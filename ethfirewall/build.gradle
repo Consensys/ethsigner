@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+jar {
+  baseName 'pantheon'
+  manifest {
+    attributes(
+      'Specification-Title': baseName,
+      'Specification-Version': project.version,
+      'Implementation-Title': baseName,
+      'Implementation-Version': calculateVersion()
+      )
+  }
+}
