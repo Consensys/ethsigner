@@ -172,12 +172,6 @@ allprojects {
    *   as well), <milestone> is the Ethereum milestone tested (not all test use it) and <variant>
    *   is only use in some general state tests where for the same json file and same milestone,
    *   multiple variant of that test are run. The variant is a simple number.
-   * - 'test.ethereum.state.eip': for general state tests, allows to only run tests for the
-   *   milestone specified by this value. So for instance,
-   *    ./gradlew :ethereum:tech.pegasys.pantheon.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.state.eip=Frontier
-   *   only run general state tests for Frontier. Note that this behavior could be achieved as well
-   *   with the 'include' option above since it is a pattern, but this is a slightly more convenient
-   *   option.
    * - 'root.log.level' and 'evm.log.level': allow to control the log level used during the tests.
    */
   test {
@@ -263,7 +257,7 @@ subprojects {
 
   task integrationTest(type: Test, dependsOn:["compileTestJava"]){
     group = "verification"
-    description = "Runs the Pantheon integration tests"
+    description = "Runs the Ethfirewall integration tests"
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath

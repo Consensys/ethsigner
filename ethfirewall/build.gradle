@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 
 jar {
-  baseName 'pantheon'
+  baseName 'ethfirewall'
   manifest {
     attributes(
       'Specification-Title': baseName,
