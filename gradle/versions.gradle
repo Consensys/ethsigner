@@ -1,0 +1,49 @@
+/*
+ * Copyright 2018 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+dependencyManagement {
+  dependencies {
+    dependency 'com.google.errorprone:javac:9+181-r4173-1'
+    dependency 'com.google.errorprone:error_prone_check_api:2.3.2'
+    dependency 'com.google.errorprone:error_prone_core:2.3.2'
+    dependency 'com.google.errorprone:error_prone_annotation:2.3.2'
+    dependency 'com.google.errorprone:error_prone_test_helpers:2.3.2'
+
+    dependency 'com.google.guava:guava:27.0.1-jre'
+
+    dependency 'com.squareup.okhttp3:okhttp:3.12.1'
+
+    dependency 'commons-cli:commons-cli:1.4'
+
+    dependency 'info.picocli:picocli:3.9.2'
+
+    dependency 'io.vertx:vertx-codegen:3.6.3'
+    dependency 'io.vertx:vertx-core:3.6.3'
+    dependency 'io.vertx:vertx-unit:3.6.3'
+    dependency 'io.vertx:vertx-web:3.6.3'
+
+    dependency 'junit:junit:4.12'
+
+    dependency 'org.apache.logging.log4j:log4j-api:2.11.1'
+    dependency 'org.apache.logging.log4j:log4j-core:2.11.1'
+    dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.1'
+
+    dependency 'org.assertj:assertj-core:3.11.1'
+
+    dependency 'org.mockito:mockito-core:2.23.4'
+
+    dependency 'org.web3j:abi:4.1.1'
+    dependency 'org.web3j:core:4.1.1'
+    dependency 'org.web3j:crypto:4.1.1'
+  }
+}

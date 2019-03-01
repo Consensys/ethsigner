@@ -1,0 +1,19 @@
+apply plugin: 'java-library'
+
+jar {
+  baseName 'ethfirewall'
+  manifest {
+    attributes(
+      'Specification-Title': baseName,
+      'Specification-Version': project.version,
+      'Implementation-Title': baseName,
+      'Implementation-Version': calculateVersion()
+      )
+  }
+}
+
+
+dependencies {
+  testImplementation 'junit:junit'
+  testImplementation 'org.assertj:assertj-core'
+}
