@@ -163,7 +163,7 @@ allprojects {
    * The properties passed are:
    * - 'test.ethereum.include': allows to run a single Ethereum reference tests. For instance,
    *   running a single general state test can be done with:
-   *    ./gradlew :ethereum:tech.pegasys.pantheon.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
+   *    ./gradlew :ethereum:tech.pegasys.ethfirewall.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
    *   The meaning being that will be run only the tests for which the value passed as "include"
    *   (which can be a java pattern) matches parts of the test name. Knowing that tests names for
    *   reference tests are of the form:
@@ -305,9 +305,9 @@ applicationDefaultJvmArgs = [
 ]
 
 run {
-  args project.hasProperty("pantheon.run.args") ? project.property("pantheon.run.args").toString().split("\\s+") : []
+  args project.hasProperty("ethfirewall.run.args") ? project.property("ethfirewall.run.args").toString().split("\\s+") : []
   doFirst {
-    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('PANTHEON_HOME', "$buildDir/pantheon")}
+    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('ETHFIREWALL_HOME', "$buildDir/ethfirewall")}
   }
 }
 
@@ -318,8 +318,8 @@ startScripts {
   }
 
   doLast {
-    unixScript.text = unixScript.text.replace('PANTHEON_HOME', '\$APP_HOME')
-    windowsScript.text = windowsScript.text.replace('PANTHEON_HOME', '%~dp0..')
+    unixScript.text = unixScript.text.replace('ETHFIREWALL_HOME', '\$APP_HOME')
+    windowsScript.text = windowsScript.text.replace('ETHFIREWALL_HOME', '%~dp0..')
 
     // Prevent the error originating from the 8191 chars limit on Windows
     windowsScript.text =
@@ -438,12 +438,6 @@ task releaseIntegrationTest(type: Test){
   }
 }
 
-task releaseReferenceTest(type: Test, dependsOn : [
-  ':ethereum:core:referenceTests',
-  ':ethereum:rlp:referenceTests',
-  ':ethereum:trie:referenceTests'
-]){
-}
 
 task releaseAcceptanceTest(type: Test, dependsOn : ':acceptance-tests:acceptanceTest') {}
 
@@ -455,7 +449,6 @@ release {
     'build',
     'releaseIntegrationTest',
     'releaseAcceptanceTest',
-    'releaseReferenceTest',
     'checkLicenses',
     'javadoc'
   ]
@@ -481,12 +474,12 @@ bintray {
 
   pkg {
     repo = 'pegasys-repo'
-    name = 'pantheon'
+    name = 'ethfirewall'
     userOrg = 'consensys'
     licenses = ['Apache-2.0']
-    websiteUrl = 'https://github.com/PegaSysEng/pantheon'
-    issueTrackerUrl = 'https://github.com/PegaSysEng/pantheon/issues'
-    vcsUrl = 'https://github.com/PegaSysEng/pantheon.git'
+    websiteUrl = 'https://github.com/PegaSysEng/ethfirewall'
+    issueTrackerUrl = 'https://github.com/PegaSysEng/ethfirewall/issues'
+    vcsUrl = 'https://github.com/PegaSysEng/ethfirewall.git'
 
     version {
       name = project.version

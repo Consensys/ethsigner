@@ -11,3 +11,9 @@ jar {
       )
   }
 }
+
+
+dependencies {
+  testImplementation 'junit:junit'
+  testImplementation 'org.assertj:assertj-core'
+}
