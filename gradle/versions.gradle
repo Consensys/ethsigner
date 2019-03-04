@@ -31,6 +31,7 @@ dependencyManagement {
     dependency 'io.vertx:vertx-core:3.6.3'
     dependency 'io.vertx:vertx-unit:3.6.3'
     dependency 'io.vertx:vertx-web:3.6.3'
+    dependency 'io.vertx:vertx-web-client:3.6.3'
 
     dependency 'junit:junit:4.12'
 

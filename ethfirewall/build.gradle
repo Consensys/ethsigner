@@ -14,6 +14,13 @@ jar {
 
 
 dependencies {
+  compile 'io.vertx:vertx-core'
+  compile 'io.vertx:vertx-web'
+  compile 'io.vertx:vertx-web-client'
+  compile 'org.apache.logging.log4j:log4j-api'
+  compile 'org.apache.logging.log4j:log4j-core'
+  compile 'org.apache.logging.log4j:log4j-slf4j-impl'
+
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
 }

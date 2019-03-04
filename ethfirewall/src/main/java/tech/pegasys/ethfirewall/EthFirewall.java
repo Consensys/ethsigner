@@ -12,10 +12,22 @@
  */
 package tech.pegasys.ethfirewall;
 
+import io.vertx.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class EthFirewall {
+  private static final Logger LOG = LoggerFactory.getLogger(EthFirewall.class);
 
   public static void main(final String... args) {
-    System.out.println("Running EthFirewall.");
-    return;
+    LOG.info("Running EthFirewall.");
+
+    try {
+      final Runner runner = new Runner();
+      runner.start(Vertx.vertx());
+    } catch (Throwable t) {
+      LOG.error("Unexpected exception starting EthFirewall", t);
+      System.exit(1);
+    }
   }
 }
