@@ -12,15 +12,19 @@
  */
 package tech.pegasys.ethfirewall;
 
+import com.google.common.base.Suppliers;
 import java.io.File;
-import java.io.PrintStream;
 
+import java.util.List;
+import java.util.function.Supplier;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import picocli.CommandLine;
+import picocli.CommandLine.AbstractParseResultHandler;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 
@@ -41,6 +45,9 @@ public class EthFirewallCommand implements Runnable {
 
   private static final Logger LOG = LogManager.getLogger();
   private CommandLine commandLine;
+
+  private final Supplier<EthFirewallExceptionHandler> exceptionHandlerSupplier =
+      Suppliers.memoize(EthFirewallExceptionHandler::new);
 
   @Option(
       names = {"--logging", "-l"},
@@ -89,25 +96,15 @@ public class EthFirewallCommand implements Runnable {
       arity = "1")
   private final Integer listenPort = 8545;
 
-  public void parse(final PrintStream output, final String... args) {
+  public void parse(final AbstractParseResultHandler<List<Object>> resultHandler,
+      final EthFirewallExceptionHandler exceptionHandler, final String... args) {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
-    try {
-      commandLine.parse(args);
-      if (commandLine.isUsageHelpRequested()) {
-        commandLine.usage(output);
-        return;
-      } else if (commandLine.isVersionHelpRequested()) {
-        commandLine.printVersionHelp(System.out);
-        return;
-      }
-    } catch (ParameterException ex) {
-      output.println(ex.getMessage());
-    }
+    commandLine.parseWithHandlers(resultHandler, exceptionHandler, args);
   }
 
   @Override
@@ -115,5 +112,42 @@ public class EthFirewallCommand implements Runnable {
     // set log level per CLI flags
     System.out.println("Setting logging level to " + logLevel.name());
     Configurator.setAllLevels("", logLevel);
+
+    // Create TransactionSigner, ReverseProxy and http request forwarders.
+  }
+
+  public EthFirewallExceptionHandler exceptionHandler() {
+    return exceptionHandlerSupplier.get();
+  }
+
+
+  // Inner class so we can get to loggingLevel.
+  public class EthFirewallExceptionHandler
+      extends CommandLine.AbstractHandler<List<Object>, EthFirewallExceptionHandler>
+      implements CommandLine.IExceptionHandler2<List<Object>> {
+
+    @Override
+    public List<Object> handleParseException(final ParameterException ex, final String[] args) {
+      if (logLevel != null && Level.DEBUG.isMoreSpecificThan(logLevel)) {
+        ex.printStackTrace(err());
+      } else {
+        err().println(ex.getMessage());
+      }
+      if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, err())) {
+        ex.getCommandLine().usage(err(), ansi());
+      }
+      return returnResultOrExit(null);
+    }
+
+    @Override
+    public List<Object> handleExecutionException(
+        final ExecutionException ex, final CommandLine.ParseResult parseResult) {
+      return throwOrExit(ex);
+    }
+
+    @Override
+    protected EthFirewallExceptionHandler self() {
+      return this;
+    }
   }
 }

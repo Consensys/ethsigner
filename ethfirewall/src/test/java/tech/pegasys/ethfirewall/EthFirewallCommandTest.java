@@ -22,11 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import picocli.CommandLine.Help.Ansi;
+import picocli.CommandLine.RunLast;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EthFirewallCommandTest {
 
-  @Mock private Logger logger;
+  @Mock
+  private Logger logger;
   final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
@@ -35,8 +38,11 @@ public class EthFirewallCommandTest {
 
   final EthFirewallCommand command = new EthFirewallCommand();
 
-  private void parseCommand(String... args) {
-    command.parse(outPrintStream, args);
+  private void parseCommand(String cmdLine) {
+    command.parse(
+        new RunLast().useOut(outPrintStream).useAnsi(Ansi.OFF),
+        command.exceptionHandler().useErr(errPrintStream).useAnsi(Ansi.OFF),
+        cmdLine.split(" "));
   }
 
   @Test
@@ -50,15 +56,14 @@ public class EthFirewallCommandTest {
   @Test
   public void invalidInputForPortShowsError() {
     parseCommand(
-        "--password=MyPassword --keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=abc"
-            .split(" "));
-    assertThat(commandOutput.toString()).contains("--downstream-port", "'abc' is not an int");
+        "--password=MyPassword --keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=abc");
+    assertThat(commandErrorOutput.toString()).contains("--downstream-port", "'abc' is not an int");
   }
 
   @Test
   public void missingPasswordShowsError() {
     parseCommand(
-        "--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000".split(" "));
-    assertThat(commandOutput.toString()).contains("--password", "Missing");
+        "--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000");
+    assertThat(commandErrorOutput.toString()).contains("--password", "Missing");
   }
 }
