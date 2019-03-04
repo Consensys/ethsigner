@@ -10,8 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.reverseproxy;
+package tech.pegasys.ethfirewall.jsonrpc;
 
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -21,27 +22,19 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReverseProxy {
+public class ReverseProxyHandler implements Handler<RoutingContext> {
+  private static final Logger LOG = LoggerFactory.getLogger(ReverseProxyHandler.class);
+  private final HttpClient ethNodeClient;
 
-  private static final Logger LOG = LoggerFactory.getLogger(ReverseProxy.class);
-
-  /** The destination for proxy requests. */
-  private final HttpClient target;
-
-  public ReverseProxy(final HttpClient target) {
-    this.target = target;
+  public ReverseProxyHandler(final HttpClient ethNodeClient) {
+    this.ethNodeClient = ethNodeClient;
   }
 
-  /**
-   * Forwards the sendRequest onto the target, writing the response from the target to the original
-   * sendRequest.
-   *
-   * @param context contains the sendRequest for proxy.
-   */
-  public void proxy(final RoutingContext context) {
+  @Override
+  public void handle(final RoutingContext context) {
     final HttpServerRequest originalRequest = context.request();
     final HttpClientRequest proxyRequest =
-        target.request(
+        ethNodeClient.request(
             originalRequest.method(),
             originalRequest.uri(),
             proxiedResponse -> {
@@ -79,7 +72,7 @@ public class ReverseProxy {
 
   private void logRequest(final RoutingContext context, final HttpClientRequest proxyRequest) {
     LOG.debug(
-        "Proxying originalRequest: method: {}, uri: {}, body: {}, target: method: {}, uri: {}",
+        "Proxying originalRequest: method: {}, uri: {}, body: {}, ethNodeClient: method: {}, uri: {}",
         context.request().method(),
         context.request().absoluteURI(),
         context.getBody(),

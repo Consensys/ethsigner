@@ -13,10 +13,12 @@
 package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.config.EthFirewallConfig;
-import tech.pegasys.ethfirewall.reverseproxy.JsonRpcReverseProxy;
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcHttpService;
+import tech.pegasys.ethfirewall.jsonrpc.ReverseProxyHandler;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +26,21 @@ public class Runner {
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
 
   public void start(final Vertx vertx) {
-    final EthFirewallConfig ethFirewallConfig = new EthFirewallConfig();
-    final JsonRpcReverseProxy jsonRpcReverseProxy = new JsonRpcReverseProxy(ethFirewallConfig);
-    vertx.deployVerticle(jsonRpcReverseProxy, this::handleDeployResult);
+    final EthFirewallConfig config = new EthFirewallConfig();
+
+    final ReverseProxyHandler reverseProxyHandler = createReverseProxyHandler(vertx, config);
+    final JsonRpcHttpService jsonRpcHttpService =
+        new JsonRpcHttpService(config, (ignore) -> reverseProxyHandler);
+    vertx.deployVerticle(jsonRpcHttpService, this::handleDeployResult);
+  }
+
+  private ReverseProxyHandler createReverseProxyHandler(
+      final Vertx vertx, final EthFirewallConfig config) {
+    final WebClientOptions clientOptions =
+        new WebClientOptions()
+            .setDefaultPort(config.getEthPort())
+            .setDefaultHost(config.getEthHost());
+    return new ReverseProxyHandler(vertx.createHttpClient(clientOptions));
   }
 
   private void handleDeployResult(final AsyncResult<?> result) {
