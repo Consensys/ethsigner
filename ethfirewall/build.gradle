@@ -17,7 +17,7 @@ dependencies {
   implementation 'info.picocli:picocli'
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.apache.logging.log4j:log4j-core'
-  implementation 'org.web3j:core'
+  implementation 'org.web3j:crypto'
 
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web'
