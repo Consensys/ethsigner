@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethfirewall;
 
-import com.google.common.base.Suppliers;
 import java.io.File;
-
 import java.util.List;
 import java.util.function.Supplier;
+
+import com.google.common.base.Suppliers;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,8 +96,10 @@ public class EthFirewallCommand implements Runnable {
       arity = "1")
   private final Integer listenPort = 8545;
 
-  public void parse(final AbstractParseResultHandler<List<Object>> resultHandler,
-      final EthFirewallExceptionHandler exceptionHandler, final String... args) {
+  public void parse(
+      final AbstractParseResultHandler<List<Object>> resultHandler,
+      final EthFirewallExceptionHandler exceptionHandler,
+      final String... args) {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
@@ -119,7 +121,6 @@ public class EthFirewallCommand implements Runnable {
   public EthFirewallExceptionHandler exceptionHandler() {
     return exceptionHandlerSupplier.get();
   }
-
 
   // Inner class so we can get to loggingLevel.
   public class EthFirewallExceptionHandler

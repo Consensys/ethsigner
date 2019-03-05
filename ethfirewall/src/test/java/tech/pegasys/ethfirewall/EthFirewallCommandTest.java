@@ -28,8 +28,7 @@ import picocli.CommandLine.RunLast;
 @RunWith(MockitoJUnitRunner.class)
 public class EthFirewallCommandTest {
 
-  @Mock
-  private Logger logger;
+  @Mock private Logger logger;
   final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
@@ -62,8 +61,7 @@ public class EthFirewallCommandTest {
 
   @Test
   public void missingPasswordShowsError() {
-    parseCommand(
-        "--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000");
+    parseCommand("--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000");
     assertThat(commandErrorOutput.toString()).contains("--password", "Missing");
   }
 }

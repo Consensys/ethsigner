@@ -21,7 +21,8 @@ public final class EthFirewall {
   public static void main(final String... args) {
     final EthFirewallCommand command = new EthFirewallCommand();
 
-    command.parse(new RunLast().andExit(SUCCESS_EXIT_CODE),
+    command.parse(
+        new RunLast().andExit(SUCCESS_EXIT_CODE),
         command.exceptionHandler().andExit(ERROR_EXIT_CODE),
         args);
   }
