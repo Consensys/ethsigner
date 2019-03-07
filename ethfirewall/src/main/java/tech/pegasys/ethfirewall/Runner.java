@@ -10,7 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy;
+package tech.pegasys.ethfirewall;
+
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
+import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
+import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
+import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionBodyProvider;
+import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;

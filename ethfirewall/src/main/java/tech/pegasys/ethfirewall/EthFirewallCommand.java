@@ -13,7 +13,6 @@
 package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
-import tech.pegasys.ethfirewall.jsonrpcproxy.Runner;
 import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 import java.io.File;
