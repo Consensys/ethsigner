@@ -12,10 +12,15 @@
  */
 package tech.pegasys.ethfirewall;
 
+import picocli.CommandLine.RunLast;
+
 public final class EthFirewall {
+  private static final int SUCCESS_EXIT_CODE = 0;
+  private static final int ERROR_EXIT_CODE = 1;
 
   public static void main(final String... args) {
-    System.out.println("Running EthFirewall.");
-    return;
+    final EthFirewallCommand command = new EthFirewallCommand();
+
+    command.parse(new RunLast(), command.exceptionHandler().andExit(ERROR_EXIT_CODE), args);
   }
 }
