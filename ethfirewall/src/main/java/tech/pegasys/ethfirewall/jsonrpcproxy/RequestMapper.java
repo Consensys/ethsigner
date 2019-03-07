@@ -15,21 +15,24 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 
 public class RequestMapper {
-  private final RequestHandler defaultHandler;
-  private final Map<String, RequestHandler> handlers = new HashMap<>();
 
-  public RequestMapper(final RequestHandler defaultHandler) {
+  private final Handler<RoutingContext> defaultHandler;
+  private final Map<String, Handler<RoutingContext>> handlers = new HashMap<>();
+
+  public RequestMapper(final Handler<RoutingContext> defaultHandler) {
     this.defaultHandler = defaultHandler;
   }
 
-  public void addHandler(final String jsonMethod, final RequestHandler requestHandler) {
+  public void addHandler(final String jsonMethod, final Handler<RoutingContext> requestHandler) {
     handlers.put(jsonMethod, requestHandler);
   }
 
-  public RequestHandler getMatchingHandler(final JsonObject bodyJson) {
+  public Handler<RoutingContext> getMatchingHandler(final JsonObject bodyJson) {
     final String method = bodyJson.getString("method");
     return handlers.getOrDefault(method, defaultHandler);
   }

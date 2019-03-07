@@ -17,35 +17,51 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Runner {
 
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
+  private TransactionSigner transactionSigner;
   private HttpClientOptions clientOptions;
   private HttpServerOptions serverOptions;
 
-  public Runner(final HttpClientOptions clientOptions, final HttpServerOptions serverOptions) {
+  public Runner(
+      final TransactionSigner transactionSigner,
+      final HttpClientOptions clientOptions,
+      final HttpServerOptions serverOptions) {
+    this.transactionSigner = transactionSigner;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
   }
 
   public void start() {
+    // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
     final Vertx vertx = Vertx.vertx();
-    final RequestMapper requestMapper = createRequestMapper(vertx);
-    final JsonRpcHttpService httpService =
-        new JsonRpcHttpService(vertx, serverOptions, requestMapper);
+    final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
+    final JsonRpcHttpService httpService = new JsonRpcHttpService(serverOptions, requestMapper);
 
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
-  private RequestMapper createRequestMapper(final Vertx vertx) {
+  private RequestMapper createRequestMapper(
+      final Vertx vertx, final TransactionSigner transactionSigner) {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
-    final PassThroughHandler passThroughHandler = new PassThroughHandler(downStreamConnection);
+    final PassThroughHandler passThroughHandler =
+        new PassThroughHandler(downStreamConnection, RoutingContext::getBody);
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
+
+    final TransactionBodyProvider sendTransactionHandler =
+        new TransactionBodyProvider(transactionSigner);
+
+    requestMapper.addHandler(
+        "eth_sendTransaction",
+        new PassThroughHandler(downStreamConnection, sendTransactionHandler));
+
     return requestMapper;
   }
 

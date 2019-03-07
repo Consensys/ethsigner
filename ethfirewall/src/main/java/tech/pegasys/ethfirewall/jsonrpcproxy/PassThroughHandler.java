@@ -12,49 +12,56 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler implements RequestHandler {
+public class PassThroughHandler implements Handler<RoutingContext> {
+
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
   private final HttpClient ethNodeClient;
+  private BodyProvider bodyProvider;
 
-  public PassThroughHandler(final HttpClient ethNodeClient) {
+  public PassThroughHandler(final HttpClient ethNodeClient, final BodyProvider bodyProvider) {
     this.ethNodeClient = ethNodeClient;
+    this.bodyProvider = bodyProvider;
   }
 
   @Override
-  public Future<Response> handle(final Request request) {
-    final Future<Response> futureResponse = Future.future();
+  public void handle(final RoutingContext context) {
+    final HttpServerRequest originalRequest = context.request();
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
-            request.getMethod(),
-            request.getUri(),
+            originalRequest.method(),
+            originalRequest.uri(),
             proxiedResponse -> {
               logResponse(proxiedResponse);
+
+              originalRequest.response().setStatusCode(proxiedResponse.statusCode());
+              originalRequest.response().headers().setAll(proxiedResponse.headers());
+              originalRequest.response().setChunked(false);
+
               proxiedResponse.bodyHandler(
                   data -> {
                     logResponseBody(data);
-                    final Response response =
-                        new Response(proxiedResponse.statusCode(), proxiedResponse.headers(), data);
-                    futureResponse.complete(response);
+
+                    // End the sendRequest, preventing any other handler from executing
+                    originalRequest.response().end(data);
                   });
             });
 
-    proxyRequest.headers().setAll(request.getHeaders());
+    proxyRequest.headers().setAll(originalRequest.headers());
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    // Ends the sendRequest, completing execution of the proxy call
-    proxyRequest.end(request.getBody());
-
-    logRequest(request, proxyRequest);
-    return futureResponse;
+    proxyRequest.end(bodyProvider.getBody(context));
+    logRequest(context, proxyRequest);
   }
 
   private void logResponse(final HttpClientResponse response) {
@@ -65,12 +72,12 @@ public class PassThroughHandler implements RequestHandler {
     LOG.debug("Response body: {}", body);
   }
 
-  private void logRequest(final Request request, final HttpClientRequest proxyRequest) {
+  private void logRequest(final RoutingContext context, final HttpClientRequest proxyRequest) {
     LOG.debug(
         "Send Request downstream: method: {}, uri: {}, body: {}, ethNodeClient: method: {}, uri: {}",
-        request.getMethod(),
-        request.getUri(),
-        request.getBody(),
+        context.request().method(),
+        context.request().absoluteURI(),
+        context.getBody(),
         proxyRequest.method(),
         proxyRequest.absoluteURI());
   }

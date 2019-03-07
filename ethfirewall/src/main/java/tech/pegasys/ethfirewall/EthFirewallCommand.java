@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethfirewall;
 
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.Runner;
+import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -23,6 +26,9 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.web3j.crypto.CipherException;
 import picocli.CommandLine;
 import picocli.CommandLine.AbstractParseResultHandler;
 import picocli.CommandLine.Command;
@@ -44,6 +50,7 @@ import picocli.CommandLine.ParameterException;
     footerHeading = "%n",
     footer = "Ethfirewall is licensed under the Apache License 2.0")
 public class EthFirewallCommand implements Runnable {
+  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private CommandLine commandLine;
 
   private final Supplier<EthFirewallExceptionHandler> exceptionHandlerSupplier =
@@ -115,19 +122,28 @@ public class EthFirewallCommand implements Runnable {
     System.out.println("Setting logging level to " + logLevel.name());
     Configurator.setAllLevels("", logLevel);
 
-    final WebClientOptions clientOptions =
-        new WebClientOptions()
-            .setDefaultPort(downstreamHttpPort)
-            .setDefaultHost(downstreamHttpHost);
-    final HttpServerOptions serverOptions =
-        new HttpServerOptions()
-            .setPort(httpListenPort)
-            .setHost(httpListenHost)
-            .setReuseAddress(true)
-            .setReusePort(true);
+    try {
+      final TransactionSigner transactionSigner =
+          TransactionSigner.createFrom(keyFilename, password);
+      final WebClientOptions clientOptions =
+          new WebClientOptions()
+              .setDefaultPort(downstreamHttpPort)
+              .setDefaultHost(downstreamHttpHost);
+      final HttpServerOptions serverOptions =
+          new HttpServerOptions()
+              .setPort(httpListenPort)
+              .setHost(httpListenHost)
+              .setReuseAddress(true)
+              .setReusePort(true);
 
-    final Runner runner = new Runner(clientOptions, serverOptions);
-    runner.start();
+      final Runner runner = new Runner(transactionSigner, clientOptions, serverOptions);
+      runner.start();
+    } catch (IOException ex) {
+      LOG.info(
+          "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
+    } catch (CipherException ex) {
+      LOG.info("Unable to decode keyfile with supplied password.");
+    }
   }
 
   public EthFirewallExceptionHandler exceptionHandler() {

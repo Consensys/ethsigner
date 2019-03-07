@@ -15,7 +15,9 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.google.common.collect.ImmutableMap;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +26,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestMapperTest {
-  @Mock private RequestHandler defaultHandler;
-  @Mock private RequestHandler handler1;
-  @Mock private RequestHandler handler2;
+  @Mock private Handler<RoutingContext> defaultHandler;
+  @Mock private Handler<RoutingContext> handler1;
+  @Mock private Handler<RoutingContext> handler2;
   private RequestMapper requestMapper;
 
   @Before

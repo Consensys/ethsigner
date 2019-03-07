@@ -12,37 +12,10 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.RoutingContext;
 
-public class Request {
-  private final String uri;
-  private final HttpMethod method;
-  private final Buffer body;
-  private final MultiMap headers;
-
-  public Request(
-      final String uri, final HttpMethod method, final Buffer body, final MultiMap headers) {
-    this.uri = uri;
-    this.method = method;
-    this.body = body;
-    this.headers = headers;
-  }
-
-  public String getUri() {
-    return uri;
-  }
-
-  public HttpMethod getMethod() {
-    return method;
-  }
-
-  public Buffer getBody() {
-    return body;
-  }
-
-  public MultiMap getHeaders() {
-    return headers;
-  }
+@FunctionalInterface
+public interface BodyProvider {
+  Buffer getBody(RoutingContext context);
 }

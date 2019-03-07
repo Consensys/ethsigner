@@ -15,7 +15,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JsonRpcHttpService extends AbstractVerticle {
+
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
@@ -35,18 +36,14 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
-      final Vertx vertx,
-      final HttpServerOptions serverOptions,
-      final RequestMapper requestHandlerMapper) {
+      final HttpServerOptions serverOptions, final RequestMapper requestHandlerMapper) {
     this.serverOptions = serverOptions;
-
     this.requestHandlerMapper = requestHandlerMapper;
-    this.vertx = vertx;
   }
 
   @Override
   public void start(final Future<Void> startFuture) {
-    HttpServer httpServer = vertx.createHttpServer(serverOptions);
+    httpServer = vertx.createHttpServer(serverOptions);
     httpServer
         .requestHandler(router())
         .listen(
@@ -86,26 +83,9 @@ public class JsonRpcHttpService extends AbstractVerticle {
     return router;
   }
 
-  private void handleJsonRpc(final RoutingContext context) {
-    final RequestHandler handler = requestHandlerMapper.getMatchingHandler(context.getBodyAsJson());
-    final Request request =
-        new Request(
-            context.request().uri(),
-            context.request().method(),
-            context.getBody(),
-            context.request().headers());
-    final Future<Response> response = handler.handle(request);
-
-    response.setHandler(
-        (result) -> {
-          if (result.succeeded()) {
-            final Response r = result.result();
-            context.response().setStatusCode(r.getStatusCode());
-            context.response().headers().setAll(r.getHeaders());
-            context.response().end(r.getBody());
-          } else {
-            LOG.error("Failed json rpc request", result.cause());
-          }
-        });
+  private void handleJsonRpc(final RoutingContext routingContext) {
+    final Handler<RoutingContext> handler =
+        requestHandlerMapper.getMatchingHandler(routingContext.getBodyAsJson());
+    handler.handle(routingContext);
   }
 }
