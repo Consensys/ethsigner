@@ -55,8 +55,9 @@ public class EthFirewallCommandTest {
   @Test
   public void invalidInputForPortShowsError() {
     parseCommand(
-        "--password=MyPassword --keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=abc");
-    assertThat(commandErrorOutput.toString()).contains("--downstream-port", "'abc' is not an int");
+        "--password=MyPassword --keyfile=./keyfile --downstream-http-host=127.0.0.1 --downstream-http-port=abc");
+    assertThat(commandErrorOutput.toString())
+        .contains("--downstream-http-port", "'abc' is not an int");
   }
 
   @Test
