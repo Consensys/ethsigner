@@ -42,8 +42,8 @@ public class RequestMapperTest {
   @Test
   public void returnsDefaultHandlerForUnknownRpcMethod() {
     RequestMapper requestMapper = new RequestMapper(defaultHandler);
-    requestMapper.addHandler("unknown", defaultHandler);
-    requestMapper.addHandler("", defaultHandler);
+    assertThat(requestMapper.getMatchingHandler(rpcJson(""))).isEqualTo(defaultHandler);
+    assertThat(requestMapper.getMatchingHandler(rpcJson("nothing"))).isEqualTo(defaultHandler);
   }
 
   private JsonObject rpcJson(final String methodName) {
