@@ -10,16 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall;
+package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import picocli.CommandLine.RunLast;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.RoutingContext;
 
-public final class EthFirewall {
-  private static final int ERROR_EXIT_CODE = 1;
-
-  public static void main(final String... args) {
-    final EthFirewallCommand command = new EthFirewallCommand();
-
-    command.parse(new RunLast(), command.exceptionHandler().andExit(ERROR_EXIT_CODE), args);
-  }
+@FunctionalInterface
+public interface BodyProvider {
+  Buffer getBody(RoutingContext context);
 }
