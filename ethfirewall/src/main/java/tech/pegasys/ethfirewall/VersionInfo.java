@@ -12,14 +12,12 @@
  */
 package tech.pegasys.ethfirewall;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import picocli.CommandLine.IVersionProvider;
 
-import org.junit.Test;
+public class VersionInfo implements IVersionProvider {
 
-public class SampleTest {
-
-  @Test
-  public void passingTest() {
-    assertThat(true).isTrue();
+  @Override
+  public String[] getVersion() throws Exception {
+    return new String[] {"Version 0.0.1"};
   }
 }

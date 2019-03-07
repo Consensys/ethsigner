@@ -14,13 +14,16 @@ jar {
 
 
 dependencies {
-  compile 'io.vertx:vertx-core'
-  compile 'io.vertx:vertx-web'
-  compile 'io.vertx:vertx-web-client'
-  compile 'org.apache.logging.log4j:log4j-api'
-  compile 'org.apache.logging.log4j:log4j-core'
-  compile 'org.apache.logging.log4j:log4j-slf4j-impl'
+  implementation 'info.picocli:picocli'
+  implementation 'com.google.guava:guava'
 
+  implementation 'org.apache.logging.log4j:log4j-api'
+  implementation 'org.apache.logging.log4j:log4j-core'
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
+
+  implementation 'io.vertx:vertx-core'
+  implementation 'io.vertx:vertx-web'
+    
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
