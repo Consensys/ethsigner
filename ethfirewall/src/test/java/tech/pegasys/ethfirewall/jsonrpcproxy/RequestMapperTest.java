@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -29,25 +28,20 @@ public class RequestMapperTest {
   @Mock private Handler<RoutingContext> defaultHandler;
   @Mock private Handler<RoutingContext> handler1;
   @Mock private Handler<RoutingContext> handler2;
-  private RequestMapper requestMapper;
 
-  @Before
-  public void setup() {
-    requestMapper = new RequestMapper(defaultHandler);
+  @Test
+  public void returnsHandleForAssociatedRpcMethod() {
+    RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("foo", handler1);
     requestMapper.addHandler("bar", handler2);
     requestMapper.addHandler("default", defaultHandler);
-  }
-
-  @Test
-  public void returnsHandler() {
     assertThat(requestMapper.getMatchingHandler(rpcJson("foo"))).isSameAs(handler1);
     assertThat(requestMapper.getMatchingHandler(rpcJson("bar"))).isSameAs(handler2);
   }
 
   @Test
-  public void returnsDefaultHandler() {
-    requestMapper.addHandler("default", defaultHandler);
+  public void returnsDefaultHandlerForUnknownRpcMethod() {
+    RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("unknown", defaultHandler);
     requestMapper.addHandler("", defaultHandler);
   }
