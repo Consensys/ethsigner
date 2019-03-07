@@ -64,4 +64,16 @@ public class EthFirewallCommandTest {
     parseCommand("--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000");
     assertThat(commandErrorOutput.toString()).contains("--password", "Missing");
   }
+
+  @Test
+  public void fieldsFromCommandLineAreStoredInVariables() {
+    parseCommand("--keyfile=./keyfile "
+        + "--downstream-http-host=127.0.0.1 "
+        + "--downstream-http-port=5000 "
+        + "--http-listen-port=5001"
+        + "--http-listen-host=localhost "
+        + "--logging=TRACE");
+
+    //TODO add these tests when Runner is in place.0
+  }
 }

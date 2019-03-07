@@ -72,29 +72,29 @@ public class EthFirewallCommand implements Runnable {
   private File keyFilename;
 
   @Option(
-      names = "--downstream-host",
+      names = "--downstream-http-host",
       description = "The endpoint to which received requests are forwarded",
       arity = "1")
-  private String downstreamHost = "127.0.0.1";
+  private String downstreamHttpHost = "127.0.0.1";
 
   @Option(
-      names = "--downstream-port",
+      names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
       arity = "1")
-  private Integer downstreamPort;
+  private Integer downstreamHttpPort;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--rpc-listen-host"},
+      names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private String listenHost = "127.0.0.1";
+  private String httpListenHost = "127.0.0.1";
 
   @Option(
-      names = {"--rpc-listen-port"},
+      names = {"--http-listen-port"},
       description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final Integer listenPort = 8545;
+  private final Integer httpListenPort = 8545;
 
   public void parse(
       final AbstractParseResultHandler<List<Object>> resultHandler,
