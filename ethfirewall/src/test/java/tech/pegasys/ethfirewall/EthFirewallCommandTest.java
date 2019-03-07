@@ -17,18 +17,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.RunLast;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EthFirewallCommandTest {
-
-  @Mock private Logger logger;
   final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 

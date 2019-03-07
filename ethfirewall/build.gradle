@@ -23,7 +23,8 @@ dependencies {
 
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web'
-    
+  implementation 'io.vertx:vertx-web-client'
+
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'

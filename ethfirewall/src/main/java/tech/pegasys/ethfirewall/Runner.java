@@ -10,37 +10,43 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall;
-
-import tech.pegasys.ethfirewall.config.EthFirewallConfig;
-import tech.pegasys.ethfirewall.jsonrpc.JsonRpcHttpService;
-import tech.pegasys.ethfirewall.jsonrpc.ReverseProxyHandler;
+package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
-import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Runner {
+
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
+  private HttpClientOptions clientOptions;
+  private HttpServerOptions serverOptions;
 
-  public void start(final Vertx vertx) {
-    final EthFirewallConfig config = new EthFirewallConfig();
-
-    final ReverseProxyHandler reverseProxyHandler = createReverseProxyHandler(vertx, config);
-    final JsonRpcHttpService jsonRpcHttpService =
-        new JsonRpcHttpService(config, (ignore) -> reverseProxyHandler);
-    vertx.deployVerticle(jsonRpcHttpService, this::handleDeployResult);
+  public Runner(final HttpClientOptions clientOptions, final HttpServerOptions serverOptions) {
+    this.clientOptions = clientOptions;
+    this.serverOptions = serverOptions;
   }
 
-  private ReverseProxyHandler createReverseProxyHandler(
-      final Vertx vertx, final EthFirewallConfig config) {
-    final WebClientOptions clientOptions =
-        new WebClientOptions()
-            .setDefaultPort(config.getEthPort())
-            .setDefaultHost(config.getEthHost());
-    return new ReverseProxyHandler(vertx.createHttpClient(clientOptions));
+  public void start() {
+    final Vertx vertx = Vertx.vertx();
+    final RequestMapper requestMapper = createRequestMapper(vertx);
+    final JsonRpcHttpService httpService =
+        new JsonRpcHttpService(vertx, serverOptions, requestMapper);
+
+    vertx.deployVerticle(httpService, this::handleDeployResult);
+  }
+
+  private RequestMapper createRequestMapper(final Vertx vertx) {
+
+    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
+    final PassThroughHandler passThroughHandler = new PassThroughHandler(downStreamConnection);
+
+    final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
+    return requestMapper;
   }
 
   private void handleDeployResult(final AsyncResult<?> result) {

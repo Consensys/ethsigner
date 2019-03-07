@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpc;
+package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 /** Failure handler that records log details of the problem. */
 public class LogErrorHandler implements Handler<RoutingContext> {
-
   private static final Logger LOG = LoggerFactory.getLogger(LogErrorHandler.class);
 
   @Override

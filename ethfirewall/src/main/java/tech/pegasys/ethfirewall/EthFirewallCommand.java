@@ -12,14 +12,16 @@
  */
 package tech.pegasys.ethfirewall;
 
+import tech.pegasys.ethfirewall.jsonrpcproxy.Runner;
+
 import java.io.File;
 import java.util.List;
 import java.util.function.Supplier;
 
 import com.google.common.base.Suppliers;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import picocli.CommandLine;
 import picocli.CommandLine.AbstractParseResultHandler;
@@ -42,8 +44,6 @@ import picocli.CommandLine.ParameterException;
     footerHeading = "%n",
     footer = "Ethfirewall is licensed under the Apache License 2.0")
 public class EthFirewallCommand implements Runnable {
-
-  private static final Logger LOG = LogManager.getLogger();
   private CommandLine commandLine;
 
   private final Supplier<EthFirewallExceptionHandler> exceptionHandlerSupplier =
@@ -115,7 +115,19 @@ public class EthFirewallCommand implements Runnable {
     System.out.println("Setting logging level to " + logLevel.name());
     Configurator.setAllLevels("", logLevel);
 
-    // Create TransactionSigner, ReverseProxy and http request forwarders.
+    final WebClientOptions clientOptions =
+        new WebClientOptions()
+            .setDefaultPort(downstreamHttpPort)
+            .setDefaultHost(downstreamHttpHost);
+    final HttpServerOptions serverOptions =
+        new HttpServerOptions()
+            .setPort(httpListenPort)
+            .setHost(httpListenHost)
+            .setReuseAddress(true)
+            .setReusePort(true);
+
+    final Runner runner = new Runner(clientOptions, serverOptions);
+    runner.start();
   }
 
   public EthFirewallExceptionHandler exceptionHandler() {

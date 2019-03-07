@@ -10,16 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpc;
-
-import tech.pegasys.ethfirewall.config.EthFirewallConfig;
-
-import java.util.function.Function;
+package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -34,22 +30,23 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
-  private EthFirewallConfig config;
-  private Function<String, Handler<RoutingContext>> handler;
-  private HttpServer httpServer;
+  private final RequestMapper requestHandlerMapper;
+  private final HttpServerOptions serverOptions;
+  private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
-      final EthFirewallConfig config, final Function<String, Handler<RoutingContext>> handler) {
-    this.config = config;
-    this.handler = handler;
+      final Vertx vertx,
+      final HttpServerOptions serverOptions,
+      final RequestMapper requestHandlerMapper) {
+    this.serverOptions = serverOptions;
+
+    this.requestHandlerMapper = requestHandlerMapper;
+    this.vertx = vertx;
   }
 
   @Override
   public void start(final Future<Void> startFuture) {
-    final HttpServerOptions serverOptions =
-        new HttpServerOptions().setPort(config.getPort()).setHost(config.getHost());
-    httpServer = vertx.createHttpServer(serverOptions);
-
+    HttpServer httpServer = vertx.createHttpServer(serverOptions);
     httpServer
         .requestHandler(router())
         .listen(
@@ -89,8 +86,26 @@ public class JsonRpcHttpService extends AbstractVerticle {
     return router;
   }
 
-  private void handleJsonRpc(final RoutingContext routingContext) {
-    final String method = routingContext.getBodyAsJson().getString("method");
-    handler.apply(method).handle(routingContext);
+  private void handleJsonRpc(final RoutingContext context) {
+    final RequestHandler handler = requestHandlerMapper.getMatchingHandler(context.getBodyAsJson());
+    final Request request =
+        new Request(
+            context.request().uri(),
+            context.request().method(),
+            context.getBody(),
+            context.request().headers());
+    final Future<Response> response = handler.handle(request);
+
+    response.setHandler(
+        (result) -> {
+          if (result.succeeded()) {
+            final Response r = result.result();
+            context.response().setStatusCode(r.getStatusCode());
+            context.response().headers().setAll(r.getHeaders());
+            context.response().end(r.getBody());
+          } else {
+            LOG.error("Failed json rpc request", result.cause());
+          }
+        });
   }
 }
