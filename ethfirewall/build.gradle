@@ -31,4 +31,8 @@ dependencies {
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+
+  integrationTestImplementation 'io.rest-assured:rest-assured:3.0.7'
+  integrationTestImplementation 'org.assertj:assertj-core'
+  integrationTestImplementation 'org.mock-server:mockserver-netty:5.5.1'
 }
