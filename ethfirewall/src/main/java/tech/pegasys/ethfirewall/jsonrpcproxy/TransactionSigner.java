@@ -52,10 +52,17 @@ public class TransactionSigner {
     if (txnParams.getString("data") != null) {
       dataString = txnParams.getString("data");
     }
+
+    // TODO(tmm): This should be configurable, but currently matches Geth.
+    String gasValue = "90000";
+    if (txnParams.getString("gas") != null) {
+      gasValue = txnParams.getString("gas").substring(2);
+    }
+
     return RawTransaction.createTransaction(
         new BigInteger(txnParams.getString("nonce").substring(2), 16),
         new BigInteger(txnParams.getString("gasPrice").substring(2), 16),
-        new BigInteger(txnParams.getString("gas").substring(2), 16),
+        new BigInteger(gasValue, 16),
         txnParams.getString("to"),
         new BigInteger(txnParams.getString("value").substring(2), 16),
         dataString);
