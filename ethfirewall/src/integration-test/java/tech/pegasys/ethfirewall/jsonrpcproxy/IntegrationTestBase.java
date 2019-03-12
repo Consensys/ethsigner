@@ -92,7 +92,8 @@ public class IntegrationTestBase {
   }
 
   public void configureEthNode(
-      final String method, final String responseBody, final Map<String, String> responseHeaders) {
+      final String method, final String responseBody, final Map<String, String> responseHeaders,
+      final int statusCode) {
     List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
         .when(
@@ -101,10 +102,10 @@ public class IntegrationTestBase {
                 .withPath("/")
                 .withBody(json("{\"method\":\"" + method + "\"}")),
             Times.exactly(1))
-        .respond(response().withBody(responseBody).withHeaders(headers));
+        .respond(response().withBody(responseBody).withHeaders(headers).withStatusCode(statusCode));
   }
 
-  public void sendRequest(final String proxyBodyRequest, final Map<String, String> proxyHeaders,
+  public void sendRequestAndVerify(final String proxyBodyRequest, final Map<String, String> proxyHeaders,
       final String ethNodeBody, final int ethNodeStatusCode,
       final Map<String, String> ethNodeHeaders) {
     given()
