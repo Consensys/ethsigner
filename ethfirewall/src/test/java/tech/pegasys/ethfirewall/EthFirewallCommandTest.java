@@ -72,6 +72,6 @@ public class EthFirewallCommandTest {
             + "--http-listen-host=localhost "
             + "--logging=TRACE");
 
-    // TODO add these tests when Runner is in place.0
+
   }
 }
