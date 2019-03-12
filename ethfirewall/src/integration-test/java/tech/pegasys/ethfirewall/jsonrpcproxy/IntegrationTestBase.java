@@ -104,17 +104,8 @@ public class IntegrationTestBase {
         .respond(response().withBody(responseBody).withHeaders(headers));
   }
 
-  private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
-    return headers.entrySet().stream()
-        .map(e -> new Header(e.getKey(), e.getValue()))
-        .collect(toList());
-  }
-
-  public void sendRequestAndVerify(
-      final String proxyBodyRequest,
-      final Map<String, String> proxyHeaders,
-      final String ethNodeBody,
-      final int ethNodeStatusCode,
+  public void sendRequest(final String proxyBodyRequest, final Map<String, String> proxyHeaders,
+      final String ethNodeBody, final int ethNodeStatusCode,
       final Map<String, String> ethNodeHeaders) {
     given()
         .when()
@@ -125,10 +116,20 @@ public class IntegrationTestBase {
         .statusCode(ethNodeStatusCode)
         .body(equalTo(ethNodeBody))
         .headers(ethNodeHeaders);
+  }
 
+  public void verifyEthNodeRequest(final String proxyBodyRequest,
+      final Map<String, String> proxyHeaders) {
     ethNode.verify(
         request()
             .withBody(json(proxyBodyRequest))
             .withHeaders(convertHeadersToMockServerHeaders(proxyHeaders)));
   }
+
+  private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
+    return headers.entrySet().stream()
+        .map(e -> new Header(e.getKey(), e.getValue()))
+        .collect(toList());
+  }
+
 }
