@@ -20,21 +20,16 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
-import org.web3j.protocol.core.methods.response.EthSendRawTransaction;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.NetVersion;
 
 public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() throws Exception {
-    final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
-    final NetVersion netVersionResponse = new NetVersion();
-    netVersionResponse.setId(1);
-    netVersionResponse.setResult("4");
-    netVersionResponse.setJsonrpc("2.0");
+    final Request<?, ? extends Response> netVersionRequest = jsonRpc.netVersion();
+    final Response<String> netVersionResponse = createStringResponse("4");
 
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
@@ -65,11 +60,11 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
             new BigInteger("2441406250"),
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    final Request<?, EthSendTransaction> ethSendTransactionRequest =
+    final Request<?, ? extends Response> ethSendTransactionRequest =
         jsonRpc.ethSendTransaction(transaction);
     ethSendTransactionRequest.setId(1);
 
-    Request<?, EthSendTransaction> ethSendRawTransactionRequest =
+    Request<?, ? extends Response> ethSendRawTransactionRequest =
         jsonRpc.ethSendRawTransaction(
             "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"
                 + "8609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5"
@@ -78,15 +73,20 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
                 + "56d93a47d86e6554e988d32cbbb273cfda4");
     ethSendRawTransactionRequest.setId(1);
 
-    EthSendRawTransaction ethSendRawTransactionResponse = new EthSendRawTransaction();
-    ethSendRawTransactionResponse.setId(1);
-    ethSendRawTransactionResponse.setJsonrpc("2.0");
-    ethSendRawTransactionResponse.setResult(
-        "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+    Response<String> ethSendRawTransactionResponse =
+        createStringResponse("0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
     configureEthNode(ethSendRawTransactionRequest, ethSendRawTransactionResponse, emptyMap(), 200);
     sendRequestAndVerify(
         ethSendTransactionRequest, emptyMap(), ethSendRawTransactionResponse, 200, emptyMap());
     verifyEthNodeRequest(ethSendRawTransactionRequest, emptyMap());
+  }
+
+  private Response<String> createStringResponse(final String result) {
+    final Response<String> response = new Response<>();
+    response.setId(1);
+    response.setResult(result);
+    response.setJsonrpc("2.0");
+    return response;
   }
 }
