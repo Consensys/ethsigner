@@ -28,7 +28,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() throws Exception {
-    final Request<?, ? extends Response> netVersionRequest = jsonRpc.netVersion();
+    final Request<?, ? extends Response<?>> netVersionRequest = jsonRpc.netVersion();
     final Response<String> netVersionResponse = createStringResponse("4");
 
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
@@ -60,11 +60,11 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
             new BigInteger("2441406250"),
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    final Request<?, ? extends Response> ethSendTransactionRequest =
+    final Request<?, ? extends Response<?>> ethSendTransactionRequest =
         jsonRpc.ethSendTransaction(transaction);
     ethSendTransactionRequest.setId(5);
 
-    Request<?, ? extends Response> ethSendRawTransactionRequest =
+    Request<?, ? extends Response<?>> ethSendRawTransactionRequest =
         jsonRpc.ethSendRawTransaction(
             "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"
                 + "8609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5"

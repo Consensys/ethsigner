@@ -111,7 +111,7 @@ public class IntegrationTestBase {
   }
 
   public void configureEthNode(
-      final Request<?, ? extends Response> request,
+      final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
       final int responseStatusCode)
@@ -129,7 +129,7 @@ public class IntegrationTestBase {
   }
 
   public void sendRequestAndVerify(
-      final Request<?, ? extends Response> proxyBodyRequest,
+      final Request<?, ? extends Response<?>> proxyBodyRequest,
       final Map<String, String> proxyHeaders,
       final Object response,
       final int ethNodeStatusCode,
@@ -147,8 +147,8 @@ public class IntegrationTestBase {
         .headers(ethNodeHeaders);
   }
 
-  public <T extends Response> void verifyEthNodeRequest(
-      final Request<?, T> proxyBodyRequest, final Map<String, String> proxyHeaders) {
+  public void verifyEthNodeRequest(
+      final Request<?, ? extends Response<?>> proxyBodyRequest, final Map<String, String> proxyHeaders) {
     ethNode.verify(
         request()
             .withBody(json(proxyBodyRequest))
