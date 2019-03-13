@@ -33,6 +33,8 @@ public class Runner {
   private TransactionSigner transactionSigner;
   private HttpClientOptions clientOptions;
   private HttpServerOptions serverOptions;
+  private Vertx vertx;
+  private String deploymentId;
 
   public Runner(
       final TransactionSigner transactionSigner,
@@ -45,11 +47,14 @@ public class Runner {
 
   public void start() {
     // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
-    final Vertx vertx = Vertx.vertx();
+    vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
     final JsonRpcHttpService httpService = new JsonRpcHttpService(serverOptions, requestMapper);
-
     vertx.deployVerticle(httpService, this::handleDeployResult);
+  }
+
+  public void stop() {
+    vertx.undeploy(deploymentId);
   }
 
   private RequestMapper createRequestMapper(
@@ -71,9 +76,10 @@ public class Runner {
     return requestMapper;
   }
 
-  private void handleDeployResult(final AsyncResult<?> result) {
+  private void handleDeployResult(final AsyncResult<String> result) {
     if (result.succeeded()) {
-      LOG.info("Deployment id is: {}", result.result());
+      deploymentId = result.result();
+      LOG.info("Deployment id is: {}", deploymentId);
     } else {
       LOG.warn("Deployment failed! ", result.cause());
     }

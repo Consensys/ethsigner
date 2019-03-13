@@ -43,6 +43,10 @@ dependencyManagement {
 
     dependency 'org.mockito:mockito-core:2.23.4'
 
+    dependency 'io.rest-assured:rest-assured:3.0.7'
+
+    dependency 'org.mock-server:mockserver-netty:5.5.1'
+
     dependency 'org.web3j:abi:4.1.1'
     dependency 'org.web3j:core:4.1.1'
     dependency 'org.web3j:crypto:4.1.1'
