@@ -29,27 +29,15 @@ public class RunnerBuilder {
 
   public RunnerBuilder() {}
 
-  public TransactionSigner getTransactionSigner() {
-    return transactionSigner;
-  }
-
-  public WebClientOptions getClientOptions() {
-    return clientOptions;
-  }
-
-  public HttpServerOptions getServerOptions() {
-    return serverOptions;
-  }
-
-  public void setTransactionSigner(TransactionSigner transactionSigner) {
+  public void setTransactionSigner(final TransactionSigner transactionSigner) {
     this.transactionSigner = transactionSigner;
   }
 
-  public void setClientOptions(WebClientOptions clientOptions) {
+  public void setClientOptions(final WebClientOptions clientOptions) {
     this.clientOptions = clientOptions;
   }
 
-  public void setServerOptions(HttpServerOptions serverOptions) {
+  public void setServerOptions(final HttpServerOptions serverOptions) {
     this.serverOptions = serverOptions;
   }
 

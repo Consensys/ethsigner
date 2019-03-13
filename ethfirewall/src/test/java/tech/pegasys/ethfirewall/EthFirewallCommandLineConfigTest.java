@@ -24,12 +24,12 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EthFirewallConfigTest {
+public class EthFirewallCommandLineConfigTest {
 
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
-  private EthFirewallConfig config = new EthFirewallConfig(outPrintStream);
+  private EthFirewallCommandLineConfig config = new EthFirewallCommandLineConfig(outPrintStream);
 
   private boolean parseCommand(String cmdLine) {
     return config.parse(cmdLine.split(" "));
@@ -92,18 +92,18 @@ public class EthFirewallConfigTest {
   @Test
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate config before executions, to prevent stale data remaining in the object.
-    config = new EthFirewallConfig(outPrintStream);
+    config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault("logging", config::getLogLevel, Level.INFO);
 
-    config = new EthFirewallConfig(outPrintStream);
+    config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
         "downstream-http-host", config::getDownstreamHttpHost, "127.0.0.1");
 
-    config = new EthFirewallConfig(outPrintStream);
+    config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-port", config::getHttpListenPort, 8545);
 
-    config = new EthFirewallConfig(outPrintStream);
+    config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-host", config::getHttpListenHost, "127.0.0.1");
   }

@@ -29,10 +29,10 @@ import org.web3j.crypto.CipherException;
 
 public final class EthFirewall {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EthFirewallConfig.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EthFirewallCommandLineConfig.class);
 
   private final EthFirewallConfig config;
-  private RunnerBuilder runnerBuilder;
+  private final RunnerBuilder runnerBuilder;
 
   public EthFirewall(final EthFirewallConfig config, final RunnerBuilder runnerBuilder) {
     this.config = config;
@@ -83,7 +83,7 @@ public final class EthFirewall {
   }
 
   public static void main(final String... args) {
-    final EthFirewallConfig config = new EthFirewallConfig(System.out);
+    final EthFirewallCommandLineConfig config = new EthFirewallCommandLineConfig(System.out);
     if (!config.parse(args)) {
       return;
     }
