@@ -32,7 +32,7 @@ dependencies {
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
 
-  integrationTestImplementation 'io.rest-assured:rest-assured:3.0.7'
+  integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
-  integrationTestImplementation 'org.mock-server:mockserver-netty:5.5.1'
+  integrationTestImplementation 'org.mock-server:mockserver-netty'
 }
