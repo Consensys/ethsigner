@@ -62,7 +62,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     final Request<?, ? extends Response> ethSendTransactionRequest =
         jsonRpc.ethSendTransaction(transaction);
-    ethSendTransactionRequest.setId(1);
+    ethSendTransactionRequest.setId(5);
 
     Request<?, ? extends Response> ethSendRawTransactionRequest =
         jsonRpc.ethSendRawTransaction(
@@ -71,7 +71,8 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
                 + "d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456751ca03631b1cec6"
                 + "e5033e8a2bff6d1b2d08bfe106cbbb82df5eb7b380a1fdb5c06be2a06d15eeb833f26114de087c930e375"
                 + "56d93a47d86e6554e988d32cbbb273cfda4");
-    ethSendRawTransactionRequest.setId(1);
+    // we create the eth_sendRawTransaction req with same id as the eth_sendTransaction req
+    ethSendRawTransactionRequest.setId(5);
 
     Response<String> ethSendRawTransactionResponse =
         createStringResponse("0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
