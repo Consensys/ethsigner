@@ -14,43 +14,79 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static java.util.Collections.emptyMap;
 
-import com.google.common.collect.ImmutableMap;
+import java.math.BigInteger;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthProtocolVersion;
+import org.web3j.protocol.core.methods.response.EthSendRawTransaction;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.NetVersion;
 
 public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
-  public void requestWithHeadersIsProxied() {
-    final String proxyBodyRequest =
-        "{\"jsonrpc\":\"2.0\",\"method\":\"net_version\",\"params\":[],\"id\":1}";
-    final Map<String, String> proxyHeadersRequest = ImmutableMap.of("Accept", "*/*");
-    final String ethNodeResponse = "{\"jsonrpc\": \"2.0\",\"id\" : 1,\"result\":\"4\"}";
-    final Map<String, String> ethNodeHeaders = ImmutableMap.of("Content-Type", "Application/Json");
+  public void requestWithHeadersIsProxied() throws Exception {
+    final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
+    final NetVersion netVersionResponse = new NetVersion();
+    netVersionResponse.setId(1);
+    netVersionResponse.setResult("4");
+    netVersionResponse.setJsonrpc("2.0");
 
-    configureEthNode("net_version", ethNodeResponse, ethNodeHeaders, 200);
-    sendRequestAndVerify(proxyBodyRequest, proxyHeadersRequest, ethNodeResponse, 200, ethNodeHeaders);
-    verifyEthNodeRequest(proxyBodyRequest, proxyHeadersRequest);
+    final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
+    final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
+
+    configureEthNode(netVersionRequest, netVersionResponse, responseHeaders, 200);
+    sendRequestAndVerify(
+        netVersionRequest, requestHeaders, netVersionResponse, 200, responseHeaders);
+    verifyEthNodeRequest(netVersionRequest, requestHeaders);
   }
 
   @Test
-  public void requestReturningErrorIsProxied() {
-    final String proxyBodyRequest =
-        "{\"jsonrpc\":\"2.0\",\"method\":\"eth_protocolVersion\",\"params\":[],\"id\":1}";
-    configureEthNode("eth_protocolVersion", "Not Found", emptyMap(), 404);
-    sendRequestAndVerify(proxyBodyRequest, emptyMap(), "Not Found", 404, emptyMap());
-    verifyEthNodeRequest(proxyBodyRequest, emptyMap());
+  public void requestReturningErrorIsProxied() throws Exception {
+    final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
+    configureEthNode(ethProtocolVersionRequest, "Not Found", emptyMap(), 404);
+    sendRequestAndVerify(ethProtocolVersionRequest, emptyMap(), "Not Found", 404, emptyMap());
+    verifyEthNodeRequest(ethProtocolVersionRequest, emptyMap());
   }
 
   @Test
-  public void requestWithSendTransactionIsSignedBeforeProxying() {
-    final String ethNodeResponse = "{\"jsonrpc\": \"2.0\",\"id\" : 1,\"result\":\"4\"}";
-    final String proxyRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_sendTransaction\",\"params\": [{\"from\":\"0xb60e8dd61c5d32be8058bb8eb970870f07233155\", \"to\":\"0xd46e8dd67c5d32be8058bb8eb970870f07244567\", \"gas\": \"0x76c0\", \"gasPrice\": \"0x9184e72a000\", \"value\": \"0x9184e72a\", \"nonce\": \"0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2\", \"data\": \"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675\"}],\"id\":1}";
-    final String proxyBodyRequest =
-        "{\"jsonrpc\":\"2.0\",\"method\":\"eth_sendRawTransaction\",\"params\":[\"0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456751ca03631b1cec6e5033e8a2bff6d1b2d08bfe106cbbb82df5eb7b380a1fdb5c06be2a06d15eeb833f26114de087c930e37556d93a47d86e6554e988d32cbbb273cfda4\"],\"id\":1}";
+  public void requestWithSendTransactionIsSignedBeforeProxying() throws Exception {
+    final Transaction transaction =
+        new Transaction(
+            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            new BigInteger(
+                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
+            new BigInteger("10000000000000"),
+            new BigInteger("30400"),
+            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+            new BigInteger("2441406250"),
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+    final Request<?, EthSendTransaction> ethSendTransactionRequest =
+        jsonRpc.ethSendTransaction(transaction);
+    ethSendTransactionRequest.setId(1);
 
-    configureEthNode("eth_sendRawTransaction", ethNodeResponse, emptyMap(), 200);
-    sendRequestAndVerify(proxyRequest, emptyMap(), ethNodeResponse, 200, emptyMap());
-    verifyEthNodeRequest(proxyBodyRequest, emptyMap());
+    Request<?, EthSendTransaction> ethSendRawTransactionRequest =
+        jsonRpc.ethSendRawTransaction(
+            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"
+                + "8609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5"
+                + "d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456751ca03631b1cec6"
+                + "e5033e8a2bff6d1b2d08bfe106cbbb82df5eb7b380a1fdb5c06be2a06d15eeb833f26114de087c930e375"
+                + "56d93a47d86e6554e988d32cbbb273cfda4");
+    ethSendRawTransactionRequest.setId(1);
+
+    EthSendRawTransaction ethSendRawTransactionResponse = new EthSendRawTransaction();
+    ethSendRawTransactionResponse.setId(1);
+    ethSendRawTransactionResponse.setJsonrpc("2.0");
+    ethSendRawTransactionResponse.setResult(
+        "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+
+    configureEthNode(ethSendRawTransactionRequest, ethSendRawTransactionResponse, emptyMap(), 200);
+    sendRequestAndVerify(
+        ethSendTransactionRequest, emptyMap(), ethSendRawTransactionResponse, 200, emptyMap());
+    verifyEthNodeRequest(ethSendRawTransactionRequest, emptyMap());
   }
 }

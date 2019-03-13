@@ -17,9 +17,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
+import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
 
@@ -32,6 +34,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
@@ -40,23 +44,32 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.matchers.Times;
 import org.mockserver.model.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
 
 public class IntegrationTestBase {
-  static ClientAndServer ethNode;
+  private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
+
+  private static final String LOCALHOST = "127.0.0.1";
   private static Runner runner;
+  private static ClientAndServer ethNode;
+  private ObjectMapper objectMapper = new ObjectMapper();
+  JsonRpc2_0Web3j jsonRpc;
 
   @BeforeClass
-  public static void setup() throws IOException, CipherException {
+  public static void setupEthFirewall() throws IOException, CipherException {
     ethNode = startClientAndServer();
 
     final File keyFile = createKeyFile();
     final TransactionSigner transactionSigner = TransactionSigner.createFrom(keyFile, "password");
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
-    httpClientOptions.setDefaultHost("localhost");
+    httpClientOptions.setDefaultHost(LOCALHOST);
     httpClientOptions.setDefaultPort(ethNode.getLocalPort());
 
     final ServerSocket serverSocket = new ServerSocket(0);
@@ -67,6 +80,11 @@ public class IntegrationTestBase {
 
     runner = new Runner(transactionSigner, httpClientOptions, httpServerOptions);
     runner.start();
+
+    LOG.info(
+        "Started ethFirewall on port {}, eth stub node on port {}",
+        serverSocket.getLocalPort(),
+        ethNode.getLocalPort());
     serverSocket.close();
   }
 
@@ -81,7 +99,8 @@ public class IntegrationTestBase {
   }
 
   @Before
-  public void resetEthNode() {
+  public void setup() {
+    jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     ethNode.reset();
   }
 
@@ -92,22 +111,31 @@ public class IntegrationTestBase {
   }
 
   public void configureEthNode(
-      final String method, final String responseBody, final Map<String, String> responseHeaders,
-      final int statusCode) {
+      final Request<?, ? extends Response> request,
+      final Object response,
+      final Map<String, String> responseHeaders,
+      final int responseStatusCode)
+      throws JsonProcessingException {
+    final String requestBody = objectMapper.writeValueAsString(request);
+    final String responseBody = objectMapper.writeValueAsString(response);
     List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
-        .when(
-            request()
-                .withMethod("POST")
-                .withPath("/")
-                .withBody(json("{\"method\":\"" + method + "\"}")),
-            Times.exactly(1))
-        .respond(response().withBody(responseBody).withHeaders(headers).withStatusCode(statusCode));
+        .when(request().withBody(json(requestBody)), exactly(1))
+        .respond(
+            response()
+                .withBody(responseBody)
+                .withHeaders(headers)
+                .withStatusCode(responseStatusCode));
   }
 
-  public void sendRequestAndVerify(final String proxyBodyRequest, final Map<String, String> proxyHeaders,
-      final String ethNodeBody, final int ethNodeStatusCode,
-      final Map<String, String> ethNodeHeaders) {
+  public void sendRequestAndVerify(
+      final Request<?, ? extends Response> proxyBodyRequest,
+      final Map<String, String> proxyHeaders,
+      final Object response,
+      final int ethNodeStatusCode,
+      final Map<String, String> ethNodeHeaders)
+      throws JsonProcessingException {
+    String responseBody = objectMapper.writeValueAsString(response);
     given()
         .when()
         .body(proxyBodyRequest)
@@ -115,12 +143,12 @@ public class IntegrationTestBase {
         .post()
         .then()
         .statusCode(ethNodeStatusCode)
-        .body(equalTo(ethNodeBody))
+        .body(equalTo(responseBody))
         .headers(ethNodeHeaders);
   }
 
-  public void verifyEthNodeRequest(final String proxyBodyRequest,
-      final Map<String, String> proxyHeaders) {
+  public <T extends Response> void verifyEthNodeRequest(
+      final Request<?, T> proxyBodyRequest, final Map<String, String> proxyHeaders) {
     ethNode.verify(
         request()
             .withBody(json(proxyBodyRequest))
@@ -132,5 +160,4 @@ public class IntegrationTestBase {
         .map(e -> new Header(e.getKey(), e.getValue()))
         .collect(toList());
   }
-
 }
