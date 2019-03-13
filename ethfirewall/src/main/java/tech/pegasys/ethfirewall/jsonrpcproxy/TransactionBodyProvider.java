@@ -16,6 +16,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 public class TransactionBodyProvider implements BodyProvider {
 

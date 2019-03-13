@@ -10,13 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy;
+package tech.pegasys.ethfirewall.signing;
 
+import io.vertx.core.json.JsonObject;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-
-import io.vertx.core.json.JsonObject;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -26,27 +25,33 @@ import org.web3j.utils.Numeric;
 
 public class TransactionSigner {
 
-  private Credentials credentials;
+  private final Credentials credentials;
+  private final ChainIdProvider chain;
 
-  public TransactionSigner(final Credentials credentials) {
+  public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
+    this.chain = chain;
     this.credentials = credentials;
   }
 
-  public static TransactionSigner createFrom(final File keyFile, final String password)
+  //TODO move this out from here - signer shouldn't know about File!
+  public static TransactionSigner createFrom(final File keyFile, final String password,
+      final ChainIdProvider chain)
       throws IOException, CipherException {
     final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
 
-    return new TransactionSigner(credentials);
+    return new TransactionSigner(chain, credentials);
   }
 
   public String signTransaction(final JsonObject transaction) {
     final RawTransaction rawTransaction = fromTransactionJson(transaction);
 
-    final byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+    // Sign the transaction using the post Spurious Dragon technique
+    final byte[] signedMessage = TransactionEncoder
+        .signMessage(rawTransaction, chain.id(), credentials);
     return Numeric.toHexString(signedMessage);
   }
 
-  public static RawTransaction fromTransactionJson(final JsonObject transaction) {
+  private RawTransaction fromTransactionJson(final JsonObject transaction) {
     final JsonObject txnParams = transaction.getJsonArray("params").getJsonObject(0);
     String dataString = "";
     if (txnParams.getString("data") != null) {

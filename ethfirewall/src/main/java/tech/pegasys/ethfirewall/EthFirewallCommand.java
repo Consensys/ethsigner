@@ -12,17 +12,13 @@
  */
 package tech.pegasys.ethfirewall;
 
-import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
-
+import com.google.common.base.Suppliers;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.client.WebClientOptions;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
-
-import com.google.common.base.Suppliers;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
@@ -34,6 +30,9 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
+import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -49,6 +48,7 @@ import picocli.CommandLine.ParameterException;
     footerHeading = "%n",
     footer = "Ethfirewall is licensed under the Apache License 2.0")
 public class EthFirewallCommand implements Runnable {
+
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private CommandLine commandLine;
 
@@ -102,6 +102,15 @@ public class EthFirewallCommand implements Runnable {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--chain-id"},
+      description = "The id of the chain that the target for anu signed transactions.",
+      required = true,
+      arity = "1")
+  private byte chainId;
+
+
   public void parse(
       final AbstractParseResultHandler<List<Object>> resultHandler,
       final EthFirewallExceptionHandler exceptionHandler,
@@ -123,7 +132,7 @@ public class EthFirewallCommand implements Runnable {
 
     try {
       final TransactionSigner transactionSigner =
-          TransactionSigner.createFrom(keyFilename, password);
+          TransactionSigner.createFrom(keyFilename, password, new ConfigurationChainId(chainId));
       final WebClientOptions clientOptions =
           new WebClientOptions()
               .setDefaultPort(downstreamHttpPort)
