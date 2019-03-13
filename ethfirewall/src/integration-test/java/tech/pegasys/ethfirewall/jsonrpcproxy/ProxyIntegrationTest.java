@@ -23,13 +23,16 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.NetVersion;
 
 public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() throws Exception {
-    final Request<?, ? extends Response<?>> netVersionRequest = jsonRpc.netVersion();
-    final Response<String> netVersionResponse = createStringResponse("4");
+    final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
+    final Response<String> netVersionResponse = new NetVersion();
+    netVersionResponse.setResult("4");
 
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
@@ -74,20 +77,13 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     // we create the eth_sendRawTransaction req with same id as the eth_sendTransaction req
     ethSendRawTransactionRequest.setId(5);
 
-    Response<String> ethSendRawTransactionResponse =
-        createStringResponse("0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+    Response<String> ethSendRawTransactionResponse = new EthSendTransaction();
+    ethSendRawTransactionResponse.setResult(
+        "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
     configureEthNode(ethSendRawTransactionRequest, ethSendRawTransactionResponse, emptyMap(), 200);
     sendRequestAndVerify(
         ethSendTransactionRequest, emptyMap(), ethSendRawTransactionResponse, 200, emptyMap());
     verifyEthNodeRequest(ethSendRawTransactionRequest, emptyMap());
-  }
-
-  private Response<String> createStringResponse(final String result) {
-    final Response<String> response = new Response<>();
-    response.setId(1);
-    response.setResult(result);
-    response.setJsonrpc("2.0");
-    return response;
   }
 }

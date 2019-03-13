@@ -148,7 +148,8 @@ public class IntegrationTestBase {
   }
 
   public void verifyEthNodeRequest(
-      final Request<?, ? extends Response<?>> proxyBodyRequest, final Map<String, String> proxyHeaders) {
+      final Request<?, ? extends Response<?>> proxyBodyRequest,
+      final Map<String, String> proxyHeaders) {
     ethNode.verify(
         request()
             .withBody(json(proxyBodyRequest))
