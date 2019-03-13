@@ -109,6 +109,7 @@ public class EthFirewallCommand implements Runnable {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
+    commandLine.registerConverter(Level.class, Level::valueOf);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
