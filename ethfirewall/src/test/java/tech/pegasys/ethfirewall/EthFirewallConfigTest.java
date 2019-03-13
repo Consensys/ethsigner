@@ -14,30 +14,29 @@ package tech.pegasys.ethfirewall;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.client.WebClientOptions;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import picocli.CommandLine.Help.Ansi;
-import picocli.CommandLine.RunLast;
+import tech.pegasys.ethfirewall.jsonrpcproxy.support.StubbedRunnerBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EthFirewallCommandTest {
+public class EthFirewallConfigTest {
   final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
   final ByteArrayOutputStream commandErrorOutput = new ByteArrayOutputStream();
   private final PrintStream errPrintStream = new PrintStream(commandErrorOutput);
 
-  final EthFirewallCommand command = new EthFirewallCommand();
+  private StubbedRunnerBuilder runnerBuilder;
+
+  final EthFirewallConfig command = new EthFirewallConfig(errPrintStream);
 
   private void parseCommand(String cmdLine) {
-    command.parse(
-        new RunLast().useOut(outPrintStream).useAnsi(Ansi.OFF),
-        command.exceptionHandler().useErr(errPrintStream).useAnsi(Ansi.OFF),
-        cmdLine.split(" "));
+    command.parse(cmdLine.split(" "));
   }
 
   @Test
@@ -72,6 +71,12 @@ public class EthFirewallCommandTest {
             + "--http-listen-host=localhost "
             + "--logging=TRACE");
 
+    final WebClientOptions clientOptions = runnerBuilder.getClientOptions();
+    assertThat(clientOptions.getDefaultPort()).isEqualTo(5000);
+    assertThat(clientOptions.getDefaultHost()).isEqualTo("localhost");
 
+    final HttpServerOptions serverOptions = runnerBuilder.getServerOptions();
+    assertThat(serverOptions.getPort()).isEqualTo(5001);
+    assertThat(serverOptions.getHost()).isEqualTo("127.0.0.1");
   }
 }

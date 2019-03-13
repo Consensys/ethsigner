@@ -12,28 +12,23 @@
  */
 package tech.pegasys.ethfirewall;
 
-import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
-
+import com.google.common.base.Suppliers;
 import java.io.File;
-import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Supplier;
-
-import com.google.common.base.Suppliers;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.crypto.CipherException;
 import picocli.CommandLine;
 import picocli.CommandLine.AbstractParseResultHandler;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ExecutionException;
+import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -48,12 +43,9 @@ import picocli.CommandLine.ParameterException;
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
     footer = "Ethfirewall is licensed under the Apache License 2.0")
-public class EthFirewallCommand implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
+public class EthFirewallConfig {
+  private static final Logger LOG = LoggerFactory.getLogger(EthFirewallConfig.class);
   private CommandLine commandLine;
-
-  private final Supplier<EthFirewallExceptionHandler> exceptionHandlerSupplier =
-      Suppliers.memoize(EthFirewallExceptionHandler::new);
 
   @Option(
       names = {"--logging", "-l"},
@@ -63,11 +55,11 @@ public class EthFirewallCommand implements Runnable {
   private final Level logLevel = Level.INFO;
 
   @Option(
-      names = {"-p", "--password"},
-      description = "Password required to access the key file.",
+      names = {"-p", "--password-file"},
+      description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
       required = true,
       arity = "1")
-  private String password;
+  private String passwordFilePath;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -86,6 +78,7 @@ public class EthFirewallCommand implements Runnable {
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
+      required = true,
       arity = "1")
   private Integer downstreamHttpPort;
 
@@ -102,10 +95,14 @@ public class EthFirewallCommand implements Runnable {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
-  public void parse(
-      final AbstractParseResultHandler<List<Object>> resultHandler,
-      final EthFirewallExceptionHandler exceptionHandler,
-      final String... args) {
+
+  private final PrintStream output;
+
+  public EthFirewallConfig(PrintStream output) {
+    this.output = output;
+  }
+
+  public boolean parse(final String... args) {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
@@ -113,70 +110,61 @@ public class EthFirewallCommand implements Runnable {
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
-    commandLine.parseWithHandlers(resultHandler, exceptionHandler, args);
-  }
-
-  @Override
-  public void run() {
-    // set log level per CLI flags
-    System.out.println("Setting logging level to " + logLevel.name());
-    Configurator.setAllLevels("", logLevel);
-
     try {
-      final TransactionSigner transactionSigner =
-          TransactionSigner.createFrom(keyFilename, password);
-      final WebClientOptions clientOptions =
-          new WebClientOptions()
-              .setDefaultPort(downstreamHttpPort)
-              .setDefaultHost(downstreamHttpHost);
-      final HttpServerOptions serverOptions =
-          new HttpServerOptions()
-              .setPort(httpListenPort)
-              .setHost(httpListenHost)
-              .setReuseAddress(true)
-              .setReusePort(true);
+      commandLine.parse(args);
+    }
+    catch(ParameterException ex) {
+      handleParseException(ex);
+      return false;
+    }
+    if(commandLine.isUsageHelpRequested()) {
+      commandLine.usage(output);
+      return false;
+    }
+    else if (commandLine.isVersionHelpRequested()) {
+      commandLine.printVersionHelp(output);
+      return false;
+    }
+    return true;
+  }
 
-      final Runner runner = new Runner(transactionSigner, clientOptions, serverOptions);
-      runner.start();
-    } catch (IOException ex) {
-      LOG.info(
-          "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
-    } catch (CipherException ex) {
-      LOG.info("Unable to decode keyfile with supplied password.");
+  public void handleParseException(final ParameterException ex) {
+    if (logLevel != null && Level.DEBUG.isMoreSpecificThan(logLevel)) {
+      ex.printStackTrace(output);
+    } else {
+      output.println(ex.getMessage());
+    }
+    if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
+      ex.getCommandLine().usage(output, Ansi.AUTO);
     }
   }
 
-  public EthFirewallExceptionHandler exceptionHandler() {
-    return exceptionHandlerSupplier.get();
+  public Level getLogLevel() {
+    return logLevel;
   }
 
-  // Inner class so we can get to loggingLevel.
-  public class EthFirewallExceptionHandler
-      extends CommandLine.AbstractHandler<List<Object>, EthFirewallExceptionHandler>
-      implements CommandLine.IExceptionHandler2<List<Object>> {
-
-    @Override
-    public List<Object> handleParseException(final ParameterException ex, final String[] args) {
-      if (logLevel != null && Level.DEBUG.isMoreSpecificThan(logLevel)) {
-        ex.printStackTrace(err());
-      } else {
-        err().println(ex.getMessage());
-      }
-      if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, err())) {
-        ex.getCommandLine().usage(err(), ansi());
-      }
-      return returnResultOrExit(null);
-    }
-
-    @Override
-    public List<Object> handleExecutionException(
-        final ExecutionException ex, final CommandLine.ParseResult parseResult) {
-      return throwOrExit(ex);
-    }
-
-    @Override
-    protected EthFirewallExceptionHandler self() {
-      return this;
-    }
+  public String getPasswordFilePath() {
+    return passwordFilePath;
   }
+
+  public File getKeyFilename() {
+    return keyFilename;
+  }
+
+  public String getDownstreamHttpHost() {
+    return downstreamHttpHost;
+  }
+
+  public Integer getDownstreamHttpPort() {
+    return downstreamHttpPort;
+  }
+
+  public String getHttpListenHost() {
+    return httpListenHost;
+  }
+
+  public Integer getHttpListenPort() {
+    return httpListenPort;
+  }
+
 }
