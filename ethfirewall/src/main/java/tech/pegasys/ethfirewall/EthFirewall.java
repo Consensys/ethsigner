@@ -53,7 +53,7 @@ public final class EthFirewall {
 
     try {
       runnerBuilder.setTransactionSigner(
-          TransactionSigner.createFrom(config.getKeyFilename(), password.get()));
+          TransactionSigner.createFrom(config.getKeyFile(), password.get()));
       runnerBuilder
           .setClientOptions(new WebClientOptions().setDefaultPort(config.getDownstreamHttpPort())
               .setDefaultHost(config.getDownstreamHttpHost()));

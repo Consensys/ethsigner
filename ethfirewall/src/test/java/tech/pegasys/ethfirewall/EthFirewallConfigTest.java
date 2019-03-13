@@ -14,29 +14,65 @@ package tech.pegasys.ethfirewall;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.client.WebClientOptions;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.function.Supplier;
+import org.apache.logging.log4j.Level;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import tech.pegasys.ethfirewall.jsonrpcproxy.support.StubbedRunnerBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EthFirewallConfigTest {
+
   final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
   final ByteArrayOutputStream commandErrorOutput = new ByteArrayOutputStream();
   private final PrintStream errPrintStream = new PrintStream(commandErrorOutput);
 
-  private StubbedRunnerBuilder runnerBuilder;
+  final EthFirewallConfig config = new EthFirewallConfig(outPrintStream);
 
-  final EthFirewallConfig command = new EthFirewallConfig(errPrintStream);
+  private boolean parseCommand(String cmdLine) {
+    return config.parse(cmdLine.split(" "));
+  }
 
-  private void parseCommand(String cmdLine) {
-    command.parse(cmdLine.split(" "));
+  @After
+  public void postAction() {
+    System.out.print(commandOutput.toString());
+  }
+
+  private String validCommandLine() {
+    return "--key-file=./keyfile "
+        + "--password-file=./passwordFile "
+        + "--downstream-http-host=127.0.0.1 "
+        + "--downstream-http-port=5000 "
+        + "--http-listen-port=5001 "
+        + "--http-listen-host=localhost "
+        + "--logging=INFO";
+  }
+
+  private String removeFieldFrom(final String input, final String fieldname) {
+    return input.replaceAll("--" + fieldname + "=\\w*", "");
+  }
+
+  private String modifyField(final String input, final String fieldname, final String value) {
+    return input.replaceFirst("--" + fieldname + "=\\w*", "--" + fieldname + "=" + value);
+  }
+
+  @Test
+  public void fullyPopulatedCommandLineParsesIntoVariables() {
+    final boolean result = parseCommand(validCommandLine());
+
+    assertThat(result).isTrue();
+    assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
+    assertThat(config.getKeyFile().getPath()).isEqualTo("./keyfile");
+    assertThat(config.getPasswordFilePath()).isEqualTo("./passwordFile");
+    assertThat(config.getDownstreamHttpHost()).isEqualTo("127.0.0.1");
+    assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
+    assertThat(config.getHttpListenHost()).isEqualTo("localhost");
+    assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
 
   @Test
@@ -48,35 +84,54 @@ public class EthFirewallConfigTest {
   }
 
   @Test
-  public void invalidInputForPortShowsError() {
-    parseCommand(
-        "--password=MyPassword --keyfile=./keyfile --downstream-http-host=127.0.0.1 --downstream-http-port=abc");
-    assertThat(commandErrorOutput.toString())
+  public void nonIntegerInputForDownstreamPortShowsError() {
+    final String cmdLine = modifyField(validCommandLine(), "downstream-http-port", "abc");
+    final boolean result = parseCommand(cmdLine);
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString())
         .contains("--downstream-http-port", "'abc' is not an int");
   }
 
   @Test
-  public void missingPasswordShowsError() {
-    parseCommand("--keyfile=./keyfile --downstream-host=127.0.0.1 --downstream-port=5000");
-    assertThat(commandErrorOutput.toString()).contains("--password", "Missing");
+  public void missingDownstreamPortShowsError() {
+    final String cmdLine = removeFieldFrom(validCommandLine(), "downstream-http-port");
+    final boolean result = parseCommand(cmdLine);
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--downstream-http-port", "Missing");
   }
 
   @Test
-  public void fieldsFromCommandLineAreStoredInVariables() {
-    parseCommand(
-        "--keyfile=./keyfile "
-            + "--downstream-http-host=127.0.0.1 "
-            + "--downstream-http-port=5000 "
-            + "--http-listen-port=5001"
-            + "--http-listen-host=localhost "
-            + "--logging=TRACE");
+  public void missingRequireParamShowsAppropriateError() {
+    missingParameterShowsError("password-file");
+    missingParameterShowsError("key-file");
+    missingParameterShowsError("downstream-http-port");
+  }
 
-    final WebClientOptions clientOptions = runnerBuilder.getClientOptions();
-    assertThat(clientOptions.getDefaultPort()).isEqualTo(5000);
-    assertThat(clientOptions.getDefaultHost()).isEqualTo("localhost");
+  @Test
+  public void missingOptionalParametersAreSetToDefault() {
+    missingOptionalParameterIsValidAndMeetsDefault("logging", () -> config.getLogLevel(),
+        Level.INFO);
+    missingOptionalParameterIsValidAndMeetsDefault("downstream-http-host", () -> config.getDownstreamHttpHost(),
+        "127.0.0.1");
+    missingOptionalParameterIsValidAndMeetsDefault("http-listen-port", () -> config.getHttpListenPort(),
+        8545);
+    missingOptionalParameterIsValidAndMeetsDefault("http-listen-host", () -> config.getHttpListenPort(),
+        "127.0.0.1");
+  }
 
-    final HttpServerOptions serverOptions = runnerBuilder.getServerOptions();
-    assertThat(serverOptions.getPort()).isEqualTo(5001);
-    assertThat(serverOptions.getHost()).isEqualTo("127.0.0.1");
+  private void missingParameterShowsError(final String paramToRemove) {
+    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final boolean result = parseCommand(cmdLine);
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+  }
+
+  private <T> void missingOptionalParameterIsValidAndMeetsDefault(final String paramToRemove, final
+  Supplier<T> actualValueGetter, final T expectedValue) {
+    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final boolean result = parseCommand(cmdLine);
+    assertThat(result).isTrue();
+    assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
   }
 }
+

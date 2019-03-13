@@ -12,23 +12,16 @@
  */
 package tech.pegasys.ethfirewall;
 
-import com.google.common.base.Suppliers;
 import java.io.File;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.function.Supplier;
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-import picocli.CommandLine.AbstractParseResultHandler;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
-import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -63,11 +56,11 @@ public class EthFirewallConfig {
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"-k", "--keyfile"},
+      names = {"-k", "--key-file"},
       description = "The path to a file containing the key used to sign transactions.",
       required = true,
       arity = "1")
-  private File keyFilename;
+  private File keyFile;
 
   @Option(
       names = "--downstream-http-host",
@@ -117,6 +110,7 @@ public class EthFirewallConfig {
       handleParseException(ex);
       return false;
     }
+
     if(commandLine.isUsageHelpRequested()) {
       commandLine.usage(output);
       return false;
@@ -147,8 +141,8 @@ public class EthFirewallConfig {
     return passwordFilePath;
   }
 
-  public File getKeyFilename() {
-    return keyFilename;
+  public File getKeyFile() {
+    return keyFile;
   }
 
   public String getDownstreamHttpHost() {
