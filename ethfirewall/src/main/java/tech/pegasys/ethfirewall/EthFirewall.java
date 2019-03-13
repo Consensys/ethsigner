@@ -12,35 +12,34 @@
  */
 package tech.pegasys.ethfirewall;
 
-import com.google.common.base.Charsets;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.client.WebClientOptions;
+import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
+
+import com.google.common.base.Charsets;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 public final class EthFirewall {
 
   private static final Logger LOG = LoggerFactory.getLogger(EthFirewallConfig.class);
 
-  private static final int ERROR_EXIT_CODE = 1;
-
   private final EthFirewallConfig config;
   private RunnerBuilder runnerBuilder;
 
-  public EthFirewall(EthFirewallConfig config, final RunnerBuilder runnerBuilder) {
+  public EthFirewall(final EthFirewallConfig config, final RunnerBuilder runnerBuilder) {
     this.config = config;
     this.runnerBuilder = runnerBuilder;
   }
 
   public void run() {
-
     // set log level per CLI flags
     System.out.println("Setting logging level to " + config.getLogLevel().name());
     Configurator.setAllLevels("", config.getLogLevel());
@@ -54,13 +53,16 @@ public final class EthFirewall {
     try {
       runnerBuilder.setTransactionSigner(
           TransactionSigner.createFrom(config.getKeyFile(), password.get()));
-      runnerBuilder
-          .setClientOptions(new WebClientOptions().setDefaultPort(config.getDownstreamHttpPort())
+      runnerBuilder.setClientOptions(
+          new WebClientOptions()
+              .setDefaultPort(config.getDownstreamHttpPort())
               .setDefaultHost(config.getDownstreamHttpHost()));
       runnerBuilder.setServerOptions(
-          new HttpServerOptions().setPort(config.getHttpListenPort())
+          new HttpServerOptions()
+              .setPort(config.getHttpListenPort())
               .setHost(config.getHttpListenHost())
-              .setReuseAddress(true).setReusePort(true));
+              .setReuseAddress(true)
+              .setReusePort(true));
 
       runnerBuilder.build().start();
     } catch (IOException ex) {
@@ -80,17 +82,13 @@ public final class EthFirewall {
     }
   }
 
-
   public static void main(final String... args) {
-
     final EthFirewallConfig config = new EthFirewallConfig(System.out);
-    if(!config.parse(args)) {
+    if (!config.parse(args)) {
       return;
     }
 
     final EthFirewall ethFirewall = new EthFirewall(config, new RunnerBuilder());
     ethFirewall.run();
   }
-
-
 }

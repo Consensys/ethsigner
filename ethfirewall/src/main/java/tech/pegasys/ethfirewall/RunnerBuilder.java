@@ -1,10 +1,23 @@
+/*
+ * Copyright 2019 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package tech.pegasys.ethfirewall;
+
+import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 public class RunnerBuilder {
 
@@ -14,8 +27,7 @@ public class RunnerBuilder {
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
 
-  public RunnerBuilder() {
-  }
+  public RunnerBuilder() {}
 
   public TransactionSigner getTransactionSigner() {
     return transactionSigner;
@@ -42,15 +54,15 @@ public class RunnerBuilder {
   }
 
   public Runner build() {
-    if(transactionSigner == null) {
+    if (transactionSigner == null) {
       LOG.error("Unable to construct Runner, transactionSigner is unset.");
       return null;
     }
-    if(clientOptions == null) {
+    if (clientOptions == null) {
       LOG.error("Unable to construct Runner, clientOptions is unset.");
       return null;
     }
-    if(serverOptions == null) {
+    if (serverOptions == null) {
       LOG.error("Unable to construct Runner, serverOptions is unset.");
       return null;
     }

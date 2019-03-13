@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.function.Supplier;
+
 import org.apache.logging.log4j.Level;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -26,21 +26,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EthFirewallConfigTest {
 
-  final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
+  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
-  final ByteArrayOutputStream commandErrorOutput = new ByteArrayOutputStream();
-  private final PrintStream errPrintStream = new PrintStream(commandErrorOutput);
-
-  final EthFirewallConfig config = new EthFirewallConfig(outPrintStream);
+  private EthFirewallConfig config = new EthFirewallConfig(outPrintStream);
 
   private boolean parseCommand(String cmdLine) {
     return config.parse(cmdLine.split(" "));
-  }
-
-  @After
-  public void postAction() {
-    System.out.print(commandOutput.toString());
   }
 
   private String validCommandLine() {
@@ -54,11 +46,11 @@ public class EthFirewallConfigTest {
   }
 
   private String removeFieldFrom(final String input, final String fieldname) {
-    return input.replaceAll("--" + fieldname + "=\\w*", "");
+    return input.replaceAll("--" + fieldname + "=.*?(\\s|$)", "");
   }
 
   private String modifyField(final String input, final String fieldname, final String value) {
-    return input.replaceFirst("--" + fieldname + "=\\w*", "--" + fieldname + "=" + value);
+    return input.replaceFirst("--" + fieldname + "=.*\\b", "--" + fieldname + "=" + value);
   }
 
   @Test
@@ -80,7 +72,6 @@ public class EthFirewallConfigTest {
     parseCommand("--help");
     final String expectedOutputStart = String.format("Usage:%n%nethfirewall [OPTIONS]");
     assertThat(commandOutput.toString()).startsWith(expectedOutputStart);
-    assertThat(commandErrorOutput.toString()).isEmpty();
   }
 
   @Test
@@ -88,20 +79,11 @@ public class EthFirewallConfigTest {
     final String cmdLine = modifyField(validCommandLine(), "downstream-http-port", "abc");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
   }
 
   @Test
-  public void missingDownstreamPortShowsError() {
-    final String cmdLine = removeFieldFrom(validCommandLine(), "downstream-http-port");
-    final boolean result = parseCommand(cmdLine);
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--downstream-http-port", "Missing");
-  }
-
-  @Test
-  public void missingRequireParamShowsAppropriateError() {
+  public void missingRequiredParamShowsAppropriateError() {
     missingParameterShowsError("password-file");
     missingParameterShowsError("key-file");
     missingParameterShowsError("downstream-http-port");
@@ -109,14 +91,21 @@ public class EthFirewallConfigTest {
 
   @Test
   public void missingOptionalParametersAreSetToDefault() {
-    missingOptionalParameterIsValidAndMeetsDefault("logging", () -> config.getLogLevel(),
-        Level.INFO);
-    missingOptionalParameterIsValidAndMeetsDefault("downstream-http-host", () -> config.getDownstreamHttpHost(),
-        "127.0.0.1");
-    missingOptionalParameterIsValidAndMeetsDefault("http-listen-port", () -> config.getHttpListenPort(),
-        8545);
-    missingOptionalParameterIsValidAndMeetsDefault("http-listen-host", () -> config.getHttpListenPort(),
-        "127.0.0.1");
+    // Must recreate config before executions, to prevent stale data remaining in the object.
+    config = new EthFirewallConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault("logging", config::getLogLevel, Level.INFO);
+
+    config = new EthFirewallConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-host", config::getDownstreamHttpHost, "127.0.0.1");
+
+    config = new EthFirewallConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "http-listen-port", config::getHttpListenPort, 8545);
+
+    config = new EthFirewallConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "http-listen-host", config::getHttpListenHost, "127.0.0.1");
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
@@ -126,12 +115,12 @@ public class EthFirewallConfigTest {
     assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
   }
 
-  private <T> void missingOptionalParameterIsValidAndMeetsDefault(final String paramToRemove, final
-  Supplier<T> actualValueGetter, final T expectedValue) {
+  private <T> void missingOptionalParameterIsValidAndMeetsDefault(
+      final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
+    assertThat(commandOutput.toString()).isEmpty();
   }
 }
-

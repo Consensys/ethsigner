@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall;
 
 import java.io.File;
 import java.io.PrintStream;
+
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,6 @@ public class EthFirewallConfig {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
-
   private final PrintStream output;
 
   public EthFirewallConfig(PrintStream output) {
@@ -105,17 +105,15 @@ public class EthFirewallConfig {
     // (https://picocli.info/#_printing_help_automatically)
     try {
       commandLine.parse(args);
-    }
-    catch(ParameterException ex) {
+    } catch (ParameterException ex) {
       handleParseException(ex);
       return false;
     }
 
-    if(commandLine.isUsageHelpRequested()) {
+    if (commandLine.isUsageHelpRequested()) {
       commandLine.usage(output);
       return false;
-    }
-    else if (commandLine.isVersionHelpRequested()) {
+    } else if (commandLine.isVersionHelpRequested()) {
       commandLine.printVersionHelp(output);
       return false;
     }
@@ -160,5 +158,4 @@ public class EthFirewallConfig {
   public Integer getHttpListenPort() {
     return httpListenPort;
   }
-
 }
