@@ -23,6 +23,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
+import io.vertx.ext.web.handler.TimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+  public static final int REQUEST_TIMEOUT = 5_000;
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
@@ -77,6 +79,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
+        .handler(TimeoutHandler.create(REQUEST_TIMEOUT))
         .failureHandler(new LogErrorHandler())
         .handler(this::handleJsonRpc);
     router.route().handler(context -> {});

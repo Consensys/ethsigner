@@ -28,6 +28,7 @@ public class LogErrorHandler implements Handler<RoutingContext> {
       LOG.error(
           String.format("Failed sendRequest: %s", failureContext.request().absoluteURI()),
           failureContext.failure());
+      failureContext.next();
     } else {
       LOG.warn("Error handler triggered without any propagated failure");
     }
