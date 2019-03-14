@@ -81,7 +81,7 @@ public class Runner {
       deploymentId = result.result();
       LOG.info("Vertx deployment id is: {}", deploymentId);
     } else {
-      LOG.error("Vertx deployed failed", result.cause());
+      LOG.error("Vertx deployment failed", result.cause());
       System.exit(1);
     }
   }
