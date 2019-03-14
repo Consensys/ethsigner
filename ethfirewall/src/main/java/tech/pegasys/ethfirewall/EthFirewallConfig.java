@@ -13,6 +13,7 @@
 package tech.pegasys.ethfirewall;
 
 import java.nio.file.Path;
+
 import org.apache.logging.log4j.Level;
 
 public interface EthFirewallConfig {
