@@ -12,15 +12,12 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
-import io.vertx.core.json.JsonObject;
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
-import org.web3j.crypto.CipherException;
+
+import io.vertx.core.json.JsonObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 
 public class TransactionSigner {
@@ -33,21 +30,12 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  //TODO move this out from here - signer shouldn't know about File!
-  public static TransactionSigner createFrom(final File keyFile, final String password,
-      final ChainIdProvider chain)
-      throws IOException, CipherException {
-    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
-
-    return new TransactionSigner(chain, credentials);
-  }
-
   public String signTransaction(final JsonObject transaction) {
     final RawTransaction rawTransaction = fromTransactionJson(transaction);
 
     // Sign the transaction using the post Spurious Dragon technique
-    final byte[] signedMessage = TransactionEncoder
-        .signMessage(rawTransaction, chain.id(), credentials);
+    final byte[] signedMessage =
+        TransactionEncoder.signMessage(rawTransaction, chain.id(), credentials);
     return Numeric.toHexString(signedMessage);
   }
 
