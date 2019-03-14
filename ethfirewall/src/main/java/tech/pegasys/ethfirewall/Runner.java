@@ -79,9 +79,10 @@ public class Runner {
   private void handleDeployResult(final AsyncResult<String> result) {
     if (result.succeeded()) {
       deploymentId = result.result();
-      LOG.info("Deployment id is: {}", deploymentId);
+      LOG.info("Vertx deployment id is: {}", deploymentId);
     } else {
-      LOG.warn("Deployment failed! ", result.cause());
+      LOG.error("Vertx deployed failed", result.cause());
+      System.exit(1);
     }
   }
 }
