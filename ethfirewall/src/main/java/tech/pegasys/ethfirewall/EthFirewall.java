@@ -49,6 +49,12 @@ public final class EthFirewall {
       return;
     }
 
+    if (config.getHttpListenHost().equals(config.getHttpListenHost())
+        && config.getHttpListenPort().equals(config.getDownstreamHttpPort())) {
+      LOG.error("Http host and port must be different to the downstream host and port");
+      return;
+    }
+
     try {
       runnerBuilder.setTransactionSigner(
           TransactionSigner.createFrom(config.getKeyPath().toFile(), password.get()));
