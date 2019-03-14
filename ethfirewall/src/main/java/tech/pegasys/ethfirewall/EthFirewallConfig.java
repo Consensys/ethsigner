@@ -12,17 +12,16 @@
  */
 package tech.pegasys.ethfirewall;
 
-import java.io.File;
-
+import java.nio.file.Path;
 import org.apache.logging.log4j.Level;
 
 public interface EthFirewallConfig {
 
   Level getLogLevel();
 
-  String getPasswordFilePath();
+  Path getPasswordFilePath();
 
-  File getKeyFile();
+  Path getKeyPath();
 
   String getDownstreamHttpHost();
 

@@ -15,6 +15,7 @@ package tech.pegasys.ethfirewall;
 import java.io.File;
 import java.io.PrintStream;
 
+import java.nio.file.Path;
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
       required = true,
       arity = "1")
-  private String passwordFilePath;
+  private Path passwordFilePath;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -61,7 +62,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description = "The path to a file containing the key used to sign transactions.",
       required = true,
       arity = "1")
-  private File keyFile;
+  private Path keyFile;
 
   @Option(
       names = "--downstream-http-host",
@@ -137,12 +138,12 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public String getPasswordFilePath() {
+  public Path getPasswordFilePath() {
     return passwordFilePath;
   }
 
   @Override
-  public File getKeyFile() {
+  public Path getKeyPath() {
     return keyFile;
   }
 

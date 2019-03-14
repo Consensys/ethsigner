@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethfirewall;
 
+import java.io.File;
+import java.nio.file.Path;
 import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
 
 import java.io.IOException;
@@ -29,7 +31,7 @@ import org.web3j.crypto.CipherException;
 
 public final class EthFirewall {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EthFirewallCommandLineConfig.class);
+  private static final Logger LOG = LoggerFactory.getLogger(EthFirewall.class);
 
   private final EthFirewallConfig config;
   private final RunnerBuilder runnerBuilder;
@@ -52,7 +54,7 @@ public final class EthFirewall {
 
     try {
       runnerBuilder.setTransactionSigner(
-          TransactionSigner.createFrom(config.getKeyFile(), password.get()));
+          TransactionSigner.createFrom(config.getKeyPath().toFile(), password.get()));
       runnerBuilder.setClientOptions(
           new WebClientOptions()
               .setDefaultPort(config.getDownstreamHttpPort())
@@ -75,9 +77,10 @@ public final class EthFirewall {
 
   private Optional<String> readPasswordFromFile() {
     try {
-      byte[] fileContent = Files.readAllBytes(Paths.get(config.getPasswordFilePath()));
+      byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
       return Optional.of(new String(fileContent, Charsets.UTF_8));
     } catch (IOException ex) {
+      LOG.debug("Failed to read password from password file, {}", ex);
       return Optional.empty();
     }
   }

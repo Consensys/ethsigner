@@ -59,8 +59,8 @@ public class EthFirewallCommandLineConfigTest {
 
     assertThat(result).isTrue();
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
-    assertThat(config.getKeyFile().getPath()).isEqualTo("./keyfile");
-    assertThat(config.getPasswordFilePath()).isEqualTo("./passwordFile");
+    assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
+    assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
     assertThat(config.getDownstreamHttpHost()).isEqualTo("127.0.0.1");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
