@@ -31,7 +31,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
-  public static final int REQUEST_TIMEOUT = 5_000;
+  private static final int REQUEST_TIMEOUT = 5_000;
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
