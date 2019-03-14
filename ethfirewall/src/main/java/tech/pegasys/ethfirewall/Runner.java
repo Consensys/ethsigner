@@ -33,23 +33,27 @@ public class Runner {
   private TransactionSigner transactionSigner;
   private HttpClientOptions clientOptions;
   private HttpServerOptions serverOptions;
+  private Integer httpRequestTimeout;
   private Vertx vertx;
   private String deploymentId;
 
   public Runner(
       final TransactionSigner transactionSigner,
       final HttpClientOptions clientOptions,
-      final HttpServerOptions serverOptions) {
+      final HttpServerOptions serverOptions,
+      final Integer httpRequestTimeout) {
     this.transactionSigner = transactionSigner;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
+    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   public void start() {
     // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
     vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
-    final JsonRpcHttpService httpService = new JsonRpcHttpService(serverOptions, requestMapper);
+    final JsonRpcHttpService httpService =
+        new JsonRpcHttpService(serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 

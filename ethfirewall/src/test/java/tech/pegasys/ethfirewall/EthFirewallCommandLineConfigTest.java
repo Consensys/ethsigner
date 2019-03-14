@@ -40,6 +40,7 @@ public class EthFirewallCommandLineConfigTest {
         + "--password-file=./passwordFile "
         + "--downstream-http-host=127.0.0.1 "
         + "--downstream-http-port=5000 "
+        + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "
         + "--logging=INFO";
@@ -63,6 +64,7 @@ public class EthFirewallCommandLineConfigTest {
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
     assertThat(config.getDownstreamHttpHost()).isEqualTo("127.0.0.1");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
+    assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(10000);
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
@@ -98,6 +100,10 @@ public class EthFirewallCommandLineConfigTest {
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
         "downstream-http-host", config::getDownstreamHttpHost, "127.0.0.1");
+
+    config = new EthFirewallCommandLineConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-request-timeout", config::getDownstreamHttpRequestTimeout, 5000);
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(

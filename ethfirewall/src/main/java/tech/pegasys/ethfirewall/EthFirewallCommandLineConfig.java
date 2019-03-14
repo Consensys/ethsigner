@@ -76,6 +76,13 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       arity = "1")
   private Integer downstreamHttpPort;
 
+  @Option(
+      names = {"--downstream-http-request-timeout"},
+      description =
+          "Timeout in ms to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private Integer downstreamHttpRequestTimeout = 5_000;
+
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--http-listen-host"},
@@ -164,5 +171,10 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   @Override
   public Integer getHttpListenPort() {
     return httpListenPort;
+  }
+
+  @Override
+  public Integer getDownstreamHttpRequestTimeout() {
+    return downstreamHttpRequestTimeout;
   }
 }

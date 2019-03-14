@@ -28,6 +28,8 @@ public interface EthFirewallConfig {
 
   Integer getDownstreamHttpPort();
 
+  Integer getDownstreamHttpRequestTimeout();
+
   String getHttpListenHost();
 
   Integer getHttpListenPort();

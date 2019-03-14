@@ -68,7 +68,7 @@ public final class EthFirewall {
               .setHost(config.getHttpListenHost())
               .setReuseAddress(true)
               .setReusePort(true));
-
+      runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
       runnerBuilder.build().start();
     } catch (IOException ex) {
       LOG.info(

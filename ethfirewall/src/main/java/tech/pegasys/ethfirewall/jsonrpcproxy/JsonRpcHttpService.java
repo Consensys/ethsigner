@@ -31,15 +31,18 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
-  private static final int REQUEST_TIMEOUT = 5_000;
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
+  private final int httpRequestTimeout;
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
-      final HttpServerOptions serverOptions, final RequestMapper requestHandlerMapper) {
+      final HttpServerOptions serverOptions,
+      final int httpRequestTimeout,
+      final RequestMapper requestHandlerMapper) {
     this.serverOptions = serverOptions;
+    this.httpRequestTimeout = httpRequestTimeout;
     this.requestHandlerMapper = requestHandlerMapper;
   }
 
@@ -79,7 +82,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .handler(TimeoutHandler.create(REQUEST_TIMEOUT))
+        .handler(TimeoutHandler.create(httpRequestTimeout))
         .failureHandler(new LogErrorHandler())
         .handler(this::handleJsonRpc);
     router.route().handler(context -> {});
