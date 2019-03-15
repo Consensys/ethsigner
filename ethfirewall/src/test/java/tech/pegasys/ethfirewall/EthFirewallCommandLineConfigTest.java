@@ -40,7 +40,7 @@ public class EthFirewallCommandLineConfigTest {
   private String validCommandLine() {
     return "--key-file=./keyfile "
         + "--password-file=./passwordFile "
-        + "--downstream-http-host=127.0.0.1 "
+        + "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
         + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
@@ -65,7 +65,7 @@ public class EthFirewallCommandLineConfigTest {
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
-    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("127.0.0.1"));
+    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(10000);
     assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getByName("localhost"));
