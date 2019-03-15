@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethfirewall;
 
-import java.net.InetAddress;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 
+import java.net.InetAddress;
 import java.nio.file.Path;
 
 import org.apache.logging.log4j.Level;
