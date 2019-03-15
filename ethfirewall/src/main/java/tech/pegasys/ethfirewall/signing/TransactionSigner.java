@@ -22,6 +22,9 @@ import org.web3j.utils.Numeric;
 
 public class TransactionSigner {
 
+  private static final int HEXADECIMAL = 16;
+  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
+
   private final Credentials credentials;
   private final ChainIdProvider chain;
 
@@ -40,24 +43,39 @@ public class TransactionSigner {
   }
 
   private RawTransaction fromTransactionJson(final JsonObject transaction) {
-    final JsonObject txnParams = transaction.getJsonArray("params").getJsonObject(0);
-    String dataString = "";
-    if (txnParams.getString("data") != null) {
-      dataString = txnParams.getString("data");
-    }
-
-    // TODO(tmm): This should be configurable, but currently matches Geth.
-    String gasValue = "90000";
-    if (txnParams.getString("gas") != null) {
-      gasValue = txnParams.getString("gas").substring(2);
-    }
+    final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
 
     return RawTransaction.createTransaction(
-        new BigInteger(txnParams.getString("nonce").substring(2), 16),
-        new BigInteger(txnParams.getString("gasPrice").substring(2), 16),
-        new BigInteger(gasValue, 16),
-        txnParams.getString("to"),
-        new BigInteger(txnParams.getString("value").substring(2), 16),
-        dataString);
+        hex("nonce", params),
+        hex("gasPrice", params),
+        gas(params),
+        params.getString("to"),
+        hex("value", params),
+        data(params));
+  }
+
+  private String data(final JsonObject params) {
+    return params.getString("data") != null ? params.getString("data") : "";
+  }
+
+  private BigInteger gas(final JsonObject params) {
+    // TODO(tmm): This should be configurable, but currently matches Geth.
+    String gasValue = "90000";
+
+    if (params.getString("gas") != null) {
+      gasValue = params.getString("gas").substring(HEXADECIMAL_PREFIX_LENGTH);
+    }
+
+    return hex(gasValue);
+  }
+
+  private BigInteger hex(final String value) {
+    return new BigInteger(value, HEXADECIMAL);
+  }
+
+  private BigInteger hex(final String key, final JsonObject params) {
+    return params.containsKey(key)
+        ? new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL)
+        : null;
   }
 }
