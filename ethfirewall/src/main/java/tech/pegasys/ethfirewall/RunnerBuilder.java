@@ -26,7 +26,7 @@ public class RunnerBuilder {
   private TransactionSigner transactionSigner;
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
-  private Integer requestTimeout;
+  private Long requestTimeout;
 
   public RunnerBuilder() {}
 
@@ -42,7 +42,7 @@ public class RunnerBuilder {
     this.serverOptions = serverOptions;
   }
 
-  public void setHttpRequestTimeout(final Integer requestTimeout) {
+  public void setHttpRequestTimeout(final Long requestTimeout) {
     this.requestTimeout = requestTimeout;
   }
 

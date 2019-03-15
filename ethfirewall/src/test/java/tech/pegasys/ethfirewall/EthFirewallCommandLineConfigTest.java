@@ -103,7 +103,7 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "downstream-http-request-timeout", config::getDownstreamHttpRequestTimeout, 5000);
+        "downstream-http-request-timeout", config::getDownstreamHttpRequestTimeout, 5000L);
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(

@@ -28,7 +28,7 @@ public interface EthFirewallConfig {
 
   Integer getDownstreamHttpPort();
 
-  Integer getDownstreamHttpRequestTimeout();
+  Long getDownstreamHttpRequestTimeout();
 
   String getHttpListenHost();
 
