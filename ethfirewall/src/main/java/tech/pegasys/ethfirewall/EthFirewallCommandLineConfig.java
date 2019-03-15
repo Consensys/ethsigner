@@ -80,7 +80,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   @Option(
       names = {"--downstream-http-request-timeout"},
       description =
-          "Timeout in ms to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
+          "Timeout (in milliseconds) to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
       arity = "1")
   private Long downstreamHttpRequestTimeout = 5_000L;
 
