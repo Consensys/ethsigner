@@ -53,9 +53,14 @@ public final class EthFirewall {
       return;
     }
 
+    if (config.getDownstreamHttpRequestTimeout() == 0) {
+      LOG.error("Http request timeout must be greater than 0.");
+      return;
+    }
+
     if (config.getHttpListenHost().equals(config.getDownstreamHttpHost())
         && config.getHttpListenPort().equals(config.getDownstreamHttpPort())) {
-      LOG.error("Http host and port must be different to the downstream host and port");
+      LOG.error("Http host and port must be different to the downstream host and port.");
       return;
     }
 

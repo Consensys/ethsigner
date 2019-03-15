@@ -26,7 +26,7 @@ public class RunnerBuilder {
   private TransactionSigner transactionSigner;
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
-  private Long requestTimeout;
+  private long requestTimeout;
 
   public RunnerBuilder() {}
 
@@ -59,7 +59,7 @@ public class RunnerBuilder {
       LOG.error("Unable to construct Runner, serverOptions is unset.");
       return null;
     }
-    if (requestTimeout == null) {
+    if (requestTimeout == 0) {
       LOG.error("Unable to construct Runner, requestTimeout is unset.");
       return null;
     }
