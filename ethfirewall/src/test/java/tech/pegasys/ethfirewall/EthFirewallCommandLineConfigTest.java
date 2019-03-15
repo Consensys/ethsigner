@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -57,17 +58,17 @@ public class EthFirewallCommandLineConfigTest {
   }
 
   @Test
-  public void fullyPopulatedCommandLineParsesIntoVariables() {
+  public void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
-    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getLoopbackAddress());
+    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("127.0.0.1"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(10000);
-    assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getLoopbackAddress());
+    assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getByName("localhost"));
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
 

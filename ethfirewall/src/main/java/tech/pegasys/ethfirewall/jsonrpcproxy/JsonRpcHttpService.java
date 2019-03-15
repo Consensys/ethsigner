@@ -34,12 +34,12 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
-  private final Long httpRequestTimeout;
+  private final long httpRequestTimeout;
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
       final HttpServerOptions serverOptions,
-      final Long httpRequestTimeout,
+      final long httpRequestTimeout,
       final RequestMapper requestHandlerMapper) {
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;

@@ -86,7 +86,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description =
           "Timeout (in milliseconds) to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private Long downstreamHttpRequestTimeout = 5_000L;
+  private long downstreamHttpRequestTimeout = 5_000L;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -192,7 +192,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public Long getDownstreamHttpRequestTimeout() {
+  public long getDownstreamHttpRequestTimeout() {
     return downstreamHttpRequestTimeout;
   }
 }
