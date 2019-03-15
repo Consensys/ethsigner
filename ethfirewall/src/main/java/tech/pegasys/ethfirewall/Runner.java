@@ -16,7 +16,7 @@ import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
 import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionBodyProvider;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;

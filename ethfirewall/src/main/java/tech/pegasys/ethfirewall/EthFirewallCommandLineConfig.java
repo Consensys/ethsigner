@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethfirewall;
 
+import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
+
 import java.io.PrintStream;
 import java.nio.file.Path;
 
@@ -38,6 +41,7 @@ import picocli.CommandLine.ParameterException;
     footerHeading = "%n",
     footer = "Ethfirewall is licensed under the Apache License 2.0")
 public class EthFirewallCommandLineConfig implements EthFirewallConfig {
+
   private static final Logger LOG = LoggerFactory.getLogger(EthFirewallCommandLineConfig.class);
   private CommandLine commandLine;
 
@@ -88,6 +92,14 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
   private final Integer httpListenPort = 8545;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--chain-id"},
+      description = "The Chain Id that will be the intended recipient for signed transactions",
+      required = true,
+      arity = "1")
+  private byte chainId;
 
   private final PrintStream output;
 
@@ -164,5 +176,10 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   @Override
   public Integer getHttpListenPort() {
     return httpListenPort;
+  }
+
+  @Override
+  public ChainIdProvider getChainId() {
+    return new ConfigurationChainId(chainId);
   }
 }

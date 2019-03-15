@@ -42,6 +42,7 @@ public class EthFirewallCommandLineConfigTest {
         + "--downstream-http-port=5000 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "
+        + "--chain-id=6 "
         + "--logging=INFO";
   }
 

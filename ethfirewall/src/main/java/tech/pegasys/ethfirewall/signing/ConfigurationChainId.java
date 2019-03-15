@@ -10,29 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall;
+package tech.pegasys.ethfirewall.signing;
 
-import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+public class ConfigurationChainId implements ChainIdProvider {
 
-import java.nio.file.Path;
+  private final byte id;
 
-import org.apache.logging.log4j.Level;
+  public ConfigurationChainId(final byte id) {
+    this.id = id;
+  }
 
-public interface EthFirewallConfig {
-
-  Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
-
-  String getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  String getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
+  @Override
+  public byte id() {
+    return id;
+  }
 }

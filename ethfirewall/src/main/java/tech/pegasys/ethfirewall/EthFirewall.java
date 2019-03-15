@@ -12,8 +12,10 @@
  */
 package tech.pegasys.ethfirewall;
 
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
+import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
@@ -25,6 +27,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 
 public final class EthFirewall {
 
@@ -51,7 +55,7 @@ public final class EthFirewall {
 
     try {
       runnerBuilder.setTransactionSigner(
-          TransactionSigner.createFrom(config.getKeyPath().toFile(), password.get()));
+          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
       runnerBuilder.setClientOptions(
           new WebClientOptions()
               .setDefaultPort(config.getDownstreamHttpPort())
@@ -70,6 +74,14 @@ public final class EthFirewall {
     } catch (CipherException ex) {
       LOG.info("Unable to decode keyfile with supplied passwordFile.");
     }
+  }
+
+  private TransactionSigner transactionSigner(
+      final File keyFile, final String password, final ChainIdProvider chain)
+      throws IOException, CipherException {
+    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
+
+    return new TransactionSigner(chain, credentials);
   }
 
   private Optional<String> readPasswordFromFile() {
