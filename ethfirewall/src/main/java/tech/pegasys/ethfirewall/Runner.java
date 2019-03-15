@@ -33,7 +33,7 @@ public class Runner {
   private TransactionSigner transactionSigner;
   private HttpClientOptions clientOptions;
   private HttpServerOptions serverOptions;
-  private Long httpRequestTimeout;
+  private long httpRequestTimeout;
   private Vertx vertx;
   private String deploymentId;
 
@@ -41,7 +41,7 @@ public class Runner {
       final TransactionSigner transactionSigner,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
-      final Long httpRequestTimeout) {
+      final long httpRequestTimeout) {
     this.transactionSigner = transactionSigner;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
