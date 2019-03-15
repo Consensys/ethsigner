@@ -97,6 +97,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   @Option(
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
+      required = true,
       arity = "1")
   private byte chainId;
 
