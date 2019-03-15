@@ -78,7 +78,7 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
-    runner = new Runner(transactionSigner, httpClientOptions, httpServerOptions, 5000);
+    runner = new Runner(transactionSigner, httpClientOptions, httpServerOptions, 5000L);
     runner.start();
 
     LOG.info(
