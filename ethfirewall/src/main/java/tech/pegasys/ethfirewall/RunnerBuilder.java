@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethfirewall;
 
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionSigner;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;

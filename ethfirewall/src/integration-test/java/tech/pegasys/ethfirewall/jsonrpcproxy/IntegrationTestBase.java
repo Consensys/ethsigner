@@ -24,6 +24,9 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
+import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,11 +51,14 @@ import org.mockserver.model.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 
 public class IntegrationTestBase {
+
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -66,7 +72,8 @@ public class IntegrationTestBase {
     ethNode = startClientAndServer();
 
     final File keyFile = createKeyFile();
-    final TransactionSigner transactionSigner = TransactionSigner.createFrom(keyFile, "password");
+    final TransactionSigner transactionSigner =
+        transactionSigner(keyFile, "password", new ConfigurationChainId((byte) 9));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -160,5 +167,13 @@ public class IntegrationTestBase {
     return headers.entrySet().stream()
         .map(e -> new Header(e.getKey(), e.getValue()))
         .collect(toList());
+  }
+
+  private static TransactionSigner transactionSigner(
+      final File keyFile, final String password, final ChainIdProvider chain)
+      throws IOException, CipherException {
+    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
+
+    return new TransactionSigner(chain, credentials);
   }
 }

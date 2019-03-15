@@ -69,11 +69,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
     Request<?, ? extends Response<?>> ethSendRawTransactionRequest =
         jsonRpc.ethSendRawTransaction(
-            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"
-                + "8609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5"
-                + "d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f0724456751ca03631b1cec6"
-                + "e5033e8a2bff6d1b2d08bfe106cbbb82df5eb7b380a1fdb5c06be2a06d15eeb833f26114de087c930e375"
-                + "56d93a47d86e6554e988d32cbbb273cfda4");
+            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0f04e0e7b41adea417596550611138a3ec9a452abb6648d734107c53476e76a27a05b826d9e9b4e0dd0e7b8939c102a2079d71cfc27cd6b7bebe5a006d5ad17d780");
     // we create the eth_sendRawTransaction req with same id as the eth_sendTransaction req
     ethSendRawTransactionRequest.setId(5);
 

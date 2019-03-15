@@ -10,32 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall;
+package tech.pegasys.ethfirewall.signing;
 
-import java.net.InetAddress;
-import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+/** Obtains the chain ID for the blockchain that transaction are being signed. */
+public interface ChainIdProvider {
 
-import java.nio.file.Path;
-
-import org.apache.logging.log4j.Level;
-
-public interface EthFirewallConfig {
-
-  Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
-
-  InetAddress getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Long getDownstreamHttpRequestTimeout();
-
-  InetAddress getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
+  byte id();
 }
