@@ -13,8 +13,8 @@
 package tech.pegasys.ethfirewall;
 
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       names = "--downstream-http-host",
       description = "The endpoint to which received requests are forwarded",
       arity = "1")
-  private String downstreamHttpHost = "127.0.0.1";
+  private InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = "--downstream-http-port",
@@ -89,7 +89,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private String httpListenHost = "127.0.0.1";
+  private InetAddress httpListenHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = {"--http-listen-port"},
@@ -155,7 +155,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public String getDownstreamHttpHost() {
+  public InetAddress getDownstreamHttpHost() {
     return downstreamHttpHost;
   }
 
@@ -165,7 +165,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public String getHttpListenHost() {
+  public InetAddress getHttpListenHost() {
     return httpListenHost;
   }
 

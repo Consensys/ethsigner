@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -62,10 +63,10 @@ public class EthFirewallCommandLineConfigTest {
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
-    assertThat(config.getDownstreamHttpHost()).isEqualTo("127.0.0.1");
+    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getLoopbackAddress());
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(10000);
-    assertThat(config.getHttpListenHost()).isEqualTo("localhost");
+    assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getLoopbackAddress());
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
 
@@ -99,7 +100,7 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "downstream-http-host", config::getDownstreamHttpHost, "127.0.0.1");
+        "downstream-http-host", config::getDownstreamHttpHost, InetAddress.getLoopbackAddress());
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
@@ -111,7 +112,7 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-listen-host", config::getHttpListenHost, "127.0.0.1");
+        "http-listen-host", config::getHttpListenHost, InetAddress.getLoopbackAddress());
   }
 
   private void missingParameterShowsError(final String paramToRemove) {

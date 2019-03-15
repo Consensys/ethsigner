@@ -49,7 +49,7 @@ public final class EthFirewall {
       return;
     }
 
-    if (config.getHttpListenHost().equals(config.getHttpListenHost())
+    if (config.getHttpListenHost().equals(config.getDownstreamHttpHost())
         && config.getHttpListenPort().equals(config.getDownstreamHttpPort())) {
       LOG.error("Http host and port must be different to the downstream host and port");
       return;
@@ -61,11 +61,11 @@ public final class EthFirewall {
       runnerBuilder.setClientOptions(
           new WebClientOptions()
               .setDefaultPort(config.getDownstreamHttpPort())
-              .setDefaultHost(config.getDownstreamHttpHost()));
+              .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()));
       runnerBuilder.setServerOptions(
           new HttpServerOptions()
               .setPort(config.getHttpListenPort())
-              .setHost(config.getHttpListenHost())
+              .setHost(config.getHttpListenHost().getHostAddress())
               .setReuseAddress(true)
               .setReusePort(true));
       runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
