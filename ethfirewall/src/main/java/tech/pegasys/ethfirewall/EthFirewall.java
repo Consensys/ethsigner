@@ -53,7 +53,7 @@ public final class EthFirewall {
       return;
     }
 
-    if (config.getDownstreamHttpRequestTimeout() == 0) {
+    if (config.getDownstreamHttpRequestTimeout() <= 0) {
       LOG.error("Http request timeout must be greater than 0.");
       return;
     }
