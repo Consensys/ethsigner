@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -67,7 +68,7 @@ public class EthFirewallCommandLineConfigTest {
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
     assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
-    assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(10000);
+    assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getByName("localhost"));
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
@@ -106,7 +107,9 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "downstream-http-request-timeout", config::getDownstreamHttpRequestTimeout, 5000L);
+        "downstream-http-request-timeout",
+        config::getDownstreamHttpRequestTimeout,
+        Duration.ofSeconds(5));
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(

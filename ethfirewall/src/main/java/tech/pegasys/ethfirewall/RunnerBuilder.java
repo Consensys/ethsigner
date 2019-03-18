@@ -14,6 +14,8 @@ package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
+import java.time.Duration;
+
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ public class RunnerBuilder {
   private TransactionSigner transactionSigner;
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
-  private long requestTimeout;
+  private Duration requestTimeout;
 
   public RunnerBuilder() {}
 
@@ -42,7 +44,7 @@ public class RunnerBuilder {
     this.serverOptions = serverOptions;
   }
 
-  public void setHttpRequestTimeout(final Long requestTimeout) {
+  public void setHttpRequestTimeout(final Duration requestTimeout) {
     this.requestTimeout = requestTimeout;
   }
 
@@ -59,7 +61,7 @@ public class RunnerBuilder {
       LOG.error("Unable to construct Runner, serverOptions is unset.");
       return null;
     }
-    if (requestTimeout == 0) {
+    if (requestTimeout == null) {
       LOG.error("Unable to construct Runner, requestTimeout is unset.");
       return null;
     }

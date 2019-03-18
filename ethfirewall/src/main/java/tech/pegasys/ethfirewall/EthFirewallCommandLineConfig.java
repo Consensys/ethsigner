@@ -18,6 +18,7 @@ import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
@@ -86,7 +87,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description =
           "Timeout (in milliseconds) to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private long downstreamHttpRequestTimeout = 5_000L;
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -192,7 +193,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public long getDownstreamHttpRequestTimeout() {
-    return downstreamHttpRequestTimeout;
+  public Duration getDownstreamHttpRequestTimeout() {
+    return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
 }
