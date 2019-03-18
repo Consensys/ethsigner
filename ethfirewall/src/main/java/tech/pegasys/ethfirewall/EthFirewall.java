@@ -53,20 +53,31 @@ public final class EthFirewall {
       return;
     }
 
+    if (config.getDownstreamHttpRequestTimeout().toMillis() <= 0) {
+      LOG.error("Http request timeout must be greater than 0.");
+      return;
+    }
+
+    if (config.getHttpListenHost().equals(config.getDownstreamHttpHost())
+        && config.getHttpListenPort().equals(config.getDownstreamHttpPort())) {
+      LOG.error("Http host and port must be different to the downstream host and port.");
+      return;
+    }
+
     try {
       runnerBuilder.setTransactionSigner(
           transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
       runnerBuilder.setClientOptions(
           new WebClientOptions()
               .setDefaultPort(config.getDownstreamHttpPort())
-              .setDefaultHost(config.getDownstreamHttpHost()));
+              .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()));
       runnerBuilder.setServerOptions(
           new HttpServerOptions()
               .setPort(config.getHttpListenPort())
-              .setHost(config.getHttpListenHost())
+              .setHost(config.getHttpListenHost().getHostAddress())
               .setReuseAddress(true)
               .setReusePort(true));
-
+      runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
       runnerBuilder.build().start();
     } catch (IOException ex) {
       LOG.info(

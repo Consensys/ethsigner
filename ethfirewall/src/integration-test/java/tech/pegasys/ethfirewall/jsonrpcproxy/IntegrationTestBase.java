@@ -34,6 +34,7 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +86,8 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
-    runner = new Runner(transactionSigner, httpClientOptions, httpServerOptions);
+    runner =
+        new Runner(transactionSigner, httpClientOptions, httpServerOptions, Duration.ofSeconds(5));
     runner.start();
 
     LOG.info(

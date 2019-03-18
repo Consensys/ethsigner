@@ -16,6 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -38,8 +41,9 @@ public class EthFirewallCommandLineConfigTest {
   private String validCommandLine() {
     return "--key-file=./keyfile "
         + "--password-file=./passwordFile "
-        + "--downstream-http-host=127.0.0.1 "
+        + "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
+        + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "
         + "--chain-id=6 "
@@ -55,16 +59,17 @@ public class EthFirewallCommandLineConfigTest {
   }
 
   @Test
-  public void fullyPopulatedCommandLineParsesIntoVariables() {
+  public void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
     assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
-    assertThat(config.getDownstreamHttpHost()).isEqualTo("127.0.0.1");
+    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
-    assertThat(config.getHttpListenHost()).isEqualTo("localhost");
+    assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
+    assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getByName("localhost"));
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
 
@@ -98,7 +103,13 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "downstream-http-host", config::getDownstreamHttpHost, "127.0.0.1");
+        "downstream-http-host", config::getDownstreamHttpHost, InetAddress.getLoopbackAddress());
+
+    config = new EthFirewallCommandLineConfig(outPrintStream);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-request-timeout",
+        config::getDownstreamHttpRequestTimeout,
+        Duration.ofSeconds(5));
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
@@ -106,7 +117,7 @@ public class EthFirewallCommandLineConfigTest {
 
     config = new EthFirewallCommandLineConfig(outPrintStream);
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-listen-host", config::getHttpListenHost, "127.0.0.1");
+        "http-listen-host", config::getHttpListenHost, InetAddress.getLoopbackAddress());
   }
 
   private void missingParameterShowsError(final String paramToRemove) {

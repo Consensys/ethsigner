@@ -16,7 +16,9 @@ import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
@@ -71,7 +73,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       names = "--downstream-http-host",
       description = "The endpoint to which received requests are forwarded",
       arity = "1")
-  private String downstreamHttpHost = "127.0.0.1";
+  private InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = "--downstream-http-port",
@@ -80,12 +82,19 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       arity = "1")
   private Integer downstreamHttpPort;
 
+  @Option(
+      names = {"--downstream-http-request-timeout"},
+      description =
+          "Timeout (in milliseconds) to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
+
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private String httpListenHost = "127.0.0.1";
+  private InetAddress httpListenHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = {"--http-listen-port"},
@@ -159,7 +168,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public String getDownstreamHttpHost() {
+  public InetAddress getDownstreamHttpHost() {
     return downstreamHttpHost;
   }
 
@@ -169,7 +178,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   }
 
   @Override
-  public String getHttpListenHost() {
+  public InetAddress getHttpListenHost() {
     return httpListenHost;
   }
 
@@ -181,5 +190,10 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
   @Override
   public ChainIdProvider getChainId() {
     return new ConfigurationChainId(chainId);
+  }
+
+  @Override
+  public Duration getDownstreamHttpRequestTimeout() {
+    return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
 }
