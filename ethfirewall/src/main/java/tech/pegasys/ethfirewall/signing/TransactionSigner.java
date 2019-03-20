@@ -17,8 +17,8 @@ import java.math.BigInteger;
 import io.vertx.core.json.JsonObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
+import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 public class TransactionSigner {
 
