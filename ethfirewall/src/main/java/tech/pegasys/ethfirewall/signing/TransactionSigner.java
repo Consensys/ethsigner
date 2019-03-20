@@ -45,8 +45,9 @@ public class TransactionSigner {
   private RawTransaction fromTransactionJson(final JsonObject transaction) {
     final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
 
+    // TODO validate the nonce is present, not null
     return RawTransaction.createTransaction(
-        hex("nonce", params),
+        parseNonce(transaction, params),
         hex("gasPrice", params),
         gas(params),
         params.getString("to"),
@@ -54,8 +55,17 @@ public class TransactionSigner {
         data(params));
   }
 
+  private BigInteger parseNonce(final JsonObject transaction, final JsonObject params) {
+
+    if (params.containsKey("nonce")) {
+      return hex("nonce", params);
+    }
+
+    throw new IllegalArgumentException("Missing the nonce%n" + transaction.encodePrettily());
+  }
+
   private String data(final JsonObject params) {
-    return params.getString("data") != null ? params.getString("data") : "";
+    return params.getString("data");
   }
 
   private BigInteger gas(final JsonObject params) {
@@ -68,6 +78,8 @@ public class TransactionSigner {
 
     return hex(gasValue);
   }
+
+  // TODO validate hex
 
   private BigInteger hex(final String value) {
     return new BigInteger(value, HEXADECIMAL);
