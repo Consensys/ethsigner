@@ -60,8 +60,9 @@ public class PassThroughHandler implements Handler<RoutingContext> {
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    proxyRequest.end(bodyProvider.getBody(context));
-    logRequest(context, proxyRequest);
+    final Buffer proxyRequestBody = bodyProvider.getBody(context);
+    proxyRequest.end(proxyRequestBody);
+    logRequest(context, proxyRequest, proxyRequestBody);
   }
 
   private void logResponse(final HttpClientResponse response) {
@@ -72,13 +73,17 @@ public class PassThroughHandler implements Handler<RoutingContext> {
     LOG.debug("Response body: {}", body);
   }
 
-  private void logRequest(final RoutingContext context, final HttpClientRequest proxyRequest) {
+  private void logRequest(
+      final RoutingContext context,
+      final HttpClientRequest proxyRequest,
+      final Buffer proxyRequestBody) {
     LOG.debug(
-        "Send Request downstream: method: {}, uri: {}, body: {}, ethNodeClient: method: {}, uri: {}",
+        "Proxying originalRequest: method: {}, uri: {}, body: {}, target: method: {}, uri: {}, body: {}",
         context.request().method(),
         context.request().absoluteURI(),
         context.getBody(),
         proxyRequest.method(),
-        proxyRequest.absoluteURI());
+        proxyRequest.absoluteURI(),
+        proxyRequestBody);
   }
 }

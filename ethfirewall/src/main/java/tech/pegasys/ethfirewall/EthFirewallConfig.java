@@ -14,7 +14,9 @@ package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 
+import java.net.InetAddress;
 import java.nio.file.Path;
+import java.time.Duration;
 
 import org.apache.logging.log4j.Level;
 
@@ -26,11 +28,13 @@ public interface EthFirewallConfig {
 
   Path getKeyPath();
 
-  String getDownstreamHttpHost();
+  InetAddress getDownstreamHttpHost();
 
   Integer getDownstreamHttpPort();
 
-  String getHttpListenHost();
+  Duration getDownstreamHttpRequestTimeout();
+
+  InetAddress getHttpListenHost();
 
   Integer getHttpListenPort();
 

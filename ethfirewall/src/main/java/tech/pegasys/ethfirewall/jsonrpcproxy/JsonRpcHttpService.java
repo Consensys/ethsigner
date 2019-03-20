@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import java.time.Duration;
+
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -23,6 +25,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
+import io.vertx.ext.web.handler.TimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +36,15 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
+  private final Duration httpRequestTimeout;
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
-      final HttpServerOptions serverOptions, final RequestMapper requestHandlerMapper) {
+      final HttpServerOptions serverOptions,
+      final Duration httpRequestTimeout,
+      final RequestMapper requestHandlerMapper) {
     this.serverOptions = serverOptions;
+    this.httpRequestTimeout = httpRequestTimeout;
     this.requestHandlerMapper = requestHandlerMapper;
   }
 
@@ -77,6 +84,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
+        .handler(TimeoutHandler.create(httpRequestTimeout.toMillis()))
         .failureHandler(new LogErrorHandler())
         .handler(this::handleJsonRpc);
     router.route().handler(context -> {});
