@@ -45,13 +45,13 @@ public class TransactionSigner {
   private RawTransaction fromTransactionJson(final JsonObject transaction) {
     final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
 
-    // TODO validate the nonce is present, not null
+    // TODO validate the nonce is present, ie. not null
     return RawTransaction.createTransaction(
         parseNonce(transaction, params),
-        hex("gasPrice", params),
+        optionalHex("gasPrice", params),
         gas(params),
         params.getString("to"),
-        hex("value", params),
+        optionalHex("value", params),
         data(params));
   }
 
@@ -86,6 +86,10 @@ public class TransactionSigner {
   }
 
   private BigInteger hex(final String key, final JsonObject params) {
+    return new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL);
+  }
+
+  private BigInteger optionalHex(final String key, final JsonObject params) {
     return params.containsKey(key)
         ? new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL)
         : null;
