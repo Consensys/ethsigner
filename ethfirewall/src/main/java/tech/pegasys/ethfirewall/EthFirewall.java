@@ -12,23 +12,21 @@
  */
 package tech.pegasys.ethfirewall;
 
-import tech.pegasys.ethfirewall.signing.ChainIdProvider;
-import tech.pegasys.ethfirewall.signing.TransactionSigner;
-
+import com.google.common.base.Charsets;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.client.WebClientOptions;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
-
-import com.google.common.base.Charsets;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import tech.pegasys.ethfirewall.signing.ChainIdProvider;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 public final class EthFirewall {
 

@@ -12,9 +12,8 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
-import java.math.BigInteger;
-
 import io.vertx.core.json.JsonObject;
+import java.math.BigInteger;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -27,10 +26,12 @@ public class TransactionSigner {
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
+  private final MandatoryTransactionNonce nonce;
 
   public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
     this.chain = chain;
     this.credentials = credentials;
+    this.nonce = new MandatoryTransactionNonce();
   }
 
   public String signTransaction(final JsonObject transaction) {
@@ -45,9 +46,8 @@ public class TransactionSigner {
   private RawTransaction fromTransactionJson(final JsonObject transaction) {
     final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
 
-    // TODO validate the nonce is present, ie. not null
     return RawTransaction.createTransaction(
-        nonce(transaction, params),
+        nonce.get(transaction),
         optionalHex("gasPrice", params),
         gas(params),
         params.getString("to"),
@@ -55,40 +55,25 @@ public class TransactionSigner {
         data(params));
   }
 
-  private BigInteger nonce(final JsonObject transaction, final JsonObject params) {
-
-    if (params.containsKey("nonce")) {
-      return hex("nonce", params);
-    }
-
-    throw new IllegalArgumentException("Missing the nonce%n" + transaction.encodePrettily());
-  }
-
   private String data(final JsonObject params) {
     return params.getString("data");
   }
 
   private BigInteger gas(final JsonObject params) {
-    // TODO(tmm): This should be configurable, but currently matches Geth.
-    String gasValue = "90000";
 
     if (params.getString("gas") != null) {
-      gasValue = params.getString("gas").substring(HEXADECIMAL_PREFIX_LENGTH);
+      return hex(params.getString("gas").substring(HEXADECIMAL_PREFIX_LENGTH));
     }
 
-    return hex(gasValue);
+    // TODO(tmm): This should be configurable, but currently matches Geth.
+    return new BigInteger("90000");
   }
-
-  // TODO validate hex
 
   private BigInteger hex(final String value) {
     return new BigInteger(value, HEXADECIMAL);
   }
 
-  private BigInteger hex(final String key, final JsonObject params) {
-    return new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL);
-  }
-
+  // TODO validate hex format - prefix 0x
   private BigInteger optionalHex(final String key, final JsonObject params) {
     return params.containsKey(key)
         ? new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL)

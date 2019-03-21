@@ -12,12 +12,16 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import tech.pegasys.ethfirewall.signing.TransactionSigner;
-
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 public class TransactionBodyProvider implements BodyProvider {
 
@@ -29,19 +33,33 @@ public class TransactionBodyProvider implements BodyProvider {
 
   @Override
   public Buffer getBody(RoutingContext context) {
+    final JsonRpcRequest request;
+    Object id = null;
 
-    // TODO validate the JSON provided is a correct JSON-RPC formatted transaction payloead
+    //TODO move this up - deal only with the request object
+    try {
+      final JsonObject requestJson = context.getBodyAsJson();
+
+      id = new JsonRpcRequestId(requestJson.getValue("id")).getValue();
+      request = requestJson.mapTo(JsonRpcRequest.class);
+    } catch (final IllegalArgumentException exception) {
+      return errorResponse(id, JsonRpcError.INVALID_REQUEST);
+    }
+
     final String signedTransactionHexString =
         transactionSigner.signTransaction(context.getBodyAsJson());
-
-    final int originalId = context.getBodyAsJson().getInteger("id");
 
     final JsonObject jsonObj = new JsonObject();
     jsonObj.put("jsonrpc", "2.0");
     jsonObj.put("method", "eth_sendRawTransaction");
     jsonObj.put("params", new JsonArray().add(signedTransactionHexString));
-    jsonObj.put("id", originalId);
+    jsonObj.put("id", id);
 
     return Buffer.buffer(jsonObj.toString());
+  }
+
+
+  private Buffer errorResponse(final Object id, final JsonRpcError error) {
+    return Json.encodeToBuffer(new JsonRpcErrorResponse(id, error));
   }
 }
