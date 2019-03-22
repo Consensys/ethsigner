@@ -48,15 +48,23 @@ public class TransactionSigner {
   private RawTransaction fromTransactionJson(final SignTransactionJsonRpcRequest request) {
     final SignTransactionJsonParameters params = request.getParams();
 
-    // TODO when missing nonce - get it from somewhere
-
     return RawTransaction.createTransaction(
-        optionalHex(params.nonce()),
+        nonce(params),
         optionalHex(params.gasPrice()),
         gas(params),
         params.receiver(),
         optionalHex(params.value()),
         params.data());
+  }
+
+  private BigInteger nonce(final SignTransactionJsonParameters params) {
+    if (params.nonce().isPresent()) {
+
+      return optionalHex(params.nonce());
+    } else {
+      // TODO when missing nonce - get it from somewhere
+      return BigInteger.ZERO;
+    }
   }
 
   private BigInteger gas(final SignTransactionJsonParameters params) {
