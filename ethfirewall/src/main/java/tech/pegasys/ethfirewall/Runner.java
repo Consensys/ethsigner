@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall;
 
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcBody;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
@@ -67,8 +68,10 @@ public class Runner {
       final Vertx vertx, final TransactionSigner transactionSigner) {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
+
     final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, RoutingContext::getBody);
+        new PassThroughHandler(
+            downStreamConnection, (RoutingContext context) -> new JsonRpcBody(context.getBody()));
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
 

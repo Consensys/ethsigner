@@ -19,15 +19,24 @@ import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
-import io.vertx.core.buffer.Buffer;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendTransactionBodyProvider implements BodyProvider {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SendTransactionBodyProvider.class);
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
+
+  static {
+    // Force Jackson to fail when @JsonCreator values are missing
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+  }
 
   private final TransactionSigner signer;
 
@@ -36,18 +45,23 @@ public class SendTransactionBodyProvider implements BodyProvider {
   }
 
   @Override
-  public Buffer getBody(RoutingContext context) {
+  public JsonRpcBody getBody(RoutingContext context) {
     final SendTransactionJsonRpcRequest request;
     JsonRpcRequestId id = null;
+    final JsonObject requestJson;
 
     try {
-      final JsonObject requestJson = context.getBodyAsJson();
+      requestJson = context.getBodyAsJson();
+    } catch (final IllegalArgumentException exception) {
+      LOG.debug("Deserialisation to JSON failed for: {}", context.getBodyAsString(), exception);
+      return errorResponse(id);
+    }
+
+    try {
       id = id(requestJson);
       request = requestJson.mapTo(SendTransactionJsonRpcRequest.class);
     } catch (final IllegalArgumentException exception) {
-
-      // TODO need to abort - don't make the proxy
-      // TODO log info & debug
+      LOG.debug("JSON Deserialisation failed for request: {}", requestJson, exception);
       return errorResponse(id);
     }
 
@@ -58,12 +72,16 @@ public class SendTransactionBodyProvider implements BodyProvider {
             JSON_RPC_VERSION, JSON_RPC_METHOD, new Object[] {signedTransactionHexString});
     sendRawTransaction.setId(id);
 
-    // TODO any problems signing - exit & don't proxy, log info & debug
-    return Json.encodeToBuffer(sendRawTransaction);
+    try {
+      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
+    } catch (final IllegalArgumentException exception) {
+      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, exception);
+      return errorResponse(id);
+    }
   }
 
-  private Buffer errorResponse(final Object id) {
-    return Json.encodeToBuffer(new JsonRpcErrorResponse(id, JsonRpcError.INVALID_REQUEST));
+  private JsonRpcBody errorResponse(final JsonRpcRequestId id) {
+    return new JsonRpcBody(new JsonRpcErrorResponse(id, JsonRpcError.INVALID_REQUEST));
   }
 
   private JsonRpcRequestId id(final JsonObject requestJson) {

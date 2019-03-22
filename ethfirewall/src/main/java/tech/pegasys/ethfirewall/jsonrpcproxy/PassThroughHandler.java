@@ -18,9 +18,11 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 public class PassThroughHandler implements Handler<RoutingContext> {
 
@@ -60,9 +62,32 @@ public class PassThroughHandler implements Handler<RoutingContext> {
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    final Buffer proxyRequestBody = bodyProvider.getBody(context);
-    proxyRequest.end(proxyRequestBody);
-    logRequest(context, proxyRequest, proxyRequestBody);
+    final JsonRpcBody providedBody = bodyProvider.getBody(context);
+
+    if (providedBody.hasError()) {
+      sendErrorResponse(context, originalRequest, providedBody.error());
+    } else {
+      // Data is only written to the wire on end()
+      final Buffer proxyRequestBody = providedBody.body();
+      proxyRequest.end(proxyRequestBody);
+      logRequest(context, proxyRequest, proxyRequestBody);
+    }
+  }
+
+  private void sendErrorResponse(
+      final RoutingContext context, final HttpServerRequest originalRequest,
+      final JsonRpcErrorResponse error) {
+    LOG.info("Dropping request from {}", originalRequest.remoteAddress());
+    LOG.debug("Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        originalRequest.method(), originalRequest.absoluteURI(), context.getBodyAsString(),
+        Json.encode(error));
+
+    originalRequest.response().setStatusCode(400);
+    originalRequest.response().headers().setAll(originalRequest.headers());
+    originalRequest.response().headers().remove("Content-Length"); // created during 'end'.
+    originalRequest.response().setChunked(false);
+
+    originalRequest.response().end(Json.encodeToBuffer(error));
   }
 
   private void logResponse(final HttpClientResponse response) {
@@ -78,7 +103,7 @@ public class PassThroughHandler implements Handler<RoutingContext> {
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
     LOG.debug(
-        "Original: method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
+        "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
         context.request().method(),
         context.request().absoluteURI(),
         context.getBody(),

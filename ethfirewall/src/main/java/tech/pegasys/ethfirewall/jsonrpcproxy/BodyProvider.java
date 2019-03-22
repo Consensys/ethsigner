@@ -12,10 +12,10 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 
 @FunctionalInterface
 public interface BodyProvider {
-  Buffer getBody(RoutingContext context);
+
+  JsonRpcBody getBody(RoutingContext context);
 }
