@@ -43,6 +43,9 @@ public class TransactionBodyProvider implements BodyProvider {
       id = id(requestJson);
       request = requestJson.mapTo(SignTransactionJsonRpcRequest.class);
     } catch (final IllegalArgumentException exception) {
+
+      // TODO need to abort - don't make the proxy
+      // TODO log info & debug
       return errorResponse(id);
     }
 
@@ -55,6 +58,7 @@ public class TransactionBodyProvider implements BodyProvider {
     jsonObj.put("params", new JsonArray().add(signedTransactionHexString));
     jsonObj.put("id", id);
 
+    // TODO any problems signing - exit & don't proxy
     return Buffer.buffer(jsonObj.toString());
   }
 

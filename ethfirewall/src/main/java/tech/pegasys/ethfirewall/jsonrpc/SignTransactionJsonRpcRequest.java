@@ -30,10 +30,13 @@ public class SignTransactionJsonRpcRequest {
   public SignTransactionJsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
-      @JsonProperty("params") final SignTransactionJsonParameters params) {
+      @JsonProperty("params") final SignTransactionJsonParameters[] params) {
     this.version = version;
     this.method = method;
-    this.params = params;
+
+    // TODO more than one - complian?
+
+    this.params = params[0];
     if (method == null) {
       throw new InvalidJsonRpcRequestException("Field 'method' is required");
     }
