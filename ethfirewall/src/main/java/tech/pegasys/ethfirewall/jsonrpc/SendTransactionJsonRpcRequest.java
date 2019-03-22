@@ -19,18 +19,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
 
-public class SignTransactionJsonRpcRequest {
+public class SendTransactionJsonRpcRequest {
 
   private JsonRpcRequestId id;
   private final String method;
-  private final SignTransactionJsonParameters params;
+  private final SendTransactionJsonParameters params;
   private final String version;
 
   @JsonCreator
-  public SignTransactionJsonRpcRequest(
+  public SendTransactionJsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
-      @JsonProperty("params") final SignTransactionJsonParameters[] params) {
+      @JsonProperty("params") final SendTransactionJsonParameters[] params) {
     this.version = version;
     this.method = method;
 
@@ -58,7 +58,7 @@ public class SignTransactionJsonRpcRequest {
     return version;
   }
 
-  public SignTransactionJsonParameters getParams() {
+  public SendTransactionJsonParameters getParams() {
     return params;
   }
 
@@ -75,7 +75,7 @@ public class SignTransactionJsonRpcRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final SignTransactionJsonRpcRequest that = (SignTransactionJsonRpcRequest) o;
+    final SendTransactionJsonRpcRequest that = (SendTransactionJsonRpcRequest) o;
     return Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
         && Objects.equal(params, that.params)

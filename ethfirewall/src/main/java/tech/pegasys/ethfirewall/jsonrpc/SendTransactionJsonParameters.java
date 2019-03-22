@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SignTransactionJsonParameters {
+public class SendTransactionJsonParameters {
 
   private final String data;
   private final String gas;
@@ -29,7 +29,7 @@ public class SignTransactionJsonParameters {
   private final String value;
 
   @JsonCreator
-  public SignTransactionJsonParameters(
+  public SendTransactionJsonParameters(
       @JsonProperty("data") final String data,
       @JsonProperty("gas") final String gas,
       @JsonProperty("gasPrice") final String gasPrice,

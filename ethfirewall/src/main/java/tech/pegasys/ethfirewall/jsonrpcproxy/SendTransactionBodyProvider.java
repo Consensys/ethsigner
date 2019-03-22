@@ -14,7 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -24,27 +24,26 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
-public class TransactionBodyProvider implements BodyProvider {
+public class SendTransactionBodyProvider implements BodyProvider {
 
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final TransactionSigner signer;
 
-  public TransactionBodyProvider(final TransactionSigner transactionSigner) {
+  public SendTransactionBodyProvider(final TransactionSigner transactionSigner) {
     this.signer = transactionSigner;
   }
 
   @Override
   public Buffer getBody(RoutingContext context) {
-    final SignTransactionJsonRpcRequest request;
+    final SendTransactionJsonRpcRequest request;
     JsonRpcRequestId id = null;
 
-    // TODO generics? for the type?
     try {
       final JsonObject requestJson = context.getBodyAsJson();
       id = id(requestJson);
-      request = requestJson.mapTo(SignTransactionJsonRpcRequest.class);
+      request = requestJson.mapTo(SendTransactionJsonRpcRequest.class);
     } catch (final IllegalArgumentException exception) {
 
       // TODO need to abort - don't make the proxy
@@ -59,7 +58,7 @@ public class TransactionBodyProvider implements BodyProvider {
             JSON_RPC_VERSION, JSON_RPC_METHOD, new Object[] {signedTransactionHexString});
     sendRawTransaction.setId(id);
 
-    // TODO any problems signing - exit & don't proxy
+    // TODO any problems signing - exit & don't proxy, log info & debug
     return Json.encodeToBuffer(sendRawTransaction);
   }
 

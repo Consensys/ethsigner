@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
-import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonParameters;
-import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  public String signTransaction(final SignTransactionJsonRpcRequest request) {
+  public String signTransaction(final SendTransactionJsonRpcRequest request) {
     final RawTransaction rawTransaction = rawTransaction(request);
 
     // Sign the transaction using the post Spurious Dragon technique
@@ -45,8 +45,8 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction rawTransaction(final SignTransactionJsonRpcRequest request) {
-    final SignTransactionJsonParameters params = request.getParams();
+  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
+    final SendTransactionJsonParameters params = request.getParams();
 
     return RawTransaction.createTransaction(
         nonce(params),
@@ -57,7 +57,7 @@ public class TransactionSigner {
         params.data());
   }
 
-  private BigInteger nonce(final SignTransactionJsonParameters params) {
+  private BigInteger nonce(final SendTransactionJsonParameters params) {
     if (params.nonce().isPresent()) {
 
       return optionalHex(params.nonce());
@@ -67,7 +67,7 @@ public class TransactionSigner {
     }
   }
 
-  private BigInteger gas(final SignTransactionJsonParameters params) {
+  private BigInteger gas(final SendTransactionJsonParameters params) {
 
     if (params.gas().isPresent()) {
       return hex(params.gas().get().substring(HEXADECIMAL_PREFIX_LENGTH));

@@ -15,7 +15,7 @@ package tech.pegasys.ethfirewall;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
-import tech.pegasys.ethfirewall.jsonrpcproxy.TransactionBodyProvider;
+import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionBodyProvider;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import java.time.Duration;
@@ -72,8 +72,8 @@ public class Runner {
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
 
-    final TransactionBodyProvider sendTransactionHandler =
-        new TransactionBodyProvider(transactionSigner);
+    final SendTransactionBodyProvider sendTransactionHandler =
+        new SendTransactionBodyProvider(transactionSigner);
 
     requestMapper.addHandler(
         "eth_sendTransaction",
