@@ -37,7 +37,7 @@ public class TransactionSigner {
   }
 
   public String signTransaction(final SignTransactionJsonRpcRequest request) {
-    final RawTransaction rawTransaction = fromTransactionJson(request);
+    final RawTransaction rawTransaction = rawTransaction(request);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -45,7 +45,7 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction fromTransactionJson(final SignTransactionJsonRpcRequest request) {
+  private RawTransaction rawTransaction(final SignTransactionJsonRpcRequest request) {
     final SignTransactionJsonParameters params = request.getParams();
 
     return RawTransaction.createTransaction(

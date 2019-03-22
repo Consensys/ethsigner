@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
@@ -20,11 +21,13 @@ import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 public class TransactionBodyProvider implements BodyProvider {
+
+  private static final String JSON_RPC_VERSION = "2.0";
+  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final TransactionSigner signer;
 
@@ -35,7 +38,7 @@ public class TransactionBodyProvider implements BodyProvider {
   @Override
   public Buffer getBody(RoutingContext context) {
     final SignTransactionJsonRpcRequest request;
-    Object id = null;
+    JsonRpcRequestId id = null;
 
     // TODO generics? for the type?
     try {
@@ -51,22 +54,20 @@ public class TransactionBodyProvider implements BodyProvider {
 
     final String signedTransactionHexString = signer.signTransaction(request);
 
-    // TODO Pojo this!
-    final JsonObject jsonObj = new JsonObject();
-    jsonObj.put("jsonrpc", "2.0");
-    jsonObj.put("method", "eth_sendRawTransaction");
-    jsonObj.put("params", new JsonArray().add(signedTransactionHexString));
-    jsonObj.put("id", id);
+    final JsonRpcRequest sendRawTransaction =
+        new JsonRpcRequest(
+            JSON_RPC_VERSION, JSON_RPC_METHOD, new Object[] {signedTransactionHexString});
+    sendRawTransaction.setId(id);
 
     // TODO any problems signing - exit & don't proxy
-    return Buffer.buffer(jsonObj.toString());
+    return Json.encodeToBuffer(sendRawTransaction);
   }
 
   private Buffer errorResponse(final Object id) {
     return Json.encodeToBuffer(new JsonRpcErrorResponse(id, JsonRpcError.INVALID_REQUEST));
   }
 
-  private Object id(final JsonObject requestJson) {
-    return new JsonRpcRequestId(requestJson.getValue("id")).getValue();
+  private JsonRpcRequestId id(final JsonObject requestJson) {
+    return new JsonRpcRequestId(requestJson.getValue("id"));
   }
 }

@@ -17,11 +17,14 @@ import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException
 import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
 
-public class GenerocJsonRpcRequest {
+public class JsonRpcRequest {
 
   private JsonRpcRequestId id;
   private final String method;
@@ -29,7 +32,7 @@ public class GenerocJsonRpcRequest {
   private final String version;
 
   @JsonCreator
-  public GenerocJsonRpcRequest(
+  public JsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
       @JsonProperty("params") final Object[] params) {
@@ -41,24 +44,29 @@ public class GenerocJsonRpcRequest {
     }
   }
 
+  @JsonGetter("id")
   public Object getId() {
     return id == null ? null : id.getValue();
   }
 
+  @JsonGetter("method")
   public String getMethod() {
     return method;
   }
 
+  @JsonGetter("jsonrpc")
   public String getVersion() {
     return version;
   }
 
+  @JsonInclude(Include.NON_NULL)
+  @JsonGetter("params")
   public Object[] getParams() {
     return params;
   }
 
   @JsonSetter("id")
-  protected void setId(final JsonRpcRequestId id) {
+  public void setId(final JsonRpcRequestId id) {
     this.id = id;
   }
 
@@ -70,7 +78,7 @@ public class GenerocJsonRpcRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final GenerocJsonRpcRequest that = (GenerocJsonRpcRequest) o;
+    final JsonRpcRequest that = (JsonRpcRequest) o;
     return Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
         && Arrays.equals(params, that.params)
