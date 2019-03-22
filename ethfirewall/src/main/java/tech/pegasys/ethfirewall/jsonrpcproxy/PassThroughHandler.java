@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -22,7 +24,6 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 public class PassThroughHandler implements Handler<RoutingContext> {
 
@@ -75,11 +76,15 @@ public class PassThroughHandler implements Handler<RoutingContext> {
   }
 
   private void sendErrorResponse(
-      final RoutingContext context, final HttpServerRequest originalRequest,
+      final RoutingContext context,
+      final HttpServerRequest originalRequest,
       final JsonRpcErrorResponse error) {
     LOG.info("Dropping request from {}", originalRequest.remoteAddress());
-    LOG.debug("Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        originalRequest.method(), originalRequest.absoluteURI(), context.getBodyAsString(),
+    LOG.debug(
+        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        originalRequest.method(),
+        originalRequest.absoluteURI(),
+        context.getBodyAsString(),
         Json.encode(error));
 
     originalRequest.response().setStatusCode(400);
