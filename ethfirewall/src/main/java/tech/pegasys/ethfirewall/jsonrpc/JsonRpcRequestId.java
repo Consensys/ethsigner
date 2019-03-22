@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpc;
 
-import tech.pegasys.pantheon.ethereum.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
+import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
 import java.math.BigInteger;
 

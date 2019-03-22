@@ -12,8 +12,12 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
-import io.vertx.core.json.JsonObject;
+import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonRpcRequest;
+
 import java.math.BigInteger;
+import java.util.Optional;
+
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -26,16 +30,14 @@ public class TransactionSigner {
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
-  private final MandatoryTransactionNonce nonce;
 
   public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
     this.chain = chain;
     this.credentials = credentials;
-    this.nonce = new MandatoryTransactionNonce();
   }
 
-  public String signTransaction(final JsonObject transaction) {
-    final RawTransaction rawTransaction = fromTransactionJson(transaction);
+  public String signTransaction(final SignTransactionJsonRpcRequest request) {
+    final RawTransaction rawTransaction = fromTransactionJson(request);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -43,26 +45,24 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction fromTransactionJson(final JsonObject transaction) {
-    final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
+  private RawTransaction fromTransactionJson(final SignTransactionJsonRpcRequest request) {
+    final SignTransactionJsonParameters params = request.getParams();
+
+    // TODO when missing nonce - get it from somewhere
 
     return RawTransaction.createTransaction(
-        nonce.get(transaction),
-        optionalHex("gasPrice", params),
+        optionalHex(params.nonce()),
+        optionalHex(params.gasPrice()),
         gas(params),
-        params.getString("to"),
-        optionalHex("value", params),
-        data(params));
+        params.receiver(),
+        optionalHex(params.value()),
+        params.data());
   }
 
-  private String data(final JsonObject params) {
-    return params.getString("data");
-  }
+  private BigInteger gas(final SignTransactionJsonParameters params) {
 
-  private BigInteger gas(final JsonObject params) {
-
-    if (params.getString("gas") != null) {
-      return hex(params.getString("gas").substring(HEXADECIMAL_PREFIX_LENGTH));
+    if (params.gas().isPresent()) {
+      return hex(params.gas().get().substring(HEXADECIMAL_PREFIX_LENGTH));
     }
 
     // TODO(tmm): This should be configurable, but currently matches Geth.
@@ -74,9 +74,7 @@ public class TransactionSigner {
   }
 
   // TODO validate hex format - prefix 0x
-  private BigInteger optionalHex(final String key, final JsonObject params) {
-    return params.containsKey(key)
-        ? new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL)
-        : null;
+  private BigInteger optionalHex(final Optional<String> value) {
+    return value.isPresent() ? hex(value.get().substring(HEXADECIMAL_PREFIX_LENGTH)) : null;
   }
 }

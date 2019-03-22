@@ -12,43 +12,43 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethfirewall.jsonrpc.SignTransactionJsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 public class TransactionBodyProvider implements BodyProvider {
 
-  private final TransactionSigner transactionSigner;
+  private final TransactionSigner signer;
 
   public TransactionBodyProvider(final TransactionSigner transactionSigner) {
-    this.transactionSigner = transactionSigner;
+    this.signer = transactionSigner;
   }
 
   @Override
   public Buffer getBody(RoutingContext context) {
-    final JsonRpcRequest request;
+    final SignTransactionJsonRpcRequest request;
     Object id = null;
 
-    //TODO move this up - deal only with the request object
+    // TODO generics? for the type?
     try {
       final JsonObject requestJson = context.getBodyAsJson();
-
-      id = new JsonRpcRequestId(requestJson.getValue("id")).getValue();
-      request = requestJson.mapTo(JsonRpcRequest.class);
+      id = id(requestJson);
+      request = requestJson.mapTo(SignTransactionJsonRpcRequest.class);
     } catch (final IllegalArgumentException exception) {
-      return errorResponse(id, JsonRpcError.INVALID_REQUEST);
+      return errorResponse(id);
     }
 
-    final String signedTransactionHexString =
-        transactionSigner.signTransaction(context.getBodyAsJson());
+    final String signedTransactionHexString = signer.signTransaction(request);
 
+    // TODO Pojo this!
     final JsonObject jsonObj = new JsonObject();
     jsonObj.put("jsonrpc", "2.0");
     jsonObj.put("method", "eth_sendRawTransaction");
@@ -58,8 +58,11 @@ public class TransactionBodyProvider implements BodyProvider {
     return Buffer.buffer(jsonObj.toString());
   }
 
+  private Buffer errorResponse(final Object id) {
+    return Json.encodeToBuffer(new JsonRpcErrorResponse(id, JsonRpcError.INVALID_REQUEST));
+  }
 
-  private Buffer errorResponse(final Object id, final JsonRpcError error) {
-    return Json.encodeToBuffer(new JsonRpcErrorResponse(id, error));
+  private Object id(final JsonObject requestJson) {
+    return new JsonRpcRequestId(requestJson.getValue("id")).getValue();
   }
 }

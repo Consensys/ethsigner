@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,30 +12,25 @@
  */
 package tech.pegasys.ethfirewall.jsonrpc;
 
+import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
-import java.util.Arrays;
-import tech.pegasys.pantheon.ethereum.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 
-public class JsonRpcRequest {
+public class SignTransactionJsonRpcRequest {
 
   private JsonRpcRequestId id;
   private final String method;
-  private final Object[] params;
+  private final SignTransactionJsonParameters params;
   private final String version;
-  private boolean isNotification = true;
 
   @JsonCreator
-  public JsonRpcRequest(
+  public SignTransactionJsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
-      @JsonProperty("params") final Object[] params) {
+      @JsonProperty("params") final SignTransactionJsonParameters params) {
     this.version = version;
     this.method = method;
     this.params = params;
@@ -44,57 +39,24 @@ public class JsonRpcRequest {
     }
   }
 
-  @JsonGetter("id")
   public Object getId() {
     return id == null ? null : id.getValue();
   }
 
-  @JsonGetter("method")
   public String getMethod() {
     return method;
   }
 
-  @JsonGetter("jsonrpc")
   public String getVersion() {
     return version;
   }
 
-  @JsonInclude(Include.NON_NULL)
-  @JsonGetter("params")
-  public Object[] getParams() {
+  public SignTransactionJsonParameters getParams() {
     return params;
-  }
-
-  @JsonIgnore
-  public boolean isNotification() {
-    return isNotification;
-  }
-
-  @JsonIgnore
-  public int getParamLength() {
-    return hasParams() ? params.length : 0;
-  }
-
-  @JsonIgnore
-  public boolean hasParams() {
-
-    // Null Object: "params":null
-    if (params == null) {
-      return false;
-    }
-
-    // Null Array: "params":[null]
-    if (params.length == 0 || params[0] == null) {
-      return false;
-    }
-
-    return true;
   }
 
   @JsonSetter("id")
   protected void setId(final JsonRpcRequestId id) {
-    // If an id is explicitly set, it is not a notification
-    isNotification = false;
     this.id = id;
   }
 
@@ -106,16 +68,15 @@ public class JsonRpcRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final JsonRpcRequest that = (JsonRpcRequest) o;
-    return isNotification == that.isNotification
-        && Objects.equal(id, that.id)
+    final SignTransactionJsonRpcRequest that = (SignTransactionJsonRpcRequest) o;
+    return Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
-        && Arrays.equals(params, that.params)
+        && Objects.equal(params, that.params)
         && Objects.equal(version, that.version);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, method, Arrays.hashCode(params), version, isNotification);
+    return Objects.hashCode(id, method, params, version);
   }
 }
