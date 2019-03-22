@@ -78,7 +78,7 @@ public class PassThroughHandler implements Handler<RoutingContext> {
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
     LOG.debug(
-        "Proxying request: method: {}, uri: {}, body: {}, target: method: {}, uri: {}, body: {}",
+        "Original: method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
         context.request().method(),
         context.request().absoluteURI(),
         context.getBody(),
