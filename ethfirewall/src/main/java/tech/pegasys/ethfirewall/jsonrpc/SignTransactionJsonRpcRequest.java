@@ -34,12 +34,16 @@ public class SignTransactionJsonRpcRequest {
     this.version = version;
     this.method = method;
 
-    // TODO more than one - complian?
-
-    this.params = params[0];
     if (method == null) {
       throw new InvalidJsonRpcRequestException("Field 'method' is required");
     }
+
+    if (params == null || params.length != 1) {
+      throw new InvalidJsonRpcRequestException(
+          "Field 'params' is required and must be an array of length one");
+    }
+
+    this.params = params[0];
   }
 
   public Object getId() {
