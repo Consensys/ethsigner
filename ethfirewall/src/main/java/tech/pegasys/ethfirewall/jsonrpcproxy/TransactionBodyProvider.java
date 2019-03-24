@@ -29,6 +29,8 @@ public class TransactionBodyProvider implements BodyProvider {
 
   @Override
   public Buffer getBody(RoutingContext context) {
+
+    // TODO validate the JSON provided is a correct JSON-RPC formatted transaction payloead
     final String signedTransactionHexString =
         transactionSigner.signTransaction(context.getBodyAsJson());
 
