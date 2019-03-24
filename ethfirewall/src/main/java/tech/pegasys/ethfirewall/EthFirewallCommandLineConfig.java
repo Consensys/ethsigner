@@ -108,7 +108,7 @@ public class EthFirewallCommandLineConfig implements EthFirewallConfig {
       description = "The Chain Id that will be the intended recipient for signed transactions",
       required = true,
       arity = "1")
-  private byte chainId;
+  private long chainId;
 
   private final PrintStream output;
 
