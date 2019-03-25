@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -87,7 +88,7 @@ public class PassThroughHandler implements Handler<RoutingContext> {
         context.getBodyAsString(),
         Json.encode(error));
 
-    originalRequest.response().setStatusCode(400);
+    originalRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
     originalRequest.response().headers().setAll(originalRequest.headers());
     originalRequest.response().headers().remove("Content-Length"); // created during 'end'.
     originalRequest.response().setChunked(false);

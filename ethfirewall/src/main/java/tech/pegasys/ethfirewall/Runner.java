@@ -69,6 +69,7 @@ public class Runner {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
+    // TODO use the json request
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
             downStreamConnection, (RoutingContext context) -> new JsonRpcBody(context.getBody()));
