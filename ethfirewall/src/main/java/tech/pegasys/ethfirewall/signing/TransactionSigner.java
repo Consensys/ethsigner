@@ -52,7 +52,7 @@ public class TransactionSigner {
         nonce(params),
         optionalHex(params.gasPrice()),
         gas(params),
-        params.receiver(),
+        receiver(params),
         optionalHex(params.value()),
         params.data());
   }
@@ -70,19 +70,24 @@ public class TransactionSigner {
   private BigInteger gas(final SendTransactionJsonParameters params) {
 
     if (params.gas().isPresent()) {
+      // TODO validate hex format - ie. has prefix 0x
       return hex(params.gas().get().substring(HEXADECIMAL_PREFIX_LENGTH));
     }
 
-    // TODO(tmm): This should be configurable, but currently matches Geth.
+    // TODO This should be configurable, but currently matches Geth.
     return new BigInteger("90000");
+  }
+
+  private String receiver(final SendTransactionJsonParameters params) {
+    return params.receiver().isPresent() ? params.receiver().get() : null;
   }
 
   private BigInteger hex(final String value) {
     return new BigInteger(value, HEXADECIMAL);
   }
 
-  // TODO validate hex format - prefix 0x
+  // TODO validate hex format - ie. has prefix 0x
   private BigInteger optionalHex(final Optional<String> value) {
-    return value.isPresent() ? hex(value.get().substring(HEXADECIMAL_PREFIX_LENGTH)) : null;
+    return value.map(v -> hex(v.substring(HEXADECIMAL_PREFIX_LENGTH))).orElse(null);
   }
 }

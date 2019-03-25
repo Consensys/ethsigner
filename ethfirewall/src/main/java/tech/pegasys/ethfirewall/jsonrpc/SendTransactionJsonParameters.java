@@ -17,30 +17,45 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
 
   private final String data;
-  private final String gas;
-  private final String gasPrice;
-  private final String nonce;
-  private final String receiver;
-  private final String value;
+  private String gas;
+  private String gasPrice;
+  private String nonce;
+  private String receiver;
+  private String value;
 
   @JsonCreator
-  public SendTransactionJsonParameters(
-      @JsonProperty("data") final String data,
-      @JsonProperty("gas") final String gas,
-      @JsonProperty("gasPrice") final String gasPrice,
-      @JsonProperty("nonce") final String nonce,
-      @JsonProperty("to") final String receiverAddress,
-      @JsonProperty("value") final String value) {
+  public SendTransactionJsonParameters(@JsonProperty("data") final String data) {
     this.data = data;
+  }
+
+  @JsonSetter("gas")
+  public void gas(final String gas) {
     this.gas = gas;
+  }
+
+  @JsonSetter("gasPrice")
+  public void gasPrice(final String gasPrice) {
     this.gasPrice = gasPrice;
+  }
+
+  @JsonSetter("nonce")
+  public void nonce(final String nonce) {
     this.nonce = nonce;
-    this.receiver = receiverAddress;
+  }
+
+  @JsonSetter("to")
+  public void receiver(final String receiver) {
+    this.receiver = receiver;
+  }
+
+  @JsonSetter("value")
+  public void value(final String value) {
     this.value = value;
   }
 
@@ -56,8 +71,8 @@ public class SendTransactionJsonParameters {
     return Optional.ofNullable(gasPrice);
   }
 
-  public String receiver() {
-    return receiver;
+  public Optional<String> receiver() {
+    return Optional.ofNullable(receiver);
   }
 
   public Optional<String> value() {
