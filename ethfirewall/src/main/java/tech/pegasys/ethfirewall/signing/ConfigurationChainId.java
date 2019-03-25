@@ -14,14 +14,14 @@ package tech.pegasys.ethfirewall.signing;
 
 public class ConfigurationChainId implements ChainIdProvider {
 
-  private final byte id;
+  private final long id;
 
-  public ConfigurationChainId(final byte id) {
+  public ConfigurationChainId(final long id) {
     this.id = id;
   }
 
   @Override
-  public byte id() {
+  public long id() {
     return id;
   }
 }
