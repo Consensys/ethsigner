@@ -15,56 +15,27 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 import static java.util.Collections.emptyMap;
 
 import java.math.BigInteger;
-import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.NetVersion;
 
-public class ProxyIntegrationTest extends IntegrationTestBase {
+/** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
+public class SigningSendTransactionTest extends IntegrationTestBase {
 
-  @Test
-  public void requestWithHeadersIsProxied() throws Exception {
-    final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
-    final Response<String> netVersionResponse = new NetVersion();
-    netVersionResponse.setResult("4");
+  // TODO bad json
 
-    final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
-    final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
+  // TODO bad input
 
-    setUpEthereumNode(
-        netVersionRequest, netVersionResponse, responseHeaders, HttpResponseStatus.OK);
-    sendRequestAndVerify(
-        netVersionRequest,
-        requestHeaders,
-        netVersionResponse,
-        HttpResponseStatus.OK,
-        responseHeaders);
-    verifyEthNodeRequest(netVersionRequest, requestHeaders);
-  }
+  // TODO optional input
+
+  // TODO happy path - all populated
 
   @Test
-  public void requestReturningErrorIsProxied() throws Exception {
-    final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
-    setUpEthereumNode(
-        ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
-    sendRequestAndVerify(
-        ethProtocolVersionRequest,
-        emptyMap(),
-        "Not Found",
-        HttpResponseStatus.NOT_FOUND,
-        emptyMap());
-    verifyEthNodeRequest(ethProtocolVersionRequest, emptyMap());
-  }
-
-  @Test
-  public void requestWithSendTransactionIsSignedBeforeProxying() throws Exception {
+  public void signSendTransaction() throws Exception {
     final Transaction transaction =
         new Transaction(
             "0xb60e8dd61c5d32be8058bb8eb970870f07233155",

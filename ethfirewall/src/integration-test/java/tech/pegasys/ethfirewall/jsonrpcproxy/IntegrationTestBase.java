@@ -41,6 +41,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
@@ -119,11 +120,11 @@ public class IntegrationTestBase {
     runner.stop();
   }
 
-  public void configureEthNode(
+  public void setUpEthereumNode(
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
-      final int responseStatusCode)
+      final HttpResponseStatus status)
       throws JsonProcessingException {
     final String requestBody = objectMapper.writeValueAsString(request);
     final String responseBody = objectMapper.writeValueAsString(response);
@@ -131,27 +132,24 @@ public class IntegrationTestBase {
     ethNode
         .when(request().withBody(json(requestBody)), exactly(1))
         .respond(
-            response()
-                .withBody(responseBody)
-                .withHeaders(headers)
-                .withStatusCode(responseStatusCode));
+            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
   }
 
   public void sendRequestAndVerify(
-      final Request<?, ? extends Response<?>> proxyBodyRequest,
-      final Map<String, String> proxyHeaders,
+      final Request<?, ? extends Response<?>> request,
+      final Map<String, String> requestHeaders,
       final Object response,
-      final int ethNodeStatusCode,
+      final HttpResponseStatus status,
       final Map<String, String> ethNodeHeaders)
       throws JsonProcessingException {
     String responseBody = objectMapper.writeValueAsString(response);
     given()
         .when()
-        .body(proxyBodyRequest)
-        .headers(proxyHeaders)
+        .body(request)
+        .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(ethNodeStatusCode)
+        .statusCode(status.code())
         .body(equalTo(responseBody))
         .headers(ethNodeHeaders);
   }
