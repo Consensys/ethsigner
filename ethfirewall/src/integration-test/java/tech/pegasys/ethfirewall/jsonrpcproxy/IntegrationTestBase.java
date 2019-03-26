@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -120,7 +121,7 @@ public class IntegrationTestBase {
     runner.stop();
   }
 
-  public void setUpEthereumNode(
+  public void setUpEthereumNodeResponse(
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
@@ -154,7 +155,14 @@ public class IntegrationTestBase {
         .headers(ethNodeHeaders);
   }
 
-  public void verifyEthNodeRequest(
+  public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
+    ethNode.verify(
+        request()
+            .withBody(json(proxyBodyRequest))
+            .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
+  }
+
+  public void verifyEthereumNodeReceived(
       final Request<?, ? extends Response<?>> proxyBodyRequest,
       final Map<String, String> proxyHeaders) {
     ethNode.verify(

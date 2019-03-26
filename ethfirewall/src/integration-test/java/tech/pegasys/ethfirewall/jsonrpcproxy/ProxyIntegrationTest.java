@@ -38,7 +38,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
 
-    setUpEthereumNode(
+    setUpEthereumNodeResponse(
         netVersionRequest, netVersionResponse, responseHeaders, HttpResponseStatus.OK);
     sendRequestAndVerify(
         netVersionRequest,
@@ -46,13 +46,13 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         netVersionResponse,
         HttpResponseStatus.OK,
         responseHeaders);
-    verifyEthNodeRequest(netVersionRequest, requestHeaders);
+    verifyEthereumNodeReceived(netVersionRequest, requestHeaders);
   }
 
   @Test
   public void requestReturningErrorIsProxied() throws Exception {
     final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
-    setUpEthereumNode(
+    setUpEthereumNodeResponse(
         ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
     sendRequestAndVerify(
         ethProtocolVersionRequest,
@@ -60,7 +60,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         "Not Found",
         HttpResponseStatus.NOT_FOUND,
         emptyMap());
-    verifyEthNodeRequest(ethProtocolVersionRequest, emptyMap());
+    verifyEthereumNodeReceived(ethProtocolVersionRequest);
   }
 
   @Test
@@ -89,7 +89,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     ethSendRawTransactionResponse.setResult(
         "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
-    setUpEthereumNode(
+    setUpEthereumNodeResponse(
         ethSendRawTransactionRequest,
         ethSendRawTransactionResponse,
         emptyMap(),
@@ -100,6 +100,6 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         ethSendRawTransactionResponse,
         HttpResponseStatus.OK,
         emptyMap());
-    verifyEthNodeRequest(ethSendRawTransactionRequest, emptyMap());
+    verifyEthereumNodeReceived(ethSendRawTransactionRequest);
   }
 }
