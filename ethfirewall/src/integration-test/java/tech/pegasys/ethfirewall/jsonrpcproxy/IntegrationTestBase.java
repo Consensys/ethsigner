@@ -155,6 +155,32 @@ public class IntegrationTestBase {
         .headers(ethNodeHeaders);
   }
 
+  public void sendRequestAndVerify(
+      final String request,
+      final Map<String, String> requestHeaders,
+      final Object response,
+      final HttpResponseStatus status,
+      final Map<String, String> ethNodeHeaders)
+      throws JsonProcessingException {
+    String responseBody = objectMapper.writeValueAsString(response);
+    given()
+        .when()
+        .body(request)
+        .headers(requestHeaders)
+        .post()
+        .then()
+        .statusCode(status.code())
+        .body(equalTo(responseBody))
+        .headers(ethNodeHeaders);
+  }
+
+  public void sendRequestAndVerify(
+      final String request,
+      final Map<String, String> requestHeaders,
+      final HttpResponseStatus status) {
+    given().when().body(request).headers(requestHeaders).post().then().statusCode(status.code());
+  }
+
   public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
     ethNode.verify(
         request()

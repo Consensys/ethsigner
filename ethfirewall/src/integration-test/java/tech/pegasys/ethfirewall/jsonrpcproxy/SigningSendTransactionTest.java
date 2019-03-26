@@ -17,6 +17,7 @@ import static java.util.Collections.emptyMap;
 import java.math.BigInteger;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
@@ -29,7 +30,17 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
 
-  // TODO bad json
+  @Test
+  public void malformedJsonRequest() {
+
+    sendRequestAndVerify("{Bad Json: {{{}", NO_HEADERS, HttpResponseStatus.BAD_REQUEST);
+
+    // TODO bad json - verify response from EthFirewall
+
+    // TODO should be 400, not 500
+  }
+
+  // TODO bad json response from Node
 
   // TODO bad input
 
@@ -38,7 +49,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   // TODO happy path - all populated
 
   @Test
-  public void signSendTransaction() throws Exception {
+  public void signSendTransaction() throws JsonProcessingException {
 
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequest();
