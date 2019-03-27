@@ -26,7 +26,6 @@ import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -37,14 +36,14 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 public class SigningSendTransactionTest extends IntegrationTestBase {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
+  private static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   @Test
   public void malformedJsonRequest() {
     sendVerifyingResponse(
-        ethFirewallRequest("{Bad Json: {{{}"), ethFirewallResponse(JsonRpcError.PARSE_ERROR));
+        ethFirewallRequest(MALFORMED_JSON), ethFirewallResponse(JsonRpcError.PARSE_ERROR));
   }
 
-  @Ignore
   @Test
   public void malformedJsonResponse() {
 
@@ -52,14 +51,10 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         defaultSendRawTransactionRequest();
 
     setUpEthNodeResponse(
-        ehtNodeRequest(sendRawTransactionRequest),
-        ethNodeResponse("0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331"));
-
-    // TODO bad json response from Node
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(MALFORMED_JSON));
 
     sendVerifyingResponse(
-        ethFirewallRequest(sendRawTransactionRequest),
-        ethFirewallResponse(JsonRpcError.PARSE_ERROR));
+        ethFirewallRequest(sendRawTransactionRequest), ethFirewallResponse(MALFORMED_JSON));
   }
 
   // TODO bad input
@@ -193,10 +188,6 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   private EthFirewallResponse ethFirewallResponse(final String value) {
-    return new EthFirewallResponse(NO_HEADERS, value, HttpResponseStatus.BAD_REQUEST);
-  }
-
-  private EthNodeResponse ethNodeResponse(final Response<String> body) {
-    return new EthNodeResponse(NO_HEADERS, Json.encode(body), HttpResponseStatus.OK);
+    return new EthFirewallResponse(NO_HEADERS, value, HttpResponseStatus.OK);
   }
 }
