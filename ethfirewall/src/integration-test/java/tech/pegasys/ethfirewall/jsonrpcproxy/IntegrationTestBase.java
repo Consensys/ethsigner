@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -66,11 +67,12 @@ import org.web3j.protocol.core.Response;
 public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
-
   private static final String LOCALHOST = "127.0.0.1";
+
   private static Runner runner;
   private static ClientAndServer ethNode;
-  JsonRpc2_0Web3j jsonRpc;
+
+  private JsonRpc2_0Web3j jsonRpc;
 
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
@@ -101,6 +103,10 @@ public class IntegrationTestBase {
     serverSocket.close();
   }
 
+  protected Web3j jsonRpc() {
+    return jsonRpc;
+  }
+
   @SuppressWarnings("UnstableApiUsage")
   private static File createKeyFile() throws IOException {
     final URL walletResource = Resources.getResource("keyfile.json");
@@ -124,7 +130,7 @@ public class IntegrationTestBase {
   }
 
   public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
-    List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     ethNode
         .when(request().withBody(json(request.getBody())), exactly(1))
         .respond(
@@ -140,7 +146,7 @@ public class IntegrationTestBase {
       final Map<String, String> responseHeaders,
       final HttpResponseStatus status) {
     final String responseBody = Json.encode(response);
-    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
         .when(request().withBody(json(request.getBody())), exactly(1))
         .respond(
@@ -154,7 +160,7 @@ public class IntegrationTestBase {
       final HttpResponseStatus status) {
     final String requestBody = Json.encode(request);
     final String responseBody = Json.encode(response);
-    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
         .when(request().withBody(json(requestBody)), exactly(1))
         .respond(
@@ -180,7 +186,7 @@ public class IntegrationTestBase {
       final Object expectResponse,
       final HttpResponseStatus expectStatus,
       final Map<String, String> expectHeaders) {
-    String responseBody = Json.encode(expectResponse);
+    final String responseBody = Json.encode(expectResponse);
     given()
         .when()
         .body(request)

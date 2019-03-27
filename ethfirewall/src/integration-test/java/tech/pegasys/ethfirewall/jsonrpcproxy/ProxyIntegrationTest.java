@@ -31,7 +31,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() {
-    final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
+    final Request<?, NetVersion> netVersionRequest = jsonRpc().netVersion();
     final Response<String> netVersionResponse = new NetVersion();
     netVersionResponse.setResult("4");
 
@@ -51,7 +51,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestReturningErrorIsProxied() {
-    final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
+    final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc().ethProtocolVersion();
     setUpEthNodeResponse(
         ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
     sendVerifyingResponse(
@@ -76,12 +76,13 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             new BigInteger("2441406250"),
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     final Request<?, ? extends Response<?>> ethSendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
+        jsonRpc().ethSendTransaction(transaction);
     ethSendTransactionRequest.setId(5);
 
     Request<?, ? extends Response<?>> ethSendRawTransactionRequest =
-        jsonRpc.ethSendRawTransaction(
-            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0f04e0e7b41adea417596550611138a3ec9a452abb6648d734107c53476e76a27a05b826d9e9b4e0dd0e7b8939c102a2079d71cfc27cd6b7bebe5a006d5ad17d780");
+        jsonRpc()
+            .ethSendRawTransaction(
+                "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0f04e0e7b41adea417596550611138a3ec9a452abb6648d734107c53476e76a27a05b826d9e9b4e0dd0e7b8939c102a2079d71cfc27cd6b7bebe5a006d5ad17d780");
     // we create the eth_sendRawTransaction req with same id as the eth_sendTransaction req
     ethSendRawTransactionRequest.setId(5);
 
