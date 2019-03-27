@@ -19,13 +19,13 @@ import java.util.Map;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 
-public class EthereumFirewallResponse {
+public class EthFirewallResponse {
 
   private final String body;
   private final Map<String, String> headers;
   private final HttpResponseStatus status;
 
-  public EthereumFirewallResponse(
+  public EthFirewallResponse(
       final Map<String, String> headers,
       final JsonRpcResponse body,
       final HttpResponseStatus status) {

@@ -26,8 +26,8 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -136,8 +136,8 @@ public class IntegrationTestBase {
             response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
   }
 
-  public void sendRequestAndVerify(
-      final EthereumFirewallRequest request, final EthereumFirewallResponse expectResponse) {
+  public void sendVerifyingResponse(
+      final EthFirewallRequest request, final EthFirewallResponse expectResponse) {
     given()
         .when()
         .body(request.getBody())
@@ -149,7 +149,7 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  public void sendRequestAndVerify(
+  public void sendVerifyingResponse(
       final Request<?, ? extends Response<?>> request,
       final Map<String, String> requestHeaders,
       final Object expectResponse,
@@ -167,7 +167,7 @@ public class IntegrationTestBase {
         .headers(expectHeaders);
   }
 
-  public void sendRequestAndVerify(
+  public void sendVerifyingResponse(
       final String request,
       final Map<String, String> requestHeaders,
       final Object expectResponse,
@@ -185,7 +185,7 @@ public class IntegrationTestBase {
         .headers(expectHeaders);
   }
 
-  public void sendRequestAndVerify(
+  public void sendVerifyingResponse(
       final String request,
       final Map<String, String> requestHeaders,
       final HttpResponseStatus expectStatus,

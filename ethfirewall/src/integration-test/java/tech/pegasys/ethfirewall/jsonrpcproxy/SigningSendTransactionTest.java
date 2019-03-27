@@ -16,8 +16,8 @@ import static java.util.Collections.emptyMap;
 
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -36,19 +36,31 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void malformedJsonRequest() {
-    sendRequestAndVerify(request("{Bad Json: {{{}"), expectResponse(JsonRpcError.PARSE_ERROR));
+    sendVerifyingResponse(
+        ethFirewallRequest("{Bad Json: {{{}"), ethFirewallResponse(JsonRpcError.PARSE_ERROR));
   }
 
-  private EthereumFirewallRequest request(final String body) {
-    return new EthereumFirewallRequest(NO_HEADERS, body);
-  }
+  @Test
+  public void malformedJsonResponse() {
 
-  private EthereumFirewallResponse expectResponse(final JsonRpcError error) {
-    return new EthereumFirewallResponse(
-        NO_HEADERS, invalidRequest(error), HttpResponseStatus.BAD_REQUEST);
-  }
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequest();
 
-  // TODO bad json response from Node
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        defaultSendRawTransactionRequest();
+
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+
+    setUpEthereumNodeResponse(
+        sendRawTransactionRequest, sendRawTransactionResponse, NO_HEADERS, HttpResponseStatus.OK);
+
+    sendVerifyingResponse(
+        ethFirewallRequest("{Bad Json: {{{}"), ethFirewallResponse(JsonRpcError.PARSE_ERROR));
+
+    // TODO bad json response from Node
+  }
 
   // TODO bad input
 
@@ -72,7 +84,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     setUpEthereumNodeResponse(
         sendRawTransactionRequest, sendRawTransactionResponse, NO_HEADERS, HttpResponseStatus.OK);
 
-    sendRequestAndVerify(
+    sendVerifyingResponse(
         sendTransactionRequest,
         NO_HEADERS,
         sendRawTransactionResponse,
@@ -156,7 +168,12 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     return sendRawTransactionResponse;
   }
 
-  private JsonRpcErrorResponse invalidRequest(final JsonRpcError code) {
-    return new JsonRpcErrorResponse(code);
+  private EthFirewallRequest ethFirewallRequest(final String body) {
+    return new EthFirewallRequest(NO_HEADERS, body);
+  }
+
+  private EthFirewallResponse ethFirewallResponse(final JsonRpcError error) {
+    return new EthFirewallResponse(
+        NO_HEADERS, new JsonRpcErrorResponse(error), HttpResponseStatus.BAD_REQUEST);
   }
 }

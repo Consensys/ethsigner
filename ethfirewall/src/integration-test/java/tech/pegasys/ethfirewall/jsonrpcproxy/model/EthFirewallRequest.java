@@ -14,12 +14,12 @@ package tech.pegasys.ethfirewall.jsonrpcproxy.model;
 
 import java.util.Map;
 
-public class EthereumFirewallRequest {
+public class EthFirewallRequest {
 
   private final String body;
   private final Map<String, String> headers;
 
-  public EthereumFirewallRequest(final Map<String, String> headers, final String body) {
+  public EthFirewallRequest(final Map<String, String> headers, final String body) {
     this.body = body;
     this.headers = headers;
   }

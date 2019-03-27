@@ -40,7 +40,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
     setUpEthereumNodeResponse(
         netVersionRequest, netVersionResponse, responseHeaders, HttpResponseStatus.OK);
-    sendRequestAndVerify(
+    sendVerifyingResponse(
         netVersionRequest,
         requestHeaders,
         netVersionResponse,
@@ -54,7 +54,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
     setUpEthereumNodeResponse(
         ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
-    sendRequestAndVerify(
+    sendVerifyingResponse(
         ethProtocolVersionRequest,
         emptyMap(),
         "Not Found",
@@ -94,7 +94,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         ethSendRawTransactionResponse,
         emptyMap(),
         HttpResponseStatus.OK);
-    sendRequestAndVerify(
+    sendVerifyingResponse(
         ethSendTransactionRequest,
         emptyMap(),
         ethSendRawTransactionResponse,
