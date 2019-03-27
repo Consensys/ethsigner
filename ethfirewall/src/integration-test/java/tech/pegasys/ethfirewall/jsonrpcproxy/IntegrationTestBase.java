@@ -25,6 +25,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -39,13 +40,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.Json;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,7 +67,6 @@ public class IntegrationTestBase {
   private static final String LOCALHOST = "127.0.0.1";
   private static Runner runner;
   private static ClientAndServer ethNode;
-  private ObjectMapper objectMapper = new ObjectMapper();
   JsonRpc2_0Web3j jsonRpc;
 
   @BeforeClass
@@ -125,10 +124,9 @@ public class IntegrationTestBase {
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
-      final HttpResponseStatus status)
-      throws JsonProcessingException {
-    final String requestBody = objectMapper.writeValueAsString(request);
-    final String responseBody = objectMapper.writeValueAsString(response);
+      final HttpResponseStatus status) {
+    final String requestBody = Json.encode(request);
+    final String responseBody = Json.encode(response);
     List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
         .when(request().withBody(json(requestBody)), exactly(1))
@@ -139,46 +137,54 @@ public class IntegrationTestBase {
   public void sendRequestAndVerify(
       final Request<?, ? extends Response<?>> request,
       final Map<String, String> requestHeaders,
-      final Object response,
-      final HttpResponseStatus status,
-      final Map<String, String> ethNodeHeaders)
-      throws JsonProcessingException {
-    String responseBody = objectMapper.writeValueAsString(response);
+      final Object expectedResponse,
+      final HttpResponseStatus expectedStatus,
+      final Map<String, String> expectedHeaders) {
+    String responseBody = Json.encode(expectedResponse);
     given()
         .when()
         .body(request)
         .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(status.code())
+        .statusCode(expectedStatus.code())
         .body(equalTo(responseBody))
-        .headers(ethNodeHeaders);
+        .headers(expectedHeaders);
   }
 
   public void sendRequestAndVerify(
       final String request,
       final Map<String, String> requestHeaders,
-      final Object response,
-      final HttpResponseStatus status,
-      final Map<String, String> ethNodeHeaders)
-      throws JsonProcessingException {
-    String responseBody = objectMapper.writeValueAsString(response);
+      final Object expectedResponse,
+      final HttpResponseStatus expectedStatus,
+      final Map<String, String> expectedHeaders) {
+    String responseBody = Json.encode(expectedResponse);
     given()
         .when()
         .body(request)
         .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(status.code())
+        .statusCode(expectedStatus.code())
         .body(equalTo(responseBody))
-        .headers(ethNodeHeaders);
+        .headers(expectedHeaders);
   }
 
   public void sendRequestAndVerify(
       final String request,
       final Map<String, String> requestHeaders,
-      final HttpResponseStatus status) {
-    given().when().body(request).headers(requestHeaders).post().then().statusCode(status.code());
+      final HttpResponseStatus expectedStatus,
+      final JsonRpcErrorResponse expectedResponse) {
+    final String response = Json.encode(expectedResponse);
+
+    given()
+        .when()
+        .body(request)
+        .headers(requestHeaders)
+        .post()
+        .then()
+        .statusCode(expectedStatus.code())
+        .body(equalTo(response));
   }
 
   public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {

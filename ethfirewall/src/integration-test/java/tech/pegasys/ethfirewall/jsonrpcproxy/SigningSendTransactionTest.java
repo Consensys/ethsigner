@@ -14,6 +14,9 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static java.util.Collections.emptyMap;
 
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+
 import java.math.BigInteger;
 import java.util.Map;
 
@@ -33,11 +36,11 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   @Test
   public void malformedJsonRequest() {
 
-    sendRequestAndVerify("{Bad Json: {{{}", NO_HEADERS, HttpResponseStatus.BAD_REQUEST);
-
-    // TODO bad json - verify response from EthFirewall
-
-    // TODO should be 400, not 500
+    sendRequestAndVerify(
+        "{Bad Json: {{{}",
+        NO_HEADERS,
+        HttpResponseStatus.BAD_REQUEST,
+        invalidRequest(JsonRpcError.PARSE_ERROR));
   }
 
   // TODO bad json response from Node
@@ -58,7 +61,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         defaultSendRawTransactionRequest();
 
     final Response<String> sendRawTransactionResponse =
-        createSendRawTransactionResponse(
+        sendRawTransactionResponse(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
     setUpEthereumNodeResponse(
@@ -142,9 +145,13 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     return sendRawTransactionRequest;
   }
 
-  private Response<String> createSendRawTransactionResponse(final String value) {
+  private Response<String> sendRawTransactionResponse(final String value) {
     final Response<String> sendRawTransactionResponse = new EthSendTransaction();
     sendRawTransactionResponse.setResult(value);
     return sendRawTransactionResponse;
+  }
+
+  private JsonRpcErrorResponse invalidRequest(final JsonRpcError code) {
+    return new JsonRpcErrorResponse(code);
   }
 }
