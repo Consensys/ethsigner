@@ -38,7 +38,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
 
-    setUpEthereumNodeResponse(
+    setUpEthNodeResponse(
         netVersionRequest, netVersionResponse, responseHeaders, HttpResponseStatus.OK);
     sendVerifyingResponse(
         netVersionRequest,
@@ -52,7 +52,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   @Test
   public void requestReturningErrorIsProxied() throws Exception {
     final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
-    setUpEthereumNodeResponse(
+    setUpEthNodeResponse(
         ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
     sendVerifyingResponse(
         ethProtocolVersionRequest,
@@ -89,7 +89,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     ethSendRawTransactionResponse.setResult(
         "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
-    setUpEthereumNodeResponse(
+    setUpEthNodeResponse(
         ethSendRawTransactionRequest,
         ethSendRawTransactionResponse,
         emptyMap(),

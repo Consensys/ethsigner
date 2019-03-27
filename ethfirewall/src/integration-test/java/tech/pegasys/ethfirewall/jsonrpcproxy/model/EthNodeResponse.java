@@ -12,29 +12,17 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy.model;
 
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcResponse;
-
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.json.Json;
 
-public class EthFirewallResponse {
+public class EthNodeResponse {
 
   private final String body;
   private final Map<String, String> headers;
   private final HttpResponseStatus status;
 
-  public EthFirewallResponse(
-      final Map<String, String> headers,
-      final JsonRpcResponse body,
-      final HttpResponseStatus status) {
-    this.body = Json.encode(body);
-    this.headers = headers;
-    this.status = status;
-  }
-
-  public EthFirewallResponse(
+  public EthNodeResponse(
       final Map<String, String> headers, final String body, final HttpResponseStatus status) {
     this.body = body;
     this.headers = headers;

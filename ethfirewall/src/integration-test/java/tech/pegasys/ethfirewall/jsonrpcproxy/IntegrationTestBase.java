@@ -28,6 +28,8 @@ import tech.pegasys.ethfirewall.Runner;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -123,6 +125,44 @@ public class IntegrationTestBase {
   }
 
   public void setUpEthereumNodeResponse(
+      final Request<?, ? extends Response<?>> request,
+      final Object response,
+      final Map<String, String> responseHeaders,
+      final HttpResponseStatus status) {
+    final String requestBody = Json.encode(request);
+    final String responseBody = Json.encode(response);
+    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+    ethNode
+        .when(request().withBody(json(requestBody)), exactly(1))
+        .respond(
+            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
+  }
+
+  public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
+    List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    ethNode
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response()
+                .withBody(response.getBody())
+                .withHeaders(headers)
+                .withStatusCode(response.getStatusCode()));
+  }
+
+  public void setUpEthNodeResponse(
+      final EthFirewallRequest request,
+      final Object response,
+      final Map<String, String> responseHeaders,
+      final HttpResponseStatus status) {
+    final String responseBody = Json.encode(response);
+    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+    ethNode
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
+  }
+
+  public void setUpEthNodeResponse(
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,

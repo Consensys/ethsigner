@@ -12,33 +12,21 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy.model;
 
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcResponse;
-
 import java.util.Map;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.Response;
 
-public class EthFirewallResponse {
+public class EthNodeRequest {
 
   private final String body;
   private final Map<String, String> headers;
-  private final HttpResponseStatus status;
 
-  public EthFirewallResponse(
-      final Map<String, String> headers,
-      final JsonRpcResponse body,
-      final HttpResponseStatus status) {
+  public EthNodeRequest(
+      final Map<String, String> headers, final Request<?, ? extends Response<?>> body) {
     this.body = Json.encode(body);
     this.headers = headers;
-    this.status = status;
-  }
-
-  public EthFirewallResponse(
-      final Map<String, String> headers, final String body, final HttpResponseStatus status) {
-    this.body = body;
-    this.headers = headers;
-    this.status = status;
   }
 
   public String getBody() {
@@ -47,9 +35,5 @@ public class EthFirewallResponse {
 
   public Map<String, String> getHeaders() {
     return headers;
-  }
-
-  public int getStatusCode() {
-    return status.code();
   }
 }
