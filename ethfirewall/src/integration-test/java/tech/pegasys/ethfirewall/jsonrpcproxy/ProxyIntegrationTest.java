@@ -30,7 +30,7 @@ import org.web3j.protocol.core.methods.response.NetVersion;
 public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
-  public void requestWithHeadersIsProxied() throws Exception {
+  public void requestWithHeadersIsProxied() {
     final Request<?, NetVersion> netVersionRequest = jsonRpc.netVersion();
     final Response<String> netVersionResponse = new NetVersion();
     netVersionResponse.setResult("4");
@@ -50,7 +50,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void requestReturningErrorIsProxied() throws Exception {
+  public void requestReturningErrorIsProxied() {
     final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc.ethProtocolVersion();
     setUpEthNodeResponse(
         ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
@@ -64,7 +64,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void requestWithSendTransactionIsSignedBeforeProxying() throws Exception {
+  public void requestWithSendTransactionIsSignedBeforeProxying() {
     final Transaction transaction =
         new Transaction(
             "0xb60e8dd61c5d32be8058bb8eb970870f07233155",

@@ -25,7 +25,6 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeRequest;
@@ -124,20 +123,6 @@ public class IntegrationTestBase {
     runner.stop();
   }
 
-  public void setUpEthereumNodeResponse(
-      final Request<?, ? extends Response<?>> request,
-      final Object response,
-      final Map<String, String> responseHeaders,
-      final HttpResponseStatus status) {
-    final String requestBody = Json.encode(request);
-    final String responseBody = Json.encode(response);
-    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
-    ethNode
-        .when(request().withBody(json(requestBody)), exactly(1))
-        .respond(
-            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
-  }
-
   public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
     List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     ethNode
@@ -205,41 +190,6 @@ public class IntegrationTestBase {
         .statusCode(expectStatus.code())
         .body(equalTo(responseBody))
         .headers(expectHeaders);
-  }
-
-  public void sendVerifyingResponse(
-      final String request,
-      final Map<String, String> requestHeaders,
-      final Object expectResponse,
-      final HttpResponseStatus expectStatus,
-      final Map<String, String> expectHeaders) {
-    String responseBody = Json.encode(expectResponse);
-    given()
-        .when()
-        .body(request)
-        .headers(requestHeaders)
-        .post()
-        .then()
-        .statusCode(expectStatus.code())
-        .body(equalTo(responseBody))
-        .headers(expectHeaders);
-  }
-
-  public void sendVerifyingResponse(
-      final String request,
-      final Map<String, String> requestHeaders,
-      final HttpResponseStatus expectStatus,
-      final JsonRpcErrorResponse expectResponse) {
-    final String response = Json.encode(expectResponse);
-
-    given()
-        .when()
-        .body(request)
-        .headers(requestHeaders)
-        .post()
-        .then()
-        .statusCode(expectStatus.code())
-        .body(equalTo(response));
   }
 
   public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
