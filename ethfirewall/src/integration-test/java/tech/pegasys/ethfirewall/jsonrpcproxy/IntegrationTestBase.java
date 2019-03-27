@@ -26,6 +26,8 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -135,47 +137,60 @@ public class IntegrationTestBase {
   }
 
   public void sendRequestAndVerify(
+      final EthereumFirewallRequest request, final EthereumFirewallResponse expectResponse) {
+    given()
+        .when()
+        .body(request.getBody())
+        .headers(request.getHeaders())
+        .post()
+        .then()
+        .statusCode(expectResponse.getStatusCode())
+        .body(equalTo(expectResponse.getBody()))
+        .headers(expectResponse.getHeaders());
+  }
+
+  public void sendRequestAndVerify(
       final Request<?, ? extends Response<?>> request,
       final Map<String, String> requestHeaders,
-      final Object expectedResponse,
-      final HttpResponseStatus expectedStatus,
-      final Map<String, String> expectedHeaders) {
-    String responseBody = Json.encode(expectedResponse);
+      final Object expectResponse,
+      final HttpResponseStatus expectStatus,
+      final Map<String, String> expectHeaders) {
+    String responseBody = Json.encode(expectResponse);
     given()
         .when()
         .body(request)
         .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(expectedStatus.code())
+        .statusCode(expectStatus.code())
         .body(equalTo(responseBody))
-        .headers(expectedHeaders);
+        .headers(expectHeaders);
   }
 
   public void sendRequestAndVerify(
       final String request,
       final Map<String, String> requestHeaders,
-      final Object expectedResponse,
-      final HttpResponseStatus expectedStatus,
-      final Map<String, String> expectedHeaders) {
-    String responseBody = Json.encode(expectedResponse);
+      final Object expectResponse,
+      final HttpResponseStatus expectStatus,
+      final Map<String, String> expectHeaders) {
+    String responseBody = Json.encode(expectResponse);
     given()
         .when()
         .body(request)
         .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(expectedStatus.code())
+        .statusCode(expectStatus.code())
         .body(equalTo(responseBody))
-        .headers(expectedHeaders);
+        .headers(expectHeaders);
   }
 
   public void sendRequestAndVerify(
       final String request,
       final Map<String, String> requestHeaders,
-      final HttpResponseStatus expectedStatus,
-      final JsonRpcErrorResponse expectedResponse) {
-    final String response = Json.encode(expectedResponse);
+      final HttpResponseStatus expectStatus,
+      final JsonRpcErrorResponse expectResponse) {
+    final String response = Json.encode(expectResponse);
 
     given()
         .when()
@@ -183,7 +198,7 @@ public class IntegrationTestBase {
         .headers(requestHeaders)
         .post()
         .then()
-        .statusCode(expectedStatus.code())
+        .statusCode(expectStatus.code())
         .body(equalTo(response));
   }
 

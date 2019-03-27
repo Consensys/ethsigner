@@ -16,11 +16,12 @@ import static java.util.Collections.emptyMap;
 
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthereumFirewallResponse;
 
 import java.math.BigInteger;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
@@ -35,12 +36,16 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void malformedJsonRequest() {
+    sendRequestAndVerify(request("{Bad Json: {{{}"), expectResponse(JsonRpcError.PARSE_ERROR));
+  }
 
-    sendRequestAndVerify(
-        "{Bad Json: {{{}",
-        NO_HEADERS,
-        HttpResponseStatus.BAD_REQUEST,
-        invalidRequest(JsonRpcError.PARSE_ERROR));
+  private EthereumFirewallRequest request(final String body) {
+    return new EthereumFirewallRequest(NO_HEADERS, body);
+  }
+
+  private EthereumFirewallResponse expectResponse(final JsonRpcError error) {
+    return new EthereumFirewallResponse(
+        NO_HEADERS, invalidRequest(error), HttpResponseStatus.BAD_REQUEST);
   }
 
   // TODO bad json response from Node
@@ -52,7 +57,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   // TODO happy path - all populated
 
   @Test
-  public void signSendTransaction() throws JsonProcessingException {
+  public void signSendTransaction() {
 
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequest();
