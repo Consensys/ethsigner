@@ -28,6 +28,10 @@ public class JsonRpcErrorResponse implements JsonRpcResponse {
     this.error = error;
   }
 
+  public JsonRpcErrorResponse(final JsonRpcError error) {
+    this(null, error);
+  }
+
   @JsonGetter("id")
   public Object getId() {
     return id;

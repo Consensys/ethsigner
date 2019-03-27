@@ -20,6 +20,7 @@ import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -47,13 +48,13 @@ public class SendTransactionBodyProvider implements BodyProvider {
   @Override
   public JsonRpcBody getBody(RoutingContext context) {
     final SendTransactionJsonRpcRequest request;
-    JsonRpcRequestId id = null;
     final JsonObject requestJson;
+    JsonRpcRequestId id = null;
 
     try {
       requestJson = context.getBodyAsJson();
-    } catch (final IllegalArgumentException exception) {
-      LOG.debug("Deserialisation to JSON failed for: {}", context.getBodyAsString(), exception);
+    } catch (final DecodeException exception) {
+      LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), exception);
       return errorResponse(id);
     }
 
