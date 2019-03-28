@@ -49,13 +49,11 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void malformedJsonResponse() {
-    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
-        defaultSendRawTransactionRequest();
-    setUpEthNodeResponse(
-        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(MALFORMED_JSON));
+    final Request<?, ? extends Response<?>> sendRawTransaction = defaultSendRawTransactionRequest();
+    setUpEthNodeResponse(ehtNodeRequest(sendRawTransaction), ethNodeResponse(MALFORMED_JSON));
 
     sendVerifyingResponse(
-        ethFirewallRequest(sendRawTransactionRequest), ethFirewallResponse(MALFORMED_JSON));
+        ethFirewallRequest(sendRawTransaction), ethFirewallResponse(MALFORMED_JSON));
   }
 
   @Test
@@ -91,21 +89,21 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void invalidSenderAddressEmpty() {
-    final String firewallRequest = defaultSendTransactionRequestWithSender("");
-
-    final Request<?, ? extends Response<?>> nodeRequest =
+    final String sendTransactionRequest = defaultSendTransactionRequestWithSender("");
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
         sendRawTransactionRequest(
             "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c0940000000000000000000000000000000000000000849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09d99057d1cb7a52c62c6e81ebf0e14516c5e93812f9a91beaa4576b05242ced4a04a87eefa7aa1240da54d0809f2867526cb726d93c064154a9855c30be6b190e8");
-
-    final Response<String> nodeResponse =
+    final Response<String> sendRawTransactionResponse =
         sendRawTransactionResponse(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
 
-    setUpEthNodeResponse(ehtNodeRequest(nodeRequest), ethNodeResponse(nodeResponse));
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
 
-    sendVerifyingResponse(ethFirewallRequest(firewallRequest), ethFirewallResponse(nodeResponse));
-
-    verifyEthereumNodeReceived(nodeRequest);
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
@@ -129,20 +127,21 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void signSendTransaction() {
-
-    final Request<?, ? extends Response<?>> firewallRequest = defaultSendTransactionRequest();
-
-    final Request<?, ? extends Response<?>> nodeRequest = defaultSendRawTransactionRequest();
-
-    final Response<String> nodeResponse =
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequest();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        defaultSendRawTransactionRequest();
+    final Response<String> sendRawTransactionResponse =
         sendRawTransactionResponse(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
 
-    setUpEthNodeResponse(ehtNodeRequest(nodeRequest), ethNodeResponse(nodeResponse));
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
 
-    sendVerifyingResponse(ethFirewallRequest(firewallRequest), ethFirewallResponse(nodeResponse));
-
-    verifyEthereumNodeReceived(nodeRequest);
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
   // TODO refactor below methods into utility (after complete tests)
