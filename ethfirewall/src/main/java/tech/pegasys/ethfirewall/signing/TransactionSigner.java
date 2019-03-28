@@ -79,7 +79,7 @@ public class TransactionSigner {
   }
 
   private String receiver(final SendTransactionJsonParameters params) {
-    return params.receiver().isPresent() ? params.receiver().get() : null;
+    return params.receiver().orElse(null);
   }
 
   private BigInteger hex(final String value) {
