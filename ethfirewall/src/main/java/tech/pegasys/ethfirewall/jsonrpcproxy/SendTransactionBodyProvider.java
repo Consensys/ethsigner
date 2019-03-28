@@ -48,15 +48,22 @@ public class SendTransactionBodyProvider implements BodyProvider {
       requestJson = context.getBodyAsJson();
     } catch (final DecodeException exception) {
       LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), exception);
-      return errorResponse(id);
+      return errorResponse(id, JsonRpcError.PARSE_ERROR);
     }
 
     try {
       id = id(requestJson);
       request = requestJson.mapTo(SendTransactionJsonRpcRequest.class);
-    } catch (final IllegalArgumentException exception) {
-      LOG.debug("JSON Deserialisation failed for request: {}", requestJson, exception);
-      return errorResponse(id);
+
+    } catch (final NumberFormatException e) {
+
+      // TODO fix this - Jackson wraps as NFR
+      LOG.debug("Parsing values failed for request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
+
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("JSON Deserialisation failed for request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INVALID_REQUEST);
     }
 
     final String signedTransactionHexString = signer.signTransaction(request);
@@ -70,12 +77,12 @@ public class SendTransactionBodyProvider implements BodyProvider {
       return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
     } catch (final IllegalArgumentException exception) {
       LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, exception);
-      return errorResponse(id);
+      return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
     }
   }
 
-  private JsonRpcBody errorResponse(final JsonRpcRequestId id) {
-    return new JsonRpcBody(new JsonRpcErrorResponse(id, JsonRpcError.INVALID_REQUEST));
+  private JsonRpcBody errorResponse(final JsonRpcRequestId id, final JsonRpcError error) {
+    return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
   }
 
   private JsonRpcRequestId id(final JsonObject requestJson) {

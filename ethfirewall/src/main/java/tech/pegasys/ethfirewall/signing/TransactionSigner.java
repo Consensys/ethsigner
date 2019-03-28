@@ -17,16 +17,12 @@ import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 import java.math.BigInteger;
-import java.util.Optional;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.utils.Numeric;
 
 public class TransactionSigner {
-
-  private static final int HEXADECIMAL = 16;
-  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
@@ -50,17 +46,16 @@ public class TransactionSigner {
 
     return RawTransaction.createTransaction(
         nonce(params),
-        optionalHex(params.gasPrice()),
+        params.gasPrice().orElse(null),
         gas(params),
-        receiver(params),
-        optionalHex(params.value()),
+        params.receiver().orElse(null),
+        params.value().orElse(null),
         params.data());
   }
 
   private BigInteger nonce(final SendTransactionJsonParameters params) {
     if (params.nonce().isPresent()) {
-
-      return optionalHex(params.nonce());
+      return params.nonce().get();
     } else {
       // TODO when missing nonce - get it from somewhere
       return BigInteger.ZERO;
@@ -70,24 +65,10 @@ public class TransactionSigner {
   private BigInteger gas(final SendTransactionJsonParameters params) {
 
     if (params.gas().isPresent()) {
-      // TODO validate hex format - ie. has prefix 0x
-      return hex(params.gas().get().substring(HEXADECIMAL_PREFIX_LENGTH));
+      return params.gas().get();
     }
 
     // TODO This should be configurable, but currently matches Geth.
     return new BigInteger("90000");
-  }
-
-  private String receiver(final SendTransactionJsonParameters params) {
-    return params.receiver().orElse(null);
-  }
-
-  private BigInteger hex(final String value) {
-    return new BigInteger(value, HEXADECIMAL);
-  }
-
-  // TODO validate hex format - ie. has prefix 0x
-  private BigInteger optionalHex(final Optional<String> value) {
-    return value.map(v -> hex(v.substring(HEXADECIMAL_PREFIX_LENGTH))).orElse(null);
   }
 }

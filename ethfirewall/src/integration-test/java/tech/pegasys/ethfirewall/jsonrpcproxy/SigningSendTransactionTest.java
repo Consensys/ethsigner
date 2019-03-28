@@ -23,9 +23,12 @@ import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeResponse;
 
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -55,7 +58,20 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewallRequest(sendRawTransactionRequest), ethFirewallResponse(MALFORMED_JSON));
   }
 
-  // TODO bad input
+  @Ignore
+  @Test
+  public void invalidNonce() {
+    sendVerifyingResponse(
+        ethFirewallRequest(defaultSendTransactionRequestWithNonce("I'm an invalid nonce!")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
+  // TODO invalid from (wonrg size)
+  // TODO invalid to (invalid hex, out of range)
+  // TODO invalid gas (NaN)
+  // TODO gas price (NaN)
+  // TODO value (NaN)
+  // TODO data (missing)
 
   // TODO optional input
 
@@ -106,6 +122,13 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         jsonRpc().ethSendTransaction(transaction);
     sendTransactionRequest.setId(77);
     return sendTransactionRequest;
+  }
+
+  private String defaultSendTransactionRequestWithNonce(final String nonce) {
+    final String sendTransaction = Json.encode(defaultSendTransactionRequest());
+    final Pattern nonceWithValue = Pattern.compile("nonce\\\":\\\"(\\w*)\\\"");
+    final Matcher matches = nonceWithValue.matcher(sendTransaction);
+    return matches.replaceFirst(String.format("nonce\":\"%s\"", nonce));
   }
 
   private Request<?, ? extends Response<?>> defaultSendRawTransactionRequest() {

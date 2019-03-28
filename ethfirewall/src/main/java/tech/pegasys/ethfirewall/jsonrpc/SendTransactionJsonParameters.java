@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpc;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,12 +23,15 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
 
+  private static final int HEXADECIMAL = 16;
+  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
+
   private final String data;
-  private String gas;
-  private String gasPrice;
-  private String nonce;
+  private BigInteger gas;
+  private BigInteger gasPrice;
+  private BigInteger nonce;
   private String receiver;
-  private String value;
+  private BigInteger value;
 
   @JsonCreator
   public SendTransactionJsonParameters(@JsonProperty("data") final String data) {
@@ -36,17 +40,17 @@ public class SendTransactionJsonParameters {
 
   @JsonSetter("gas")
   public void gas(final String gas) {
-    this.gas = gas;
+    this.gas = optionalHex(gas);
   }
 
   @JsonSetter("gasPrice")
   public void gasPrice(final String gasPrice) {
-    this.gasPrice = gasPrice;
+    this.gasPrice = optionalHex(gasPrice);
   }
 
   @JsonSetter("nonce")
   public void nonce(final String nonce) {
-    this.nonce = nonce;
+    this.nonce = optionalHex(nonce);
   }
 
   @JsonSetter("to")
@@ -56,18 +60,18 @@ public class SendTransactionJsonParameters {
 
   @JsonSetter("value")
   public void value(final String value) {
-    this.value = value;
+    this.value = optionalHex(value);
   }
 
   public String data() {
     return data;
   }
 
-  public Optional<String> gas() {
+  public Optional<BigInteger> gas() {
     return Optional.ofNullable(gas);
   }
 
-  public Optional<String> gasPrice() {
+  public Optional<BigInteger> gasPrice() {
     return Optional.ofNullable(gasPrice);
   }
 
@@ -75,11 +79,21 @@ public class SendTransactionJsonParameters {
     return Optional.ofNullable(receiver);
   }
 
-  public Optional<String> value() {
+  public Optional<BigInteger> value() {
     return Optional.ofNullable(value);
   }
 
-  public Optional<String> nonce() {
+  public Optional<BigInteger> nonce() {
     return Optional.ofNullable(nonce);
+  }
+
+  private BigInteger hex(final String value) {
+    return new BigInteger(value, HEXADECIMAL);
+  }
+
+  // TODO validate hex format - ie. has prefix 0x
+  // TODO exception on parse?
+  private BigInteger optionalHex(final String value) {
+    return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
   }
 }
