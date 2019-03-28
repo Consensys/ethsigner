@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpc;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.io.BaseEncoding;
 
 public class EthAddress {
@@ -34,7 +35,12 @@ public class EthAddress {
    * @throws IllegalArgumentException if the string is either not hexadecimal, or not the valid
    *     representation of an address.
    */
+  @JsonCreator
   public static EthAddress fromHexString(final String str) {
+    if (str == null) {
+      throw new IllegalArgumentException("Require a non-null String");
+    }
+
     return new EthAddress(fromRawHexString(str));
   }
 
