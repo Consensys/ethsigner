@@ -158,12 +158,24 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
-  // TODO this should go through, proxied as 'to' is optional
   @Test
   public void missingReceiverAddress() {
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequestNoReceiver();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        sendRawTransactionRequest(
+            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
+
     sendVerifyingResponse(
-        ethFirewallRequest(defaultSendTransactionRequestNoReceiver()),
-        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
+
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
   // TODO invalid gas (NaN)
@@ -172,8 +184,6 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   // TODO data (missing)
 
   // TODO optional input
-
-  // TODO happy path - all populated
 
   // TODO change the chainID when signing
 
