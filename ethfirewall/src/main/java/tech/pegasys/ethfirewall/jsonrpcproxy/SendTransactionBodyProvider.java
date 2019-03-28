@@ -19,7 +19,6 @@ import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -32,12 +31,6 @@ public class SendTransactionBodyProvider implements BodyProvider {
   private static final Logger LOG = LoggerFactory.getLogger(SendTransactionBodyProvider.class);
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-
-  static {
-    // Force Jackson to fail when @JsonCreator values are missing
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-  }
 
   private final TransactionSigner signer;
 

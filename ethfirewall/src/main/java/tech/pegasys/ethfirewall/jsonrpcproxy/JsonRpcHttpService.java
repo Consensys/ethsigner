@@ -17,6 +17,7 @@ import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
@@ -41,6 +42,12 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+
+  static {
+    // Force Jackson to fail when @JsonCreator values are missing
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+  }
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
