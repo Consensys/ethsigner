@@ -54,16 +54,9 @@ public class SendTransactionBodyProvider implements BodyProvider {
     try {
       id = id(requestJson);
       request = requestJson.mapTo(SendTransactionJsonRpcRequest.class);
-
-    } catch (final NumberFormatException e) {
-
-      // TODO fix this - Jackson wraps as NFR
-      LOG.debug("Parsing values failed for request: {}", requestJson, e);
-      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
-
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Deserialisation failed for request: {}", requestJson, e);
-      return errorResponse(id, JsonRpcError.INVALID_REQUEST);
+      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
     }
 
     final String signedTransactionHexString = signer.signTransaction(request);

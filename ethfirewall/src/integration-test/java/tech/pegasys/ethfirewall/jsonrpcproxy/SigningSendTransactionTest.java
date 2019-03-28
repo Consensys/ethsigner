@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -40,11 +39,12 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
   private static final String MALFORMED_JSON = "{Bad Json: {{{}";
+  private static final Object NO_ID = null;
 
   @Test
   public void malformedJsonRequest() {
     sendVerifyingResponse(
-        ethFirewallRequest(MALFORMED_JSON), ethFirewallResponse(JsonRpcError.PARSE_ERROR));
+        ethFirewallRequest(MALFORMED_JSON), ethFirewallResponse(NO_ID, JsonRpcError.PARSE_ERROR));
   }
 
   @Test
@@ -58,7 +58,6 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewallRequest(sendRawTransactionRequest), ethFirewallResponse(MALFORMED_JSON));
   }
 
-  @Ignore
   @Test
   public void invalidNonce() {
     sendVerifyingResponse(
@@ -66,7 +65,30 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
-  // TODO invalid from (wonrg size)
+  @Test
+  public void invalidSenderAddressTooShort() {
+    sendVerifyingResponse(
+        ethFirewallRequest(
+            defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
+  @Test
+  public void invalidSenderAddressTooLong() {
+    sendVerifyingResponse(
+        ethFirewallRequest(
+            defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233155A")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
+  @Test
+  public void invalidSenderAddressMalformedHex() {
+    sendVerifyingResponse(
+        ethFirewallRequest(
+            defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
   // TODO invalid to (invalid hex, out of range)
   // TODO invalid gas (NaN)
   // TODO gas price (NaN)
@@ -101,6 +123,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   // TODO refacotr below methods into utility (after complete tests)
+  private static final int DEFAULT_ID = 77;
 
   /**
    * Due to the underlying server mocking, When only a single request is used, the contents does not
@@ -120,7 +143,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         jsonRpc().ethSendTransaction(transaction);
-    sendTransactionRequest.setId(77);
+    sendTransactionRequest.setId(DEFAULT_ID);
     return sendTransactionRequest;
   }
 
@@ -129,6 +152,13 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     final Pattern nonceWithValue = Pattern.compile("nonce\\\":\\\"(\\w*)\\\"");
     final Matcher matches = nonceWithValue.matcher(sendTransaction);
     return matches.replaceFirst(String.format("nonce\":\"%s\"", nonce));
+  }
+
+  private String defaultSendTransactionRequestWithSender(final String sender) {
+    final String sendTransaction = Json.encode(defaultSendTransactionRequest());
+    final Pattern nonceWithValue = Pattern.compile("to\\\":\\\"(\\w*)\\\"");
+    final Matcher matches = nonceWithValue.matcher(sendTransaction);
+    return matches.replaceFirst(String.format("to\":\"%s\"", sender));
   }
 
   private Request<?, ? extends Response<?>> defaultSendRawTransactionRequest() {
@@ -163,9 +193,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     return new EthFirewallRequest(NO_HEADERS, body);
   }
 
+  private EthFirewallResponse ethFirewallResponse(final Object id, final JsonRpcError error) {
+    return new EthFirewallResponse(
+        NO_HEADERS, new JsonRpcErrorResponse(id, error), HttpResponseStatus.BAD_REQUEST);
+  }
+
   private EthFirewallResponse ethFirewallResponse(final JsonRpcError error) {
     return new EthFirewallResponse(
-        NO_HEADERS, new JsonRpcErrorResponse(error), HttpResponseStatus.BAD_REQUEST);
+        NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), HttpResponseStatus.BAD_REQUEST);
   }
 
   private EthFirewallResponse ethFirewallResponse(final Response<String> body) {

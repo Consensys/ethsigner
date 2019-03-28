@@ -27,11 +27,12 @@ public class SendTransactionJsonParameters {
   private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   private final String data;
+
   private BigInteger gas;
   private BigInteger gasPrice;
   private BigInteger nonce;
-  private String receiver;
   private BigInteger value;
+  private EthAddress receiver;
 
   @JsonCreator
   public SendTransactionJsonParameters(@JsonProperty("data") final String data) {
@@ -55,7 +56,7 @@ public class SendTransactionJsonParameters {
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
-    this.receiver = receiver;
+    this.receiver = EthAddress.fromHexString(receiver);
   }
 
   @JsonSetter("value")
@@ -75,7 +76,7 @@ public class SendTransactionJsonParameters {
     return Optional.ofNullable(gasPrice);
   }
 
-  public Optional<String> receiver() {
+  public Optional<EthAddress> receiver() {
     return Optional.ofNullable(receiver);
   }
 

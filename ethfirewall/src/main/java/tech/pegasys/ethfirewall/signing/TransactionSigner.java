@@ -48,9 +48,13 @@ public class TransactionSigner {
         nonce(params),
         params.gasPrice().orElse(null),
         gas(params),
-        params.receiver().orElse(null),
+        receiver(params),
         params.value().orElse(null),
         params.data());
+  }
+
+  private String receiver(final SendTransactionJsonParameters params) {
+    return params.receiver().isPresent() ? params.receiver().get().toString() : null;
   }
 
   private BigInteger nonce(final SendTransactionJsonParameters params) {
