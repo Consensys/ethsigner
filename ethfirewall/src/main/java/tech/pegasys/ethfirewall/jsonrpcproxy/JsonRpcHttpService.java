@@ -12,15 +12,24 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -33,6 +42,12 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+
+  static {
+    // Force Jackson to fail when @JsonCreator values are missing
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+  }
 
   private final RequestMapper requestHandlerMapper;
   private final HttpServerOptions serverOptions;
@@ -91,9 +106,23 @@ public class JsonRpcHttpService extends AbstractVerticle {
     return router;
   }
 
-  private void handleJsonRpc(final RoutingContext routingContext) {
-    final Handler<RoutingContext> handler =
-        requestHandlerMapper.getMatchingHandler(routingContext.getBodyAsJson());
-    handler.handle(routingContext);
+  private void handleJsonRpc(final RoutingContext context) {
+    try {
+      final JsonObject json = context.getBodyAsJson();
+      final Handler<RoutingContext> handler = requestHandlerMapper.getMatchingHandler(json);
+      handler.handle(context);
+    } catch (final DecodeException e) {
+      sendParseErrorResponse(context, e);
+    }
+  }
+
+  private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
+    LOG.info("Dropping request from {}", context.request().remoteAddress());
+    LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
+
+    final HttpServerResponse response = context.response();
+    response.setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
+
+    response.end(Json.encodeToBuffer(new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR)));
   }
 }

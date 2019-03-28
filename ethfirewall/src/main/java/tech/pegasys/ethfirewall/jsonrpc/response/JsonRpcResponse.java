@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2018 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,12 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy;
+package tech.pegasys.ethfirewall.jsonrpc.response;
 
-import io.vertx.ext.web.RoutingContext;
+import com.fasterxml.jackson.annotation.JsonGetter;
 
-@FunctionalInterface
-public interface BodyProvider {
+public interface JsonRpcResponse {
 
-  JsonRpcBody getBody(RoutingContext context);
+  @JsonGetter("jsonrpc")
+  default String getVersion() {
+    return "2.0";
+  }
+
+  JsonRpcResponseType getType();
 }

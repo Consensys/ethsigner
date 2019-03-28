@@ -12,19 +12,17 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 import java.math.BigInteger;
 
-import io.vertx.core.json.JsonObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.utils.Numeric;
 
 public class TransactionSigner {
-
-  private static final int HEXADECIMAL = 16;
-  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
@@ -34,8 +32,8 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  public String signTransaction(final JsonObject transaction) {
-    final RawTransaction rawTransaction = fromTransactionJson(transaction);
+  public String signTransaction(final SendTransactionJsonRpcRequest request) {
+    final RawTransaction rawTransaction = rawTransaction(request);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -43,56 +41,34 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction fromTransactionJson(final JsonObject transaction) {
-    final JsonObject params = transaction.getJsonArray("params").getJsonObject(0);
+  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
+    final SendTransactionJsonParameters params = request.getParams();
 
-    // TODO validate the nonce is present, ie. not null
     return RawTransaction.createTransaction(
-        nonce(transaction, params),
-        optionalHex("gasPrice", params),
+        nonce(params),
+        params.gasPrice().orElse(null),
         gas(params),
-        params.getString("to"),
-        optionalHex("value", params),
-        data(params));
+        params.receiver().orElse(null),
+        params.value().orElse(null),
+        params.data());
   }
 
-  private BigInteger nonce(final JsonObject transaction, final JsonObject params) {
+  private BigInteger nonce(final SendTransactionJsonParameters params) {
+    if (params.nonce().isPresent()) {
+      return params.nonce().get();
+    } else {
+      // TODO when missing nonce - get it from somewhere
+      return BigInteger.ZERO;
+    }
+  }
 
-    if (params.containsKey("nonce")) {
-      return hex("nonce", params);
+  private BigInteger gas(final SendTransactionJsonParameters params) {
+
+    if (params.gas().isPresent()) {
+      return params.gas().get();
     }
 
-    throw new IllegalArgumentException("Missing the nonce%n" + transaction.encodePrettily());
-  }
-
-  private String data(final JsonObject params) {
-    return params.getString("data");
-  }
-
-  private BigInteger gas(final JsonObject params) {
-    // TODO(tmm): This should be configurable, but currently matches Geth.
-    String gasValue = "90000";
-
-    if (params.getString("gas") != null) {
-      gasValue = params.getString("gas").substring(HEXADECIMAL_PREFIX_LENGTH);
-    }
-
-    return hex(gasValue);
-  }
-
-  // TODO validate hex
-
-  private BigInteger hex(final String value) {
-    return new BigInteger(value, HEXADECIMAL);
-  }
-
-  private BigInteger hex(final String key, final JsonObject params) {
-    return new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL);
-  }
-
-  private BigInteger optionalHex(final String key, final JsonObject params) {
-    return params.containsKey(key)
-        ? new BigInteger(params.getString(key).substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL)
-        : null;
+    // TODO This should be configurable, but currently matches Geth.
+    return new BigInteger("90000");
   }
 }
