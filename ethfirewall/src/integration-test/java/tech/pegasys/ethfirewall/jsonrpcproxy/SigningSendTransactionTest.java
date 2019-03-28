@@ -75,17 +75,11 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
 
     setUpEthNodeResponse(
-        ethFirewallRequest(sendRawTransactionRequest),
-        sendRawTransactionResponse,
-        NO_HEADERS,
-        HttpResponseStatus.OK);
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
 
     sendVerifyingResponse(
-        sendTransactionRequest,
-        NO_HEADERS,
-        sendRawTransactionResponse,
-        HttpResponseStatus.OK,
-        NO_HEADERS);
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
 
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
@@ -151,7 +145,15 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         NO_HEADERS, new JsonRpcErrorResponse(error), HttpResponseStatus.BAD_REQUEST);
   }
 
-  private EthFirewallResponse ethFirewallResponse(final String value) {
-    return new EthFirewallResponse(NO_HEADERS, value, HttpResponseStatus.OK);
+  private EthFirewallResponse ethFirewallResponse(final Response<String> body) {
+    return new EthFirewallResponse(NO_HEADERS, Json.encode(body), HttpResponseStatus.OK);
+  }
+
+  private EthFirewallResponse ethFirewallResponse(final String body) {
+    return new EthFirewallResponse(NO_HEADERS, body, HttpResponseStatus.OK);
+  }
+
+  private EthNodeResponse ethNodeResponse(final Response<String> body) {
+    return new EthNodeResponse(NO_HEADERS, Json.encode(body), HttpResponseStatus.OK);
   }
 }
