@@ -46,7 +46,7 @@ public class TransactionSigner {
 
     return RawTransaction.createTransaction(
         nonce(params),
-        params.gasPrice().orElse(null),
+        params.gasPrice().orElse(BigInteger.ZERO),
         gas(params),
         receiver(params),
         params.value().orElse(BigInteger.ZERO),

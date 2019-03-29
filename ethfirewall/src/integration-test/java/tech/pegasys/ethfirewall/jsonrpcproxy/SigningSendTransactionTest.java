@@ -41,6 +41,8 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   private static final String MALFORMED_JSON = "{Bad Json: {{{}";
   private static final Object NO_ID = null;
 
+  // TODO better naming for these tests!
+
   @Test
   public void malformedJsonRequest() {
     sendVerifyingResponse(
@@ -59,7 +61,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   @Test
   public void invalidNonce() {
     sendVerifyingResponse(
-        ethFirewallRequest(defaultSendTransactionRequestWithNonce("I'm an invalid nonce!")),
+        ethFirewallRequest(defaultSendTransactionRequestWithNonce("I'm an invalid nonce format!")),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
@@ -206,12 +208,69 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
-  // TODO invalid gas (NaN)
-  // TODO gas price (NaN)
-  // TODO value (NaN)
-  // TODO data (missing)
+  @Test
+  public void invalidValue() {
+    sendVerifyingResponse(
+        ethFirewallRequest(defaultSendTransactionRequestWithValue("I'm an invalid value format!")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
 
-  // TODO optional input
+  @Test
+  public void missingGas() {
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequestNoGas();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        sendRawTransactionRequest(
+            "0xf8aca0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2808276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0e22863d8ad64de06fe67f5d22eb19bf90ef26cb089a4912f846b42b10fa6027aa019b9851d46f1f5098b30a68133755d14e9bb43b86de750d9363b0cb7e1d6f939");
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d7777777");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
+
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
+
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  public void invalidGas() {
+    sendVerifyingResponse(
+        ethFirewallRequest(defaultSendTransactionRequestWithGas("I'm an invalid gas format!")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
+  @Test
+  public void missingGasPrice() {
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequestNoGasPrice();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        sendRawTransactionRequest(
+            "0xf8b3a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a00083015f9094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0f6950faa587a4e12ac799ed27b247384684c4ea35274708fc25095a82df4abe0a02d13f3b28eff9a51eeb3a8e97975c43f41d79ec704bbfd9519be4bc27a255fcc");
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
+
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
+
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  public void invalidGasPrice() {
+    sendVerifyingResponse(
+        ethFirewallRequest(
+            defaultSendTransactionRequestWithGasPrice("I'm an invalid gas price format!")),
+        ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
+  }
+
+  // TODO data (missing)
 
   // TODO change the chainID when signing
 
@@ -330,6 +389,63 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         jsonRpc().ethSendTransaction(transaction);
     sendTransactionRequest.setId(DEFAULT_ID);
     return sendTransactionRequest;
+  }
+
+  private Request<?, ? extends Response<?>> defaultSendTransactionRequestNoGas() {
+    final Transaction transaction =
+        new Transaction(
+            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            new BigInteger(
+                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
+            null,
+            new BigInteger("30400"),
+            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+            new BigInteger("2441406250"),
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        jsonRpc().ethSendTransaction(transaction);
+    sendTransactionRequest.setId(DEFAULT_ID);
+    return sendTransactionRequest;
+  }
+
+  private Request<?, ? extends Response<?>> defaultSendTransactionRequestNoGasPrice() {
+    final Transaction transaction =
+        new Transaction(
+            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            new BigInteger(
+                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
+            new BigInteger("10000000000000"),
+            null,
+            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+            new BigInteger("2441406250"),
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        jsonRpc().ethSendTransaction(transaction);
+    sendTransactionRequest.setId(DEFAULT_ID);
+    return sendTransactionRequest;
+  }
+
+  private String defaultSendTransactionRequestWithGas(final String value) {
+    final String sendTransaction = Json.encode(defaultSendTransactionRequest());
+    final Pattern nonceWithValue = Pattern.compile("gas\\\":\\\"(\\w*)\\\"");
+    final Matcher matches = nonceWithValue.matcher(sendTransaction);
+    return matches.replaceFirst(String.format("gas\":\"%s\"", value));
+  }
+
+  private String defaultSendTransactionRequestWithGasPrice(final String value) {
+    final String sendTransaction = Json.encode(defaultSendTransactionRequest());
+    final Pattern nonceWithValue = Pattern.compile("gasPrice\\\":\\\"(\\w*)\\\"");
+    final Matcher matches = nonceWithValue.matcher(sendTransaction);
+    return matches.replaceFirst(String.format("gasPrice\":\"%s\"", value));
+  }
+
+  private String defaultSendTransactionRequestWithValue(final String value) {
+    final String sendTransaction = Json.encode(defaultSendTransactionRequest());
+    final Pattern nonceWithValue = Pattern.compile("value\\\":\\\"(\\w*)\\\"");
+    final Matcher matches = nonceWithValue.matcher(sendTransaction);
+    return matches.replaceFirst(String.format("value\":\"%s\"", value));
   }
 
   private String defaultSendTransactionRequestWithNonce(final String nonce) {
