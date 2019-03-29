@@ -61,8 +61,8 @@ public class TransactionSigner {
     if (params.nonce().isPresent()) {
       return params.nonce().get();
     } else {
-      // TODO when missing nonce - get it from somewhere
-      return BigInteger.ZERO;
+      // TODO when missing nonce - sensible retrieval (PIE-1468)
+      throw new IllegalArgumentException("Missing nonce");
     }
   }
 

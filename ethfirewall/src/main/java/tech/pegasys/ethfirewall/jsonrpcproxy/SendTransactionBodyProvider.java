@@ -59,7 +59,13 @@ public class SendTransactionBodyProvider implements BodyProvider {
       return errorResponse(id, JsonRpcError.INVALID_PARAMS);
     }
 
-    final String signedTransactionHexString = signer.signTransaction(request);
+    final String signedTransactionHexString;
+    try {
+      signedTransactionHexString = signer.signTransaction(request);
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("Unaccounted control flow for request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
+    }
 
     final JsonRpcRequest sendRawTransaction =
         new JsonRpcRequest(

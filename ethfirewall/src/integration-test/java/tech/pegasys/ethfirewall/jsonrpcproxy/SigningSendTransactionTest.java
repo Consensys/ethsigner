@@ -64,6 +64,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
+  public void missingNonce() {
+    // TODO This behaviour will change with the get nonce (PIE-1468)
+    sendVerifyingResponse(
+        ethFirewallRequest(defaultSendTransactionRequestNoNonce()),
+        ethFirewallResponse(JsonRpcError.INTERNAL_ERROR));
+  }
+
+  @Test
   public void invalidSenderAddressTooShort() {
     sendVerifyingResponse(
         ethFirewallRequest(
@@ -237,6 +245,23 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
             null,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
+            new BigInteger("10000000000000"),
+            new BigInteger("30400"),
+            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+            new BigInteger("2441406250"),
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        jsonRpc().ethSendTransaction(transaction);
+    sendTransactionRequest.setId(DEFAULT_ID);
+    return sendTransactionRequest;
+  }
+
+  private Request<?, ? extends Response<?>> defaultSendTransactionRequestNoNonce() {
+    final Transaction transaction =
+        new Transaction(
+            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            null,
             new BigInteger("10000000000000"),
             new BigInteger("30400"),
             "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
