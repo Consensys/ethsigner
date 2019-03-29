@@ -12,7 +12,10 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.PARSE_ERROR;
+
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewall;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNode;
 
@@ -39,7 +42,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   @Test
   public void parseErrorResponseWhenJsonRequestIsMalformed() {
     sendVerifyingResponse(
-        ethFirewall.request(MALFORMED_JSON), ethFirewall.response(NO_ID, JsonRpcError.PARSE_ERROR));
+        ethFirewall.request(MALFORMED_JSON), ethFirewall.response(NO_ID, PARSE_ERROR));
   }
 
   @Test
@@ -55,7 +58,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenNonceIsNaN() {
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestWithNonce("I'm an invalid nonce format!")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -63,7 +66,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     // TODO This behaviour will change with the get nonce (PIE-1468)
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestNoNonce()),
-        ethFirewall.response(JsonRpcError.INTERNAL_ERROR));
+        ethFirewall.response(INTERNAL_ERROR));
   }
 
   @Test
@@ -71,7 +74,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     sendVerifyingResponse(
         ethFirewall.request(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -79,7 +82,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     sendVerifyingResponse(
         ethFirewall.request(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233155A")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -87,7 +90,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     sendVerifyingResponse(
         ethFirewall.request(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -113,7 +116,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenMissingSenderAddress() {
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestNoSender()),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -121,7 +124,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     sendVerifyingResponse(
         ethFirewall.request(
             defaultSendTransactionRequestWithReceiver("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -130,7 +133,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewall.request(
             defaultSendTransactionRequestWithReceiver(
                 "0xb60e8dd61c5d32be8058bb8eb970870f07233155A")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -139,7 +142,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewall.request(
             defaultSendTransactionRequestWithReceiver(
                 "0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -203,7 +206,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenValueIsNaN() {
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestWithValue("I'm an invalid value format!")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -229,7 +232,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenGasIsNaN() {
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestWithGas("I'm an invalid gas format!")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
@@ -256,14 +259,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     sendVerifyingResponse(
         ethFirewall.request(
             defaultSendTransactionRequestWithGasPrice("I'm an invalid gas price format!")),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenMissingData() {
     sendVerifyingResponse(
         ethFirewall.request(defaultSendTransactionRequestNoData()),
-        ethFirewall.response(JsonRpcError.INVALID_PARAMS));
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
