@@ -475,46 +475,35 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     return Json.encode(sendTransactionRequest);
   }
 
-  private String defaultSendTransactionRequestWithGas(final String value) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("gas\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("gas\":\"%s\"", value));
+  private String defaultSendTransactionRequestWithGas(final String gas) {
+    return replaceParameter("gas", gas, defaultSendTransactionRequest());
   }
 
-  private String defaultSendTransactionRequestWithGasPrice(final String value) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("gasPrice\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("gasPrice\":\"%s\"", value));
+  private String defaultSendTransactionRequestWithGasPrice(final String gasPrice) {
+    return replaceParameter("gasPrice", gasPrice, defaultSendTransactionRequest());
   }
 
   private String defaultSendTransactionRequestWithValue(final String value) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("value\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("value\":\"%s\"", value));
+    return replaceParameter("value", value, defaultSendTransactionRequest());
   }
 
   private String defaultSendTransactionRequestWithNonce(final String nonce) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("nonce\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("nonce\":\"%s\"", nonce));
+    return replaceParameter("nonce", nonce, defaultSendTransactionRequest());
   }
 
-  private String defaultSendTransactionRequestWithReceiver(final String sender) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("from\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("from\":\"%s\"", sender));
+  private String defaultSendTransactionRequestWithReceiver(final String receiver) {
+    return replaceParameter("from", receiver, defaultSendTransactionRequest());
   }
 
   private String defaultSendTransactionRequestWithSender(final String sender) {
-    final String sendTransaction = defaultSendTransactionRequest();
-    final Pattern nonceWithValue = Pattern.compile("to\\\":\\\"(\\w*)\\\"");
-    final Matcher matches = nonceWithValue.matcher(sendTransaction);
-    return matches.replaceFirst(String.format("to\":\"%s\"", sender));
+    return replaceParameter("to", sender, defaultSendTransactionRequest());
+  }
+
+  private String replaceParameter(
+      final String key, final String replacementValue, final String body) {
+    final Pattern nonceWithValue = Pattern.compile(String.format("%s\\\":\\\"(\\w*)\\\"", key));
+    final Matcher matches = nonceWithValue.matcher(body);
+    return matches.replaceFirst(String.format("%s\":\"%s\"", key, replacementValue));
   }
 
   private String defaultSendRawTransactionRequest() {
