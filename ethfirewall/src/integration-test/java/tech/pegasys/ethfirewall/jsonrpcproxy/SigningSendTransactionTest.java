@@ -16,7 +16,7 @@ import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INTERNAL_ER
 import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.PARSE_ERROR;
 
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.SendTransaction;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
 import io.vertx.core.json.Json;
 import org.junit.Before;

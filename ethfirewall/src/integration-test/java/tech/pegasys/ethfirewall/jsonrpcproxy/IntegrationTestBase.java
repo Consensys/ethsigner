@@ -25,12 +25,12 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewall;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNode;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewall;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNode;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNodeRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNodeResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;

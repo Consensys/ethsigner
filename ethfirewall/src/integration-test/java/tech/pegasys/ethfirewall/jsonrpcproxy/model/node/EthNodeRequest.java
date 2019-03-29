@@ -10,16 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy.model;
+package tech.pegasys.ethfirewall.jsonrpcproxy.model.node;
 
 import java.util.Map;
 
-public class EthFirewallRequest {
+public class EthNodeRequest {
 
   private final String body;
   private final Map<String, String> headers;
 
-  public EthFirewallRequest(final Map<String, String> headers, final String body) {
+  public EthNodeRequest(final Map<String, String> headers, final String body) {
     this.body = body;
     this.headers = headers;
   }
