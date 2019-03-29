@@ -14,18 +14,13 @@ package tech.pegasys.ethfirewall.jsonrpcproxy.model;
 
 import java.util.Map;
 
-import io.vertx.core.json.Json;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.Response;
-
 public class EthNodeRequest {
 
   private final String body;
   private final Map<String, String> headers;
 
-  public EthNodeRequest(
-      final Map<String, String> headers, final Request<?, ? extends Response<?>> body) {
-    this.body = Json.encode(body);
+  public EthNodeRequest(final Map<String, String> headers, final String body) {
+    this.body = body;
     this.headers = headers;
   }
 

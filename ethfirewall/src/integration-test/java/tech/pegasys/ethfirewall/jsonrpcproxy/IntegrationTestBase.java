@@ -141,19 +141,6 @@ public class IntegrationTestBase {
   }
 
   public void setUpEthNodeResponse(
-      final EthFirewallRequest request,
-      final Object response,
-      final Map<String, String> responseHeaders,
-      final HttpResponseStatus status) {
-    final String responseBody = Json.encode(response);
-    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
-    ethNode
-        .when(request().withBody(json(request.getBody())), exactly(1))
-        .respond(
-            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
-  }
-
-  public void setUpEthNodeResponse(
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
@@ -196,6 +183,13 @@ public class IntegrationTestBase {
         .statusCode(expectStatus.code())
         .body(equalTo(responseBody))
         .headers(expectHeaders);
+  }
+
+  public void verifyEthereumNodeReceived(final String proxyBodyRequest) {
+    ethNode.verify(
+        request()
+            .withBody(proxyBodyRequest)
+            .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
   public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
