@@ -277,21 +277,16 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
-  // TODO change the chainID when signing
-
-  // TODO integer values, not wrapped as strings
-
-  // TODO signing a contract - vinod expamples
-
   @Test
-  public void signSendTransaction() {
+  public void signContract() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
-        defaultSendTransactionRequest();
+        smartContractSendTransactionRequest();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
-        defaultSendRawTransactionRequest();
+        sendRawTransactionRequest(
+            "0xf90182018083015f908080b90134608060405234801561001057600080fd5b50604051602080610114833981016040525160005560e1806100336000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632a1afcd98114605757806360fe47b114607b5780636d4ce63c146092575b600080fd5b348015606257600080fd5b50606960a4565b60408051918252519081900360200190f35b348015608657600080fd5b50609060043560aa565b005b348015609d57600080fd5b50606960af565b60005481565b600055565b600054905600a165627a7a72305820ade758a90b7d6841e99ca64c339eda0498d86ec9a97d5dcdeb3f12e3500079130029000000000000000000000000000000000000000000000000000000000000000a35a0d23d332cad1010a308bf531ccbb8985349eedfe9ec823b34c6e7fbddcba02420a048c9496343c72828e15dac889dfbb2aa5d9b2c23e87357e571350375aef90651");
     final Response<String> sendRawTransactionResponse =
         sendRawTransactionResponse(
-            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331");
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
     setUpEthNodeResponse(
         ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
 
@@ -302,7 +297,31 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
-  // TODO refactor below methods into utility (after complete tests)
+  @Test
+  public void signSendTransaction() {
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequest();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        sendRawTransactionRequest(
+            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0f04e0e7b41adea417596550611138a3ec9a452abb6648d734107c53476e76a27a05b826d9e9b4e0dd0e7b8939c102a2079d71cfc27cd6b7bebe5a006d5ad17d780");
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
+
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
+
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
+  }
+
+  // TODO integer values, not wrapped as strings
+
+  // TODO change the chainID when signing
+
+  // TODO ----- refactor below methods into utility (after complete tests) ----
   private static final int DEFAULT_ID = 77;
 
   /**
@@ -320,6 +339,23 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
             "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
             new BigInteger("2441406250"),
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        jsonRpc().ethSendTransaction(transaction);
+    sendTransactionRequest.setId(DEFAULT_ID);
+    return sendTransactionRequest;
+  }
+
+  private Request<?, ? extends Response<?>> smartContractSendTransactionRequest() {
+    final Transaction transaction =
+        new Transaction(
+            "0xae8ed09c458cebc142c06bdd297709575482b0fd",
+            new BigInteger("1"),
+            null,
+            null,
+            null,
+            null,
+            "0x608060405234801561001057600080fd5b50604051602080610114833981016040525160005560e1806100336000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632a1afcd98114605757806360fe47b114607b5780636d4ce63c146092575b600080fd5b348015606257600080fd5b50606960a4565b60408051918252519081900360200190f35b348015608657600080fd5b50609060043560aa565b005b348015609d57600080fd5b50606960af565b60005481565b600055565b600054905600a165627a7a72305820ade758a90b7d6841e99ca64c339eda0498d86ec9a97d5dcdeb3f12e3500079130029000000000000000000000000000000000000000000000000000000000000000a");
 
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         jsonRpc().ethSendTransaction(transaction);
