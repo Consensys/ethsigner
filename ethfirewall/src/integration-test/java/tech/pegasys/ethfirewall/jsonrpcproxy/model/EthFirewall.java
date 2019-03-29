@@ -26,6 +26,10 @@ public class EthFirewall {
   private static final Map<String, String> NO_HEADERS = emptyMap();
   private static final int DEFAULT_ID = 77;
 
+  public EthFirewallRequest request(final Map<String, String> headers, final String body) {
+    return new EthFirewallRequest(headers, body);
+  }
+
   public EthFirewallRequest request(final String body) {
     return new EthFirewallRequest(NO_HEADERS, body);
   }
@@ -40,7 +44,15 @@ public class EthFirewall {
         NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), HttpResponseStatus.BAD_REQUEST);
   }
 
+  public EthFirewallResponse response(final Map<String, String> headers, final String body) {
+    return new EthFirewallResponse(headers, body, HttpResponseStatus.OK);
+  }
+
   public EthFirewallResponse response(final String body) {
     return new EthFirewallResponse(NO_HEADERS, body, HttpResponseStatus.OK);
+  }
+
+  public EthFirewallResponse response(final String body, final HttpResponseStatus code) {
+    return new EthFirewallResponse(NO_HEADERS, body, code);
   }
 }

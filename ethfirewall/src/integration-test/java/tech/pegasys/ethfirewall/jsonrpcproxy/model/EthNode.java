@@ -22,8 +22,16 @@ public class EthNode {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
 
+  public EthNodeResponse response(final Map<String, String> headers, final String body) {
+    return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
+  }
+
   public EthNodeResponse response(final String body) {
     return new EthNodeResponse(NO_HEADERS, body, HttpResponseStatus.OK);
+  }
+
+  public EthNodeResponse response(final String body, final HttpResponseStatus code) {
+    return new EthNodeResponse(NO_HEADERS, body, code);
   }
 
   public EthNodeRequest request(final String body) {

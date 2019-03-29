@@ -12,51 +12,47 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import static java.util.Collections.emptyMap;
-
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.json.Json;
 import org.junit.Test;
-import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
 public class ProxyIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() {
-    final Request<?, NetVersion> netVersionRequest = jsonRpc().netVersion();
-    final Response<String> netVersionResponse = new NetVersion();
-    netVersionResponse.setResult("4");
-
+    final String netVersionRequest = Json.encode(jsonRpc().netVersion());
+    final Response<String> netVersion = new NetVersion();
+    netVersion.setResult("4");
+    final String netVersionResponse = Json.encode(netVersion);
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
-
     setUpEthNodeResponse(
-        netVersionRequest, netVersionResponse, responseHeaders, HttpResponseStatus.OK);
+        ethNode.request(netVersionRequest), ethNode.response(responseHeaders, netVersionResponse));
+
     sendVerifyingResponse(
-        netVersionRequest,
-        requestHeaders,
-        netVersionResponse,
-        HttpResponseStatus.OK,
-        responseHeaders);
-    verifyEthereumNodeReceived(netVersionRequest, requestHeaders);
+        ethFirewall.request(requestHeaders, netVersionRequest),
+        ethFirewall.response(responseHeaders, netVersionResponse));
+
+    verifyEthereumNodeReceived(requestHeaders, netVersionRequest);
   }
 
   @Test
   public void requestReturningErrorIsProxied() {
-    final Request<?, EthProtocolVersion> ethProtocolVersionRequest = jsonRpc().ethProtocolVersion();
+    final String ethProtocolVersionRequest = Json.encode(jsonRpc().ethProtocolVersion());
+
     setUpEthNodeResponse(
-        ethProtocolVersionRequest, "Not Found", emptyMap(), HttpResponseStatus.NOT_FOUND);
+        ethNode.request(ethProtocolVersionRequest),
+        ethNode.response("Not Found", HttpResponseStatus.NOT_FOUND));
+
     sendVerifyingResponse(
-        ethProtocolVersionRequest,
-        emptyMap(),
-        "Not Found",
-        HttpResponseStatus.NOT_FOUND,
-        emptyMap());
+        ethFirewall.request(ethProtocolVersionRequest),
+        ethFirewall.response("Not Found", HttpResponseStatus.NOT_FOUND));
+
     verifyEthereumNodeReceived(ethProtocolVersionRequest);
   }
 }
