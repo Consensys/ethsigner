@@ -49,7 +49,7 @@ public class TransactionSigner {
         params.gasPrice().orElse(null),
         gas(params),
         receiver(params),
-        params.value().orElse(null),
+        params.value().orElse(BigInteger.ZERO),
         params.data());
   }
 

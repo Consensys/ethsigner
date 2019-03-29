@@ -186,6 +186,26 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
+  @Test
+  public void missingValue() {
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        defaultSendTransactionRequestNoValue();
+    final Request<?, ? extends Response<?>> sendRawTransactionRequest =
+        sendRawTransactionRequest(
+            "0xf8aea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a09909c15a400a8ee08025883c3f136287f2129b48cd5f3ebfae5f344c0deeb0e9a0382f174debaaee54054c9a2cb0ddc71cde22da321e83c940f34b24c1291236b9");
+    final Response<String> sendRawTransactionResponse =
+        sendRawTransactionResponse(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
+    setUpEthNodeResponse(
+        ehtNodeRequest(sendRawTransactionRequest), ethNodeResponse(sendRawTransactionResponse));
+
+    sendVerifyingResponse(
+        ethFirewallRequest(sendTransactionRequest),
+        ethFirewallResponse(sendRawTransactionResponse));
+
+    verifyEthereumNodeReceived(sendRawTransactionRequest);
+  }
+
   // TODO invalid gas (NaN)
   // TODO gas price (NaN)
   // TODO value (NaN)
@@ -194,6 +214,8 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   // TODO optional input
 
   // TODO change the chainID when signing
+
+  // TODO integer values, not wrapped as strings
 
   @Test
   public void signSendTransaction() {
@@ -284,6 +306,24 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
             new BigInteger("30400"),
             null,
             new BigInteger("2441406250"),
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    final Request<?, ? extends Response<?>> sendTransactionRequest =
+        jsonRpc().ethSendTransaction(transaction);
+    sendTransactionRequest.setId(DEFAULT_ID);
+    return sendTransactionRequest;
+  }
+
+  private Request<?, ? extends Response<?>> defaultSendTransactionRequestNoValue() {
+    final Transaction transaction =
+        new Transaction(
+            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            new BigInteger(
+                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
+            new BigInteger("10000000000000"),
+            new BigInteger("30400"),
+            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
+            null,
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
 
     final Request<?, ? extends Response<?>> sendTransactionRequest =
