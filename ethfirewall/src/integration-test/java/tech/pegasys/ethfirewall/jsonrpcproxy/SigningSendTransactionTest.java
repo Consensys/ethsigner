@@ -41,16 +41,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   private static final String MALFORMED_JSON = "{Bad Json: {{{}";
   private static final Object NO_ID = null;
 
-  // TODO better naming for these tests!
-
   @Test
-  public void malformedJsonRequest() {
+  public void parseErrorResponseWhenJsonRequestIsMalformed() {
     sendVerifyingResponse(
         ethFirewallRequest(MALFORMED_JSON), ethFirewallResponse(NO_ID, JsonRpcError.PARSE_ERROR));
   }
 
   @Test
-  public void malformedJsonResponse() {
+  public void proxyMalformedJsonResponseFromNode() {
     final Request<?, ? extends Response<?>> sendRawTransaction = defaultSendRawTransactionRequest();
     setUpEthNodeResponse(ehtNodeRequest(sendRawTransaction), ethNodeResponse(MALFORMED_JSON));
 
@@ -59,14 +57,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidNonce() {
+  public void invalidParamsResponseWhenNonceIsNaN() {
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestWithNonce("I'm an invalid nonce format!")),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
   @Test
-  public void missingNonce() {
+  public void internalErrorResponseWhenMissingNonce() {
     // TODO This behaviour will change with the get nonce (PIE-1468)
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestNoNonce()),
@@ -74,7 +72,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidSenderAddressTooShort() {
+  public void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
@@ -82,7 +80,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidSenderAddressTooLong() {
+  public void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233155A")),
@@ -90,7 +88,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidSenderAddressMalformedHex() {
+  public void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
@@ -98,7 +96,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidSenderAddressEmpty() {
+  public void signTransactionWhenSenderAddressIsEmpty() {
     final String sendTransactionRequest = defaultSendTransactionRequestWithSender("");
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
         sendRawTransactionRequest(
@@ -117,14 +115,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingSenderAddress() {
+  public void invalidParamsResponseWhenMissingSenderAddress() {
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestNoSender()),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
   @Test
-  public void invalidReceiverAddressTooShort() {
+  public void invalidParamsResponseWhenReceiverAddressIsTooShort() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithReceiver("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
@@ -132,7 +130,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidReceiverAddressTooLong() {
+  public void invalidParamsResponseWhenReceiverAddressIsTooLong() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithReceiver(
@@ -141,7 +139,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidReceiverAddressMalformedHex() {
+  public void invalidParamsWhenReceiverAddressIsMalformedHex() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithReceiver(
@@ -150,7 +148,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidReceiverAddressEmpty() {
+  public void signTransactionWhenReceiverAddressIsEmpty() {
     final String sendTransactionRequest = defaultSendTransactionRequestWithReceiver("");
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
         sendRawTransactionRequest(
@@ -169,7 +167,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingReceiverAddress() {
+  public void signTransactionWhenMissingReceiverAddress() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequestNoReceiver();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
@@ -189,7 +187,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingValue() {
+  public void signTransactionWhenMissingValue() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequestNoValue();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
@@ -209,14 +207,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidValue() {
+  public void invalidParamsResponseWhenValueIsNaN() {
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestWithValue("I'm an invalid value format!")),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
   @Test
-  public void missingGas() {
+  public void signTransactionWhenMissingGas() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequestNoGas();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
@@ -236,14 +234,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidGas() {
+  public void invalidParamsResponseWhenGasIsNaN() {
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestWithGas("I'm an invalid gas format!")),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
   @Test
-  public void missingGasPrice() {
+  public void signTransactionWhenMissingGasPrice() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         defaultSendTransactionRequestNoGasPrice();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
@@ -263,7 +261,7 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidGasPrice() {
+  public void invalidParamsResponseWhenGasPriceIsNaN() {
     sendVerifyingResponse(
         ethFirewallRequest(
             defaultSendTransactionRequestWithGasPrice("I'm an invalid gas price format!")),
@@ -271,14 +269,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingData() {
+  public void invalidParamsResponseWhenMissingData() {
     sendVerifyingResponse(
         ethFirewallRequest(defaultSendTransactionRequestNoData()),
         ethFirewallResponse(JsonRpcError.INVALID_PARAMS));
   }
 
   @Test
-  public void signContract() {
+  public void signSendTransactionWhenContract() {
     final Request<?, ? extends Response<?>> sendTransactionRequest =
         smartContractSendTransactionRequest();
     final Request<?, ? extends Response<?>> sendRawTransactionRequest =
