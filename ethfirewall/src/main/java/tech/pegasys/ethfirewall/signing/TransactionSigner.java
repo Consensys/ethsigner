@@ -13,7 +13,6 @@
 package tech.pegasys.ethfirewall.signing;
 
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
-import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 import java.math.BigInteger;
@@ -32,8 +31,8 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  public String signTransaction(final SendTransactionJsonRpcRequest request) {
-    final RawTransaction rawTransaction = rawTransaction(request);
+  public String signTransaction(final SendTransactionJsonParameters params) {
+    final RawTransaction rawTransaction = rawTransaction(params);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -41,9 +40,7 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
-    final SendTransactionJsonParameters params = request.getParams();
-
+  private RawTransaction rawTransaction(final SendTransactionJsonParameters params) {
     return RawTransaction.createTransaction(
         nonce(params),
         params.gasPrice().orElse(null),

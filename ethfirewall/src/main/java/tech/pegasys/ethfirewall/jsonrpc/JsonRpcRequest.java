@@ -14,8 +14,6 @@ package tech.pegasys.ethfirewall.jsonrpc;
 
 import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,19 +21,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
+import io.vertx.core.json.JsonObject;
 
 public class JsonRpcRequest {
 
   private JsonRpcRequestId id;
   private final String method;
-  private final Object[] params;
+  private final Object params;
   private final String version;
 
   @JsonCreator
   public JsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
-      @JsonProperty("params") final Object[] params) {
+      @JsonProperty("params") final Object params) {
     this.version = version;
     this.method = method;
     this.params = params;
@@ -44,9 +43,18 @@ public class JsonRpcRequest {
     }
   }
 
+  public JsonRpcRequest(final String version, final String method, final String params) {
+    this.version = version;
+    this.method = method;
+    this.params = new JsonObject(params);
+    if (method == null) {
+      throw new InvalidJsonRpcRequestException("Field 'method' is required");
+    }
+  }
+
   @JsonGetter("id")
-  public Object getId() {
-    return id == null ? null : id.getValue();
+  public JsonRpcRequestId getId() {
+    return id;
   }
 
   @JsonGetter("method")
@@ -61,7 +69,7 @@ public class JsonRpcRequest {
 
   @JsonInclude(Include.NON_NULL)
   @JsonGetter("params")
-  public Object[] getParams() {
+  public Object getParams() {
     return params;
   }
 
@@ -81,12 +89,12 @@ public class JsonRpcRequest {
     final JsonRpcRequest that = (JsonRpcRequest) o;
     return Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
-        && Arrays.equals(params, that.params)
+        && params.equals(that.params)
         && Objects.equal(version, that.version);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, method, Arrays.hashCode(params), version);
+    return Objects.hashCode(id, method, params.hashCode(), version);
   }
 }

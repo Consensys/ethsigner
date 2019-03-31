@@ -15,9 +15,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.google.common.collect.ImmutableMap;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -25,9 +23,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestMapperTest {
-  @Mock private Handler<RoutingContext> defaultHandler;
-  @Mock private Handler<RoutingContext> handler1;
-  @Mock private Handler<RoutingContext> handler2;
+  @Mock private JsonRpcRequestHandler defaultHandler;
+  @Mock private JsonRpcRequestHandler handler1;
+  @Mock private JsonRpcRequestHandler handler2;
 
   @Test
   public void returnsHandleForAssociatedRpcMethod() {
@@ -35,15 +33,15 @@ public class RequestMapperTest {
     requestMapper.addHandler("foo", handler1);
     requestMapper.addHandler("bar", handler2);
     requestMapper.addHandler("default", defaultHandler);
-    assertThat(requestMapper.getMatchingHandler(rpcJson("foo"))).isSameAs(handler1);
-    assertThat(requestMapper.getMatchingHandler(rpcJson("bar"))).isSameAs(handler2);
+    assertThat(requestMapper.getMatchingHandler("foo")).isSameAs(handler1);
+    assertThat(requestMapper.getMatchingHandler("bar")).isSameAs(handler2);
   }
 
   @Test
   public void returnsDefaultHandlerForUnknownRpcMethod() {
     RequestMapper requestMapper = new RequestMapper(defaultHandler);
-    assertThat(requestMapper.getMatchingHandler(rpcJson(""))).isEqualTo(defaultHandler);
-    assertThat(requestMapper.getMatchingHandler(rpcJson("nothing"))).isEqualTo(defaultHandler);
+    assertThat(requestMapper.getMatchingHandler("")).isEqualTo(defaultHandler);
+    assertThat(requestMapper.getMatchingHandler("nothing")).isEqualTo(defaultHandler);
   }
 
   private JsonObject rpcJson(final String methodName) {

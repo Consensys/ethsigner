@@ -12,10 +12,10 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -26,7 +26,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler implements Handler<RoutingContext> {
+public class PassThroughHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
   private final HttpClient ethNodeClient;
@@ -38,7 +38,7 @@ public class PassThroughHandler implements Handler<RoutingContext> {
   }
 
   @Override
-  public void handle(final RoutingContext context) {
+  public void handle(final RoutingContext context, final JsonRpcRequest request) {
     final HttpServerRequest originalRequest = context.request();
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
@@ -64,7 +64,7 @@ public class PassThroughHandler implements Handler<RoutingContext> {
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    final JsonRpcBody providedBody = bodyProvider.getBody(context);
+    final JsonRpcBody providedBody = bodyProvider.getBody(request);
 
     if (providedBody.hasError()) {
       sendErrorResponse(context, originalRequest, providedBody.error());

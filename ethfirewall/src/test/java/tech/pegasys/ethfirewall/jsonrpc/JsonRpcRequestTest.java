@@ -10,12 +10,21 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy;
+package tech.pegasys.ethfirewall.jsonrpc;
 
-import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
+import io.vertx.core.json.JsonObject;
+import org.junit.Test;
 
-@FunctionalInterface
-public interface BodyProvider {
+public class JsonRpcRequestTest {
 
-  JsonRpcBody getBody(final JsonRpcRequest request);
+  @Test
+  public void basicDecoding() {
+
+    final JsonObject input = new JsonObject();
+    input.put("jsonrpc", 2.0);
+    input.put("method", "mine");
+    input.put("params", 5);
+
+    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
+  }
 }

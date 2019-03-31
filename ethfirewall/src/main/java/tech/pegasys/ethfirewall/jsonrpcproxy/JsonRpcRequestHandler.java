@@ -12,23 +12,11 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import java.util.HashMap;
-import java.util.Map;
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 
-public class RequestMapper {
+import io.vertx.ext.web.RoutingContext;
 
-  private final JsonRpcRequestHandler defaultHandler;
-  private final Map<String, JsonRpcRequestHandler> handlers = new HashMap<>();
+public interface JsonRpcRequestHandler {
 
-  public RequestMapper(final JsonRpcRequestHandler defaultHandler) {
-    this.defaultHandler = defaultHandler;
-  }
-
-  public void addHandler(final String jsonMethod, final JsonRpcRequestHandler requestHandler) {
-    handlers.put(jsonMethod, requestHandler);
-  }
-
-  public JsonRpcRequestHandler getMatchingHandler(final String method) {
-    return handlers.getOrDefault(method, defaultHandler);
-  }
+  void handle(RoutingContext context, JsonRpcRequest request);
 }

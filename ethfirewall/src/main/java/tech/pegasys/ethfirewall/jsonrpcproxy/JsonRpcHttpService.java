@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
@@ -22,7 +23,6 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -107,13 +107,25 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private void handleJsonRpc(final RoutingContext context) {
+    final JsonObject requestJson;
     try {
-      final JsonObject json = context.getBodyAsJson();
-      final Handler<RoutingContext> handler = requestHandlerMapper.getMatchingHandler(json);
-      handler.handle(context);
+      requestJson = context.getBodyAsJson();
     } catch (final DecodeException e) {
       sendParseErrorResponse(context, e);
+      return;
     }
+
+    final JsonRpcRequest request;
+    try {
+      request = requestJson.mapTo(JsonRpcRequest.class);
+    } catch (final IllegalArgumentException e) {
+      sendParseErrorResponse(context, e);
+      return;
+    }
+
+    final JsonRpcRequestHandler handler =
+        requestHandlerMapper.getMatchingHandler(request.getMethod());
+    handler.handle(context, request);
   }
 
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {

@@ -13,12 +13,15 @@
 package tech.pegasys.ethfirewall.jsonrpc;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
@@ -95,5 +98,24 @@ public class SendTransactionJsonParameters {
   // TODO exception on parse?
   private BigInteger optionalHex(final String value) {
     return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
+  }
+
+  public static SendTransactionJsonParameters from(final JsonRpcRequest request) throws Throwable {
+    final JsonObject receivedParams;
+    final Object params = request.getParams();
+
+    if (params instanceof ArrayList) {
+      JsonArray jsonArray = new JsonArray((ArrayList) params);
+
+      if (jsonArray.size() != 1) {
+        throw new Throwable("Illegally constructed Transaction Json content.");
+      }
+
+      receivedParams = jsonArray.getJsonObject(0);
+    } else {
+      receivedParams = JsonObject.mapFrom(params);
+    }
+
+    return receivedParams.mapTo(SendTransactionJsonParameters.class);
   }
 }
