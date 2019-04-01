@@ -301,7 +301,5 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
     verifyEthereumNodeReceived(sendRawTransactionRequest);
   }
 
-  // TODO integer values, not wrapped as strings
-
   // TODO change the chainID when signing
 }
