@@ -77,11 +77,14 @@ public class IntegrationTestBase {
 
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
+    setupEthFirewall(9);
+  }
+
+  public static void setupEthFirewall(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
-    final File keyFile = createKeyFile();
     final TransactionSigner transactionSigner =
-        transactionSigner(keyFile, "password", new ConfigurationChainId((byte) 9));
+        transactionSigner(new ConfigurationChainId(chainId));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -108,16 +111,6 @@ public class IntegrationTestBase {
     return jsonRpc;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
-  private static File createKeyFile() throws IOException {
-    final URL walletResource = Resources.getResource("keyfile.json");
-    final Path wallet = Files.createTempFile("ethfirewall_intg_keyfile", ".json");
-    Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
-    File keyFile = wallet.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
-  }
-
   @Before
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
@@ -141,7 +134,7 @@ public class IntegrationTestBase {
                 .withStatusCode(response.getStatusCode()));
   }
 
-  public void sendVerifyingResponse(
+  public void sendResponseThenVerify(
       final EthFirewallRequest request, final EthFirewallResponse expectResponse) {
     given()
         .when()
@@ -154,14 +147,14 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  public void verifyEthereumNodeReceived(final String proxyBodyRequest) {
+  public void verifyEthNodeReceived(final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
             .withBody(proxyBodyRequest)
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
-  public void verifyEthereumNodeReceived(
+  public void verifyEthNodeReceived(
       final Map<String, String> proxyHeaders, final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
@@ -175,11 +168,21 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner(
-      final File keyFile, final String password, final ChainIdProvider chain)
+  private static TransactionSigner transactionSigner(final ChainIdProvider chain)
       throws IOException, CipherException {
-    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
+    final File keyFile = createKeyFile();
+    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
 
     return new TransactionSigner(chain, credentials);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private static File createKeyFile() throws IOException {
+    final URL walletResource = Resources.getResource("keyfile.json");
+    final Path wallet = Files.createTempFile("ethfirewall_intg_keyfile", ".json");
+    Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
+    File keyFile = wallet.toFile();
+    keyFile.deleteOnExit();
+    return keyFile;
   }
 }

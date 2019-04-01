@@ -34,11 +34,11 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     setUpEthNodeResponse(
         ethNode.request(netVersionRequest), ethNode.response(responseHeaders, netVersionResponse));
 
-    sendVerifyingResponse(
+    sendResponseThenVerify(
         ethFirewall.request(requestHeaders, netVersionRequest),
         ethFirewall.response(responseHeaders, netVersionResponse));
 
-    verifyEthereumNodeReceived(requestHeaders, netVersionRequest);
+    verifyEthNodeReceived(requestHeaders, netVersionRequest);
   }
 
   @Test
@@ -49,10 +49,10 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         ethNode.request(ethProtocolVersionRequest),
         ethNode.response("Not Found", HttpResponseStatus.NOT_FOUND));
 
-    sendVerifyingResponse(
+    sendResponseThenVerify(
         ethFirewall.request(ethProtocolVersionRequest),
         ethFirewall.response("Not Found", HttpResponseStatus.NOT_FOUND));
 
-    verifyEthereumNodeReceived(ethProtocolVersionRequest);
+    verifyEthNodeReceived(ethProtocolVersionRequest);
   }
 }
