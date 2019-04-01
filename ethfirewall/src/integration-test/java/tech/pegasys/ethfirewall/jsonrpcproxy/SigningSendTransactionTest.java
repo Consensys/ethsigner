@@ -324,6 +324,4 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
-
-  // TODO change the chainID when signing
 }
