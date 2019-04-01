@@ -63,6 +63,9 @@ public class SendTransactionBodyProvider implements BodyProvider {
     try {
       signedTransactionHexString = signer.signTransaction(request);
     } catch (final IllegalArgumentException e) {
+      LOG.debug("Bad input value from request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
+    } catch (final Throwable e) {
       LOG.debug("Unaccounted control flow for request: {}", requestJson, e);
       return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
     }

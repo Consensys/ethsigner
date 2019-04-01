@@ -25,6 +25,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 public class SendTransaction {
 
   private static final int DEFAULT_ID = 77;
+  private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
 
   private final Web3j jsonRpc;
 
@@ -48,11 +49,11 @@ public class SendTransaction {
     return replaceParameter("nonce", nonce, request());
   }
 
-  public String withReceiver(final String receiver) {
+  public String withSender(final String receiver) {
     return replaceParameter("from", receiver, request());
   }
 
-  public String withSender(final String sender) {
+  public String withReceiver(final String sender) {
     return replaceParameter("to", sender, request());
   }
 
@@ -77,7 +78,7 @@ public class SendTransaction {
   public String missingNonce() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             null,
             new BigInteger("10000000000000"),
             new BigInteger("30400"),
@@ -94,7 +95,7 @@ public class SendTransaction {
   public String missingReceiver() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             new BigInteger("10000000000000"),
@@ -112,7 +113,7 @@ public class SendTransaction {
   public String missingValue() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             new BigInteger("10000000000000"),
@@ -130,7 +131,7 @@ public class SendTransaction {
   public String missingGas() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             null,
@@ -148,7 +149,7 @@ public class SendTransaction {
   public String missingGasPrice() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             new BigInteger("10000000000000"),
@@ -166,7 +167,7 @@ public class SendTransaction {
   public String missingData() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             new BigInteger("10000000000000"),
@@ -188,7 +189,7 @@ public class SendTransaction {
   public String request() {
     final Transaction transaction =
         new Transaction(
-            "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
+            UNLOCKED_ACCOUNT,
             new BigInteger(
                 "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
             new BigInteger("10000000000000"),
@@ -206,7 +207,7 @@ public class SendTransaction {
   public String smartContract() {
     final Transaction transaction =
         new Transaction(
-            "0xae8ed09c458cebc142c06bdd297709575482b0fd",
+            UNLOCKED_ACCOUNT,
             new BigInteger("1"),
             null,
             null,

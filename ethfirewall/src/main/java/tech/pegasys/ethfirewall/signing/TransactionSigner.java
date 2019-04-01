@@ -33,12 +33,20 @@ public class TransactionSigner {
   }
 
   public String signTransaction(final SendTransactionJsonRpcRequest request) {
+    if (senderNotUnlockedAccount(request)) {
+      throw new IllegalArgumentException("From address does not match unlocked account");
+    }
+
     final RawTransaction rawTransaction = rawTransaction(request);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
         TransactionEncoder.signMessage(rawTransaction, chain.id(), credentials);
     return Numeric.toHexString(signedMessage);
+  }
+
+  private boolean senderNotUnlockedAccount(final SendTransactionJsonRpcRequest request) {
+    return !request.getParams().sender().equalsIgnoreCase(credentials.getAddress());
   }
 
   private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
@@ -54,7 +62,7 @@ public class TransactionSigner {
   }
 
   private String receiver(final SendTransactionJsonParameters params) {
-    return params.receiver().isPresent() ? params.receiver().get().toString() : null;
+    return params.receiver().orElse(null);
   }
 
   private BigInteger nonce(final SendTransactionJsonParameters params) {
@@ -62,7 +70,7 @@ public class TransactionSigner {
       return params.nonce().get();
     } else {
       // TODO when missing nonce - sensible retrieval (PIE-1468)
-      throw new IllegalArgumentException("Missing nonce");
+      throw new RuntimeException("Missing nonce");
     }
   }
 
