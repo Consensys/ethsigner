@@ -14,6 +14,8 @@ package tech.pegasys.ethfirewall.jsonrpc;
 
 import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
+import java.util.ArrayList;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class JsonRpcRequest {
@@ -43,15 +46,6 @@ public class JsonRpcRequest {
     }
   }
 
-  public JsonRpcRequest(final String version, final String method, final String params) {
-    this.version = version;
-    this.method = method;
-    this.params = new JsonObject(params);
-    if (method == null) {
-      throw new InvalidJsonRpcRequestException("Field 'method' is required");
-    }
-  }
-
   @JsonGetter("id")
   public JsonRpcRequestId getId() {
     return id;
@@ -69,7 +63,15 @@ public class JsonRpcRequest {
 
   @JsonInclude(Include.NON_NULL)
   @JsonGetter("params")
+  public Object getRawParams() {
+    return params;
+  }
+
   public Object getParams() {
+    if (params instanceof ArrayList) {
+      JsonArray jsonArray = new JsonArray((ArrayList) params);
+      return jsonArray.getJsonObject(0);
+    }
     return params;
   }
 
@@ -96,5 +98,22 @@ public class JsonRpcRequest {
   @Override
   public int hashCode() {
     return Objects.hashCode(id, method, params.hashCode(), version);
+  }
+
+  public static JsonRpcRequest convertFrom(final JsonObject jsonObject) {
+    final JsonRpcRequest result = jsonObject.mapTo(JsonRpcRequest.class);
+
+    final Object params = result.getRawParams();
+    if (params != null) {
+      if (params instanceof ArrayList) {
+        JsonArray jsonArray = new JsonArray((ArrayList) params);
+
+        if (jsonArray.size() > 1) {
+          throw new IllegalArgumentException("Illegally constructed Transaction Json content.");
+        }
+      }
+    }
+
+    return result;
   }
 }

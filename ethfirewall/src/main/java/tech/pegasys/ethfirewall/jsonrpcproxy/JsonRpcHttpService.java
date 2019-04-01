@@ -107,25 +107,29 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private void handleJsonRpc(final RoutingContext context) {
-    final JsonObject requestJson;
     try {
-      requestJson = context.getBodyAsJson();
-    } catch (final DecodeException e) {
-      sendParseErrorResponse(context, e);
-      return;
-    }
+      final JsonObject requestJson;
+      try {
+        requestJson = context.getBodyAsJson();
+      } catch (final DecodeException e) {
+        sendParseErrorResponse(context, e);
+        return;
+      }
 
-    final JsonRpcRequest request;
-    try {
-      request = requestJson.mapTo(JsonRpcRequest.class);
-    } catch (final IllegalArgumentException e) {
-      sendParseErrorResponse(context, e);
-      return;
-    }
+      final JsonRpcRequest request;
+      try {
+        request = JsonRpcRequest.convertFrom(requestJson);
+      } catch (final IllegalArgumentException e) {
+        sendParseErrorResponse(context, e);
+        return;
+      }
 
-    final JsonRpcRequestHandler handler =
-        requestHandlerMapper.getMatchingHandler(request.getMethod());
-    handler.handle(context.request(), request);
+      final JsonRpcRequestHandler handler =
+          requestHandlerMapper.getMatchingHandler(request.getMethod());
+      handler.handle(context.request(), request);
+    } catch (Exception e) {
+      LOG.error("Oh noes", e);
+    }
   }
 
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {

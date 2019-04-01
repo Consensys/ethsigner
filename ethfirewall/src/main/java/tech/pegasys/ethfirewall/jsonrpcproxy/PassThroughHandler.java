@@ -22,6 +22,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +108,6 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
       final HttpServerRequest originalRequest,
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
-
     originalRequest.bodyHandler(
         body -> {
           LOG.debug(

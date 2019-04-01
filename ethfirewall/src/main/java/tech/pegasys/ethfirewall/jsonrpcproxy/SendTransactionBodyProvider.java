@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import static java.util.Collections.singletonList;
+
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
@@ -56,7 +58,8 @@ public class SendTransactionBodyProvider implements BodyProvider {
     final String signedTransactionHexString = signer.signTransaction(params);
 
     final JsonRpcRequest sendRawTransaction =
-        new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD, signedTransactionHexString);
+        new JsonRpcRequest(
+            JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
     sendRawTransaction.setId(request.getId());
 
     try {
