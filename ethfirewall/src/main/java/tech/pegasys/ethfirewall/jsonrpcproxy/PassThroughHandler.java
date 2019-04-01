@@ -22,7 +22,6 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,17 +75,17 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   }
 
   private void sendErrorResponse(
-      final HttpServerRequest httpRequest,
-      final JsonRpcErrorResponse error) {
+      final HttpServerRequest httpRequest, final JsonRpcErrorResponse error) {
     LOG.info("Dropping request from {}", httpRequest.remoteAddress());
-    httpRequest.bodyHandler(body -> {
-      LOG.debug(
-          "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-          httpRequest.method(),
-          httpRequest.absoluteURI(),
-          body.toString(),
-          Json.encode(error));
-    });
+    httpRequest.bodyHandler(
+        body -> {
+          LOG.debug(
+              "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+              httpRequest.method(),
+              httpRequest.absoluteURI(),
+              body.toString(),
+              Json.encode(error));
+        });
 
     httpRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
     httpRequest.response().headers().setAll(httpRequest.headers());
@@ -109,15 +108,16 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
 
-    originalRequest.bodyHandler(body -> {
-      LOG.debug(
-          "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
-          originalRequest.method(),
-          originalRequest.absoluteURI(),
-          body.toString(),
-          proxyRequest.method(),
-          proxyRequest.absoluteURI(),
-          proxyRequestBody);
-    });
+    originalRequest.bodyHandler(
+        body -> {
+          LOG.debug(
+              "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
+              originalRequest.method(),
+              originalRequest.absoluteURI(),
+              body.toString(),
+              proxyRequest.method(),
+              proxyRequest.absoluteURI(),
+              proxyRequestBody);
+        });
   }
 }
