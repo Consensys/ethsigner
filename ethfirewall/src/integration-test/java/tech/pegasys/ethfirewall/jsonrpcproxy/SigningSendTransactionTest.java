@@ -72,14 +72,23 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withSender("577919ae5df4941180eac211965f275CDCE314D")),
+        ethFirewall.request(
+            sendTransaction.withSender("0x577919ae5df4941180eac211965f275CDCE314D")),
         ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withSender("1577919ae5df4941180eac211965f275CDCE314D")),
+        ethFirewall.request(
+            sendTransaction.withSender("0x1577919ae5df4941180eac211965f275CDCE314D")),
+        ethFirewall.response(INVALID_PARAMS));
+  }
+
+  @Test
+  public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+    sendRequestThenVerifyResponse(
+        ethFirewall.request(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
         ethFirewall.response(INVALID_PARAMS));
   }
 
@@ -125,21 +134,17 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   @Test
   public void signTransactionWhenReceiverAddressIsEmpty() {
-    final String sendTransactionRequest = sendTransaction.withReceiver("");
-    final String sendRawTransactionRequest =
-        sendRawTransaction.request(
-            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
-    final String sendRawTransactionResponse =
-        sendRawTransaction.response(
-            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1524444");
-    setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
-
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        ethFirewall.request(sendTransaction.withReceiver("")),
+        ethFirewall.response(INVALID_PARAMS));
+  }
 
-    verifyEthNodeReceived(sendRawTransactionRequest);
+  @Test
+  public void invalidParamsResponseWhenReceiverAddressMissingHexPrefix() {
+    sendRequestThenVerifyResponse(
+        ethFirewall.request(
+            sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D")),
+        ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test

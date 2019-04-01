@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
 
+  private static final String ENCODING_PREFIX = "0x";
   private static final int HEXADECIMAL = 16;
   private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
@@ -39,6 +40,8 @@ public class SendTransactionJsonParameters {
   public SendTransactionJsonParameters(
       @JsonProperty("from") final String sender, @JsonProperty("data") final String data) {
     this.data = data;
+
+    validatePrefix(sender);
     this.sender = sender;
   }
 
@@ -59,6 +62,7 @@ public class SendTransactionJsonParameters {
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
+    validatePrefix(receiver);
     this.receiver = receiver;
   }
 
@@ -99,9 +103,16 @@ public class SendTransactionJsonParameters {
     return new BigInteger(value, HEXADECIMAL);
   }
 
-  // TODO validate hex format - ie. has prefix 0x
-  // TODO exception on parse?
   private BigInteger optionalHex(final String value) {
+    validatePrefix(value);
+
     return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
+  }
+
+  private void validatePrefix(final String value) {
+    if (!value.startsWith(ENCODING_PREFIX)) {
+      throw new IllegalArgumentException(
+          String.format("Prefix of '0x' is expected in value: %s", value));
+    }
   }
 }
