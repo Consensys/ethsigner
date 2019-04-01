@@ -68,6 +68,8 @@ public class IntegrationTestBase {
   private static final String LOCALHOST = "127.0.0.1";
   private static final long DEFAULT_CHAIN_ID = 9;
 
+  protected static final String MALFORMED_JSON = "{Bad Json: {{{}";
+
   private static Runner runner;
   private static ClientAndServer clientAndServer;
 
