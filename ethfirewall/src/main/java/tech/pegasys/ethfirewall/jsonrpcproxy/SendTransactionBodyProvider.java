@@ -41,7 +41,7 @@ public class SendTransactionBodyProvider implements BodyProvider {
 
     final SendTransactionJsonParameters params;
     try {
-      params = (SendTransactionJsonParameters) request.getParams();
+      params = SendTransactionJsonParameters.from(request);
     } catch (final NumberFormatException e) {
 
       // TODO fix this - Jackson wraps as NFR

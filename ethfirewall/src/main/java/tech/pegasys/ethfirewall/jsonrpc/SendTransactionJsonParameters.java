@@ -100,7 +100,7 @@ public class SendTransactionJsonParameters {
     return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
   }
 
-  public static SendTransactionJsonParameters from(final JsonRpcRequest request) throws Throwable {
+  public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
     final JsonObject receivedParams;
     final Object params = request.getParams();
 
@@ -108,7 +108,7 @@ public class SendTransactionJsonParameters {
       JsonArray jsonArray = new JsonArray((ArrayList) params);
 
       if (jsonArray.size() != 1) {
-        throw new Throwable("Illegally constructed Transaction Json content.");
+        throw new IllegalArgumentException("Illegally constructed Transaction Json content.");
       }
 
       receivedParams = jsonArray.getJsonObject(0);

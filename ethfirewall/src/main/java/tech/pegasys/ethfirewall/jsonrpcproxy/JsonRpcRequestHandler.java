@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import io.vertx.core.http.HttpServerRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 
 import io.vertx.ext.web.RoutingContext;
 
 public interface JsonRpcRequestHandler {
 
-  void handle(RoutingContext context, JsonRpcRequest request);
+  void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);
 }

@@ -125,7 +125,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
     final JsonRpcRequestHandler handler =
         requestHandlerMapper.getMatchingHandler(request.getMethod());
-    handler.handle(context, request);
+    handler.handle(context.request(), request);
   }
 
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
