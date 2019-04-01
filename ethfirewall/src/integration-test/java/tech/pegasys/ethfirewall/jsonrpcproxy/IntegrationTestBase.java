@@ -80,7 +80,7 @@ public class IntegrationTestBase {
     setupEthFirewall(9);
   }
 
-  public static void setupEthFirewall(final long chainId) throws IOException, CipherException {
+  protected static void setupEthFirewall(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
     final TransactionSigner transactionSigner =
@@ -105,6 +105,10 @@ public class IntegrationTestBase {
         serverSocket.getLocalPort(),
         clientAndServer.getLocalPort());
     serverSocket.close();
+  }
+
+  protected static void resetEthFirewall() throws IOException, CipherException {
+    setupEthFirewall();
   }
 
   protected Web3j jsonRpc() {

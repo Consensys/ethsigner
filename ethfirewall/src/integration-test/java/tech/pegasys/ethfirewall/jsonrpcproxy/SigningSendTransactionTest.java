@@ -302,6 +302,8 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
         ethFirewall.response(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
+
+    resetEthFirewall();
   }
 
   @Test
