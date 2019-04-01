@@ -72,16 +72,14 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
-            sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f0723315")),
+        ethFirewall.request(sendTransaction.withSender("577919ae5df4941180eac211965f275CDCE314D")),
         ethFirewall.response(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
-            sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f07233155A")),
+        ethFirewall.request(sendTransaction.withSender("1577919ae5df4941180eac211965f275CDCE314D")),
         ethFirewall.response(INVALID_PARAMS));
   }
 
@@ -94,9 +92,29 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
   }
 
   @Test
-  public void signTransactionWhenSenderAddressIsEmpty() {
+  public void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
         ethFirewall.request(sendTransaction.withSender("")), ethFirewall.response(INVALID_PARAMS));
+  }
+
+  @Test
+  public void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
+    final String sendTransactionRequest =
+        sendTransaction.withSender("0x7577919ae5df4941180eac211965f275CDCE314D");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf8b2a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0f04e0e7b41adea417596550611138a3ec9a452abb6648d734107c53476e76a27a05b826d9e9b4e0dd0e7b8939c102a2079d71cfc27cd6b7bebe5a006d5ad17d780");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
+    setUpEthNodeResponse(
+        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        ethFirewall.request(sendTransactionRequest),
+        ethFirewall.response(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
@@ -287,8 +305,4 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
-
-  // TODO case sensitivty
-  // TODO partial sender
-  // TODO excess sender
 }
