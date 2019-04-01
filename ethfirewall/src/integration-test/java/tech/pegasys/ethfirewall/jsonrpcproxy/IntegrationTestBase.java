@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -24,6 +25,10 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeResponse;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -38,12 +43,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.Json;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -54,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -61,12 +67,12 @@ import org.web3j.protocol.core.Response;
 public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
-
   private static final String LOCALHOST = "127.0.0.1";
+
   private static Runner runner;
   private static ClientAndServer ethNode;
-  private ObjectMapper objectMapper = new ObjectMapper();
-  JsonRpc2_0Web3j jsonRpc;
+
+  private JsonRpc2_0Web3j jsonRpc;
 
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
@@ -97,6 +103,10 @@ public class IntegrationTestBase {
     serverSocket.close();
   }
 
+  protected Web3j jsonRpc() {
+    return jsonRpc;
+  }
+
   @SuppressWarnings("UnstableApiUsage")
   private static File createKeyFile() throws IOException {
     final URL walletResource = Resources.getResource("keyfile.json");
@@ -119,44 +129,83 @@ public class IntegrationTestBase {
     runner.stop();
   }
 
-  public void configureEthNode(
+  public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
+    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    ethNode
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response()
+                .withBody(response.getBody())
+                .withHeaders(headers)
+                .withStatusCode(response.getStatusCode()));
+  }
+
+  public void setUpEthNodeResponse(
+      final EthFirewallRequest request,
+      final Object response,
+      final Map<String, String> responseHeaders,
+      final HttpResponseStatus status) {
+    final String responseBody = Json.encode(response);
+    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+    ethNode
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
+  }
+
+  public void setUpEthNodeResponse(
       final Request<?, ? extends Response<?>> request,
       final Object response,
       final Map<String, String> responseHeaders,
-      final int responseStatusCode)
-      throws JsonProcessingException {
-    final String requestBody = objectMapper.writeValueAsString(request);
-    final String responseBody = objectMapper.writeValueAsString(response);
-    List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
+      final HttpResponseStatus status) {
+    final String requestBody = Json.encode(request);
+    final String responseBody = Json.encode(response);
+    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
     ethNode
         .when(request().withBody(json(requestBody)), exactly(1))
         .respond(
-            response()
-                .withBody(responseBody)
-                .withHeaders(headers)
-                .withStatusCode(responseStatusCode));
+            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
   }
 
-  public void sendRequestAndVerify(
-      final Request<?, ? extends Response<?>> proxyBodyRequest,
-      final Map<String, String> proxyHeaders,
-      final Object response,
-      final int ethNodeStatusCode,
-      final Map<String, String> ethNodeHeaders)
-      throws JsonProcessingException {
-    String responseBody = objectMapper.writeValueAsString(response);
+  public void sendVerifyingResponse(
+      final EthFirewallRequest request, final EthFirewallResponse expectResponse) {
     given()
         .when()
-        .body(proxyBodyRequest)
-        .headers(proxyHeaders)
+        .body(request.getBody())
+        .headers(request.getHeaders())
         .post()
         .then()
-        .statusCode(ethNodeStatusCode)
-        .body(equalTo(responseBody))
-        .headers(ethNodeHeaders);
+        .statusCode(expectResponse.getStatusCode())
+        .body(equalTo(expectResponse.getBody()))
+        .headers(expectResponse.getHeaders());
   }
 
-  public void verifyEthNodeRequest(
+  public void sendVerifyingResponse(
+      final Request<?, ? extends Response<?>> request,
+      final Map<String, String> requestHeaders,
+      final Object expectResponse,
+      final HttpResponseStatus expectStatus,
+      final Map<String, String> expectHeaders) {
+    final String responseBody = Json.encode(expectResponse);
+    given()
+        .when()
+        .body(request)
+        .headers(requestHeaders)
+        .post()
+        .then()
+        .statusCode(expectStatus.code())
+        .body(equalTo(responseBody))
+        .headers(expectHeaders);
+  }
+
+  public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
+    ethNode.verify(
+        request()
+            .withBody(json(proxyBodyRequest))
+            .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
+  }
+
+  public void verifyEthereumNodeReceived(
       final Request<?, ? extends Response<?>> proxyBodyRequest,
       final Map<String, String> proxyHeaders) {
     ethNode.verify(

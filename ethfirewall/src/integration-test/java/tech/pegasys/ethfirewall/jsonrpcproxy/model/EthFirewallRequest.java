@@ -10,12 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy;
+package tech.pegasys.ethfirewall.jsonrpcproxy.model;
 
-import io.vertx.ext.web.RoutingContext;
+import java.util.Map;
 
-@FunctionalInterface
-public interface BodyProvider {
+public class EthFirewallRequest {
 
-  JsonRpcBody getBody(RoutingContext context);
+  private final String body;
+  private final Map<String, String> headers;
+
+  public EthFirewallRequest(final Map<String, String> headers, final String body) {
+    this.body = body;
+    this.headers = headers;
+  }
+
+  public String getBody() {
+    return body;
+  }
+
+  public Map<String, String> getHeaders() {
+    return headers;
+  }
 }
