@@ -138,7 +138,7 @@ public class IntegrationTestBase {
                 .withStatusCode(response.getStatusCode()));
   }
 
-  public void sendResponseThenVerify(
+  public void sendRequestThenVerifyResponse(
       final EthFirewallRequest request, final EthFirewallResponse expectResponse) {
     given()
         .when()
