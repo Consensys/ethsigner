@@ -26,7 +26,7 @@ public class EthAddress {
     this.bytes = bytes;
   }
 
-  //TODO replace with simple String endsWith()
+  // TODO replace with simple String endsWith()
 
   /**
    * Parse an hexadecimal string representing an account address.

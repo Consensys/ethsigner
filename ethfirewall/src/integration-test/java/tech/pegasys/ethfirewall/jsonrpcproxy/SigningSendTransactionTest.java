@@ -16,14 +16,13 @@ import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INTERNAL_ER
 import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.PARSE_ERROR;
 
-import org.junit.Before;
-import org.junit.Test;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
-/**
- * Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node.
- */
+import org.junit.Before;
+import org.junit.Test;
+
+/** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningSendTransactionTest extends IntegrationTestBase {
 
   private static final String MALFORMED_JSON = "{Bad Json: {{{}";
@@ -31,7 +30,6 @@ public class SigningSendTransactionTest extends IntegrationTestBase {
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
-
 
   @Before
   public void setUp() {
