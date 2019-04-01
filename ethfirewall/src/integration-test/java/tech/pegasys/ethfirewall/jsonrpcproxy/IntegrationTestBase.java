@@ -66,6 +66,7 @@ public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
   private static final String LOCALHOST = "127.0.0.1";
+  private static final long DEFAULT_CHAIN_ID = 9;
 
   private static Runner runner;
   private static ClientAndServer clientAndServer;
@@ -77,7 +78,7 @@ public class IntegrationTestBase {
 
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
-    setupEthFirewall(9);
+    setupEthFirewall(DEFAULT_CHAIN_ID);
   }
 
   protected static void setupEthFirewall(final long chainId) throws IOException, CipherException {
