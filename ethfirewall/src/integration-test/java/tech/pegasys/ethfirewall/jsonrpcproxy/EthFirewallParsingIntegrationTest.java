@@ -16,7 +16,7 @@ import static tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError.PARSE_ERROR
 
 import org.junit.Test;
 
-public class EthFirewallParsingTest extends IntegrationTestBase {
+public class EthFirewallParsingIntegrationTest extends IntegrationTestBase {
 
   private static final Object NO_ID = null;
 

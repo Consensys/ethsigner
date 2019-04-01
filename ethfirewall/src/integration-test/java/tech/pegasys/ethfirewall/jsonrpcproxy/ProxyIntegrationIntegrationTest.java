@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
-public class ProxyIntegrationTest extends IntegrationTestBase {
+public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void requestWithHeadersIsProxied() {
