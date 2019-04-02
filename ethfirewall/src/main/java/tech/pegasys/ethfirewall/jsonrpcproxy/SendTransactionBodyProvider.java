@@ -12,17 +12,17 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,16 @@ public class SendTransactionBodyProvider implements BodyProvider {
       return errorResponse(request.getId(), JsonRpcError.INVALID_REQUEST);
     }
 
-    final String signedTransactionHexString = signer.signTransaction(params);
+    final String signedTransactionHexString;
+    try {
+      signedTransactionHexString = signer.signTransaction(request);
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("Bad input value from request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
+    } catch (final Throwable e) {
+      LOG.debug("Unaccounted control flow for request: {}", requestJson, e);
+      return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
+    }
 
     final JsonRpcRequest sendRawTransaction =
         new JsonRpcRequest(

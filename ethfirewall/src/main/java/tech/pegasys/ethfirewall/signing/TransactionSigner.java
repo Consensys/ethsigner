@@ -13,6 +13,7 @@
 package tech.pegasys.ethfirewall.signing;
 
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 import java.math.BigInteger;
@@ -31,8 +32,12 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  public String signTransaction(final SendTransactionJsonParameters params) {
-    final RawTransaction rawTransaction = rawTransaction(params);
+  public String signTransaction(final SendTransactionJsonRpcRequest request) {
+    if (senderNotUnlockedAccount(request)) {
+      throw new IllegalArgumentException("From address does not match unlocked account");
+    }
+
+    final RawTransaction rawTransaction = rawTransaction(request);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -40,22 +45,32 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private RawTransaction rawTransaction(final SendTransactionJsonParameters params) {
+  private boolean senderNotUnlockedAccount(final SendTransactionJsonRpcRequest request) {
+    return !request.getParams().sender().equalsIgnoreCase(credentials.getAddress());
+  }
+
+  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
+    final SendTransactionJsonParameters params = request.getParams();
+
     return RawTransaction.createTransaction(
         nonce(params),
-        params.gasPrice().orElse(null),
+        params.gasPrice().orElse(BigInteger.ZERO),
         gas(params),
-        params.receiver().orElse(null),
-        params.value().orElse(null),
+        receiver(params),
+        params.value().orElse(BigInteger.ZERO),
         params.data());
+  }
+
+  private String receiver(final SendTransactionJsonParameters params) {
+    return params.receiver().orElse(null);
   }
 
   private BigInteger nonce(final SendTransactionJsonParameters params) {
     if (params.nonce().isPresent()) {
       return params.nonce().get();
     } else {
-      // TODO when missing nonce - get it from somewhere
-      return BigInteger.ZERO;
+      // TODO when missing nonce - sensible retrieval (PIE-1468)
+      throw new RuntimeException("Missing nonce");
     }
   }
 

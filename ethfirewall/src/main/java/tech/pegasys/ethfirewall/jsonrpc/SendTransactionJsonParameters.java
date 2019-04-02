@@ -24,19 +24,26 @@ import io.vertx.core.json.JsonObject;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
 
+  private static final String ENCODING_PREFIX = "0x";
   private static final int HEXADECIMAL = 16;
   private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   private final String data;
+  private String sender;
+
   private BigInteger gas;
   private BigInteger gasPrice;
   private BigInteger nonce;
-  private String receiver;
   private BigInteger value;
+  private String receiver;
 
   @JsonCreator
-  public SendTransactionJsonParameters(@JsonProperty("data") final String data) {
+  public SendTransactionJsonParameters(
+      @JsonProperty("from") final String sender, @JsonProperty("data") final String data) {
     this.data = data;
+
+    validatePrefix(sender);
+    this.sender = sender;
   }
 
   @JsonSetter("gas")
@@ -56,6 +63,7 @@ public class SendTransactionJsonParameters {
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
+    validatePrefix(receiver);
     this.receiver = receiver;
   }
 
@@ -88,6 +96,10 @@ public class SendTransactionJsonParameters {
     return Optional.ofNullable(nonce);
   }
 
+  public String sender() {
+    return sender;
+  }
+
   private BigInteger hex(final String value) {
     return new BigInteger(value, HEXADECIMAL);
   }
@@ -95,11 +107,15 @@ public class SendTransactionJsonParameters {
   // TODO validate hex format - ie. has prefix 0x
   // TODO exception on parse?
   private BigInteger optionalHex(final String value) {
+    validatePrefix(value);
+
     return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
   }
 
-  public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
-    final JsonObject receivedParams = JsonObject.mapFrom(request.getParams());
-    return receivedParams.mapTo(SendTransactionJsonParameters.class);
+  private void validatePrefix(final String value) {
+    if (!value.startsWith(ENCODING_PREFIX)) {
+      throw new IllegalArgumentException(
+          String.format("Prefix of '0x' is expected in value: %s", value));
+    }
   }
 }
