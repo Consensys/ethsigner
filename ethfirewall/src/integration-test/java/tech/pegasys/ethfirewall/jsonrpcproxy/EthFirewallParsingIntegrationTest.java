@@ -23,6 +23,6 @@ public class EthFirewallParsingIntegrationTest extends IntegrationTestBase {
   @Test
   public void parseErrorResponseWhenJsonRequestIsMalformed() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(MALFORMED_JSON), ethFirewall.response(NO_ID, PARSE_ERROR));
+        request.ethFirewall(MALFORMED_JSON), response.ethFirewall(NO_ID, PARSE_ERROR));
   }
 }
