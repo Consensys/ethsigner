@@ -25,12 +25,12 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewall;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewallRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall.EthFirewallResponse;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNode;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNodeRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.node.EthNodeResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthNodeRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthRequestFactory;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthNodeResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -75,8 +75,8 @@ public class IntegrationTestBase {
 
   private JsonRpc2_0Web3j jsonRpc;
 
-  protected final EthFirewall ethFirewall = new EthFirewall();
-  protected final EthNode ethNode = new EthNode();
+  protected final EthRequestFactory request = new EthRequestFactory();
+  protected final EthResponseFactory response = new EthResponseFactory();
 
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {

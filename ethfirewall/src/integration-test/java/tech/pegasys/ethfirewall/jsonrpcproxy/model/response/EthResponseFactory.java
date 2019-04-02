@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy.model.firewall;
+package tech.pegasys.ethfirewall.jsonrpcproxy.model.response;
 
 import static java.util.Collections.emptyMap;
 
@@ -21,38 +21,42 @@ import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class EthFirewall {
+public class EthResponseFactory {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
   private static final int DEFAULT_ID = 77;
 
-  public EthFirewallRequest request(final Map<String, String> headers, final String body) {
-    return new EthFirewallRequest(headers, body);
-  }
-
-  public EthFirewallRequest request(final String body) {
-    return new EthFirewallRequest(NO_HEADERS, body);
-  }
-
-  public EthFirewallResponse response(final Object id, final JsonRpcError error) {
+  public EthFirewallResponse ethFirewall(final Object id, final JsonRpcError error) {
     return new EthFirewallResponse(
         NO_HEADERS, new JsonRpcErrorResponse(id, error), HttpResponseStatus.BAD_REQUEST);
   }
 
-  public EthFirewallResponse response(final JsonRpcError error) {
+  public EthFirewallResponse ethFirewall(final JsonRpcError error) {
     return new EthFirewallResponse(
         NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), HttpResponseStatus.BAD_REQUEST);
   }
 
-  public EthFirewallResponse response(final Map<String, String> headers, final String body) {
+  public EthFirewallResponse ethFirewall(final Map<String, String> headers, final String body) {
     return new EthFirewallResponse(headers, body, HttpResponseStatus.OK);
   }
 
-  public EthFirewallResponse response(final String body) {
+  public EthFirewallResponse ethFirewall(final String body) {
     return new EthFirewallResponse(NO_HEADERS, body, HttpResponseStatus.OK);
   }
 
-  public EthFirewallResponse response(final String body, final HttpResponseStatus code) {
+  public EthFirewallResponse ethFirewall(final String body, final HttpResponseStatus code) {
     return new EthFirewallResponse(NO_HEADERS, body, code);
+  }
+
+  public EthNodeResponse ethNode(final Map<String, String> headers, final String body) {
+    return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
+  }
+
+  public EthNodeResponse ethNode(final String body) {
+    return new EthNodeResponse(NO_HEADERS, body, HttpResponseStatus.OK);
+  }
+
+  public EthNodeResponse ethNode(final String body, final HttpResponseStatus code) {
+    return new EthNodeResponse(NO_HEADERS, body, code);
   }
 }

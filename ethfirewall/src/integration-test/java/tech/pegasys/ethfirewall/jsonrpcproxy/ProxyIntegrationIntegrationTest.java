@@ -32,11 +32,11 @@ public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
     final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
     final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
     setUpEthNodeResponse(
-        ethNode.request(netVersionRequest), ethNode.response(responseHeaders, netVersionResponse));
+        request.ethNode(netVersionRequest), response.ethNode(responseHeaders, netVersionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(requestHeaders, netVersionRequest),
-        ethFirewall.response(responseHeaders, netVersionResponse));
+        request.ethFirewall(requestHeaders, netVersionRequest),
+        response.ethFirewall(responseHeaders, netVersionResponse));
 
     verifyEthNodeReceived(requestHeaders, netVersionRequest);
   }
@@ -46,12 +46,12 @@ public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
     final String ethProtocolVersionRequest = Json.encode(jsonRpc().ethProtocolVersion());
 
     setUpEthNodeResponse(
-        ethNode.request(ethProtocolVersionRequest),
-        ethNode.response("Not Found", HttpResponseStatus.NOT_FOUND));
+        request.ethNode(ethProtocolVersionRequest),
+        response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(ethProtocolVersionRequest),
-        ethFirewall.response("Not Found", HttpResponseStatus.NOT_FOUND));
+        request.ethFirewall(ethProtocolVersionRequest),
+        response.ethFirewall("Not Found", HttpResponseStatus.NOT_FOUND));
 
     verifyEthNodeReceived(ethProtocolVersionRequest);
   }

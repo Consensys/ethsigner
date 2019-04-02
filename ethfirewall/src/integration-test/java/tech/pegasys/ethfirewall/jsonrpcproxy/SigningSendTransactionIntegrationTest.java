@@ -39,61 +39,61 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   @Test
   public void proxyMalformedJsonResponseFromNode() {
     final String rawTransaction = sendRawTransaction.request();
-    setUpEthNodeResponse(ethNode.request(rawTransaction), ethNode.response(MALFORMED_JSON));
+    setUpEthNodeResponse(request.ethNode(rawTransaction), response.ethNode(MALFORMED_JSON));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(rawTransaction), ethFirewall.response(MALFORMED_JSON));
+        request.ethFirewall(rawTransaction), response.ethFirewall(MALFORMED_JSON));
   }
 
   @Test
   public void invalidParamsResponseWhenNonceIsNaN() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withNonce("I'm an invalid nonce format!")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withNonce("I'm an invalid nonce format!")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void internalErrorResponseWhenMissingNonce() {
     // TODO This behaviour will change with the get nonce (PIE-1468)
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.missingNonce()), ethFirewall.response(INTERNAL_ERROR));
+        request.ethFirewall(sendTransaction.missingNonce()), response.ethFirewall(INTERNAL_ERROR));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
+        request.ethFirewall(
             sendTransaction.withSender("0x577919ae5df4941180eac211965f275CDCE314D")),
-        ethFirewall.response(INVALID_PARAMS));
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
+        request.ethFirewall(
             sendTransaction.withSender("0x1577919ae5df4941180eac211965f275CDCE314D")),
-        ethFirewall.response(INVALID_PARAMS));
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
+        request.ethFirewall(
             sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
-        ethFirewall.response(INVALID_PARAMS));
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withSender("")), ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withSender("")), response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
@@ -107,11 +107,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -119,22 +119,22 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenMissingSenderAddress() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.missingSender()), ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.missingSender()), response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void signTransactionWhenReceiverAddressIsEmpty() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withReceiver("")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withReceiver("")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenReceiverAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(
+        request.ethFirewall(
             sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D")),
-        ethFirewall.response(INVALID_PARAMS));
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
@@ -147,11 +147,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -166,11 +166,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -178,8 +178,8 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenValueIsNaN() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withValue("I'm an invalid value format!")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withValue("I'm an invalid value format!")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
@@ -192,11 +192,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d7777777");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -204,8 +204,8 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenGasIsNaN() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withGas("I'm an invalid gas format!")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withGas("I'm an invalid gas format!")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
@@ -218,11 +218,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -230,14 +230,14 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   @Test
   public void invalidParamsResponseWhenGasPriceIsNaN() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.withGasPrice("I'm an invalid gas price format!")),
-        ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.withGasPrice("I'm an invalid gas price format!")),
+        response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
   public void invalidParamsResponseWhenMissingData() {
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransaction.missingData()), ethFirewall.response(INVALID_PARAMS));
+        request.ethFirewall(sendTransaction.missingData()), response.ethFirewall(INVALID_PARAMS));
   }
 
   @Test
@@ -250,11 +250,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
@@ -271,11 +271,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
 
@@ -292,11 +292,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
     setUpEthNodeResponse(
-        ethNode.request(sendRawTransactionRequest), ethNode.response(sendRawTransactionResponse));
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
 
     sendRequestThenVerifyResponse(
-        ethFirewall.request(sendTransactionRequest),
-        ethFirewall.response(sendRawTransactionResponse));
+        request.ethFirewall(sendTransactionRequest),
+        response.ethFirewall(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
   }

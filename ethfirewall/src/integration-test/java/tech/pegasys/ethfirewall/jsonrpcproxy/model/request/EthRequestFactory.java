@@ -10,31 +10,25 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy.model.node;
+package tech.pegasys.ethfirewall.jsonrpcproxy.model.request;
 
 import static java.util.Collections.emptyMap;
 
 import java.util.Map;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-
-public class EthNode {
+public class EthRequestFactory {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
 
-  public EthNodeResponse response(final Map<String, String> headers, final String body) {
-    return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
+  public EthFirewallRequest ethFirewall(final Map<String, String> headers, final String body) {
+    return new EthFirewallRequest(headers, body);
   }
 
-  public EthNodeResponse response(final String body) {
-    return new EthNodeResponse(NO_HEADERS, body, HttpResponseStatus.OK);
+  public EthFirewallRequest ethFirewall(final String body) {
+    return new EthFirewallRequest(NO_HEADERS, body);
   }
 
-  public EthNodeResponse response(final String body, final HttpResponseStatus code) {
-    return new EthNodeResponse(NO_HEADERS, body, code);
-  }
-
-  public EthNodeRequest request(final String body) {
+  public EthNodeRequest ethNode(final String body) {
     return new EthNodeRequest(NO_HEADERS, body);
   }
 }
