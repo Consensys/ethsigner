@@ -35,7 +35,7 @@ import picocli.CommandLine.ParameterException;
     abbreviateSynopsis = true,
     name = "ethfirewall",
     mixinStandardHelpOptions = true,
-    versionProvider = VersionInfo.class,
+    versionProvider = VersionProvider.class,
     header = "Usage:",
     synopsisHeading = "%n",
     descriptionHeading = "%nDescription:%n%n",
