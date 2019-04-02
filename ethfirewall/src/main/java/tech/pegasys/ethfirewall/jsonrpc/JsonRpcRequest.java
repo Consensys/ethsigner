@@ -15,6 +15,7 @@ package tech.pegasys.ethfirewall.jsonrpc;
 import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -63,14 +64,17 @@ public class JsonRpcRequest {
 
   @JsonInclude(Include.NON_NULL)
   @JsonGetter("params")
-  public Object getRawParams() {
+  private Object getRawParams() {
     return params;
   }
 
   public Object getParams() {
-    if (params instanceof ArrayList) {
-      JsonArray jsonArray = new JsonArray((ArrayList) params);
-      return jsonArray.getJsonObject(0);
+    if (params instanceof List) {
+      JsonArray jsonArray = new JsonArray((List) params);
+      if (jsonArray.isEmpty()) {
+        return null;
+      }
+      return jsonArray.getValue(0);
     }
     return params;
   }

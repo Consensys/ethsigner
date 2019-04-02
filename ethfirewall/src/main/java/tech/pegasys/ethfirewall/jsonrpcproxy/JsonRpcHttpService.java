@@ -107,8 +107,8 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private void handleJsonRpc(final RoutingContext context) {
+    JsonObject requestJson = null;
     try {
-      final JsonObject requestJson;
       try {
         requestJson = context.getBodyAsJson();
       } catch (final DecodeException e) {
@@ -128,7 +128,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context.request(), request);
     } catch (Exception e) {
-      LOG.error("Oh noes", e);
+      LOG.error("An unhandled error occurred while processing {}", requestJson, e);
     }
   }
 
