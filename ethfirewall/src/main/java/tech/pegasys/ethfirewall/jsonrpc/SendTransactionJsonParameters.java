@@ -118,4 +118,9 @@ public class SendTransactionJsonParameters {
           String.format("Prefix of '0x' is expected in value: %s", value));
     }
   }
+
+  public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
+    final JsonObject receivedParams = JsonObject.mapFrom(request.getParams());
+    return receivedParams.mapTo(SendTransactionJsonParameters.class);
+  }
 }
