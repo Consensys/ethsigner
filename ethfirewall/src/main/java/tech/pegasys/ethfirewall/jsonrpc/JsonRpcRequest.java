@@ -15,6 +15,7 @@ package tech.pegasys.ethfirewall.jsonrpc;
 import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -93,10 +94,28 @@ public class JsonRpcRequest {
       return false;
     }
     final JsonRpcRequest that = (JsonRpcRequest) o;
-    return Objects.equal(id, that.id)
+
+    final boolean isParamsEqual = isParamsEqual(that.params);
+
+    return isParamsEqual
+        && Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
-        && params.equals(that.params)
         && Objects.equal(version, that.version);
+  }
+
+  private boolean isParamsEqual(final Object otherParams) {
+    if (params.getClass().isArray()) {
+      if (!otherParams.getClass().isArray()) {
+        return false;
+      }
+      Object[] paramsArray = (Object[]) params;
+      Object[] thatParamsArray = (Object[]) otherParams;
+      return Arrays.equals(paramsArray, thatParamsArray);
+    } else if (otherParams.getClass().isArray()) {
+      return false;
+    }
+
+    return params.equals(otherParams);
   }
 
   @Override

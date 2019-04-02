@@ -17,5 +17,5 @@ import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 @FunctionalInterface
 public interface BodyProvider {
 
-  JsonRpcBody getBody(final JsonRpcRequest request);
+  JsonRpcBody getBody(JsonRpcRequest request);
 }
