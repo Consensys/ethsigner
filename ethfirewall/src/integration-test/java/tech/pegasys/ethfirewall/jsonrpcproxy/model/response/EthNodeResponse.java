@@ -10,23 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethfirewall.jsonrpcproxy.model;
+package tech.pegasys.ethfirewall.jsonrpcproxy.model.response;
 
 import java.util.Map;
 
-import io.vertx.core.json.Json;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.Response;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class EthNodeRequest {
+public class EthNodeResponse {
 
   private final String body;
   private final Map<String, String> headers;
+  private final HttpResponseStatus status;
 
-  public EthNodeRequest(
-      final Map<String, String> headers, final Request<?, ? extends Response<?>> body) {
-    this.body = Json.encode(body);
+  public EthNodeResponse(
+      final Map<String, String> headers, final String body, final HttpResponseStatus status) {
+    this.body = body;
     this.headers = headers;
+    this.status = status;
   }
 
   public String getBody() {
@@ -35,5 +35,9 @@ public class EthNodeRequest {
 
   public Map<String, String> getHeaders() {
     return headers;
+  }
+
+  public int getStatusCode() {
+    return status.code();
   }
 }

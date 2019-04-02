@@ -25,10 +25,12 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethfirewall.Runner;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthFirewallResponse;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeRequest;
-import tech.pegasys.ethfirewall.jsonrpcproxy.model.EthNodeResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthFirewallRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthNodeRequest;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthRequestFactory;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthFirewallResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthNodeResponse;
+import tech.pegasys.ethfirewall.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethfirewall.signing.ChainIdProvider;
 import tech.pegasys.ethfirewall.signing.ConfigurationChainId;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
@@ -44,11 +46,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.io.Resources;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.Json;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -61,30 +61,37 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.Response;
 
 public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
   private static final String LOCALHOST = "127.0.0.1";
+  private static final long DEFAULT_CHAIN_ID = 9;
+
+  protected static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   private static Runner runner;
-  private static ClientAndServer ethNode;
+  private static ClientAndServer clientAndServer;
 
   private JsonRpc2_0Web3j jsonRpc;
 
+  protected final EthRequestFactory request = new EthRequestFactory();
+  protected final EthResponseFactory response = new EthResponseFactory();
+
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
-    ethNode = startClientAndServer();
+    setupEthFirewall(DEFAULT_CHAIN_ID);
+  }
 
-    final File keyFile = createKeyFile();
+  protected static void setupEthFirewall(final long chainId) throws IOException, CipherException {
+    clientAndServer = startClientAndServer();
+
     final TransactionSigner transactionSigner =
-        transactionSigner(keyFile, "password", new ConfigurationChainId((byte) 9));
+        transactionSigner(new ConfigurationChainId(chainId));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
-    httpClientOptions.setDefaultPort(ethNode.getLocalPort());
+    httpClientOptions.setDefaultPort(clientAndServer.getLocalPort());
 
     final ServerSocket serverSocket = new ServerSocket(0);
     RestAssured.port = serverSocket.getLocalPort();
@@ -99,39 +106,33 @@ public class IntegrationTestBase {
     LOG.info(
         "Started ethFirewall on port {}, eth stub node on port {}",
         serverSocket.getLocalPort(),
-        ethNode.getLocalPort());
+        clientAndServer.getLocalPort());
     serverSocket.close();
+  }
+
+  protected static void resetEthFirewall() throws IOException, CipherException {
+    setupEthFirewall();
   }
 
   protected Web3j jsonRpc() {
     return jsonRpc;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
-  private static File createKeyFile() throws IOException {
-    final URL walletResource = Resources.getResource("keyfile.json");
-    final Path wallet = Files.createTempFile("ethfirewall_intg_keyfile", ".json");
-    Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
-    File keyFile = wallet.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
-  }
-
   @Before
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
-    ethNode.reset();
+    clientAndServer.reset();
   }
 
   @AfterClass
   public static void teardown() {
-    ethNode.stop();
+    clientAndServer.stop();
     runner.stop();
   }
 
   public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
     final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
-    ethNode
+    clientAndServer
         .when(request().withBody(json(request.getBody())), exactly(1))
         .respond(
             response()
@@ -140,34 +141,7 @@ public class IntegrationTestBase {
                 .withStatusCode(response.getStatusCode()));
   }
 
-  public void setUpEthNodeResponse(
-      final EthFirewallRequest request,
-      final Object response,
-      final Map<String, String> responseHeaders,
-      final HttpResponseStatus status) {
-    final String responseBody = Json.encode(response);
-    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
-    ethNode
-        .when(request().withBody(json(request.getBody())), exactly(1))
-        .respond(
-            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
-  }
-
-  public void setUpEthNodeResponse(
-      final Request<?, ? extends Response<?>> request,
-      final Object response,
-      final Map<String, String> responseHeaders,
-      final HttpResponseStatus status) {
-    final String requestBody = Json.encode(request);
-    final String responseBody = Json.encode(response);
-    final List<Header> headers = convertHeadersToMockServerHeaders(responseHeaders);
-    ethNode
-        .when(request().withBody(json(requestBody)), exactly(1))
-        .respond(
-            response().withBody(responseBody).withHeaders(headers).withStatusCode(status.code()));
-  }
-
-  public void sendVerifyingResponse(
+  public void sendRequestThenVerifyResponse(
       final EthFirewallRequest request, final EthFirewallResponse expectResponse) {
     given()
         .when()
@@ -180,37 +154,18 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  public void sendVerifyingResponse(
-      final Request<?, ? extends Response<?>> request,
-      final Map<String, String> requestHeaders,
-      final Object expectResponse,
-      final HttpResponseStatus expectStatus,
-      final Map<String, String> expectHeaders) {
-    final String responseBody = Json.encode(expectResponse);
-    given()
-        .when()
-        .body(request)
-        .headers(requestHeaders)
-        .post()
-        .then()
-        .statusCode(expectStatus.code())
-        .body(equalTo(responseBody))
-        .headers(expectHeaders);
-  }
-
-  public void verifyEthereumNodeReceived(final Request<?, ? extends Response<?>> proxyBodyRequest) {
-    ethNode.verify(
+  public void verifyEthNodeReceived(final String proxyBodyRequest) {
+    clientAndServer.verify(
         request()
-            .withBody(json(proxyBodyRequest))
+            .withBody(proxyBodyRequest)
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
-  public void verifyEthereumNodeReceived(
-      final Request<?, ? extends Response<?>> proxyBodyRequest,
-      final Map<String, String> proxyHeaders) {
-    ethNode.verify(
+  public void verifyEthNodeReceived(
+      final Map<String, String> proxyHeaders, final String proxyBodyRequest) {
+    clientAndServer.verify(
         request()
-            .withBody(json(proxyBodyRequest))
+            .withBody(proxyBodyRequest)
             .withHeaders(convertHeadersToMockServerHeaders(proxyHeaders)));
   }
 
@@ -220,11 +175,21 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner(
-      final File keyFile, final String password, final ChainIdProvider chain)
+  private static TransactionSigner transactionSigner(final ChainIdProvider chain)
       throws IOException, CipherException {
-    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
+    final File keyFile = createKeyFile();
+    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
 
     return new TransactionSigner(chain, credentials);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private static File createKeyFile() throws IOException {
+    final URL walletResource = Resources.getResource("keyfile.json");
+    final Path wallet = Files.createTempFile("ethfirewall_intg_keyfile", ".json");
+    Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
+    File keyFile = wallet.toFile();
+    keyFile.deleteOnExit();
+    return keyFile;
   }
 }
