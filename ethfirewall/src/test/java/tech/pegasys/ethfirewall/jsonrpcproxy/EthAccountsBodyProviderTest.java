@@ -84,7 +84,6 @@ public class EthAccountsBodyProviderTest {
     assertThat(error.getString("message")).isEqualTo(JsonRpcError.INVALID_PARAMS.getMessage());
   }
 
-
   @Test
   public void missingParametersIsOk() {
     final String address = "MyAddress";
@@ -101,6 +100,5 @@ public class EthAccountsBodyProviderTest {
     assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
     assertThat(jsonObj.getInteger("id")).isEqualTo(id);
     assertThat(jsonObj.getJsonArray("result")).containsExactly(address);
-
   }
 }

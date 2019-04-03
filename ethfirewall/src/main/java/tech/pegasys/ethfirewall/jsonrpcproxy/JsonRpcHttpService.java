@@ -26,7 +26,6 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -126,7 +125,9 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
     LOG.info("Dropping request from {}", context.request().remoteAddress());
     LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-    responder.populateResponse(context.request(), HttpResponseStatus.BAD_REQUEST.code(),
+    responder.populateResponse(
+        context.request(),
+        HttpResponseStatus.BAD_REQUEST.code(),
         Json.encodeToBuffer(new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR)));
   }
 }

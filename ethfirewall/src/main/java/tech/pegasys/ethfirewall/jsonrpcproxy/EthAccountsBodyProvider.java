@@ -14,11 +14,12 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static java.util.Collections.singletonList;
 
-import java.util.Collection;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcSuccessResponse;
+
+import java.util.Collection;
 
 import io.vertx.core.json.Json;
 import org.slf4j.Logger;
@@ -38,7 +39,6 @@ public class EthAccountsBodyProvider implements BodyProvider {
   public JsonRpcBody getBody(final JsonRpcRequest request) {
     final Object params = request.getParams();
 
-
     if (!isEmptyArray(params) && (params != null)) {
       LOG.info("eth_accounts should have no parameters, but has {}", request.getParams());
       return new JsonRpcBody(
@@ -53,8 +53,8 @@ public class EthAccountsBodyProvider implements BodyProvider {
   private boolean isEmptyArray(final Object params) {
     boolean arrayIsEmpty = false;
     boolean paramsIsArray = (params instanceof Collection);
-    if(paramsIsArray) {
-      Collection<?> collection = (Collection<?>)params;
+    if (paramsIsArray) {
+      Collection<?> collection = (Collection<?>) params;
       arrayIsEmpty = collection.isEmpty();
     }
 

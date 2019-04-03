@@ -74,7 +74,6 @@ public class Runner {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
-
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
             responder,
