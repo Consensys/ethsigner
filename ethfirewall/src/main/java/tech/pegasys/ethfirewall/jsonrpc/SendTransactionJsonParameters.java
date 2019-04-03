@@ -105,8 +105,6 @@ public class SendTransactionJsonParameters {
     return new BigInteger(value, HEXADECIMAL);
   }
 
-  // TODO validate hex format - ie. has prefix 0x
-  // TODO exception on parse?
   private BigInteger optionalHex(final String value) {
     validatePrefix(value);
 
@@ -125,11 +123,11 @@ public class SendTransactionJsonParameters {
     final Object sendTransactionObject;
     final Object params = request.getParams();
     if (params instanceof List) {
-      @SuppressWarnings("unchecked")
-      final List<Object> paramList = (List<Object>) params;
+      @SuppressWarnings("unchecked") final List<Object> paramList = (List<Object>) params;
       if (paramList.size() != 1) {
         throw new IllegalArgumentException(
-            "Rpc Parameters contains an array with more than 1 element.");
+            "SendTransaction Json Rpc requires a single parameter, request contained " +
+            paramList.size());
       }
       sendTransactionObject = paramList.get(0);
     } else {

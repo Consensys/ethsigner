@@ -16,6 +16,7 @@ import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 
 import io.vertx.core.http.HttpServerRequest;
 
+@FunctionalInterface
 public interface JsonRpcRequestHandler {
 
   void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);

@@ -14,17 +14,15 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static java.util.Collections.singletonList;
 
+import io.vertx.core.json.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
-
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SendTransactionBodyProvider implements BodyProvider {
 
@@ -60,7 +58,7 @@ public class SendTransactionBodyProvider implements BodyProvider {
       LOG.debug("Bad input value from request: {}", request, e);
       return errorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
-      LOG.debug("Unaccounted control flow for request: {}", request, e);
+      LOG.debug("Unhandled error processing request: {}", request, e);
       return errorResponse(request.getId(), JsonRpcError.INTERNAL_ERROR);
     }
 
@@ -79,9 +77,5 @@ public class SendTransactionBodyProvider implements BodyProvider {
 
   private JsonRpcBody errorResponse(final JsonRpcRequestId id, final JsonRpcError error) {
     return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
-  }
-
-  private JsonRpcRequestId id(final JsonObject requestJson) {
-    return new JsonRpcRequestId(requestJson.getValue("id"));
   }
 }
