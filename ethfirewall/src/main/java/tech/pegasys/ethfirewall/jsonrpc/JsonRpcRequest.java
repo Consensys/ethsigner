@@ -28,14 +28,14 @@ public class JsonRpcRequest {
 
   private JsonRpcRequestId id;
   private final String method;
-  private final Object[] params;
+  private final Object params;
   private final String version;
 
   @JsonCreator
   public JsonRpcRequest(
       @JsonProperty("jsonrpc") final String version,
       @JsonProperty("method") final String method,
-      @JsonProperty("params") final Object[] params) {
+      @JsonProperty("params") final Object params) {
     this.version = version;
     this.method = method;
     this.params = params;
@@ -45,8 +45,8 @@ public class JsonRpcRequest {
   }
 
   @JsonGetter("id")
-  public Object getId() {
-    return id == null ? null : id.getValue();
+  public JsonRpcRequestId getId() {
+    return id;
   }
 
   @JsonGetter("method")
@@ -61,7 +61,7 @@ public class JsonRpcRequest {
 
   @JsonInclude(Include.NON_NULL)
   @JsonGetter("params")
-  public Object[] getParams() {
+  public Object getParams() {
     return params;
   }
 
@@ -79,14 +79,36 @@ public class JsonRpcRequest {
       return false;
     }
     final JsonRpcRequest that = (JsonRpcRequest) o;
-    return Objects.equal(id, that.id)
+
+    return isParamsEqual(that.params)
+        && Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
-        && Arrays.equals(params, that.params)
         && Objects.equal(version, that.version);
+  }
+
+  private boolean isParamsEqual(final Object otherParams) {
+    if (params.getClass().isArray()) {
+      if (!otherParams.getClass().isArray()) {
+        return false;
+      }
+      Object[] paramsArray = (Object[]) params;
+      Object[] thatParamsArray = (Object[]) otherParams;
+      return Arrays.equals(paramsArray, thatParamsArray);
+    } else if (otherParams.getClass().isArray()) {
+      return false;
+    }
+
+    return params.equals(otherParams);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, method, Arrays.hashCode(params), version);
+    final int paramsHashCode;
+    if (params.getClass().isArray()) {
+      paramsHashCode = Arrays.hashCode((Object[]) params);
+    } else {
+      paramsHashCode = params.hashCode();
+    }
+    return Objects.hashCode(id, method, paramsHashCode, version);
   }
 }

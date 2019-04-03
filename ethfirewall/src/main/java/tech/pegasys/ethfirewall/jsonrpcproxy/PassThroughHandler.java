@@ -12,21 +12,20 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler implements Handler<RoutingContext> {
+public class PassThroughHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
   private final HttpClient ethNodeClient;
@@ -38,62 +37,61 @@ public class PassThroughHandler implements Handler<RoutingContext> {
   }
 
   @Override
-  public void handle(final RoutingContext context) {
-    final HttpServerRequest originalRequest = context.request();
+  public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest request) {
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
-            originalRequest.method(),
-            originalRequest.uri(),
+            httpServerRequest.method(),
+            httpServerRequest.uri(),
             proxiedResponse -> {
               logResponse(proxiedResponse);
 
-              originalRequest.response().setStatusCode(proxiedResponse.statusCode());
-              originalRequest.response().headers().setAll(proxiedResponse.headers());
-              originalRequest.response().setChunked(false);
+              httpServerRequest.response().setStatusCode(proxiedResponse.statusCode());
+              httpServerRequest.response().headers().setAll(proxiedResponse.headers());
+              httpServerRequest.response().setChunked(false);
 
               proxiedResponse.bodyHandler(
                   data -> {
                     logResponseBody(data);
 
                     // End the sendRequest, preventing any other handler from executing
-                    originalRequest.response().end(data);
+                    httpServerRequest.response().end(data);
                   });
             });
 
-    proxyRequest.headers().setAll(originalRequest.headers());
+    proxyRequest.headers().setAll(httpServerRequest.headers());
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    final JsonRpcBody providedBody = bodyProvider.getBody(context);
+    final JsonRpcBody providedBody = bodyProvider.getBody(request);
 
     if (providedBody.hasError()) {
-      sendErrorResponse(context, originalRequest, providedBody.error());
+      sendErrorResponse(request, httpServerRequest, providedBody.error());
     } else {
       // Data is only written to the wire on end()
       final Buffer proxyRequestBody = providedBody.body();
       proxyRequest.end(proxyRequestBody);
-      logRequest(context, proxyRequest, proxyRequestBody);
+      logRequest(request, httpServerRequest, proxyRequest, proxyRequestBody);
     }
   }
 
   private void sendErrorResponse(
-      final RoutingContext context,
-      final HttpServerRequest originalRequest,
+      final JsonRpcRequest jsonRequest,
+      final HttpServerRequest httpRequest,
       final JsonRpcErrorResponse error) {
-    LOG.info("Dropping request from {}", originalRequest.remoteAddress());
+    LOG.info("Dropping request from {}", httpRequest.remoteAddress());
     LOG.debug(
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        originalRequest.method(),
-        originalRequest.absoluteURI(),
-        context.getBodyAsString(),
+        httpRequest.method(),
+        httpRequest.absoluteURI(),
+        Json.encodePrettily(jsonRequest),
         Json.encode(error));
 
-    originalRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
-    originalRequest.response().headers().setAll(originalRequest.headers());
-    originalRequest.response().headers().remove("Content-Length"); // created during 'end'.
-    originalRequest.response().setChunked(false);
+    httpRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
+    httpRequest.response().headers().setAll(httpRequest.headers());
+    httpRequest.response().headers().remove("Content-Length"); // created during 'end'.
+    httpRequest.response().setChunked(false);
 
-    originalRequest.response().end(Json.encodeToBuffer(error));
+    httpRequest.response().end(Json.encodeToBuffer(error));
   }
 
   private void logResponse(final HttpClientResponse response) {
@@ -105,14 +103,15 @@ public class PassThroughHandler implements Handler<RoutingContext> {
   }
 
   private void logRequest(
-      final RoutingContext context,
+      final JsonRpcRequest originalJsonRpcRequest,
+      final HttpServerRequest originalRequest,
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
     LOG.debug(
         "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
-        context.request().method(),
-        context.request().absoluteURI(),
-        context.getBody(),
+        originalRequest.method(),
+        originalRequest.absoluteURI(),
+        Json.encodePrettily(originalJsonRpcRequest),
         proxyRequest.method(),
         proxyRequest.absoluteURI(),
         proxyRequestBody);

@@ -26,7 +26,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,10 +69,10 @@ public class Runner {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
-    // TODO use the json request
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
-            downStreamConnection, (RoutingContext context) -> new JsonRpcBody(context.getBody()));
+            downStreamConnection,
+            (jsonRpcRequest) -> new JsonRpcBody(Json.encodeToBuffer(jsonRpcRequest)));
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
 

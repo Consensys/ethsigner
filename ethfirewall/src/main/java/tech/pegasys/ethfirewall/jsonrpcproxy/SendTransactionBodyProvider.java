@@ -12,17 +12,16 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import static java.util.Collections.singletonList;
+
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,55 +38,45 @@ public class SendTransactionBodyProvider implements BodyProvider {
   }
 
   @Override
-  public JsonRpcBody getBody(RoutingContext context) {
-    final SendTransactionJsonRpcRequest request;
-    final JsonObject requestJson;
-    JsonRpcRequestId id = null;
+  public JsonRpcBody getBody(final JsonRpcRequest request) {
 
+    final SendTransactionJsonParameters params;
     try {
-      requestJson = context.getBodyAsJson();
-    } catch (final DecodeException exception) {
-      LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), exception);
-      return errorResponse(id, JsonRpcError.PARSE_ERROR);
-    }
+      params = SendTransactionJsonParameters.from(request);
+    } catch (final NumberFormatException e) {
+      LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
+      return errorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
 
-    try {
-      id = id(requestJson);
-      request = requestJson.mapTo(SendTransactionJsonRpcRequest.class);
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Deserialisation failed for request: {}", requestJson, e);
-      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
+      LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
+      return errorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
 
     final String signedTransactionHexString;
     try {
-      signedTransactionHexString = signer.signTransaction(request);
+      signedTransactionHexString = signer.signTransaction(params);
     } catch (final IllegalArgumentException e) {
-      LOG.debug("Bad input value from request: {}", requestJson, e);
-      return errorResponse(id, JsonRpcError.INVALID_PARAMS);
+      LOG.debug("Bad input value from request: {}", request, e);
+      return errorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
-      LOG.debug("Unaccounted control flow for request: {}", requestJson, e);
-      return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
+      LOG.debug("Unhandled error processing request: {}", request, e);
+      return errorResponse(request.getId(), JsonRpcError.INTERNAL_ERROR);
     }
 
     final JsonRpcRequest sendRawTransaction =
         new JsonRpcRequest(
-            JSON_RPC_VERSION, JSON_RPC_METHOD, new Object[] {signedTransactionHexString});
-    sendRawTransaction.setId(id);
+            JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
+    sendRawTransaction.setId(request.getId());
 
     try {
       return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
     } catch (final IllegalArgumentException exception) {
       LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, exception);
-      return errorResponse(id, JsonRpcError.INTERNAL_ERROR);
+      return errorResponse(request.getId(), JsonRpcError.INTERNAL_ERROR);
     }
   }
 
   private JsonRpcBody errorResponse(final JsonRpcRequestId id, final JsonRpcError error) {
     return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
-  }
-
-  private JsonRpcRequestId id(final JsonObject requestJson) {
-    return new JsonRpcRequestId(requestJson.getValue("id"));
   }
 }

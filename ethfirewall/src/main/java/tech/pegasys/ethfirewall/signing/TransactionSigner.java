@@ -13,7 +13,6 @@
 package tech.pegasys.ethfirewall.signing;
 
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
-import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
 
 import java.math.BigInteger;
@@ -32,12 +31,12 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
-  public String signTransaction(final SendTransactionJsonRpcRequest request) {
-    if (senderNotUnlockedAccount(request)) {
+  public String signTransaction(final SendTransactionJsonParameters params) {
+    if (senderNotUnlockedAccount(params)) {
       throw new IllegalArgumentException("From address does not match unlocked account");
     }
 
-    final RawTransaction rawTransaction = rawTransaction(request);
+    final RawTransaction rawTransaction = rawTransaction(params);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -45,12 +44,11 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private boolean senderNotUnlockedAccount(final SendTransactionJsonRpcRequest request) {
-    return !request.getParams().sender().equalsIgnoreCase(credentials.getAddress());
+  private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
+    return !params.sender().equalsIgnoreCase(credentials.getAddress());
   }
 
-  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
-    final SendTransactionJsonParameters params = request.getParams();
+  private RawTransaction rawTransaction(final SendTransactionJsonParameters params) {
 
     return RawTransaction.createTransaction(
         nonce(params),
