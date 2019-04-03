@@ -31,7 +31,10 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   private final HttpClient ethNodeClient;
   private BodyProvider bodyProvider;
 
-  public PassThroughHandler(final HttpClient ethNodeClient, final BodyProvider bodyProvider) {
+  public PassThroughHandler(
+      final JsonRpcResponder responder,
+      final HttpClient ethNodeClient,
+      final BodyProvider bodyProvider) {
     this.ethNodeClient = ethNodeClient;
     this.bodyProvider = bodyProvider;
   }

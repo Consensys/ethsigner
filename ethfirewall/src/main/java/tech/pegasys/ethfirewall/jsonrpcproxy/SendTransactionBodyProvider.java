@@ -14,15 +14,16 @@ package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import static java.util.Collections.singletonList;
 
-import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
+
+import io.vertx.core.json.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SendTransactionBodyProvider implements BodyProvider {
 

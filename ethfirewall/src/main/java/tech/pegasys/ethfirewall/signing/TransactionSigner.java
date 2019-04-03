@@ -31,6 +31,10 @@ public class TransactionSigner {
     this.credentials = credentials;
   }
 
+  public String getAddress() {
+    return credentials.getAddress();
+  }
+
   public String signTransaction(final SendTransactionJsonParameters params) {
     if (senderNotUnlockedAccount(params)) {
       throw new IllegalArgumentException("From address does not match unlocked account");
