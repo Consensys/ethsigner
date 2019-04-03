@@ -95,9 +95,7 @@ public class JsonRpcRequest {
     }
     final JsonRpcRequest that = (JsonRpcRequest) o;
 
-    final boolean isParamsEqual = isParamsEqual(that.params);
-
-    return isParamsEqual
+    return isParamsEqual(that.params)
         && Objects.equal(id, that.id)
         && Objects.equal(method, that.method)
         && Objects.equal(version, that.version);
@@ -120,7 +118,13 @@ public class JsonRpcRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(id, method, params.hashCode(), version);
+    final int paramsHashCode;
+    if (params.getClass().isArray()) {
+      paramsHashCode = Arrays.hashCode((Object[]) params);
+    } else {
+      paramsHashCode = params.hashCode();
+    }
+    return Objects.hashCode(id, method, paramsHashCode, version);
   }
 
   public static JsonRpcRequest convertFrom(final JsonObject jsonObject) {

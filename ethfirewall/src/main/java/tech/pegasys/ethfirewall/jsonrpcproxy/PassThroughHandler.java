@@ -77,7 +77,6 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   private void sendErrorResponse(
       final HttpServerRequest httpRequest, final JsonRpcErrorResponse error) {
     LOG.info("Dropping request from {}", httpRequest.remoteAddress());
-    /*
     httpRequest.bodyHandler(
         body -> {
           LOG.debug(
@@ -87,7 +86,6 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
               body.toString(),
               Json.encode(error));
         });
-        */
 
     httpRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
     httpRequest.response().headers().setAll(httpRequest.headers());

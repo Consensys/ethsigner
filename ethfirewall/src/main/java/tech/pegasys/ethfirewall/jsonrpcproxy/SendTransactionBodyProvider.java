@@ -45,8 +45,6 @@ public class SendTransactionBodyProvider implements BodyProvider {
     try {
       params = SendTransactionJsonParameters.from(request);
     } catch (final NumberFormatException e) {
-
-      // TODO fix this - Jackson wraps as NFR
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       return errorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
 
