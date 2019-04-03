@@ -123,11 +123,12 @@ public class SendTransactionJsonParameters {
     final Object sendTransactionObject;
     final Object params = request.getParams();
     if (params instanceof List) {
-      @SuppressWarnings("unchecked") final List<Object> paramList = (List<Object>) params;
+      @SuppressWarnings("unchecked")
+      final List<Object> paramList = (List<Object>) params;
       if (paramList.size() != 1) {
         throw new IllegalArgumentException(
-            "SendTransaction Json Rpc requires a single parameter, request contained " +
-            paramList.size());
+            "SendTransaction Json Rpc requires a single parameter, request contained "
+                + paramList.size());
       }
       sendTransactionObject = paramList.get(0);
     } else {
