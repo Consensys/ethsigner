@@ -74,7 +74,6 @@ public class Runner {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
-    // TODO use the json request
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
             responder,
@@ -82,9 +81,6 @@ public class Runner {
             (jsonRpcRequest) -> new JsonRpcBody(Json.encodeToBuffer(jsonRpcRequest)));
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
-
-    final SendTransactionBodyProvider sendTransactionHandler =
-        new SendTransactionBodyProvider(transactionSigner);
 
     requestMapper.addHandler(
         "eth_sendTransaction",
