@@ -15,7 +15,8 @@ package tech.pegasys.ethfirewall.jsonrpc;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.List;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.json.JsonObject;
@@ -31,7 +32,7 @@ public class JsonRpcRequestTest {
     input.put("method", "mine");
     input.put("params", 5);
 
-    final JsonRpcRequest request = JsonRpcRequest.convertFrom(input);
+    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
     assertThat(request.getVersion()).isEqualTo("2.0");
     assertThat(request.getMethod()).isEqualTo("mine");
     assertThat(request.getParams()).isEqualTo(5);
@@ -45,36 +46,26 @@ public class JsonRpcRequestTest {
     input.put("method", "mine");
     input.put("params", singletonList(5));
 
-    final JsonRpcRequest request = JsonRpcRequest.convertFrom(input);
+    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
     assertThat(request.getVersion()).isEqualTo("2.0");
     assertThat(request.getMethod()).isEqualTo("mine");
-    assertThat(request.getParams()).isEqualTo(5);
+    assertThat(request.getParams()).isEqualTo(singletonList(5));
   }
 
   @Test
-  public void arrayOfSingleJsonObjectCorrectExtracts() {
-    final JsonObject parameters = new JsonObject("{\"input\":\"yes\"}");
-
-    final JsonObject input = new JsonObject();
-    input.put("jsonrpc", 2.0);
-    input.put("method", "mine");
-    input.put("params", singletonList(parameters));
-
-    final JsonRpcRequest request = JsonRpcRequest.convertFrom(input);
-    assertThat(request.getVersion()).isEqualTo("2.0");
-    assertThat(request.getMethod()).isEqualTo("mine");
-    assertThat(request.getParams()).isEqualTo(parameters);
-  }
-
-  @Test
-  public void multiEntriesInParamsThrowsException() {
+  public void multiEntriesInParamsIsValid() {
     final JsonObject input = new JsonObject();
     input.put("jsonrpc", 2.0);
     input.put("method", "mine");
     input.put("params", Lists.newArrayList(5, 5));
 
-    assertThatThrownBy(() -> JsonRpcRequest.convertFrom(input))
-        .isInstanceOf(IllegalArgumentException.class);
+    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
+    assertThat(request.getParams()).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked")
+    final List<Object> paramArray = (List) request.getParams();
+    assertThat(paramArray).containsExactly(5, 5);
+    assertThat(request.getVersion()).isEqualTo("2.0");
+    assertThat(request.getMethod()).isEqualTo("mine");
   }
 
   @Test
@@ -84,10 +75,13 @@ public class JsonRpcRequestTest {
     input.put("method", "mine");
     input.put("params", emptyList());
 
-    final JsonRpcRequest request = JsonRpcRequest.convertFrom(input);
+    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
+    assertThat(request.getParams()).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked")
+    final List<Object> paramArray = (List<Object>) request.getParams();
+    assertThat(paramArray.size()).isZero();
     assertThat(request.getVersion()).isEqualTo("2.0");
     assertThat(request.getMethod()).isEqualTo("mine");
-    assertThat(request.getParams()).isNull();
   }
 
   @Test

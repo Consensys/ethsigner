@@ -14,9 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpc;
 
 import tech.pegasys.ethfirewall.jsonrpc.exception.InvalidJsonRpcRequestException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -25,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 public class JsonRpcRequest {
 
@@ -65,18 +61,7 @@ public class JsonRpcRequest {
 
   @JsonInclude(Include.NON_NULL)
   @JsonGetter("params")
-  private Object getRawParams() {
-    return params;
-  }
-
   public Object getParams() {
-    if (params instanceof List) {
-      JsonArray jsonArray = new JsonArray((List) params);
-      if (jsonArray.isEmpty()) {
-        return null;
-      }
-      return jsonArray.getValue(0);
-    }
     return params;
   }
 
@@ -125,22 +110,5 @@ public class JsonRpcRequest {
       paramsHashCode = params.hashCode();
     }
     return Objects.hashCode(id, method, paramsHashCode, version);
-  }
-
-  public static JsonRpcRequest convertFrom(final JsonObject jsonObject) {
-    final JsonRpcRequest result = jsonObject.mapTo(JsonRpcRequest.class);
-
-    final Object params = result.getRawParams();
-    if (params != null) {
-      if (params instanceof ArrayList) {
-        JsonArray jsonArray = new JsonArray((ArrayList) params);
-
-        if (jsonArray.size() > 1) {
-          throw new IllegalArgumentException("Illegally constructed Transaction Json content.");
-        }
-      }
-    }
-
-    return result;
   }
 }

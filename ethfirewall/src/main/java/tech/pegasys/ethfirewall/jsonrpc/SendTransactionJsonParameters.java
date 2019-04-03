@@ -13,6 +13,7 @@
 package tech.pegasys.ethfirewall.jsonrpc;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -120,7 +121,23 @@ public class SendTransactionJsonParameters {
   }
 
   public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
-    final JsonObject receivedParams = JsonObject.mapFrom(request.getParams());
+
+    final Object sendTransactionObject;
+    final Object params = request.getParams();
+    if (params instanceof List) {
+      @SuppressWarnings("unchecked")
+      final List<Object> paramList = (List<Object>) params;
+      if (paramList.size() != 1) {
+        throw new IllegalArgumentException(
+            "Rpc Parameters contains an array with more than 1 element.");
+      }
+      sendTransactionObject = paramList.get(0);
+    } else {
+      sendTransactionObject = params;
+    }
+
+    final JsonObject receivedParams = JsonObject.mapFrom(sendTransactionObject);
+
     return receivedParams.mapTo(SendTransactionJsonParameters.class);
   }
 }

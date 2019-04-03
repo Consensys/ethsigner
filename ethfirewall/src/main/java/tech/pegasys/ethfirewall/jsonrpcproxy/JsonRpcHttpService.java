@@ -118,7 +118,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
       final JsonRpcRequest request;
       try {
-        request = JsonRpcRequest.convertFrom(requestJson);
+        request = requestJson.mapTo(JsonRpcRequest.class);
       } catch (final IllegalArgumentException e) {
         sendParseErrorResponse(context, e);
         return;

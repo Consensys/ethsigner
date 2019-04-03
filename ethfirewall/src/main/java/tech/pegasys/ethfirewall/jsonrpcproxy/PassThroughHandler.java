@@ -65,27 +65,26 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
     final JsonRpcBody providedBody = bodyProvider.getBody(request);
 
     if (providedBody.hasError()) {
-      sendErrorResponse(httpServerRequest, providedBody.error());
+      sendErrorResponse(request, httpServerRequest, providedBody.error());
     } else {
       // Data is only written to the wire on end()
       final Buffer proxyRequestBody = providedBody.body();
       proxyRequest.end(proxyRequestBody);
-      logRequest(httpServerRequest, proxyRequest, proxyRequestBody);
+      logRequest(request, httpServerRequest, proxyRequest, proxyRequestBody);
     }
   }
 
   private void sendErrorResponse(
-      final HttpServerRequest httpRequest, final JsonRpcErrorResponse error) {
+      final JsonRpcRequest jsonRequest,
+      final HttpServerRequest httpRequest,
+      final JsonRpcErrorResponse error) {
     LOG.info("Dropping request from {}", httpRequest.remoteAddress());
-    httpRequest.bodyHandler(
-        body -> {
-          LOG.debug(
-              "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-              httpRequest.method(),
-              httpRequest.absoluteURI(),
-              body.toString(),
-              Json.encode(error));
-        });
+    LOG.debug(
+        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        httpRequest.method(),
+        httpRequest.absoluteURI(),
+        Json.encodePrettily(jsonRequest),
+        Json.encode(error));
 
     httpRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
     httpRequest.response().headers().setAll(httpRequest.headers());
@@ -104,19 +103,17 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   }
 
   private void logRequest(
+      final JsonRpcRequest originalJsonRpcRequest,
       final HttpServerRequest originalRequest,
       final HttpClientRequest proxyRequest,
       final Buffer proxyRequestBody) {
-    originalRequest.bodyHandler(
-        body -> {
-          LOG.debug(
-              "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
-              originalRequest.method(),
-              originalRequest.absoluteURI(),
-              body.toString(),
-              proxyRequest.method(),
-              proxyRequest.absoluteURI(),
-              proxyRequestBody);
-        });
+    LOG.debug(
+        "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
+        originalRequest.method(),
+        originalRequest.absoluteURI(),
+        Json.encodePrettily(originalJsonRpcRequest),
+        proxyRequest.method(),
+        proxyRequest.absoluteURI(),
+        proxyRequestBody);
   }
 }
