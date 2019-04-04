@@ -49,17 +49,17 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private final RequestMapper requestHandlerMapper;
-  private final JsonRpcResponder responder;
+  private final HttpResponseFactory responseFactory;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
-      final JsonRpcResponder responder,
+      final HttpResponseFactory responseFactory,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final RequestMapper requestHandlerMapper) {
-    this.responder = responder;
+    this.responseFactory = responseFactory;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.requestHandlerMapper = requestHandlerMapper;
@@ -125,9 +125,9 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
     LOG.info("Dropping request from {}", context.request().remoteAddress());
     LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-    responder.populateResponse(
+    responseFactory.create(
         context.request(),
         HttpResponseStatus.BAD_REQUEST.code(),
-        Json.encodeToBuffer(new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR)));
+        new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR));
   }
 }

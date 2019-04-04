@@ -13,10 +13,11 @@
 package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.jsonrpcproxy.EthAccountsBodyProvider;
+import tech.pegasys.ethfirewall.jsonrpcproxy.HttpResponseFactory;
 import tech.pegasys.ethfirewall.jsonrpcproxy.InternalResponseHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcBody;
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcErrorReporter;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
-import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcResponder;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
 import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionBodyProvider;
@@ -40,7 +41,8 @@ public class Runner {
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
-  private final JsonRpcResponder responder = new JsonRpcResponder();
+  private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
   private Vertx vertx;
   private String deploymentId;
@@ -61,7 +63,7 @@ public class Runner {
     vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
     final JsonRpcHttpService httpService =
-        new JsonRpcHttpService(responder, serverOptions, httpRequestTimeout, requestMapper);
+        new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
@@ -76,7 +78,7 @@ public class Runner {
 
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
-            responder,
+            errorReporter,
             downStreamConnection,
             (jsonRpcRequest) -> new JsonRpcBody(Json.encodeToBuffer(jsonRpcRequest)));
 
@@ -85,12 +87,16 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new PassThroughHandler(
-            responder, downStreamConnection, new SendTransactionBodyProvider(transactionSigner)));
+            errorReporter,
+            downStreamConnection,
+            new SendTransactionBodyProvider(transactionSigner)));
 
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responder, new EthAccountsBodyProvider(transactionSigner.getAddress())));
+            responseFactory,
+            new EthAccountsBodyProvider(transactionSigner.getAddress()),
+            errorReporter));
 
     return requestMapper;
   }

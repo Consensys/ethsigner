@@ -12,22 +12,24 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcResponse;
+
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 
-public class JsonRpcResponder {
+public class HttpResponseFactory {
 
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
-  public void populateResponse(
-      final HttpServerRequest httpRequest, final int statusCode, final Buffer body) {
+  public void create(
+      final HttpServerRequest httpRequest, final int statusCode, final JsonRpcResponse body) {
     final HttpServerResponse response = httpRequest.response();
 
     response.putHeader("Content", JSON);
     response.setStatusCode(statusCode);
     response.setChunked(false);
-    response.end(body);
+    response.end(Json.encodeToBuffer(body));
   }
 }

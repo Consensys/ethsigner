@@ -13,22 +13,29 @@
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcSuccessResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InternalResponseHandler extends AbstractJsonRpcHandler {
+public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(InternalResponseHandler.class);
 
+  private HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
+  private final JsonRpcErrorReporter errorReporter;
 
   public InternalResponseHandler(
-      final JsonRpcResponder responder, final BodyProvider responseBodyProvider) {
-    super(responder);
+      final HttpResponseFactory responder,
+      final BodyProvider responseBodyProvider,
+      final JsonRpcErrorReporter errorReporter) {
+    this.responder = responder;
     this.responseBodyProvider = responseBodyProvider;
+    this.errorReporter = errorReporter;
   }
 
   @Override
@@ -37,10 +44,11 @@ public class InternalResponseHandler extends AbstractJsonRpcHandler {
     final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
 
     if (providedBody.hasError()) {
-      sendErrorResponse(httpServerRequest, providedBody.error());
+      errorReporter.send(rpcRequest, httpServerRequest, providedBody.error());
     } else {
-      responder.populateResponse(
-          httpServerRequest, HttpResponseStatus.OK.code(), providedBody.body());
+      final JsonRpcSuccessResponse result =
+          Json.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
+      responder.create(httpServerRequest, HttpResponseStatus.OK.code(), result);
     }
   }
 }

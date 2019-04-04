@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -20,29 +21,28 @@ import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractJsonRpcHandler implements JsonRpcRequestHandler {
+public class JsonRpcErrorReporter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractJsonRpcHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcErrorReporter.class);
 
-  protected final JsonRpcResponder responder;
+  private final HttpResponseFactory responder;
 
-  AbstractJsonRpcHandler(final JsonRpcResponder responder) {
+  public JsonRpcErrorReporter(final HttpResponseFactory responder) {
     this.responder = responder;
   }
 
-  void sendErrorResponse(final HttpServerRequest httpRequest, final JsonRpcErrorResponse error) {
+  void send(
+      final JsonRpcRequest jsonRequest,
+      final HttpServerRequest httpRequest,
+      final JsonRpcErrorResponse error) {
     LOG.info("Dropping request from {}", httpRequest.remoteAddress());
-    httpRequest.bodyHandler(
-        body -> {
-          LOG.debug(
-              "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-              httpRequest.method(),
-              httpRequest.absoluteURI(),
-              body.toString(),
-              Json.encode(error));
-        });
+    LOG.debug(
+        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        httpRequest.method(),
+        httpRequest.absoluteURI(),
+        Json.encodePrettily(jsonRequest),
+        Json.encode(error));
 
-    responder.populateResponse(
-        httpRequest, HttpResponseStatus.BAD_REQUEST.code(), Json.encodeToBuffer(error));
+    responder.create(httpRequest, HttpResponseStatus.BAD_REQUEST.code(), error);
   }
 }

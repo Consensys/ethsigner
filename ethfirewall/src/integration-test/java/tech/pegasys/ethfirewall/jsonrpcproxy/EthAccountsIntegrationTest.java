@@ -28,7 +28,7 @@ import org.web3j.protocol.core.methods.response.EthAccounts;
 public class EthAccountsIntegrationTest extends IntegrationTestBase {
 
   @Test
-  public void ethAccountsWithEmptyArrayReturnsSuccessContainingAddress() {
+  public void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {
 
     final Request<?, EthAccounts> requestBody = jsonRpc().ethAccounts();
     final Map<String, String> expectedHeaders =
