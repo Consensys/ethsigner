@@ -13,7 +13,7 @@
 package tech.pegasys.ethfirewall;
 
 import tech.pegasys.ethfirewall.jsonrpcproxy.EthAccountsBodyProvider;
-import tech.pegasys.ethfirewall.jsonrpcproxy.InternalResponder;
+import tech.pegasys.ethfirewall.jsonrpcproxy.InternalResponseHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcBody;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcResponder;
@@ -89,7 +89,7 @@ public class Runner {
 
     requestMapper.addHandler(
         "eth_accounts",
-        new InternalResponder(
+        new InternalResponseHandler(
             responder, new EthAccountsBodyProvider(transactionSigner.getAddress())));
 
     return requestMapper;

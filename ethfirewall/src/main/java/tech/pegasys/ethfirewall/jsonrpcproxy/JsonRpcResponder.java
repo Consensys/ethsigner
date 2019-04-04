@@ -22,11 +22,11 @@ public class JsonRpcResponder {
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
   public void populateResponse(
-      final HttpServerRequest httpRequest, final int status_code, final Buffer body) {
+      final HttpServerRequest httpRequest, final int statusCode, final Buffer body) {
     final HttpServerResponse response = httpRequest.response();
 
     response.putHeader("Content", JSON);
-    response.setStatusCode(status_code);
+    response.setStatusCode(statusCode);
     response.setChunked(false);
     response.end(body);
   }

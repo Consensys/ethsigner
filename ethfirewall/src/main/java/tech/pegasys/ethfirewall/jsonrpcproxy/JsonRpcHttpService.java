@@ -49,7 +49,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private final RequestMapper requestHandlerMapper;
-  private JsonRpcResponder responder;
+  private final JsonRpcResponder responder;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private HttpServer httpServer = null;

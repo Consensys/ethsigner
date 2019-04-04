@@ -39,7 +39,7 @@ public class EthAccountsBodyProvider implements BodyProvider {
   public JsonRpcBody getBody(final JsonRpcRequest request) {
     final Object params = request.getParams();
 
-    if (!isEmptyArray(params) && (params != null)) {
+    if (isPopulated(params) && isNotEmptyArray(params)) {
       LOG.info("eth_accounts should have no parameters, but has {}", request.getParams());
       return new JsonRpcBody(
           new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS));
@@ -50,7 +50,11 @@ public class EthAccountsBodyProvider implements BodyProvider {
     return new JsonRpcBody(Json.encodeToBuffer(response));
   }
 
-  private boolean isEmptyArray(final Object params) {
+  private boolean isPopulated(final Object params) {
+    return params != null;
+  }
+
+  private boolean isNotEmptyArray(final Object params) {
     boolean arrayIsEmpty = false;
     boolean paramsIsArray = (params instanceof Collection);
     if (paramsIsArray) {
@@ -58,6 +62,6 @@ public class EthAccountsBodyProvider implements BodyProvider {
       arrayIsEmpty = collection.isEmpty();
     }
 
-    return paramsIsArray && arrayIsEmpty;
+    return !(paramsIsArray && arrayIsEmpty);
   }
 }

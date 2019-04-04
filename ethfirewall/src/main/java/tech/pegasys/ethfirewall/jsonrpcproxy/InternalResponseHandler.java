@@ -19,13 +19,13 @@ import io.vertx.core.http.HttpServerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InternalResponder extends AbstractJsonRpcHandler {
+public class InternalResponseHandler extends AbstractJsonRpcHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InternalResponseHandler.class);
 
   private final BodyProvider responseBodyProvider;
 
-  public InternalResponder(
+  public InternalResponseHandler(
       final JsonRpcResponder responder, final BodyProvider responseBodyProvider) {
     super(responder);
     this.responseBodyProvider = responseBodyProvider;
