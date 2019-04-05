@@ -62,8 +62,8 @@ public class EthFirewallProcessRunner {
 
     final List<String> params = new ArrayList<>();
 
-    // TODO path to executable - to use when starting the process
-    params.add("build/install/pantheon/bin/pantheon");
+    // TODO created by gradle target - installDist
+    params.add("build/install/ethfirewall/bin/ethfirewall");
 
     // TODO launch parameters
     params.add("--data-path");
