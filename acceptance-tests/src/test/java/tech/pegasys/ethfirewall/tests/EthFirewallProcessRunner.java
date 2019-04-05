@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
@@ -61,14 +65,21 @@ public class EthFirewallProcessRunner {
   public void start(final String name) {
 
     final List<String> params = new ArrayList<>();
-
     params.add(executableLocation());
-
-    // TODO launch parameters
-    params.add("--data-path");
-    //    params.add(dataDir.toAbsolutePath().toString());
+    params.add("--logging DEBUG");
+    params.add("--password-file");
+    params.add(createPasswordFile().getAbsolutePath());
+    params.add("--key-file");
+    params.add(createKeyFile().getAbsolutePath());
+    params.add("--downstream-http-host 127.0.0.1");
+    params.add("--downstream-http-port 8545");
+    params.add("--downstream-http-request-timeout 500");
+    params.add("----http-listen-host 127.0.0.1");
+    params.add("----http-listen-port 9945");
+    params.add("--chain-id 3216547778");
 
     LOG.info("Creating EthFirewall process with params {}", params);
+
     final ProcessBuilder processBuilder =
         new ProcessBuilder(params)
             .directory(new File(System.getProperty("user.dir")).getParentFile())
@@ -116,5 +127,34 @@ public class EthFirewallProcessRunner {
                 return true;
               }
             });
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private static File createKeyFile() {
+    final Path wallet;
+    try {
+      final URL walletResource = Resources.getResource("keyfile.json");
+      wallet = Files.createTempFile("ethfirewall_into_keyfile", ".json");
+      Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+    File keyFile = wallet.toFile();
+    keyFile.deleteOnExit();
+    return keyFile;
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private static File createPasswordFile() {
+    final Path wallet;
+    try {
+      wallet = Files.createTempFile("ethfirewall_into_passwordfile", ".json");
+      Files.write(wallet, "password".getBytes(UTF_8));
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+    File keyFile = wallet.toFile();
+    keyFile.deleteOnExit();
+    return keyFile;
   }
 }
