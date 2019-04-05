@@ -25,7 +25,7 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(InternalResponseHandler.class);
 
-  private HttpResponseFactory responder;
+  private final HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
   private final JsonRpcErrorReporter errorReporter;
 
