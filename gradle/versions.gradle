@@ -23,6 +23,8 @@ dependencyManagement {
 
     dependency 'com.squareup.okhttp3:okhttp:3.12.1'
 
+    dependency 'com.github.docker-java:docker-java:3.1.1'
+
     dependency 'commons-cli:commons-cli:1.4'
 
     dependency 'info.picocli:picocli:3.9.2'
@@ -32,6 +34,8 @@ dependencyManagement {
     dependency 'io.vertx:vertx-unit:3.6.3'
     dependency 'io.vertx:vertx-web:3.6.3'
     dependency 'io.vertx:vertx-web-client:3.6.3'
+
+    dependency 'io.rest-assured:rest-assured:3.0.7'
 
     dependency 'junit:junit:4.12'
 
@@ -43,7 +47,7 @@ dependencyManagement {
 
     dependency 'org.mockito:mockito-core:2.23.4'
 
-    dependency 'io.rest-assured:rest-assured:3.0.7'
+    dependency 'org.awaitility:awaitility:3.1.6'
 
     dependency 'org.mock-server:mockserver-netty:5.5.1'
 

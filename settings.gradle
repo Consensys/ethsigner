@@ -12,4 +12,5 @@
  */
 
 rootProject.name='ethfirewall'
+include 'acceptance-tests'
 include 'ethfirewall'
