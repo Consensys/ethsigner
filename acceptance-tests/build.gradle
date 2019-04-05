@@ -22,7 +22,6 @@ dependencies {
   testImplementation 'org.apache.logging.log4j:log4j-api'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.awaitility:awaitility'
-  testImplementation 'org.java-websocket:Java-WebSocket'
 }
 
 test.enabled = false
