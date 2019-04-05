@@ -13,9 +13,7 @@
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -28,10 +26,15 @@ import org.slf4j.LoggerFactory;
 public class PassThroughHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
+  private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
-  private BodyProvider bodyProvider;
+  private final BodyProvider bodyProvider;
 
-  public PassThroughHandler(final HttpClient ethNodeClient, final BodyProvider bodyProvider) {
+  public PassThroughHandler(
+      final JsonRpcErrorReporter errorReporter,
+      final HttpClient ethNodeClient,
+      final BodyProvider bodyProvider) {
+    this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
     this.bodyProvider = bodyProvider;
   }
@@ -65,33 +68,13 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
     final JsonRpcBody providedBody = bodyProvider.getBody(request);
 
     if (providedBody.hasError()) {
-      sendErrorResponse(request, httpServerRequest, providedBody.error());
+      errorReporter.send(request, httpServerRequest, providedBody.error());
     } else {
       // Data is only written to the wire on end()
       final Buffer proxyRequestBody = providedBody.body();
       proxyRequest.end(proxyRequestBody);
       logRequest(request, httpServerRequest, proxyRequest, proxyRequestBody);
     }
-  }
-
-  private void sendErrorResponse(
-      final JsonRpcRequest jsonRequest,
-      final HttpServerRequest httpRequest,
-      final JsonRpcErrorResponse error) {
-    LOG.info("Dropping request from {}", httpRequest.remoteAddress());
-    LOG.debug(
-        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        httpRequest.method(),
-        httpRequest.absoluteURI(),
-        Json.encodePrettily(jsonRequest),
-        Json.encode(error));
-
-    httpRequest.response().setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
-    httpRequest.response().headers().setAll(httpRequest.headers());
-    httpRequest.response().headers().remove("Content-Length"); // created during 'end'.
-    httpRequest.response().setChunked(false);
-
-    httpRequest.response().end(Json.encodeToBuffer(error));
   }
 
   private void logResponse(final HttpClientResponse response) {

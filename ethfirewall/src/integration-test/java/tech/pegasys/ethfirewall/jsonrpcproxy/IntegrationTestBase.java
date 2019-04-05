@@ -79,6 +79,8 @@ public class IntegrationTestBase {
   protected final EthRequestFactory request = new EthRequestFactory();
   protected final EthResponseFactory response = new EthResponseFactory();
 
+  protected static String unlockedAccount;
+
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
     setupEthFirewall(DEFAULT_CHAIN_ID);
@@ -109,6 +111,8 @@ public class IntegrationTestBase {
         serverSocket.getLocalPort(),
         clientAndServer.getLocalPort());
     serverSocket.close();
+
+    unlockedAccount = transactionSigner.getAddress();
   }
 
   protected static void resetEthFirewall() throws IOException, CipherException {

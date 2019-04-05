@@ -12,7 +12,11 @@
  */
 package tech.pegasys.ethfirewall;
 
+import tech.pegasys.ethfirewall.jsonrpcproxy.EthAccountsBodyProvider;
+import tech.pegasys.ethfirewall.jsonrpcproxy.HttpResponseFactory;
+import tech.pegasys.ethfirewall.jsonrpcproxy.InternalResponseHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcBody;
+import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcErrorReporter;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
@@ -33,10 +37,13 @@ import org.slf4j.LoggerFactory;
 public class Runner {
 
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
-  private TransactionSigner transactionSigner;
-  private HttpClientOptions clientOptions;
-  private HttpServerOptions serverOptions;
-  private Duration httpRequestTimeout;
+  private final TransactionSigner transactionSigner;
+  private final HttpClientOptions clientOptions;
+  private final HttpServerOptions serverOptions;
+  private final Duration httpRequestTimeout;
+  private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
+
   private Vertx vertx;
   private String deploymentId;
 
@@ -56,7 +63,7 @@ public class Runner {
     vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
     final JsonRpcHttpService httpService =
-        new JsonRpcHttpService(serverOptions, httpRequestTimeout, requestMapper);
+        new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
@@ -71,17 +78,25 @@ public class Runner {
 
     final PassThroughHandler passThroughHandler =
         new PassThroughHandler(
+            errorReporter,
             downStreamConnection,
             (jsonRpcRequest) -> new JsonRpcBody(Json.encodeToBuffer(jsonRpcRequest)));
 
     final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
 
-    final SendTransactionBodyProvider sendTransactionHandler =
-        new SendTransactionBodyProvider(transactionSigner);
-
     requestMapper.addHandler(
         "eth_sendTransaction",
-        new PassThroughHandler(downStreamConnection, sendTransactionHandler));
+        new PassThroughHandler(
+            errorReporter,
+            downStreamConnection,
+            new SendTransactionBodyProvider(transactionSigner)));
+
+    requestMapper.addHandler(
+        "eth_accounts",
+        new InternalResponseHandler(
+            responseFactory,
+            new EthAccountsBodyProvider(transactionSigner.getAddress()),
+            errorReporter));
 
     return requestMapper;
   }
