@@ -62,14 +62,13 @@ public class EthFirewallProcessRunner {
 
     final List<String> params = new ArrayList<>();
 
-    // TODO created by gradle target - installDist
-    params.add("build/install/ethfirewall/bin/ethfirewall");
+    params.add(executableLocation());
 
     // TODO launch parameters
     params.add("--data-path");
     //    params.add(dataDir.toAbsolutePath().toString());
 
-    LOG.info("Creating pantheon process with params {}", params);
+    LOG.info("Creating EthFirewall process with params {}", params);
     final ProcessBuilder processBuilder =
         new ProcessBuilder(params)
             .directory(new File(System.getProperty("user.dir")).getParentFile())
@@ -81,8 +80,12 @@ public class EthFirewallProcessRunner {
       outputProcessorExecutor.submit(() -> printOutput(name, process));
       processes.put(name, process);
     } catch (final IOException e) {
-      LOG.error("Error starting PantheonNode process", e);
+      LOG.error("Error starting EthFirewall process", e);
     }
+  }
+
+  private String executableLocation() {
+    return "build/install/ethfirewall/bin/ethfirewall";
   }
 
   private void printOutput(final String name, final Process process) {
