@@ -15,12 +15,12 @@ package tech.pegasys.ethfirewall;
 import tech.pegasys.ethfirewall.jsonrpcproxy.EthAccountsBodyProvider;
 import tech.pegasys.ethfirewall.jsonrpcproxy.HttpResponseFactory;
 import tech.pegasys.ethfirewall.jsonrpcproxy.InternalResponseHandler;
-import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcBody;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcErrorReporter;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
 import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionBodyProvider;
+import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionHandler;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import java.time.Duration;
@@ -30,7 +30,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,17 +75,12 @@ public class Runner {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
-    final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(
-            errorReporter,
-            downStreamConnection,
-            (jsonRpcRequest) -> new JsonRpcBody(Json.encodeToBuffer(jsonRpcRequest)));
-
-    final RequestMapper requestMapper = new RequestMapper(passThroughHandler);
+    final RequestMapper requestMapper =
+        new RequestMapper(new PassThroughHandler(downStreamConnection));
 
     requestMapper.addHandler(
         "eth_sendTransaction",
-        new PassThroughHandler(
+        new SendTransactionHandler(
             errorReporter,
             downStreamConnection,
             new SendTransactionBodyProvider(transactionSigner)));

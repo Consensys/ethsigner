@@ -23,13 +23,20 @@ import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler implements JsonRpcRequestHandler {
+public class SendTransactionHandler implements JsonRpcRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
+  private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
+  private final SendTransactionBodyProvider bodyProvider;
 
-  public PassThroughHandler(final HttpClient ethNodeClient) {
+  public SendTransactionHandler(
+      final JsonRpcErrorReporter errorReporter,
+      final HttpClient ethNodeClient,
+      final SendTransactionBodyProvider bodyProvider) {
+    this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
+    this.bodyProvider = bodyProvider;
   }
 
   @Override
@@ -55,10 +62,19 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
             });
 
     proxyRequest.headers().setAll(httpServerRequest.headers());
+    proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
 
-    proxyRequest.end(Json.encodeToBuffer(request));
-    logRequest(request, httpServerRequest);
+    final JsonRpcBody providedBody = bodyProvider.getBody(request);
+
+    if (providedBody.hasError()) {
+      errorReporter.send(request, httpServerRequest, providedBody.error());
+    } else {
+      // Data is only written to the wire on end()
+      final Buffer proxyRequestBody = providedBody.body();
+      proxyRequest.end(proxyRequestBody);
+      logRequest(request, httpServerRequest, proxyRequest, proxyRequestBody);
+    }
   }
 
   private void logResponse(final HttpClientResponse response) {
@@ -69,11 +85,18 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
     LOG.debug("Response body: {}", body);
   }
 
-  private void logRequest(final JsonRpcRequest jsonRequest, final HttpServerRequest httpRequest) {
+  private void logRequest(
+      final JsonRpcRequest originalJsonRpcRequest,
+      final HttpServerRequest originalRequest,
+      final HttpClientRequest proxyRequest,
+      final Buffer proxyRequestBody) {
     LOG.debug(
-        "Proxying method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
-        httpRequest.method(),
-        httpRequest.absoluteURI(),
-        Json.encodePrettily(jsonRequest));
+        "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
+        originalRequest.method(),
+        originalRequest.absoluteURI(),
+        Json.encodePrettily(originalJsonRpcRequest),
+        proxyRequest.method(),
+        proxyRequest.absoluteURI(),
+        proxyRequestBody);
   }
 }
