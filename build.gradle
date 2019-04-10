@@ -447,37 +447,3 @@ release {
     requireBranch = project.hasProperty('release.branch') ? project.property('release.branch') : 'master'
   }
 }
-
-apply plugin: 'com.jfrog.bintray'
-
-bintray {
-  user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-  key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
-
-  filesSpec {
-    from distTar.destinationDir.path
-    from distZip.destinationDir.path
-    into '.'
-  }
-
-  publish = true
-
-  pkg {
-    repo = 'pegasys-repo'
-    name = 'ethfirewall'
-    userOrg = 'consensys'
-    licenses = ['Apache-2.0']
-    websiteUrl = 'https://github.com/PegaSysEng/ethfirewall'
-    issueTrackerUrl = 'https://github.com/PegaSysEng/ethfirewall/issues'
-    vcsUrl = 'https://github.com/PegaSysEng/ethfirewall.git'
-
-    version {
-      name = project.version
-      released  = new Date()
-    }
-  }
-}
-
-afterReleaseBuild.dependsOn bintrayUpload
-bintrayUpload.mustRunAfter(distTar)
-bintrayUpload.mustRunAfter(distZip)
