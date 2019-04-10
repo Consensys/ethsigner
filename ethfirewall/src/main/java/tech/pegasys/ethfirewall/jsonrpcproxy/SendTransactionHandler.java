@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class SendTransactionHandler implements JsonRpcRequestHandler {
 
-  private static class TransactionEncodingException extends Throwable {
+  private static class TransactionEncodingException extends Exception {
 
     private final JsonRpcError error;
 
@@ -90,6 +90,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
     try {
       final Buffer bodyContent = getBody(requestBody);
+      logRequest(requestBody, httpServerRequest, request, bodyContent);
       request.end(bodyContent);
     } catch (final TransactionEncodingException e) {
       errorReporter.send(
@@ -122,7 +123,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
         proxyRequestBody);
   }
 
-  public Buffer getBody(final JsonRpcRequest request) throws TransactionEncodingException {
+  private Buffer getBody(final JsonRpcRequest request) throws TransactionEncodingException {
 
     final SendTransactionJsonParameters params;
     try {
