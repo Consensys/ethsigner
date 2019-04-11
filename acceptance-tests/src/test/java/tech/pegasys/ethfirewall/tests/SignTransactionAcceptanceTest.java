@@ -12,13 +12,18 @@
  */
 package tech.pegasys.ethfirewall.tests;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.junit.Test;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Convert.Unit;
 
 public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
@@ -26,6 +31,11 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
   public static final String GENESIS_ACCOUNT_ONE_PRIVATE_KEY =
       "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63";
+
+  public static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
+      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+
+  public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
 
   private final JsonRpc2_0Web3j jsonRpc =
       new JsonRpc2_0Web3j(
@@ -39,27 +49,28 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransfer() {
 
-    //    final BigInteger nonce = BigInteger.ZERO;
-    //    final BigInteger gasPrice = BigInteger.valueOf(5);
-    //    final BigDecimal transferAmount = new BigDecimal(15.5);
-    //    final Unit transferUnit = Unit.ETHER;
-    //    final String sender = address(GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
-    //    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-    //
-    //    final Transaction transaction =
-    //        Transaction.createEtherTransaction(sender,
-    //            nonce,
-    //            gasPrice,
-    //            INTRINSIC_GAS,
-    //            recipient,
-    //            Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
-    //
-    //    try {
-    //
-    //      final String hash = jsonRpc.ethSendTransaction(transaction).send().getTransactionHash();
-    //    } catch (final IOException e) {
-    //      throw new RuntimeException(e);
-    //    }
+    final BigInteger nonce = BigInteger.ZERO;
+    final BigInteger gasPrice = BigInteger.valueOf(5);
+    final BigDecimal transferAmount = new BigDecimal(15.5);
+    final Unit transferUnit = Unit.ETHER;
+    final String sender = address(GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
+    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            sender,
+            nonce,
+            gasPrice,
+            INTRINSIC_GAS,
+            recipient,
+            Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
+
+    try {
+
+      final String hash = jsonRpc.ethSendTransaction(transaction).send().getTransactionHash();
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
 
     // TODO value transfer
 

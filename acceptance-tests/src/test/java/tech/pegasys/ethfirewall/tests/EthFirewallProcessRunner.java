@@ -133,8 +133,8 @@ public class EthFirewallProcessRunner {
   private static File createKeyFile() {
     final Path wallet;
     try {
-      final URL walletResource = Resources.getResource("keyfile.json");
-      wallet = Files.createTempFile("ethfirewall_into_keyfile", ".json");
+      final URL walletResource = Resources.getResource("rich_benefactor_one.json");
+      wallet = Files.createTempFile("ethsigner_into_keyfile", ".json");
       Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
     } catch (final IOException e) {
       throw new RuntimeException(e);
@@ -148,8 +148,8 @@ public class EthFirewallProcessRunner {
   private static File createPasswordFile() {
     final Path wallet;
     try {
-      wallet = Files.createTempFile("ethfirewall_into_passwordfile", ".json");
-      Files.write(wallet, "password".getBytes(UTF_8));
+      wallet = Files.createTempFile("ethsigner_into_passwordfile", ".json");
+      Files.write(wallet, "pass".getBytes(UTF_8));
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
