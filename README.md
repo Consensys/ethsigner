@@ -1,5 +1,5 @@
-# EthFirewall
+# EthSigner
 
-A transaction signing and firewall application to be used with a web3 provider.
+A transaction signing application to be used with a web3 provider.
 
-[EthFirewall Command Line Options](docs/Reference/EthFirewall-CLI.md)
+[EthSigner Command Line Options](docs/Reference/EthSigner-CLI.md)
