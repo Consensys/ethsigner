@@ -63,7 +63,7 @@ Explain the problem and include additional details to help maintainers reproduce
 
 * **Use a clear and descriptive summary** for the issue to identify the problem.
 * **Describe the exact steps which reproduce the problem** in as many details as possible. For example, 
-start by explaining how you started Pantheon, e.g. which command exactly you used in the terminal, 
+start by explaining how you started EthSigner, e.g. which command exactly you used in the terminal, 
 or how you started it otherwise. 
 * **Provide specific examples to demonstrate the steps**. Include links to files or GitHub projects, 
 or copy/pasteable snippets, which you use in those examples. If you're providing snippets in the issue, 
@@ -84,14 +84,14 @@ and under which conditions it normally happens.
 
 Include details about your configuration and environment:
 
-* **Which version of the software are you using?** You can get the exact version by running `pantheon -v` in your terminal.
+* **Which version of the software are you using?** You can get the exact version by running `ethsigner -v` in your terminal.
 * **What OS & Version are you running?**
   * **For Linux - What kernel are you running?** You can get the exact version by running `uname -a` in your terminal.
 * **Are you running in a virtual machine?** If so, which VM software are you using and which operating 
 systems and versions are used for the host and the guest?
 * **Are you running in a docker container?** If so, what version of docker?
 * **Are you running in a a Cloud?** If so, which one, and what type/size of VM is it?
-* **What version of Java are you running?** You can get the exact version by looking at the pantheon 
+* **What version of Java are you running?** You can get the exact version by looking at the EthSigner 
 logfile during startup.
 
 ### Suggesting Enhancements
@@ -129,7 +129,7 @@ Provide the following information:
 * **Explain why this enhancement would be useful** to most users.
 * **Does this enhancement exist in other clients?**
 * **Specify which version of the software you're using.** You can get the exact version by running 
-`pantheon -v` in your terminal.
+`ethsigner -v` in your terminal.
 * **Specify the name and version of the OS you're using.**
 
 ## Your First Contribution
@@ -148,7 +148,7 @@ This facilitates social contribution, easy testing, and peer review.
 
 To contribute changes, use the following workflow:
 
-1. [**Fork the repository**](https://github.com/PegaSysEng/pantheon/fork).
+1. [**Fork the repository**](https://github.com/PegaSysEng/ethsigner/fork).
 1. **Clone your fork** to your computer.
 1. **Create a topic branch** and name it appropriately.
 Starting the branch name with the issue number is a good practice and a reminder to fix only one issue in a 
@@ -164,7 +164,7 @@ to be confident that your changes will pass CI tests once pushed as a Pull Reque
     * For doc changes, displaying the doc with [MkDocs] in a preview mode enables you to check the
   rendering as explained in the [MkDocs And Markdown Guide](MKDOCS-MARKDOWN-GUIDE.md#preview-the-documentation). 
 1. **Push your changes** to your remote fork (usually labeled as `origin`).
-1. **Create a pull-request** (PR) on the Pantheon repository. If the PR addresses an existing Jira issue, 
+1. **Create a pull-request** (PR) on the EthSigner repository. If the PR addresses an existing Jira issue, 
 include the issue number in the PR title in square brackets (for example, `[PAN-2374]`). 
 1. **Add labels** to identify the type of your PR. _For example, if your PR only changes documentation, add the
 "documentation" label. If it fixes a bug, add the "bug" label._
@@ -175,7 +175,7 @@ If you don't know who to choose, simply select the reviewers proposed by GitHub 
 1. **Make any required changes** on your contribution from the reviewers feedback.
 _Make the changes, commit to your branch, and push to your remote fork._
 1. **When your PR is validated**, all tests passed and your branch has no conflicts with the target branch,
-you can **"squash and merge"** your PR and you're done. You contributed to Pantheon ! Thanks !
+you can **"squash and merge"** your PR and you're done. You contributed to EthSigner! Thanks !
 
 ### Architectural Best Practices
 
@@ -241,7 +241,7 @@ These rules are not automatically enforced but are recommended to make the docum
  and enhance the user experience.
 
 Also have a look at our [MKDocs Markdown guide](MKDOCS-MARKDOWN-GUIDE.md) if you're not famililar with 
-MarkDown syntax. We also have a number of extensions that are available in the Pantheon documentation described
+MarkDown syntax. We also have a number of extensions that are available in the EthSigner documentation described
 in this guide.
 
 ## Git Commit Messages & Pull Request Messages
@@ -262,7 +262,7 @@ in this guide.
 
 [private@pegasys.tech]: mailto:private@pegasys.tech
 [Gitter]: https://gitter.im/PegaSysEng/EthSigner
-[Pantheon documentation]: Coming soon - check docs in repo for now.
+[EthSigner documentation]: Coming soon - check docs in repo for now.
 [CLA.md]: /CLA.md
 [Code Reviews]: /docs/community/code-reviews.md
 [MkDocs]: https://www.mkdocs.org/
