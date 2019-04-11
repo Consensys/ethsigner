@@ -52,20 +52,20 @@ try {
             if (previousResult != null && (previousResult == 'FAILURE' || previousResult == 'UNSTABLE')) {
                 slackSend(
                     color: 'good',
-                    message: "EthFirewall branch ${env.BRANCH_NAME} build is back to HEALTHY.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                    message: "EthSigner branch ${env.BRANCH_NAME} build is back to HEALTHY.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                     channel: channel
                 )
             }
         } else if (currentBuild.result == 'FAILURE') {
             slackSend(
                 color: 'danger',
-                message: "EthFirewall branch ${env.BRANCH_NAME} build is FAILING.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                message: "EthSigner branch ${env.BRANCH_NAME} build is FAILING.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                 channel: channel
             )
         } else if (currentBuild.result == 'UNSTABLE') {
             slackSend(
                 color: 'warning',
-                message: "EthFirewall branch ${env.BRANCH_NAME} build is UNSTABLE.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                message: "EthSigner branch ${env.BRANCH_NAME} build is UNSTABLE.\nBuild Number: #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                 channel: channel
             )
         }
