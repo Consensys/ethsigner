@@ -87,7 +87,7 @@ public class AcceptanceTestBase {
     try {
       Thread.sleep(2500L);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
 
     // TODO Pantheon takes over 1 second to startup - problem?
@@ -110,7 +110,7 @@ public class AcceptanceTestBase {
     try {
       Thread.sleep(1000L);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
