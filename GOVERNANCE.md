@@ -5,7 +5,7 @@ This project is led by a benevolent dictator (PegaSys) and managed by the commun
 # Principles
 
 The community adheres to the following principles:
-* Open: Pantheon is open source. See repository guidelines and CLA, below.
+* Open: EthSigner is open source. See repository guidelines and CLA, below.
 * Welcoming and respectful: See Code of Conduct, below.
 * Transparent and accessible: Work and collaboration should be done in public. 
 * Merit: Ideas and contributions are accepted according to their technical merit and alignment with project objectives and design principles.
@@ -32,7 +32,6 @@ This document was influenced by the following:
 - OSSWatch Benevolent Dictator Governance Model, available at [oss watch benevolent dictator].  
 
 [CLA.md]: /CLA.md
-[community membership]: /docs/community/community-membership.md 
 [code of conduct]: /CODE-OF-CONDUCT.md
 [oss watch benevolent dictator]: http://oss-watch.ac.uk/resources/benevolentdictatorgovernancemodel
 [kub community membership]: https://raw.githubusercontent.com/kubernetes/community/master/community-membership.md
