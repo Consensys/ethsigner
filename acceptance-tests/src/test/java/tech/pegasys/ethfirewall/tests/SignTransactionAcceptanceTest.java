@@ -12,12 +12,54 @@
  */
 package tech.pegasys.ethfirewall.tests;
 
+import java.math.BigInteger;
+
 import org.junit.Test;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Async;
 
 public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
+  private static final String LOCALHOST = "127.0.0.1";
+
+  public static final String GENESIS_ACCOUNT_ONE_PRIVATE_KEY =
+      "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63";
+
+  private final JsonRpc2_0Web3j jsonRpc =
+      new JsonRpc2_0Web3j(
+          new HttpService("http://" + LOCALHOST + ":" + 9945),
+          2000,
+          Async.defaultExecutorService());
+
+  /** Number of GAS units that the transaction will cost. */
+  private static final BigInteger INTRINSIC_GAS = BigInteger.valueOf(21000);
+
   @Test
   public void valueTransfer() {
+
+    //    final BigInteger nonce = BigInteger.ZERO;
+    //    final BigInteger gasPrice = BigInteger.valueOf(5);
+    //    final BigDecimal transferAmount = new BigDecimal(15.5);
+    //    final Unit transferUnit = Unit.ETHER;
+    //    final String sender = address(GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
+    //    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+    //
+    //    final Transaction transaction =
+    //        Transaction.createEtherTransaction(sender,
+    //            nonce,
+    //            gasPrice,
+    //            INTRINSIC_GAS,
+    //            recipient,
+    //            Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
+    //
+    //    try {
+    //
+    //      final String hash = jsonRpc.ethSendTransaction(transaction).send().getTransactionHash();
+    //    } catch (final IOException e) {
+    //      throw new RuntimeException(e);
+    //    }
 
     // TODO value transfer
 
@@ -30,5 +72,13 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     // TODO contract
 
     // TODO verify deployment on node
+  }
+
+  public static String address(String privateKeyInHex) {
+    BigInteger privateKeyInBT = new BigInteger(privateKeyInHex, 16);
+    ECKeyPair aPair = ECKeyPair.create(privateKeyInBT);
+    BigInteger publicKeyInBT = aPair.getPublicKey();
+    String sPublickeyInHex = publicKeyInBT.toString(16);
+    return sPublickeyInHex;
   }
 }

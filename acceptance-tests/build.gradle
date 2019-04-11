@@ -19,6 +19,8 @@ dependencies {
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'junit:junit'
+  testImplementation 'org.web3j:core'
+  testImplementation 'org.web3j:crypto'
   testImplementation 'org.apache.logging.log4j:log4j-api'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.awaitility:awaitility'
