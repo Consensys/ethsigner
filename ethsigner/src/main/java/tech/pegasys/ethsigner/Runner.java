@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.RequestMapper;
 import tech.pegasys.ethsigner.jsonrpcproxy.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.jsonrpcproxy.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.jsonrpcproxy.passthrough.PassThroughHandler;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.TransactionSigner;
 

@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction;
 
 import static java.util.Collections.singletonList;
 
-import tech.pegasys.ethsigner.RawTransactionConverter;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;

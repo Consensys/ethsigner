@@ -24,7 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import tech.pegasys.ethsigner.RawTransactionConverter;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -32,9 +31,11 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
-import tech.pegasys.ethsigner.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.signing.ConfigurationChainId;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.TrackingNonceProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.ChainIdProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class IntegrationTestBase {
   private static Runner runner;
   private static ClientAndServer clientAndServer;
 
-  private JsonRpc2_0Web3j jsonRpc;
+  private static JsonRpc2_0Web3j jsonRpc;
 
   protected final EthRequestFactory request = new EthRequestFactory();
   protected final EthResponseFactory response = new EthResponseFactory();
@@ -102,14 +103,15 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
-    // NEED SOME WEB3J HERE!
+    jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     runner =
         new Runner(
             transactionSigner,
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
-            new RawTransactionConverter());
+            new RawTransactionConverter(
+                new TrackingNonceProvider(jsonRpc, transactionSigner.getAddress())));
     runner.start();
 
     LOG.info(
@@ -131,7 +133,6 @@ public class IntegrationTestBase {
 
   @Before
   public void setup() {
-    jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     clientAndServer.reset();
   }
 

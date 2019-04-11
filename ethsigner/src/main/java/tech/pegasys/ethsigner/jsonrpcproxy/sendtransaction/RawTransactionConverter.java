@@ -23,7 +23,7 @@ import org.web3j.crypto.RawTransaction;
 public class RawTransactionConverter {
   private final NonceProvider nonceProvider;
 
-  public RawTransactionConverter(NonceProvider nonceProvider) {
+  public RawTransactionConverter(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
   }
 

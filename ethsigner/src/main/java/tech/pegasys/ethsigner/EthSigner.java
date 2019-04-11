@@ -12,8 +12,11 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.TrackingNonceProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.ChainIdProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
 
@@ -65,29 +71,33 @@ public final class EthSigner {
     }
 
     try {
-    final Web3j web3j =
-        new JsonRpc2_0Web3j(
-            new HttpService(
-                "http://" + config.getDownstreamHttpHost() + ":" + config
-                    .getDownstreamHttpPort()));
-    final TransactionSigner signer = transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
-    final NonceProvider nonceProvider = new TrackingNonceProvider(web3j, signer.getAddress());
+      final Web3j web3j =
+          new JsonRpc2_0Web3j(
+              new HttpService(
+                  "http://"
+                      + config.getDownstreamHttpHost()
+                      + ":"
+                      + config.getDownstreamHttpPort()));
+      final TransactionSigner signer =
+          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId());
+      final NonceProvider nonceProvider = new TrackingNonceProvider(web3j, signer.getAddress());
 
-      runnerBuilder.setTransactionSigner(signer)
-          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
-      runnerBuilder.setClientOptions(
-          new WebClientOptions()
-              .setDefaultPort(config.getDownstreamHttpPort())
-              .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()));
-      runnerBuilder.setServerOptions(
-          new HttpServerOptions()
-              .setPort(config.getHttpListenPort())
-              .setHost(config.getHttpListenHost().getHostAddress())
-              .setReuseAddress(true)
-              .setReusePort(true));
-      runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
-      runnerBuilder.setTransactionConverter(new RawTransactionConverter());
-      runnerBuilder.build().start();
+      runnerBuilder
+          .setTransactionSigner(signer)
+          .setClientOptions(
+              new WebClientOptions()
+                  .setDefaultPort(config.getDownstreamHttpPort())
+                  .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
+          .setServerOptions(
+              new HttpServerOptions()
+                  .setPort(config.getHttpListenPort())
+                  .setHost(config.getHttpListenHost().getHostAddress())
+                  .setReuseAddress(true)
+                  .setReusePort(true))
+          .setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
+          .setTransactionConverter(new RawTransactionConverter(nonceProvider))
+          .build()
+          .start();
     } catch (IOException ex) {
       LOG.info(
           "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
@@ -101,7 +111,7 @@ public final class EthSigner {
       throws IOException, CipherException {
     final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
 
-    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
+    return new TransactionSigner(chain, credentials);
   }
 
   private Optional<String> readPasswordFromFile() {
