@@ -24,7 +24,7 @@ plugins {
   id 'net.researchgate.release' version '2.7.0'
 }
 
-group = 'tech.pegasys.ethfirewall'
+group = 'tech.pegasys.ethsigner'
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
 
@@ -163,7 +163,7 @@ allprojects {
    * The properties passed are:
    * - 'test.ethereum.include': allows to run a single Ethereum reference tests. For instance,
    *   running a single general state test can be done with:
-   *    ./gradlew :ethereum:tech.pegasys.ethfirewall.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
+   *    ./gradlew :ethereum:tech.pegasys.ethsigner.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
    *   The meaning being that will be run only the tests for which the value passed as "include"
    *   (which can be a java pattern) matches parts of the test name. Knowing that tests names for
    *   reference tests are of the form:
@@ -257,7 +257,7 @@ subprojects {
 
   task integrationTest(type: Test, dependsOn:["compileTestJava"]){
     group = "verification"
-    description = "Runs the Ethfirewall integration tests"
+    description = "Runs the EthSigner integration tests"
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -290,7 +290,7 @@ subprojects {
 jar { enabled = false }
 
 apply plugin: 'application'
-mainClassName = "tech.pegasys.ethfirewall.EthFirewall"
+mainClassName = "tech.pegasys.ethsigner.EthSigner"
 applicationDefaultJvmArgs = [
   "-Dvertx.disableFileCPResolving=true",
   // We shutdown log4j ourselves, as otherwise his shutdown hook runs before our own and whatever
@@ -299,9 +299,9 @@ applicationDefaultJvmArgs = [
 ]
 
 run {
-  args project.hasProperty("ethfirewall.run.args") ? project.property("ethfirewall.run.args").toString().split("\\s+") : []
+  args project.hasProperty("ethsigner.run.args") ? project.property("ethsigner.run.args").toString().split("\\s+") : []
   doFirst {
-    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('ETHFIREWALL_HOME', "$buildDir/ethfirewall")}
+    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('ETHSIGNER_HOME', "$buildDir/ethsigner")}
   }
 }
 
@@ -312,8 +312,8 @@ startScripts {
   }
 
   doLast {
-    unixScript.text = unixScript.text.replace('ETHFIREWALL_HOME', '\$APP_HOME')
-    windowsScript.text = windowsScript.text.replace('ETHFIREWALL_HOME', '%~dp0..')
+    unixScript.text = unixScript.text.replace('ETHSIGNER_HOME', '\$APP_HOME')
+    windowsScript.text = windowsScript.text.replace('ETHSIGNER_HOME', '%~dp0..')
 
     // Prevent the error originating from the 8191 chars limit on Windows
     windowsScript.text =
@@ -325,7 +325,7 @@ startScripts {
 }
 
 dependencies {
-  compile project(':ethfirewall')
+  compile project(':ethsigner')
   errorprone 'com.google.errorprone:error_prone_core'
 }
 
@@ -468,12 +468,12 @@ bintray {
 
   pkg {
     repo = 'pegasys-repo'
-    name = 'ethfirewall'
+    name = 'ethsigner'
     userOrg = 'consensys'
     licenses = ['Apache-2.0']
-    websiteUrl = 'https://github.com/PegaSysEng/ethfirewall'
-    issueTrackerUrl = 'https://github.com/PegaSysEng/ethfirewall/issues'
-    vcsUrl = 'https://github.com/PegaSysEng/ethfirewall.git'
+    websiteUrl = 'https://github.com/PegaSysEng/ethsigner'
+    issueTrackerUrl = 'https://github.com/PegaSysEng/ethsigner/issues'
+    vcsUrl = 'https://github.com/PegaSysEng/ethsigner.git'
 
     version {
       name = project.version

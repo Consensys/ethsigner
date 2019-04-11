@@ -10,7 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.jsonrpcproxy;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+
+import io.vertx.core.http.HttpServerRequest;
+
+@FunctionalInterface
+public interface JsonRpcRequestHandler {
+
+  void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);
+}

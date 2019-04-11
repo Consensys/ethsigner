@@ -15,7 +15,7 @@ dependencies {
 
   testRuntime 'org.apache.logging.log4j:log4j-core'
 
-  testImplementation project(':ethfirewall')
+  testImplementation project(':ethsigner')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'junit:junit'
@@ -30,7 +30,7 @@ test.enabled = false
 
 task acceptanceTest(type: Test) {
   mustRunAfter rootProject.subprojects*.test
-  description = 'Runs EthFirewall acceptance tests.'
+  description = 'Runs EthSigner acceptance tests.'
   group = 'verification'
 }
 acceptanceTest.dependsOn(rootProject.installDist)
