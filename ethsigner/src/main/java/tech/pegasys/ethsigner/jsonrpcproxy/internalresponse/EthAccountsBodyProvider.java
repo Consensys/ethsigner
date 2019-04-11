@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.jsonrpcproxy;
+package tech.pegasys.ethsigner.jsonrpcproxy.internalresponse;
 
 import static java.util.Collections.singletonList;
 
@@ -18,6 +18,8 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.BodyProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.JsonRpcBody;
 
 import java.util.Collection;
 

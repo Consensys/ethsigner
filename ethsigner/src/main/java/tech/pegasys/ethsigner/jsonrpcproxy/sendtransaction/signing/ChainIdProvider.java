@@ -10,18 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signing;
+package tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing;
 
-public class ConfigurationChainId implements ChainIdProvider {
+/** Obtains the chain ID for the blockchain that transaction are being signed. */
+public interface ChainIdProvider {
 
-  private final long id;
-
-  public ConfigurationChainId(final long id) {
-    this.id = id;
-  }
-
-  @Override
-  public long id() {
-    return id;
-  }
+  long id();
 }

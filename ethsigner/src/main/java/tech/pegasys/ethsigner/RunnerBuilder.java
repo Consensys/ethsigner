@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.TransactionSigner;
 
 import java.time.Duration;
 

@@ -102,6 +102,7 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
+    // NEED SOME WEB3J HERE!
     runner =
         new Runner(
             transactionSigner,

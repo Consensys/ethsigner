@@ -31,7 +31,7 @@ public class JsonRpcErrorReporter {
     this.responder = responder;
   }
 
-  void send(
+  public void send(
       final JsonRpcRequest jsonRequest,
       final HttpServerRequest httpRequest,
       final JsonRpcErrorResponse error) {

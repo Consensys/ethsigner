@@ -10,10 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signing;
+package tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction;
 
-/** Obtains the chain ID for the blockchain that transaction are being signed. */
-public interface ChainIdProvider {
+import java.io.IOException;
+import java.math.BigInteger;
 
-  long id();
+public interface NonceProvider {
+
+  BigInteger getNonce() throws IOException;
 }

@@ -65,7 +65,15 @@ public final class EthSigner {
     }
 
     try {
-      runnerBuilder.setTransactionSigner(
+    final Web3j web3j =
+        new JsonRpc2_0Web3j(
+            new HttpService(
+                "http://" + config.getDownstreamHttpHost() + ":" + config
+                    .getDownstreamHttpPort()));
+    final TransactionSigner signer = transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
+    final NonceProvider nonceProvider = new TrackingNonceProvider(web3j, signer.getAddress());
+
+      runnerBuilder.setTransactionSigner(signer)
           transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
       runnerBuilder.setClientOptions(
           new WebClientOptions()
@@ -93,7 +101,7 @@ public final class EthSigner {
       throws IOException, CipherException {
     final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
 
-    return new TransactionSigner(chain, credentials);
+    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
   }
 
   private Optional<String> readPasswordFromFile() {

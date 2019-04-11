@@ -10,33 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner;
+package tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing;
 
-import tech.pegasys.ethsigner.jsonrpcproxy.sendtransaction.signing.ChainIdProvider;
+public class ConfigurationChainId implements ChainIdProvider {
 
-import java.net.InetAddress;
-import java.nio.file.Path;
-import java.time.Duration;
+  private final long id;
 
-import org.apache.logging.log4j.Level;
+  public ConfigurationChainId(final long id) {
+    this.id = id;
+  }
 
-public interface Config {
-
-  Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
-
-  InetAddress getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  InetAddress getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
+  @Override
+  public long id() {
+    return id;
+  }
 }
