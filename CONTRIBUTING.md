@@ -1,7 +1,7 @@
-# Contributing to Pantheon
+# Contributing to EthSigner
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
-Welcome to the Pantheon repository!  The following is a set of guidelines for contributing to this 
+Welcome to the EthSigner repository!  The following is a set of guidelines for contributing to this 
 repo and its packages. These are mostly guidelines, not rules. Use your best judgment, 
 and feel free to propose changes to this document in a pull request.
 
@@ -26,14 +26,14 @@ and feel free to propose changes to this document in a pull request.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Pantheon Code of Conduct](CODE-OF-CONDUCT.md).
+This project and everyone participating in it is governed by the [EthSigner Code of Conduct](CODE-OF-CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior to [private@pegasys.tech].
 
 ## I just have a quick question
 
 > **Note:** Please don't file an issue to ask a question.  You'll get faster results by using the resources below.
 
-* [Pantheon documentation]
+* [EthSigner documentation]
 * [Gitter]
 
 ## How To Contribute
