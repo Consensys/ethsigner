@@ -10,6 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.jsonrpcproxy;
 
-rootProject.name='ethsigner'
-include 'ethsigner'
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.PARSE_ERROR;
+
+import org.junit.Test;
+
+public class EthSignerParsingIntegrationTest extends IntegrationTestBase {
+
+  private static final Object NO_ID = null;
+
+  @Test
+  public void parseErrorResponseWhenJsonRequestIsMalformed() {
+    sendRequestThenVerifyResponse(
+        request.ethSigner(MALFORMED_JSON), response.ethSigner(NO_ID, PARSE_ERROR));
+  }
+}
