@@ -39,7 +39,7 @@ public class EthFirewallProcessRunner {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
-      LogManager.getLogger("tech.pegasys.ethfirewall.SubProcessLog");
+      LogManager.getLogger("tech.pegasys.ethsigner.SubProcessLog");
 
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
@@ -66,7 +66,7 @@ public class EthFirewallProcessRunner {
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
-    params.add("--logging DEBUG");
+    params.add("--logging INFO");
     params.add("--password-file");
     params.add(createPasswordFile().getAbsolutePath());
     params.add("--key-file");
@@ -74,11 +74,11 @@ public class EthFirewallProcessRunner {
     params.add("--downstream-http-host 127.0.0.1");
     params.add("--downstream-http-port 8545");
     params.add("--downstream-http-request-timeout 500");
-    params.add("----http-listen-host 127.0.0.1");
-    params.add("----http-listen-port 9945");
+    params.add("--http-listen-host 127.0.0.1");
+    params.add("--http-listen-port 9945");
     params.add("--chain-id 3216547778");
 
-    LOG.info("Creating EthFirewall process with params {}", params);
+    LOG.info("Creating EthSigner process with params {}", params);
 
     final ProcessBuilder processBuilder =
         new ProcessBuilder(params)
@@ -91,7 +91,7 @@ public class EthFirewallProcessRunner {
       outputProcessorExecutor.submit(() -> printOutput(name, process));
       processes.put(name, process);
     } catch (final IOException e) {
-      LOG.error("Error starting EthFirewall process", e);
+      LOG.error("Error starting EthSigner process", e);
     }
   }
 

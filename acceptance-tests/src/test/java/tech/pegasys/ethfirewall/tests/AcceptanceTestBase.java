@@ -13,9 +13,12 @@
 package tech.pegasys.ethfirewall.tests;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
@@ -47,8 +50,25 @@ public class AcceptanceTestBase {
             .build();
 
     try {
-      final CreateContainerResponse pantheon =
-          dockerClient.createContainerCmd("pegasyseng/pantheon:latest").exec();
+      // Bind the exposed 8545-8546 ports from the container to 8545-8546 on the host
+      final HostConfig portBindingConfig =
+          HostConfig.newHostConfig()
+              .withPortBindings(PortBinding.parse("8545:8545"), PortBinding.parse("8546:8546"));
+
+      final CreateContainerCmd createPantheon =
+          dockerClient
+              .createContainerCmd("pegasyseng/pantheon:latest")
+              .withHostConfig(portBindingConfig)
+              .withCmd(
+                  "--miner-enabled",
+                  "--miner-coinbase",
+                  "fe3b557e8fb62b89f4916b721be55ceb828dbd73",
+                  "--rpc-http-cors-origins=\"all\"",
+                  "--rpc-http-enabled",
+                  "--rpc-ws-enabled",
+                  "--network=dev");
+
+      final CreateContainerResponse pantheon = createPantheon.exec();
       pantheonId = pantheon.getId();
       dockerClient.startContainerCmd(pantheonId).exec();
     } catch (final NotFoundException e) {
@@ -59,6 +79,8 @@ public class AcceptanceTestBase {
 
     ethFirewallRunner = new EthFirewallProcessRunner();
     ethFirewallRunner.start("EthFirewall");
+
+    // TODO Pantheon takes over 1 second to startup - problem?
   }
 
   @After
