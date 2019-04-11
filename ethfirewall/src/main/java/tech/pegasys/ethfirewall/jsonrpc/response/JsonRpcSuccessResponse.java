@@ -14,6 +14,7 @@ package tech.pegasys.ethfirewall.jsonrpc.response;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.Objects;
 
@@ -23,7 +24,8 @@ public class JsonRpcSuccessResponse implements JsonRpcResponse {
   private final Object id;
   private final Object result;
 
-  public JsonRpcSuccessResponse(final Object id, final Object result) {
+  public JsonRpcSuccessResponse(
+      @JsonProperty("id") final Object id, @JsonProperty("result") final Object result) {
     this.id = id;
     this.result = result;
   }

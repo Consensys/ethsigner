@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import tech.pegasys.ethfirewall.RawTransactionConverter;
 import tech.pegasys.ethfirewall.Runner;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthFirewallRequest;
 import tech.pegasys.ethfirewall.jsonrpcproxy.model.request.EthNodeRequest;
@@ -78,6 +79,8 @@ public class IntegrationTestBase {
   protected final EthRequestFactory request = new EthRequestFactory();
   protected final EthResponseFactory response = new EthResponseFactory();
 
+  protected static String unlockedAccount;
+
   @BeforeClass
   public static void setupEthFirewall() throws IOException, CipherException {
     setupEthFirewall(DEFAULT_CHAIN_ID);
@@ -108,6 +111,8 @@ public class IntegrationTestBase {
         serverSocket.getLocalPort(),
         clientAndServer.getLocalPort());
     serverSocket.close();
+
+    unlockedAccount = transactionSigner.getAddress();
   }
 
   protected static void resetEthFirewall() throws IOException, CipherException {
@@ -180,7 +185,7 @@ public class IntegrationTestBase {
     final File keyFile = createKeyFile();
     final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
 
-    return new TransactionSigner(chain, credentials);
+    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
   }
 
   @SuppressWarnings("UnstableApiUsage")

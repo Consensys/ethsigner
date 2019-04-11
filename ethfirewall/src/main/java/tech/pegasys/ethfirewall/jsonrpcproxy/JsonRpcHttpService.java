@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
 
@@ -22,11 +23,9 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -50,14 +49,17 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private final RequestMapper requestHandlerMapper;
+  private final HttpResponseFactory responseFactory;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private HttpServer httpServer = null;
 
   public JsonRpcHttpService(
+      final HttpResponseFactory responseFactory,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final RequestMapper requestHandlerMapper) {
+    this.responseFactory = responseFactory;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.requestHandlerMapper = requestHandlerMapper;
@@ -108,21 +110,24 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private void handleJsonRpc(final RoutingContext context) {
     try {
-      final JsonObject json = context.getBodyAsJson();
-      final Handler<RoutingContext> handler = requestHandlerMapper.getMatchingHandler(json);
-      handler.handle(context);
-    } catch (final DecodeException e) {
+      final JsonObject requestJson = context.getBodyAsJson();
+      final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
+      final JsonRpcRequestHandler handler =
+          requestHandlerMapper.getMatchingHandler(request.getMethod());
+      handler.handle(context.request(), request);
+    } catch (final DecodeException | IllegalArgumentException e) {
       sendParseErrorResponse(context, e);
+    } catch (Exception e) {
+      LOG.error("An unhandled error occurred while processing {}", context.getBodyAsString(), e);
     }
   }
 
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
     LOG.info("Dropping request from {}", context.request().remoteAddress());
     LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-
-    final HttpServerResponse response = context.response();
-    response.setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
-
-    response.end(Json.encodeToBuffer(new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR)));
+    responseFactory.create(
+        context.request(),
+        HttpResponseStatus.BAD_REQUEST.code(),
+        new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR));
   }
 }

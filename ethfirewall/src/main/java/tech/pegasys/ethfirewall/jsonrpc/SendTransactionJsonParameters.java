@@ -13,12 +13,14 @@
 package tech.pegasys.ethfirewall.jsonrpc;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import io.vertx.core.json.JsonObject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SendTransactionJsonParameters {
@@ -114,5 +116,27 @@ public class SendTransactionJsonParameters {
       throw new IllegalArgumentException(
           String.format("Prefix of '0x' is expected in value: %s", value));
     }
+  }
+
+  public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
+
+    final Object sendTransactionObject;
+    final Object params = request.getParams();
+    if (params instanceof List) {
+      @SuppressWarnings("unchecked")
+      final List<Object> paramList = (List<Object>) params;
+      if (paramList.size() != 1) {
+        throw new IllegalArgumentException(
+            "SendTransaction Json Rpc requires a single parameter, request contained "
+                + paramList.size());
+      }
+      sendTransactionObject = paramList.get(0);
+    } else {
+      sendTransactionObject = params;
+    }
+
+    final JsonObject receivedParams = JsonObject.mapFrom(sendTransactionObject);
+
+    return receivedParams.mapTo(SendTransactionJsonParameters.class);
   }
 }

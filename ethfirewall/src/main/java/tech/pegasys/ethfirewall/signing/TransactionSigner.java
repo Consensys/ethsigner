@@ -12,11 +12,9 @@
  */
 package tech.pegasys.ethfirewall.signing;
 
+import tech.pegasys.ethfirewall.RawTransactionConverter;
 import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
-import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonRpcRequest;
 import tech.pegasys.ethfirewall.signing.web3j.TransactionEncoder;
-
-import java.math.BigInteger;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -26,18 +24,27 @@ public class TransactionSigner {
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
+  private final RawTransactionConverter converter;
 
-  public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
+  public TransactionSigner(
+      final ChainIdProvider chain,
+      final Credentials credentials,
+      final RawTransactionConverter converter) {
     this.chain = chain;
     this.credentials = credentials;
+    this.converter = converter;
   }
 
-  public String signTransaction(final SendTransactionJsonRpcRequest request) {
-    if (senderNotUnlockedAccount(request)) {
+  public String getAddress() {
+    return credentials.getAddress();
+  }
+
+  public String signTransaction(final SendTransactionJsonParameters params) {
+    if (senderNotUnlockedAccount(params)) {
       throw new IllegalArgumentException("From address does not match unlocked account");
     }
 
-    final RawTransaction rawTransaction = rawTransaction(request);
+    final RawTransaction rawTransaction = converter.from(params);
 
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
@@ -45,42 +52,7 @@ public class TransactionSigner {
     return Numeric.toHexString(signedMessage);
   }
 
-  private boolean senderNotUnlockedAccount(final SendTransactionJsonRpcRequest request) {
-    return !request.getParams().sender().equalsIgnoreCase(credentials.getAddress());
-  }
-
-  private RawTransaction rawTransaction(final SendTransactionJsonRpcRequest request) {
-    final SendTransactionJsonParameters params = request.getParams();
-
-    return RawTransaction.createTransaction(
-        nonce(params),
-        params.gasPrice().orElse(BigInteger.ZERO),
-        gas(params),
-        receiver(params),
-        params.value().orElse(BigInteger.ZERO),
-        params.data());
-  }
-
-  private String receiver(final SendTransactionJsonParameters params) {
-    return params.receiver().orElse(null);
-  }
-
-  private BigInteger nonce(final SendTransactionJsonParameters params) {
-    if (params.nonce().isPresent()) {
-      return params.nonce().get();
-    } else {
-      // TODO when missing nonce - sensible retrieval (PIE-1468)
-      throw new RuntimeException("Missing nonce");
-    }
-  }
-
-  private BigInteger gas(final SendTransactionJsonParameters params) {
-
-    if (params.gas().isPresent()) {
-      return params.gas().get();
-    }
-
-    // TODO This should be configurable, but currently matches Geth.
-    return new BigInteger("90000");
+  private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
+    return !params.sender().equalsIgnoreCase(credentials.getAddress());
   }
 }

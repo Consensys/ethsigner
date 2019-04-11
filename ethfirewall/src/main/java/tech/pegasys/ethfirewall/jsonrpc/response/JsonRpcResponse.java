@@ -13,7 +13,9 @@
 package tech.pegasys.ethfirewall.jsonrpc.response;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public interface JsonRpcResponse {
 
   @JsonGetter("jsonrpc")

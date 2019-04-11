@@ -92,7 +92,7 @@ public final class EthFirewall {
       throws IOException, CipherException {
     final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
 
-    return new TransactionSigner(chain, credentials);
+    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
   }
 
   private Optional<String> readPasswordFromFile() {
