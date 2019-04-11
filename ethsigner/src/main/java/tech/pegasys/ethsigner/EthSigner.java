@@ -78,6 +78,7 @@ public final class EthSigner {
               .setReuseAddress(true)
               .setReusePort(true));
       runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
+      runnerBuilder.setTransactionConverter(new RawTransactionConverter());
       runnerBuilder.build().start();
     } catch (IOException ex) {
       LOG.info(
@@ -92,7 +93,7 @@ public final class EthSigner {
       throws IOException, CipherException {
     final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
 
-    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
+    return new TransactionSigner(chain, credentials);
   }
 
   private Optional<String> readPasswordFromFile() {
