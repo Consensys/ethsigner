@@ -19,7 +19,6 @@ import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcErrorReporter;
 import tech.pegasys.ethfirewall.jsonrpcproxy.JsonRpcHttpService;
 import tech.pegasys.ethfirewall.jsonrpcproxy.PassThroughHandler;
 import tech.pegasys.ethfirewall.jsonrpcproxy.RequestMapper;
-import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionBodyProvider;
 import tech.pegasys.ethfirewall.jsonrpcproxy.SendTransactionHandler;
 import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
@@ -80,10 +79,7 @@ public class Runner {
 
     requestMapper.addHandler(
         "eth_sendTransaction",
-        new SendTransactionHandler(
-            errorReporter,
-            downStreamConnection,
-            new SendTransactionBodyProvider(transactionSigner)));
+        new SendTransactionHandler(errorReporter, downStreamConnection, transactionSigner));
 
     requestMapper.addHandler(
         "eth_accounts",

@@ -12,7 +12,14 @@
  */
 package tech.pegasys.ethfirewall.jsonrpcproxy;
 
+import static java.util.Collections.singletonList;
+
 import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethfirewall.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethfirewall.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethfirewall.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethfirewall.signing.TransactionSigner;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -26,17 +33,21 @@ import org.slf4j.LoggerFactory;
 public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
+
+  private static final String JSON_RPC_VERSION = "2.0";
+  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
+
   private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
-  private final BodyProvider bodyProvider;
+  private final TransactionSigner signer;
 
   public SendTransactionHandler(
       final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
-      final BodyProvider bodyProvider) {
+      TransactionSigner signer) {
     this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
-    this.bodyProvider = bodyProvider;
+    this.signer = signer;
   }
 
   @Override
@@ -65,15 +76,12 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     request.headers().remove("Content-Length"); // created during 'end'.
     request.setChunked(false);
 
-    final JsonRpcBody providedBody = bodyProvider.getBody(requestBody);
-
-    if (providedBody.hasError()) {
-      errorReporter.send(requestBody, httpServerRequest, providedBody.error());
+    final JsonRpcBody rpcBody = getBody(requestBody);
+    if (rpcBody.hasError()) {
+      errorReporter.send(requestBody, httpServerRequest, rpcBody.error());
     } else {
-      // Data is only written to the wire on end()
-      final Buffer proxyRequestBody = providedBody.body();
-      request.end(proxyRequestBody);
-      logRequest(requestBody, httpServerRequest, request, proxyRequestBody);
+      logRequest(requestBody, httpServerRequest, request, rpcBody.body());
+      request.end(rpcBody.body());
     }
   }
 
@@ -98,5 +106,47 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
         proxyRequest.method(),
         proxyRequest.absoluteURI(),
         proxyRequestBody);
+  }
+
+  private JsonRpcBody getBody(final JsonRpcRequest request) {
+
+    final SendTransactionJsonParameters params;
+    try {
+      params = SendTransactionJsonParameters.from(request);
+    } catch (final NumberFormatException e) {
+      LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+    }
+
+    final String signedTransactionHexString;
+    try {
+      signedTransactionHexString = signer.signTransaction(params);
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("Bad input value from request: {}", request, e);
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+    } catch (final Throwable e) {
+      LOG.debug("Unhandled error processing request: {}", request, e);
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INTERNAL_ERROR);
+    }
+
+    final JsonRpcRequest sendRawTransaction =
+        new JsonRpcRequest(
+            JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
+    sendRawTransaction.setId(request.getId());
+
+    try {
+      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INTERNAL_ERROR);
+    }
+  }
+
+  private static JsonRpcBody createJsonRpcBodyFrom(
+      final JsonRpcRequestId id, final JsonRpcError error) {
+    return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
   }
 }
