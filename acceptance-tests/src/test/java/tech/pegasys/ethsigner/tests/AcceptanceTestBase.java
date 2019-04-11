@@ -36,6 +36,10 @@ public class AcceptanceTestBase {
   private String pantheonId;
   private EthSignerProcessRunner ethSignerRunner;
 
+  public AcceptanceTestBase() {
+    Runtime.getRuntime().addShutdownHook(new Thread(this::tearDownBase));
+  }
+
   @Before
   public void setUpBase() {
     final DefaultDockerClientConfig config =
@@ -84,14 +88,12 @@ public class AcceptanceTestBase {
     ethSignerRunner = new EthSignerProcessRunner();
     ethSignerRunner.start("EthFirewall");
 
+    // TODO await for EthSigner to be 'alive'
     try {
-      Thread.sleep(2500L);
+      Thread.sleep(15000L);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-
-    // TODO Pantheon takes over 1 second to startup - problem?
-
   }
 
   @After

@@ -63,16 +63,12 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
             recipient,
             Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
 
-    System.out.println("------------------ BEFORE -------------------");
-
     try {
 
       final String hash = jsonRpc.ethSendTransaction(transaction).send().getTransactionHash();
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-
-    System.out.println("------------------ AFTER -------------------");
 
     // TODO value transfer
 

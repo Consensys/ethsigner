@@ -64,19 +64,34 @@ public class EthSignerProcessRunner {
 
   public void start(final String name) {
 
+    final String loggingLevel = "INFO";
+    final String pantheonIp = "127.0.0.1";
+    final String pantheonPort = "8545";
+    final String timeoutMs = "500";
+    final String hostIp = "127.0.0.1";
+    final String hostPort = "9945";
+    final String chainId = "3216547778";
+
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
-    params.add("--logging INFO");
+    params.add("--logging");
+    params.add(loggingLevel);
     params.add("--password-file");
     params.add(createPasswordFile().getAbsolutePath());
     params.add("--key-file");
     params.add(createKeyFile().getAbsolutePath());
-    params.add("--downstream-http-host 127.0.0.1");
-    params.add("--downstream-http-port 8545");
-    params.add("--downstream-http-request-timeout 500");
-    params.add("--http-listen-host 127.0.0.1");
-    params.add("--http-listen-port 9945");
-    params.add("--chain-id 3216547778");
+    params.add("--downstream-http-host");
+    params.add(pantheonIp);
+    params.add("--downstream-http-port");
+    params.add(pantheonPort);
+    params.add("--downstream-http-request-timeout");
+    params.add(timeoutMs);
+    params.add("--http-listen-host");
+    params.add(hostIp);
+    params.add("--http-listen-port");
+    params.add(hostPort);
+    params.add("--chain-id");
+    params.add(chainId);
 
     LOG.info("Creating EthSigner process with params {}", params);
 
