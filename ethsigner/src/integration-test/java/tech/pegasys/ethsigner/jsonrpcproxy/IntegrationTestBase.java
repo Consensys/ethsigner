@@ -26,12 +26,12 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.RawTransactionConverter;
 import tech.pegasys.ethsigner.Runner;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
