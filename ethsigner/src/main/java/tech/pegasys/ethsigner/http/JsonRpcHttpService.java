@@ -10,11 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.jsonrpcproxy;
+package tech.pegasys.ethsigner.http;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
 import java.time.Duration;
 

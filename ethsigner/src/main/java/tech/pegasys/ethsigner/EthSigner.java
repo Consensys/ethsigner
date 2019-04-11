@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
@@ -29,6 +32,9 @@ import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
 
@@ -65,21 +71,33 @@ public final class EthSigner {
     }
 
     try {
-      runnerBuilder.setTransactionSigner(
-          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId()));
-      runnerBuilder.setClientOptions(
-          new WebClientOptions()
-              .setDefaultPort(config.getDownstreamHttpPort())
-              .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()));
-      runnerBuilder.setServerOptions(
-          new HttpServerOptions()
-              .setPort(config.getHttpListenPort())
-              .setHost(config.getHttpListenHost().getHostAddress())
-              .setReuseAddress(true)
-              .setReusePort(true));
-      runnerBuilder.setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout());
-      runnerBuilder.setTransactionConverter(new RawTransactionConverter());
-      runnerBuilder.build().start();
+      final Web3j web3j =
+          new JsonRpc2_0Web3j(
+              new HttpService(
+                  "http://"
+                      + config.getDownstreamHttpHost()
+                      + ":"
+                      + config.getDownstreamHttpPort()));
+      final TransactionSigner signer =
+          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId());
+      final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
+
+      runnerBuilder
+          .setTransactionSigner(signer)
+          .setClientOptions(
+              new WebClientOptions()
+                  .setDefaultPort(config.getDownstreamHttpPort())
+                  .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
+          .setServerOptions(
+              new HttpServerOptions()
+                  .setPort(config.getHttpListenPort())
+                  .setHost(config.getHttpListenHost().getHostAddress())
+                  .setReuseAddress(true)
+                  .setReusePort(true))
+          .setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
+          .setTransactionConverter(new RawTransactionConverter(nonceProvider))
+          .build()
+          .start();
     } catch (IOException ex) {
       LOG.info(
           "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");

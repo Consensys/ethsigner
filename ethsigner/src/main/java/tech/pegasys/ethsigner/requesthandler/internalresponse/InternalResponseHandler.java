@@ -10,10 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.jsonrpcproxy;
+package tech.pegasys.ethsigner.requesthandler.internalresponse;
 
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.requesthandler.BodyProvider;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;

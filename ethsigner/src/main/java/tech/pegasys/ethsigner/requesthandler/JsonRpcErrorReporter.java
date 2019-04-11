@@ -10,8 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.jsonrpcproxy;
+package tech.pegasys.ethsigner.requesthandler;
 
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
@@ -31,7 +32,7 @@ public class JsonRpcErrorReporter {
     this.responder = responder;
   }
 
-  void send(
+  public void send(
       final JsonRpcRequest jsonRequest,
       final HttpServerRequest httpRequest,
       final JsonRpcErrorResponse error) {

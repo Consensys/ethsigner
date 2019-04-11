@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
