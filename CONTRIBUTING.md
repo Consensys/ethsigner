@@ -260,32 +260,9 @@ in this guide.
 | [`requires-changes`][search-label-requires-changes]                     | Pull requests which need to be updated based on review comments and then reviewed again.   |
 | [`needs engineering approval`][search-label-needs-engineering-approval] | Pull requests which need to be approved from a technical person, mainly documentation PRs. |
 
-[search-label-windows]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22windows%22
-[search-label-linux]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22linux%22
-[search-label-mac]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22mac%22
-[search-label-documentation]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22documentation%22
-[search-label-performance]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22performance%22
-[search-label-security]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22security%22
-[search-label-api]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22api%22
-[search-label-enhancement]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22enhancement%22
-[search-label-bug]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22bug%22
-[search-label-help-wanted]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22help%20wanted%22
-[search-label-good-first-issue]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22good%20first%20issue%22
-[search-label-info-needed]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22info%20needed%22
-[search-label-needs-reproduction]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22needs%20reproduction%22
-[search-label-blocked]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22blocked%22
-[search-label-duplicate]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22duplicate%22
-[search-label-wontfix]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22wontfix%22
-[search-label-invalid]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22invalid%22
-[search-label-do-we-want-this]: https://github.com/PegaSysEng/pantheon/issues?q=is%3Aopen+is%3Aissue+label%3A%22do%20we%20want%20this%22
-[search-label-work-in-progress]: https://github.com/PegaSysEng/pantheon/pulls?q=is%3Aopen+is%3Apr+label%3A%22work%20in%20progress%22
-[search-label-requires-changes]: https://github.com/PegaSysEng/pantheon/pulls?q=is%3Aopen+is%3Apr+label%3A%22requires%20changes%22
-[search-label-needs-engineering-approval]: https://github.com/PegaSysEng/pantheon/pulls?q=is%3Aopen+is%3Apr+label%3A%22needs+engineering+approval%22
-
 [private@pegasys.tech]: mailto:private@pegasys.tech
-[Gitter]: https://gitter.im/PegaSysEng/pantheon
-[Pantheon documentation]: https://docs.pantheon.pegasys.tech/
-[Debugging documentation]: https://docs.pantheon.pegasys.tech/en/stable/Using-Pantheon/Debugging/
+[Gitter]: https://gitter.im/PegaSysEng/EthSigner
+[Pantheon documentation]: Coming soon - check docs in repo for now.
 [CLA.md]: /CLA.md
 [Code Reviews]: /docs/community/code-reviews.md
 [MkDocs]: https://www.mkdocs.org/
