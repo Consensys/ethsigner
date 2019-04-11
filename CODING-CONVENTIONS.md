@@ -76,9 +76,6 @@ To create understandable, self-documenting code:
   - Make it easier to use the right way than the wrong way
   - Avoid abbreviations. We are a global team and when English is a second language abbreviations reduce readability. The following abbreviations are exceptions: 
     * tx -> Transaction
-    * IBFT -> Istanbul Byzantine Fault Tolerant (a consensus protocol)
-    * EVM -> Ethereum Virtual Machine 
-    * P2P -> Peer to Peer
     * RPC -> Remote Procedure Call
     
 # 3.2 Creating Code for Constant Refactoring and Evolving Design
