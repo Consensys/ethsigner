@@ -103,7 +103,12 @@ public class IntegrationTestBase {
     httpServerOptions.setHost("localhost");
 
     runner =
-        new Runner(transactionSigner, httpClientOptions, httpServerOptions, Duration.ofSeconds(5));
+        new Runner(
+            transactionSigner,
+            httpClientOptions,
+            httpServerOptions,
+            Duration.ofSeconds(5),
+            new RawTransactionConverter());
     runner.start();
 
     LOG.info(
@@ -185,7 +190,7 @@ public class IntegrationTestBase {
     final File keyFile = createKeyFile();
     final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
 
-    return new TransactionSigner(chain, credentials, new RawTransactionConverter());
+    return new TransactionSigner(chain, credentials);
   }
 
   @SuppressWarnings("UnstableApiUsage")

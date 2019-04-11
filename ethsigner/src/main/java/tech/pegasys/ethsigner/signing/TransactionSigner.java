@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.signing;
 
-import tech.pegasys.ethsigner.RawTransactionConverter;
-import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.signing.web3j.TransactionEncoder;
 
 import org.web3j.crypto.Credentials;
@@ -24,35 +22,20 @@ public class TransactionSigner {
 
   private final Credentials credentials;
   private final ChainIdProvider chain;
-  private final RawTransactionConverter converter;
 
-  public TransactionSigner(
-      final ChainIdProvider chain,
-      final Credentials credentials,
-      final RawTransactionConverter converter) {
+  public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
     this.chain = chain;
     this.credentials = credentials;
-    this.converter = converter;
   }
 
   public String getAddress() {
     return credentials.getAddress();
   }
 
-  public String signTransaction(final SendTransactionJsonParameters params) {
-    if (senderNotUnlockedAccount(params)) {
-      throw new IllegalArgumentException("From address does not match unlocked account");
-    }
-
-    final RawTransaction rawTransaction = converter.from(params);
-
+  public String signTransaction(final RawTransaction rawTransaction) {
     // Sign the transaction using the post Spurious Dragon technique
     final byte[] signedMessage =
         TransactionEncoder.signMessage(rawTransaction, chain.id(), credentials);
     return Numeric.toHexString(signedMessage);
-  }
-
-  private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
-    return !params.sender().equalsIgnoreCase(credentials.getAddress());
   }
 }
