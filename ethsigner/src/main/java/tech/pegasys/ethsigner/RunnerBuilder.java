@@ -29,6 +29,7 @@ public class RunnerBuilder {
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
   private Duration requestTimeout;
+  private RawTransactionConverter transactionConverter;
 
   public RunnerBuilder() {}
 
@@ -48,6 +49,10 @@ public class RunnerBuilder {
     this.requestTimeout = requestTimeout;
   }
 
+  public void setTransactionConverter(final RawTransactionConverter transactionConverter) {
+    this.transactionConverter = transactionConverter;
+  }
+
   public Runner build() {
     if (transactionSigner == null) {
       LOG.error("Unable to construct Runner, transactionSigner is unset.");
@@ -61,10 +66,17 @@ public class RunnerBuilder {
       LOG.error("Unable to construct Runner, serverOptions is unset.");
       return null;
     }
+
+    if (transactionConverter == null) {
+      LOG.error("Unable to construct Runner, transaction transactionConverter is unset.");
+      return null;
+    }
+
     if (requestTimeout == null) {
       LOG.error("Unable to construct Runner, requestTimeout is unset.");
       return null;
     }
-    return new Runner(transactionSigner, clientOptions, serverOptions, requestTimeout);
+    return new Runner(
+        transactionSigner, clientOptions, serverOptions, requestTimeout, transactionConverter);
   }
 }
