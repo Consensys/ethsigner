@@ -23,14 +23,18 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 
 public class AcceptanceTestBase {
 
+  private static final Logger LOG = LogManager.getLogger();
+
   private DockerClient dockerClient;
   private String pantheonId;
-  private EthFirewallProcessRunner ethFirewallRunner;
+  private EthSignerProcessRunner ethSignerRunner;
 
   @Before
   public void setUpBase() {
@@ -77,21 +81,37 @@ public class AcceptanceTestBase {
           e);
     }
 
-    ethFirewallRunner = new EthFirewallProcessRunner();
-    ethFirewallRunner.start("EthFirewall");
+    ethSignerRunner = new EthSignerProcessRunner();
+    ethSignerRunner.start("EthFirewall");
+
+    try {
+      Thread.sleep(2500L);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
 
     // TODO Pantheon takes over 1 second to startup - problem?
+
   }
 
   @After
   public void tearDownBase() {
     if (dockerClient != null && pantheonId != null) {
+      LOG.info("Stopping the Pantheon Docker container");
       dockerClient.stopContainerCmd(pantheonId).exec();
       dockerClient.waitContainerCmd(pantheonId).exec((new WaitContainerResultCallback()));
+      LOG.info("Removing the Pantheon Docker container");
       dockerClient.removeContainerCmd(pantheonId).exec();
     }
 
-    ethFirewallRunner.shutdown();
+    LOG.info("Shutting down EthSigner");
+    ethSignerRunner.shutdown();
+
+    try {
+      Thread.sleep(1000L);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   // TODO ports! need the EthFirewall ports for request / response - or provide functions!

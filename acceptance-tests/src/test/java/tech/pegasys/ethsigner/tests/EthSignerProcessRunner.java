@@ -35,7 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
 
-public class EthFirewallProcessRunner {
+public class EthSignerProcessRunner {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
@@ -44,7 +44,7 @@ public class EthFirewallProcessRunner {
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
 
-  EthFirewallProcessRunner() {
+  EthSignerProcessRunner() {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
