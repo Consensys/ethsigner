@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.junit.Test;
-import org.web3j.crypto.ECKeyPair;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
@@ -53,12 +52,11 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     final BigInteger gasPrice = BigInteger.valueOf(5);
     final BigDecimal transferAmount = new BigDecimal(15.5);
     final Unit transferUnit = Unit.ETHER;
-    final String sender = address(GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
 
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            sender,
+            GENESIS_ACCOUNT_ONE_PUBLIC_KEY,
             nonce,
             gasPrice,
             INTRINSIC_GAS,
@@ -87,13 +85,5 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     // TODO contract
 
     // TODO verify deployment on node
-  }
-
-  public static String address(String privateKeyInHex) {
-    BigInteger privateKeyInBT = new BigInteger(privateKeyInHex, 16);
-    ECKeyPair aPair = ECKeyPair.create(privateKeyInBT);
-    BigInteger publicKeyInBT = aPair.getPublicKey();
-    String sPublickeyInHex = publicKeyInBT.toString(16);
-    return sPublickeyInHex;
   }
 }
