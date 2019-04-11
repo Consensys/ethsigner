@@ -12,24 +12,12 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
-
-import java.math.BigInteger;
+import java.io.IOException;
 
 import org.web3j.crypto.RawTransaction;
 
-public class RawTransactionConverter {
+@FunctionalInterface
+public interface RawTransactionSupplier {
 
-  public RawTransactionConverter() {}
-
-  public RawTransaction from(final SendTransactionJsonParameters input) {
-
-    return RawTransaction.createTransaction(
-        input.nonce().orElseGet(() -> null),
-        input.gasPrice().orElseGet(() -> BigInteger.ZERO),
-        input.gas().orElseGet(() -> BigInteger.valueOf(90000)),
-        input.receiver().orElseGet(() -> ""),
-        input.value().orElseGet(() -> BigInteger.ZERO),
-        input.data());
-  }
+  RawTransaction get() throws IOException;
 }

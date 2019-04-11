@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
@@ -41,6 +42,7 @@ public class Runner {
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private final RawTransactionConverter transactionConverter;
+  private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
@@ -52,12 +54,14 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final RawTransactionConverter transactionConverter) {
+      final RawTransactionConverter transactionConverter,
+      final NonceProvider nonceProvider) {
     this.transactionSigner = transactionSigner;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionConverter = transactionConverter;
+    this.nonceProvider = nonceProvider;
   }
 
   public void start() {
@@ -84,7 +88,11 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            errorReporter, downStreamConnection, transactionSigner, transactionConverter));
+            errorReporter,
+            downStreamConnection,
+            transactionSigner,
+            transactionConverter,
+            nonceProvider));
 
     requestMapper.addHandler(
         "eth_accounts",

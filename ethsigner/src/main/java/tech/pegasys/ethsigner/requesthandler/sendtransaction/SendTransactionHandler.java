@@ -12,24 +12,16 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.RawTransaction;
@@ -38,94 +30,44 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
 
-  private static final String JSON_RPC_VERSION = "2.0";
-  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-
   private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
   private final TransactionSigner signer;
   private final RawTransactionConverter converter;
+  private final NonceProvider nonceProvider;
 
   public SendTransactionHandler(
       final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
       final TransactionSigner signer,
-      final RawTransactionConverter converter) {
+      final RawTransactionConverter converter,
+      final NonceProvider nonceProvider) {
     this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
     this.signer = signer;
     this.converter = converter;
+    this.nonceProvider = nonceProvider;
   }
 
   @Override
-  public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest requestBody) {
-    final HttpClientRequest request =
-        ethNodeClient.request(
-            httpServerRequest.method(),
-            httpServerRequest.uri(),
-            proxiedResponse -> {
-              logResponse(proxiedResponse);
-
-              httpServerRequest.response().setStatusCode(proxiedResponse.statusCode());
-              httpServerRequest.response().headers().setAll(proxiedResponse.headers());
-              httpServerRequest.response().setChunked(false);
-
-              proxiedResponse.bodyHandler(
-                  data -> {
-                    logResponseBody(data);
-
-                    // End the sendRequest, preventing any other handler from executing
-                    httpServerRequest.response().end(data);
-                  });
-            });
-
-    request.headers().setAll(httpServerRequest.headers());
-    request.headers().remove("Content-Length"); // created during 'end'.
-    request.setChunked(false);
-
-    final JsonRpcBody rpcBody = getBody(requestBody);
-    if (rpcBody.hasError()) {
-      errorReporter.send(requestBody, httpServerRequest, rpcBody.error());
-    } else {
-      logRequest(requestBody, httpServerRequest, request, rpcBody.body());
-      request.end(rpcBody.body());
-    }
-  }
-
-  private void logResponse(final HttpClientResponse response) {
-    LOG.debug("Response status: {}", response.statusCode());
-  }
-
-  private void logResponseBody(final Buffer body) {
-    LOG.debug("Response body: {}", body);
-  }
-
-  private void logRequest(
-      final JsonRpcRequest originalJsonRpcRequest,
-      final HttpServerRequest originalRequest,
-      final HttpClientRequest proxyRequest,
-      final Buffer proxyRequestBody) {
-    LOG.debug(
-        "Original method: {}, uri: {}, body: {}, Proxy: method: {}, uri: {}, body: {}",
-        originalRequest.method(),
-        originalRequest.absoluteURI(),
-        Json.encodePrettily(originalJsonRpcRequest),
-        proxyRequest.method(),
-        proxyRequest.absoluteURI(),
-        proxyRequestBody);
-  }
-
-  private JsonRpcBody getBody(final JsonRpcRequest request) {
-
+  public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest request) {
     final SendTransactionJsonParameters params;
     try {
       params = SendTransactionJsonParameters.from(request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+      errorReporter.send(
+          request,
+          httpServerRequest,
+          new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS));
+      return;
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+      errorReporter.send(
+          request,
+          httpServerRequest,
+          new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS));
+      return;
     }
 
     if (senderNotUnlockedAccount(params)) {
@@ -133,37 +75,46 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           signer.getAddress());
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+      errorReporter.send(
+          request,
+          httpServerRequest,
+          new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS));
+      return;
     }
 
-    final String signedTransactionHexString;
-    try {
-      final RawTransaction rawTransaction = converter.from(params);
-      signedTransactionHexString = signer.signTransaction(rawTransaction);
-    } catch (final IllegalArgumentException e) {
-      LOG.debug("Bad input value from request: {}", request, e);
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
-    } catch (final Throwable e) {
-      LOG.debug("Unhandled error processing request: {}", request, e);
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INTERNAL_ERROR);
-    }
-
-    final JsonRpcRequest sendRawTransaction =
-        new JsonRpcRequest(
-            JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(request.getId());
-
-    try {
-      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
-    } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
-      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INTERNAL_ERROR);
-    }
+    sendTransaction(params, httpServerRequest, request);
   }
 
-  private static JsonRpcBody createJsonRpcBodyFrom(
-      final JsonRpcRequestId id, final JsonRpcError error) {
-    return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
+  private void sendTransaction(
+      final SendTransactionJsonParameters params,
+      final HttpServerRequest httpServerRequest,
+      final JsonRpcRequest request) {
+    final RawTransaction rawTransaction = converter.from(params);
+
+    final TransactionPassthrough sendTransactionTransmitter =
+        createTransactionTransmitter(rawTransaction, httpServerRequest, request);
+
+    sendTransactionTransmitter.send();
+  }
+
+  private TransactionPassthrough createTransactionTransmitter(
+      final RawTransaction rawTransaction,
+      final HttpServerRequest httpServerRequest,
+      final JsonRpcRequest request) {
+    final TransactionInformation tnxInfo;
+
+    if (rawTransaction.getNonce() != null) {
+      tnxInfo =
+          new TransactionInformation(httpServerRequest, () -> rawTransaction, request.getId());
+      return new TransactionPassthrough(errorReporter, ethNodeClient, tnxInfo, signer);
+    } else {
+      tnxInfo =
+          new TransactionInformation(
+              httpServerRequest,
+              new NoncePopulatingRawTransactionSupplier(nonceProvider, rawTransaction),
+              request.getId());
+      return new RetryingTransactionTransmitter(errorReporter, ethNodeClient, tnxInfo, signer);
+    }
   }
 
   private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {

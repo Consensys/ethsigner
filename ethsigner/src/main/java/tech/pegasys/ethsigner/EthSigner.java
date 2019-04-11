@@ -95,7 +95,8 @@ public final class EthSigner {
                   .setReuseAddress(true)
                   .setReusePort(true))
           .setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .setTransactionConverter(new RawTransactionConverter(nonceProvider))
+          .setTransactionConverter(new RawTransactionConverter())
+          .setNonceProvider(nonceProvider)
           .build()
           .start();
     } catch (IOException ex) {
