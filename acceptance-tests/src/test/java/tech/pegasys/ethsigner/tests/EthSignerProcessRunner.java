@@ -70,7 +70,7 @@ public class EthSignerProcessRunner {
     final String timeoutMs = "500";
     final String hostIp = "127.0.0.1";
     final String hostPort = "9945";
-    final String chainId = "3216547778";
+    final String chainId = "321654777";
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
