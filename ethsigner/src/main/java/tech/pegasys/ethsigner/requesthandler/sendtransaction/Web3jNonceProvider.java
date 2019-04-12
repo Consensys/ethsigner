@@ -36,7 +36,7 @@ public class Web3jNonceProvider implements NonceProvider {
 
   @Override
   public BigInteger getNonce() throws IOException {
-    return getNonceFromClient().add(BigInteger.ONE);
+    return getNonceFromClient();
   }
 
   private BigInteger getNonceFromClient() throws IOException {

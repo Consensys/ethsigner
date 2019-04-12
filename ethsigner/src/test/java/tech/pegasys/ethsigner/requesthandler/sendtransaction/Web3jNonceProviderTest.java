@@ -52,10 +52,10 @@ public class Web3jNonceProviderTest {
   }
 
   @Test
-  public void followingInitialisationGrabsNonceFromWeb3jProvider() throws IOException {
+  public void returnsValueAsReceivedFromWeb3jProvider() throws IOException {
     final Web3jNonceProvider nonceProvider = new Web3jNonceProvider(web3j, accountAddress);
 
-    assertThat(nonceProvider.getNonce()).isEqualTo(priorTransactionCount.add(BigInteger.ONE));
+    assertThat(nonceProvider.getNonce()).isEqualTo(priorTransactionCount);
 
     verify(request).send();
     verify(ethGetTransactionCount).getTransactionCount();
