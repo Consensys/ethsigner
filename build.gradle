@@ -432,9 +432,6 @@ task releaseIntegrationTest(type: Test){
   }
 }
 
-
-task releaseAcceptanceTest(type: Test, dependsOn : ':acceptance-tests:acceptanceTest') {}
-
 release {
   preTagCommitMessage = '[Gradle Release Plugin] - pre tag commit: '
   tagCommitMessage = '[Gradle Release Plugin] - creating tag: '
@@ -442,7 +439,6 @@ release {
   buildTasks = [
     'build',
     'releaseIntegrationTest',
-    'releaseAcceptanceTest',
     'checkLicenses',
     'javadoc'
   ]
