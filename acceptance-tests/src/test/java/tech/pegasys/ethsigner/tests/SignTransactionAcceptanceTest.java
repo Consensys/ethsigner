@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -35,11 +36,23 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransfer() throws IOException, InterruptedException {
 
-    final BigInteger nonce = BigInteger.ONE;
+    final BigInteger nonce = BigInteger.ZERO;
     final BigInteger gasPrice = BigInteger.valueOf(10000000000000L);
     final BigDecimal transferAmount = new BigDecimal(15.5);
     final Unit transferUnit = Unit.ETHER;
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+
+    final BigInteger transferAmountWei = new BigInteger("15500000000000000000");
+
+    // TODO starting balance - refactor into private methods
+
+    final BigInteger startBalance =
+        jsonRpc
+            .ethGetBalance(
+                recipient,
+                DefaultBlockParameter.valueOf(jsonRpc.ethBlockNumber().send().getBlockNumber()))
+            .send()
+            .getBalance();
 
     final Transaction transaction =
         Transaction.createEtherTransaction(
@@ -71,20 +84,12 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final EthGetTransactionReceipt r = jsonRpc.ethGetTransactionReceipt(hash).send();
 
-    if (r.getTransactionReceipt().isPresent()) {
-      System.out.println("Found receipt: " + hash);
-    } else {
-      System.out.println("Cannot find receipt: " + hash);
-    }
-
     final BigInteger settledBlock = r.getTransactionReceipt().get().getBlockNumber();
 
-    final EthGetBalance receipentBalance =
+    final EthGetBalance endBalance =
         jsonRpc.ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
-
-    System.err.println(receipentBalance.getBalance());
-
-    // TODO verify transfer happened on node
+    assertThat(endBalance.getBalance())
+        .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));
   }
 
   @Test
