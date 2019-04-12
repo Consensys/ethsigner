@@ -46,11 +46,14 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     // TODO starting balance - refactor into private methods
 
+    // TODO logging of calls (for test setup / querying)
+
     final BigInteger startBalance =
-        jsonRpc
+        ethNodeJsonRpc
             .ethGetBalance(
                 recipient,
-                DefaultBlockParameter.valueOf(jsonRpc.ethBlockNumber().send().getBlockNumber()))
+                DefaultBlockParameter.valueOf(
+                    ethSignerJsonRpc.ethBlockNumber().send().getBlockNumber()))
             .send()
             .getBalance();
 
@@ -63,31 +66,29 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
             recipient,
             Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
 
-    final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
+    final EthSendTransaction response = ethSignerJsonRpc.ethSendTransaction(transaction).send();
 
     assertThat(response.getTransactionHash()).isNotEmpty();
     assertThat(response.getError()).isNull();
 
     final String hash = response.getTransactionHash();
 
-    // TODO web3j to Pantheon, not via EthSigner
-
     waitFor(
         () ->
             assertThat(
-                    jsonRpc
+                    ethNodeJsonRpc
                         .ethGetTransactionReceipt(hash)
                         .send()
                         .getTransactionReceipt()
                         .isPresent())
                 .isTrue());
 
-    final EthGetTransactionReceipt r = jsonRpc.ethGetTransactionReceipt(hash).send();
+    final EthGetTransactionReceipt r = ethNodeJsonRpc.ethGetTransactionReceipt(hash).send();
 
     final BigInteger settledBlock = r.getTransactionReceipt().get().getBlockNumber();
 
     final EthGetBalance endBalance =
-        jsonRpc.ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
+        ethNodeJsonRpc.ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
     assertThat(endBalance.getBalance())
         .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));
   }

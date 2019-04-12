@@ -54,9 +54,15 @@ public class AcceptanceTestBase {
 
   // TODO encapsulation
 
-  protected final JsonRpc2_0Web3j jsonRpc =
+  protected final JsonRpc2_0Web3j ethSignerJsonRpc =
       new JsonRpc2_0Web3j(
           new HttpService("http://" + LOCALHOST + ":" + 9945),
+          2000,
+          Async.defaultExecutorService());
+
+  protected final JsonRpc2_0Web3j ethNodeJsonRpc =
+      new JsonRpc2_0Web3j(
+          new HttpService("http://" + LOCALHOST + ":" + 8545),
           2000,
           Async.defaultExecutorService());
 
@@ -116,7 +122,8 @@ public class AcceptanceTestBase {
     ethSignerRunner = new EthSignerProcessRunner();
     ethSignerRunner.start("EthSigner");
 
-    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    waitFor(() -> assertThat(ethNodeJsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    waitFor(() -> assertThat(ethSignerJsonRpc.ethBlockNumber().send().hasError()).isFalse());
   }
 
   public static void waitFor(final ThrowingRunnable condition) {
@@ -139,12 +146,6 @@ public class AcceptanceTestBase {
 
     LOG.info("Shutting down EthSigner");
     ethSignerRunner.shutdown();
-
-    try {
-      Thread.sleep(1000L);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   // TODO ports! need the EthFirewall ports for request / response - or provide functions!
