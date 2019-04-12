@@ -87,7 +87,7 @@ public class AcceptanceTestBase {
     }
 
     ethSignerRunner = new EthSignerProcessRunner();
-    ethSignerRunner.start("EthFirewall");
+    ethSignerRunner.start("EthSigner");
 
     // TODO await for EthSigner to be 'alive'
     try {
@@ -126,7 +126,7 @@ public class AcceptanceTestBase {
       dockerClient.stopContainerCmd(pantheonId).exec();
       dockerClient.waitContainerCmd(pantheonId).exec((new WaitContainerResultCallback()));
     } catch (final NotModifiedException e) {
-      LOG.error("Pantheon Docker container has already been stopped");
+      LOG.error("Pantheon Docker container has already stopped");
     }
   }
 

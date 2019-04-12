@@ -64,7 +64,7 @@ public class EthSignerProcessRunner {
 
   public void start(final String name) {
 
-    final String loggingLevel = "INFO";
+    final String loggingLevel = "DEBUG";
     final String pantheonIp = "127.0.0.1";
     final String pantheonPort = "8545";
     final String timeoutMs = "500";
@@ -111,7 +111,7 @@ public class EthSignerProcessRunner {
   }
 
   private String executableLocation() {
-    return "build/install/ethfirewall/bin/ethfirewall";
+    return "build/install/ethsigner/bin/ethsigner";
   }
 
   private void printOutput(final String name, final Process process) {

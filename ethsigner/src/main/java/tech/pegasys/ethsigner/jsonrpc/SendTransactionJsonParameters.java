@@ -29,7 +29,6 @@ public class SendTransactionJsonParameters {
   private static final int HEXADECIMAL = 16;
   private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
-  private final String data;
   private String sender;
 
   private BigInteger gas;
@@ -37,14 +36,13 @@ public class SendTransactionJsonParameters {
   private BigInteger nonce;
   private BigInteger value;
   private String receiver;
+  private String data;
 
   @JsonCreator
-  public SendTransactionJsonParameters(
-      @JsonProperty("from") final String sender, @JsonProperty("data") final String data) {
-    this.data = data;
-
+  public SendTransactionJsonParameters(@JsonProperty("from") final String sender) {
     validatePrefix(sender);
     this.sender = sender;
+    this.data = "";
   }
 
   @JsonSetter("gas")
@@ -71,6 +69,11 @@ public class SendTransactionJsonParameters {
   @JsonSetter("value")
   public void value(final String value) {
     this.value = optionalHex(value);
+  }
+
+  @JsonSetter("data")
+  public void data(final String data) {
+    this.data = data;
   }
 
   public String data() {
