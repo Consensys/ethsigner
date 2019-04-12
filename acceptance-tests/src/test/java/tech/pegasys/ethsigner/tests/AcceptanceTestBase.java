@@ -13,8 +13,7 @@
 package tech.pegasys.ethsigner.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.concurrent.TimeUnit;
+import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -30,8 +29,6 @@ import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
-import org.awaitility.core.ThrowingRunnable;
 import org.junit.After;
 import org.junit.Before;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -116,17 +113,6 @@ public class AcceptanceTestBase {
 
     waitFor(() -> assertThat(ethNodeJsonRpc.ethBlockNumber().send().hasError()).isFalse());
     waitFor(() -> assertThat(ethSignerJsonRpc.ethBlockNumber().send().hasError()).isFalse());
-  }
-
-  public static void waitFor(final ThrowingRunnable condition) {
-    waitFor(30, condition);
-  }
-
-  public static void waitFor(final int timeout, final ThrowingRunnable condition) {
-    Awaitility.await()
-        .ignoreExceptions()
-        .atMost(timeout, TimeUnit.SECONDS)
-        .untilAsserted(condition);
   }
 
   @After
