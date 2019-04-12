@@ -49,7 +49,7 @@ public class EthSignerProcessRunner {
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
 
-  EthSignerProcessRunner() {
+  public EthSignerProcessRunner() {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 

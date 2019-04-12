@@ -38,7 +38,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
   private static final BigInteger INTRINSIC_GAS = BigInteger.valueOf(21000);
 
   @Test
-  public void valueTransfer() throws IOException, InterruptedException {
+  public void valueTransfer() throws IOException {
 
     final BigInteger nonce = BigInteger.ZERO;
     final BigInteger gasPrice = BigInteger.valueOf(10000000000000L);
