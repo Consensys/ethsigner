@@ -39,6 +39,7 @@ public class Runner {
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
+  private final RawTransactionConverter transactionConverter;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
@@ -49,11 +50,13 @@ public class Runner {
       final TransactionSigner transactionSigner,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
-      final Duration httpRequestTimeout) {
+      final Duration httpRequestTimeout,
+      final RawTransactionConverter transactionConverter) {
     this.transactionSigner = transactionSigner;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
+    this.transactionConverter = transactionConverter;
   }
 
   public void start() {
@@ -79,7 +82,8 @@ public class Runner {
 
     requestMapper.addHandler(
         "eth_sendTransaction",
-        new SendTransactionHandler(errorReporter, downStreamConnection, transactionSigner));
+        new SendTransactionHandler(
+            errorReporter, downStreamConnection, transactionSigner, transactionConverter));
 
     requestMapper.addHandler(
         "eth_accounts",

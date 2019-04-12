@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonList;
 
+import tech.pegasys.ethsigner.RawTransactionConverter;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
@@ -29,6 +30,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.crypto.RawTransaction;
 
 public class SendTransactionHandler implements JsonRpcRequestHandler {
 
@@ -40,14 +42,17 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
   private final TransactionSigner signer;
+  private final RawTransactionConverter converter;
 
   public SendTransactionHandler(
       final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
-      TransactionSigner signer) {
+      final TransactionSigner signer,
+      final RawTransactionConverter converter) {
     this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
     this.signer = signer;
+    this.converter = converter;
   }
 
   @Override
@@ -121,9 +126,18 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
 
+    if (senderNotUnlockedAccount(params)) {
+      LOG.info(
+          "From address ({}) does not match unlocked account ({})",
+          params.sender(),
+          signer.getAddress());
+      return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
+    }
+
     final String signedTransactionHexString;
     try {
-      signedTransactionHexString = signer.signTransaction(params);
+      final RawTransaction rawTransaction = converter.from(params);
+      signedTransactionHexString = signer.signTransaction(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Bad input value from request: {}", request, e);
       return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
@@ -148,5 +162,9 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private static JsonRpcBody createJsonRpcBodyFrom(
       final JsonRpcRequestId id, final JsonRpcError error) {
     return new JsonRpcBody(new JsonRpcErrorResponse(id, error));
+  }
+
+  private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
+    return !params.sender().equalsIgnoreCase(signer.getAddress());
   }
 }
