@@ -17,6 +17,7 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -98,12 +99,9 @@ public class AcceptanceTestBase {
 
   @After
   public void tearDownBase() {
-    if (dockerClient != null && pantheonId != null) {
-      LOG.info("Stopping the Pantheon Docker container");
-      dockerClient.stopContainerCmd(pantheonId).exec();
-      dockerClient.waitContainerCmd(pantheonId).exec((new WaitContainerResultCallback()));
-      LOG.info("Removing the Pantheon Docker container");
-      dockerClient.removeContainerCmd(pantheonId).exec();
+    if (hasPantheonContainer()) {
+      stopPantheonContainer();
+      removePantheonContainer();
     }
 
     LOG.info("Shutting down EthSigner");
@@ -117,4 +115,23 @@ public class AcceptanceTestBase {
   }
 
   // TODO ports! need the EthFirewall ports for request / response - or provide functions!
+
+  private boolean hasPantheonContainer() {
+    return dockerClient != null && pantheonId != null;
+  }
+
+  private void stopPantheonContainer() {
+    try {
+      LOG.info("Stopping the Pantheon Docker container");
+      dockerClient.stopContainerCmd(pantheonId).exec();
+      dockerClient.waitContainerCmd(pantheonId).exec((new WaitContainerResultCallback()));
+    } catch (final NotModifiedException e) {
+      LOG.error("Pantheon Docker container has already been stopped");
+    }
+  }
+
+  private void removePantheonContainer() {
+    LOG.info("Removing the Pantheon Docker container");
+    dockerClient.removeContainerCmd(pantheonId).withForce(true).exec();
+  }
 }

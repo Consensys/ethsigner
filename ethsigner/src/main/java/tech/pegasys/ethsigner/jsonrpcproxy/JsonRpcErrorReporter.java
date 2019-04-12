@@ -35,9 +35,9 @@ public class JsonRpcErrorReporter {
       final JsonRpcRequest jsonRequest,
       final HttpServerRequest httpRequest,
       final JsonRpcErrorResponse error) {
-    LOG.info("Dropping request from {}", httpRequest.remoteAddress());
+    LOG.info("Error request from request source {}", httpRequest.remoteAddress());
     LOG.debug(
-        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        "Error response from request with method: {}, uri: {}, body: {}, Error body: {}",
         httpRequest.method(),
         httpRequest.absoluteURI(),
         Json.encodePrettily(jsonRequest),

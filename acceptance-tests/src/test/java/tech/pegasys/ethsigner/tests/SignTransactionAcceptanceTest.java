@@ -48,7 +48,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransfer() {
 
-    final BigInteger nonce = BigInteger.ZERO;
+    final BigInteger nonce = BigInteger.ONE;
     final BigInteger gasPrice = BigInteger.valueOf(5);
     final BigDecimal transferAmount = new BigDecimal(15.5);
     final Unit transferUnit = Unit.ETHER;
