@@ -12,6 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.concurrent.TimeUnit;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -26,12 +30,35 @@ import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ThrowingRunnable;
 import org.junit.After;
 import org.junit.Before;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Async;
 
 public class AcceptanceTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
+
+  public static final String LOCALHOST = "127.0.0.1";
+
+  public static final String GENESIS_ACCOUNT_ONE_PRIVATE_KEY =
+      "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63";
+
+  public static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
+      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+
+  public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
+
+  // TODO encapsulation
+
+  protected final JsonRpc2_0Web3j jsonRpc =
+      new JsonRpc2_0Web3j(
+          new HttpService("http://" + LOCALHOST + ":" + 9945),
+          2000,
+          Async.defaultExecutorService());
 
   private DockerClient dockerClient;
   private String pantheonId;
@@ -89,12 +116,18 @@ public class AcceptanceTestBase {
     ethSignerRunner = new EthSignerProcessRunner();
     ethSignerRunner.start("EthSigner");
 
-    // TODO await for EthSigner to be 'alive'
-    try {
-      Thread.sleep(15000L);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+  }
+
+  public static void waitFor(final ThrowingRunnable condition) {
+    waitFor(30, condition);
+  }
+
+  public static void waitFor(final int timeout, final ThrowingRunnable condition) {
+    Awaitility.await()
+        .ignoreExceptions()
+        .atMost(timeout, TimeUnit.SECONDS)
+        .untilAsserted(condition);
   }
 
   @After

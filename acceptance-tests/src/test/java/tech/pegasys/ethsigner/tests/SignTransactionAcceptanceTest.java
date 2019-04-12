@@ -12,44 +12,31 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.junit.Test;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.utils.Async;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
-  private static final String LOCALHOST = "127.0.0.1";
-
-  public static final String GENESIS_ACCOUNT_ONE_PRIVATE_KEY =
-      "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63";
-
-  public static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
-
-  public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
-
-  private final JsonRpc2_0Web3j jsonRpc =
-      new JsonRpc2_0Web3j(
-          new HttpService("http://" + LOCALHOST + ":" + 9945),
-          2000,
-          Async.defaultExecutorService());
-
   /** Number of GAS units that the transaction will cost. */
   private static final BigInteger INTRINSIC_GAS = BigInteger.valueOf(21000);
 
   @Test
-  public void valueTransfer() {
+  public void valueTransfer() throws IOException, InterruptedException {
 
     final BigInteger nonce = BigInteger.ONE;
-    final BigInteger gasPrice = BigInteger.valueOf(5);
+    final BigInteger gasPrice = BigInteger.valueOf(10000000000000L);
     final BigDecimal transferAmount = new BigDecimal(15.5);
     final Unit transferUnit = Unit.ETHER;
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
@@ -63,16 +50,41 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
             recipient,
             Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
 
-    try {
+    final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
 
-      final String hash = jsonRpc.ethSendTransaction(transaction).send().getTransactionHash();
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
+    assertThat(response.getTransactionHash()).isNotEmpty();
+    assertThat(response.getError()).isNull();
+
+    final String hash = response.getTransactionHash();
+
+    // TODO web3j to Pantheon, not via EthSigner
+
+    waitFor(
+        () ->
+            assertThat(
+                    jsonRpc
+                        .ethGetTransactionReceipt(hash)
+                        .send()
+                        .getTransactionReceipt()
+                        .isPresent())
+                .isTrue());
+
+    final EthGetTransactionReceipt r = jsonRpc.ethGetTransactionReceipt(hash).send();
+
+    if (r.getTransactionReceipt().isPresent()) {
+      System.out.println("Found receipt: " + hash);
+    } else {
+      System.out.println("Cannot find receipt: " + hash);
     }
 
-    // TODO value transfer
+    final BigInteger settledBlock = r.getTransactionReceipt().get().getBlockNumber();
 
-    // TODO verify deployment on node
+    final EthGetBalance receipentBalance =
+        jsonRpc.ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
+
+    System.err.println(receipentBalance.getBalance());
+
+    // TODO verify transfer happened on node
   }
 
   @Test
