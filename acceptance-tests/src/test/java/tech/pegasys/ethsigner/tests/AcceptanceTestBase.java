@@ -45,8 +45,8 @@ public class AcceptanceTestBase {
   private final Web3j ethNodeJsonRpc;
 
   private EthSignerProcessRunner ethSignerRunner;
-  private DockerClient dockerClient;
-  private String pantheonId;
+  private DockerClient docker;
+  private String pantheonContainerId;
 
   public AcceptanceTestBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(this::tearDownBase));
@@ -66,6 +66,48 @@ public class AcceptanceTestBase {
 
   @Before
   public void setUpBase() {
+    docker = createDockerClient();
+    pantheonContainerId = createPantheonContainer();
+    startPantheonContainer();
+
+    ethSignerRunner = new EthSignerProcessRunner();
+    ethSignerRunner.start("EthSigner");
+
+    awaitPantheonStartup();
+    awaitEthSignerStartup();
+  }
+
+  @After
+  public void tearDownBase() {
+    if (hasPantheonContainer()) {
+      stopPantheonContainer();
+      removePantheonContainer();
+    }
+
+    stopEthSigner();
+  }
+
+  protected Web3j ethSigner() {
+    return ethSignerJsonRpc;
+  }
+
+  protected Web3j ethNode() {
+    return ethNodeJsonRpc;
+  }
+
+  private void awaitEthSignerStartup() {
+    LOG.info("Waiting for EthSigner to become responsive...");
+    waitFor(() -> assertThat(ethSignerJsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    LOG.info("EthSigner is now responsive");
+  }
+
+  private void awaitPantheonStartup() {
+    LOG.info("Waiting for Pantheon to become responsive...");
+    waitFor(() -> assertThat(ethNodeJsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    LOG.info("Pantheon is now responsive");
+  }
+
+  private DockerClient createDockerClient() {
     final DefaultDockerClientConfig config =
         DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
@@ -76,11 +118,12 @@ public class AcceptanceTestBase {
             .withMaxTotalConnections(100)
             .withMaxPerRouteConnections(10);
 
-    dockerClient =
-        DockerClientBuilder.getInstance(config)
-            .withDockerCmdExecFactory(dockerCmdExecFactory)
-            .build();
+    return DockerClientBuilder.getInstance(config)
+        .withDockerCmdExecFactory(dockerCmdExecFactory)
+        .build();
+  }
 
+  private String createPantheonContainer() {
     try {
       // Bind the exposed 8545-8546 ports from the container to 8545-8546 on the host
       final HostConfig portBindingConfig =
@@ -88,7 +131,7 @@ public class AcceptanceTestBase {
               .withPortBindings(PortBinding.parse("8545:8545"), PortBinding.parse("8546:8546"));
 
       final CreateContainerCmd createPantheon =
-          dockerClient
+          docker
               .createContainerCmd("pegasyseng/pantheon:latest")
               .withHostConfig(portBindingConfig)
               .withCmd(
@@ -101,49 +144,27 @@ public class AcceptanceTestBase {
                   "--network=dev");
 
       final CreateContainerResponse pantheon = createPantheon.exec();
-      pantheonId = pantheon.getId();
-      dockerClient.startContainerCmd(pantheonId).exec();
+      return pantheon.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(
           "Before you run the acceptance tests, execute 'docker pull pegasyseng/pantheon:latest'",
           e);
     }
-
-    ethSignerRunner = new EthSignerProcessRunner();
-    ethSignerRunner.start("EthSigner");
-
-    waitFor(() -> assertThat(ethNodeJsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    waitFor(() -> assertThat(ethSignerJsonRpc.ethBlockNumber().send().hasError()).isFalse());
   }
 
-  @After
-  public void tearDownBase() {
-    if (hasPantheonContainer()) {
-      stopPantheonContainer();
-      removePantheonContainer();
-    }
-
-    LOG.info("Shutting down EthSigner");
-    ethSignerRunner.shutdown();
-  }
-
-  protected Web3j ethSigner() {
-    return ethSignerJsonRpc;
-  }
-
-  protected Web3j ethNode() {
-    return ethNodeJsonRpc;
+  private void startPantheonContainer() {
+    docker.startContainerCmd(pantheonContainerId).exec();
   }
 
   private boolean hasPantheonContainer() {
-    return dockerClient != null && pantheonId != null;
+    return docker != null && pantheonContainerId != null;
   }
 
   private void stopPantheonContainer() {
     try {
       LOG.info("Stopping the Pantheon Docker container");
-      dockerClient.stopContainerCmd(pantheonId).exec();
-      dockerClient.waitContainerCmd(pantheonId).exec((new WaitContainerResultCallback()));
+      docker.stopContainerCmd(pantheonContainerId).exec();
+      docker.waitContainerCmd(pantheonContainerId).exec((new WaitContainerResultCallback()));
     } catch (final NotModifiedException e) {
       LOG.error("Pantheon Docker container has already stopped");
     }
@@ -151,6 +172,11 @@ public class AcceptanceTestBase {
 
   private void removePantheonContainer() {
     LOG.info("Removing the Pantheon Docker container");
-    dockerClient.removeContainerCmd(pantheonId).withForce(true).exec();
+    docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
+  }
+
+  private void stopEthSigner() {
+    LOG.info("Shutting down EthSigner");
+    ethSignerRunner.shutdown();
   }
 }
