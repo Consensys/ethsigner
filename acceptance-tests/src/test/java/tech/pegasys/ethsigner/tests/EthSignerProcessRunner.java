@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.tests;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -66,7 +68,6 @@ public class EthSignerProcessRunner {
   }
 
   public void start(final String name) {
-
     final String loggingLevel = "DEBUG";
     final String pantheonIp = "127.0.0.1";
     final String pantheonPort = "8545";
@@ -166,7 +167,7 @@ public class EthSignerProcessRunner {
     final Path wallet;
     try {
       wallet = Files.createTempFile("ethsigner_into_passwordfile", ".json");
-      Files.write(wallet, "pass".getBytes(UTF_8));
+      Files.write(wallet, Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }

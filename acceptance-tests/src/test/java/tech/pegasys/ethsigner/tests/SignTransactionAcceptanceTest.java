@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -59,7 +61,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            GENESIS_ACCOUNT_ONE_PUBLIC_KEY,
+            Accounts.GENESIS_ACCOUNT_ONE_PUBLIC_KEY,
             nonce,
             gasPrice,
             INTRINSIC_GAS,

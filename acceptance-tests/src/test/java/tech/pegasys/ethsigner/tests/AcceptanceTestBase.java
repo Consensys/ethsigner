@@ -44,14 +44,6 @@ public class AcceptanceTestBase {
 
   public static final String LOCALHOST = "127.0.0.1";
 
-  public static final String GENESIS_ACCOUNT_ONE_PRIVATE_KEY =
-      "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63";
-
-  public static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
-
-  public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
-
   // TODO encapsulation
 
   protected final JsonRpc2_0Web3j ethSignerJsonRpc =
