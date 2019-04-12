@@ -10,11 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests;
+package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
+import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 
 import java.io.IOException;
@@ -52,11 +53,10 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     // TODO logging of calls (for test setup / querying)
 
     final BigInteger startBalance =
-        ethNodeJsonRpc
+        ethNode()
             .ethGetBalance(
                 recipient,
-                DefaultBlockParameter.valueOf(
-                    ethSignerJsonRpc.ethBlockNumber().send().getBlockNumber()))
+                DefaultBlockParameter.valueOf(ethNode().ethBlockNumber().send().getBlockNumber()))
             .send()
             .getBalance();
 
@@ -69,7 +69,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
             recipient,
             Convert.toWei(transferAmount, transferUnit).toBigIntegerExact());
 
-    final EthSendTransaction response = ethSignerJsonRpc.ethSendTransaction(transaction).send();
+    final EthSendTransaction response = ethSigner().ethSendTransaction(transaction).send();
 
     assertThat(response.getTransactionHash()).isNotEmpty();
     assertThat(response.getError()).isNull();
@@ -79,19 +79,20 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     waitFor(
         () ->
             assertThat(
-                    ethNodeJsonRpc
+                    ethNode()
                         .ethGetTransactionReceipt(hash)
                         .send()
                         .getTransactionReceipt()
                         .isPresent())
                 .isTrue());
 
-    final EthGetTransactionReceipt r = ethNodeJsonRpc.ethGetTransactionReceipt(hash).send();
+    final EthGetTransactionReceipt r = ethNode().ethGetTransactionReceipt(hash).send();
 
+    // TODO use the ifPresent()
     final BigInteger settledBlock = r.getTransactionReceipt().get().getBlockNumber();
 
     final EthGetBalance endBalance =
-        ethNodeJsonRpc.ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
+        ethNode().ethGetBalance(recipient, DefaultBlockParameter.valueOf(settledBlock)).send();
     assertThat(endBalance.getBalance())
         .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));
   }

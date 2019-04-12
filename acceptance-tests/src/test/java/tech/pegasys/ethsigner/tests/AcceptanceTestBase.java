@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
@@ -38,29 +39,29 @@ import org.web3j.utils.Async;
 public class AcceptanceTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String LOCALHOST = "127.0.0.1";
 
-  public static final String LOCALHOST = "127.0.0.1";
+  private final Web3j ethSignerJsonRpc;
+  private final Web3j ethNodeJsonRpc;
 
-  // TODO encapsulation
-
-  protected final JsonRpc2_0Web3j ethSignerJsonRpc =
-      new JsonRpc2_0Web3j(
-          new HttpService("http://" + LOCALHOST + ":" + 9945),
-          2000,
-          Async.defaultExecutorService());
-
-  protected final JsonRpc2_0Web3j ethNodeJsonRpc =
-      new JsonRpc2_0Web3j(
-          new HttpService("http://" + LOCALHOST + ":" + 8545),
-          2000,
-          Async.defaultExecutorService());
-
+  private EthSignerProcessRunner ethSignerRunner;
   private DockerClient dockerClient;
   private String pantheonId;
-  private EthSignerProcessRunner ethSignerRunner;
 
   public AcceptanceTestBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(this::tearDownBase));
+
+    ethSignerJsonRpc =
+        new JsonRpc2_0Web3j(
+            new HttpService("http://" + LOCALHOST + ":" + 9945),
+            2000,
+            Async.defaultExecutorService());
+
+    ethNodeJsonRpc =
+        new JsonRpc2_0Web3j(
+            new HttpService("http://" + LOCALHOST + ":" + 8545),
+            2000,
+            Async.defaultExecutorService());
   }
 
   @Before
@@ -126,7 +127,13 @@ public class AcceptanceTestBase {
     ethSignerRunner.shutdown();
   }
 
-  // TODO ports! need the EthFirewall ports for request / response - or provide functions!
+  protected Web3j ethSigner() {
+    return ethSignerJsonRpc;
+  }
+
+  protected Web3j ethNode() {
+    return ethNodeJsonRpc;
+  }
 
   private boolean hasPantheonContainer() {
     return dockerClient != null && pantheonId != null;
