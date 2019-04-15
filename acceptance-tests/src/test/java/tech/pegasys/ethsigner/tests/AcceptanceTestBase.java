@@ -48,8 +48,13 @@ public class AcceptanceTestBase {
 
   @AfterClass
   public static void tearDownBase() {
-    ethNode.shutdown();
-    ethSigner.shutdown();
+    if (ethNode != null) {
+      ethNode.shutdown();
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
   }
 
   protected Web3j ethSigner() {
