@@ -35,7 +35,7 @@ public class JsonRpcErrorReporter {
       final JsonRpcRequest jsonRequest,
       final HttpServerRequest httpRequest,
       final JsonRpcErrorResponse error) {
-    LOG.info("Error request from request source {}", httpRequest.remoteAddress());
+    LOG.info("Error encountered by request from: {}", httpRequest.remoteAddress());
     LOG.debug(
         "Error response from request with method: {}, uri: {}, body: {}, Error body: {}",
         httpRequest.method(),
