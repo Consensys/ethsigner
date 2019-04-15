@@ -30,17 +30,17 @@ public class AcceptanceTestBase {
   private static final Logger LOG = LogManager.getLogger();
 
   private static Node ethNode;
-  private static Signer ehtSigner;
+  private static Signer ethSigner;
 
   @BeforeClass
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
-    ehtSigner = new Signer();
+    ethSigner = new Signer();
     ethNode = new PantheonNode();
 
     ethNode.start();
-    ehtSigner.start();
+    ethSigner.start();
 
     awaitPantheonStartup();
     awaitEthSignerStartup();
@@ -49,11 +49,11 @@ public class AcceptanceTestBase {
   @AfterClass
   public static void tearDownBase() {
     ethNode.shutdown();
-    ehtSigner.shutdown();
+    ethSigner.shutdown();
   }
 
   protected Web3j ethSigner() {
-    return ehtSigner.web3j();
+    return ethSigner.web3j();
   }
 
   protected Web3j ethNode() {
@@ -62,7 +62,7 @@ public class AcceptanceTestBase {
 
   private static void awaitEthSignerStartup() {
     LOG.info("Waiting for EthSigner to become responsive...");
-    waitFor(() -> assertThat(ehtSigner.web3j().ethBlockNumber().send().hasError()).isFalse());
+    waitFor(() -> assertThat(ethSigner.web3j().ethBlockNumber().send().hasError()).isFalse());
     LOG.info("EthSigner is now responsive");
   }
 
