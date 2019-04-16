@@ -47,7 +47,7 @@ public class PantheonNode implements Node {
             Async.defaultExecutorService());
 
     docker = createDockerClient();
-    pantheonContainerId = createPantheonContainer();
+    pantheonContainerId = createPantheonContainer(config);
   }
 
   @Override
@@ -103,13 +103,11 @@ public class PantheonNode implements Node {
         .build();
   }
 
-  private String createPantheonContainer() {
-    try {
-      // Bind the exposed 8545-8546 ports from the container to 8545-8546 on the host
-      final HostConfig portBindingConfig =
-          HostConfig.newHostConfig()
-              .withPortBindings(PortBinding.parse("8545:8545"), PortBinding.parse("8546:8546"));
+  private String createPantheonContainer(final NodeConfiguration config) {
+    final HostConfig portBindingConfig =
+        HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
 
+    try {
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd("pegasyseng/pantheon:latest")
@@ -130,5 +128,13 @@ public class PantheonNode implements Node {
           "Before you run the acceptance tests, execute 'docker pull pegasyseng/pantheon:latest'",
           e);
     }
+  }
+
+  private PortBinding tcpPortBinding(final NodeConfiguration config) {
+    return PortBinding.parse(config.tcpPort() + ":8545");
+  }
+
+  private PortBinding wsPortBinding(final NodeConfiguration config) {
+    return PortBinding.parse(config.wsPort() + ":8546");
   }
 }

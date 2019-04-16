@@ -20,15 +20,20 @@ public class NodeConfiguration {
 
   // TODO make these actual config options
   private static final String LOCALHOST = "127.0.0.1";
-  private static final int PORT = 8545;
+  private static final int TCP_PORT = 8545;
+  private static final int WS_PORT = 8546;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   public String hostname() {
     return LOCALHOST;
   }
 
-  public int port() {
-    return PORT;
+  public int tcpPort() {
+    return TCP_PORT;
+  }
+
+  public int wsPort() {
+    return WS_PORT;
   }
 
   public Duration pollingInterval() {
@@ -36,6 +41,6 @@ public class NodeConfiguration {
   }
 
   public String downstreamUrl() {
-    return String.format(HTTP_URL_FORMAT, hostname(), port());
+    return String.format(HTTP_URL_FORMAT, hostname(), tcpPort());
   }
 }
