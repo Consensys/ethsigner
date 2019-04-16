@@ -54,8 +54,8 @@ public class EthSignerProcessRunner {
   private final String nodeHostname;
   private final String nodeTcpPort;
   private final String timeoutMs;
-  private final String hostIp;
-  private final String hostPort;
+  private final String signerHostname;
+  private final String signerPort;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
@@ -64,8 +64,8 @@ public class EthSignerProcessRunner {
     this.nodeHostname = nodeConfig.hostname();
     this.nodeTcpPort = String.valueOf(nodeConfig.tcpPort());
     this.timeoutMs = String.valueOf(nodeConfig.pollingInterval().toMillis());
-    this.hostIp = signerConfig.hostname();
-    this.hostPort = String.valueOf(signerConfig.tcpPort());
+    this.signerHostname = signerConfig.hostname();
+    this.signerPort = String.valueOf(signerConfig.tcpPort());
   }
 
   public synchronized void shutdown() {
@@ -100,9 +100,9 @@ public class EthSignerProcessRunner {
     params.add("--downstream-http-request-timeout");
     params.add(timeoutMs);
     params.add("--http-listen-host");
-    params.add(hostIp);
+    params.add(signerHostname);
     params.add("--http-listen-port");
-    params.add(hostPort);
+    params.add(signerPort);
     params.add("--chain-id");
     params.add(PANTHEON_DEVMODE_CHAIN_ID);
 
@@ -162,7 +162,7 @@ public class EthSignerProcessRunner {
     final Path wallet;
     try {
       final URL walletResource = Resources.getResource("rich_benefactor_one.json");
-      wallet = Files.createTempFile("ethsigner_into_keyfile", ".json");
+      wallet = Files.createTempFile("ethsigner_keyfile", ".json");
       Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
     } catch (final IOException e) {
       throw new RuntimeException(e);
@@ -172,11 +172,11 @@ public class EthSignerProcessRunner {
     return keyFile;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
+
   private static File createPasswordFile() {
     final Path wallet;
     try {
-      wallet = Files.createTempFile("ethsigner_into_passwordfile", ".json");
+      wallet = Files.createTempFile("ethsigner_passwordfile", ".json");
       Files.write(wallet, Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
     } catch (final IOException e) {
       throw new RuntimeException(e);
