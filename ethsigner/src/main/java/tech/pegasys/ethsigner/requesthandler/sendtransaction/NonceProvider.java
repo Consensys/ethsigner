@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 import java.io.IOException;
 import java.math.BigInteger;
 
+@FunctionalInterface
 public interface NonceProvider {
 
   BigInteger getNonce() throws IOException;

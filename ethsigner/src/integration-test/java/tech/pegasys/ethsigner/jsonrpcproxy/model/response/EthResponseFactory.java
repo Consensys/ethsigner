@@ -13,7 +13,9 @@
 package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 
 import static java.util.Collections.emptyMap;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
+import io.vertx.core.json.Json;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
@@ -58,5 +60,13 @@ public class EthResponseFactory {
 
   public EthNodeResponse ethNode(final String body, final HttpResponseStatus code) {
     return new EthNodeResponse(NO_HEADERS, body, code);
+  }
+
+  public EthNodeResponse ethNode(final JsonRpcError error) {
+    final JsonRpcErrorResponse errorResponse =
+        new JsonRpcErrorResponse(DEFAULT_ID, error);
+
+    return new EthNodeResponse(NO_HEADERS, Json.encode(errorResponse),
+        HttpResponseStatus.BAD_REQUEST);
   }
 }

@@ -12,27 +12,19 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.mockserver.model.HttpRequest.request;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
-
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 
 import java.io.IOException;
 import java.math.BigInteger;
-
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
@@ -311,8 +303,6 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
-    final JsonRpcErrorResponse ethNodeResponseBody =
-        new JsonRpcErrorResponse(JsonRpcError.NONCE_TOO_LOW);
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(
             "0xf892808609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0eab405b58d6aa7db96ebfab8c55825504090447d6209848eeca5a2a2ff909467a064712627fdf02027521a716b8e9a497d31f7c4d5ecb75840fde86ade1d726fab");
@@ -323,7 +313,7 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
 
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithInitialNonce),
-        response.ethNode(Json.encode(ethNodeResponseBody), BAD_REQUEST));
+        response.ethNode(NONCE_TOO_LOW));
 
     final String successResponseFromWeb3Provider = "VALID_RESULT";
     setUpEthNodeResponse(
@@ -341,20 +331,11 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         sendRawTransaction.request(
             "0xf892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a05b2b6e380da44241ecd30b21bd56f05da80e217a6347dfe06b0fb00b2e4adc14a048c4f0255bdb5526171b0a771e61b9f44b3c3fca2feffae04d1748297726ca0f");
 
-    final JsonRpcErrorResponse errorResponse =
-        new JsonRpcErrorResponse(getRequestId(rawTransactionWithInitialNonce), INVALID_PARAMS);
-
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithInitialNonce),
-        response.ethNode(Json.encode(errorResponse), BAD_REQUEST));
+        response.ethNode(INVALID_PARAMS));
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INVALID_PARAMS));
-  }
-
-  private static JsonRpcRequestId getRequestId(final String jsonBody) {
-    final JsonObject obj = new JsonObject(jsonBody);
-    final JsonRpcRequest request = obj.mapTo(JsonRpcRequest.class);
-    return request.getId();
   }
 }

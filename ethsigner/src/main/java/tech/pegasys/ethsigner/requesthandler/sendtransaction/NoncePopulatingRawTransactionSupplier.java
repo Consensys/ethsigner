@@ -22,7 +22,7 @@ public class NoncePopulatingRawTransactionSupplier implements RawTransactionSupp
   private final RawTransaction template;
 
   public NoncePopulatingRawTransactionSupplier(
-      NonceProvider nonceProvider, RawTransaction template) {
+      final NonceProvider nonceProvider, final RawTransaction template) {
     this.nonceProvider = nonceProvider;
     this.template = template;
   }
