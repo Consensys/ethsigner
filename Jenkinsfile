@@ -22,7 +22,7 @@ try {
     node {
         checkout scm
         docker.image('docker:18.06.3-ce-dind').withRun('--privileged') { d ->
-            docker.build('ethsigner-build', 'docker').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
                     stage('Build') {
                         sh './gradlew --no-daemon --parallel build'
