@@ -17,17 +17,20 @@ import java.time.Duration;
 public class SignerConfiguration {
 
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
-
-  // TODO make these actual config options
-  private static final String LOCALHOST = "127.0.0.1";
   private static final int TCP_PORT = 9945;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   /** ChainId defined in the Pantheon dev mode genesis. */
   private static final String CHAIN_ID = "2018";
 
+  private final String hostname;
+
+  public SignerConfiguration(final String hostname) {
+    this.hostname = hostname;
+  }
+
   public String hostname() {
-    return LOCALHOST;
+    return hostname;
   }
 
   public int tcpPort() {

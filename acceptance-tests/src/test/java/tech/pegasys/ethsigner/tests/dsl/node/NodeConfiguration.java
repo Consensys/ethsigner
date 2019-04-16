@@ -17,15 +17,18 @@ import java.time.Duration;
 public class NodeConfiguration {
 
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
-
-  // TODO make these actual config options
-  private static final String LOCALHOST = "127.0.0.1";
   private static final int TCP_PORT = 8545;
   private static final int WS_PORT = 8546;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
+  private final String hostname;
+
+  public NodeConfiguration(final String hostname) {
+    this.hostname = hostname;
+  }
+
   public String hostname() {
-    return LOCALHOST;
+    return hostname;
   }
 
   public int tcpPort() {

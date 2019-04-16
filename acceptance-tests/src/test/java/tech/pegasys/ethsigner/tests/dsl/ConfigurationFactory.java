@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.tests.dsl;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 
+import java.util.Optional;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -23,26 +25,36 @@ import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 
 public class ConfigurationFactory {
 
+  private static final String LOCALHOST = "127.0.0.1";
+
   private final DockerClient docker;
   private final NodeConfiguration node;
   private final SignerConfiguration signer;
 
-  // TODO get / load node configuration
-
   public ConfigurationFactory() {
-
-    this.docker = createDockerClient();
-
-    // TODO use the hostname from docker to feed into the others
-    this.node = new NodeConfiguration();
-    this.signer = new SignerConfiguration();
-  }
-
-  public DockerClient createDockerClient() {
-    // TODO the DockerHost comes from here
     final DefaultDockerClientConfig config =
         DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
+    this.docker = createDockerClient(config);
+
+    final Optional<String> dockerHost = dockerHost(config);
+
+    if (dockerHost.isPresent()) {
+      this.node = new NodeConfiguration(dockerHost.get());
+      this.signer = new SignerConfiguration(dockerHost.get());
+    } else {
+      this.node = new NodeConfiguration(LOCALHOST);
+      this.signer = new SignerConfiguration(LOCALHOST);
+    }
+  }
+
+  private Optional<String> dockerHost(final DefaultDockerClientConfig config) {
+    return config.getDockerHost() == null
+        ? Optional.empty()
+        : Optional.of(config.getDockerHost().getHost());
+  }
+
+  private DockerClient createDockerClient(final DefaultDockerClientConfig config) {
     final DockerCmdExecFactory dockerCmdExecFactory =
         new JerseyDockerCmdExecFactory()
             .withReadTimeout(1000)
