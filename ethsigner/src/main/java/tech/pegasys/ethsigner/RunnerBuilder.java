@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import java.time.Duration;
@@ -33,24 +34,29 @@ public class RunnerBuilder {
 
   public RunnerBuilder() {}
 
-  public void setTransactionSigner(final TransactionSigner transactionSigner) {
+  public RunnerBuilder setTransactionSigner(final TransactionSigner transactionSigner) {
     this.transactionSigner = transactionSigner;
+    return this;
   }
 
-  public void setClientOptions(final WebClientOptions clientOptions) {
+  public RunnerBuilder setClientOptions(final WebClientOptions clientOptions) {
     this.clientOptions = clientOptions;
+    return this;
   }
 
-  public void setServerOptions(final HttpServerOptions serverOptions) {
+  public RunnerBuilder setServerOptions(final HttpServerOptions serverOptions) {
     this.serverOptions = serverOptions;
+    return this;
   }
 
-  public void setHttpRequestTimeout(final Duration requestTimeout) {
+  public RunnerBuilder setHttpRequestTimeout(final Duration requestTimeout) {
     this.requestTimeout = requestTimeout;
+    return this;
   }
 
-  public void setTransactionConverter(final RawTransactionConverter transactionConverter) {
+  public RunnerBuilder setTransactionConverter(final RawTransactionConverter transactionConverter) {
     this.transactionConverter = transactionConverter;
+    return this;
   }
 
   public Runner build() {

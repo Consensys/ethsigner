@@ -21,25 +21,27 @@ if (env.BRANCH_NAME == "master") {
 try {
     node {
         checkout scm
-        docker.image('openjdk:11-jdk-stretch').inside {
-            try {
-                stage('Build') {
-                    sh './gradlew --no-daemon --parallel build'
-                }
-                stage('Test') {
-                    sh './gradlew --no-daemon --parallel test'
-                }
-                stage('Integration Test') {
-                    sh './gradlew --no-daemon --parallel integrationTest'
-                }
-                stage('Integration Test') {
-                    sh './gradlew --no-daemon --parallel acceptanceTest'
-                }
-            } finally {
-                archiveArtifacts '**/build/reports/**'
-                archiveArtifacts '**/build/test-results/**'
+        docker.image('docker:18.06.3-ce-dind').withRun('--privileged') { d ->
+            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+                try {
+                    stage('Build') {
+                        sh './gradlew --no-daemon --parallel build'
+                    }
+                    stage('Test') {
+                        sh './gradlew --no-daemon --parallel test'
+                    }
+                    stage('Integration Test') {
+                        sh './gradlew --no-daemon --parallel integrationTest'
+                    }
+                    stage('Integration Test') {
+                        sh './gradlew --no-daemon --parallel acceptanceTest'
+                    }
+                } finally {
+                    archiveArtifacts '**/build/reports/**'
+                    archiveArtifacts '**/build/test-results/**'
 
-                junit allowEmptyResults: true, testResults: '**/build/test-results/**/*.xml'
+                    junit allowEmptyResults: true, testResults: '**/build/test-results/**/*.xml'
+                }
             }
         }
     }

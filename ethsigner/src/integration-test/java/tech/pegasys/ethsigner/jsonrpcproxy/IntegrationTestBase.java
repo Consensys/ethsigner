@@ -24,7 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import tech.pegasys.ethsigner.RawTransactionConverter;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -32,6 +31,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
@@ -50,6 +51,7 @@ import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -62,6 +64,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
@@ -72,7 +75,7 @@ public class IntegrationTestBase {
   protected static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   private static Runner runner;
-  private static ClientAndServer clientAndServer;
+  protected static ClientAndServer clientAndServer;
 
   private JsonRpc2_0Web3j jsonRpc;
 
@@ -102,13 +105,24 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
+    final Web3j web3j =
+        new JsonRpc2_0Web3j(
+            new HttpService(
+                "http://"
+                    + httpClientOptions.getDefaultHost()
+                    + ":"
+                    + httpClientOptions.getDefaultPort()),
+            2000,
+            defaultExecutorService());
+
     runner =
         new Runner(
             transactionSigner,
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
-            new RawTransactionConverter());
+            new RawTransactionConverter(
+                new Web3jNonceProvider(web3j, transactionSigner.getAddress())));
     runner.start();
 
     LOG.info(
@@ -201,5 +215,14 @@ public class IntegrationTestBase {
     File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
+  }
+
+  protected static String generateTransactionCountResponse() {
+    final JsonObject json = new JsonObject();
+    json.put("id", 1);
+    json.put("jsonrpc", "2.0");
+    json.put("result", "0x0");
+
+    return json.encode();
   }
 }
