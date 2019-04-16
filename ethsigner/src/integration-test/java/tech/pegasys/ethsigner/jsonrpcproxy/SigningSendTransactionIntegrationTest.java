@@ -16,15 +16,17 @@ import static org.mockserver.model.HttpRequest.request;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
+
 import java.io.IOException;
 import java.math.BigInteger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
@@ -312,8 +314,7 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
             "0xf892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a05b2b6e380da44241ecd30b21bd56f05da80e217a6347dfe06b0fb00b2e4adc14a048c4f0255bdb5526171b0a771e61b9f44b3c3fca2feffae04d1748297726ca0f");
 
     setUpEthNodeResponse(
-        request.ethNode(rawTransactionWithInitialNonce),
-        response.ethNode(NONCE_TOO_LOW));
+        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
 
     final String successResponseFromWeb3Provider = "VALID_RESULT";
     setUpEthNodeResponse(
@@ -332,8 +333,7 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
             "0xf892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a05b2b6e380da44241ecd30b21bd56f05da80e217a6347dfe06b0fb00b2e4adc14a048c4f0255bdb5526171b0a771e61b9f44b3c3fca2feffae04d1748297726ca0f");
 
     setUpEthNodeResponse(
-        request.ethNode(rawTransactionWithInitialNonce),
-        response.ethNode(INVALID_PARAMS));
+        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(INVALID_PARAMS));
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INVALID_PARAMS));

@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
