@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl;
+package tech.pegasys.ethsigner.tests.dsl.node;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -35,19 +35,15 @@ public class PantheonNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  // TODO this to go somewhere
-  private static final String LOCALHOST = "127.0.0.1";
-
   private final DockerClient docker;
   private final String pantheonContainerId;
-
   private final Web3j jsonRpc;
 
-  public PantheonNode() {
+  public PantheonNode(final NodeConfiguration config) {
     jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService("http://" + LOCALHOST + ":" + 8545),
-            2000,
+            new HttpService(config.downstreamUrl()),
+            config.pollingInterval().toMillis(),
             Async.defaultExecutorService());
 
     docker = createDockerClient();

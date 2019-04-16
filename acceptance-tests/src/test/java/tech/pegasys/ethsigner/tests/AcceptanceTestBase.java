@@ -15,9 +15,10 @@ package tech.pegasys.ethsigner.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import tech.pegasys.ethsigner.tests.dsl.Node;
-import tech.pegasys.ethsigner.tests.dsl.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.Signer;
+import tech.pegasys.ethsigner.tests.dsl.node.Node;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,8 @@ public class AcceptanceTestBase {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
     ethSigner = new Signer();
-    ethNode = new PantheonNode();
+    // TODO get / load node configuration
+    ethNode = new PantheonNode(new NodeConfiguration());
 
     ethNode.start();
     ethSigner.start();
