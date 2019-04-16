@@ -157,31 +157,35 @@ public class EthSignerProcessRunner {
             });
   }
 
-  @SuppressWarnings("UnstableApiUsage")
-  private static File createKeyFile() {
-    final Path wallet;
-    try {
-      final URL walletResource = Resources.getResource("rich_benefactor_one.json");
-      wallet = Files.createTempFile("ethsigner_keyfile", ".json");
-      Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-    File keyFile = wallet.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
+  private File createPasswordFile() {
+    return createJsonFile(
+        "ethsigner_passwordfile", Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
   }
 
+  @SuppressWarnings("UnstableApiUsage")
+  private File createKeyFile() {
+    final URL resource = Resources.getResource("rich_benefactor_one.json");
+    final byte[] data;
 
-  private static File createPasswordFile() {
-    final Path wallet;
     try {
-      wallet = Files.createTempFile("ethsigner_passwordfile", ".json");
-      Files.write(wallet, Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
+      data = Resources.toString(resource, UTF_8).getBytes(UTF_8);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-    File keyFile = wallet.toFile();
+
+    return createJsonFile("ethsigner_keyfile", data);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private File createJsonFile(final String tempNamePrefix, final byte[] data) {
+    final Path file;
+    try {
+      file = Files.createTempFile(tempNamePrefix, ".json");
+      Files.write(file, data);
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
+    }
+    File keyFile = file.toFile();
     keyFile.deleteOnExit();
     return keyFile;
   }
