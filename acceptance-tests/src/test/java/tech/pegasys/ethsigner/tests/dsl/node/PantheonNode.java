@@ -15,15 +15,11 @@ package tech.pegasys.ethsigner.tests.dsl.node;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
-import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -39,15 +35,15 @@ public class PantheonNode implements Node {
   private final String pantheonContainerId;
   private final Web3j jsonRpc;
 
-  public PantheonNode(final NodeConfiguration config) {
-    jsonRpc =
+  public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
+    this.jsonRpc =
         new JsonRpc2_0Web3j(
             new HttpService(config.downstreamUrl()),
             config.pollingInterval().toMillis(),
             Async.defaultExecutorService());
 
-    docker = createDockerClient();
-    pantheonContainerId = createPantheonContainer(config);
+    this.docker = docker;
+    this.pantheonContainerId = createPantheonContainer(config);
   }
 
   @Override
@@ -85,22 +81,6 @@ public class PantheonNode implements Node {
   private void removePantheonContainer() {
     LOG.info("Removing the Pantheon Docker container");
     docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
-  }
-
-  private DockerClient createDockerClient() {
-    final DefaultDockerClientConfig config =
-        DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-
-    final DockerCmdExecFactory dockerCmdExecFactory =
-        new JerseyDockerCmdExecFactory()
-            .withReadTimeout(1000)
-            .withConnectTimeout(1000)
-            .withMaxTotalConnections(100)
-            .withMaxPerRouteConnections(10);
-
-    return DockerClientBuilder.getInstance(config)
-        .withDockerCmdExecFactory(dockerCmdExecFactory)
-        .build();
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
