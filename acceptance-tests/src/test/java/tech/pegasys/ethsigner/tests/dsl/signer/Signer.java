@@ -10,9 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl;
+package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,21 +26,15 @@ public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  // TODO this to go somewhere
-  private static final String LOCALHOST = "127.0.0.1";
-
+  private final EthSignerProcessRunner runner;
   private final Web3j jsonRpc;
 
-  private EthSignerProcessRunner runner;
-
-  public Signer() {
-
-    runner = new EthSignerProcessRunner();
-
+  public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+    runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
     jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService("http://" + LOCALHOST + ":" + 9945),
-            2000,
+            new HttpService(signerConfig.url()),
+            signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
   }
 

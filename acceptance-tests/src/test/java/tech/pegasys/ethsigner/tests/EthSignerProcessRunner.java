@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.tests;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,8 +51,21 @@ public class EthSignerProcessRunner {
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
 
-  public EthSignerProcessRunner() {
+  private final String nodeHostname;
+  private final String nodeTcpPort;
+  private final String timeoutMs;
+  private final String hostIp;
+  private final String hostPort;
+
+  public EthSignerProcessRunner(
+      final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+
+    this.nodeHostname = nodeConfig.hostname();
+    this.nodeTcpPort = String.valueOf(nodeConfig.tcpPort());
+    this.timeoutMs = String.valueOf(nodeConfig.pollingInterval().toMillis());
+    this.hostIp = signerConfig.hostname();
+    this.hostPort = String.valueOf(signerConfig.tcpPort());
   }
 
   public synchronized void shutdown() {
@@ -67,13 +82,8 @@ public class EthSignerProcessRunner {
     }
   }
 
-  public void start(final String name) {
+  public void start(final String processName) {
     final String loggingLevel = "DEBUG";
-    final String pantheonIp = "127.0.0.1";
-    final String pantheonPort = "8545";
-    final String timeoutMs = "500";
-    final String hostIp = "127.0.0.1";
-    final String hostPort = "9945";
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
@@ -84,9 +94,9 @@ public class EthSignerProcessRunner {
     params.add("--key-file");
     params.add(createKeyFile().getAbsolutePath());
     params.add("--downstream-http-host");
-    params.add(pantheonIp);
+    params.add(nodeHostname);
     params.add("--downstream-http-port");
-    params.add(pantheonPort);
+    params.add(nodeTcpPort);
     params.add("--downstream-http-request-timeout");
     params.add(timeoutMs);
     params.add("--http-listen-host");
@@ -106,8 +116,8 @@ public class EthSignerProcessRunner {
 
     try {
       final Process process = processBuilder.start();
-      outputProcessorExecutor.submit(() -> printOutput(name, process));
-      processes.put(name, process);
+      outputProcessorExecutor.submit(() -> printOutput(processName, process));
+      processes.put(processName, process);
     } catch (final IOException e) {
       LOG.error("Error starting EthSigner process", e);
     }
