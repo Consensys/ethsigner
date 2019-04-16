@@ -29,11 +29,10 @@ public class RetryingTransactionTransmitter extends TransactionPassthrough {
   private static final Logger LOG = LoggerFactory.getLogger(RetryingTransactionTransmitter.class);
 
   public RetryingTransactionTransmitter(
-      final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
       final TransactionInformation transactionInfo,
       final TransactionSigner signer) {
-    super(errorReporter, ethNodeClient, transactionInfo, signer);
+    super(ethNodeClient, transactionInfo, signer);
   }
 
   @Override

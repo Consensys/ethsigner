@@ -37,17 +37,14 @@ public class TransactionPassthrough {
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
-  private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
   private final TransactionSigner signer;
   protected final TransactionInformation transactionInfo;
 
   public TransactionPassthrough(
-      final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
       final TransactionInformation transactionInfo,
       final TransactionSigner signer) {
-    this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
     this.transactionInfo = transactionInfo;
     this.signer = signer;
@@ -56,7 +53,6 @@ public class TransactionPassthrough {
   public void send() {
     final JsonRpcBody body = getBody();
     if (body.hasError()) {
-
     } else {
       final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
       final HttpClientRequest proxyRequest =

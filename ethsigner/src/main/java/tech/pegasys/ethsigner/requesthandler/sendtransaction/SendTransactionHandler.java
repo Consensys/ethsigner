@@ -106,14 +106,14 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     if (rawTransaction.getNonce() != null) {
       tnxInfo =
           new TransactionInformation(httpServerRequest, () -> rawTransaction, request.getId());
-      return new TransactionPassthrough(errorReporter, ethNodeClient, tnxInfo, signer);
+      return new TransactionPassthrough(ethNodeClient, tnxInfo, signer);
     } else {
       tnxInfo =
           new TransactionInformation(
               httpServerRequest,
               new NoncePopulatingRawTransactionSupplier(nonceProvider, rawTransaction),
               request.getId());
-      return new RetryingTransactionTransmitter(errorReporter, ethNodeClient, tnxInfo, signer);
+      return new RetryingTransactionTransmitter(ethNodeClient, tnxInfo, signer);
     }
   }
 

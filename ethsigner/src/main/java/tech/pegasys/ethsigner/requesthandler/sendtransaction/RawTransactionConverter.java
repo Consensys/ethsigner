@@ -25,11 +25,11 @@ public class RawTransactionConverter {
   public RawTransaction from(final SendTransactionJsonParameters input) {
 
     return RawTransaction.createTransaction(
-        input.nonce().orElseGet(() -> null),
-        input.gasPrice().orElseGet(() -> BigInteger.ZERO),
-        input.gas().orElseGet(() -> BigInteger.valueOf(90000)),
-        input.receiver().orElseGet(() -> ""),
-        input.value().orElseGet(() -> BigInteger.ZERO),
+        input.nonce().orElse(null),
+        input.gasPrice().orElse(BigInteger.ZERO),
+        input.gas().orElse(BigInteger.valueOf(90000)),
+        input.receiver().orElse(""),
+        input.value().orElse(BigInteger.ZERO),
         input.data());
   }
 }
