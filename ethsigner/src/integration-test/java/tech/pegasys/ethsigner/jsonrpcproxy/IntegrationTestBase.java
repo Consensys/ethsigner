@@ -17,10 +17,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.model.HttpRequest.request;
@@ -28,6 +24,35 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import com.google.common.io.Resources;
+import io.restassured.RestAssured;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Header;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.RegexBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -41,36 +66,6 @@ import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.ServerSocket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.io.Resources;
-import io.restassured.RestAssured;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServerOptions;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Header;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-
 public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
@@ -80,7 +75,7 @@ public class IntegrationTestBase {
   protected static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   private static Runner runner;
-  private static ClientAndServer clientAndServer;
+  protected static ClientAndServer clientAndServer;
 
   private JsonRpc2_0Web3j jsonRpc;
 
@@ -110,14 +105,14 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
-    final Web3j web3j = mock(Web3j.class);
-    @SuppressWarnings("unchecked")
-    final Request<?, EthGetTransactionCount> rq =
-        (Request<String, EthGetTransactionCount>) mock(Request.class);
-    final EthGetTransactionCount ethGetTransactionCount = mock(EthGetTransactionCount.class);
-    when(ethGetTransactionCount.getTransactionCount()).thenReturn(BigInteger.ONE);
-    when(rq.send()).thenReturn(ethGetTransactionCount);
-    doReturn(rq).when(web3j).ethGetTransactionCount(any(), any());
+    final Web3j web3j =
+        new JsonRpc2_0Web3j(
+            new HttpService(
+                "http://"
+                    + httpClientOptions.getDefaultHost()
+                    + ":"
+                    + httpClientOptions.getDefaultPort()),
+            2000, defaultExecutorService());
 
     runner =
         new Runner(
@@ -219,5 +214,14 @@ public class IntegrationTestBase {
     File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
+  }
+
+  protected static String generateTransactionCountResponse() {
+    final JsonObject json = new JsonObject();
+    json.put("id", 1);
+    json.put("jsonrpc", "2.0");
+    json.put("result", "0x0");
+
+    return json.encode();
   }
 }

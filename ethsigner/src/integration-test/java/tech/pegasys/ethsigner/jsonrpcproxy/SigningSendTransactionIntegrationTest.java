@@ -12,8 +12,11 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
+import org.mockserver.model.RegexBody;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
@@ -53,13 +56,14 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void missingNonceResultsInEthNodeRespondingSuccessfully() {
+    clientAndServer.when(request()
+        .withBody(new RegexBody(".*eth_getTransactionCount.*")))
+        .respond(response(generateTransactionCountResponse()));
+
     final String ethNodeResponseBody = "VALID_RESPONSE";
     final String responseBody =
         sendRawTransaction.request(
-            "0xf892018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb97087"
-                + "0f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058"
-                + "bb8eb970870f07244567535a05b2b6e380da44241ecd30b21bd56f05da80e217a6347dfe06b0fb0"
-                + "0b2e4adc14a048c4f0255bdb5526171b0a771e61b9f44b3c3fca2feffae04d1748297726ca0f");
+            "0xf892808609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0eab405b58d6aa7db96ebfab8c55825504090447d6209848eeca5a2a2ff909467a064712627fdf02027521a716b8e9a497d31f7c4d5ecb75840fde86ade1d726fab");
     setUpEthNodeResponse(request.ethNode(responseBody), response.ethNode(ethNodeResponseBody));
 
     sendRequestThenVerifyResponse(
