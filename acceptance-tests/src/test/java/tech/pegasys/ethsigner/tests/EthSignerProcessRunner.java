@@ -45,17 +45,14 @@ public class EthSignerProcessRunner {
   private static final Logger PROCESS_LOG =
       LogManager.getLogger("tech.pegasys.ethsigner.SubProcessLog");
 
-  /** ChainId defined in the Pantheon dev mode genesis. */
-  private static final String PANTHEON_DEVMODE_CHAIN_ID = "2018";
-
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
-
   private final String nodeHostname;
   private final String nodeTcpPort;
   private final String timeoutMs;
   private final String signerHostname;
   private final String signerPort;
+  private final String chainId;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
@@ -66,6 +63,7 @@ public class EthSignerProcessRunner {
     this.timeoutMs = String.valueOf(nodeConfig.pollingInterval().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerPort = String.valueOf(signerConfig.tcpPort());
+    this.chainId = signerConfig.chainId();
   }
 
   public synchronized void shutdown() {
@@ -104,7 +102,7 @@ public class EthSignerProcessRunner {
     params.add("--http-listen-port");
     params.add(signerPort);
     params.add("--chain-id");
-    params.add(PANTHEON_DEVMODE_CHAIN_ID);
+    params.add(chainId);
 
     LOG.info("Creating EthSigner process with params {}", params);
 

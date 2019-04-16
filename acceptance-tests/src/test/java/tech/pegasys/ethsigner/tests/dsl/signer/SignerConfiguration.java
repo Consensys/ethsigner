@@ -23,6 +23,9 @@ public class SignerConfiguration {
   private static final int TCP_PORT = 9945;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
+  /** ChainId defined in the Pantheon dev mode genesis. */
+  private static final String CHAIN_ID = "2018";
+
   public String hostname() {
     return LOCALHOST;
   }
@@ -37,5 +40,9 @@ public class SignerConfiguration {
 
   public String url() {
     return String.format(HTTP_URL_FORMAT, hostname(), tcpPort());
+  }
+
+  public String chainId() {
+    return CHAIN_ID;
   }
 }
