@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
@@ -22,6 +23,7 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
@@ -53,10 +55,19 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void internalErrorResponseWhenMissingNonce() {
-    // TODO This behaviour will change with the get nonce (PIE-1468)
+  public void missingNonceResultsInEthNodeRespondingSuccessfully() {
+    clientAndServer
+        .when(request().withBody(new RegexBody(".*eth_getTransactionCount.*")))
+        .respond(response(generateTransactionCountResponse()));
+
+    final String ethNodeResponseBody = "VALID_RESPONSE";
+    final String requestBody =
+        sendRawTransaction.request(
+            "0xf892808609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0eab405b58d6aa7db96ebfab8c55825504090447d6209848eeca5a2a2ff909467a064712627fdf02027521a716b8e9a497d31f7c4d5ecb75840fde86ade1d726fab");
+    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INTERNAL_ERROR));
+        request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(ethNodeResponseBody));
   }
 
   @Test

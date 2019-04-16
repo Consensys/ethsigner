@@ -35,4 +35,5 @@ dependencies {
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
+  integrationTestImplementation 'org.mockito:mockito-core'
 }

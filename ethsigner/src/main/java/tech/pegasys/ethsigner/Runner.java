@@ -12,14 +12,15 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.jsonrpcproxy.EthAccountsBodyProvider;
-import tech.pegasys.ethsigner.jsonrpcproxy.HttpResponseFactory;
-import tech.pegasys.ethsigner.jsonrpcproxy.InternalResponseHandler;
-import tech.pegasys.ethsigner.jsonrpcproxy.JsonRpcErrorReporter;
-import tech.pegasys.ethsigner.jsonrpcproxy.JsonRpcHttpService;
-import tech.pegasys.ethsigner.jsonrpcproxy.PassThroughHandler;
-import tech.pegasys.ethsigner.jsonrpcproxy.RequestMapper;
-import tech.pegasys.ethsigner.jsonrpcproxy.SendTransactionHandler;
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.http.JsonRpcHttpService;
+import tech.pegasys.ethsigner.http.RequestMapper;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
+import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
+import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
+import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import java.time.Duration;
