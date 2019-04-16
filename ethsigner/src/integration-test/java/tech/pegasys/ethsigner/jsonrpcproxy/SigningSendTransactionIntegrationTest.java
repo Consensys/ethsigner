@@ -61,10 +61,10 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
         .respond(response(generateTransactionCountResponse()));
 
     final String ethNodeResponseBody = "VALID_RESPONSE";
-    final String responseBody =
+    final String requestBody =
         sendRawTransaction.request(
             "0xf892808609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0eab405b58d6aa7db96ebfab8c55825504090447d6209848eeca5a2a2ff909467a064712627fdf02027521a716b8e9a497d31f7c4d5ecb75840fde86ade1d726fab");
-    setUpEthNodeResponse(request.ethNode(responseBody), response.ethNode(ethNodeResponseBody));
+    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(ethNodeResponseBody));
