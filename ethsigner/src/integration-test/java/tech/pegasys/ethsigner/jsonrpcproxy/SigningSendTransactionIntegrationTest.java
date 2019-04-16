@@ -16,7 +16,6 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
-import org.mockserver.model.RegexBody;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
@@ -24,6 +23,7 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
@@ -56,8 +56,8 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   public void missingNonceResultsInEthNodeRespondingSuccessfully() {
-    clientAndServer.when(request()
-        .withBody(new RegexBody(".*eth_getTransactionCount.*")))
+    clientAndServer
+        .when(request().withBody(new RegexBody(".*eth_getTransactionCount.*")))
         .respond(response(generateTransactionCountResponse()));
 
     final String ethNodeResponseBody = "VALID_RESPONSE";

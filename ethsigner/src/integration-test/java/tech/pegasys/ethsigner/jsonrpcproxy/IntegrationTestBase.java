@@ -24,35 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import com.google.common.io.Resources;
-import io.restassured.RestAssured;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
-import java.io.File;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Header;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.RegexBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.http.HttpService;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -65,6 +36,35 @@ import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
+import com.google.common.io.Resources;
+import io.restassured.RestAssured;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
@@ -112,7 +112,8 @@ public class IntegrationTestBase {
                     + httpClientOptions.getDefaultHost()
                     + ":"
                     + httpClientOptions.getDefaultPort()),
-            2000, defaultExecutorService());
+            2000,
+            defaultExecutorService());
 
     runner =
         new Runner(
