@@ -20,11 +20,8 @@ import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 
-import java.io.IOException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.core.ConditionTimeoutException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.web3j.protocol.Web3j;
@@ -78,19 +75,7 @@ public class AcceptanceTestBase {
 
   private static void awaitPantheonStartup() {
     LOG.info("Waiting for Pantheon to become responsive...");
-
-    try {
-      waitFor(() -> assertThat(ethNode.web3j().ethBlockNumber().send().hasError()).isFalse());
-    } catch (final ConditionTimeoutException e) {
-
-      try {
-        LOG.error(
-            "Pantheon never started up: " + ethNode.web3j().ethBlockNumber().send().toString());
-      } catch (IOException ex) {
-        LOG.error(e);
-      }
-    }
-
+    waitFor(() -> assertThat(ethNode.web3j().ethBlockNumber().send().hasError()).isFalse());
     LOG.info("Pantheon is now responsive");
   }
 }
