@@ -17,7 +17,6 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -26,21 +25,16 @@ import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InternalResponseHandler implements JsonRpcRequestHandler {
+public class InternalResponseHandler extends JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(InternalResponseHandler.class);
 
-  private final HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
-  private final JsonRpcErrorReporter errorReporter;
 
   public InternalResponseHandler(
-      final HttpResponseFactory responder,
-      final BodyProvider responseBodyProvider,
-      final JsonRpcErrorReporter errorReporter) {
-    this.responder = responder;
+      final HttpResponseFactory responder, final BodyProvider responseBodyProvider) {
+    super(responder);
     this.responseBodyProvider = responseBodyProvider;
-    this.errorReporter = errorReporter;
   }
 
   @Override
@@ -49,7 +43,7 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
     final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
 
     if (providedBody.hasError()) {
-      errorReporter.send(rpcRequest, httpServerRequest, providedBody.error());
+      reportError(httpServerRequest, rpcRequest, providedBody.error());
     } else {
       final JsonRpcSuccessResponse result =
           Json.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);

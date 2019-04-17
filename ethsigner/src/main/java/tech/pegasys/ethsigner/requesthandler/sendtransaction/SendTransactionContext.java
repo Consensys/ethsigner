@@ -16,12 +16,12 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 
 import io.vertx.core.http.HttpServerRequest;
 
-public class TransactionInformation {
+public class SendTransactionContext {
   private final HttpServerRequest initialRequest;
   private final JsonRpcRequestId receivedId;
   private final RawTransactionBuilder rawTransactionBuilder;
 
-  public TransactionInformation(
+  public SendTransactionContext(
       final HttpServerRequest initialRequest,
       final RawTransactionBuilder rawTransactionBuilder,
       final JsonRpcRequestId receivedId) {

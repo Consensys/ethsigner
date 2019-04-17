@@ -12,12 +12,42 @@
  */
 package tech.pegasys.ethsigner.requesthandler;
 
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@FunctionalInterface
-public interface JsonRpcRequestHandler {
+public abstract class JsonRpcRequestHandler {
 
-  void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);
+  public abstract void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);
+
+  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcRequestHandler.class);
+
+  protected final HttpResponseFactory responder;
+
+  public JsonRpcRequestHandler(HttpResponseFactory responder) {
+    this.responder = responder;
+  }
+
+  protected void reportError(
+      final HttpServerRequest httpServerRequest,
+      final JsonRpcRequest request,
+      final JsonRpcError errorCode) {
+    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(request.getId(), errorCode);
+
+    LOG.debug(
+        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        httpServerRequest.method(),
+        httpServerRequest.absoluteURI(),
+        Json.encodePrettily(request),
+        Json.encode(errorResponse));
+
+    responder.create(httpServerRequest, HttpResponseStatus.BAD_REQUEST.code(), errorResponse);
+  }
 }

@@ -38,7 +38,7 @@ public class NonceTooLowRetryMechanism implements RetryMechanism {
   }
 
   @Override
-  public boolean shouldResend(final HttpClientResponse response, final Buffer body)
+  public boolean shouldRetry(final HttpClientResponse response, final Buffer body)
       throws IOException {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);

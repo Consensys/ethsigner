@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import static java.util.Collections.singletonList;
 
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
@@ -41,24 +42,27 @@ public class TransactionTransmitter {
 
   private final HttpClient ethNodeClient;
   private final TransactionSigner signer;
-  private final TransactionInformation transactionInfo;
+  private final SendTransactionContext context;
   private final RetryMechanism retryMechanism;
+  private final HttpResponseFactory responder;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
-      final TransactionInformation transactionInfo,
+      final SendTransactionContext context,
       final TransactionSigner signer,
-      final RetryMechanism retryMechanism) {
+      final RetryMechanism retryMechanism,
+      HttpResponseFactory responder) {
     this.ethNodeClient = ethNodeClient;
-    this.transactionInfo = transactionInfo;
+    this.context = context;
     this.signer = signer;
     this.retryMechanism = retryMechanism;
+    this.responder = responder;
   }
 
   public void send() {
     final JsonRpcBody body = getBody();
     if (body.hasError()) {
-      // ????? DO SOMETHING ????
+      reportError(JsonRpcError.INTERNAL_ERROR);
     } else {
       sendTransaction(body.body());
     }
@@ -69,31 +73,31 @@ public class TransactionTransmitter {
     // account.
     final String signedTransactionHexString;
     try {
-      final RawTransaction rawTransaction = transactionInfo.getRawTransactionBuilder().build();
+      final RawTransaction rawTransaction = context.getRawTransactionBuilder().build();
       signedTransactionHexString = signer.signTransaction(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Bad input value from request: {}", "UNKNOWN", e);
-      return createJsonRpcBodyFrom(JsonRpcError.INVALID_PARAMS);
+      return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
       LOG.debug("Unhandled error processing request: {}", "UNKNOWN", e);
-      return createJsonRpcBodyFrom(JsonRpcError.INTERNAL_ERROR);
+      return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
     final JsonRpcRequest sendRawTransaction =
         new JsonRpcRequest(
             JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(transactionInfo.getReceivedId());
+    sendRawTransaction.setId(context.getReceivedId());
 
     try {
       return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
-      return createJsonRpcBodyFrom(JsonRpcError.INTERNAL_ERROR);
+      return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
   }
 
   private void sendTransaction(final Buffer bodyContent) {
-    final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
+    final HttpServerRequest httpServerRequest = context.getInitialRequest();
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(), httpServerRequest.uri(), this::handleResponse);
@@ -102,10 +106,6 @@ public class TransactionTransmitter {
     proxyRequest.headers().remove("Content-Length"); // created during 'end'.
     proxyRequest.setChunked(false);
     proxyRequest.end(bodyContent);
-  }
-
-  private JsonRpcBody createJsonRpcBodyFrom(final JsonRpcError error) {
-    return new JsonRpcBody(new JsonRpcErrorResponse(transactionInfo.getReceivedId(), error));
   }
 
   private void handleResponse(final HttpClientResponse response) {
@@ -120,15 +120,17 @@ public class TransactionTransmitter {
   private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
     try {
       if (response.statusCode() != HttpResponseStatus.OK.code()
-          && retryMechanism.shouldResend(response, body)) {
+          && retryMechanism.shouldRetry(response, body)) {
         send();
         return;
       }
     } catch (final IOException e) {
       LOG.info("Retry mechanism failed, reporting error.");
+      reportError(JsonRpcError.INTERNAL_ERROR);
+      return;
     }
 
-    final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
+    final HttpServerRequest httpServerRequest = context.getInitialRequest();
     httpServerRequest.response().setStatusCode(response.statusCode());
     httpServerRequest.response().headers().setAll(response.headers());
     httpServerRequest.response().setChunked(false);
@@ -141,5 +143,20 @@ public class TransactionTransmitter {
 
   private void logResponseBody(final Buffer body) {
     LOG.debug("Response body: {}", body);
+  }
+
+  protected void reportError(final JsonRpcError errorCode) {
+    final JsonRpcErrorResponse errorResponse =
+        new JsonRpcErrorResponse(context.getReceivedId(), errorCode);
+
+    LOG.debug(
+        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        context.getInitialRequest().method(),
+        context.getInitialRequest().absoluteURI(),
+        context.getRawTransactionBuilder().toString(),
+        Json.encode(errorResponse));
+
+    responder.create(
+        context.getInitialRequest(), HttpResponseStatus.BAD_REQUEST.code(), errorResponse);
   }
 }

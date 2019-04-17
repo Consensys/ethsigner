@@ -60,4 +60,24 @@ public class RawTransactionBuilder {
   public RawTransaction build() {
     return RawTransaction.createTransaction(nonce, gasPrice, gasLimit, to, value, data);
   }
+
+  @Override
+  public String toString() {
+    return "RawTransactionBuilder{"
+        + "nonce="
+        + nonce
+        + ", gasPrice="
+        + gasPrice
+        + ", gasLimit="
+        + gasLimit
+        + ", to='"
+        + to
+        + '\''
+        + ", value="
+        + value
+        + ", data='"
+        + data
+        + '\''
+        + '}';
+  }
 }

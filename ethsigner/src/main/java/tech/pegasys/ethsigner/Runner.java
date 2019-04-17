@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.http.RequestMapper;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
@@ -44,7 +43,6 @@ public class Runner {
   private final RawTransactionConverter transactionConverter;
   private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
   private Vertx vertx;
   private String deploymentId;
@@ -83,23 +81,17 @@ public class Runner {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
-        new RequestMapper(new PassThroughHandler(downStreamConnection));
+        new RequestMapper(new PassThroughHandler(responseFactory, downStreamConnection));
 
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            errorReporter,
-            downStreamConnection,
-            transactionSigner,
-            transactionConverter,
-            nonceProvider));
+            responseFactory, downStreamConnection, transactionSigner, nonceProvider));
 
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory,
-            new EthAccountsBodyProvider(transactionSigner.getAddress()),
-            errorReporter));
+            responseFactory, new EthAccountsBodyProvider(transactionSigner.getAddress())));
 
     return requestMapper;
   }

@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.requesthandler.passthrough;
 
+import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
@@ -24,12 +25,13 @@ import io.vertx.core.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler implements JsonRpcRequestHandler {
+public class PassThroughHandler extends JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
   private final HttpClient ethNodeClient;
 
-  public PassThroughHandler(final HttpClient ethNodeClient) {
+  public PassThroughHandler(final HttpResponseFactory responder, final HttpClient ethNodeClient) {
+    super(responder);
     this.ethNodeClient = ethNodeClient;
   }
 

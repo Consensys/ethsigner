@@ -20,5 +20,5 @@ import io.vertx.core.http.HttpClientResponse;
 @FunctionalInterface
 public interface RetryMechanism {
 
-  boolean shouldResend(final HttpClientResponse response, final Buffer body) throws IOException;
+  boolean shouldRetry(final HttpClientResponse response, final Buffer body) throws IOException;
 }
