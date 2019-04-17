@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
-import java.util.concurrent.TimeUnit;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -92,9 +90,9 @@ public class PantheonNode implements Node {
     docker.pullImageCmd("pegasyseng/pantheon:latest").exec(callback);
 
     try {
-      callback.awaitCompletion(30, TimeUnit.SECONDS);
+      callback.awaitCompletion();
     } catch (final InterruptedException e) {
-      LOG.error("Failed to pull the Pantehon image", e);
+      LOG.error(e);
     }
   }
 
