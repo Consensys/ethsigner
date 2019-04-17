@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 
+import java.net.URI;
 import java.util.Optional;
 
 import com.github.dockerjava.api.DockerClient;
@@ -49,9 +50,7 @@ public class ConfigurationFactory {
   }
 
   private Optional<String> dockerHost(final DefaultDockerClientConfig config) {
-    return config.getDockerHost() == null
-        ? Optional.empty()
-        : Optional.of(config.getDockerHost().getHost());
+    return Optional.of(config.getDockerHost()).map(URI::getHost);
   }
 
   private DockerClient createDockerClient(final DefaultDockerClientConfig config) {
