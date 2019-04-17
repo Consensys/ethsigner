@@ -31,10 +31,9 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import java.io.File;
@@ -60,8 +59,6 @@ import org.mockserver.model.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -121,7 +118,6 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
-            new RawTransactionConverter(),
             new Web3jNonceProvider(web3j, serialiser.getAddress()));
     runner.start();
 
@@ -199,8 +195,7 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner()
-      throws IOException, CipherException {
+  private static TransactionSigner transactionSigner() throws IOException, CipherException {
     final File keyFile = createKeyFile();
     return FileBasedTransactionSigner.createFrom(keyFile, "password");
   }

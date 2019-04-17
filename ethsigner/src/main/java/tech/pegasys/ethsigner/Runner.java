@@ -15,13 +15,12 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.http.RequestMapper;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.time.Duration;
 
@@ -40,9 +39,8 @@ public class Runner {
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
-  private final RawTransactionConverter transactionConverter;
+  private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
   private Vertx vertx;
   private String deploymentId;
@@ -52,12 +50,12 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final RawTransactionConverter transactionConverter) {
+      final NonceProvider nonceProvider) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
-    this.transactionConverter = transactionConverter;
+    this.nonceProvider = nonceProvider;
   }
 
   public void start() {
@@ -88,9 +86,7 @@ public class Runner {
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory,
-            new EthAccountsBodyProvider(transactionSigner.getAddress()),
-            errorReporter));
+            responseFactory, new EthAccountsBodyProvider(serialiser.getAddress())));
 
     return requestMapper;
   }

@@ -17,7 +17,7 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.io.IOException;
 
@@ -37,11 +37,11 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
   public SendTransactionHandler(
       final HttpResponseFactory responder,
       final HttpClient ethNodeClient,
-      final TransactionSigner signer,
+      final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider) {
     super(responder);
     this.ethNodeClient = ethNodeClient;
-    this.signer = signer;
+    this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
   }
 
@@ -64,7 +64,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
       LOG.info(
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
-          signer.getAddress());
+          serialiser.getAddress());
       reportError(httpServerRequest, request, JsonRpcError.INVALID_PARAMS);
       return;
     }
@@ -108,10 +108,11 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
       retryMechanism = (rq, body) -> false;
     }
 
-    return new TransactionTransmitter(ethNodeClient, context, signer, retryMechanism, responder);
+    return new TransactionTransmitter(
+        ethNodeClient, context, serialiser, retryMechanism, responder);
   }
 
   private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
-    return !params.sender().equalsIgnoreCase(signer.getAddress());
+    return !params.sender().equalsIgnoreCase(serialiser.getAddress());
   }
 }

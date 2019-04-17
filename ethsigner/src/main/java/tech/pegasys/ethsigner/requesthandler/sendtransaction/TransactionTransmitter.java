@@ -19,7 +19,7 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.io.IOException;
 
@@ -41,7 +41,7 @@ public class TransactionTransmitter {
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final HttpClient ethNodeClient;
-  private final TransactionSigner signer;
+  private final TransactionSerialiser serialiser;
   private final SendTransactionContext context;
   private final RetryMechanism retryMechanism;
   private final HttpResponseFactory responder;
@@ -49,12 +49,12 @@ public class TransactionTransmitter {
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final SendTransactionContext context,
-      final TransactionSigner signer,
+      final TransactionSerialiser serialiser,
       final RetryMechanism retryMechanism,
       HttpResponseFactory responder) {
     this.ethNodeClient = ethNodeClient;
     this.context = context;
-    this.signer = signer;
+    this.serialiser = serialiser;
     this.retryMechanism = retryMechanism;
     this.responder = responder;
   }
@@ -74,7 +74,7 @@ public class TransactionTransmitter {
     final String signedTransactionHexString;
     try {
       final RawTransaction rawTransaction = context.getRawTransactionBuilder().build();
-      signedTransactionHexString = signer.signTransaction(rawTransaction);
+      signedTransactionHexString = serialiser.serialise(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Bad input value from request: {}", "UNKNOWN", e);
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
