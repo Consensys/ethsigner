@@ -92,7 +92,7 @@ public class PantheonNode implements Node {
     docker.pullImageCmd("pegasyseng/pantheon:latest").exec(callback);
 
     try {
-      callback.awaitCompletion(5, TimeUnit.SECONDS);
+      callback.awaitCompletion(30, TimeUnit.SECONDS);
     } catch (final InterruptedException e) {
       LOG.error("Failed to pull the Pantehon image", e);
     }
