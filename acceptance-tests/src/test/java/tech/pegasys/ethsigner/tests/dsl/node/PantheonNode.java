@@ -37,6 +37,9 @@ public class PantheonNode implements Node {
   private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
+
+    LOG.info("Pantheon Web3j service targeting: " + config.downstreamUrl());
+
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             new HttpService(config.downstreamUrl()),
@@ -55,6 +58,7 @@ public class PantheonNode implements Node {
 
   @Override
   public void start() {
+    LOG.info("Starting Pantheon Docker container: " + pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
   }
 
@@ -86,12 +90,14 @@ public class PantheonNode implements Node {
   }
 
   private void pullPantheonImage() {
+    final String image = "pegasyseng/pantheon:latest";
     final PullImageResultCallback callback = new PullImageResultCallback();
-    docker.pullImageCmd("pegasyseng/pantheon:latest").exec(callback);
+    docker.pullImageCmd(image).exec(callback);
 
     try {
-      LOG.info("Pulling the Pantheon Docker image");
+      LOG.info("Pulling the Pantheon Docker image...");
       callback.awaitCompletion();
+      LOG.info("Pulled the Pantheon Docker image: " + image);
     } catch (final InterruptedException e) {
       LOG.error(e);
     }
@@ -117,7 +123,7 @@ public class PantheonNode implements Node {
 
       LOG.info("Creating the Pantheon Docker image...");
       final CreateContainerResponse pantheon = createPantheon.exec();
-      LOG.info("CCreated Pantheon Docker image, id: " + pantheon.getId());
+      LOG.info("Created Pantheon Docker image, id: " + pantheon.getId());
       return pantheon.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(

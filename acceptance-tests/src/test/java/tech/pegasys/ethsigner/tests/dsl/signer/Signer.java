@@ -30,6 +30,9 @@ public class Signer {
   private final Web3j jsonRpc;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+
+    LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
+
     runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
     jsonRpc =
         new JsonRpc2_0Web3j(
