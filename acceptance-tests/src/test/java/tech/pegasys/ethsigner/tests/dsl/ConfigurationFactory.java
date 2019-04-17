@@ -54,8 +54,8 @@ public class ConfigurationFactory {
   private DockerClient createDockerClient(final DefaultDockerClientConfig config) {
     final DockerCmdExecFactory dockerCmdExecFactory =
         new JerseyDockerCmdExecFactory()
-            .withReadTimeout(5000)
-            .withConnectTimeout(30000)
+            .withReadTimeout(2000)
+            .withConnectTimeout(2000)
             .withMaxTotalConnections(100)
             .withMaxPerRouteConnections(10);
 
