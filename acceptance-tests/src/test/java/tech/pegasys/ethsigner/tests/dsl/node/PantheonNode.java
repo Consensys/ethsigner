@@ -12,18 +12,16 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.PullResponseItem;
+import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +46,7 @@ public class PantheonNode implements Node {
             Async.defaultExecutorService());
 
     this.docker = docker;
+    pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
   }
 
@@ -88,22 +87,15 @@ public class PantheonNode implements Node {
     docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
   }
 
-  private static class CallbackThing implements ResultCallback<PullResponseItem> {
+  private void pullPantheonImage() {
+    final PullImageResultCallback callback = new PullImageResultCallback();
+    docker.pullImageCmd("pegasyseng/pantheon:latest").exec(callback);
 
-    @Override
-    public void onStart(Closeable closeable) {}
-
-    @Override
-    public void onNext(PullResponseItem object) {}
-
-    @Override
-    public void onError(Throwable throwable) {}
-
-    @Override
-    public void onComplete() {}
-
-    @Override
-    public void close() throws IOException {}
+    try {
+      callback.awaitCompletion(5, TimeUnit.SECONDS);
+    } catch (final InterruptedException e) {
+      LOG.error("Failed to pull the Pantehon image", e);
+    }
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
@@ -111,9 +103,6 @@ public class PantheonNode implements Node {
         HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
 
     try {
-      // TODO pull the image, avoid permissioning  problems locally
-      docker.pullImageCmd("pegasyseng/pantheon:latest").exec(new CallbackThing());
-
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd("pegasyseng/pantheon:latest")
