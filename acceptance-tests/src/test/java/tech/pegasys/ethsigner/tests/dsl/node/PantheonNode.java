@@ -117,6 +117,7 @@ public class PantheonNode implements Node {
                   "--miner-coinbase",
                   "fe3b557e8fb62b89f4916b721be55ceb828dbd73",
                   "--rpc-http-cors-origins=\"all\"",
+                  "--host-whitelist=\"all\"",
                   "--rpc-http-enabled",
                   "--rpc-ws-enabled",
                   "--network=dev");
