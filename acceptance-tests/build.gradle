@@ -14,6 +14,7 @@
 dependencies {
 
   testRuntime 'org.apache.logging.log4j:log4j-core'
+  testRuntime 'javax.activation:activation'
 
   testImplementation project(':ethsigner')
 
