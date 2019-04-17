@@ -90,6 +90,7 @@ public class PantheonNode implements Node {
     docker.pullImageCmd("pegasyseng/pantheon:latest").exec(callback);
 
     try {
+      LOG.info("Pulling the Pantheon Docker image");
       callback.awaitCompletion();
     } catch (final InterruptedException e) {
       LOG.error(e);
@@ -114,7 +115,9 @@ public class PantheonNode implements Node {
                   "--rpc-ws-enabled",
                   "--network=dev");
 
+      LOG.info("Creating the Pantheon Docker image...");
       final CreateContainerResponse pantheon = createPantheon.exec();
+      LOG.info("CCreated Pantheon Docker image, id: " + pantheon.getId());
       return pantheon.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(
