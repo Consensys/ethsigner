@@ -37,16 +37,14 @@ public class ConfigurationFactory {
         DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
     this.docker = createDockerClient(config);
+    this.node = nodeConfiguration(config);
+    this.signer = new SignerConfiguration(LOCALHOST);
+  }
 
-    final Optional<String> dockerHost = dockerHost(config);
+  private NodeConfiguration nodeConfiguration(final DefaultDockerClientConfig config) {
+    final String hostname = dockerHost(config).orElse(LOCALHOST);
 
-    if (dockerHost.isPresent()) {
-      this.node = new NodeConfiguration(dockerHost.get());
-      this.signer = new SignerConfiguration(dockerHost.get());
-    } else {
-      this.node = new NodeConfiguration(LOCALHOST);
-      this.signer = new SignerConfiguration(LOCALHOST);
-    }
+    return new NodeConfiguration(hostname);
   }
 
   private Optional<String> dockerHost(final DefaultDockerClientConfig config) {
