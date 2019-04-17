@@ -98,7 +98,7 @@ public class EthSignerProcessRunner {
     params.add("--downstream-http-request-timeout");
     params.add(timeoutMs);
     params.add("--http-listen-host");
-    params.add(signerHostname);
+    params.add("127.0.0.1");
     params.add("--http-listen-port");
     params.add(signerPort);
     params.add("--chain-id");
