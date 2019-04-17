@@ -12,20 +12,19 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.DockerCmdAsyncExec;
-import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
-import java.io.Closeable;
-import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -89,39 +88,30 @@ public class PantheonNode implements Node {
     docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
   }
 
-  private class CallbackThing implements ResultCallback<PullResponseItem>{
+  private static class CallbackThing implements ResultCallback<PullResponseItem> {
 
     @Override
-    public void onStart(Closeable closeable) {
-
-    }
+    public void onStart(Closeable closeable) {}
 
     @Override
-    public void onNext(PullResponseItem object) {
-
-    }
+    public void onNext(PullResponseItem object) {}
 
     @Override
-    public void onError(Throwable throwable) {
-
-    }
+    public void onError(Throwable throwable) {}
 
     @Override
-    public void onComplete() {
-
-    }
+    public void onComplete() {}
 
     @Override
-    public void close() throws IOException {
-
-    }
+    public void close() throws IOException {}
   }
+
   private String createPantheonContainer(final NodeConfiguration config) {
     final HostConfig portBindingConfig =
         HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
 
     try {
-      //TODO pull the image, avoid permissioning  problems locally
+      // TODO pull the image, avoid permissioning  problems locally
       docker.pullImageCmd("pegasyseng/pantheon:latest").exec(new CallbackThing());
 
       final CreateContainerCmd createPantheon =
