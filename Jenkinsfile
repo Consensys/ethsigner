@@ -33,7 +33,7 @@ try {
                     stage('Integration Test') {
                         sh './gradlew --no-daemon --parallel integrationTest'
                     }
-                    stage('Integration Test') {
+                    stage('Acceptance Test') {
                         sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
                 } finally {
