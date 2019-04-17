@@ -20,11 +20,12 @@ import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
+import java.io.IOException;
+
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.crypto.RawTransaction;
 
 public class SendTransactionHandler implements JsonRpcRequestHandler {
 
@@ -82,39 +83,49 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
-    sendTransaction(params, httpServerRequest, request);
+    try {
+      sendTransaction(params, httpServerRequest, request);
+    } catch (final IOException e) {
+      LOG.info("Unable to get nonce from web3j provider.");
+      errorReporter.send(
+          request,
+          httpServerRequest,
+          new JsonRpcErrorResponse(request.getId(), JsonRpcError.INTERNAL_ERROR));
+    }
   }
 
   private void sendTransaction(
       final SendTransactionJsonParameters params,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request) {
-    final RawTransaction rawTransaction = converter.from(params);
+      final JsonRpcRequest request)
+      throws IOException {
 
-    final TransactionPassthrough sendTransactionTransmitter =
-        createTransactionTransmitter(rawTransaction, httpServerRequest, request);
+    final TransactionTransmitter sendTransactionTransmitter =
+        createTransactionTransmitter(params, httpServerRequest, request);
 
     sendTransactionTransmitter.send();
   }
 
-  private TransactionPassthrough createTransactionTransmitter(
-      final RawTransaction rawTransaction,
+  private TransactionTransmitter createTransactionTransmitter(
+      final SendTransactionJsonParameters params,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request) {
-    final TransactionInformation tnxInfo;
+      final JsonRpcRequest request)
+      throws IOException {
 
-    if (rawTransaction.getNonce() != null) {
-      tnxInfo =
-          new TransactionInformation(httpServerRequest, () -> rawTransaction, request.getId());
-      return new TransactionPassthrough(ethNodeClient, tnxInfo, signer);
+    final RawTransactionBuilder transactionBuilder = RawTransactionBuilder.from(params);
+    final TransactionInformation tnxInfo =
+        new TransactionInformation(httpServerRequest, transactionBuilder, request.getId());
+
+    final RetryMechanism retryMechanism;
+
+    if (!params.nonce().isPresent()) {
+      transactionBuilder.updateNonce(nonceProvider.getNonce());
+      retryMechanism = new NonceTooLowRetryMechanism(transactionBuilder, nonceProvider);
     } else {
-      tnxInfo =
-          new TransactionInformation(
-              httpServerRequest,
-              new NoncePopulatingRawTransactionSupplier(nonceProvider, rawTransaction),
-              request.getId());
-      return new RetryingTransactionTransmitter(ethNodeClient, tnxInfo, signer);
+      retryMechanism = (rq, body) -> false;
     }
+
+    return new TransactionTransmitter(ethNodeClient, tnxInfo, signer, retryMechanism);
   }
 
   private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {

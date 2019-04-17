@@ -19,14 +19,14 @@ import io.vertx.core.http.HttpServerRequest;
 public class TransactionInformation {
   private final HttpServerRequest initialRequest;
   private final JsonRpcRequestId receivedId;
-  private final RawTransactionSupplier rawTransactionSupplier;
+  private final RawTransactionBuilder rawTransactionBuilder;
 
   public TransactionInformation(
-      HttpServerRequest initialRequest,
-      RawTransactionSupplier rawTransactionSupplier,
-      JsonRpcRequestId receivedId) {
+      final HttpServerRequest initialRequest,
+      final RawTransactionBuilder rawTransactionBuilder,
+      final JsonRpcRequestId receivedId) {
     this.initialRequest = initialRequest;
-    this.rawTransactionSupplier = rawTransactionSupplier;
+    this.rawTransactionBuilder = rawTransactionBuilder;
     this.receivedId = receivedId;
   }
 
@@ -34,8 +34,8 @@ public class TransactionInformation {
     return initialRequest;
   }
 
-  public RawTransactionSupplier getRawTransactionSupplier() {
-    return rawTransactionSupplier;
+  public RawTransactionBuilder getRawTransactionBuilder() {
+    return rawTransactionBuilder;
   }
 
   public JsonRpcRequestId getReceivedId() {

@@ -20,6 +20,9 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
 
+import java.io.IOException;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -30,38 +33,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.RawTransaction;
 
-public class TransactionPassthrough {
+public class TransactionTransmitter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TransactionPassthrough.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TransactionTransmitter.class);
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final HttpClient ethNodeClient;
   private final TransactionSigner signer;
-  protected final TransactionInformation transactionInfo;
+  private final TransactionInformation transactionInfo;
+  private final RetryMechanism retryMechanism;
 
-  public TransactionPassthrough(
+  public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final TransactionInformation transactionInfo,
-      final TransactionSigner signer) {
+      final TransactionSigner signer,
+      final RetryMechanism retryMechanism) {
     this.ethNodeClient = ethNodeClient;
     this.transactionInfo = transactionInfo;
     this.signer = signer;
+    this.retryMechanism = retryMechanism;
   }
 
   public void send() {
     final JsonRpcBody body = getBody();
     if (body.hasError()) {
+      // ????? DO SOMETHING ????
     } else {
-      final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
-      final HttpClientRequest proxyRequest =
-          ethNodeClient.request(
-              httpServerRequest.method(), httpServerRequest.uri(), this::handleResponse);
-
-      proxyRequest.headers().setAll(httpServerRequest.headers());
-      proxyRequest.headers().remove("Content-Length"); // created during 'end'.
-      proxyRequest.setChunked(false);
-      proxyRequest.end(body.body());
+      sendTransaction(body.body());
     }
   }
 
@@ -70,7 +69,7 @@ public class TransactionPassthrough {
     // account.
     final String signedTransactionHexString;
     try {
-      final RawTransaction rawTransaction = transactionInfo.getRawTransactionSupplier().get();
+      final RawTransaction rawTransaction = transactionInfo.getRawTransactionBuilder().build();
       signedTransactionHexString = signer.signTransaction(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Bad input value from request: {}", "UNKNOWN", e);
@@ -93,6 +92,18 @@ public class TransactionPassthrough {
     }
   }
 
+  private void sendTransaction(final Buffer bodyContent) {
+    final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
+    final HttpClientRequest proxyRequest =
+        ethNodeClient.request(
+            httpServerRequest.method(), httpServerRequest.uri(), this::handleResponse);
+
+    proxyRequest.headers().setAll(httpServerRequest.headers());
+    proxyRequest.headers().remove("Content-Length"); // created during 'end'.
+    proxyRequest.setChunked(false);
+    proxyRequest.end(bodyContent);
+  }
+
   private JsonRpcBody createJsonRpcBodyFrom(final JsonRpcError error) {
     return new JsonRpcBody(new JsonRpcErrorResponse(transactionInfo.getReceivedId(), error));
   }
@@ -106,7 +117,17 @@ public class TransactionPassthrough {
         });
   }
 
-  protected void handleResponseBody(final HttpClientResponse response, final Buffer body) {
+  private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
+    try {
+      if (response.statusCode() != HttpResponseStatus.OK.code()
+          && retryMechanism.shouldResend(response, body)) {
+        send();
+        return;
+      }
+    } catch (final IOException e) {
+      LOG.info("Retry mechanism failed, reporting error.");
+    }
+
     final HttpServerRequest httpServerRequest = transactionInfo.getInitialRequest();
     httpServerRequest.response().setStatusCode(response.statusCode());
     httpServerRequest.response().headers().setAll(response.headers());

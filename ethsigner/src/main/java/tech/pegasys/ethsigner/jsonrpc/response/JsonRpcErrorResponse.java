@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpc.response;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.Objects;
 
@@ -23,7 +24,8 @@ public class JsonRpcErrorResponse implements JsonRpcResponse {
   private final Object id;
   private final JsonRpcError error;
 
-  public JsonRpcErrorResponse(final Object id, final JsonRpcError error) {
+  public JsonRpcErrorResponse(
+      @JsonProperty("id") final Object id, @JsonProperty("error") final JsonRpcError error) {
     this.id = id;
     this.error = error;
   }

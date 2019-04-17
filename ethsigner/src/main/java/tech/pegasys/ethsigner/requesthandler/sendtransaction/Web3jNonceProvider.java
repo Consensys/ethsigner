@@ -41,7 +41,7 @@ public class Web3jNonceProvider implements NonceProvider {
 
   private BigInteger getNonceFromClient() throws IOException {
     final Request<?, EthGetTransactionCount> request =
-        web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.LATEST);
+        web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.PENDING);
     try {
       final EthGetTransactionCount count = request.send();
       return count.getTransactionCount();
