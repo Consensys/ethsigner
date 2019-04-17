@@ -33,9 +33,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.signing.ConfigurationChainId;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,8 +59,6 @@ import org.mockserver.model.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -92,8 +89,8 @@ public class IntegrationTestBase {
   protected static void setupEthSigner(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
-    final TransactionSigner transactionSigner =
-        transactionSigner(new ConfigurationChainId(chainId));
+    final TransactionSerialiser serialiser =
+        new TransactionSerialiser(transactionSigner(), chainId);
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -117,12 +114,11 @@ public class IntegrationTestBase {
 
     runner =
         new Runner(
-            transactionSigner,
+            serialiser,
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
-            new RawTransactionConverter(
-                new Web3jNonceProvider(web3j, transactionSigner.getAddress())));
+            new RawTransactionConverter(new Web3jNonceProvider(web3j, serialiser.getAddress())));
     runner.start();
 
     LOG.info(
@@ -131,7 +127,7 @@ public class IntegrationTestBase {
         clientAndServer.getLocalPort());
     serverSocket.close();
 
-    unlockedAccount = transactionSigner.getAddress();
+    unlockedAccount = serialiser.getAddress();
   }
 
   protected static void resetEthSigner() throws IOException, CipherException {
@@ -199,12 +195,10 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner(final ChainIdProvider chain)
+  private static FileBasedTransactionSigner transactionSigner()
       throws IOException, CipherException {
     final File keyFile = createKeyFile();
-    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
-
-    return new TransactionSigner(chain, credentials);
+    return FileBasedTransactionSigner.createFrom(keyFile, "password");
   }
 
   @SuppressWarnings("UnstableApiUsage")

@@ -12,30 +12,11 @@
  */
 package tech.pegasys.ethsigner.signing;
 
-import tech.pegasys.ethsigner.signing.web3j.TransactionEncoder;
+import org.web3j.crypto.Sign.SignatureData;
 
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.utils.Numeric;
+public interface TransactionSigner {
 
-public class TransactionSigner {
+  SignatureData sign(final byte[] data);
 
-  private final Credentials credentials;
-  private final ChainIdProvider chain;
-
-  public TransactionSigner(final ChainIdProvider chain, final Credentials credentials) {
-    this.chain = chain;
-    this.credentials = credentials;
-  }
-
-  public String getAddress() {
-    return credentials.getAddress();
-  }
-
-  public String signTransaction(final RawTransaction rawTransaction) {
-    // Sign the transaction using the post Spurious Dragon technique
-    final byte[] signedMessage =
-        TransactionEncoder.signMessage(rawTransaction, chain.id(), credentials);
-    return Numeric.toHexString(signedMessage);
-  }
+  String getAddress();
 }

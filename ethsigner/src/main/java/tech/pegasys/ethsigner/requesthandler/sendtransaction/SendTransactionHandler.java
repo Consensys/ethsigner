@@ -22,7 +22,7 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -43,17 +43,17 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private final JsonRpcErrorReporter errorReporter;
   private final HttpClient ethNodeClient;
-  private final TransactionSigner signer;
+  private final TransactionSerialiser serialiser;
   private final RawTransactionConverter converter;
 
   public SendTransactionHandler(
       final JsonRpcErrorReporter errorReporter,
       final HttpClient ethNodeClient,
-      final TransactionSigner signer,
+      final TransactionSerialiser serialiser,
       final RawTransactionConverter converter) {
     this.errorReporter = errorReporter;
     this.ethNodeClient = ethNodeClient;
-    this.signer = signer;
+    this.serialiser = serialiser;
     this.converter = converter;
   }
 
@@ -132,14 +132,14 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.info(
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
-          signer.getAddress());
+          serialiser.getAddress());
       return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
 
     final String signedTransactionHexString;
     try {
       final RawTransaction rawTransaction = converter.from(params);
-      signedTransactionHexString = signer.signTransaction(rawTransaction);
+      signedTransactionHexString = serialiser.serialise(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Bad input value from request: {}", request, e);
       return createJsonRpcBodyFrom(request.getId(), JsonRpcError.INVALID_PARAMS);
@@ -167,6 +167,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   }
 
   private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
-    return !params.sender().equalsIgnoreCase(signer.getAddress());
+    return !params.sender().equalsIgnoreCase(serialiser.getAddress());
   }
 }
