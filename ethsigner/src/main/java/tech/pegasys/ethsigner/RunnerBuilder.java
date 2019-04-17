@@ -95,11 +95,6 @@ public class RunnerBuilder {
       return null;
     }
     return new Runner(
-        transactionSigner,
-        clientOptions,
-        serverOptions,
-        requestTimeout,
-        transactionConverter,
-        nonceProvider);
+        serialiser, clientOptions, serverOptions, requestTimeout, transactionConverter, nonceProvider);
   }
 }

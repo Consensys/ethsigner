@@ -31,7 +31,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
   private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
 
   private final HttpClient ethNodeClient;
-  private final TransactionSigner signer;
+  private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
 
   public SendTransactionHandler(

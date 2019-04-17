@@ -15,10 +15,10 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.http.RequestMapper;
+import tech.pegasys.ethsigner.requesthandler.JsonRpcErrorReporter;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.signing.TransactionSigner;
@@ -36,36 +36,34 @@ import org.slf4j.LoggerFactory;
 public class Runner {
 
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
-  private final TransactionSigner transactionSigner;
+  private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private final RawTransactionConverter transactionConverter;
-  private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final JsonRpcErrorReporter errorReporter = new JsonRpcErrorReporter(responseFactory);
 
   private Vertx vertx;
   private String deploymentId;
 
   public Runner(
-      final TransactionSigner transactionSigner,
+      final TransactionSerialiser serialiser,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final RawTransactionConverter transactionConverter,
-      final NonceProvider nonceProvider) {
-    this.transactionSigner = transactionSigner;
+      final RawTransactionConverter transactionConverter) {
+    this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionConverter = transactionConverter;
-    this.nonceProvider = nonceProvider;
   }
 
   public void start() {
     // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
     vertx = Vertx.vertx();
-    final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
+    final RequestMapper requestMapper = createRequestMapper(vertx);
     final JsonRpcHttpService httpService =
         new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
@@ -75,8 +73,7 @@ public class Runner {
     vertx.undeploy(deploymentId);
   }
 
-  private RequestMapper createRequestMapper(
-      final Vertx vertx, final TransactionSigner transactionSigner) {
+  private RequestMapper createRequestMapper(final Vertx vertx) {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
@@ -86,12 +83,14 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            responseFactory, downStreamConnection, transactionSigner, nonceProvider));
+            responseFactory, downStreamConnection, serialiser, nonceProvider));
 
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory, new EthAccountsBodyProvider(transactionSigner.getAddress())));
+            responseFactory,
+            new EthAccountsBodyProvider(transactionSigner.getAddress()),
+            errorReporter));
 
     return requestMapper;
   }

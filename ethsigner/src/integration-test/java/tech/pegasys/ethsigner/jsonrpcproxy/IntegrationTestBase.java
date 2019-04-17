@@ -92,8 +92,8 @@ public class IntegrationTestBase {
   protected static void setupEthSigner(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
-    final TransactionSigner transactionSigner =
-        transactionSigner(new ConfigurationChainId(chainId));
+    final TransactionSerialiser serialiser =
+        new TransactionSerialiser(transactionSigner(), chainId);
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -117,12 +117,12 @@ public class IntegrationTestBase {
 
     runner =
         new Runner(
-            transactionSigner,
+            serialiser,
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
             new RawTransactionConverter(),
-            new Web3jNonceProvider(web3j, transactionSigner.getAddress()));
+            new Web3jNonceProvider(web3j, serialiser.getAddress()));
     runner.start();
 
     LOG.info(
@@ -131,7 +131,7 @@ public class IntegrationTestBase {
         clientAndServer.getLocalPort());
     serverSocket.close();
 
-    unlockedAccount = transactionSigner.getAddress();
+    unlockedAccount = serialiser.getAddress();
   }
 
   protected static void resetEthSigner() throws IOException, CipherException {
@@ -199,12 +199,10 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner(final ChainIdProvider chain)
+  private static TransactionSigner transactionSigner()
       throws IOException, CipherException {
     final File keyFile = createKeyFile();
-    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
-
-    return new TransactionSigner(chain, credentials);
+    return FileBasedTransactionSigner.createFrom(keyFile, "password");
   }
 
   @SuppressWarnings("UnstableApiUsage")
