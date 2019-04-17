@@ -23,10 +23,10 @@ public class WaitUtils {
     waitFor(30, condition);
   }
 
-  public static void waitFor(final int timeout, final ThrowingRunnable condition) {
+  public static void waitFor(final int timeoutSeconds, final ThrowingRunnable condition) {
     Awaitility.await()
         .ignoreExceptions()
-        .atMost(timeout, TimeUnit.SECONDS)
+        .atMost(timeoutSeconds, TimeUnit.SECONDS)
         .untilAsserted(condition);
   }
 }
