@@ -18,16 +18,16 @@ import io.vertx.core.http.HttpServerRequest;
 
 public class SendTransactionContext {
   private final HttpServerRequest initialRequest;
-  private final JsonRpcRequestId receivedId;
+  private final JsonRpcRequestId id;
   private final RawTransactionBuilder rawTransactionBuilder;
 
   public SendTransactionContext(
       final HttpServerRequest initialRequest,
       final RawTransactionBuilder rawTransactionBuilder,
-      final JsonRpcRequestId receivedId) {
+      final JsonRpcRequestId id) {
     this.initialRequest = initialRequest;
     this.rawTransactionBuilder = rawTransactionBuilder;
-    this.receivedId = receivedId;
+    this.id = id;
   }
 
   public HttpServerRequest getInitialRequest() {
@@ -38,7 +38,7 @@ public class SendTransactionContext {
     return rawTransactionBuilder;
   }
 
-  public JsonRpcRequestId getReceivedId() {
-    return receivedId;
+  public JsonRpcRequestId getId() {
+    return id;
   }
 }

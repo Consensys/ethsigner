@@ -28,17 +28,17 @@ public class NonceTooLowRetryMechanism implements RetryMechanism {
 
   private static final Logger LOG = LoggerFactory.getLogger(NonceTooLowRetryMechanism.class);
 
-  final RawTransactionBuilder transactionBuilder;
-  final NonceProvider nonceProvider;
+  private final RawTransactionBuilder transactionBuilder;
+  private final NonceProvider nonceProvider;
 
   public NonceTooLowRetryMechanism(
-      RawTransactionBuilder transactionBuilder, NonceProvider nonceProvider) {
+      final RawTransactionBuilder transactionBuilder, final NonceProvider nonceProvider) {
     this.transactionBuilder = transactionBuilder;
     this.nonceProvider = nonceProvider;
   }
 
   @Override
-  public boolean shouldRetry(final HttpClientResponse response, final Buffer body)
+  public boolean mustRetry(final HttpClientResponse response, final Buffer body)
       throws IOException {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);

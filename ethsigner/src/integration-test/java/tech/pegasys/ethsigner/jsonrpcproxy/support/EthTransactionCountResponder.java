@@ -16,14 +16,17 @@ import static org.mockserver.model.HttpResponse.response;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
 
 import java.math.BigInteger;
 import java.util.function.Function;
 
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.mockserver.mock.action.ExpectationResponseCallback;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
+import org.mockserver.model.RegexBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,7 @@ public class EthTransactionCountResponder implements ExpectationResponseCallback
 
   private static final Logger LOG = LoggerFactory.getLogger(EthTransactionCountResponder.class);
 
-  public static final String REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
+  private static final String REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
 
   private BigInteger nonce = BigInteger.ZERO;
   private Function<BigInteger, BigInteger> nonceMutator;
@@ -54,12 +57,15 @@ public class EthTransactionCountResponder implements ExpectationResponseCallback
   }
 
   protected String generateTransactionCountResponse(final JsonRpcRequestId id) {
-    final JsonObject json = new JsonObject();
+    final JsonRpcSuccessResponse response =
+        new JsonRpcSuccessResponse(id.getValue(), "0x" + nonce.toString());
     LOG.debug("Responding with Nonce of {}", nonce.toString());
-    json.put("id", id.getValue());
-    json.put("jsonrpc", "2.0");
-    json.put("result", "0x" + nonce.toString(16));
 
-    return json.encode();
+    return Json.encode(response);
+  }
+
+  public HttpRequest request() {
+    return HttpRequest.request()
+        .withBody(new RegexBody(EthTransactionCountResponder.REQUEST_REGEX_PATTERN));
   }
 }

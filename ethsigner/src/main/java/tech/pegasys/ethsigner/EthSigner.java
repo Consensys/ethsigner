@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
@@ -93,7 +92,6 @@ public final class EthSigner {
                   .setReuseAddress(true)
                   .setReusePort(true))
           .setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .setTransactionConverter(new RawTransactionConverter())
           .setNonceProvider(nonceProvider)
           .build()
           .start();

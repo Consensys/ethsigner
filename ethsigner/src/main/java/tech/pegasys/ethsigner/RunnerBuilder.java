@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.time.Duration;
@@ -31,7 +30,6 @@ public class RunnerBuilder {
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
   private Duration requestTimeout;
-  private RawTransactionConverter transactionConverter;
   private NonceProvider nonceProvider;
 
   public RunnerBuilder() {}
@@ -56,11 +54,6 @@ public class RunnerBuilder {
     return this;
   }
 
-  public RunnerBuilder setTransactionConverter(final RawTransactionConverter transactionConverter) {
-    this.transactionConverter = transactionConverter;
-    return this;
-  }
-
   public RunnerBuilder setNonceProvider(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
     return this;
@@ -77,11 +70,6 @@ public class RunnerBuilder {
     }
     if (serverOptions == null) {
       LOG.error("Unable to construct Runner, serverOptions is unset.");
-      return null;
-    }
-
-    if (transactionConverter == null) {
-      LOG.error("Unable to construct Runner, transaction transactionConverter is unset.");
       return null;
     }
 

@@ -18,14 +18,11 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
@@ -38,12 +35,6 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   public void setUp() {
     sendTransaction = new SendTransaction(jsonRpc());
     sendRawTransaction = new SendRawTransaction(jsonRpc());
-
-    final EthTransactionCountResponder getTransactionResponse =
-        new EthTransactionCountResponder(nonce -> nonce.add(BigInteger.ONE));
-    clientAndServer
-        .when(request().withBody(new RegexBody(EthTransactionCountResponder.REQUEST_REGEX_PATTERN)))
-        .respond(getTransactionResponse);
   }
 
   @Test

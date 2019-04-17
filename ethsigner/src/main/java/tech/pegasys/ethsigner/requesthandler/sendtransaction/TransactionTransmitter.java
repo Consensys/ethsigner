@@ -76,17 +76,18 @@ public class TransactionTransmitter {
       final RawTransaction rawTransaction = context.getRawTransactionBuilder().build();
       signedTransactionHexString = serialiser.serialise(rawTransaction);
     } catch (final IllegalArgumentException e) {
-      LOG.debug("Bad input value from request: {}", "UNKNOWN", e);
+      LOG.debug("Failed to encode transaction: {}", context.getRawTransactionBuilder(), e);
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
-      LOG.debug("Unhandled error processing request: {}", "UNKNOWN", e);
+      LOG.debug(
+          "Failed to encode/serialise transaction: {}", context.getRawTransactionBuilder(), e);
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
     final JsonRpcRequest sendRawTransaction =
         new JsonRpcRequest(
             JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(context.getReceivedId());
+    sendRawTransaction.setId(context.getId());
 
     try {
       return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
@@ -120,7 +121,7 @@ public class TransactionTransmitter {
   private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
     try {
       if (response.statusCode() != HttpResponseStatus.OK.code()
-          && retryMechanism.shouldRetry(response, body)) {
+          && retryMechanism.mustRetry(response, body)) {
         send();
         return;
       }
@@ -146,8 +147,7 @@ public class TransactionTransmitter {
   }
 
   protected void reportError(final JsonRpcError errorCode) {
-    final JsonRpcErrorResponse errorResponse =
-        new JsonRpcErrorResponse(context.getReceivedId(), errorCode);
+    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(context.getId(), errorCode);
 
     LOG.debug(
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",

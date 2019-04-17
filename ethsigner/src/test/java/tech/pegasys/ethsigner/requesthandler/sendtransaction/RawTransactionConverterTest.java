@@ -12,36 +12,4 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
-
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.vertx.core.json.JsonObject;
-import org.junit.Test;
-import org.web3j.crypto.RawTransaction;
-
-public class RawTransactionConverterTest {
-
-  @Test
-  public void ensureDefaultValuesArePopulatedForMissingFields() {
-    final Map<String, Object> inputData = new HashMap<>();
-    inputData.put("from", "0xABCDE");
-    inputData.put("data", "TheData");
-
-    final JsonObject input = new JsonObject(inputData);
-    final SendTransactionJsonParameters params = input.mapTo(SendTransactionJsonParameters.class);
-
-    final RawTransactionConverter converter = new RawTransactionConverter();
-    final RawTransaction rawTransaction = converter.from(params);
-
-    assertThat(rawTransaction.getGasLimit()).isEqualTo(BigInteger.valueOf(90000));
-    assertThat(rawTransaction.getGasPrice()).isEqualTo(BigInteger.ZERO);
-    assertThat(rawTransaction.getValue()).isEqualTo(BigInteger.ZERO);
-    assertThat(rawTransaction.getData()).isEqualTo(inputData.get("data"));
-    assertThat(rawTransaction.getNonce()).isNull();
-  }
-}
+public class RawTransactionConverterTest {}

@@ -31,6 +31,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
@@ -38,6 +39,7 @@ import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -142,6 +144,13 @@ public class IntegrationTestBase {
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     clientAndServer.reset();
+    setupTransactionCountResponder();
+  }
+
+  public void setupTransactionCountResponder() {
+    final EthTransactionCountResponder getTransactionResponse =
+        new EthTransactionCountResponder(nonce -> nonce.add(BigInteger.ONE));
+    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
   }
 
   @AfterClass
