@@ -12,13 +12,26 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
-public class Accounts {
+import java.math.BigInteger;
 
-  /** Private key: 8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63 */
-  private static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+public class Account {
 
-  public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
+  private final String address;
+  private BigInteger nonce = BigInteger.ZERO;
 
-  public static final Account RICH_BENEFACTOR = new Account(GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
+  public Account(final String address) {
+    this.address = address;
+  }
+
+  public String address() {
+    return address;
+  }
+
+  public BigInteger getNextNonceAndIncrement() {
+
+    final BigInteger next = nonce;
+    nonce = nonce.add(BigInteger.ONE);
+
+    return next;
+  }
 }
