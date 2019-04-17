@@ -15,10 +15,9 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Optional;
@@ -30,8 +29,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -78,12 +75,13 @@ public final class EthSigner {
                       + config.getDownstreamHttpHost()
                       + ":"
                       + config.getDownstreamHttpPort()));
-      final TransactionSigner signer =
-          transactionSigner(config.getKeyPath().toFile(), password.get(), config.getChainId());
+      final FileBasedTransactionSigner signer =
+          FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
+
       final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
       runnerBuilder
-          .setTransactionSigner(signer)
+          .setTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
           .setClientOptions(
               new WebClientOptions()
                   .setDefaultPort(config.getDownstreamHttpPort())
@@ -104,14 +102,6 @@ public final class EthSigner {
     } catch (CipherException ex) {
       LOG.info("Unable to decode keyfile with supplied passwordFile.");
     }
-  }
-
-  private TransactionSigner transactionSigner(
-      final File keyFile, final String password, final ChainIdProvider chain)
-      throws IOException, CipherException {
-    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
-
-    return new TransactionSigner(chain, credentials);
   }
 
   private Optional<String> readPasswordFromFile() {

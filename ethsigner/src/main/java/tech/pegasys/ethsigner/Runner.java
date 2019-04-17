@@ -21,7 +21,7 @@ import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHa
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.time.Duration;
 
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class Runner {
 
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
-  private final TransactionSigner transactionSigner;
+  private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
@@ -48,12 +48,12 @@ public class Runner {
   private String deploymentId;
 
   public Runner(
-      final TransactionSigner transactionSigner,
+      final TransactionSerialiser serialiser,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final RawTransactionConverter transactionConverter) {
-    this.transactionSigner = transactionSigner;
+    this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
@@ -63,7 +63,7 @@ public class Runner {
   public void start() {
     // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
     vertx = Vertx.vertx();
-    final RequestMapper requestMapper = createRequestMapper(vertx, transactionSigner);
+    final RequestMapper requestMapper = createRequestMapper(vertx);
     final JsonRpcHttpService httpService =
         new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
@@ -73,8 +73,7 @@ public class Runner {
     vertx.undeploy(deploymentId);
   }
 
-  private RequestMapper createRequestMapper(
-      final Vertx vertx, final TransactionSigner transactionSigner) {
+  private RequestMapper createRequestMapper(final Vertx vertx) {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
@@ -84,14 +83,12 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            errorReporter, downStreamConnection, transactionSigner, transactionConverter));
+            errorReporter, downStreamConnection, serialiser, transactionConverter));
 
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory,
-            new EthAccountsBodyProvider(transactionSigner.getAddress()),
-            errorReporter));
+            responseFactory, new EthAccountsBodyProvider(serialiser.getAddress()), errorReporter));
 
     return requestMapper;
   }
