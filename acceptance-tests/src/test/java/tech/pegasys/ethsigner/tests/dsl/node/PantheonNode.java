@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
@@ -37,9 +40,9 @@ public class PantheonNode implements Node {
 
   private final DockerClient docker;
   private final String pantheonContainerId;
-  private final Web3j jsonRpc;
   private final Transactions transaction;
   private final Accounts accounts;
+  private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
 
@@ -59,11 +62,6 @@ public class PantheonNode implements Node {
   }
 
   @Override
-  public Web3j web3j() {
-    return jsonRpc;
-  }
-
-  @Override
   public void start() {
     LOG.info("Starting Pantheon Docker container: " + pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
@@ -78,8 +76,15 @@ public class PantheonNode implements Node {
   }
 
   @Override
+  public void awaitStartupCompletion() {
+    LOG.info("Waiting for Pantheon to become responsive...");
+    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    LOG.info("Pantheon is now responsive");
+  }
+
+  @Override
   public Accounts accounts() {
-    return null;
+    return accounts;
   }
 
   @Override

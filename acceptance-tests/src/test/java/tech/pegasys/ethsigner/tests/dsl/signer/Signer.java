@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -28,8 +31,8 @@ public class Signer {
   private static final Logger LOG = LogManager.getLogger();
 
   private final EthSignerProcessRunner runner;
-  private final Web3j jsonRpc;
   private final Transactions transactions;
+  private final Web3j jsonRpc;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
 
@@ -44,10 +47,6 @@ public class Signer {
     this.transactions = new Transactions(jsonRpc);
   }
 
-  public Web3j web3j() {
-    return jsonRpc;
-  }
-
   public void start() {
     LOG.info("Starting EthSigner");
     runner.start("EthSigner");
@@ -60,5 +59,11 @@ public class Signer {
 
   public Transactions transactions() {
     return transactions;
+  }
+
+  public void awaitStartupCompletion() {
+    LOG.info("Waiting for Pantheon to become responsive...");
+    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    LOG.info("Pantheon is now responsive");
   }
 }

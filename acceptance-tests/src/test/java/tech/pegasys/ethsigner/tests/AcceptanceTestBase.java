@@ -12,25 +12,26 @@
  */
 package tech.pegasys.ethsigner.tests;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
-
 import tech.pegasys.ethsigner.tests.dsl.ConfigurationFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public class AcceptanceTestBase {
 
-  private static final Logger LOG = LogManager.getLogger();
-
   private static Node ethNode;
   private static Signer ethSigner;
+
+  protected Signer ethSigner() {
+    return ethSigner;
+  }
+
+  protected Node ethNode() {
+    return ethNode;
+  }
 
   @BeforeClass
   public static void setUpBase() {
@@ -43,8 +44,8 @@ public class AcceptanceTestBase {
     ethNode.start();
     ethSigner.start();
 
-    awaitPantheonStartup();
-    awaitEthSignerStartup();
+    ethNode.awaitStartupCompletion();
+    ethSigner.awaitStartupCompletion();
   }
 
   @AfterClass
@@ -56,25 +57,5 @@ public class AcceptanceTestBase {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
-  }
-
-  protected Signer ethSigner() {
-    return ethSigner;
-  }
-
-  protected Node ethNode() {
-    return ethNode;
-  }
-
-  private static void awaitEthSignerStartup() {
-    LOG.info("Waiting for EthSigner to become responsive...");
-    waitFor(() -> assertThat(ethSigner.web3j().ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("EthSigner is now responsive");
-  }
-
-  private static void awaitPantheonStartup() {
-    LOG.info("Waiting for Pantheon to become responsive...");
-    waitFor(() -> assertThat(ethNode.web3j().ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
   }
 }
