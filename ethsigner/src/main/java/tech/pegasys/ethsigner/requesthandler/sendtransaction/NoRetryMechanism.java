@@ -14,10 +14,16 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import java.io.IOException;
 
-import org.web3j.crypto.RawTransaction;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientResponse;
 
-@FunctionalInterface
-public interface RawTransactionSupplier {
+public class NoRetryMechanism<T> implements RetryMechanism<T> {
 
-  RawTransaction get() throws IOException;
+  @Override
+  public boolean mustRetry(final HttpClientResponse response, final Buffer body) {
+    return false;
+  }
+
+  @Override
+  public void retry(final T context, final Runnable sender) throws IOException {}
 }

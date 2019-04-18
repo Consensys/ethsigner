@@ -17,8 +17,9 @@ import java.io.IOException;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
 
-@FunctionalInterface
-public interface RetryMechanism {
+public interface RetryMechanism<T> {
 
-  boolean mustRetry(final HttpClientResponse response, final Buffer body) throws IOException;
+  boolean mustRetry(final HttpClientResponse response, final Buffer body);
+
+  void retry(final T context, Runnable sender) throws IOException;
 }

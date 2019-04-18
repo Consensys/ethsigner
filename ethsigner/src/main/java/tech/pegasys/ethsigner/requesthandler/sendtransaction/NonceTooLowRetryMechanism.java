@@ -24,31 +24,34 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NonceTooLowRetryMechanism implements RetryMechanism {
+public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransactionContext> {
 
   private static final Logger LOG = LoggerFactory.getLogger(NonceTooLowRetryMechanism.class);
 
-  private final RawTransactionBuilder transactionBuilder;
   private final NonceProvider nonceProvider;
 
-  public NonceTooLowRetryMechanism(
-      final RawTransactionBuilder transactionBuilder, final NonceProvider nonceProvider) {
-    this.transactionBuilder = transactionBuilder;
+  public NonceTooLowRetryMechanism(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
   }
 
   @Override
-  public boolean mustRetry(final HttpClientResponse response, final Buffer body)
-      throws IOException {
+  public boolean mustRetry(final HttpClientResponse response, final Buffer body) {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
       if (errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)) {
-        LOG.info("Nonce too low, resetting nonce and resending {}.", errorResponse.getId());
-        transactionBuilder.updateNonce(nonceProvider.getNonce());
+        LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
+
         return true;
       }
     }
     return false;
+  }
+
+  @Override
+  public void retry(final SendTransactionContext context, final Runnable sender)
+      throws IOException {
+    context.getRawTransactionBuilder().updateNonce(nonceProvider.getNonce());
+    sender.run();
   }
 
   private JsonRpcErrorResponse specialiseResponse(final Buffer body) {

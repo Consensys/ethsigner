@@ -99,13 +99,13 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
     final SendTransactionContext context =
         new SendTransactionContext(httpServerRequest, transactionBuilder, request.getId());
 
-    final RetryMechanism retryMechanism;
+    final RetryMechanism<SendTransactionContext> retryMechanism;
 
     if (!params.nonce().isPresent()) {
       transactionBuilder.updateNonce(nonceProvider.getNonce());
-      retryMechanism = new NonceTooLowRetryMechanism(transactionBuilder, nonceProvider);
+      retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
     } else {
-      retryMechanism = (rq, body) -> false;
+      retryMechanism = new NoRetryMechanism<>();
     }
 
     return new TransactionTransmitter(

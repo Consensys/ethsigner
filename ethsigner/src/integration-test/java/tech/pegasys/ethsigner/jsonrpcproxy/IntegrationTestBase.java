@@ -147,7 +147,7 @@ public class IntegrationTestBase {
     setupTransactionCountResponder();
   }
 
-  public void setupTransactionCountResponder() {
+  private void setupTransactionCountResponder() {
     final EthTransactionCountResponder getTransactionResponse =
         new EthTransactionCountResponder(nonce -> nonce.add(BigInteger.ONE));
     clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);

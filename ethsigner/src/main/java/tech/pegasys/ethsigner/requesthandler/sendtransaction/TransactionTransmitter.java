@@ -41,20 +41,20 @@ public class TransactionTransmitter {
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final HttpClient ethNodeClient;
-  private final TransactionSerialiser serialiser;
+  private final TransactionSerialiser transactionSerialiser;
   private final SendTransactionContext context;
-  private final RetryMechanism retryMechanism;
+  private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final SendTransactionContext context,
-      final TransactionSerialiser serialiser,
-      final RetryMechanism retryMechanism,
-      HttpResponseFactory responder) {
+      final TransactionSerialiser transactionSerialiser,
+      final RetryMechanism<SendTransactionContext> retryMechanism,
+      final HttpResponseFactory responder) {
     this.ethNodeClient = ethNodeClient;
     this.context = context;
-    this.serialiser = serialiser;
+    this.transactionSerialiser = transactionSerialiser;
     this.retryMechanism = retryMechanism;
     this.responder = responder;
   }
@@ -62,7 +62,7 @@ public class TransactionTransmitter {
   public void send() {
     final JsonRpcBody body = getBody();
     if (body.hasError()) {
-      reportError(JsonRpcError.INTERNAL_ERROR);
+      reportError();
     } else {
       sendTransaction(body.body());
     }
@@ -74,7 +74,7 @@ public class TransactionTransmitter {
     final String signedTransactionHexString;
     try {
       final RawTransaction rawTransaction = context.getRawTransactionBuilder().build();
-      signedTransactionHexString = serialiser.serialise(rawTransaction);
+      signedTransactionHexString = transactionSerialiser.serialise(rawTransaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", context.getRawTransactionBuilder(), e);
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
@@ -99,14 +99,14 @@ public class TransactionTransmitter {
 
   private void sendTransaction(final Buffer bodyContent) {
     final HttpServerRequest httpServerRequest = context.getInitialRequest();
-    final HttpClientRequest proxyRequest =
+    final HttpClientRequest request =
         ethNodeClient.request(
             httpServerRequest.method(), httpServerRequest.uri(), this::handleResponse);
 
-    proxyRequest.headers().setAll(httpServerRequest.headers());
-    proxyRequest.headers().remove("Content-Length"); // created during 'end'.
-    proxyRequest.setChunked(false);
-    proxyRequest.end(bodyContent);
+    request.headers().setAll(httpServerRequest.headers());
+    request.headers().remove("Content-Length"); // created during 'end'.
+    request.setChunked(false);
+    request.end(bodyContent);
   }
 
   private void handleResponse(final HttpClientResponse response) {
@@ -122,12 +122,12 @@ public class TransactionTransmitter {
     try {
       if (response.statusCode() != HttpResponseStatus.OK.code()
           && retryMechanism.mustRetry(response, body)) {
-        send();
+        retryMechanism.retry(context, this::send);
         return;
       }
     } catch (final IOException e) {
       LOG.info("Retry mechanism failed, reporting error.");
-      reportError(JsonRpcError.INTERNAL_ERROR);
+      reportError();
       return;
     }
 
@@ -146,8 +146,9 @@ public class TransactionTransmitter {
     LOG.debug("Response body: {}", body);
   }
 
-  protected void reportError(final JsonRpcError errorCode) {
-    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(context.getId(), errorCode);
+  private void reportError() {
+    final JsonRpcErrorResponse errorResponse =
+        new JsonRpcErrorResponse(context.getId(), JsonRpcError.INTERNAL_ERROR);
 
     LOG.debug(
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",

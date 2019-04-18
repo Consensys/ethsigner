@@ -22,7 +22,6 @@ import java.math.BigInteger;
 import java.util.function.Function;
 
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import org.mockserver.mock.action.ExpectationResponseCallback;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
@@ -51,9 +50,8 @@ public class EthTransactionCountResponder implements ExpectationResponseCallback
   }
 
   private static JsonRpcRequestId getRequestId(final String jsonBody) {
-    final JsonObject obj = new JsonObject(jsonBody);
-    final JsonRpcRequest request = obj.mapTo(JsonRpcRequest.class);
-    return request.getId();
+    final JsonRpcRequest jsonRpcRequest = Json.decodeValue(jsonBody, JsonRpcRequest.class);
+    return jsonRpcRequest.getId();
   }
 
   protected String generateTransactionCountResponse(final JsonRpcRequestId id) {
