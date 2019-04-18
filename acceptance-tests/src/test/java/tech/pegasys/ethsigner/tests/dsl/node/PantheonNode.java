@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Transactions;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -35,6 +38,8 @@ public class PantheonNode implements Node {
   private final DockerClient docker;
   private final String pantheonContainerId;
   private final Web3j jsonRpc;
+  private final Transactions transaction;
+  private final Accounts accounts;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
 
@@ -49,6 +54,8 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
+    this.transaction = new Transactions(jsonRpc);
+    this.accounts = new Accounts(jsonRpc);
   }
 
   @Override
@@ -68,6 +75,16 @@ public class PantheonNode implements Node {
       stopPantheonContainer();
       removePantheonContainer();
     }
+  }
+
+  @Override
+  public Accounts accounts() {
+    return null;
+  }
+
+  @Override
+  public Transactions transactions() {
+    return transaction;
   }
 
   private boolean hasPantheonContainer() {

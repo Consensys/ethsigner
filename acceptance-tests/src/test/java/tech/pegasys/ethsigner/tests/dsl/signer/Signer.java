@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
+import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,17 +29,19 @@ public class Signer {
 
   private final EthSignerProcessRunner runner;
   private final Web3j jsonRpc;
+  private final Transactions transactions;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
 
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
-    runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
-    jsonRpc =
+    this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
+    this.jsonRpc =
         new JsonRpc2_0Web3j(
             new HttpService(signerConfig.url()),
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
+    this.transactions = new Transactions(jsonRpc);
   }
 
   public Web3j web3j() {
@@ -53,5 +56,9 @@ public class Signer {
   public void shutdown() {
     LOG.info("Shutting down EthSigner");
     runner.shutdown();
+  }
+
+  public Transactions transactions() {
+    return transactions;
   }
 }

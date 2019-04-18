@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.web3j.protocol.Web3j;
 
 public class AcceptanceTestBase {
 
@@ -59,12 +58,12 @@ public class AcceptanceTestBase {
     }
   }
 
-  protected Web3j ethSigner() {
-    return ethSigner.web3j();
+  protected Signer ethSigner() {
+    return ethSigner;
   }
 
-  protected Web3j ethNode() {
-    return ethNode.web3j();
+  protected Node ethNode() {
+    return ethNode;
   }
 
   private static void awaitEthSignerStartup() {

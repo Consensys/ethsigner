@@ -12,13 +12,21 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Transactions;
+
 import org.web3j.protocol.Web3j;
 
 public interface Node {
 
+  // TODO drop this - use objects instead?
   Web3j web3j();
 
   void start();
 
   void shutdown();
+
+  Accounts accounts();
+
+  Transactions transactions();
 }

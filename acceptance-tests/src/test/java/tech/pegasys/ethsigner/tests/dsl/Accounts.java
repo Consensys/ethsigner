@@ -12,6 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
+import java.io.IOException;
+import java.math.BigInteger;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
+
 public class Accounts {
 
   /** Private key: 8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63 */
@@ -19,6 +25,27 @@ public class Accounts {
       "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
-
   public static final Account RICH_BENEFACTOR = new Account(GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
+
+  private final Web3j jsonRpc;
+
+  public Accounts(final Web3j jsonRpc) {
+    this.jsonRpc = jsonRpc;
+  }
+
+  public BigInteger balance(final String account) throws IOException {
+    return jsonRpc
+        .ethGetBalance(
+            account,
+            DefaultBlockParameter.valueOf(jsonRpc.ethBlockNumber().send().getBlockNumber()))
+        .send()
+        .getBalance();
+  }
+
+  public BigInteger balance(final String account, final BigInteger atBlock) throws IOException {
+    return jsonRpc
+        .ethGetBalance(account, DefaultBlockParameter.valueOf(atBlock))
+        .send()
+        .getBalance();
+  }
 }
