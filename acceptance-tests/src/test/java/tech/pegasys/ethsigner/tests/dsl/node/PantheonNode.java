@@ -37,6 +37,7 @@ import org.web3j.utils.Async;
 public class PantheonNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
 
   private final DockerClient docker;
   private final String pantheonContainerId;
@@ -112,14 +113,13 @@ public class PantheonNode implements Node {
   }
 
   private void pullPantheonImage() {
-    final String image = "pegasyseng/pantheon:latest";
     final PullImageResultCallback callback = new PullImageResultCallback();
-    docker.pullImageCmd(image).exec(callback);
+    docker.pullImageCmd(PANTHEON_IMAGE).exec(callback);
 
     try {
       LOG.info("Pulling the Pantheon Docker image...");
       callback.awaitCompletion();
-      LOG.info("Pulled the Pantheon Docker image: " + image);
+      LOG.info("Pulled the Pantheon Docker image: " + PANTHEON_IMAGE);
     } catch (final InterruptedException e) {
       LOG.error(e);
     }
@@ -132,7 +132,7 @@ public class PantheonNode implements Node {
     try {
       final CreateContainerCmd createPantheon =
           docker
-              .createContainerCmd("pegasyseng/pantheon:latest")
+              .createContainerCmd(PANTHEON_IMAGE)
               .withHostConfig(portBindingConfig)
               .withCmd(
                   "--miner-enabled",
