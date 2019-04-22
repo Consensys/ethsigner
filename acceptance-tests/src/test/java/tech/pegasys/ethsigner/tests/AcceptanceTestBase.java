@@ -38,8 +38,8 @@ public class AcceptanceTestBase {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
     final ConfigurationFactory config = new ConfigurationFactory();
-    ethSigner = new Signer(config.signer(), config.node());
-    ethNode = new PantheonNode(config.docker(), config.node());
+    ethSigner = new Signer(config.getSignerConfiguration(), config.getNodeConfiguration());
+    ethNode = new PantheonNode(config.getDockerClient(), config.getNodeConfiguration());
 
     ethNode.start();
     ethSigner.start();

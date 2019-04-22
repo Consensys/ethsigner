@@ -64,15 +64,15 @@ public class ConfigurationFactory {
         .build();
   }
 
-  public DockerClient docker() {
+  public DockerClient getDockerClient() {
     return docker;
   }
 
-  public NodeConfiguration node() {
+  public NodeConfiguration getNodeConfiguration() {
     return node;
   }
 
-  public SignerConfiguration signer() {
+  public SignerConfiguration getSignerConfiguration() {
     return signer;
   }
 }
