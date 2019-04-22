@@ -58,9 +58,9 @@ public class EthSignerProcessRunner {
       final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
-    this.nodeHostname = nodeConfig.hostname();
-    this.nodeTcpPort = String.valueOf(nodeConfig.tcpPort());
-    this.timeoutMs = String.valueOf(nodeConfig.pollingInterval().toMillis());
+    this.nodeHostname = nodeConfig.getHostname();
+    this.nodeTcpPort = String.valueOf(nodeConfig.getTcpPort());
+    this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerPort = String.valueOf(signerConfig.tcpPort());
     this.chainId = signerConfig.chainId();

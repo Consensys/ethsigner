@@ -46,12 +46,12 @@ public class PantheonNode implements Node {
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
 
-    LOG.info("Pantheon Web3j service targeting: " + config.downstreamUrl());
+    LOG.info("Pantheon Web3j service targeting: " + config.getDownstreamUrl());
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(config.downstreamUrl()),
-            config.pollingInterval().toMillis(),
+            new HttpService(config.getDownstreamUrl()),
+            config.getPollingInterval().toMillis(),
             Async.defaultExecutorService());
 
     this.docker = docker;
@@ -158,10 +158,10 @@ public class PantheonNode implements Node {
   }
 
   private PortBinding tcpPortBinding(final NodeConfiguration config) {
-    return PortBinding.parse(config.tcpPort() + ":8545");
+    return PortBinding.parse(config.getTcpPort() + ":8545");
   }
 
   private PortBinding wsPortBinding(final NodeConfiguration config) {
-    return PortBinding.parse(config.wsPort() + ":8546");
+    return PortBinding.parse(config.getWsPort() + ":8546");
   }
 }

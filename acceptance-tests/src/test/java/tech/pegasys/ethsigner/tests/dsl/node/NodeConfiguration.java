@@ -27,23 +27,23 @@ public class NodeConfiguration {
     this.hostname = hostname;
   }
 
-  public String hostname() {
+  public String getHostname() {
     return hostname;
   }
 
-  public int tcpPort() {
+  public int getTcpPort() {
     return TCP_PORT;
   }
 
-  public int wsPort() {
+  public int getWsPort() {
     return WS_PORT;
   }
 
-  public Duration pollingInterval() {
+  public Duration getPollingInterval() {
     return POLLING_INTERVAL;
   }
 
-  public String downstreamUrl() {
-    return String.format(HTTP_URL_FORMAT, hostname(), tcpPort());
+  public String getDownstreamUrl() {
+    return String.format(HTTP_URL_FORMAT, getHostname(), getTcpPort());
   }
 }
