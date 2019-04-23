@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.web3j.crypto.RawTransaction;
 
 public class RawTransactionConverter {
+
   private final NonceProvider nonceProvider;
 
   public RawTransactionConverter(final NonceProvider nonceProvider) {
@@ -35,7 +36,7 @@ public class RawTransactionConverter {
         valueOrDefault(input.gas(), () -> BigInteger.valueOf(90000)),
         valueOrDefault(input.receiver(), () -> ""),
         valueOrDefault(input.value(), () -> BigInteger.ZERO),
-        input.data());
+        valueOrDefault(input.data(), () -> ""));
   }
 
   private <T> T valueOrDefault(
@@ -54,6 +55,7 @@ public class RawTransactionConverter {
 
   @FunctionalInterface
   private interface ThrowingSupplier<T> {
+
     T get() throws IOException;
   }
 }
