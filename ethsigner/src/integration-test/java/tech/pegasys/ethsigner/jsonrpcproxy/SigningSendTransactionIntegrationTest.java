@@ -236,9 +236,21 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingData() {
+  public void signSendTransactionWhenMissingData() {
+    final String sendTransactionRequest = sendTransaction.missingData();
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf889a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72a8036a02955085d586b8babaa3bb1526c1a11af6d2b24df235ba04a33bf223dffc33425a06bf4b4c219bc43a34420ed80eccfe75b00e05672524dbb00ebc5da1fdc2597f2");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingData()), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
