@@ -42,7 +42,7 @@ public abstract class JsonRpcRequestHandler {
     final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(request.getId(), errorCode);
 
     LOG.debug(
-        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
+        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
         httpServerRequest.method(),
         httpServerRequest.absoluteURI(),
         Json.encodePrettily(request),

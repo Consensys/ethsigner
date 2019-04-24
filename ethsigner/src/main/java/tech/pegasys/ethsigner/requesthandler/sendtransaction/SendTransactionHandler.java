@@ -19,8 +19,6 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
-import java.io.IOException;
-
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
 import org.slf4j.Logger;
@@ -71,7 +69,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
 
     try {
       sendTransaction(params, httpServerRequest, request);
-    } catch (final IOException e) {
+    } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       reportError(httpServerRequest, request, JsonRpcError.INTERNAL_ERROR);
     }
@@ -80,8 +78,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
   private void sendTransaction(
       final SendTransactionJsonParameters params,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request)
-      throws IOException {
+      final JsonRpcRequest request) {
 
     final TransactionTransmitter transmitter =
         createTransactionTransmitter(params, httpServerRequest, request);
@@ -92,8 +89,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
   private TransactionTransmitter createTransactionTransmitter(
       final SendTransactionJsonParameters params,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request)
-      throws IOException {
+      final JsonRpcRequest request) {
 
     final RawTransactionBuilder transactionBuilder = RawTransactionBuilder.from(params);
     final SendTransactionContext context =

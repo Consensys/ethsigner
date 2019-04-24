@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import java.io.IOException;
-
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
 
@@ -25,5 +23,5 @@ public class NoRetryMechanism<T> implements RetryMechanism<T> {
   }
 
   @Override
-  public void retry(final T context, final Runnable sender) throws IOException {}
+  public void retry(final T context, final Runnable sender) {}
 }

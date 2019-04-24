@@ -31,6 +31,7 @@ dependencies {
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+  testCompile 'io.vertx:vertx-codegen:3.2.1'
 
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'

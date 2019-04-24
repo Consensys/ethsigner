@@ -19,9 +19,8 @@ import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
-
-import java.io.IOException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
@@ -60,7 +59,7 @@ public class TransactionTransmitter {
   }
 
   public void send() {
-    final JsonRpcBody body = getBody();
+    final JsonRpcBody body = createSignedTransactionBody();
     if (body.hasError()) {
       reportError();
     } else {
@@ -68,7 +67,7 @@ public class TransactionTransmitter {
     }
   }
 
-  private JsonRpcBody getBody() {
+  private JsonRpcBody createSignedTransactionBody() {
     // This assumes the parameters have already been validated and are correct for the unlocked
     // account.
     final String signedTransactionHexString;
@@ -125,7 +124,7 @@ public class TransactionTransmitter {
         retryMechanism.retry(context, this::send);
         return;
       }
-    } catch (final IOException e) {
+    } catch (final RetryException e) {
       LOG.info("Retry mechanism failed, reporting error.");
       reportError();
       return;

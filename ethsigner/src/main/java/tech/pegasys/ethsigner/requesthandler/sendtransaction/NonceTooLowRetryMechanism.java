@@ -15,8 +15,6 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
-import java.io.IOException;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
@@ -26,9 +24,13 @@ import org.slf4j.LoggerFactory;
 
 public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransactionContext> {
 
+  private static final int MAX_RETRIES = 5;
+
   private static final Logger LOG = LoggerFactory.getLogger(NonceTooLowRetryMechanism.class);
 
   private final NonceProvider nonceProvider;
+
+  private int retriesPerformed = 0;
 
   public NonceTooLowRetryMechanism(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
@@ -40,8 +42,7 @@ public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransaction
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
       if (errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
-
-        return true;
+        return retriesAvailable();
       }
     }
     return false;
@@ -49,13 +50,27 @@ public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransaction
 
   @Override
   public void retry(final SendTransactionContext context, final Runnable sender)
-      throws IOException {
-    context.getRawTransactionBuilder().updateNonce(nonceProvider.getNonce());
-    sender.run();
+      throws RetryException {
+    if (retriesAvailable()) {
+      try {
+        context.getRawTransactionBuilder().updateNonce(nonceProvider.getNonce());
+      } catch (final RuntimeException e) {
+        LOG.info("Failed to determine current nonce from web3j provider");
+        throw new RetryException();
+      }
+      retriesPerformed++;
+      sender.run();
+    } else {
+      LOG.error("Attempting to resend when retries are exhausted.");
+    }
   }
 
   private JsonRpcErrorResponse specialiseResponse(final Buffer body) {
     final JsonObject jsonBody = new JsonObject(body);
     return jsonBody.mapTo(JsonRpcErrorResponse.class);
+  }
+
+  private boolean retriesAvailable() {
+    return retriesPerformed < MAX_RETRIES;
   }
 }

@@ -28,12 +28,12 @@ public class RawTransactionBuilder {
   private String data;
 
   public RawTransactionBuilder(
-      BigInteger nonce,
-      BigInteger gasPrice,
-      BigInteger gasLimit,
-      String to,
-      BigInteger value,
-      String data) {
+      final BigInteger nonce,
+      final BigInteger gasPrice,
+      final BigInteger gasLimit,
+      final String to,
+      final BigInteger value,
+      final String data) {
     this.nonce = nonce;
     this.gasPrice = gasPrice;
     this.gasLimit = gasLimit;
