@@ -13,15 +13,20 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
+import io.vertx.core.json.Json;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.exceptions.ClientConnectionException;
 
 public class Transactions {
 
@@ -32,12 +37,25 @@ public class Transactions {
   }
 
   public String submit(final Transaction transaction) throws IOException {
+
+    // TODO when non-200 (i.e. invalid) exception is thrown: ClientConnectionException
     final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
 
     assertThat(response.getTransactionHash()).isNotEmpty();
     assertThat(response.getError()).isNull();
 
     return response.getTransactionHash();
+  }
+
+  public JsonRpcErrorResponse submitExceptional(final Transaction transaction) throws IOException {
+    try {
+      jsonRpc.ethSendTransaction(transaction).send();
+      fail("Expecting exceptional response ");
+      return null;
+    } catch (final ClientConnectionException e) {
+      final String jsonBody = e.getMessage().substring(e.getMessage().indexOf("{"));
+      return Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
+    }
   }
 
   public void awaitBlockContaining(final String hash) {

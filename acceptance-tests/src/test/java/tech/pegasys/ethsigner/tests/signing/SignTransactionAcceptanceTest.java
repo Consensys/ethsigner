@@ -17,7 +17,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Accounts.RICH_BENEFACTOR;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
+import tech.pegasys.ethsigner.tests.dsl.Account;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -30,12 +33,13 @@ import org.web3j.utils.Convert.Unit;
 
 public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
+  private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
+
   @Test
   public void valueTransfer() throws IOException {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(recipient);
-
     final Transaction transaction =
         Transaction.createEtherTransaction(
             RICH_BENEFACTOR.address(),
@@ -49,11 +53,40 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     ethNode().transactions().awaitBlockContaining(hash);
 
-    final BigInteger endBalance =
+    final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
+    final BigInteger actualEndBalance =
         ethNode().accounts().balance(recipient, ethNode().transactions().blockContaining(hash));
 
-    assertThat(endBalance)
-        .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));
+    assertThat(actualEndBalance).isCloseTo(expectedEndBalance, NO_OFFSET);
+  }
+
+  @Test
+  public void valueTransferWithInsufficientFunds() throws IOException {
+    final String senderAddress = "0x223b55228fb22b89f2216b7222e5522b8222bd22";
+    final String recipientAddress = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+    final BigInteger senderStartBalance = ethNode().accounts().balance(senderAddress);
+    final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
+    final BigInteger transferAmountWei =
+        Convert.toWei("1" + senderStartBalance.toString(), Unit.ETHER).toBigIntegerExact();
+    final Account sender = new Account(senderAddress);
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            sender.address(),
+            sender.getNextNonceAndIncrement(),
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            recipientAddress,
+            transferAmountWei);
+
+    final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
+
+    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+
+    final BigInteger senderEndBalance = ethNode().accounts().balance(senderAddress);
+    final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
+
+    assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
+    assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
   }
 
   @Test
