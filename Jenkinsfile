@@ -33,6 +33,9 @@ try {
                     stage('Integration Test') {
                         sh './gradlew --no-daemon --parallel integrationTest'
                     }
+                    stage('Acceptance Test') {
+                        sh './gradlew --no-daemon --parallel acceptanceTest'
+                    }
                 } finally {
                     archiveArtifacts '**/build/reports/**'
                     archiveArtifacts '**/build/test-results/**'
