@@ -90,6 +90,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransferFromAccountWithZeroBalance() throws IOException {
     final Account sender = new Account("0x223b55228fb22b89f2216b7222e5522b8222bd22");
+
     final String recipientAddress = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger senderStartBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
@@ -106,6 +107,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
 
+    // TODO this should be TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE
     assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);
