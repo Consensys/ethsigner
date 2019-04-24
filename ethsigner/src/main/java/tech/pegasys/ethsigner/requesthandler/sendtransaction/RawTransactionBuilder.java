@@ -49,7 +49,7 @@ public class RawTransactionBuilder {
         input.gas().orElse(BigInteger.valueOf(90000)),
         input.receiver().orElse(""),
         input.value().orElse(BigInteger.ZERO),
-        input.data());
+        input.data().orElse(""));
   }
 
   public RawTransactionBuilder updateNonce(final BigInteger nonce) {

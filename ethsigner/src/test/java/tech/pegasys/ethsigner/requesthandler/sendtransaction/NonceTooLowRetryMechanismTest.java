@@ -35,7 +35,7 @@ public class NonceTooLowRetryMechanismTest {
   private HttpClientResponse httpResponse = mock(HttpClientResponse.class);
   private SendTransactionContext context;
 
-  RetryMechanism<SendTransactionContext> retryMechanism =
+  private final RetryMechanism<SendTransactionContext> retryMechanism =
       new NonceTooLowRetryMechanism(nonceProvider);
 
   @Before
@@ -44,7 +44,7 @@ public class NonceTooLowRetryMechanismTest {
     context =
         new SendTransactionContext(
             null,
-            RawTransactionBuilder.from(new SendTransactionJsonParameters("0x1234", "Data")),
+            RawTransactionBuilder.from(new SendTransactionJsonParameters("0x1234")),
             new JsonRpcRequestId(1));
   }
 

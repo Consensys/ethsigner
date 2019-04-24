@@ -15,12 +15,14 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+
 import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.CipherException;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
