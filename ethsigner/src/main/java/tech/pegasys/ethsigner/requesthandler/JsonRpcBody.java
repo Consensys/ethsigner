@@ -12,16 +12,16 @@
  */
 package tech.pegasys.ethsigner.requesthandler;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 
 import io.vertx.core.buffer.Buffer;
 
 public class JsonRpcBody {
 
-  private final JsonRpcErrorResponse error;
+  private final JsonRpcError error;
   private final Buffer body;
 
-  public JsonRpcBody(final JsonRpcErrorResponse error) {
+  public JsonRpcBody(final JsonRpcError error) {
     this.body = null;
     this.error = error;
   }
@@ -49,7 +49,7 @@ public class JsonRpcBody {
    *
    * @return error, may be <code>null</code>
    */
-  public JsonRpcErrorResponse error() {
+  public JsonRpcError error() {
     return error;
   }
 }

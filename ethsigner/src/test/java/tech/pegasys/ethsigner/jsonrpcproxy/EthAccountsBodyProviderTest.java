@@ -15,14 +15,13 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
 
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
@@ -56,14 +55,8 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
 
     final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject response = new JsonObject(Json.encodeToBuffer(body.error()));
-
     assertThat(body.hasError()).isTrue();
-    assertThat(response.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(response.getValue("id")).isEqualTo(id);
-    final JsonObject error = response.getJsonObject("error");
-    assertThat(error.getInteger("code")).isEqualTo(JsonRpcError.INVALID_PARAMS.getCode());
-    assertThat(error.getString("message")).isEqualTo(JsonRpcError.INVALID_PARAMS.getMessage());
+    assertThat(body.error()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
@@ -76,14 +69,8 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
 
     final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject response = new JsonObject(Json.encodeToBuffer(body.error()));
-
     assertThat(body.hasError()).isTrue();
-    assertThat(response.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(response.getValue("id")).isEqualTo(id);
-    final JsonObject error = response.getJsonObject("error");
-    assertThat(error.getInteger("code")).isEqualTo(JsonRpcError.INVALID_PARAMS.getCode());
-    assertThat(error.getString("message")).isEqualTo(JsonRpcError.INVALID_PARAMS.getMessage());
+    assertThat(body.error()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test

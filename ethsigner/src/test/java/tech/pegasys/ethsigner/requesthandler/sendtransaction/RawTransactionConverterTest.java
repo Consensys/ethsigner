@@ -12,10 +12,4 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import java.math.BigInteger;
-
-@FunctionalInterface
-public interface NonceProvider {
-
-  BigInteger getNonce();
-}
+public class RawTransactionConverterTest {}
