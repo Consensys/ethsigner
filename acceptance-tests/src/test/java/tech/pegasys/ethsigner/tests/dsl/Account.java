@@ -27,6 +27,10 @@ public class Account {
     return address;
   }
 
+  public BigInteger getNextNonce() {
+    return nonce;
+  }
+
   public BigInteger getNextNonceAndIncrement() {
 
     final BigInteger next = nonce;

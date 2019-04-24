@@ -33,6 +33,10 @@ public class Accounts {
     this.jsonRpc = jsonRpc;
   }
 
+  public BigInteger balance(final Account account) throws IOException {
+    return balance(account.address());
+  }
+
   public BigInteger balance(final String account) throws IOException {
     return jsonRpc
         .ethGetBalance(
@@ -40,6 +44,10 @@ public class Accounts {
             DefaultBlockParameter.valueOf(jsonRpc.ethBlockNumber().send().getBlockNumber()))
         .send()
         .getBalance();
+  }
+
+  public BigInteger balance(final Account account, final BigInteger atBlock) throws IOException {
+    return balance(account.address(), atBlock);
   }
 
   public BigInteger balance(final String account, final BigInteger atBlock) throws IOException {
