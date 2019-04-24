@@ -18,6 +18,8 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
+import java.math.BigInteger;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -38,6 +40,9 @@ public class PantheonNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
+
+  /** Pantheon's dev.json has the hard fork at block 0. */
+  private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
 
   private final DockerClient docker;
   private final String pantheonContainerId;
@@ -81,6 +86,10 @@ public class PantheonNode implements Node {
     LOG.info("Waiting for Pantheon to become responsive...");
     waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
     LOG.info("Pantheon is now responsive");
+    waitFor(
+        () ->
+            assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
+                .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
   }
 
   @Override
