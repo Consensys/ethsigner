@@ -16,7 +16,6 @@ import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
@@ -43,8 +42,7 @@ public class EthAccountsBodyProvider implements BodyProvider {
 
     if (isPopulated(params) && isNotEmptyArray(params)) {
       LOG.info("eth_accounts should have no parameters, but has {}", request.getParams());
-      return new JsonRpcBody(
-          new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS));
+      return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     }
 
     final JsonRpcSuccessResponse response =

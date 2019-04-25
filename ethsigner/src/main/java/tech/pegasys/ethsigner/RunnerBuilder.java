@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.time.Duration;
@@ -30,7 +30,7 @@ public class RunnerBuilder {
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
   private Duration requestTimeout;
-  private RawTransactionConverter transactionConverter;
+  private NonceProvider nonceProvider;
 
   public RunnerBuilder() {}
 
@@ -54,14 +54,14 @@ public class RunnerBuilder {
     return this;
   }
 
-  public RunnerBuilder setTransactionConverter(final RawTransactionConverter transactionConverter) {
-    this.transactionConverter = transactionConverter;
+  public RunnerBuilder setNonceProvider(final NonceProvider nonceProvider) {
+    this.nonceProvider = nonceProvider;
     return this;
   }
 
   public Runner build() {
     if (serialiser == null) {
-      LOG.error("Unable to construct Runner, serialiser is unset.");
+      LOG.error("Unable to construct Runner, transactionSerialiser is unset.");
       return null;
     }
     if (clientOptions == null) {
@@ -73,16 +73,15 @@ public class RunnerBuilder {
       return null;
     }
 
-    if (transactionConverter == null) {
-      LOG.error("Unable to construct Runner, transaction transactionConverter is unset.");
-      return null;
-    }
-
     if (requestTimeout == null) {
       LOG.error("Unable to construct Runner, requestTimeout is unset.");
       return null;
     }
-    return new Runner(
-        serialiser, clientOptions, serverOptions, requestTimeout, transactionConverter);
+
+    if (nonceProvider == null) {
+      LOG.error("Unable to construct Runner, nonceProvider is unset.");
+      return null;
+    }
+    return new Runner(serialiser, clientOptions, serverOptions, requestTimeout, nonceProvider);
   }
 }

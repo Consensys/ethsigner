@@ -12,10 +12,14 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import java.math.BigInteger;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientResponse;
 
-@FunctionalInterface
-public interface NonceProvider {
+public interface RetryMechanism<T> {
 
-  BigInteger getNonce();
+  class RetryException extends RuntimeException {};
+
+  boolean mustRetry(final HttpClientResponse response, final Buffer body);
+
+  void retry(final T context, Runnable sender) throws RetryException;
 }

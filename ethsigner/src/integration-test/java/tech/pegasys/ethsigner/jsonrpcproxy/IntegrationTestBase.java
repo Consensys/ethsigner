@@ -31,13 +31,15 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RawTransactionConverter;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -118,7 +120,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(5),
-            new RawTransactionConverter(new Web3jNonceProvider(web3j, serialiser.getAddress())));
+            new Web3jNonceProvider(web3j, serialiser.getAddress()));
     runner.start();
 
     LOG.info(
@@ -142,6 +144,13 @@ public class IntegrationTestBase {
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     clientAndServer.reset();
+    setupTransactionCountResponder();
+  }
+
+  private void setupTransactionCountResponder() {
+    final EthTransactionCountResponder getTransactionResponse =
+        new EthTransactionCountResponder(nonce -> nonce.add(BigInteger.ONE));
+    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
   }
 
   @AfterClass
@@ -195,8 +204,7 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static FileBasedTransactionSigner transactionSigner()
-      throws IOException, CipherException {
+  private static TransactionSigner transactionSigner() throws IOException, CipherException {
     final File keyFile = createKeyFile();
     return FileBasedTransactionSigner.createFrom(keyFile, "password");
   }

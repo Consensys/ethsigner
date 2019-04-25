@@ -35,19 +35,19 @@ public class Web3jNonceProvider implements NonceProvider {
   }
 
   @Override
-  public BigInteger getNonce() throws IOException {
+  public BigInteger getNonce() {
     return getNonceFromClient();
   }
 
-  private BigInteger getNonceFromClient() throws IOException {
+  private BigInteger getNonceFromClient() {
     final Request<?, EthGetTransactionCount> request =
-        web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.LATEST);
+        web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.PENDING);
     try {
       final EthGetTransactionCount count = request.send();
       return count.getTransactionCount();
     } catch (final IOException e) {
       LOG.info("Failed to determine nonce from downstream handler.", e);
-      throw e;
+      throw new RuntimeException("Unable to determine nonce from web3j provider.");
     }
   }
 }
