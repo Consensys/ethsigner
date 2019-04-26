@@ -58,7 +58,11 @@ public class Signer {
   }
 
   public Transactions transactions() {
-    return transactions;
+    return this.transactions;
+  }
+
+  public Web3j jsonRpc() {
+    return this.jsonRpc;
   }
 
   public void awaitStartupCompletion() {
