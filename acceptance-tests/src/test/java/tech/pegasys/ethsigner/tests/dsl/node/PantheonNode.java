@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -108,17 +109,21 @@ public class PantheonNode implements Node {
 
   private void stopPantheonContainer() {
     try {
-      LOG.info("Stopping the Pantheon Docker container");
+      LOG.info("Stopping the Pantheon Docker container...");
       docker.stopContainerCmd(pantheonContainerId).exec();
-      docker.waitContainerCmd(pantheonContainerId).exec((new WaitContainerResultCallback()));
+      final WaitContainerResultCallback waiter = new WaitContainerResultCallback();
+      docker.waitContainerCmd(pantheonContainerId).exec((waiter));
+      waiter.awaitStatusCode(30, TimeUnit.SECONDS);
+      LOG.info("Stopped the Pantheon Docker container");
     } catch (final NotModifiedException e) {
       LOG.error("Pantheon Docker container has already stopped");
     }
   }
 
   private void removePantheonContainer() {
-    LOG.info("Removing the Pantheon Docker container");
+    LOG.info("Removing the Pantheon Docker container...");
     docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
+    LOG.info("Removed the Pantheon Docker container");
   }
 
   private void pullPantheonImage() {
