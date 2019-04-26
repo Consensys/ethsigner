@@ -17,8 +17,8 @@ import java.time.Duration;
 public class NodeConfiguration {
 
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
-  private static final int TCP_PORT = 8545;
-  private static final int WS_PORT = 8546;
+  private static final int TCP_PORT = 8547;
+  private static final int WS_PORT = 8548;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
