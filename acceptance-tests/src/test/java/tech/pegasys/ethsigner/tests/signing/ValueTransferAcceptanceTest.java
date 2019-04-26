@@ -32,6 +32,7 @@ import org.web3j.utils.Convert.Unit;
 
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
+  // TODO share this variable
   private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
 
   @Test

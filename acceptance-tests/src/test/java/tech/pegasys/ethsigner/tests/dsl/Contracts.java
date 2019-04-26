@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -60,5 +61,12 @@ public class Contracts {
     final String code = eth.getCode(address);
     assertThat(code).isNotEmpty();
     return code;
+  }
+
+  public String call(final Transaction contractViewOperation) throws IOException {
+    return jsonRpc
+        .ethCall(contractViewOperation, DefaultBlockParameter.valueOf("latest"))
+        .send()
+        .getValue();
   }
 }

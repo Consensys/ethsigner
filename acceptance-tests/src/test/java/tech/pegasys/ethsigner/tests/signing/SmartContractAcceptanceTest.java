@@ -20,6 +20,7 @@ import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 
@@ -28,6 +29,13 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
   private static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
   private static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
+
+  // TODO share this variable
+  private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
+
+  private static final String ENCODING_PREFIX = "0x";
+  private static final int HEXADECIMAL = 16;
+  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   @Test
   public void deployContract() throws IOException {
@@ -53,10 +61,51 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void invokeContract() {
+  public void invokeContract() throws IOException {
+    final Transaction contract =
+        Transaction.createContractTransaction(
+            richBenefactor().address(),
+            richBenefactor().getNextNonceAndIncrement(),
+            GAS_PRICE,
+            GAS_LIMIT,
+            BigInteger.ZERO,
+            SIMPLE_STORAGE_BINARY);
 
-    // TODO contract
+    final String hash = ethSigner().contracts().submit(contract);
 
-    // TODO verify deployment on node
+    ethNode().contracts().awaitBlockContaining(hash);
+
+    final String contractAddress = ethNode().contracts().address(hash);
+
+    final Transaction valueBeforeChange =
+        Transaction.createEthCallTransaction(
+            richBenefactor().address(), contractAddress, "0x6d4ce63c");
+
+    final BigInteger startingValue = hex(ethSigner().contracts().call(valueBeforeChange));
+
+    final Transaction changeValue =
+        Transaction.createFunctionCallTransaction(
+            richBenefactor().address(),
+            richBenefactor().getNextNonceAndIncrement(),
+            GAS_PRICE,
+            GAS_LIMIT,
+            contractAddress,
+            "0x60fe47b10000000000000000000000000000000000000000000000000000000000000007");
+
+    final String valueUpdate = ethSigner().contracts().submit(changeValue);
+
+    ethNode().contracts().awaitBlockContaining(valueUpdate);
+
+    final Transaction valueAfterChange =
+        Transaction.createEthCallTransaction(
+            richBenefactor().address(), contractAddress, "0x6d4ce63c");
+
+    final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
+
+    assertThat(endValue).isCloseTo(startingValue.add(BigInteger.valueOf(7)), NO_OFFSET);
+  }
+
+  private BigInteger hex(final String value) {
+    return new BigInteger(value.substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL);
   }
 }

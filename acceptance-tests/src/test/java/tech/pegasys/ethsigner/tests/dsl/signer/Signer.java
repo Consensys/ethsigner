@@ -79,8 +79,8 @@ public class Signer {
   }
 
   public void awaitStartupCompletion() {
-    LOG.info("Waiting for Pantheon to become responsive...");
+    LOG.info("Waiting for Signer to become responsive...");
     waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
+    LOG.info("Signer is now responsive");
   }
 }
