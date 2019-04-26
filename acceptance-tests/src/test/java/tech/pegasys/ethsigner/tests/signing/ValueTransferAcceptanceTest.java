@@ -31,7 +31,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
+public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
   private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
 
@@ -111,13 +111,5 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
     assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
-  }
-
-  @Test
-  public void contract() {
-
-    // TODO contract
-
-    // TODO verify deployment on node
   }
 }
