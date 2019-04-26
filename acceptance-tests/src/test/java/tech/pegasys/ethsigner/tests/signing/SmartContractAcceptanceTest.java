@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.dsl.utils.Hex.hex;
+import static tech.pegasys.ethsigner.tests.dsl.utils.Offset.NO_OFFSET;
 
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
@@ -20,7 +22,6 @@ import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 
@@ -29,13 +30,6 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
   private static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
   private static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
-
-  // TODO share this variable
-  private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
-
-  private static final String ENCODING_PREFIX = "0x";
-  private static final int HEXADECIMAL = 16;
-  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
 
   @Test
   public void deployContract() throws IOException {
@@ -103,9 +97,5 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
     final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
 
     assertThat(endValue).isCloseTo(startingValue.add(BigInteger.valueOf(7)), NO_OFFSET);
-  }
-
-  private BigInteger hex(final String value) {
-    return new BigInteger(value.substring(HEXADECIMAL_PREFIX_LENGTH), HEXADECIMAL);
   }
 }

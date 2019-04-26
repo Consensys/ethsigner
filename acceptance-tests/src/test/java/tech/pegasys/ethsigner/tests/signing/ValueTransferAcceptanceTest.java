@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+import static tech.pegasys.ethsigner.tests.dsl.utils.Offset.NO_OFFSET;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
@@ -24,16 +25,12 @@ import tech.pegasys.ethsigner.tests.dsl.Account;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
-
-  // TODO share this variable
-  private static final Offset<BigInteger> NO_OFFSET = Offset.offset(BigInteger.ZERO);
 
   @Test
   public void valueTransfer() throws IOException {
