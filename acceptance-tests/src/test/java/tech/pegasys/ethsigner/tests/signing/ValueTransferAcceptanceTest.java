@@ -51,7 +51,6 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
     final BigInteger actualEndBalance = ethNode().accounts().balance(recipient);
-
     assertThat(actualEndBalance).isCloseTo(expectedEndBalance, NO_OFFSET);
   }
 
@@ -71,12 +70,10 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             transferAmountWei);
 
     final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
-
     assertThat(error.getError()).isEqualTo(JsonRpcError.TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
-
     assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
     assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
   }
@@ -97,12 +94,10 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             senderStartBalance);
 
     final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
-
     assertThat(error.getError()).isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
-
     assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
     assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
   }

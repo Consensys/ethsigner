@@ -31,7 +31,8 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
   private static final String SIMPLE_STORAGE_GET = "0x6d4ce63c";
-  private static final String SIMPLE_STORAGE_SET_7 = "0x6d4ce63c";
+  private static final String SIMPLE_STORAGE_SET_7 =
+      "0x60fe47b10000000000000000000000000000000000000000000000000000000000000007";
 
   @Test
   public void deployContract() throws IOException {
@@ -49,7 +50,6 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
     final String address = ethNode().contracts().address(hash);
     final String code = ethNode().contracts().code(address);
-
     assertThat(code)
         .isEqualTo(
             "0x60806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146075575b600080fd5b348015605857600080fd5b50607360048036036020811015606d57600080fd5b50356099565b005b348015608057600080fd5b506087609e565b60408051918252519081900360200190f35b600055565b6000549056fea165627a7a72305820cb1d0935d14b589300b12fcd0ab849a7e9019c81da24d6daa4f6b2f003d1b0180029");
@@ -70,13 +70,10 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
     ethNode().contracts().awaitBlockContaining(hash);
 
     final String contractAddress = ethNode().contracts().address(hash);
-
     final Transaction valueBeforeChange =
         Transaction.createEthCallTransaction(
             richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
-
     final BigInteger startingValue = hex(ethSigner().contracts().call(valueBeforeChange));
-
     final Transaction changeValue =
         Transaction.createFunctionCallTransaction(
             richBenefactor().address(),
@@ -87,15 +84,12 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             SIMPLE_STORAGE_SET_7);
 
     final String valueUpdate = ethSigner().contracts().submit(changeValue);
-
     ethNode().contracts().awaitBlockContaining(valueUpdate);
 
     final Transaction valueAfterChange =
         Transaction.createEthCallTransaction(
             richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
-
     final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
-
     assertThat(endValue).isCloseTo(startingValue.add(BigInteger.valueOf(7)), NO_OFFSET);
   }
 }
