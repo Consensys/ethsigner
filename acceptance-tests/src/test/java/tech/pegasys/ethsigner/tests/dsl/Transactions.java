@@ -42,8 +42,6 @@ public class Transactions {
   }
 
   public String submit(final Transaction transaction) throws IOException {
-
-    // TODO when non-200 (i.e. invalid) exception is thrown: ClientConnectionException
     final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
 
     assertThat(response.getTransactionHash()).isNotEmpty();

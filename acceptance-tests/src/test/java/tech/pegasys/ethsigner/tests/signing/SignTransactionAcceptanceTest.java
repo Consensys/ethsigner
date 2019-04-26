@@ -104,7 +104,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
 
-    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+    assertThat(error.getError()).isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
