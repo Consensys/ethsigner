@@ -46,13 +46,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             recipient,
             transferAmountWei);
 
-    final BigInteger benefactorBalance = ethNode().accounts().balance(richBenefactor());
-
-    assertThat(benefactorBalance)
-        .isGreaterThan(transferAmountWei.add(GAS_PRICE.multiply(INTRINSIC_GAS)));
-
     final String hash = ethSigner().transactions().submit(transaction);
-
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);

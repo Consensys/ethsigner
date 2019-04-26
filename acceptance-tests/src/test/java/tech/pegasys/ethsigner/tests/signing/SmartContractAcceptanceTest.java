@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_LIMIT;
+import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.utils.Hex.hex;
 import static tech.pegasys.ethsigner.tests.dsl.utils.Offset.NO_OFFSET;
 
@@ -27,9 +29,9 @@ import org.web3j.protocol.core.methods.request.Transaction;
 
 public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
-  private static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
-  private static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
+  private static final String SIMPLE_STORAGE_GET = "0x6d4ce63c";
+  private static final String SIMPLE_STORAGE_SET_7 = "0x6d4ce63c";
 
   @Test
   public void deployContract() throws IOException {
@@ -43,7 +45,6 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             SIMPLE_STORAGE_BINARY);
 
     final String hash = ethSigner().contracts().submit(contract);
-
     ethNode().contracts().awaitBlockContaining(hash);
 
     final String address = ethNode().contracts().address(hash);
@@ -66,14 +67,13 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             SIMPLE_STORAGE_BINARY);
 
     final String hash = ethSigner().contracts().submit(contract);
-
     ethNode().contracts().awaitBlockContaining(hash);
 
     final String contractAddress = ethNode().contracts().address(hash);
 
     final Transaction valueBeforeChange =
         Transaction.createEthCallTransaction(
-            richBenefactor().address(), contractAddress, "0x6d4ce63c");
+            richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
 
     final BigInteger startingValue = hex(ethSigner().contracts().call(valueBeforeChange));
 
@@ -84,7 +84,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             GAS_PRICE,
             GAS_LIMIT,
             contractAddress,
-            "0x60fe47b10000000000000000000000000000000000000000000000000000000000000007");
+            SIMPLE_STORAGE_SET_7);
 
     final String valueUpdate = ethSigner().contracts().submit(changeValue);
 
@@ -92,7 +92,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
     final Transaction valueAfterChange =
         Transaction.createEthCallTransaction(
-            richBenefactor().address(), contractAddress, "0x6d4ce63c");
+            richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
 
     final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
 
