@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -46,7 +45,7 @@ public class EthAccountAcceptanceTest extends AcceptanceTestBase {
 
     EthAccounts ethAccountsRequest = ethSigner().jsonRpc().ethAccounts().send();
 
-    assertThat(ethAccountsRequest.getAccounts().size() == 1);
+    assertThat(ethAccountsRequest.getAccounts().size() == 1).isTrue();
     String account = ethAccountsRequest.getAccounts().get(0);
     assertThat(ethNode().accounts().balance(account)).isNotNull();
   }
@@ -68,7 +67,7 @@ public class EthAccountAcceptanceTest extends AcceptanceTestBase {
     ethGetTransactionCount = ethGetTransactionCountRequest.send();
     BigInteger endTransactionCount = ethGetTransactionCount.getTransactionCount();
 
-    Assertions.assertThat(startTransactionCount.add(BigInteger.ONE).equals(endTransactionCount));
+    assertThat(startTransactionCount.add(BigInteger.ONE).equals(endTransactionCount)).isTrue();
   }
 
   @Test
