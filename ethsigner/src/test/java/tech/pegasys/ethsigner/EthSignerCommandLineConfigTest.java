@@ -135,4 +135,22 @@ public class EthSignerCommandLineConfigTest {
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
   }
+
+  @Test
+  public void domainNamesDecodeIntoAnInetAddress() {
+    final String input =
+        "--key-file=./keyfile "
+            + "--password-file=./passwordFile "
+            + "--downstream-http-host=google.com "
+            + "--downstream-http-port=5000 "
+            + "--downstream-http-request-timeout=10000 "
+            + "--http-listen-port=5001 "
+            + "--http-listen-host=localhost "
+            + "--chain-id=6 "
+            + "--logging=INFO";
+
+    final boolean result = parseCommand(input);
+    assertThat(result).isTrue();
+    assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
+  }
 }
