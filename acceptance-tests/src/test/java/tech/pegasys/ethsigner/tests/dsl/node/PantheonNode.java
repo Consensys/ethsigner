@@ -146,7 +146,7 @@ public class PantheonNode implements Node {
               .withCmd(
                   "--miner-enabled",
                   "--miner-coinbase",
-                  "fe3b557e8fb62b89f4916b721be55ceb828dbd73",
+                  "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
                   "--rpc-http-cors-origins",
                   "all",
                   "--host-whitelist",
