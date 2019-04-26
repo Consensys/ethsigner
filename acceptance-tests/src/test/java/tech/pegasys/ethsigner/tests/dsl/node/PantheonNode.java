@@ -16,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.math.BigInteger;
@@ -47,8 +49,9 @@ public class PantheonNode implements Node {
 
   private final DockerClient docker;
   private final String pantheonContainerId;
-  private final Transactions transaction;
   private final Accounts accounts;
+  private final Contracts contracts;
+  private final Transactions transaction;
   private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
@@ -64,8 +67,10 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    this.transaction = new Transactions(jsonRpc);
     this.accounts = new Accounts(jsonRpc);
+    final Eth eth = new Eth(jsonRpc);
+    this.contracts = new Contracts(eth, jsonRpc);
+    this.transaction = new Transactions(eth, jsonRpc);
   }
 
   @Override
@@ -99,6 +104,11 @@ public class PantheonNode implements Node {
   }
 
   @Override
+  public Contracts contracts() {
+    return contracts;
+  }
+
+  @Override
   public Transactions transactions() {
     return transaction;
   }
@@ -113,7 +123,7 @@ public class PantheonNode implements Node {
       docker.stopContainerCmd(pantheonContainerId).exec();
       final WaitContainerResultCallback waiter = new WaitContainerResultCallback();
       docker.waitContainerCmd(pantheonContainerId).exec((waiter));
-      waiter.awaitStatusCode(30, TimeUnit.SECONDS);
+      waiter.awaitStatusCode(5, TimeUnit.SECONDS);
       LOG.info("Stopped the Pantheon Docker container");
     } catch (final NotModifiedException e) {
       LOG.error("Pantheon Docker container has already stopped");

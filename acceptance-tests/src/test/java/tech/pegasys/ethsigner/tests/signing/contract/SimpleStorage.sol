@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2018 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,23 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl.node;
+pragma solidity >=0.4.0 <0.6.0;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
-import tech.pegasys.ethsigner.tests.dsl.Transactions;
+// compile with:
+// solc SimpleStorage.sol --bin --abi --optimize --overwrite -o .
+// then create web3j wrappers with:
+// web3j solidity generate -b ./generated/SimpleStorage.bin -a ./generated/SimpleStorage.abi -o ../../../../../ -p tech.pegasys.pantheon.tests.web3j.generated
+contract SimpleStorage {
+    uint data;
 
-public interface Node {
+    function set(uint value) public {
+        data = value;
+    }
 
-  void start();
-
-  void shutdown();
-
-  void awaitStartupCompletion();
-
-  Accounts accounts();
-
-  Contracts contracts();
-
-  Transactions transactions();
+    function get() public view returns (uint) {
+        return data;
+    }
 }

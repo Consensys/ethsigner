@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.dsl.Accounts.RICH_BENEFACTOR;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -38,24 +37,28 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransfer() throws IOException {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-    final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
+    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(recipient);
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            RICH_BENEFACTOR.address(),
-            RICH_BENEFACTOR.getNextNonceAndIncrement(),
+            richBenefactor().address(),
+            richBenefactor().getNextNonceAndIncrement(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipient,
             transferAmountWei);
+
+    final BigInteger benefactorBalance = ethNode().accounts().balance(richBenefactor());
+
+    assertThat(benefactorBalance)
+        .isGreaterThan(transferAmountWei.add(GAS_PRICE.multiply(INTRINSIC_GAS)));
 
     final String hash = ethSigner().transactions().submit(transaction);
 
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
-    final BigInteger actualEndBalance =
-        ethNode().accounts().balance(recipient, ethNode().transactions().blockContaining(hash));
+    final BigInteger actualEndBalance = ethNode().accounts().balance(recipient);
 
     assertThat(actualEndBalance).isCloseTo(expectedEndBalance, NO_OFFSET);
   }
@@ -63,13 +66,13 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void valueTransferFromAccountWithInsufficientFunds() throws IOException {
     final String recipientAddress = "0x1b11ba11ca11bb11aa11bc11be11ac11ca11da11";
-    final BigInteger senderStartBalance = ethNode().accounts().balance(RICH_BENEFACTOR);
+    final BigInteger senderStartBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
     final BigInteger transferAmountWei = senderStartBalance.multiply(BigInteger.TEN);
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            RICH_BENEFACTOR.address(),
-            RICH_BENEFACTOR.getNextNonce(),
+            richBenefactor().address(),
+            richBenefactor().getNextNonce(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipientAddress,
@@ -79,7 +82,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
     assertThat(error.getError()).isEqualTo(JsonRpcError.TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE);
 
-    final BigInteger senderEndBalance = ethNode().accounts().balance(RICH_BENEFACTOR);
+    final BigInteger senderEndBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
 
     assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
@@ -92,7 +95,6 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final String recipientAddress = "0x1b22ba22ca22bb22aa22bc22be22ac22ca22da22";
     final BigInteger senderStartBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
-    final BigInteger transferAmountWei = senderStartBalance;
     final Transaction transaction =
         Transaction.createEtherTransaction(
             sender.address(),
@@ -100,7 +102,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             GAS_PRICE,
             INTRINSIC_GAS,
             recipientAddress,
-            transferAmountWei);
+            senderStartBalance);
 
     final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
 

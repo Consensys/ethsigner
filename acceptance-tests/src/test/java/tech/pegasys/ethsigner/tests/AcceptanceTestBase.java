@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.ConfigurationFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
@@ -24,6 +25,10 @@ public class AcceptanceTestBase {
 
   private static Node ethNode;
   private static Signer ethSigner;
+
+  protected Account richBenefactor() {
+    return ethSigner.accounts().richBenefactor();
+  }
 
   protected Signer ethSigner() {
     return ethSigner;

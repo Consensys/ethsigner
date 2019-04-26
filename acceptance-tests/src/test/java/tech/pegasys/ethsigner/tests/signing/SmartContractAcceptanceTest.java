@@ -12,18 +12,44 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
+import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
+
+import java.io.IOException;
+import java.math.BigInteger;
 
 import org.junit.Test;
+import org.web3j.protocol.core.methods.request.Transaction;
 
 public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
+  private static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
+  private static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
+  private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
+
   @Test
-  public void installContract() {
+  public void deployContract() throws IOException {
+    final Transaction contract =
+        Transaction.createContractTransaction(
+            richBenefactor().address(),
+            richBenefactor().getNextNonceAndIncrement(),
+            GAS_PRICE,
+            GAS_LIMIT,
+            BigInteger.ZERO,
+            SIMPLE_STORAGE_BINARY);
 
-    // TODO contract
+    final String hash = ethSigner().contracts().submit(contract);
 
-    // TODO verify deployment on node
+    ethNode().contracts().awaitBlockContaining(hash);
+
+    final String address = ethNode().contracts().address(hash);
+    final String code = ethNode().contracts().code(address);
+
+    assertThat(code)
+        .isEqualTo(
+            "0x60806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146075575b600080fd5b348015605857600080fd5b50607360048036036020811015606d57600080fd5b50356099565b005b348015608057600080fd5b506087609e565b60408051918252519081900360200190f35b600055565b6000549056fea165627a7a72305820cb1d0935d14b589300b12fcd0ab849a7e9019c81da24d6daa4f6b2f003d1b0180029");
   }
 
   @Test
