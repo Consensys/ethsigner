@@ -21,7 +21,6 @@ import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.math.BigInteger;
-import java.util.concurrent.TimeUnit;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -123,10 +122,12 @@ public class PantheonNode implements Node {
       docker.stopContainerCmd(pantheonContainerId).exec();
       final WaitContainerResultCallback waiter = new WaitContainerResultCallback();
       docker.waitContainerCmd(pantheonContainerId).exec((waiter));
-      waiter.awaitStatusCode(5, TimeUnit.SECONDS);
+      waiter.awaitCompletion();
       LOG.info("Stopped the Pantheon Docker container");
     } catch (final NotModifiedException e) {
       LOG.error("Pantheon Docker container has already stopped");
+    } catch (final InterruptedException e) {
+      LOG.error("Interrupted when waiting for Pantheon Docker container to stop");
     }
   }
 
