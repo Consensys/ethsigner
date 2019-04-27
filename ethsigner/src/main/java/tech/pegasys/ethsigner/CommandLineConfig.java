@@ -196,4 +196,32 @@ public class CommandLineConfig implements Config {
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
+
+  @Override
+  public String toString() {
+    return "CommandLineConfig{"
+        + "commandLine="
+        + commandLine
+        + ", logLevel="
+        + logLevel
+        + ", passwordFilePath="
+        + passwordFilePath
+        + ", keyFile="
+        + keyFile
+        + ", downstreamHttpHost="
+        + downstreamHttpHost
+        + ", downstreamHttpPort="
+        + downstreamHttpPort
+        + ", downstreamHttpRequestTimeout="
+        + downstreamHttpRequestTimeout
+        + ", httpListenHost="
+        + httpListenHost
+        + ", httpListenPort="
+        + httpListenPort
+        + ", chainId="
+        + chainId
+        + ", output="
+        + output
+        + '}';
+  }
 }

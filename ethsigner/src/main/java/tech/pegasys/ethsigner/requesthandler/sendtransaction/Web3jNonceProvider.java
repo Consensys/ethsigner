@@ -43,8 +43,11 @@ public class Web3jNonceProvider implements NonceProvider {
     final Request<?, EthGetTransactionCount> request =
         web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.PENDING);
     try {
+      LOG.debug("Retrieving Transaction count from web3j provider for {}.", accountAddress);
       final EthGetTransactionCount count = request.send();
-      return count.getTransactionCount();
+      final BigInteger transactionCount = count.getTransactionCount();
+      LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
+      return transactionCount;
     } catch (final IOException e) {
       LOG.info("Failed to determine nonce from downstream handler.", e);
       throw new RuntimeException("Unable to determine nonce from web3j provider.");

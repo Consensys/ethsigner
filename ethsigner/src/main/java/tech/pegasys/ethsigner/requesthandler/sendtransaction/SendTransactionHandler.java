@@ -45,6 +45,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
 
   @Override
   public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest request) {
+    LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final SendTransactionJsonParameters params;
     try {
       params = SendTransactionJsonParameters.from(request);
@@ -98,6 +99,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
     final RetryMechanism<SendTransactionContext> retryMechanism;
 
     if (!params.nonce().isPresent()) {
+      LOG.debug("Nonce not present in request {}", request.getId());
       transactionBuilder.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
     } else {
