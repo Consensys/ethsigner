@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import com.google.common.base.MoreObjects;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 
@@ -21,6 +20,7 @@ import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
