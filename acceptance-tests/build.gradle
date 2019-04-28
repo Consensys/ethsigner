@@ -25,6 +25,7 @@ dependencies {
   testImplementation 'org.apache.logging.log4j:log4j-api'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.awaitility:awaitility'
+  testImplementation 'io.vertx:vertx-core'
 }
 
 test.enabled = false

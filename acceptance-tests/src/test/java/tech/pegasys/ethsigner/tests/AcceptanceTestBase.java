@@ -17,6 +17,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 
+import io.vertx.core.Vertx;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -38,7 +39,9 @@ public class AcceptanceTestBase {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
     final ConfigurationFactory config = new ConfigurationFactory();
-    ethSigner = new Signer(config.getSignerConfiguration(), config.getNodeConfiguration());
+    final Vertx vertx = Vertx.vertx();
+
+    ethSigner = new Signer(config.getSignerConfiguration(), config.getNodeConfiguration(), vertx);
     ethNode = new PantheonNode(config.getDockerClient(), config.getNodeConfiguration());
 
     ethNode.start();

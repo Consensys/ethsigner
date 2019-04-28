@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
@@ -19,6 +20,14 @@ import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -33,8 +42,14 @@ public class Signer {
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
+  private final HttpClient client;
+  private final String downstreamUrl;
+  private final Vertx vertx;
 
-  public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+  public Signer(
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final Vertx vertx) {
 
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
@@ -45,6 +60,13 @@ public class Signer {
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
     this.transactions = new Transactions(jsonRpc);
+    this.client =
+        vertx.createHttpClient(
+            new HttpClientOptions()
+                .setDefaultHost(signerConfig.hostname())
+                .setDefaultPort(signerConfig.tcpPort()));
+    downstreamUrl = "http://" + signerConfig.hostname() + ":" + signerConfig.tcpPort();
+    this.vertx = vertx;
   }
 
   public void start() {
@@ -62,8 +84,15 @@ public class Signer {
   }
 
   public void awaitStartupCompletion() {
-    LOG.info("Waiting for Pantheon to become responsive...");
+    LOG.info("Waiting for Signer to become responsive...");
     waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
+    LOG.info("Signer is now responsive");
+  }
+
+  public void sendRawJsonRpc(final Buffer body, final Handler<HttpClientResponse> callback) {
+    final HttpClientRequest request = client.request(POST, downstreamUrl, callback);
+    request.putHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
+    request.setChunked(false);
+    request.end(body);
   }
 }
