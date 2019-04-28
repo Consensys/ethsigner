@@ -67,13 +67,13 @@ public final class EthSigner {
     }
 
     try {
-      final Web3j web3j =
-          new JsonRpc2_0Web3j(
-              new HttpService(
-                  "http://"
-                      + config.getDownstreamHttpHost()
-                      + ":"
-                      + config.getDownstreamHttpPort()));
+      final String downstreamUrl =
+          "http://"
+              + config.getDownstreamHttpHost().getHostName()
+              + ":"
+              + config.getDownstreamHttpPort();
+      LOG.info("Downstream URL = {}", downstreamUrl);
+      final Web3j web3j = new JsonRpc2_0Web3j(new HttpService(downstreamUrl));
       final FileBasedTransactionSigner signer =
           FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
 
