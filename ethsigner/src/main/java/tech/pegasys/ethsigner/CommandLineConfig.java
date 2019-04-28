@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import com.google.common.base.MoreObjects;
 import tech.pegasys.ethsigner.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.signing.ConfigurationChainId;
 
@@ -199,29 +200,18 @@ public class CommandLineConfig implements Config {
 
   @Override
   public String toString() {
-    return "CommandLineConfig{"
-        + "commandLine="
-        + commandLine
-        + ", logLevel="
-        + logLevel
-        + ", passwordFilePath="
-        + passwordFilePath
-        + ", keyFile="
-        + keyFile
-        + ", downstreamHttpHost="
-        + downstreamHttpHost
-        + ", downstreamHttpPort="
-        + downstreamHttpPort
-        + ", downstreamHttpRequestTimeout="
-        + downstreamHttpRequestTimeout
-        + ", httpListenHost="
-        + httpListenHost
-        + ", httpListenPort="
-        + httpListenPort
-        + ", chainId="
-        + chainId
-        + ", output="
-        + output
-        + '}';
+    return MoreObjects.toStringHelper(this)
+        .add("commandLine", commandLine)
+        .add("logLevel", logLevel)
+        .add("passwordFilePath", passwordFilePath)
+        .add("keyFile", keyFile)
+        .add("downstreamHttpHost", downstreamHttpHost)
+        .add("downstreamHttpPort", downstreamHttpPort)
+        .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
+        .add("httpListenHost", httpListenHost)
+        .add("httpListenPort", httpListenPort)
+        .add("chainId", chainId)
+        .add("output", output)
+        .toString();
   }
 }
