@@ -69,7 +69,7 @@ public class PantheonNode implements Node {
     this.accounts = new Accounts(jsonRpc);
     final Eth eth = new Eth(jsonRpc);
     this.contracts = new Contracts(eth, jsonRpc);
-    this.transaction = new Transactions(eth, jsonRpc);
+    this.transaction = new Transactions(eth);
   }
 
   @Override

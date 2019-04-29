@@ -24,7 +24,6 @@ import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.exceptions.ClientConnectionException;
 
@@ -32,12 +31,10 @@ public class Transactions {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Web3j jsonRpc;
   private final Eth eth;
 
-  public Transactions(final Eth eth, final Web3j jsonRpc) {
+  public Transactions(final Eth eth) {
     this.eth = eth;
-    this.jsonRpc = jsonRpc;
   }
 
   public String submit(final Transaction transaction) throws IOException {
@@ -46,7 +43,7 @@ public class Transactions {
 
   public JsonRpcErrorResponse submitExceptional(final Transaction transaction) throws IOException {
     try {
-      jsonRpc.ethSendTransaction(transaction).send();
+      eth.sendTransaction(transaction);
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
@@ -55,7 +52,7 @@ public class Transactions {
     }
   }
 
-  public void awaitBlockContaining(final String hash) throws IOException {
+  public void awaitBlockContaining(final String hash) {
     try {
       waitFor(() -> assertThat(eth.getTransactionReceipt(hash).isPresent()).isTrue());
     } catch (final ConditionTimeoutException e) {

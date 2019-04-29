@@ -51,7 +51,7 @@ public class Signer {
             Async.defaultExecutorService());
 
     final Eth eth = new Eth(jsonRpc);
-    this.transactions = new Transactions(eth, jsonRpc);
+    this.transactions = new Transactions(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.accounts = new Accounts(jsonRpc);
   }

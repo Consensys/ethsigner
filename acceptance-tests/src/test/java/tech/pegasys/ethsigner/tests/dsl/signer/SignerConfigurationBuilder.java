@@ -14,9 +14,19 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 public class SignerConfigurationBuilder {
 
+  /** ChainId defined in the Pantheon dev mode genesis. */
+  private static final String CHAIN_ID = "2018";
+
   private static final String LOCALHOST = "127.0.0.1";
 
+  private String chainId = CHAIN_ID;
+
+  public SignerConfigurationBuilder withChainId(final String chainId) {
+    this.chainId = chainId;
+    return this;
+  }
+
   public SignerConfiguration build() {
-    return new SignerConfiguration(LOCALHOST);
+    return new SignerConfiguration(chainId, LOCALHOST);
   }
 }
