@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.requesthandler.passthrough;
 
-import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
@@ -22,22 +21,23 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PassThroughHandler extends JsonRpcRequestHandler {
+public class PassThroughHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
   private final HttpClient ethNodeClient;
 
-  public PassThroughHandler(final HttpResponseFactory responder, final HttpClient ethNodeClient) {
-    super(responder);
+  public PassThroughHandler(final HttpClient ethNodeClient) {
     this.ethNodeClient = ethNodeClient;
   }
 
   @Override
-  public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest request) {
+  public void handle(final RoutingContext routingContext, final JsonRpcRequest request) {
     LOG.debug("Passing through request {}, {}", request.getId(), request.getMethod());
+    final HttpServerRequest httpServerRequest = routingContext.request();
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),

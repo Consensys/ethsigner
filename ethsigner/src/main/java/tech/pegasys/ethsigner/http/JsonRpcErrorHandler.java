@@ -17,14 +17,20 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERRO
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
+  private static final Logger LOG = LoggerFactory.getLogger(LogErrorHandler.class);
   private HttpResponseFactory httpResponseFactory;
 
   public JsonRpcErrorHandler(HttpResponseFactory httpResponseFactory) {
@@ -33,11 +39,26 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-    JsonRpcRequestId rpcRequestId = jsonRpcId(context);
-    final JsonRpcErrorResponse errorResponse =
-        new JsonRpcErrorResponse(rpcRequestId, INTERNAL_ERROR);
+    final JsonRpcError jsonRpcError = jsonRpcError(context);
+    final JsonRpcRequestId rpcRequestId = jsonRpcId(context);
+    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(rpcRequestId, jsonRpcError);
     final int statusCode = context.statusCode() == -1 ? BAD_REQUEST.code() : context.statusCode();
+    final HttpServerRequest httpServerRequest = context.request();
+    LOG.debug(
+        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
+        httpServerRequest.method(),
+        httpServerRequest.absoluteURI(),
+        Json.encodePrettily(httpServerRequest),
+        Json.encode(errorResponse));
     httpResponseFactory.create(context.request(), statusCode, errorResponse);
+  }
+
+  private JsonRpcError jsonRpcError(final RoutingContext context) {
+    if (context.failure() instanceof JsonRpcException) {
+      JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
+      return jsonRpcException.getJsonRpcError();
+    }
+    return INTERNAL_ERROR;
   }
 
   private JsonRpcRequestId jsonRpcId(final RoutingContext context) {
@@ -46,7 +67,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
           Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class);
       return jsonRpcRequest.getId();
     } catch (DecodeException e) {
-      // TODO should this be logged?
+      LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
       return new JsonRpcRequestId(null);
     }
   }

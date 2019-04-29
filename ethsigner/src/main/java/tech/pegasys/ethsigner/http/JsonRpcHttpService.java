@@ -120,7 +120,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
       final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
-      handler.handle(context.request(), request);
+      handler.handle(context, request);
     } catch (final DecodeException | IllegalArgumentException e) {
       sendParseErrorResponse(context, e);
     } catch (Exception e) {
