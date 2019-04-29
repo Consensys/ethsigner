@@ -16,8 +16,6 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 
 import org.junit.Test;
 
-// TODO remove when port allocation service is deployed on Jenins CI
-
 // TODO don't use the default ATBase - need to setup Patheon & EthSigner with different chain Ids
 public class ReplayProtectionAcceptanceTest extends AcceptanceTestBase {
 

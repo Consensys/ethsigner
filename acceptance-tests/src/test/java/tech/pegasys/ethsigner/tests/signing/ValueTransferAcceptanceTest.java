@@ -30,8 +30,6 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-// TODO remove when port allocation service is deployed on Jenins CI
-
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
   @Test

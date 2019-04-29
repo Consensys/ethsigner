@@ -27,8 +27,6 @@ import java.math.BigInteger;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 
-// TODO remove when port allocation service is deployed on Jenins CI
-
 public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
