@@ -70,10 +70,9 @@ public class ReplayProtectionAcceptanceTest {
     }
   }
 
-  @Test
-  public void wrongChainId() throws IOException {
+  private void setUp(final String genesis) {
     final NodeConfiguration nodeConfig =
-        new NodeConfigurationBuilder().withGenesis("eth_hash_4404.json").build();
+        new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig);
@@ -84,8 +83,11 @@ public class ReplayProtectionAcceptanceTest {
 
     ethNode.awaitStartupCompletion();
     ethSigner.awaitStartupCompletion();
+  }
 
-    // TODO --- completed setup ----
+  @Test
+  public void wrongChainId() throws IOException {
+    setUp("eth_hash_4404.json");
 
     final JsonRpcErrorResponse error =
         ethSigner
@@ -104,22 +106,7 @@ public class ReplayProtectionAcceptanceTest {
 
   @Test
   public void unnecessaryChainId() throws IOException {
-    final NodeConfiguration nodeConfig =
-        new NodeConfigurationBuilder()
-            .withGenesis("eth_hash_2018_no_replay_protection.json")
-            .build();
-    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
-
-    ethSigner = new Signer(signerConfig, nodeConfig);
-    ethNode = new PantheonNode(DOCKER, nodeConfig);
-
-    ethNode.start();
-    ethSigner.start();
-
-    ethNode.awaitStartupCompletion();
-    ethSigner.awaitStartupCompletion();
-
-    // TODO --- completed setup ----
+    setUp("eth_hash_2018_no_replay_protection.json");
 
     final JsonRpcErrorResponse error =
         ethSigner
