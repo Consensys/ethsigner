@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,5 +196,22 @@ public class CommandLineConfig implements Config {
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("commandLine", commandLine)
+        .add("logLevel", logLevel)
+        .add("passwordFilePath", passwordFilePath)
+        .add("keyFile", keyFile)
+        .add("downstreamHttpHost", downstreamHttpHost)
+        .add("downstreamHttpPort", downstreamHttpPort)
+        .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
+        .add("httpListenHost", httpListenHost)
+        .add("httpListenPort", httpListenPort)
+        .add("chainId", chainId)
+        .add("output", output)
+        .toString();
   }
 }

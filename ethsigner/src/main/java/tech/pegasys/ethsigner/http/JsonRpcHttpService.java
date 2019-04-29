@@ -111,6 +111,8 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private void handleJsonRpc(final RoutingContext context) {
     try {
+      LOG.trace("Request body = {}", context.getBodyAsString());
+
       final JsonObject requestJson = context.getBodyAsJson();
       final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
       final JsonRpcRequestHandler handler =
