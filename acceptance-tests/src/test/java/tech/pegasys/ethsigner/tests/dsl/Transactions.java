@@ -47,6 +47,7 @@ public class Transactions {
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
+      LOG.info("ClientConnectionException with message: " + e.getMessage());
       final String jsonBody = e.getMessage().substring(e.getMessage().indexOf("{"));
       return Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
     }
