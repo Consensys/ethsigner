@@ -170,6 +170,8 @@ public class PantheonNode implements Node {
               .withHostConfig(hostConfig)
               .withVolumes(genesisVolume)
               .withCmd(
+                  "--logging",
+                  "DEBUG",
                   "--miner-enabled",
                   "--miner-coinbase",
                   "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
