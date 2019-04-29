@@ -25,14 +25,13 @@ import tech.pegasys.ethsigner.tests.dsl.Account;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 // TODO remove when port allocation service is deployed on Jenins CI
-@Ignore
+
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
   @Test

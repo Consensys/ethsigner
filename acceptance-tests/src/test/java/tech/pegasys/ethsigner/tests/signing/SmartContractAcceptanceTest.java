@@ -24,12 +24,11 @@ import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 
 // TODO remove when port allocation service is deployed on Jenins CI
-@Ignore
+
 public class SmartContractAcceptanceTest extends AcceptanceTestBase {
 
   private static final String SIMPLE_STORAGE_BINARY = SimpleStorage.BINARY;
