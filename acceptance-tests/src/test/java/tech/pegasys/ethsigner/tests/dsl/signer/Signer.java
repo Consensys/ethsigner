@@ -44,26 +44,30 @@ public class Signer {
             new HttpService(signerConfig.url()),
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
-    this.transactions = new Transactions(jsonRpc);
+    this.transactions = new Transactions(this.jsonRpc);
   }
 
   public void start() {
     LOG.info("Starting EthSigner");
-    runner.start("EthSigner");
+    this.runner.start("EthSigner");
   }
 
   public void shutdown() {
     LOG.info("Shutting down EthSigner");
-    runner.shutdown();
+    this.runner.shutdown();
   }
 
   public Transactions transactions() {
-    return transactions;
+    return this.transactions;
+  }
+
+  public Web3j jsonRpc() {
+    return this.jsonRpc;
   }
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Pantheon to become responsive...");
-    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    waitFor(() -> assertThat(this.jsonRpc.ethBlockNumber().send().hasError()).isFalse());
     LOG.info("Pantheon is now responsive");
   }
 }

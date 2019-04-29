@@ -22,6 +22,8 @@ import org.junit.BeforeClass;
 
 public class AcceptanceTestBase {
 
+  public static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+
   private static Node ethNode;
   private static Signer ethSigner;
 
