@@ -19,14 +19,7 @@ public class SignerConfigurationBuilder {
 
   private static final String LOCALHOST = "127.0.0.1";
 
-  private String chainId = CHAIN_ID;
-
-  public SignerConfigurationBuilder withChainId(final String chainId) {
-    this.chainId = chainId;
-    return this;
-  }
-
   public SignerConfiguration build() {
-    return new SignerConfiguration(chainId, LOCALHOST);
+    return new SignerConfiguration(CHAIN_ID, LOCALHOST);
   }
 }
