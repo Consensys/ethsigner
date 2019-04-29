@@ -12,43 +12,18 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
-
-import java.net.URI;
-import java.util.Optional;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory;
 
-public class ConfigurationFactory {
+public class DockerClientFactory {
 
-  private static final String LOCALHOST = "127.0.0.1";
+  private final DefaultDockerClientConfig config;
 
-  private final DockerClient docker;
-  private final NodeConfiguration node;
-  private final SignerConfiguration signer;
-
-  public ConfigurationFactory() {
-    final DefaultDockerClientConfig config =
-        DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-
-    this.docker = createDockerClient(config);
-    this.node = nodeConfiguration(config);
-    this.signer = new SignerConfiguration(LOCALHOST);
-  }
-
-  private NodeConfiguration nodeConfiguration(final DefaultDockerClientConfig config) {
-    final String hostname = dockerHost(config).orElse(LOCALHOST);
-
-    return new NodeConfiguration(hostname);
-  }
-
-  private Optional<String> dockerHost(final DefaultDockerClientConfig config) {
-    return Optional.of(config.getDockerHost()).map(URI::getHost);
+  public DockerClientFactory() {
+    this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
   }
 
   private DockerClient createDockerClient(final DefaultDockerClientConfig config) {
@@ -64,15 +39,7 @@ public class ConfigurationFactory {
         .build();
   }
 
-  public DockerClient getDockerClient() {
-    return docker;
-  }
-
-  public NodeConfiguration getNodeConfiguration() {
-    return node;
-  }
-
-  public SignerConfiguration getSignerConfiguration() {
-    return signer;
+  public DockerClient create() {
+    return createDockerClient(config);
   }
 }

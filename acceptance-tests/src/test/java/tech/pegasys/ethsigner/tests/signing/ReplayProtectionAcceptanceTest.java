@@ -13,15 +13,67 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
+import tech.pegasys.ethsigner.tests.dsl.Account;
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.Node;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
+import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
+import com.github.dockerjava.api.DockerClient;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-// TODO don't use the default ATBase - need to setup Patheon & EthSigner with different chain Ids
-public class ReplayProtectionAcceptanceTest extends AcceptanceTestBase {
+public class ReplayProtectionAcceptanceTest {
+
+  private static Node ethNode;
+  private static Signer ethSigner;
+
+  private Account richBenefactor() {
+    return ethSigner.accounts().richBenefactor();
+  }
+
+  @BeforeClass
+  public static void setUpOnce() {
+    Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
+  }
+
+  @AfterClass
+  public static void tearDownOnce() {
+    if (ethNode != null) {
+      ethNode.shutdown();
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+  }
+
+  // TODO these should be elsewhere?
+  private void setupEthSigner(
+      final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+  }
+
+  private void setUpEthNode(final NodeConfiguration nodeConfig) {
+    final DockerClient docker = new DockerClientFactory().create();
+    ethNode = new PantheonNode(docker, nodeConfig);
+    ethNode.start();
+    ethNode.awaitStartupCompletion();
+  }
 
   @Test
   public void wrongChainId() {
     // TODO value transfer - expecting error
+
+    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
   }
 
   @Test
