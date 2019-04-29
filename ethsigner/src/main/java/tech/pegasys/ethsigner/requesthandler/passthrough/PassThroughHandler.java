@@ -37,6 +37,7 @@ public class PassThroughHandler extends JsonRpcRequestHandler {
 
   @Override
   public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest request) {
+    LOG.debug("Passing through request {}, {}", request.getId(), request.getMethod());
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
@@ -51,7 +52,6 @@ public class PassThroughHandler extends JsonRpcRequestHandler {
               proxiedResponse.bodyHandler(
                   data -> {
                     logResponseBody(data);
-
                     // End the sendRequest, preventing any other handler from executing
                     httpServerRequest.response().end(data);
                   });
