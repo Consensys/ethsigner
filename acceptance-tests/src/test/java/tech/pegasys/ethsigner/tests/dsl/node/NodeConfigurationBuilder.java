@@ -20,24 +20,28 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 public class NodeConfigurationBuilder {
 
   private static final String LOCALHOST = "127.0.0.1";
+  private static final String DEFAULT_GENESIS_FILE = "eth_hash_2018.json";
 
   private final DefaultDockerClientConfig config;
+  private String genesis;
 
   public NodeConfigurationBuilder() {
     this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-  }
-
-  private NodeConfiguration nodeConfiguration(final DefaultDockerClientConfig config) {
-    final String hostname = dockerHost(config).orElse(LOCALHOST);
-
-    return new NodeConfiguration(hostname);
+    this.genesis = DEFAULT_GENESIS_FILE;
   }
 
   private Optional<String> dockerHost(final DefaultDockerClientConfig config) {
     return Optional.of(config.getDockerHost()).map(URI::getHost);
   }
 
+  public NodeConfigurationBuilder withGenesis(final String genesisFile) {
+    this.genesis = genesisFile;
+    return this;
+  }
+
   public NodeConfiguration build() {
-    return nodeConfiguration(config);
+    final String hostname = dockerHost(config).orElse(LOCALHOST);
+
+    return new NodeConfiguration(genesis, hostname);
   }
 }

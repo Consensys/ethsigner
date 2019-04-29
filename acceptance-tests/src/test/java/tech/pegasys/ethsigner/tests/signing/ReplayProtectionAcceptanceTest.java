@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
@@ -47,20 +47,20 @@ public class ReplayProtectionAcceptanceTest {
   private static final BigInteger TRANSFER_AMOUNT_WEI =
       Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
 
-  private static Node ethNode;
-  private static Signer ethSigner;
+  private Node ethNode;
+  private Signer ethSigner;
 
   private Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
   }
 
-  @BeforeClass
-  public static void setUpOnce() {
+  @Before
+  public void setUp() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
   }
 
-  @AfterClass
-  public static void tearDownOnce() {
+  @After
+  public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
     }
@@ -72,9 +72,9 @@ public class ReplayProtectionAcceptanceTest {
 
   @Test
   public void wrongChainId() throws IOException {
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withChainId("901109").build();
+    final NodeConfiguration nodeConfig =
+        new NodeConfigurationBuilder().withGenesis("eth_hash_4404.json").build();
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig);
     ethNode = new PantheonNode(DOCKER, nodeConfig);
@@ -103,12 +103,36 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void missingChainId() {
-    // TODO value transfer - expecting error
-  }
+  public void unnecessaryChainId() throws IOException {
+    final NodeConfiguration nodeConfig =
+        new NodeConfigurationBuilder()
+            .withGenesis("eth_hash_2018_no_replay_protection.json")
+            .build();
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-  @Test
-  public void unecessaryChainId() {
-    // TODO value transfer - expecting error
+    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethNode = new PantheonNode(DOCKER, nodeConfig);
+
+    ethNode.start();
+    ethSigner.start();
+
+    ethNode.awaitStartupCompletion();
+    ethSigner.awaitStartupCompletion();
+
+    // TODO --- completed setup ----
+
+    final JsonRpcErrorResponse error =
+        ethSigner
+            .transactions()
+            .submitExceptional(
+                Transaction.createEtherTransaction(
+                    richBenefactor().address(),
+                    richBenefactor().getNextNonceAndIncrement(),
+                    GAS_PRICE,
+                    INTRINSIC_GAS,
+                    RECIPIENT,
+                    TRANSFER_AMOUNT_WEI));
+
+    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
   }
 }

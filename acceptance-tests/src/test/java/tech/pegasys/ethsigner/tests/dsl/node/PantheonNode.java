@@ -27,10 +27,13 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -151,14 +154,21 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    final HostConfig portBindingConfig =
-        HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
+    final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
+    @SuppressWarnings("unstable")
+    final Bind genesisBinding =
+        new Bind(Resources.getResource(config.getGenesisFile()).getPath(), genesisVolume);
+    final HostConfig hostConfig =
+        HostConfig.newHostConfig()
+            .withPortBindings(tcpPortBinding(config), wsPortBinding(config))
+            .withBinds(genesisBinding);
 
     try {
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
-              .withHostConfig(portBindingConfig)
+              .withHostConfig(hostConfig)
+              .withVolumes(genesisVolume)
               .withCmd(
                   "--miner-enabled",
                   "--miner-coinbase",
@@ -168,8 +178,7 @@ public class PantheonNode implements Node {
                   "--host-whitelist",
                   "*",
                   "--rpc-http-enabled",
-                  "--rpc-ws-enabled",
-                  "--network=dev");
+                  "--rpc-ws-enabled");
 
       LOG.info("Creating the Pantheon Docker image...");
       final CreateContainerResponse pantheon = createPantheon.exec();
