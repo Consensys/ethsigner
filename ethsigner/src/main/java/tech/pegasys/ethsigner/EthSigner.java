@@ -49,6 +49,9 @@ public final class EthSigner {
     System.out.println("Setting logging level to " + config.getLogLevel().name());
     Configurator.setAllLevels("", config.getLogLevel());
 
+    LOG.debug("Configuration = {}", config);
+    LOG.info("Version = {}, ", ApplicationInfo.version());
+
     Optional<String> password = readPasswordFromFile();
     if (!password.isPresent()) {
       LOG.error("Unable to extract password from supplied password file.");
