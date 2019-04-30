@@ -106,10 +106,10 @@ public class PantheonNode implements Node {
         final LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
         docker
             .logContainerCmd(pantheonContainerId)
+            .withTimestamps(true)
+            .withSince(0)
             .withStdErr(true)
             .withStdOut(true)
-            .withFollowStream(true)
-            .withTailAll()
             .exec(dockerLogs);
         LOG.debug("Docker logs -- START --");
         dockerLogs.awaitCompletion();
