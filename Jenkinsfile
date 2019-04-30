@@ -47,7 +47,7 @@ if (env.BRANCH_NAME != "master") {
 try {
     node {
     echo 'Testing lines =========== START ======='
-    echo $WORKSPACE
+    echo '$WORKSPACE'
     echo 'Testing lines =========== END ======='
         checkout scm
         docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v $WORKSPACE:$WORKSPACE') { d ->
