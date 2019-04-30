@@ -47,7 +47,7 @@ if (env.BRANCH_NAME != "master") {
 try {
     node {
         checkout scm
-        docker.image('docker:18.06.3-ce-dind').withRun('--privileged', '-v $WORKSPACE:/') { d ->
+        docker.image('docker:18.06.3-ce-dind').withRun('--privileged', '-v $WORKSPACE:/tmp') { d ->
             docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
                     stage('Build') {
