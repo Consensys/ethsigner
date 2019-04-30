@@ -68,7 +68,7 @@ public enum JsonRpcError {
   NODE_WHITELIST_BOOTNODE_CANNOT_BE_REMOVED(-32000, "Cannot remove a bootnode from whitelist"),
 
   // Transaction signing errors
-  SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "from parameter does match an unlocked account"),
+  SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "No unlocked account matches the Sender"),
 
   // Permissioning/persistence errors
   WHITELIST_PERSIST_FAILURE(
