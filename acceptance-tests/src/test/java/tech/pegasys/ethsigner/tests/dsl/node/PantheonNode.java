@@ -104,7 +104,13 @@ public class PantheonNode implements Node {
     } catch (final ConditionTimeoutException e) {
 
       LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
-      docker.logServiceCmd(pantheonContainerId).exec(dockerLogs);
+      docker
+          .logServiceCmd(pantheonContainerId)
+          .withDetails(true)
+          .withStdout(true)
+          .withStderr(true)
+          .withTimestamps(true)
+          .exec(dockerLogs);
 
       try {
         LOG.debug("Docker logs from startup failure -- START --");
