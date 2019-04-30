@@ -31,11 +31,13 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -91,13 +93,29 @@ public class PantheonNode implements Node {
 
   @Override
   public void awaitStartupCompletion() {
-    LOG.info("Waiting for Pantheon to become responsive...");
-    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
-    waitFor(
-        () ->
-            assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
-                .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
+    try {
+      LOG.info("Waiting for Pantheon to become responsive...");
+      waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+      LOG.info("Pantheon is now responsive");
+      waitFor(
+          () ->
+              assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
+                  .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
+    } catch (final ConditionTimeoutException e) {
+
+      LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
+      docker.logServiceCmd(pantheonContainerId).exec(dockerLogs);
+
+      try {
+        LOG.debug("Docker logs from startup failure -- START --");
+        dockerLogs.awaitCompletion();
+        LOG.debug("Docker logs from startup failure -- END --");
+      } catch (InterruptedException ex) {
+        LOG.error("Interrupted waiting for docker logs access", e);
+      }
+
+      throw new RuntimeException("Failed to start the Pantheon node");
+    }
   }
 
   @Override
