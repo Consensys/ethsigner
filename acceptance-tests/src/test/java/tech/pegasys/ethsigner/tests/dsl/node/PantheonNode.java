@@ -154,10 +154,11 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     @SuppressWarnings("unstable")
-    final Bind genesisBinding =
-        new Bind(Resources.getResource(config.getGenesisFile()).getPath(), genesisVolume);
+    final String genesis = Resources.getResource(config.getGenesisFile()).getPath();
+    LOG.info("Path to Genesis file {}", genesis);
+    final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
+    final Bind genesisBinding = new Bind(genesis, genesisVolume);
     final HostConfig hostConfig =
         HostConfig.newHostConfig()
             .withPortBindings(tcpPortBinding(config), wsPortBinding(config))
