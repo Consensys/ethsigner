@@ -10,23 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests;
+package tech.pegasys.ethsigner.tests.dsl.utils;
 
-import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
-import org.awaitility.Awaitility;
-import org.awaitility.core.ThrowingRunnable;
+public class ProgrammaticLogLevel {
 
-public class WaitUtils {
+  private static final Logger LOG = LogManager.getLogger();
 
-  public static void waitFor(final ThrowingRunnable condition) {
-    waitFor(30, condition);
-  }
-
-  public static void waitFor(final int timeoutSeconds, final ThrowingRunnable condition) {
-    Awaitility.await()
-        .ignoreExceptions()
-        .atMost(timeoutSeconds, TimeUnit.SECONDS)
-        .untilAsserted(condition);
+  public static void setLogLevelToDebug() {
+    LOG.info("Setting logging level to " + Level.DEBUG);
+    Configurator.setAllLevels("", Level.DEBUG);
   }
 }

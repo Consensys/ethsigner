@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.dsl.Accounts.RICH_BENEFACTOR;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -38,8 +37,8 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            RICH_BENEFACTOR.address(),
-            RICH_BENEFACTOR.getNextNonceAndIncrement(),
+            richBenefactor().address(),
+            richBenefactor().getNextNonceAndIncrement(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipient,
@@ -49,8 +48,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     ethNode().transactions().awaitBlockContaining(hash);
 
-    final BigInteger endBalance =
-        ethNode().accounts().balance(recipient, ethNode().transactions().blockContaining(hash));
+    final BigInteger endBalance = ethNode().accounts().balance(recipient);
 
     assertThat(endBalance)
         .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));

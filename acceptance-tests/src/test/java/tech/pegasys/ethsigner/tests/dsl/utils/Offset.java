@@ -10,32 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl;
+package tech.pegasys.ethsigner.tests.dsl.utils;
 
 import java.math.BigInteger;
 
-public class Account {
+public class Offset {
 
-  private final String address;
-  private BigInteger nonce = BigInteger.ZERO;
-
-  public Account(final String address) {
-    this.address = address;
-  }
-
-  public String address() {
-    return address;
-  }
-
-  public BigInteger getNextNonce() {
-    return nonce;
-  }
-
-  public BigInteger getNextNonceAndIncrement() {
-
-    final BigInteger next = nonce;
-    nonce = nonce.add(BigInteger.ONE);
-
-    return next;
-  }
+  public static final org.assertj.core.data.Offset<BigInteger> NO_OFFSET =
+      org.assertj.core.data.Offset.offset(BigInteger.ZERO);
 }

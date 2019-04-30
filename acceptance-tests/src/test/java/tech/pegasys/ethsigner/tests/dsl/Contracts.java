@@ -13,44 +13,36 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.dsl.utils.WaitUtils.waitFor;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-
 import java.io.IOException;
+import java.math.BigInteger;
 
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.exceptions.ClientConnectionException;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class Transactions {
+public class Contracts {
+
+  public static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
+  public static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final Eth eth;
+  private final Web3j jsonRpc;
 
-  public Transactions(final Eth eth) {
+  public Contracts(final Eth eth, final Web3j jsonRpc) {
     this.eth = eth;
+    this.jsonRpc = jsonRpc;
   }
 
-  public String submit(final Transaction transaction) throws IOException {
-    return eth.sendTransaction(transaction);
-  }
-
-  public JsonRpcErrorResponse submitExceptional(final Transaction transaction) throws IOException {
-    try {
-      eth.sendTransaction(transaction);
-      fail("Expecting exceptional response ");
-      return null;
-    } catch (final ClientConnectionException e) {
-      LOG.info("ClientConnectionException with message: " + e.getMessage());
-      final String jsonBody = e.getMessage().substring(e.getMessage().indexOf("{"));
-      return Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
-    }
+  public String submit(final Transaction smartContract) throws IOException {
+    return eth.sendTransaction(smartContract);
   }
 
   public void awaitBlockContaining(final String hash) {
@@ -58,7 +50,27 @@ public class Transactions {
       waitFor(() -> assertThat(eth.getTransactionReceipt(hash).isPresent()).isTrue());
     } catch (final ConditionTimeoutException e) {
       LOG.error("Timed out waiting for a block containing the transaction receipt hash: " + hash);
-      throw new RuntimeException("No receipt found for hash: " + hash);
     }
+  }
+
+  public String address(final String hash) throws IOException {
+    final TransactionReceipt receipt =
+        eth.getTransactionReceipt(hash)
+            .orElseThrow(() -> new RuntimeException("No receipt found for hash: " + hash));
+    assertThat(receipt.getContractAddress()).isNotEmpty();
+    return receipt.getContractAddress();
+  }
+
+  public String code(final String address) throws IOException {
+    final String code = eth.getCode(address);
+    assertThat(code).isNotEmpty();
+    return code;
+  }
+
+  public String call(final Transaction contractViewOperation) throws IOException {
+    return jsonRpc
+        .ethCall(contractViewOperation, DefaultBlockParameter.valueOf("latest"))
+        .send()
+        .getValue();
   }
 }

@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.dsl.node;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 public interface Node {
@@ -24,6 +25,8 @@ public interface Node {
   void awaitStartupCompletion();
 
   Accounts accounts();
+
+  Contracts contracts();
 
   Transactions transactions();
 }

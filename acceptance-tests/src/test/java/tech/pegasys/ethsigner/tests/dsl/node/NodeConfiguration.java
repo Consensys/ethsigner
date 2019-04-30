@@ -17,14 +17,16 @@ import java.time.Duration;
 public class NodeConfiguration {
 
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
-  private static final int TCP_PORT = 8545;
-  private static final int WS_PORT = 8546;
+  private static final int TCP_PORT = 8547;
+  private static final int WS_PORT = 8548;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
+  private final String genesisFile;
 
-  public NodeConfiguration(final String hostname) {
+  public NodeConfiguration(final String genesisFile, final String hostname) {
     this.hostname = hostname;
+    this.genesisFile = genesisFile;
   }
 
   public String getHostname() {
@@ -45,5 +47,9 @@ public class NodeConfiguration {
 
   public String getDownstreamUrl() {
     return String.format(HTTP_URL_FORMAT, getHostname(), getTcpPort());
+  }
+
+  public String getGenesisFile() {
+    return genesisFile;
   }
 }
