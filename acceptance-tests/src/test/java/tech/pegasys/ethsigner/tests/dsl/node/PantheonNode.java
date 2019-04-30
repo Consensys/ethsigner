@@ -101,17 +101,16 @@ public class PantheonNode implements Node {
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
-      final LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
-      docker
-          .logContainerCmd(pantheonContainerId)
-          .withStdErr(true)
-          .withStdOut(true)
-          .withFollowStream(true)
-          .withTailAll()
-          .exec(dockerLogs);
-
       try {
         LOG.info("Docker logs for container {}", pantheonContainerId);
+        final LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
+        docker
+            .logContainerCmd(pantheonContainerId)
+            .withStdErr(true)
+            .withStdOut(true)
+            .withFollowStream(true)
+            .withTailAll()
+            .exec(dockerLogs);
         LOG.debug("Docker logs -- START --");
         dockerLogs.awaitCompletion();
         LOG.debug("Docker logs -- END --");
