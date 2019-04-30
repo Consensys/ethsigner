@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.tests;
 
-import static tech.pegasys.ethsigner.tests.dsl.utils.ProgrammaticLogLevel.setLogLevelToDebug;
-
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -48,7 +46,6 @@ public class AcceptanceTestBase {
   @BeforeClass
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
-    setLogLevelToDebug();
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

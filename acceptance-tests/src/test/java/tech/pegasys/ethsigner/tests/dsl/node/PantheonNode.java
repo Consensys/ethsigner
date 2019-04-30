@@ -31,7 +31,6 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Volume;
-import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.google.common.io.Resources;
@@ -101,24 +100,7 @@ public class PantheonNode implements Node {
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
-      try {
-        LOG.info("Docker logs for container {}", pantheonContainerId);
-        final LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
-        docker
-            .logContainerCmd(pantheonContainerId)
-            .withFollowStream(true)
-            .withTail(1000)
-            .withSince(0)
-            .withStdErr(true)
-            .exec(dockerLogs);
-        LOG.debug("Docker logs -- START --");
-        dockerLogs.awaitCompletion();
-        LOG.debug("Docker logs -- END --");
-      } catch (InterruptedException ex) {
-        LOG.error("Interrupted waiting for docker logs access", e);
-      }
-
-      throw new RuntimeException("Failed to start the Pantheon node");
+      throw new RuntimeException("Failed to start the Pantheon node", e);
     }
   }
 

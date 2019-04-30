@@ -14,6 +14,7 @@
 dependencies {
 
   testRuntime 'javax.activation:activation'
+  testRuntime 'org.apache.logging.log4j:log4j-core'
 
   testImplementation project(':ethsigner')
 
@@ -23,7 +24,6 @@ dependencies {
   testImplementation 'org.web3j:core'
   testImplementation 'org.web3j:crypto'
   testImplementation 'org.apache.logging.log4j:log4j-api'
-  testImplementation 'org.apache.logging.log4j:log4j-core'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.awaitility:awaitility'
 }
