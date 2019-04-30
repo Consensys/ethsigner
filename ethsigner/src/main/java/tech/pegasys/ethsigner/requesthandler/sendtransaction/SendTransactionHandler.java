@@ -12,8 +12,9 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import static io.netty.handler.codec.rtsp.RtspResponseStatuses.GATEWAY_TIMEOUT;
-import static io.netty.handler.codec.rtsp.RtspResponseStatuses.INTERNAL_SERVER_ERROR;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
@@ -62,11 +63,11 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       params = SendTransactionJsonParameters.from(request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
-      routingContext.fail(new JsonRpcException(INVALID_PARAMS));
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
-      routingContext.fail(new JsonRpcException(INVALID_PARAMS));
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
 
@@ -75,7 +76,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           serialiser.getAddress());
-      routingContext.fail(new JsonRpcException(INVALID_PARAMS));
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
 
