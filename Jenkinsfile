@@ -4,6 +4,10 @@ import hudson.model.Result
 import hudson.model.Run
 import jenkins.model.CauseOfInterruption.UserInterruption
 
+echo 'Testing lines =========== START ======='
+echo $WORKSPACE
+echo 'Testing lines =========== END ======='
+
 if (env.BRANCH_NAME == "master") {
     properties([
         buildDiscarder(
