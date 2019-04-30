@@ -45,7 +45,7 @@ public class NodeConfiguration {
     return POLLING_INTERVAL;
   }
 
-  public String getDownstreamUrl() {
+  public String getUrl() {
     return String.format(HTTP_URL_FORMAT, getHostname(), getTcpPort());
   }
 

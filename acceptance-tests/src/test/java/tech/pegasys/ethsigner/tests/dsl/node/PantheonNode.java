@@ -58,11 +58,11 @@ public class PantheonNode implements Node {
   private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
-    LOG.info("Pantheon Web3j service targeting: {} ", config.getDownstreamUrl());
+    LOG.info("Pantheon Web3j service targeting: {} ", config.getUrl());
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(config.getDownstreamUrl()),
+            new HttpService(config.getUrl()),
             config.getPollingInterval().toMillis(),
             Async.defaultExecutorService());
 
