@@ -17,8 +17,14 @@ import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 
+import java.io.IOException;
+import java.math.BigInteger;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
 public class AcceptanceTestBase {
 
@@ -59,5 +65,15 @@ public class AcceptanceTestBase {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
+  }
+
+  public BigInteger getNonceForAddress(final String address) throws IOException {
+    final Request<?, EthGetTransactionCount> ethGetTransactionCountRequest =
+        ethSigner().jsonRpc().ethGetTransactionCount(address, DefaultBlockParameterName.LATEST);
+    final EthGetTransactionCount ethGetTransactionCount = ethGetTransactionCountRequest.send();
+
+    final BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+
+    return nonce;
   }
 }

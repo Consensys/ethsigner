@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.exceptions.ClientConnectionException;
@@ -42,7 +41,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             RICH_BENEFACTOR.address(),
-            RICH_BENEFACTOR.getNextNonceAndIncrement(),
+            getNonceForAddress(RICH_BENEFACTOR.address()),
             GAS_PRICE,
             INTRINSIC_GAS,
             RECIPIENT,
@@ -55,8 +54,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     final BigInteger endBalance =
         ethNode().accounts().balance(RECIPIENT, ethNode().transactions().blockContaining(hash));
 
-    assertThat(endBalance)
-        .isCloseTo(startBalance.add(transferAmountWei), Offset.offset(BigInteger.ONE));
+    assertThat(endBalance).isEqualByComparingTo(startBalance.add(transferAmountWei));
   }
 
   @Test
@@ -64,20 +62,20 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     final BigInteger transferAmountWei = Convert.toWei("1", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
 
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            RICH_BENEFACTOR.address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
     String hash = null;
     for (int i = 0; i < NO_OF_TRANSACTIONS; i++) {
-      final Transaction transaction =
-              Transaction.createEtherTransaction(
-                      RICH_BENEFACTOR.address(),
-                      RICH_BENEFACTOR.getNextNonceAndIncrement(),
-                      GAS_PRICE,
-                      INTRINSIC_GAS,
-                      RECIPIENT,
-                      transferAmountWei);
+
       hash = ethSigner().transactions().submit(transaction);
     }
-
-
 
     ethNode().transactions().awaitBlockContaining(hash);
 
@@ -86,9 +84,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger numberOfTransactions = BigInteger.valueOf(NO_OF_TRANSACTIONS);
     assertThat(endBalance)
-        .isCloseTo(
-            startBalance.add(transferAmountWei.multiply(numberOfTransactions)),
-            Offset.offset(BigInteger.ONE));
+        .isEqualByComparingTo(startBalance.add(transferAmountWei.multiply(numberOfTransactions)));
   }
 
   @Test
@@ -101,8 +97,7 @@ public class SignTransactionAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             RICH_BENEFACTOR.address(),
-            RICH_BENEFACTOR
-                .getNextNonceAndIncrement()
+            getNonceForAddress(RICH_BENEFACTOR.address())
                 .subtract(BigInteger.ONE), // same nonce as last tx
             GAS_PRICE,
             INTRINSIC_GAS,

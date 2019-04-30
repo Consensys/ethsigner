@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.assertj.core.data.Offset;
 import org.junit.Test;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Request;
@@ -31,7 +30,6 @@ import org.web3j.protocol.core.methods.response.EthAccounts;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.utils.Convert;
-import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 public class RequestsAcceptanceTest extends AcceptanceTestBase {
 
@@ -44,8 +42,7 @@ public class RequestsAcceptanceTest extends AcceptanceTestBase {
 
     final EthAccounts ethAccountsRequest = ethSigner().jsonRpc().ethAccounts().send();
 
-    assertThat(ethAccountsRequest.getAccounts().size() == 1)
-        .isTrue(); // we only have one private key
+    assertThat(ethAccountsRequest.getAccounts()).hasSize(1);
     final String account = ethAccountsRequest.getAccounts().get(0);
     assertThat(ethNode().accounts().balance(account)).isNotNull();
   }
@@ -85,8 +82,7 @@ public class RequestsAcceptanceTest extends AcceptanceTestBase {
     ethGetBalance = ethGetBalanceRequest.send();
     final BigInteger endBalance = ethGetBalance.getBalance();
 
-    assertThat(endBalance)
-        .isCloseTo(startBalance.add(TRANSFER_AMOUNT_WEI), Offset.offset(BigInteger.ONE));
+    assertThat(endBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
   }
 
   void submitTransactionAndWaitForBlock() throws IOException {
