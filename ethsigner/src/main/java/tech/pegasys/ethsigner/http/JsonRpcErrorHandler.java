@@ -21,8 +21,9 @@ import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 
+import java.util.Optional;
+
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
@@ -39,18 +40,34 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-    final JsonRpcError jsonRpcError = jsonRpcError(context);
-    final JsonRpcRequestId rpcRequestId = jsonRpcId(context);
-    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(rpcRequestId, jsonRpcError);
+    final Optional<JsonRpcRequest> jsonRpcRequest = jsonRpcRequest(context);
+    final JsonRpcErrorResponse errorResponse = errorResponse(context, jsonRpcRequest);
     final int statusCode = context.statusCode() == -1 ? BAD_REQUEST.code() : context.statusCode();
-    final HttpServerRequest httpServerRequest = context.request();
+    final String body = jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString());
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
-        httpServerRequest.method(),
-        httpServerRequest.absoluteURI(),
-        Json.encodePrettily(httpServerRequest),
+        context.request().method(),
+        context.request().absoluteURI(),
+        body,
         Json.encode(errorResponse));
     httpResponseFactory.create(context.request(), statusCode, errorResponse);
+  }
+
+  private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {
+    try {
+      return Optional.of(Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class));
+    } catch (DecodeException e) {
+      LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
+      return Optional.empty();
+    }
+  }
+
+  private JsonRpcErrorResponse errorResponse(
+      final RoutingContext context, final Optional<JsonRpcRequest> jsonRpcRequest) {
+    final JsonRpcRequestId rpcRequestId =
+        jsonRpcRequest.map(JsonRpcRequest::getId).orElse(new JsonRpcRequestId(null));
+    final JsonRpcError jsonRpcError = jsonRpcError(context);
+    return new JsonRpcErrorResponse(rpcRequestId, jsonRpcError);
   }
 
   private JsonRpcError jsonRpcError(final RoutingContext context) {
@@ -59,16 +76,5 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       return jsonRpcException.getJsonRpcError();
     }
     return INTERNAL_ERROR;
-  }
-
-  private JsonRpcRequestId jsonRpcId(final RoutingContext context) {
-    try {
-      final JsonRpcRequest jsonRpcRequest =
-          Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class);
-      return jsonRpcRequest.getId();
-    } catch (DecodeException e) {
-      LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
-      return new JsonRpcRequestId(null);
-    }
   }
 }
