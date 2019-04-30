@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 
 public class Accounts {
 
@@ -43,9 +43,6 @@ public class Accounts {
   }
 
   public BigInteger balance(final String account) throws IOException {
-    return jsonRpc
-        .ethGetBalance(account, DefaultBlockParameter.valueOf("latest"))
-        .send()
-        .getBalance();
+    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
   }
 }
