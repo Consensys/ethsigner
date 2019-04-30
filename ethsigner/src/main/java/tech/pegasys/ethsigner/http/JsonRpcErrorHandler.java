@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.http;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.rtsp.RtspResponseStatuses.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
@@ -42,7 +42,8 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext context) {
     final Optional<JsonRpcRequest> jsonRpcRequest = jsonRpcRequest(context);
     final JsonRpcErrorResponse errorResponse = errorResponse(context, jsonRpcRequest);
-    final int statusCode = context.statusCode() == -1 ? BAD_REQUEST.code() : context.statusCode();
+    final int statusCode =
+        context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
     final String body = jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString());
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
