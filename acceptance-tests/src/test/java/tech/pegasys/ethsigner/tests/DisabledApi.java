@@ -12,8 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 
@@ -31,17 +33,43 @@ public class DisabledApi extends AcceptanceTestBase {
   private volatile HttpClientResponse response = null;
 
   @Test
-  public void sendDisabledApiTimesOut() throws InterruptedException {
-    LOG.info("Starting Test");
+  public void sendDisabledApiReturnsBadRequest() throws InterruptedException {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "ibft_getPendingVotes", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
-    ethSigner().sendRawJsonRpc(Json.encodeToBuffer(request), response -> this.response = response);
+    ethSigner().sendRawJsonRpc(
+        Collections.emptyMap(), Json.encodeToBuffer(request), response -> this.response = response);
     // WHY is this timeout SOOOOoo long?!
     WaitUtils.waitFor(6, this::responseAvailable);
 
     assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
   }
+
+  @Test
+  public void unrecognisedJsonRpcMethodReturnsBadRequest() throws InterruptedException {
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "invalidJsonRpcMethod", new String[0]);
+    request.setId(new JsonRpcRequestId(1));
+
+    ethSigner().sendRawJsonRpc(
+        Collections.emptyMap(), Json.encodeToBuffer(request), response -> this.response = response);
+    // WHY is this timeout SOOOOoo long?!
+    WaitUtils.waitFor(6, this::responseAvailable);
+
+    assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
+  }
+
+
+  @Test
+  public void invalidCorsRequestReportsA403() {
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_blockNumber", new String[0]);
+    ethSigner().sendRawJsonRpc(singletonMap("origin", "google.com"), Json.encodeToBuffer(request),
+        response -> this.response = response);
+
+    WaitUtils.waitFor(6, this::responseAvailable);
+
+    assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.FORBIDDEN.code());
+  }
+
 
   private void responseAvailable() {
     if (response == null) {
