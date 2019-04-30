@@ -55,7 +55,7 @@ public class ReplayProtectionAcceptanceTest {
 
   @Before
   public void setUp() {
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> this.tearDown()));
+    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
   }
 
   @After
