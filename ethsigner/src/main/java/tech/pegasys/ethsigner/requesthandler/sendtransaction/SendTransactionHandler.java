@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
+import static io.netty.handler.codec.rtsp.RtspResponseStatuses.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.rtsp.RtspResponseStatuses.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
@@ -22,6 +24,10 @@ import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -76,8 +82,12 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     try {
       sendTransaction(params, routingContext.request(), request);
     } catch (final RuntimeException e) {
+      final HttpResponseStatus responseStatus =
+          e.getCause() instanceof SocketException || e.getCause() instanceof SocketTimeoutException
+              ? GATEWAY_TIMEOUT
+              : INTERNAL_SERVER_ERROR;
       LOG.info("Unable to get nonce from web3j provider.");
-      routingContext.fail(new JsonRpcException(INTERNAL_ERROR));
+      routingContext.fail(responseStatus.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
