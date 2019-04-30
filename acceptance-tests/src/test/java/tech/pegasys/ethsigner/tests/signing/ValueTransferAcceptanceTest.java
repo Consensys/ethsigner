@@ -58,7 +58,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final String recipientAddress = "0x1b11ba11ca11bb11aa11bc11be11ac11ca11da11";
     final BigInteger senderStartBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
-    final BigInteger transferAmountWei = senderStartBalance.multiply(BigInteger.TEN);
+    final BigInteger transferAmountWei = senderStartBalance.add(BigInteger.ONE);
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
