@@ -1,5 +1,9 @@
 #!/usr/bin/env groovy
 
+import hudson.model.Result
+import hudson.model.Run
+import jenkins.model.CauseOfInterruption.UserInterruption
+
 if (env.BRANCH_NAME == "master") {
     properties([
         buildDiscarder(
@@ -18,10 +22,32 @@ if (env.BRANCH_NAME == "master") {
     ])
 }
 
+def abortPreviousBuilds() {
+    Run previousBuild = currentBuild.rawBuild.getPreviousBuildInProgress()
+
+    while (previousBuild != null) {
+        if (previousBuild.isInProgress()) {
+            def executor = previousBuild.getExecutor()
+            if (executor != null) {
+                echo ">> Aborting older build #${previousBuild.number}"
+                executor.interrupt(Result.ABORTED, new UserInterruption(
+                    "Aborted by newer build #${currentBuild.number}"
+                ))
+            }
+        }
+
+        previousBuild = previousBuild.getPreviousBuildInProgress()
+    }
+}
+
+if (env.BRANCH_NAME != "master") {
+    abortPreviousBuilds()
+}
+
 try {
     node {
         checkout scm
-        docker.image('docker:18.06.3-ce-dind').withRun('--privileged') { d ->
+        docker.image('docker:18.06.3-ce-dind').withRun('--privileged', '-v $WORKSPACE:/tmp') { d ->
             docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
                     stage('Build') {
@@ -34,7 +60,7 @@ try {
                         sh './gradlew --no-daemon --parallel integrationTest'
                     }
                     stage('Acceptance Test') {
-                        sh './gradlew --no-daemon --max-workers=1 acceptanceTest'
+                        sh './gradlew --no-daemon --parallel --max-workers=1 acceptanceTest'
                     }
                 } finally {
                     archiveArtifacts '**/build/reports/**'
