@@ -22,11 +22,11 @@ public class NodeConfiguration {
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
-  private final String genesisFile;
+  private final String genesisFilePath;
 
-  public NodeConfiguration(final String genesisFile, final String hostname) {
+  public NodeConfiguration(final String genesisFilePath, final String hostname) {
     this.hostname = hostname;
-    this.genesisFile = genesisFile;
+    this.genesisFilePath = genesisFilePath;
   }
 
   public String getHostname() {
@@ -49,7 +49,7 @@ public class NodeConfiguration {
     return String.format(HTTP_URL_FORMAT, getHostname(), getTcpPort());
   }
 
-  public String getGenesisFile() {
-    return genesisFile;
+  public String getGenesisFilePath() {
+    return genesisFilePath;
   }
 }
