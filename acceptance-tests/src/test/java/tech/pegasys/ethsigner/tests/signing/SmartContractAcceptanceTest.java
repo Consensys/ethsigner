@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_LIMIT;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.utils.Hex.hex;
-import static tech.pegasys.ethsigner.tests.dsl.utils.Offset.NO_OFFSET;
 
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
@@ -90,6 +89,6 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
         Transaction.createEthCallTransaction(
             richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
     final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
-    assertThat(endValue).isCloseTo(startingValue.add(BigInteger.valueOf(7)), NO_OFFSET);
+    assertThat(endValue).isEqualTo(startingValue.add(BigInteger.valueOf(7)));
   }
 }

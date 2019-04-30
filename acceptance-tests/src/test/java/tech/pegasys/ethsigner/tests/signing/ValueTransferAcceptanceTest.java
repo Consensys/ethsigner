@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-import static tech.pegasys.ethsigner.tests.dsl.utils.Offset.NO_OFFSET;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
@@ -51,7 +50,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
     final BigInteger actualEndBalance = ethNode().accounts().balance(recipient);
-    assertThat(actualEndBalance).isCloseTo(expectedEndBalance, NO_OFFSET);
+    assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
   }
 
   @Test
@@ -74,8 +73,8 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
-    assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
-    assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
+    assertThat(senderEndBalance).isEqualTo(senderStartBalance);
+    assertThat(recipientEndBalance).isEqualTo(recipientStartBalance);
   }
 
   @Test
@@ -98,7 +97,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
-    assertThat(senderEndBalance).isCloseTo(senderStartBalance, NO_OFFSET);
-    assertThat(recipientEndBalance).isCloseTo(recipientStartBalance, NO_OFFSET);
+    assertThat(senderEndBalance).isEqualTo(senderStartBalance);
+    assertThat(recipientEndBalance).isEqualTo(recipientStartBalance);
   }
 }
