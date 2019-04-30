@@ -15,9 +15,10 @@ package tech.pegasys.ethsigner.tests;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
+
+import java.util.Collections;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClientResponse;
@@ -33,47 +34,46 @@ public class DisabledApi extends AcceptanceTestBase {
   private volatile HttpClientResponse response = null;
 
   @Test
-  public void sendDisabledApiReturnsBadRequest() throws InterruptedException {
+  public void sendDisabledApiReturnsBadRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "ibft_getPendingVotes", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
-    ethSigner().sendRawJsonRpc(
-        Collections.emptyMap(), Json.encodeToBuffer(request), response -> this.response = response);
-    // WHY is this timeout SOOOOoo long?!
-    WaitUtils.waitFor(6, this::responseAvailable);
+    ethSigner()
+        .sendRawJsonRpc(
+            Collections.emptyMap(),
+            Json.encodeToBuffer(request),
+            response -> this.response = response);
 
-    assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
+    WaitUtils.waitFor(
+        1,
+        () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
   }
 
   @Test
-  public void unrecognisedJsonRpcMethodReturnsBadRequest() throws InterruptedException {
+  public void unrecognisedJsonRpcMethodReturnsBadRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "invalidJsonRpcMethod", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
-    ethSigner().sendRawJsonRpc(
-        Collections.emptyMap(), Json.encodeToBuffer(request), response -> this.response = response);
-    // WHY is this timeout SOOOOoo long?!
-    WaitUtils.waitFor(6, this::responseAvailable);
-
-    assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
+    ethSigner()
+        .sendRawJsonRpc(
+            Collections.emptyMap(),
+            Json.encodeToBuffer(request),
+            response -> this.response = response);
+    WaitUtils.waitFor(
+        1,
+        () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
   }
-
 
   @Test
   public void invalidCorsRequestReportsA403() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_blockNumber", new String[0]);
-    ethSigner().sendRawJsonRpc(singletonMap("origin", "google.com"), Json.encodeToBuffer(request),
-        response -> this.response = response);
+    ethSigner()
+        .sendRawJsonRpc(
+            singletonMap("origin", "google.com"),
+            Json.encodeToBuffer(request),
+            response -> this.response = response);
 
-    WaitUtils.waitFor(6, this::responseAvailable);
-
-    assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.FORBIDDEN.code());
-  }
-
-
-  private void responseAvailable() {
-    if (response == null) {
-      throw new RuntimeException("Response not yet available");
-    }
+    WaitUtils.waitFor(
+        1, () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.FORBIDDEN.code()));
   }
 }

@@ -16,11 +16,12 @@ import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.Handler;
@@ -91,11 +92,13 @@ public class Signer {
     LOG.info("Signer is now responsive");
   }
 
-  public void sendRawJsonRpc(final Map<String, String> additionalHeaders, final Buffer body,
+  public void sendRawJsonRpc(
+      final Map<String, String> additionalHeaders,
+      final Buffer body,
       final Handler<HttpClientResponse> callback) {
     final HttpClientRequest request = client.request(POST, downstreamUrl, callback);
     request.putHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
-    for(final Entry<String, String> header: additionalHeaders.entrySet()) {
+    for (final Entry<String, String> header : additionalHeaders.entrySet()) {
       request.putHeader(header.getKey(), header.getValue());
     }
     request.setChunked(false);
