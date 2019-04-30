@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -56,7 +55,7 @@ public class ReplayProtectionAcceptanceTest {
 
   @Before
   public void setUp() {
-    Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> this.tearDown()));
   }
 
   @After
