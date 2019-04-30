@@ -59,8 +59,7 @@ public class PantheonNode implements Node {
   private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
-
-    LOG.info("Pantheon Web3j service targeting: " + config.getDownstreamUrl());
+    LOG.info("Pantheon Web3j service targeting: {} ", config.getDownstreamUrl());
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
@@ -79,7 +78,7 @@ public class PantheonNode implements Node {
 
   @Override
   public void start() {
-    LOG.info("Starting Pantheon Docker container: " + pantheonContainerId);
+    LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
   }
 
@@ -102,8 +101,7 @@ public class PantheonNode implements Node {
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
-
-      LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
+      final LogContainerResultCallback dockerLogs = new LogContainerResultCallback();
       docker
           .logContainerCmd(pantheonContainerId)
           .withStdErr(true)
@@ -113,9 +111,10 @@ public class PantheonNode implements Node {
           .exec(dockerLogs);
 
       try {
-        LOG.debug("Docker logs from startup failure -- START --");
+        LOG.info("Docker logs for container {}", pantheonContainerId);
+        LOG.debug("Docker logs -- START --");
         dockerLogs.awaitCompletion();
-        LOG.debug("Docker logs from startup failure -- END --");
+        LOG.debug("Docker logs -- END --");
       } catch (InterruptedException ex) {
         LOG.error("Interrupted waiting for docker logs access", e);
       }

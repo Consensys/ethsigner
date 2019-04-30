@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ProgrammaticLogLevel.setLogLevelToDebug;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
@@ -57,6 +58,7 @@ public class ReplayProtectionAcceptanceTest {
   @Before
   public void setUp() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
+    setLogLevelToDebug();
   }
 
   @After
