@@ -27,14 +27,11 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
-import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -177,8 +174,7 @@ public class PantheonNode implements Node {
 
   private String createPantheonContainer(final NodeConfiguration config) {
     final HostConfig hostConfig =
-        HostConfig.newHostConfig()
-            .withPortBindings(tcpPortBinding(config), wsPortBinding(config));
+        HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
 
     try {
       final CreateContainerCmd createPantheon =
