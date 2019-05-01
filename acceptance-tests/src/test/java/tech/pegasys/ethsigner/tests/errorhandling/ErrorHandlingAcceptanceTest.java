@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.tests.errorhandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -69,7 +69,7 @@ public class ErrorHandlingAcceptanceTest {
     SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(HttpResponseStatus.GATEWAY_TIMEOUT);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INTERNAL_ERROR);
+    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
   }
 
   @Test
@@ -89,6 +89,6 @@ public class ErrorHandlingAcceptanceTest {
     SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(HttpResponseStatus.GATEWAY_TIMEOUT);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INTERNAL_ERROR);
+    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
   }
 }

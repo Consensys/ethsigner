@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
@@ -29,7 +29,6 @@ import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -85,12 +84,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     try {
       sendTransaction(params, context.request(), request);
     } catch (final RuntimeException e) {
-      final HttpResponseStatus responseStatus =
-          e.getCause() instanceof SocketException || e.getCause() instanceof SocketTimeoutException
-              ? GATEWAY_TIMEOUT
-              : INTERNAL_SERVER_ERROR;
       LOG.info("Unable to get nonce from web3j provider.");
-      context.fail(responseStatus.code(), new JsonRpcException(INTERNAL_ERROR));
+      final Throwable cause = e.getCause();
+      if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
+        context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(DOWNSTREAM_NODE_TIMED_OUT));
+      } else {
+        context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
+      }
     }
   }
 
