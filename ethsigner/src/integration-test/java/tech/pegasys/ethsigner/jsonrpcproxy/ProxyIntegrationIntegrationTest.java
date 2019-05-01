@@ -12,19 +12,12 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_REQUEST;
-
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.Test;
-import org.mockserver.model.Delay;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
@@ -59,23 +52,6 @@ public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
     sendRequestThenVerifyResponse(
         request.ethSigner(ethProtocolVersionRequest),
         response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND));
-
-    verifyEthNodeReceived(ethProtocolVersionRequest);
-  }
-
-  @Test
-  public void requestTimingOutReturnsGatewayTimeoutError() {
-    final String ethProtocolVersionRequest = Json.encode(jsonRpc().ethProtocolVersion());
-    final String jsonRpcErrorResponse = Json.encode(new JsonRpcErrorResponse(0, INTERNAL_ERROR));
-
-    setUpEthNodeResponse(
-        request.ethNode(ethProtocolVersionRequest),
-        response.ethNode(INVALID_REQUEST),
-        new Delay(SECONDS, 2));
-
-    sendRequestThenVerifyResponse(
-        request.ethSigner(ethProtocolVersionRequest),
-        response.ethSigner(jsonRpcErrorResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
 
     verifyEthNodeReceived(ethProtocolVersionRequest);
   }
