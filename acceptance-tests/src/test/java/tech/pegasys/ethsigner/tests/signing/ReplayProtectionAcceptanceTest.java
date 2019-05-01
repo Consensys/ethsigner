@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
+import io.vertx.core.Vertx;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,8 +74,9 @@ public class ReplayProtectionAcceptanceTest {
     final NodeConfiguration nodeConfig =
         new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
+    final Vertx vertx = Vertx.vertx();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethSigner = new Signer(signerConfig, nodeConfig, vertx);
     ethNode = new PantheonNode(DOCKER, nodeConfig);
 
     ethNode.start();

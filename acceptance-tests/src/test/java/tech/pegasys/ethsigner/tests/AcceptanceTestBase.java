@@ -15,14 +15,15 @@ package tech.pegasys.ethsigner.tests;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
-
-import io.vertx.core.Vertx;
 import com.github.dockerjava.api.DockerClient;
+import io.vertx.core.Vertx;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -52,7 +53,7 @@ public class AcceptanceTestBase {
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
     final Vertx vertx = Vertx.vertx();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethSigner = new Signer(signerConfig, nodeConfig, vertx);
     ethNode = new PantheonNode(docker, nodeConfig);
 
     ethNode.start();
