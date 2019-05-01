@@ -38,7 +38,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
-            richBenefactor().getNextNonceAndIncrement(),
+            richBenefactor().nextNonceAndIncrement(),
             GAS_PRICE,
             GAS_LIMIT,
             BigInteger.ZERO,
@@ -59,7 +59,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
-            richBenefactor().getNextNonceAndIncrement(),
+            richBenefactor().nextNonceAndIncrement(),
             GAS_PRICE,
             GAS_LIMIT,
             BigInteger.ZERO,
@@ -76,7 +76,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
     final Transaction changeValue =
         Transaction.createFunctionCallTransaction(
             richBenefactor().address(),
-            richBenefactor().getNextNonceAndIncrement(),
+            richBenefactor().nextNonceAndIncrement(),
             GAS_PRICE,
             GAS_LIMIT,
             contractAddress,

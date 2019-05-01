@@ -27,11 +27,11 @@ public class Account {
     return address;
   }
 
-  public BigInteger getNextNonce() {
+  public BigInteger nextNonce() {
     return nonce;
   }
 
-  public BigInteger getNextNonceAndIncrement() {
+  public BigInteger nextNonceAndIncrement() {
 
     final BigInteger next = nonce;
     nonce = nonce.add(BigInteger.ONE);

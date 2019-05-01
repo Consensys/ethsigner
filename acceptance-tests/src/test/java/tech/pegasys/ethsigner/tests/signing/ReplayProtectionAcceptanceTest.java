@@ -94,7 +94,7 @@ public class ReplayProtectionAcceptanceTest {
             .submitExceptional(
                 Transaction.createEtherTransaction(
                     richBenefactor().address(),
-                    richBenefactor().getNextNonceAndIncrement(),
+                    richBenefactor().nextNonceAndIncrement(),
                     GAS_PRICE,
                     INTRINSIC_GAS,
                     RECIPIENT,
@@ -113,7 +113,7 @@ public class ReplayProtectionAcceptanceTest {
             .submitExceptional(
                 Transaction.createEtherTransaction(
                     richBenefactor().address(),
-                    richBenefactor().getNextNonceAndIncrement(),
+                    richBenefactor().nextNonceAndIncrement(),
                     GAS_PRICE,
                     INTRINSIC_GAS,
                     RECIPIENT,

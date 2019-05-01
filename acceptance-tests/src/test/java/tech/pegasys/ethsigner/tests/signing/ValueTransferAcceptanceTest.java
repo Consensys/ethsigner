@@ -39,7 +39,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
-            richBenefactor().getNextNonceAndIncrement(),
+            richBenefactor().nextNonceAndIncrement(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipient,
@@ -62,7 +62,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
-            richBenefactor().getNextNonce(),
+            richBenefactor().nextNonce(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipientAddress,
@@ -86,7 +86,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             sender.address(),
-            sender.getNextNonce(),
+            sender.nextNonce(),
             GAS_PRICE,
             INTRINSIC_GAS,
             recipientAddress,
