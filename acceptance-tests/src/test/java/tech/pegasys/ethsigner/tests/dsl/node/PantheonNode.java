@@ -54,7 +54,7 @@ public class PantheonNode implements Node {
   private final String pantheonContainerId;
   private final Accounts accounts;
   private final Contracts contracts;
-  private final Transactions transaction;
+  private final Transactions transactions;
   private final Web3j jsonRpc;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
@@ -72,7 +72,7 @@ public class PantheonNode implements Node {
     this.accounts = new Accounts(jsonRpc);
     final Eth eth = new Eth(jsonRpc);
     this.contracts = new Contracts(eth, jsonRpc);
-    this.transaction = new Transactions(eth);
+    this.transactions = new Transactions(eth);
   }
 
   @Override
@@ -116,7 +116,7 @@ public class PantheonNode implements Node {
 
   @Override
   public Transactions transactions() {
-    return transaction;
+    return transactions;
   }
 
   private boolean hasPantheonContainer() {
