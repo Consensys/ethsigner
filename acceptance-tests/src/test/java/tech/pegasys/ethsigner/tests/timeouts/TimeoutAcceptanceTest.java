@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.errorhandling;
+package tech.pegasys.ethsigner.tests.timeouts;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +36,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class ErrorHandlingAcceptanceTest {
+public class TimeoutAcceptanceTest {
   private Signer ethSigner;
 
   @Before
