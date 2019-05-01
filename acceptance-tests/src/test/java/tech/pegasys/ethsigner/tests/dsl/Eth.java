@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -45,6 +45,6 @@ public class Eth {
   }
 
   public String getCode(final String address) throws IOException {
-    return jsonRpc.ethGetCode(address, DefaultBlockParameter.valueOf("latest")).send().getResult();
+    return jsonRpc.ethGetCode(address, DefaultBlockParameterName.LATEST).send().getResult();
   }
 }
