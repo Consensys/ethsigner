@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 
 public class Accounts {
 
@@ -25,27 +25,24 @@ public class Accounts {
       "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
-  public static final Account RICH_BENEFACTOR = new Account(GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
 
+  private final Account benefactor;
   private final Web3j jsonRpc;
 
   public Accounts(final Web3j jsonRpc) {
     this.jsonRpc = jsonRpc;
+    this.benefactor = new Account(GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
+  }
+
+  public Account richBenefactor() {
+    return benefactor;
+  }
+
+  public BigInteger balance(final Account account) throws IOException {
+    return balance(account.address());
   }
 
   public BigInteger balance(final String account) throws IOException {
-    return jsonRpc
-        .ethGetBalance(
-            account,
-            DefaultBlockParameter.valueOf(jsonRpc.ethBlockNumber().send().getBlockNumber()))
-        .send()
-        .getBalance();
-  }
-
-  public BigInteger balance(final String account, final BigInteger atBlock) throws IOException {
-    return jsonRpc
-        .ethGetBalance(account, DefaultBlockParameter.valueOf(atBlock))
-        .send()
-        .getBalance();
+    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
   }
 }

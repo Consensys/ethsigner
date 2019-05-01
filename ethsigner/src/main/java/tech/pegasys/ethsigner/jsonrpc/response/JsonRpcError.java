@@ -67,6 +67,9 @@ public enum JsonRpcError {
   NODE_WHITELIST_MISSING_ENTRY(-32000, "Cannot remove an absent node from whitelist"),
   NODE_WHITELIST_BOOTNODE_CANNOT_BE_REMOVED(-32000, "Cannot remove a bootnode from whitelist"),
 
+  // Transaction signing errors
+  SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "No unlocked account matches the Sender"),
+
   // Permissioning/persistence errors
   WHITELIST_PERSIST_FAILURE(
       -32000, "Unable to persist changes to whitelist configuration file. Changes reverted"),
@@ -109,7 +112,7 @@ public enum JsonRpcError {
   public static JsonRpcError fromJson(
       @JsonProperty("code") final int code, @JsonProperty("message") final String message) {
     for (final JsonRpcError error : JsonRpcError.values()) {
-      if (error.getCode() == code) {
+      if (error.code == code && error.message.equals(message)) {
         return error;
       }
     }

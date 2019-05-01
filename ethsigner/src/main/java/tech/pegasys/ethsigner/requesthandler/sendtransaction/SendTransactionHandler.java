@@ -17,11 +17,13 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
@@ -76,7 +78,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           serialiser.getAddress());
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
       return;
     }
 

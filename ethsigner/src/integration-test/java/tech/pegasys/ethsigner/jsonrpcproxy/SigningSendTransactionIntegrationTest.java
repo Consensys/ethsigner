@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
@@ -68,14 +69,14 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
   public void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x1577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
@@ -89,7 +90,7 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
   public void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
