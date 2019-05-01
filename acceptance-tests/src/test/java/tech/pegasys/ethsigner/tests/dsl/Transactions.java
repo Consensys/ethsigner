@@ -18,13 +18,10 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+import tech.pegasys.ethsigner.tests.dsl.utils.Web3JErrorParser;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -34,7 +31,6 @@ import org.web3j.protocol.exceptions.ClientConnectionException;
 public class Transactions {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final Pattern WEB3J_EXCEPTION_MSG_PATTERN = Pattern.compile(".*:\\s(\\d+);(.*)");
 
   private final Eth eth;
 
@@ -55,17 +51,7 @@ public class Transactions {
     } catch (final ClientConnectionException e) {
       final String message = e.getMessage();
       LOG.info("ClientConnectionException with message: " + message);
-      final Matcher matcher = WEB3J_EXCEPTION_MSG_PATTERN.matcher(message);
-      if (matcher.matches()) {
-        final int statusCode = Integer.parseInt(matcher.group(1));
-        final HttpResponseStatus status = HttpResponseStatus.valueOf(statusCode);
-        final String jsonBody = matcher.group(2);
-        final JsonRpcErrorResponse jsonRpcResponse =
-            Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
-        return new SignerResponse<>(jsonRpcResponse, status);
-      } else {
-        throw new RuntimeException("Unable to parse web3j exception message");
-      }
+      return Web3JErrorParser.parseConnectionException(e);
     }
   }
 
