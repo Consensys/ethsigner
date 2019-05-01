@@ -16,19 +16,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
+
+import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -39,32 +47,38 @@ public class PantheonNode implements Node {
   private static final Logger LOG = LogManager.getLogger();
   private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
 
+  /** Pantheon's dev.json has the hard fork at block 0. */
+  private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
+
   private final DockerClient docker;
   private final String pantheonContainerId;
-  private final Transactions transaction;
   private final Accounts accounts;
+  private final Contracts contracts;
+  private final Transactions transactions;
   private final Web3j jsonRpc;
+  private final Eth eth;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
-
-    LOG.info("Pantheon Web3j service targeting: " + config.getDownstreamUrl());
+    LOG.info("Pantheon Web3j service targeting: {} ", config.getUrl());
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(config.getDownstreamUrl()),
+            new HttpService(config.getUrl()),
             config.getPollingInterval().toMillis(),
             Async.defaultExecutorService());
 
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    this.transaction = new Transactions(jsonRpc);
     this.accounts = new Accounts(jsonRpc);
+    this.eth = new Eth(jsonRpc);
+    this.contracts = new Contracts(eth, jsonRpc);
+    this.transactions = new Transactions(eth);
   }
 
   @Override
   public void start() {
-    LOG.info("Starting Pantheon Docker container: " + pantheonContainerId);
+    LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
   }
 
@@ -78,9 +92,17 @@ public class PantheonNode implements Node {
 
   @Override
   public void awaitStartupCompletion() {
-    LOG.info("Waiting for Pantheon to become responsive...");
-    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
+    try {
+      LOG.info("Waiting for Pantheon to become responsive...");
+      waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+      LOG.info("Pantheon is now responsive");
+      waitFor(
+          () ->
+              assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
+                  .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
+    } catch (final ConditionTimeoutException e) {
+      throw new RuntimeException("Failed to start the Pantheon node", e);
+    }
   }
 
   @Override
@@ -89,8 +111,13 @@ public class PantheonNode implements Node {
   }
 
   @Override
+  public Contracts contracts() {
+    return contracts;
+  }
+
+  @Override
   public Transactions transactions() {
-    return transaction;
+    return transactions;
   }
 
   private boolean hasPantheonContainer() {
@@ -99,17 +126,23 @@ public class PantheonNode implements Node {
 
   private void stopPantheonContainer() {
     try {
-      LOG.info("Stopping the Pantheon Docker container");
+      LOG.info("Stopping the Pantheon Docker container...");
       docker.stopContainerCmd(pantheonContainerId).exec();
-      docker.waitContainerCmd(pantheonContainerId).exec((new WaitContainerResultCallback()));
+      final WaitContainerResultCallback waiter = new WaitContainerResultCallback();
+      docker.waitContainerCmd(pantheonContainerId).exec((waiter));
+      waiter.awaitCompletion();
+      LOG.info("Stopped the Pantheon Docker container");
     } catch (final NotModifiedException e) {
       LOG.error("Pantheon Docker container has already stopped");
+    } catch (final InterruptedException e) {
+      LOG.error("Interrupted when waiting for Pantheon Docker container to stop");
     }
   }
 
   private void removePantheonContainer() {
-    LOG.info("Removing the Pantheon Docker container");
+    LOG.info("Removing the Pantheon Docker container...");
     docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
+    LOG.info("Removed the Pantheon Docker container");
   }
 
   private void pullPantheonImage() {
@@ -126,25 +159,34 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    final HostConfig portBindingConfig =
-        HostConfig.newHostConfig().withPortBindings(tcpPortBinding(config), wsPortBinding(config));
+    @SuppressWarnings("unstable")
+    final String genesis = Resources.getResource(config.getGenesisFilePath()).getPath();
+    LOG.info("Path to Genesis file: {}", genesis);
+    final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
+    final Bind genesisBinding = new Bind(genesis, genesisVolume);
+    final HostConfig hostConfig =
+        HostConfig.newHostConfig()
+            .withPortBindings(tcpPortBinding(config), wsPortBinding(config))
+            .withBinds(genesisBinding);
 
     try {
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
-              .withHostConfig(portBindingConfig)
+              .withHostConfig(hostConfig)
+              .withVolumes(genesisVolume)
               .withCmd(
+                  "--logging",
+                  "DEBUG",
                   "--miner-enabled",
                   "--miner-coinbase",
-                  "fe3b557e8fb62b89f4916b721be55ceb828dbd73",
+                  "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
                   "--rpc-http-cors-origins",
                   "all",
                   "--host-whitelist",
                   "*",
                   "--rpc-http-enabled",
-                  "--rpc-ws-enabled",
-                  "--network=dev");
+                  "--rpc-ws-enabled");
 
       LOG.info("Creating the Pantheon Docker image...");
       final CreateContainerResponse pantheon = createPantheon.exec();

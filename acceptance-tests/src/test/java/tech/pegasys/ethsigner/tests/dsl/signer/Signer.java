@@ -16,6 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
@@ -30,6 +33,8 @@ public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  private final Accounts accounts;
+  private final Contracts contracts;
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
@@ -44,30 +49,38 @@ public class Signer {
             new HttpService(signerConfig.url()),
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
-    this.transactions = new Transactions(this.jsonRpc);
+
+    final Eth eth = new Eth(jsonRpc);
+    this.transactions = new Transactions(eth);
+    this.contracts = new Contracts(eth, jsonRpc);
+    this.accounts = new Accounts(jsonRpc);
   }
 
   public void start() {
     LOG.info("Starting EthSigner");
-    this.runner.start("EthSigner");
+    runner.start("EthSigner");
   }
 
   public void shutdown() {
     LOG.info("Shutting down EthSigner");
-    this.runner.shutdown();
+    runner.shutdown();
   }
 
   public Transactions transactions() {
     return this.transactions;
   }
 
-  public Web3j jsonRpc() {
-    return this.jsonRpc;
+  public Contracts contracts() {
+    return contracts;
+  }
+
+  public Accounts accounts() {
+    return accounts;
   }
 
   public void awaitStartupCompletion() {
-    LOG.info("Waiting for Pantheon to become responsive...");
-    waitFor(() -> assertThat(this.jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-    LOG.info("Pantheon is now responsive");
+    LOG.info("Waiting for Signer to become responsive...");
+    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    LOG.info("Signer is now responsive");
   }
 }
