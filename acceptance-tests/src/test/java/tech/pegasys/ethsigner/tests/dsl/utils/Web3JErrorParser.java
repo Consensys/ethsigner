@@ -15,28 +15,26 @@ package tech.pegasys.ethsigner.tests.dsl.utils;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.web3j.protocol.exceptions.ClientConnectionException;
 
 public class Web3JErrorParser {
-  private static final Pattern WEB3J_EXCEPTION_MSG_PATTERN = Pattern.compile(".*:\\s(\\d+);(.*)");
 
   public static SignerResponse<JsonRpcErrorResponse> parseConnectionException(
       final ClientConnectionException e) {
-    final Matcher matcher = WEB3J_EXCEPTION_MSG_PATTERN.matcher(e.getMessage());
-    if (matcher.matches()) {
-      final int statusCode = Integer.parseInt(matcher.group(1));
-      final HttpResponseStatus status = HttpResponseStatus.valueOf(statusCode);
-      final String jsonBody = matcher.group(2);
+    final String message = e.getMessage();
+    final String errorBody = message.substring(message.indexOf(":") + 1).trim();
+    final String[] errorParts = errorBody.split(";", 2);
+    if (errorParts.length == 2) {
+      final String statusCode = errorParts[0];
+      final HttpResponseStatus status = HttpResponseStatus.valueOf(Integer.parseInt(statusCode));
+      final String jsonBody = errorParts[1];
       final JsonRpcErrorResponse jsonRpcResponse =
           Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
       return new SignerResponse<>(jsonRpcResponse, status);
     } else {
-      throw new RuntimeException("Unable to parse web3j exception message");
+      throw new RuntimeException("Unable to parse web3j exception message", e);
     }
   }
 }
