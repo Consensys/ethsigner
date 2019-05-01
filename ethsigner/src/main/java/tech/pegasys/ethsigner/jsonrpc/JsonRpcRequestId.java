@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.jsonrpc;
 
+import com.google.common.base.MoreObjects;
 import tech.pegasys.ethsigner.jsonrpc.exception.InvalidJsonRpcRequestException;
 
 import java.math.BigInteger;
@@ -79,5 +80,12 @@ public class JsonRpcRequestId {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("id", id)
+        .toString();
   }
 }
