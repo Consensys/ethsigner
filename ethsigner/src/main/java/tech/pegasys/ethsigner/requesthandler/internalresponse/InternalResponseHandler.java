@@ -40,16 +40,16 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
   }
 
   @Override
-  public void handle(final RoutingContext routingContext, final JsonRpcRequest rpcRequest) {
+  public void handle(final RoutingContext context, final JsonRpcRequest rpcRequest) {
     LOG.debug("Internally responding to {}, id={}", rpcRequest.getMethod(), rpcRequest.getId());
     final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
 
     if (providedBody.hasError()) {
-      routingContext.fail(new JsonRpcException(providedBody.error()));
+      context.fail(new JsonRpcException(providedBody.error()));
     } else {
       final JsonRpcSuccessResponse result =
           Json.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
-      responder.create(routingContext.request(), HttpResponseStatus.OK.code(), result);
+      responder.create(context.request(), HttpResponseStatus.OK.code(), result);
     }
   }
 }

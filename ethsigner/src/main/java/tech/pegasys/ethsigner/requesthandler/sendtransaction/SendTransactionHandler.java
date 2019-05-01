@@ -57,18 +57,18 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   }
 
   @Override
-  public void handle(final RoutingContext routingContext, final JsonRpcRequest request) {
+  public void handle(final RoutingContext context, final JsonRpcRequest request) {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final SendTransactionJsonParameters params;
     try {
       params = SendTransactionJsonParameters.from(request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
 
@@ -77,20 +77,20 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           serialiser.getAddress());
-      routingContext.fail(
+      context.fail(
           BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
       return;
     }
 
     try {
-      sendTransaction(params, routingContext.request(), request);
+      sendTransaction(params, context.request(), request);
     } catch (final RuntimeException e) {
       final HttpResponseStatus responseStatus =
           e.getCause() instanceof SocketException || e.getCause() instanceof SocketTimeoutException
               ? GATEWAY_TIMEOUT
               : INTERNAL_SERVER_ERROR;
       LOG.info("Unable to get nonce from web3j provider.");
-      routingContext.fail(responseStatus.code(), new JsonRpcException(INTERNAL_ERROR));
+      context.fail(responseStatus.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 

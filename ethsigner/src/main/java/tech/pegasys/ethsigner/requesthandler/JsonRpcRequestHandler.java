@@ -18,5 +18,5 @@ import io.vertx.ext.web.RoutingContext;
 
 public interface JsonRpcRequestHandler {
 
-  void handle(RoutingContext routingContext, JsonRpcRequest rpcRequest);
+  void handle(RoutingContext context, JsonRpcRequest rpcRequest);
 }
