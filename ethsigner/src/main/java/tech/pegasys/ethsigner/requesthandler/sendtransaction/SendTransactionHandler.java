@@ -23,7 +23,6 @@ import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
@@ -78,7 +77,8 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           serialiser.getAddress());
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
+      routingContext.fail(
+          BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
       return;
     }
 

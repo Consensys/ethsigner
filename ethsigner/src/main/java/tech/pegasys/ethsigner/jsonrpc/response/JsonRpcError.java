@@ -90,6 +90,8 @@ public enum JsonRpcError {
   UNIMPLEMENTED_PRIVATE_TRANSACTION_TYPE(-50100, "Unimplemented private transaction type"),
   PRIVATE_TRANSACTION_RECEIPT_ERROR(-50100, "Error generating the private transaction receipt");
 
+  // Gateway errors
+
   private final int code;
   private final String message;
 
