@@ -49,8 +49,7 @@ public class Transactions {
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
-      final String message = e.getMessage();
-      LOG.info("ClientConnectionException with message: " + message);
+      LOG.info("ClientConnectionException with message: " + e.getMessage());
       return Web3JErrorParser.parseConnectionException(e);
     }
   }
