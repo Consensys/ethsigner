@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -101,7 +102,8 @@ public class ReplayProtectionAcceptanceTest {
                     RECIPIENT,
                     TRANSFER_AMOUNT_WEI));
 
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
@@ -120,6 +122,7 @@ public class ReplayProtectionAcceptanceTest {
                     RECIPIENT,
                     TRANSFER_AMOUNT_WEI));
 
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INVALID_PARAMS);
   }
 }

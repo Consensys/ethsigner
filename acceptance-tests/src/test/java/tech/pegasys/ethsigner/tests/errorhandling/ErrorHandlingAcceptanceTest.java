@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.errorhandling;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
@@ -29,7 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -68,7 +68,7 @@ public class ErrorHandlingAcceptanceTest {
             transferAmountWei);
     SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
-    assertThat(signerResponse.status()).isEqualTo(HttpResponseStatus.GATEWAY_TIMEOUT);
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
     assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
   }
 
@@ -88,7 +88,7 @@ public class ErrorHandlingAcceptanceTest {
             transferAmountWei);
     SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
-    assertThat(signerResponse.status()).isEqualTo(HttpResponseStatus.GATEWAY_TIMEOUT);
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
     assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
   }
 }
