@@ -12,12 +12,17 @@
  */
 package tech.pegasys.ethsigner.tests;
 
-import tech.pegasys.ethsigner.tests.dsl.ConfigurationFactory;
+import tech.pegasys.ethsigner.tests.dsl.Account;
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+
 
 import io.vertx.core.Vertx;
+import com.github.dockerjava.api.DockerClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -25,6 +30,10 @@ public class AcceptanceTestBase {
 
   private static Node ethNode;
   private static Signer ethSigner;
+
+  protected Account richBenefactor() {
+    return ethSigner.accounts().richBenefactor();
+  }
 
   protected Signer ethSigner() {
     return ethSigner;
@@ -38,11 +47,13 @@ public class AcceptanceTestBase {
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
-    final ConfigurationFactory config = new ConfigurationFactory();
+    final DockerClient docker = new DockerClientFactory().create();
+    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
     final Vertx vertx = Vertx.vertx();
 
-    ethSigner = new Signer(config.getSignerConfiguration(), config.getNodeConfiguration(), vertx);
-    ethNode = new PantheonNode(config.getDockerClient(), config.getNodeConfiguration());
+    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethNode = new PantheonNode(docker, nodeConfig);
 
     ethNode.start();
     ethSigner.start();

@@ -12,25 +12,16 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -42,12 +33,13 @@ public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  private final Accounts accounts;
+  private final Contracts contracts;
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
   private final HttpClient client;
   private final String downstreamUrl;
-  private final Vertx vertx;
 
   public Signer(
       final SignerConfiguration signerConfig,
@@ -62,14 +54,19 @@ public class Signer {
             new HttpService(signerConfig.url()),
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
-    this.transactions = new Transactions(jsonRpc);
+
+    final Eth eth = new Eth(jsonRpc);
+    this.transactions = new Transactions(eth);
+    this.contracts = new Contracts(eth, jsonRpc);
+    this.accounts = new Accounts(jsonRpc);
+
     this.client =
         vertx.createHttpClient(
             new HttpClientOptions()
                 .setDefaultHost(signerConfig.hostname())
                 .setDefaultPort(signerConfig.tcpPort()));
     downstreamUrl = "http://" + signerConfig.hostname() + ":" + signerConfig.tcpPort();
-    this.vertx = vertx;
+
   }
 
   public void start() {
@@ -84,6 +81,14 @@ public class Signer {
 
   public Transactions transactions() {
     return transactions;
+  }
+
+  public Contracts contracts() {
+    return contracts;
+  }
+
+  public Accounts accounts() {
+    return accounts;
   }
 
   public void awaitStartupCompletion() {

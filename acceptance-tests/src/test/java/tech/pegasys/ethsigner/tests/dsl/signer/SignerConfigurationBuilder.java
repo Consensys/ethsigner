@@ -10,32 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl;
+package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import java.math.BigInteger;
+public class SignerConfigurationBuilder {
 
-public class Account {
+  /** ChainId defined in the Pantheon dev mode genesis. */
+  private static final String CHAIN_ID = "2018";
 
-  private final String address;
-  private BigInteger nonce = BigInteger.ZERO;
+  private static final String LOCALHOST = "127.0.0.1";
 
-  public Account(final String address) {
-    this.address = address;
-  }
-
-  public String address() {
-    return address;
-  }
-
-  public BigInteger nextNonce() {
-    return nonce;
-  }
-
-  public BigInteger nextNonceAndIncrement() {
-
-    final BigInteger next = nonce;
-    nonce = nonce.add(BigInteger.ONE);
-
-    return next;
+  public SignerConfiguration build() {
+    return new SignerConfiguration(CHAIN_ID, LOCALHOST);
   }
 }

@@ -64,7 +64,7 @@ public class SendTransactionHandler extends JsonRpcRequestHandler {
           "From address ({}) does not match unlocked account ({})",
           params.sender(),
           serialiser.getAddress());
-      reportError(httpServerRequest, request, JsonRpcError.INVALID_PARAMS);
+      reportError(httpServerRequest, request, JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
       return;
     }
 
