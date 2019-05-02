@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.TRANSACTION_U
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
@@ -150,8 +151,10 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             RECIPIENT,
             transferAmountWei);
 
-    final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
+    final SignerResponse<JsonRpcErrorResponse> jsonRpcErrorResponseSignerResponse =
+        ethSigner().transactions().submitExceptional(transaction);
 
-    assertThat(error.getError()).isEqualTo(JsonRpcError.NONCE_TOO_LOW);
+    assertThat(jsonRpcErrorResponseSignerResponse.jsonRpc().getError())
+        .isEqualTo(JsonRpcError.NONCE_TOO_LOW);
   }
 }
