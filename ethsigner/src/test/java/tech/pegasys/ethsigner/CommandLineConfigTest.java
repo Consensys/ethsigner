@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EthSignerCommandLineConfigTest {
+public class CommandLineConfigTest {
 
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private final PrintStream outPrintStream = new PrintStream(commandOutput);
@@ -39,8 +39,8 @@ public class EthSignerCommandLineConfigTest {
   }
 
   private String validCommandLine() {
-    return "--key-file=./keyfile "
-        + "--password-file=./passwordFile "
+    return "--key-file=keyfile "
+        + "--password-file=passwordFile "
         + "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
         + "--downstream-http-request-timeout=10000 "
@@ -64,8 +64,8 @@ public class EthSignerCommandLineConfigTest {
 
     assertThat(result).isTrue();
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
-    assertThat(config.getKeyPath().toString()).isEqualTo("./keyfile");
-    assertThat(config.getPasswordFilePath().toString()).isEqualTo("./passwordFile");
+    assertThat(config.getKeyPath().toString()).isEqualTo("keyfile");
+    assertThat(config.getPasswordFilePath().toString()).isEqualTo("passwordFile");
     assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
@@ -139,8 +139,8 @@ public class EthSignerCommandLineConfigTest {
   @Test
   public void domainNamesDecodeIntoAnInetAddress() {
     final String input =
-        "--key-file=./keyfile "
-            + "--password-file=./passwordFile "
+        "--key-file=keyfile "
+            + "--password-file=passwordFile "
             + "--downstream-http-host=google.com "
             + "--downstream-http-port=5000 "
             + "--downstream-http-request-timeout=10000 "
