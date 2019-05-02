@@ -10,13 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.requesthandler;
+package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcResponse;
 
-import io.vertx.ext.web.RoutingContext;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
-public interface JsonRpcRequestHandler {
+public class SignerResponse<T extends JsonRpcResponse> {
 
-  void handle(RoutingContext context, JsonRpcRequest rpcRequest);
+  private final T rpcResponse;
+  private final HttpResponseStatus status;
+
+  public SignerResponse(final T rpcResponse, final HttpResponseStatus status) {
+    this.rpcResponse = rpcResponse;
+    this.status = status;
+  }
+
+  public T jsonRpc() {
+    return rpcResponse;
+  }
+
+  public HttpResponseStatus status() {
+    return status;
+  }
 }

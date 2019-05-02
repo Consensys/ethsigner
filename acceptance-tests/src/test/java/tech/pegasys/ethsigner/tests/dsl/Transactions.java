@@ -17,10 +17,10 @@ import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
 
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -41,15 +41,15 @@ public class Transactions {
     return eth.sendTransaction(transaction);
   }
 
-  public JsonRpcErrorResponse submitExceptional(final Transaction transaction) throws IOException {
+  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction)
+      throws IOException {
     try {
       eth.sendTransaction(transaction);
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      final String jsonBody = e.getMessage().substring(e.getMessage().indexOf("{"));
-      return Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
+      return eth.parseException(e);
     }
   }
 
