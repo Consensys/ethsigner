@@ -36,7 +36,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private static final Logger LOG = LoggerFactory.getLogger(LogErrorHandler.class);
   private final HttpResponseFactory httpResponseFactory;
 
-  public JsonRpcErrorHandler(HttpResponseFactory httpResponseFactory) {
+  public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory) {
     this.httpResponseFactory = httpResponseFactory;
   }
 
