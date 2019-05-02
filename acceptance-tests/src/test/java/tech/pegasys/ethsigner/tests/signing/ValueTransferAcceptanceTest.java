@@ -74,7 +74,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
-    assertThat(signerResponse.rpcResponse().getError())
+    assertThat(signerResponse.jsonRpc().getError())
         .isEqualTo(TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(richBenefactor());
@@ -101,7 +101,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
-    assertThat(signerResponse.rpcResponse().getError())
+    assertThat(signerResponse.jsonRpc().getError())
         .isEqualTo(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);

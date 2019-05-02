@@ -26,7 +26,7 @@ public class SignerResponse<T extends JsonRpcResponse> {
     this.status = status;
   }
 
-  public T rpcResponse() {
+  public T jsonRpc() {
     return rpcResponse;
   }
 

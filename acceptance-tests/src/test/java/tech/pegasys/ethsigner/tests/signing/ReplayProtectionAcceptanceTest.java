@@ -103,7 +103,7 @@ public class ReplayProtectionAcceptanceTest {
                     TRANSFER_AMOUNT_WEI));
 
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INVALID_PARAMS);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
@@ -123,6 +123,6 @@ public class ReplayProtectionAcceptanceTest {
                     TRANSFER_AMOUNT_WEI));
 
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(INVALID_PARAMS);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
   }
 }
