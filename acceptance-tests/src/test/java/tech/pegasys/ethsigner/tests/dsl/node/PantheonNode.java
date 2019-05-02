@@ -15,17 +15,16 @@ package tech.pegasys.ethsigner.tests.dsl.node;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -38,7 +37,6 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -162,13 +160,12 @@ public class PantheonNode implements Node {
     }
   }
 
-  private String createPantheonContainer(final NodeConfiguration config)  {
+  private String createPantheonContainer(final NodeConfiguration config) {
     final URL resource = PantheonNode.class.getResource(config.getGenesisFilePath());
     final String genesisFilePath;
     try {
       genesisFilePath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
-    }
-    catch (final UnsupportedEncodingException ex) {
+    } catch (final UnsupportedEncodingException ex) {
       LOG.error("Unsupported encoding used to decode genesis filepath.");
       throw new RuntimeException("Illegal string decoding");
     }

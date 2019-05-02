@@ -162,8 +162,7 @@ public class EthSignerProcessRunner {
 
   @SuppressWarnings("UnstableApiUsage")
   private File createKeyFile() {
-    final URL resource = Resources.getResource(
-        "rich_benefactor_one.json");
+    final URL resource = Resources.getResource("rich_benefactor_one.json");
     final byte[] data;
 
     try {
