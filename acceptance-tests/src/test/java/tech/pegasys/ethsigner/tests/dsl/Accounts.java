@@ -15,9 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-
 public class Accounts {
 
   /** Private key: 8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63 */
@@ -27,10 +24,10 @@ public class Accounts {
   public static final String GENESIS_ACCOUNT_ONE_PASSWORD = "pass";
 
   private final Account benefactor;
-  private final Web3j jsonRpc;
+  private final Eth eth;
 
-  public Accounts(final Web3j jsonRpc) {
-    this.jsonRpc = jsonRpc;
+  public Accounts(final Eth eth) {
+    this.eth = eth;
     this.benefactor = new Account(GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
   }
 
@@ -43,6 +40,6 @@ public class Accounts {
   }
 
   public BigInteger balance(final String account) throws IOException {
-    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
+    return eth.getBalance(account);
   }
 }
