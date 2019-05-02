@@ -29,11 +29,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
-  private static final Logger LOG = LoggerFactory.getLogger(LogErrorHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
   private final HttpResponseFactory httpResponseFactory;
 
   public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory) {
@@ -46,13 +46,12 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
     final JsonRpcErrorResponse errorResponse = errorResponse(context, jsonRpcRequest);
     final int statusCode =
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
-    final String body = jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString());
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
-        context.request().method(),
-        context.request().absoluteURI(),
-        body,
-        Json.encode(errorResponse));
+        () -> context.request().method(),
+        () -> context.request().absoluteURI(),
+        () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
+        () -> Json.encode(errorResponse));
     httpResponseFactory.create(context.request(), statusCode, errorResponse);
   }
 
