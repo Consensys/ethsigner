@@ -15,6 +15,11 @@ package tech.pegasys.ethsigner.tests.dsl.node;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
@@ -157,12 +162,20 @@ public class PantheonNode implements Node {
     }
   }
 
-  private String createPantheonContainer(final NodeConfiguration config) {
-    @SuppressWarnings("unstable")
-    final String genesis = Resources.getResource(config.getGenesisFilePath()).getPath();
-    LOG.info("Path to Genesis file: {}", genesis);
+  private String createPantheonContainer(final NodeConfiguration config)  {
+    final URL resource = PantheonNode.class.getResource(config.getGenesisFilePath());
+    final String genesisFilePath;
+    try {
+      genesisFilePath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
+    }
+    catch (final UnsupportedEncodingException ex) {
+      LOG.error("Unsupported encoding used to decode genesis filepath.");
+      throw new RuntimeException("Illegal string decoding");
+    }
+
+    LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
-    final Bind genesisBinding = new Bind(genesis, genesisVolume);
+    final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
     final HostConfig hostConfig =
         HostConfig.newHostConfig()
             .withPortBindings(tcpPortBinding(config), wsPortBinding(config))

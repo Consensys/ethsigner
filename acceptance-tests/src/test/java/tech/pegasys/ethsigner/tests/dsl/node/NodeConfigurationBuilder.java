@@ -20,7 +20,8 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 public class NodeConfigurationBuilder {
 
   private static final String LOCALHOST = "127.0.0.1";
-  private static final String DEFAULT_GENESIS_FILE = "eth_hash_2018.json";
+  private static final String DEFAULT_GENESIS_FILE =
+      "eth_hash_2018.json";
 
   private final DefaultDockerClientConfig config;
   private String genesis;
