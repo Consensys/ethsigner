@@ -11,7 +11,7 @@ pipeline {
     agent {
         docker {
           image 'pegasyseng/pantheon-build:0.0.5-jdk8'
-          args '-v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace'
+          args '-v /var/jenkins-slave-workspace:/var/jenkins-slave-workspace'
         }
     }
     parameters {
@@ -54,7 +54,7 @@ pipeline {
                               }
 
 
-                            sh "./gradlew release -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
+                            sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
                     }
                 }
