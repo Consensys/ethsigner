@@ -29,12 +29,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Runner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
+  private static final Logger LOG = LogManager.getLogger();
+
   private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;

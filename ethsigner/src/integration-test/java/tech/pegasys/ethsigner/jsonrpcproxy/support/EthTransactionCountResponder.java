@@ -22,16 +22,16 @@ import java.math.BigInteger;
 import java.util.function.Function;
 
 import io.vertx.core.json.Json;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mockserver.mock.action.ExpectationResponseCallback;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.RegexBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EthTransactionCountResponder implements ExpectationResponseCallback {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EthTransactionCountResponder.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private static final String REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
 

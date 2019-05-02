@@ -22,12 +22,13 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PassThroughHandler extends JsonRpcRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PassThroughHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
+
   private final HttpClient ethNodeClient;
 
   public PassThroughHandler(final HttpResponseFactory responder, final HttpClient ethNodeClient) {
@@ -75,8 +76,8 @@ public class PassThroughHandler extends JsonRpcRequestHandler {
   private void logRequest(final JsonRpcRequest jsonRequest, final HttpServerRequest httpRequest) {
     LOG.debug(
         "Proxying method: {}, uri: {}, body: {}",
-        httpRequest.method(),
-        httpRequest.absoluteURI(),
-        Json.encodePrettily(jsonRequest));
+        () -> httpRequest.method(),
+        () -> httpRequest.absoluteURI(),
+        () -> Json.encodePrettily(jsonRequest));
   }
 }

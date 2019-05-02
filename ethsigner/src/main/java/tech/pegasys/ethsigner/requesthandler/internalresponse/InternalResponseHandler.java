@@ -22,12 +22,12 @@ import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class InternalResponseHandler extends JsonRpcRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(InternalResponseHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final BodyProvider responseBodyProvider;
 

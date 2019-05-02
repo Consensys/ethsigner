@@ -21,12 +21,12 @@ import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SendTransactionHandler extends JsonRpcRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser serialiser;

@@ -43,7 +43,6 @@ dependencyManagement {
 
     dependency 'org.apache.logging.log4j:log4j-api:2.11.1'
     dependency 'org.apache.logging.log4j:log4j-core:2.11.1'
-    dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.1'
 
     dependency 'org.assertj:assertj-core:3.11.1'
 

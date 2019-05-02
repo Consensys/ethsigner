@@ -20,14 +20,14 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class JsonRpcRequestHandler {
 
   public abstract void handle(HttpServerRequest httpServerRequest, JsonRpcRequest rpcRequest);
 
-  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcRequestHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   protected final HttpResponseFactory responder;
 
@@ -43,10 +43,10 @@ public abstract class JsonRpcRequestHandler {
 
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
-        httpServerRequest.method(),
-        httpServerRequest.absoluteURI(),
-        Json.encodePrettily(request),
-        Json.encode(errorResponse));
+        () -> httpServerRequest.method(),
+        () -> httpServerRequest.absoluteURI(),
+        () -> Json.encodePrettily(request),
+        () -> Json.encode(errorResponse));
 
     responder.create(httpServerRequest, HttpResponseStatus.BAD_REQUEST.code(), errorResponse);
   }

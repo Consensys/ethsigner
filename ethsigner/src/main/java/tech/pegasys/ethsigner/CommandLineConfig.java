@@ -22,8 +22,6 @@ import java.time.Duration;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Help.Ansi;
@@ -45,7 +43,6 @@ import picocli.CommandLine.ParameterException;
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class CommandLineConfig implements Config {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CommandLineConfig.class);
   private CommandLine commandLine;
 
   @Option(
