@@ -12,8 +12,13 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
+import java.io.IOException;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.exceptions.ClientConnectionException;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 
@@ -23,41 +28,59 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.Json;
 import org.junit.Test;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 
 public class FailureConditions extends AcceptanceTestBase {
 
   private volatile HttpClientResponse response = null;
 
   @Test
-  public void sendDisabledApiReturnsBadRequest() {
+  public void sendDisabledApiReturnsBadRequest() throws IOException  {
+    final Request<?, ArbitraryResponseType> request =
+        ethSigner().createRequest(emptyMap(), "ibft_getPendingVotes");
+
+
+    assertThatExceptionOfType(ClientConnectionException.class).isThrownBy(request::send).
+
+    try {
+      request.send();
+    }catch(final Throwable t) {
+     int i  =5;
+      }
+/*
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "ibft_getPendingVotes", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
+    Request<?, ArbitraryResponseType>
+
     ethSigner()
         .sendRawJsonRpc(
-            Collections.emptyMap(),
+            emptyMap(),
             Json.encodeToBuffer(request),
             response -> this.response = response);
 
     WaitUtils.waitFor(
         1,
         () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
+        */
   }
-
+/*
   @Test
-  public void unrecognisedJsonRpcMethodReturnsBadRequest() {
+  public void unknownJsonRpcMethodReturnsBadRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "invalidJsonRpcMethod", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
     ethSigner()
         .sendRawJsonRpc(
-            Collections.emptyMap(),
+            emptyMap(),
             Json.encodeToBuffer(request),
             response -> this.response = response);
     WaitUtils.waitFor(
         1,
         () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
   }
+  */
+
   /*
 
   @Test

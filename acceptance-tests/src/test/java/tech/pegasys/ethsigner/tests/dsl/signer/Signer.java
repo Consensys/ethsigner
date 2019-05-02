@@ -16,10 +16,13 @@ import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
+import org.web3j.protocol.core.Request;
 import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
@@ -53,6 +56,9 @@ public class Signer {
   private final HttpClient client;
   private final String downstreamUrl;
 
+  private final HttpService web3jHttpService;
+  private final RawJsonRpcRequestFactory requestFactory;
+
   public Signer(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
@@ -61,9 +67,10 @@ public class Signer {
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
+    this.web3jHttpService = new HttpService(signerConfig.url());
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(signerConfig.url()),
+            web3jHttpService,
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
 
@@ -78,6 +85,8 @@ public class Signer {
                 .setDefaultHost(signerConfig.hostname())
                 .setDefaultPort(signerConfig.tcpPort()));
     downstreamUrl = "http://" + signerConfig.hostname() + ":" + signerConfig.tcpPort();
+
+    this.requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
   }
 
   public void start() {
@@ -108,16 +117,13 @@ public class Signer {
     LOG.info("Signer is now responsive");
   }
 
-  public void sendRawJsonRpc(
+  public Request<?, ArbitraryResponseType> createRequest(
       final Map<String, String> additionalHeaders,
-      final Buffer body,
-      final Handler<HttpClientResponse> callback) {
-    final HttpClientRequest request = client.request(POST, downstreamUrl, callback);
-    request.putHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
-    for (final Entry<String, String> header : additionalHeaders.entrySet()) {
-      request.putHeader(header.getKey(), header.getValue());
-    }
-    request.setChunked(false);
-    request.end(body);
+      final String method) {
+    web3jHttpService.getHeaders().clear();
+    web3jHttpService.addHeaders(additionalHeaders);
+    web3jHttpService.addHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
+
+    return requestFactory.createRequest(method);
   }
 }
