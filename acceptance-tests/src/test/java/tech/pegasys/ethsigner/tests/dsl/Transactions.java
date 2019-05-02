@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
-import tech.pegasys.ethsigner.tests.dsl.utils.Web3JErrorParser;
 
 import java.io.IOException;
 
@@ -50,7 +49,7 @@ public class Transactions {
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return Web3JErrorParser.parseConnectionException(e);
+      return eth.parseException(e);
     }
   }
 
