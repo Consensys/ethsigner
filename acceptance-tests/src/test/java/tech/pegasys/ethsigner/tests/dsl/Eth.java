@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Optional;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -52,6 +53,17 @@ public class Eth {
 
   public String getCode(final String address) throws IOException {
     return jsonRpc.ethGetCode(address, DefaultBlockParameterName.LATEST).send().getResult();
+  }
+
+  public BigInteger getBalance(final String account) throws IOException {
+    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
+  }
+
+  public String call(final Transaction contractViewOperation) throws IOException {
+    return jsonRpc
+        .ethCall(contractViewOperation, DefaultBlockParameterName.LATEST)
+        .send()
+        .getValue();
   }
 
   public SignerResponse<JsonRpcErrorResponse> parseException(final ClientConnectionException e) {
