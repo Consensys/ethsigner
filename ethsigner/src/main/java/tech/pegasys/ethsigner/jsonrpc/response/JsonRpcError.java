@@ -91,7 +91,7 @@ public enum JsonRpcError {
   PRIVATE_TRANSACTION_RECEIPT_ERROR(-50100, "Error generating the private transaction receipt"),
 
   // Gateway errors
-  DOWNSTREAM_NODE_TIMED_OUT(-32000, "Downstream node timed out");
+  CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT(-32000, "Connection to downstream node timed out");
 
   private final int code;
   private final String message;

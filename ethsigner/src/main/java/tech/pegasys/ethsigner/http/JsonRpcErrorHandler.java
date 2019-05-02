@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.http;
 
 import static io.netty.handler.codec.rtsp.RtspResponseStatuses.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.rtsp.RtspResponseStatuses.INTERNAL_SERVER_ERROR;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private static final Logger LOG = LoggerFactory.getLogger(LogErrorHandler.class);
-  private HttpResponseFactory httpResponseFactory;
+  private final HttpResponseFactory httpResponseFactory;
 
   public JsonRpcErrorHandler(HttpResponseFactory httpResponseFactory) {
     this.httpResponseFactory = httpResponseFactory;
@@ -79,7 +79,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       return jsonRpcException.getJsonRpcError();
     } // in case of a timeout we may not have a failure exception so we use the status code
     else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
-      return DOWNSTREAM_NODE_TIMED_OUT;
+      return CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
     } else {
       return INTERNAL_ERROR;
     }

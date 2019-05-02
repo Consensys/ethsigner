@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.jsonrpc.exception;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 
 public class JsonRpcException extends RuntimeException {
-  private JsonRpcError jsonRpcError;
+  private final JsonRpcError jsonRpcError;
 
   public JsonRpcException(final JsonRpcError jsonRpcError) {
     this.jsonRpcError = jsonRpcError;

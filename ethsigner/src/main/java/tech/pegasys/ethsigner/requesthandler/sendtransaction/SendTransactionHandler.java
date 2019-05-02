@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
@@ -87,7 +87,8 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
       if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
-        context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(DOWNSTREAM_NODE_TIMED_OUT));
+        context.fail(
+            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else {
         context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }

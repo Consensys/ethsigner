@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.timeouts;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -66,10 +66,11 @@ public class TimeoutAcceptanceTest {
             INTRINSIC_GAS,
             recipient,
             transferAmountWei);
-    SignerResponse<JsonRpcErrorResponse> signerResponse =
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
+    assertThat(signerResponse.rpcResponse().getError())
+        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
   }
 
   @Test
@@ -86,9 +87,10 @@ public class TimeoutAcceptanceTest {
             INTRINSIC_GAS,
             recipient,
             transferAmountWei);
-    SignerResponse<JsonRpcErrorResponse> signerResponse =
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
-    assertThat(signerResponse.rpcResponse().getError()).isEqualTo(DOWNSTREAM_NODE_TIMED_OUT);
+    assertThat(signerResponse.rpcResponse().getError())
+        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
   }
 }
