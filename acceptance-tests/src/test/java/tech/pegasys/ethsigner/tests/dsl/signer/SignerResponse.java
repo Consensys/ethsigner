@@ -19,7 +19,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 public class SignerResponse<T extends JsonRpcResponse> {
 
   private final T rpcResponse;
-  private HttpResponseStatus status;
+  private final HttpResponseStatus status;
 
   public SignerResponse(final T rpcResponse, final HttpResponseStatus status) {
     this.rpcResponse = rpcResponse;
