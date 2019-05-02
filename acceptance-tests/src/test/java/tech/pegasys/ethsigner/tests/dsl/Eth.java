@@ -61,7 +61,14 @@ public class Eth {
     return jsonRpc.ethGetCode(address, DefaultBlockParameterName.LATEST).send().getResult();
   }
 
-  public BigInteger getBalance(String recipient) throws IOException {
-    return jsonRpc.ethGetBalance(recipient, DefaultBlockParameterName.LATEST).send().getBalance();
+  public BigInteger getBalance(final String account) throws IOException {
+    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
+  }
+
+  public String call(final Transaction contractViewOperation) throws IOException {
+    return jsonRpc
+        .ethCall(contractViewOperation, DefaultBlockParameterName.LATEST)
+        .send()
+        .getValue();
   }
 }
