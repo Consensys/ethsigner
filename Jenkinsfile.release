@@ -9,7 +9,10 @@ void tryAddKnownHost(String hostUrl){
 
 pipeline {
     agent {
-        docker { image 'openjdk:11-jdk-stretch' }
+        docker {
+          image 'pegasyseng/pantheon-build:0.0.5-jdk8'
+          args '-v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace'
+        }
     }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: '[MANDATORY] The name of the branch to create the release from')
@@ -51,7 +54,7 @@ pipeline {
                               }
 
 
-                            sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
+                            sh "./gradlew release -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
                     }
                 }
