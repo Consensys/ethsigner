@@ -10,13 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.requesthandler;
+package tech.pegasys.ethsigner.jsonrpc.exception;
 
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 
-import io.vertx.ext.web.RoutingContext;
+public class JsonRpcException extends RuntimeException {
+  private final JsonRpcError jsonRpcError;
 
-public interface JsonRpcRequestHandler {
+  public JsonRpcException(final JsonRpcError jsonRpcError) {
+    this.jsonRpcError = jsonRpcError;
+  }
 
-  void handle(RoutingContext context, JsonRpcRequest rpcRequest);
+  public JsonRpcError getJsonRpcError() {
+    return jsonRpcError;
+  }
 }

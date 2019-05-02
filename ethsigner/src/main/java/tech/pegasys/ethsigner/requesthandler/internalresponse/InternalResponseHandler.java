@@ -14,40 +14,42 @@ package tech.pegasys.ethsigner.requesthandler.internalresponse;
 
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class InternalResponseHandler extends JsonRpcRequestHandler {
+public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  private final HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
 
   public InternalResponseHandler(
       final HttpResponseFactory responder, final BodyProvider responseBodyProvider) {
-    super(responder);
+    this.responder = responder;
     this.responseBodyProvider = responseBodyProvider;
   }
 
   @Override
-  public void handle(final HttpServerRequest httpServerRequest, final JsonRpcRequest rpcRequest) {
+  public void handle(final RoutingContext context, final JsonRpcRequest rpcRequest) {
     LOG.debug("Internally responding to {}, id={}", rpcRequest.getMethod(), rpcRequest.getId());
     final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
 
     if (providedBody.hasError()) {
-      reportError(httpServerRequest, rpcRequest, providedBody.error());
+      context.fail(new JsonRpcException(providedBody.error()));
     } else {
       final JsonRpcSuccessResponse result =
           Json.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
-      responder.create(httpServerRequest, HttpResponseStatus.OK.code(), result);
+      responder.create(context.request(), HttpResponseStatus.OK.code(), result);
     }
   }
 }

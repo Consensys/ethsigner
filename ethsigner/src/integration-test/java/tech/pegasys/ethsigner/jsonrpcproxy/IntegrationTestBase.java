@@ -59,6 +59,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
@@ -119,7 +120,7 @@ public class IntegrationTestBase {
             serialiser,
             httpClientOptions,
             httpServerOptions,
-            Duration.ofSeconds(5),
+            Duration.ofSeconds(1),
             new Web3jNonceProvider(web3j, serialiser.getAddress()));
     runner.start();
 
@@ -168,6 +169,19 @@ public class IntegrationTestBase {
                 .withBody(response.getBody())
                 .withHeaders(headers)
                 .withStatusCode(response.getStatusCode()));
+  }
+
+  public void setUpEthNodeResponse(
+      final EthNodeRequest request, final EthNodeResponse response, final Delay delay) {
+    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    clientAndServer
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response()
+                .withBody(response.getBody())
+                .withHeaders(headers)
+                .withStatusCode(response.getStatusCode())
+                .withDelay(delay));
   }
 
   public void sendRequestThenVerifyResponse(

@@ -77,7 +77,7 @@ public class Runner {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
-        new RequestMapper(new PassThroughHandler(responseFactory, downStreamConnection));
+        new RequestMapper(new PassThroughHandler(downStreamConnection));
 
     requestMapper.addHandler(
         "eth_sendTransaction",

@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.http;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
@@ -103,8 +105,9 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .handler(TimeoutHandler.create(httpRequestTimeout.toMillis()))
+        .handler(TimeoutHandler.create(httpRequestTimeout.toMillis(), GATEWAY_TIMEOUT.code()))
         .failureHandler(new LogErrorHandler())
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(this::handleJsonRpc);
     router.route().handler(context -> {});
     return router;
@@ -118,7 +121,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
       final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
-      handler.handle(context.request(), request);
+      handler.handle(context, request);
     } catch (final DecodeException | IllegalArgumentException e) {
       sendParseErrorResponse(context, e);
     } catch (Exception e) {

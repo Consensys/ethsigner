@@ -80,7 +80,7 @@ public class Signer {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Signer to become responsive...");
-    waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+    waitFor(() -> assertThat(jsonRpc.ethAccounts().send().hasError()).isFalse());
     LOG.info("Signer is now responsive");
   }
 }
