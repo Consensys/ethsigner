@@ -51,7 +51,7 @@ pipeline {
                               }
 
 
-                            sh "./gradlew release -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
+                            sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
                     }
                 }
