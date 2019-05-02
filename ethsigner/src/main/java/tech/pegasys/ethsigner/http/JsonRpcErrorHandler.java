@@ -48,8 +48,8 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
-        () -> context.request().method(),
-        () -> context.request().absoluteURI(),
+        context.request()::method,
+        context.request()::absoluteURI,
         () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
         () -> Json.encode(errorResponse));
     httpResponseFactory.create(context.request(), statusCode, errorResponse);
@@ -58,7 +58,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {
     try {
       return Optional.of(Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class));
-    } catch (DecodeException e) {
+    } catch (final DecodeException e) {
       LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
       return Optional.empty();
     }
@@ -74,7 +74,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   private JsonRpcError jsonRpcError(final RoutingContext context) {
     if (context.failure() instanceof JsonRpcException) {
-      JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
+      final JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
       return jsonRpcException.getJsonRpcError();
     } // in case of a timeout we may not have a failure exception so we use the status code
     else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
