@@ -27,9 +27,10 @@ import org.web3j.utils.Convert;
 
 public class PassThroughAcceptanceTests extends AcceptanceTestBase {
 
-  static final String TRANFER_AMOUNT_ETHER = "10";
+  public static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+  static final String TRANSFER_AMOUNT_ETHER = "10";
   static final BigInteger TRANSFER_AMOUNT_WEI =
-      Convert.toWei(TRANFER_AMOUNT_ETHER, Convert.Unit.ETHER).toBigIntegerExact();
+      Convert.toWei(TRANSFER_AMOUNT_ETHER, Convert.Unit.ETHER).toBigIntegerExact();
 
   @Test
   public void ethGetTransactionCountReturnCorrectNumber() throws Exception {

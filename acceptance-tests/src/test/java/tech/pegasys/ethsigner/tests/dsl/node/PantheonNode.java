@@ -56,7 +56,6 @@ public class PantheonNode implements Node {
   private final Contracts contracts;
   private final Transactions transactions;
   private final Web3j jsonRpc;
-  private final Eth eth;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
     LOG.info("Pantheon Web3j service targeting: {} ", config.getUrl());
@@ -71,7 +70,7 @@ public class PantheonNode implements Node {
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
     this.accounts = new Accounts(jsonRpc);
-    this.eth = new Eth(jsonRpc);
+    final Eth eth = new Eth(jsonRpc);
     this.contracts = new Contracts(eth, jsonRpc);
     this.transactions = new Transactions(eth);
   }

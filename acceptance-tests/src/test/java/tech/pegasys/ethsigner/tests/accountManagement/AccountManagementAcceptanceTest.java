@@ -26,13 +26,12 @@ public class AccountManagementAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void ethSignerAccountsReturnsAccountForPrivKey() throws Exception {
     List<String> accounts = ethSigner().accounts().list();
-    assertThat(accounts.size())
-        .isEqualTo(1); // for Pantheon there should always only be one account
+    assertThat(accounts.size()).isEqualTo(1);
     assertThat(ethNode().accounts().balance(accounts.get(0))).isNotNull();
   }
 
   @Test
-  public void ethAccountsRetrunsNoAccounts() throws IOException {
+  public void ethAccountsReturnsNoAccounts() throws IOException {
     assertThat(ethNode().accounts().list().size()).isEqualTo(0);
   }
 }

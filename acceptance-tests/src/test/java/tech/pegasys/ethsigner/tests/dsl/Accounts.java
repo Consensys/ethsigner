@@ -43,8 +43,8 @@ public class Accounts {
     return balance(account.address());
   }
 
-  public BigInteger balance(final String account) throws IOException {
-    return jsonRpc.ethGetBalance(account, DefaultBlockParameterName.LATEST).send().getBalance();
+  public BigInteger balance(final String address) throws IOException {
+    return jsonRpc.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
   }
 
   public List<String> list() throws IOException {

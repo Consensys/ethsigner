@@ -66,4 +66,8 @@ public class Transactions {
   public BigInteger count(String address) throws IOException {
     return eth.getTransactionCount(address);
   }
+
+  public BigInteger count(Account account) throws IOException {
+    return count(account.address());
+  }
 }

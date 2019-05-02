@@ -22,7 +22,6 @@ import java.util.Optional;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthAccounts;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -44,7 +43,6 @@ public class Eth {
   }
 
   public List<String> getAccounts() throws IOException {
-    EthAccounts ethAccounts = jsonRpc.ethAccounts().send();
     return jsonRpc.ethAccounts().send().getAccounts();
   }
 

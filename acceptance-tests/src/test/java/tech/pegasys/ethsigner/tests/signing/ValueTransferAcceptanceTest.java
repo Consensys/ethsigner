@@ -31,27 +31,27 @@ import org.web3j.utils.Convert.Unit;
 
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
+  public static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final long NO_OF_TRANSACTIONS = 50;
 
   @Test
   public void valueTransfer() throws IOException {
-    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
-    final BigInteger startBalance = ethNode().accounts().balance(recipient);
+    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
             null,
             GAS_PRICE,
             INTRINSIC_GAS,
-            recipient,
+            RECIPIENT,
             transferAmountWei);
 
     final String hash = ethSigner().transactions().submit(transaction);
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
-    final BigInteger actualEndBalance = ethNode().accounts().balance(recipient);
+    final BigInteger actualEndBalance = ethNode().accounts().balance(RECIPIENT);
     assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
   }
 
