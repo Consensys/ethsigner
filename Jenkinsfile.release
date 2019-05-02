@@ -11,7 +11,7 @@ pipeline {
     agent {
         docker {
           image 'pegasyseng/pantheon-build:0.0.5-jdk8'
-          args '-v /var/jenkins-slave-workspace:/var/jenkins-slave-workspace'
+          args '-v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace'
         }
     }
     parameters {
