@@ -69,8 +69,8 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    this.accounts = new Accounts(jsonRpc);
     final Eth eth = new Eth(jsonRpc);
+    this.accounts = new Accounts(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.transactions = new Transactions(eth);
   }
