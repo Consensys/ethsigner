@@ -14,15 +14,21 @@ package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.json.Json;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.ClientConnectionException;
 
 public class Eth {
 
@@ -58,5 +64,21 @@ public class Eth {
         .ethCall(contractViewOperation, DefaultBlockParameterName.LATEST)
         .send()
         .getValue();
+  }
+
+  public SignerResponse<JsonRpcErrorResponse> parseException(final ClientConnectionException e) {
+    final String message = e.getMessage();
+    final String errorBody = message.substring(message.indexOf(":") + 1).trim();
+    final String[] errorParts = errorBody.split(";", 2);
+    if (errorParts.length == 2) {
+      final String statusCode = errorParts[0];
+      final HttpResponseStatus status = HttpResponseStatus.valueOf(Integer.parseInt(statusCode));
+      final String jsonBody = errorParts[1];
+      final JsonRpcErrorResponse jsonRpcResponse =
+          Json.decodeValue(jsonBody, JsonRpcErrorResponse.class);
+      return new SignerResponse<>(jsonRpcResponse, status);
+    } else {
+      throw new RuntimeException("Unable to parse web3j exception message", e);
+    }
   }
 }
