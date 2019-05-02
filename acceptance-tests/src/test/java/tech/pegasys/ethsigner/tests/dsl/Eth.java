@@ -46,7 +46,7 @@ public class Eth {
     return jsonRpc.ethAccounts().send().getAccounts();
   }
 
-  public BigInteger getTransactionCount(String address) throws IOException {
+  public BigInteger getTransactionCount(final String address) throws IOException {
     return jsonRpc
         .ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
         .send()

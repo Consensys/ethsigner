@@ -31,7 +31,7 @@ import org.web3j.utils.Convert.Unit;
 
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
-  public static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+  private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final long NO_OF_TRANSACTIONS = 50;
 
   @Test

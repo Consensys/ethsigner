@@ -32,6 +32,6 @@ public class AccountManagementAcceptanceTest extends AcceptanceTestBase {
 
   @Test
   public void ethAccountsReturnsNoAccounts() throws IOException {
-    assertThat(ethNode().accounts().list().size()).isEqualTo(0);
+    assertThat(ethNode().accounts().list()).isEmpty();
   }
 }

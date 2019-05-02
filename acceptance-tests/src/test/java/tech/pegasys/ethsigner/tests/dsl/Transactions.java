@@ -63,11 +63,11 @@ public class Transactions {
     }
   }
 
-  public BigInteger count(String address) throws IOException {
+  public BigInteger count(final String address) throws IOException {
     return eth.getTransactionCount(address);
   }
 
-  public BigInteger count(Account account) throws IOException {
+  public BigInteger count(final Account account) throws IOException {
     return count(account.address());
   }
 }
