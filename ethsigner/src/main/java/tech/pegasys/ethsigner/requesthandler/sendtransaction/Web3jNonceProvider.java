@@ -50,7 +50,7 @@ public class Web3jNonceProvider implements NonceProvider {
       return transactionCount;
     } catch (final IOException e) {
       LOG.info("Failed to determine nonce from downstream handler.", e);
-      throw new RuntimeException("Unable to determine nonce from web3j provider.");
+      throw new RuntimeException("Unable to determine nonce from web3j provider.", e);
     }
   }
 }

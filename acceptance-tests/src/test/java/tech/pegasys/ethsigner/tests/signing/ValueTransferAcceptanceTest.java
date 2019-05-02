@@ -12,14 +12,17 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -70,8 +73,11 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             recipientAddress,
             transferAmountWei);
 
-    final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
-    assertThat(error.getError()).isEqualTo(JsonRpcError.TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE);
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner().transactions().submitExceptional(transaction);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.jsonRpc().getError())
+        .isEqualTo(TRANSACTION_UPFRONT_COST_EXCEEDS_BALANCE);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
@@ -94,8 +100,11 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             recipientAddress,
             senderStartBalance);
 
-    final JsonRpcErrorResponse error = ethSigner().transactions().submitExceptional(transaction);
-    assertThat(error.getError()).isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner().transactions().submitExceptional(transaction);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.jsonRpc().getError())
+        .isEqualTo(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
 
     final BigInteger senderEndBalance = ethNode().accounts().balance(sender);
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
