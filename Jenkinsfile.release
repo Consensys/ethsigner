@@ -18,44 +18,42 @@ void tryAddKnownHost(String hostUrl) {
 
 
 node {
-    ws("/var/jenkins-slave-workspace/workspace/EthSignerRelease") {
-        checkout scm
-        docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
-            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
-                stage('Release') {
-                    sshagent(
-                            credentials: ['pegasys-admin-github-ssh-private-key']
-                    ) {
-                        withCredentials([
-                                usernamePassword(
-                                        credentialsId: 'pegasys-bintray',
-                                        usernameVariable: 'BINTRAY_USER',
-                                        passwordVariable: 'BINTRAY_KEY'
-                                )
+    checkout scm
+    docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
+        docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+            stage('Release') {
+                sshagent(
+                        credentials: ['pegasys-admin-github-ssh-private-key']
+                ) {
+                    withCredentials([
+                            usernamePassword(
+                                    credentialsId: 'pegasys-bintray',
+                                    usernameVariable: 'BINTRAY_USER',
+                                    passwordVariable: 'BINTRAY_KEY'
+                            )
+                    ]) {
+                        withEnv([
+                                'GIT_COMMITTER_NAME="PegaSys Admin"',
+                                'GIT_COMMITTER_EMAIL="pegasys.manager@gmail.com"',
+                                'GIT_AUTHOR_NAME="PegaSys Admin"',
+                                'GIT_AUTHOR_EMAIL="pegasys.manager@gmail.com"'
                         ]) {
-                            withEnv([
-                                    'GIT_COMMITTER_NAME="PegaSys Admin"',
-                                    'GIT_COMMITTER_EMAIL="pegasys.manager@gmail.com"',
-                                    'GIT_AUTHOR_NAME="PegaSys Admin"',
-                                    'GIT_AUTHOR_EMAIL="pegasys.manager@gmail.com"'
-                            ]) {
-                                tryAddKnownHost('github.com')
+                            tryAddKnownHost('github.com')
 
-                                script {
-                                    releaseVersion = ''
-                                    if (params.RELEASE_VERSION?.trim()) {
-                                        releaseVersion = "-Prelease.releaseVersion=${params.RELEASE_VERSION}"
-                                    }
-
-                                    nextVersion = ''
-                                    if (params.NEXT_VERSION?.trim()) {
-                                        nextVersion = "-Prelease.newVersion=${params.NEXT_VERSION}"
-                                    }
+                            script {
+                                releaseVersion = ''
+                                if (params.RELEASE_VERSION?.trim()) {
+                                    releaseVersion = "-Prelease.releaseVersion=${params.RELEASE_VERSION}"
                                 }
 
-
-                                sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
+                                nextVersion = ''
+                                if (params.NEXT_VERSION?.trim()) {
+                                    nextVersion = "-Prelease.newVersion=${params.NEXT_VERSION}"
+                                }
                             }
+
+
+                            sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
                     }
                 }
