@@ -58,10 +58,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
             });
 
     proxyRequest.headers().setAll(httpServerRequest.headers());
-    proxyRequest.headers().remove("Content-length"); //required to be recreated when using curl
-    proxyRequest.end(Json.encodeToBuffer(request));
-
-    LOG.debug("Afterwards = {}", proxyRequest.headers().get(("Content-length")));
+    proxyRequest.end(context.getBody());
     logRequest(request, httpServerRequest);
   }
 
