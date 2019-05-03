@@ -16,7 +16,6 @@ properties([
         ])
 ])
 
-
 node {
     checkout scm
     docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
@@ -51,7 +50,6 @@ node {
                                     nextVersion = "-Prelease.newVersion=${params.NEXT_VERSION}"
                                   }
                             }
-
 
                             sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
