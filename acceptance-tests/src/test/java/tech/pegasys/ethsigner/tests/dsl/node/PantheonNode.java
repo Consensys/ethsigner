@@ -161,15 +161,7 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    final URL resource = PantheonNode.class.getResource(config.getGenesisFilePath());
-    final String genesisFilePath;
-    try {
-      genesisFilePath = URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
-    } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode genesis filepath.");
-      throw new RuntimeException("Illegal string decoding");
-    }
-
+    final String genesisFilePath = getGenesisFilePath(config.getGenesisFilePath());
     LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
@@ -205,6 +197,16 @@ public class PantheonNode implements Node {
       throw new RuntimeException(
           "Before you run the acceptance tests, execute 'docker pull pegasyseng/pantheon:latest'",
           e);
+    }
+  }
+
+  private String getGenesisFilePath(final String filename) {
+    final URL resource = PantheonNode.class.getResource(filename);
+    try {
+      return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
+    } catch (final UnsupportedEncodingException ex) {
+      LOG.error("Unsupported encoding used to decode genesis filepath.");
+      throw new RuntimeException("Illegal string decoding");
     }
   }
 
