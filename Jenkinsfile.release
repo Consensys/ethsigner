@@ -1,8 +1,8 @@
 #!/usr/bin/env groovy
-void tryAddKnownHost(String hostUrl) {
+void tryAddKnownHost(String hostUrl){
     // ssh-keygen -F ${hostUrl} will fail (in bash that means status code != 0) if ${hostUrl} is not yet a known host
-    def statusCode = sh script: "ssh-keygen -F ${hostUrl}", returnStatus: true
-    if (statusCode != 0) {
+    def statusCode = sh script:"ssh-keygen -F ${hostUrl}", returnStatus:true
+    if(statusCode != 0){
         sh "mkdir -p ~/.ssh"
         sh "ssh-keyscan ${hostUrl} >> ~/.ssh/known_hosts"
     }
