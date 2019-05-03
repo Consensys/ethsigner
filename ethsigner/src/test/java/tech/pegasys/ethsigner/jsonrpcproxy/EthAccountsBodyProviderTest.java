@@ -33,8 +33,9 @@ public class EthAccountsBodyProviderTest {
     final int id = 1;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
 
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts", emptyList());
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
+    request.setParams(emptyList());
 
     final JsonRpcBody body = bodyProvider.getBody(request);
     final JsonObject jsonObj = new JsonObject(body.body());
@@ -51,8 +52,9 @@ public class EthAccountsBodyProviderTest {
     final int id = 1;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
 
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts", singletonList(5));
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
+    request.setParams(singletonList(5));
 
     final JsonRpcBody body = bodyProvider.getBody(request);
     assertThat(body.hasError()).isTrue();
@@ -65,8 +67,9 @@ public class EthAccountsBodyProviderTest {
     final int id = 1;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
 
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts", 5);
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
+    request.setParams(5);
 
     final JsonRpcBody body = bodyProvider.getBody(request);
     assertThat(body.hasError()).isTrue();
@@ -79,7 +82,7 @@ public class EthAccountsBodyProviderTest {
     final int id = 1;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
 
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts", null);
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
 
     final JsonRpcBody body = bodyProvider.getBody(request);
