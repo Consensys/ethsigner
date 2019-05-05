@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.CONNECTION_TO
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import org.junit.After;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -31,6 +30,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -58,7 +58,6 @@ public class TimeoutAcceptanceTest {
       ethSigner.shutdown();
     }
   }
-
 
   private Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
