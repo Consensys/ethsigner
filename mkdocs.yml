@@ -10,28 +10,28 @@
 # specific language governing permissions and limitations under the License.
 
 # Project information
-site_name: Orion
-site_url: https://docs.orion.pegasys.tech/en/latest/
-site_description: Orion Transaction Manager documentation.
-site_author: Orion community
-copyright: Orion and its documentation are licensed under Apache 2.0 license /
+site_name: EthSigner
+site_url: https://docs.ethsigner.pegasys.tech/en/latest/
+site_description: EthSigner Transaction Signer documentation.
+site_author: EthSigner community
+copyright: EthSigner and its documentation are licensed under Apache 2.0 license /
   This <a href="https://readthedocs.org/">Readthedocs.org</a> documentation is maintained with love by <a href="https://pegasys.tech/">PegaSys</a>.
 
 #extra project info and template customisation
 extra:
   support:
-    gitter: https://gitter.im/PegaSysEng/orion
+    gitter: https://gitter.im/PegaSysEng/EthSigner
     email: support@pegasys.tech
     pegasys_website: https://pegasys.tech/
     issues: https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10000
   google:
-    site_verification: 'za1cLzyS6LXDGO-pMzvfQdYTZ0Zc67uZtY0asA4YXZ0'
-    tag_manager: 'GTM-5B7N84J'
+#    site_verification: 'za1cLzyS6LXDGO-pMzvfQdYTZ0Zc67uZtY0asA4YXZ0'
+#    tag_manager: 'GTM-5B7N84J'
 
 
 # Repository
-repo_name: PegaSysEng/orion
-repo_url: https://github.com/PegaSysEng/orion
+repo_name: PegaSysEng/EthSigner
+repo_url: https://github.com/PegaSysEng/ethsigner
 
 theme:
   name: material
