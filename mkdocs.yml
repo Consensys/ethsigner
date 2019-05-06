@@ -37,10 +37,11 @@ theme:
   name: material
   custom_dir: docs/custom_theme
   palette:
-    primary: deep-purple
+    primary: orange
     accent: teal
   favicon: favicon.ico
-  logo: orion_logo.svg
+  logo:
+    icon: lock
 nav:
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md

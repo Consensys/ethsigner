@@ -8,7 +8,7 @@ description: EthSigner is an open-source Ethereum transaction signer developed u
 
 //TODO
 
-## What can you do with Pantheon?
+## What can you do with EthSigner?
 
 EthSigner includes a [command line interface](Reference/EthSigner-CLI.md)
 //TODO
