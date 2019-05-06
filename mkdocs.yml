@@ -1,0 +1,77 @@
+# Copyright 2018 ConsenSys AG.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
+# Project information
+site_name: Orion
+site_url: https://docs.orion.pegasys.tech/en/latest/
+site_description: Orion Transaction Manager documentation.
+site_author: Orion community
+copyright: Orion and its documentation are licensed under Apache 2.0 license /
+  This <a href="https://readthedocs.org/">Readthedocs.org</a> documentation is maintained with love by <a href="https://pegasys.tech/">PegaSys</a>.
+
+#extra project info and template customisation
+extra:
+  support:
+    gitter: https://gitter.im/PegaSysEng/orion
+    email: support@pegasys.tech
+    pegasys_website: https://pegasys.tech/
+    issues: https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10000
+  google:
+    site_verification: 'za1cLzyS6LXDGO-pMzvfQdYTZ0Zc67uZtY0asA4YXZ0'
+    tag_manager: 'GTM-5B7N84J'
+
+
+# Repository
+repo_name: PegaSysEng/orion
+repo_url: https://github.com/PegaSysEng/orion
+
+theme:
+  name: material
+  custom_dir: docs/custom_theme
+  palette:
+    primary: deep-purple
+    accent: teal
+  favicon: favicon.ico
+  logo: orion_logo.svg
+nav:
+  - Reference:
+    - EthSigner Command Line: Reference/EthSigner-CLI.md
+
+
+markdown_extensions:
+  - toc:
+      permalink: 
+      toc_depth: 3
+  - codehilite
+  - markdown_include.include:
+      base_path: docs
+  - admonition
+  - footnotes
+  - def_list
+  - abbr
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.keys
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - meta
+  - smarty
+
+plugins:
+  - search
