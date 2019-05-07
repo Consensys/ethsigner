@@ -76,8 +76,8 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   private void logRequest(final JsonRpcRequest jsonRequest, final HttpServerRequest httpRequest) {
     LOG.debug(
         "Proxying method: {}, uri: {}, body: {}",
-        () -> httpRequest.method(),
-        () -> httpRequest.absoluteURI(),
+        httpRequest::method,
+        httpRequest::absoluteURI,
         () -> Json.encodePrettily(jsonRequest));
   }
 }
