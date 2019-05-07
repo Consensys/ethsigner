@@ -21,24 +21,23 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.Objects;
 
+@JsonPropertyOrder({"jsonrpc", "method", "params", "id"})
 public class JsonRpcRequest {
 
-  private JsonRpcRequestId id;
   private final String method;
-  private final Object params;
   private final String version;
+  private JsonRpcRequestId id;
+  private Object params;
 
   @JsonCreator
   public JsonRpcRequest(
-      @JsonProperty("jsonrpc") final String version,
-      @JsonProperty("method") final String method,
-      @JsonProperty("params") final Object params) {
+      @JsonProperty("jsonrpc") final String version, @JsonProperty("method") final String method) {
     this.version = version;
     this.method = method;
-    this.params = params;
     if (method == null) {
       throw new InvalidJsonRpcRequestException("Field 'method' is required");
     }
@@ -68,6 +67,11 @@ public class JsonRpcRequest {
   @JsonSetter("id")
   public void setId(final JsonRpcRequestId id) {
     this.id = id;
+  }
+
+  @JsonSetter("params")
+  public void setParams(final Object params) {
+    this.params = params;
   }
 
   @Override

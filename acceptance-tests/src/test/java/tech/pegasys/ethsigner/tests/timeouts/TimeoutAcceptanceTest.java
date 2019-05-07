@@ -30,6 +30,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -47,6 +48,15 @@ public class TimeoutAcceptanceTest {
     ethSigner = new Signer(signerConfig, nodeConfig);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+
+    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
+  }
+
+  @After
+  public void tearDown() {
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
   }
 
   private Account richBenefactor() {

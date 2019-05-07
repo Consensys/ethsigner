@@ -1,3 +1,4 @@
+#!/usr/bin/env groovy
 void tryAddKnownHost(String hostUrl){
     // ssh-keygen -F ${hostUrl} will fail (in bash that means status code != 0) if ${hostUrl} is not yet a known host
     def statusCode = sh script:"ssh-keygen -F ${hostUrl}", returnStatus:true
@@ -7,19 +8,19 @@ void tryAddKnownHost(String hostUrl){
     }
 }
 
-pipeline {
-    agent {
-        docker { image 'openjdk:11-jdk-stretch' }
-    }
-    parameters {
-        string(name: 'BRANCH_NAME', defaultValue: 'master', description: '[MANDATORY] The name of the branch to create the release from')
-        string(name: 'RELEASE_VERSION', defaultValue: '', description: '[OPTIONAL] When empty: defaults to the current project version')
-        string(name: 'NEXT_VERSION', defaultValue: '', description: '[OPTIONAL] When empty: defaults to next patch version after current project version')
-    }
+properties([
+        parameters([
+                string(name: 'BRANCH_NAME', defaultValue: 'master', description: '[MANDATORY] The name of the branch to create the release from'),
+                string(name: 'RELEASE_VERSION', defaultValue: '', description: '[OPTIONAL] When empty: defaults to the current project version'),
+                string(name: 'NEXT_VERSION', defaultValue: '', description: '[OPTIONAL] When empty: defaults to next patch version after current project version')
+        ])
+])
 
-    stages {
-        stage('Release') {
-            steps {
+node {
+    checkout scm
+    docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
+        docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+            stage('Release') {
                 sshagent(
                     credentials: ['pegasys-admin-github-ssh-private-key']
                 ) {
@@ -38,20 +39,19 @@ pipeline {
                         ]) {
                             tryAddKnownHost('github.com')
 
-                             script{
-                                  releaseVersion = ''
-                                  if( params.RELEASE_VERSION?.trim() ){
-                                      releaseVersion = "-Prelease.releaseVersion=${params.RELEASE_VERSION}"
-                                 }
+                            script{
+                                releaseVersion = ''
+                                if( params.RELEASE_VERSION?.trim() ){
+                                    releaseVersion = "-Prelease.releaseVersion=${params.RELEASE_VERSION}"
+                                }
 
                                   nextVersion = ''
                                   if( params.NEXT_VERSION?.trim() ){
-                                      nextVersion = "-Prelease.newVersion=${params.NEXT_VERSION}"
+                                    nextVersion = "-Prelease.newVersion=${params.NEXT_VERSION}"
                                   }
-                              }
+                            }
 
-
-                            sh "./gradlew release -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
+                            sh "./gradlew release --max-workers=1 -Prelease.useAutomaticVersion=true -Prelease.branch=${params.BRANCH_NAME} ${releaseVersion} ${nextVersion}"
                         }
                     }
                 }

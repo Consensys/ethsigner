@@ -84,9 +84,8 @@ public class TransactionTransmitter {
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
-    final JsonRpcRequest sendRawTransaction =
-        new JsonRpcRequest(
-            JSON_RPC_VERSION, JSON_RPC_METHOD, singletonList(signedTransactionHexString));
+    final JsonRpcRequest sendRawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
+    sendRawTransaction.setParams(singletonList(signedTransactionHexString));
     sendRawTransaction.setId(context.getId());
 
     try {

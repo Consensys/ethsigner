@@ -60,8 +60,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
 
     proxyRequest.headers().setAll(httpServerRequest.headers());
     proxyRequest.setChunked(false);
-
-    proxyRequest.end(Json.encodeToBuffer(request));
+    proxyRequest.end(context.getBody());
     logRequest(request, httpServerRequest);
   }
 

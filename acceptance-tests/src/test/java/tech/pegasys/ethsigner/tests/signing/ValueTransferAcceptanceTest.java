@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.TRANSACTION_U
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
@@ -34,25 +35,27 @@ import org.web3j.utils.Convert.Unit;
 
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
+  private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+  private static final long NO_OF_TRANSACTIONS = 50;
+
   @Test
   public void valueTransfer() throws IOException {
-    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
-    final BigInteger startBalance = ethNode().accounts().balance(recipient);
+    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
-            richBenefactor().nextNonceAndIncrement(),
+            null,
             GAS_PRICE,
             INTRINSIC_GAS,
-            recipient,
+            RECIPIENT,
             transferAmountWei);
 
     final String hash = ethSigner().transactions().submit(transaction);
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
-    final BigInteger actualEndBalance = ethNode().accounts().balance(recipient);
+    final BigInteger actualEndBalance = ethNode().accounts().balance(RECIPIENT);
     assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
   }
 
@@ -108,5 +111,50 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final BigInteger recipientEndBalance = ethNode().accounts().balance(recipientAddress);
     assertThat(senderEndBalance).isEqualTo(senderStartBalance);
     assertThat(recipientEndBalance).isEqualTo(recipientStartBalance);
+  }
+
+  @Test
+  public void multipleValueTransfers() throws IOException {
+    final BigInteger transferAmountWei = Convert.toWei("1", Unit.ETHER).toBigIntegerExact();
+    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            richBenefactor().address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
+    String hash = null;
+    for (int i = 0; i < NO_OF_TRANSACTIONS; i++) {
+      hash = ethSigner().transactions().submit(transaction);
+    }
+    ethNode().transactions().awaitBlockContaining(hash);
+
+    final BigInteger endBalance = ethNode().accounts().balance(RECIPIENT);
+    final BigInteger numberOfTransactions = BigInteger.valueOf(NO_OF_TRANSACTIONS);
+    assertThat(endBalance)
+        .isEqualTo(startBalance.add(transferAmountWei.multiply(numberOfTransactions)));
+  }
+
+  @Test
+  public void valueTransferNonceTooLow() throws IOException {
+    valueTransfer(); // call this test to increment the nonce
+    final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            richBenefactor().address(),
+            BigInteger.ZERO,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
+    final SignerResponse<JsonRpcErrorResponse> jsonRpcErrorResponseSignerResponse =
+        ethSigner().transactions().submitExceptional(transaction);
+
+    assertThat(jsonRpcErrorResponseSignerResponse.jsonRpc().getError())
+        .isEqualTo(JsonRpcError.NONCE_TOO_LOW);
   }
 }

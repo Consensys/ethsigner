@@ -67,7 +67,7 @@ public class Signer {
   }
 
   public Transactions transactions() {
-    return transactions;
+    return this.transactions;
   }
 
   public Contracts contracts() {
