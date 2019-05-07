@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -27,6 +28,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -90,7 +92,7 @@ public class ReplayProtectionAcceptanceTest {
   public void wrongChainId() throws IOException {
     setUp("eth_hash_4404.json");
 
-    final JsonRpcErrorResponse error =
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner
             .transactions()
             .submitExceptional(
@@ -102,14 +104,15 @@ public class ReplayProtectionAcceptanceTest {
                     RECIPIENT,
                     TRANSFER_AMOUNT_WEI));
 
-    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
   public void unnecessaryChainId() throws IOException {
     setUp("eth_hash_2018_no_replay_protection.json");
 
-    final JsonRpcErrorResponse error =
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner
             .transactions()
             .submitExceptional(
@@ -121,6 +124,7 @@ public class ReplayProtectionAcceptanceTest {
                     RECIPIENT,
                     TRANSFER_AMOUNT_WEI));
 
-    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
+    assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
   }
 }

@@ -20,7 +20,11 @@ import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -33,7 +37,6 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -69,8 +72,8 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    this.accounts = new Accounts(jsonRpc);
     final Eth eth = new Eth(jsonRpc);
+    this.accounts = new Accounts(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.transactions = new Transactions(eth);
   }
@@ -158,11 +161,10 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    @SuppressWarnings("unstable")
-    final String genesis = Resources.getResource(config.getGenesisFilePath()).getPath();
-    LOG.info("Path to Genesis file: {}", genesis);
+    final String genesisFilePath = getGenesisFilePath(config.getGenesisFilePath());
+    LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
-    final Bind genesisBinding = new Bind(genesis, genesisVolume);
+    final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
     final HostConfig hostConfig =
         HostConfig.newHostConfig()
             .withPortBindings(tcpPortBinding(config), wsPortBinding(config))
@@ -195,6 +197,16 @@ public class PantheonNode implements Node {
       throw new RuntimeException(
           "Before you run the acceptance tests, execute 'docker pull pegasyseng/pantheon:latest'",
           e);
+    }
+  }
+
+  private String getGenesisFilePath(final String filename) {
+    final URL resource = PantheonNode.class.getResource(filename);
+    try {
+      return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
+    } catch (final UnsupportedEncodingException ex) {
+      LOG.error("Unsupported encoding used to decode genesis filepath.");
+      throw new RuntimeException("Illegal string decoding");
     }
   }
 

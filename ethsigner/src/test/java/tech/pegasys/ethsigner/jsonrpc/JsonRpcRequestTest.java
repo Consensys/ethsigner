@@ -86,16 +86,20 @@ public class JsonRpcRequestTest {
 
   @Test
   public void ensureEqualityWorksForLists() {
-    final JsonRpcRequest first = new JsonRpcRequest("2.0", "method", Lists.newArrayList(1, 2));
-    final JsonRpcRequest second = new JsonRpcRequest("2.0", "method", Lists.newArrayList(1, 2));
+    final JsonRpcRequest first = new JsonRpcRequest("2.0", "method");
+    first.setParams(Lists.newArrayList(1, 2));
+    final JsonRpcRequest second = new JsonRpcRequest("2.0", "method");
+    second.setParams(Lists.newArrayList(1, 2));
 
     assertThat(first.equals(second)).isTrue();
   }
 
   @Test
   public void ensureEqualityWorksForArrays() {
-    final JsonRpcRequest first = new JsonRpcRequest("2.0", "method", new Object[] {1, 2});
-    final JsonRpcRequest second = new JsonRpcRequest("2.0", "method", new Object[] {1, 2});
+    final JsonRpcRequest first = new JsonRpcRequest("2.0", "method");
+    first.setParams(new Object[] {1, 2});
+    final JsonRpcRequest second = new JsonRpcRequest("2.0", "method");
+    second.setParams(new Object[] {1, 2});
 
     assertThat(first.equals(second)).isTrue();
   }

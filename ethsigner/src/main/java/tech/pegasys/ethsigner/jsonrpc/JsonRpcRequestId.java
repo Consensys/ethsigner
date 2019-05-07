@@ -18,6 +18,7 @@ import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public class JsonRpcRequestId {
@@ -79,5 +80,10 @@ public class JsonRpcRequestId {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("id", id).toString();
   }
 }
