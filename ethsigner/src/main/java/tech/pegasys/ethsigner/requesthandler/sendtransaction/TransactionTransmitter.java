@@ -151,9 +151,9 @@ public class TransactionTransmitter {
 
     LOG.debug(
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        () -> context.getInitialRequest().method(),
-        () -> context.getInitialRequest().absoluteURI(),
-        () -> context.getRawTransactionBuilder(),
+        context.getInitialRequest()::method,
+        context.getInitialRequest()::absoluteURI,
+        context::getRawTransactionBuilder,
         () -> Json.encode(errorResponse));
 
     responder.create(
