@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 import org.web3j.protocol.Web3j;
@@ -39,6 +40,17 @@ public class Eth {
     assertThat(response.getError()).isNull();
 
     return response.getTransactionHash();
+  }
+
+  public List<String> getAccounts() throws IOException {
+    return jsonRpc.ethAccounts().send().getAccounts();
+  }
+
+  public BigInteger getTransactionCount(final String address) throws IOException {
+    return jsonRpc
+        .ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
+        .send()
+        .getTransactionCount();
   }
 
   public Optional<TransactionReceipt> getTransactionReceipt(final String hash) throws IOException {

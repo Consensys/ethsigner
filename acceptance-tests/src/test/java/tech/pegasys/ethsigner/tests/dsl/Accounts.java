@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 public class Accounts {
 
@@ -39,7 +40,11 @@ public class Accounts {
     return balance(account.address());
   }
 
-  public BigInteger balance(final String account) throws IOException {
-    return eth.getBalance(account);
+  public BigInteger balance(final String address) throws IOException {
+    return eth.getBalance(address);
+  }
+
+  public List<String> list() throws IOException {
+    return eth.getAccounts();
   }
 }
