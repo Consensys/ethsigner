@@ -50,7 +50,7 @@ public class Transactions {
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return eth.parseException(e);
+      return SignerResponse.fromError(e);
     }
   }
 
