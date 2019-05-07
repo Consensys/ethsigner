@@ -40,7 +40,6 @@ public class Signer {
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
-  private final HttpService web3jHttpService;
   private final RawRequests rawRequests;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
@@ -48,7 +47,7 @@ public class Signer {
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
-    this.web3jHttpService = new HttpService(signerConfig.url());
+    final HttpService web3jHttpService = new HttpService(signerConfig.url());
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             web3jHttpService,
