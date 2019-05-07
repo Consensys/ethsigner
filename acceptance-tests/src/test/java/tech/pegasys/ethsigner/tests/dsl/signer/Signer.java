@@ -19,6 +19,8 @@ import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
+import tech.pegasys.ethsigner.tests.dsl.RawRequest;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
@@ -38,6 +40,8 @@ public class Signer {
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
+  private final HttpService web3jHttpService;
+  private final RawRequest rawRequest;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
 
@@ -55,6 +59,8 @@ public class Signer {
     this.transactions = new Transactions(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.accounts = new Accounts(eth);
+    this.rawRequest =
+        new RawRequest(web3jHttpService, new RawJsonRpcRequestFactory(web3jHttpService));
   }
 
   public void start() {
@@ -85,13 +91,7 @@ public class Signer {
     LOG.info("Signer is now responsive");
   }
 
-  public Request<?, ArbitraryResponseType> createRequest(
-      final Map<String, String> additionalHeaders,
-      final String method) {
-    web3jHttpService.getHeaders().clear();
-    web3jHttpService.addHeaders(additionalHeaders);
-    web3jHttpService.addHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
-
-    return requestFactory.createRequest(method);
+  public RawRequest rawRequest() {
+    return rawRequest;
   }
 }

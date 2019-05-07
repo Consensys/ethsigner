@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.dsl.node;
 
 import java.time.Duration;
+import java.util.Optional;
 
 public class NodeConfiguration {
 
@@ -23,10 +24,12 @@ public class NodeConfiguration {
 
   private final String hostname;
   private final String genesisFilePath;
+  private final Optional<String> cors;
 
-  public NodeConfiguration(final String genesisFilePath, final String hostname) {
+  public NodeConfiguration(final String genesisFilePath, final String hostname, String cors) {
     this.hostname = hostname;
     this.genesisFilePath = genesisFilePath;
+    this.cors = Optional.ofNullable(cors);
   }
 
   public String getHostname() {
@@ -51,5 +54,9 @@ public class NodeConfiguration {
 
   public String getGenesisFilePath() {
     return genesisFilePath;
+  }
+
+  public Optional<String> getCors() {
+    return cors;
   }
 }

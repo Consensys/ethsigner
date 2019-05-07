@@ -12,40 +12,47 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.Web3jHelpers;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
+import io.netty.handler.codec.http.HttpHeaderValues;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.core.ConditionTimeoutException;
-import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.Request;
 import org.web3j.protocol.exceptions.ClientConnectionException;
+import org.web3j.protocol.http.HttpService;
 
-public class Transactions {
+public class RawRequest {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Eth eth;
+  private final HttpService web3jHttpService;
+  private final RawJsonRpcRequestFactory requestFactory;
 
-  public Transactions(final Eth eth) {
-    this.eth = eth;
+  public RawRequest(HttpService web3jHttpService, RawJsonRpcRequestFactory requestFactory) {
+    this.web3jHttpService = web3jHttpService;
+    this.requestFactory = requestFactory;
   }
 
-  public String submit(final Transaction transaction) throws IOException {
-    return eth.sendTransaction(transaction);
-  }
+  public SignerResponse<JsonRpcErrorResponse> exceptionalRequest(
+      final String method, final Map<String, String> additionalHeaders) throws IOException {
 
-  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction)
-      throws IOException {
+    web3jHttpService.getHeaders().clear();
+    web3jHttpService.addHeaders(additionalHeaders);
+    web3jHttpService.addHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
+
+    final Request<?, ArbitraryResponseType> request = requestFactory.createRequest(method);
+
     try {
-      eth.sendTransaction(transaction);
+      request.send();
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
@@ -54,12 +61,8 @@ public class Transactions {
     }
   }
 
-  public void awaitBlockContaining(final String hash) {
-    try {
-      waitFor(() -> assertThat(eth.getTransactionReceipt(hash).isPresent()).isTrue());
-    } catch (final ConditionTimeoutException e) {
-      LOG.error("Timed out waiting for a block containing the transaction receipt hash: " + hash);
-      throw new RuntimeException("No receipt found for hash: " + hash);
-    }
+  public SignerResponse<JsonRpcErrorResponse> exceptionalRequest(final String method)
+      throws IOException {
+    return exceptionalRequest(method, Collections.emptyMap());
   }
 }

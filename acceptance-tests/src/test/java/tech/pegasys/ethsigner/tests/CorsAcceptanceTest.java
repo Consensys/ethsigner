@@ -12,7 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests;
 
-import tech.pegasys.ethsigner.tests.dsl.Account;
+import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -21,38 +24,33 @@ import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
+import java.io.IOException;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class AcceptanceTestBase {
+public class CorsAcceptanceTest {
 
-  private static Node ethNode;
-  private static Signer ethSigner;
+  private static final DockerClient DOCKER = new DockerClientFactory().create();
+  private Node ethNode;
+  private Signer ethSigner;
 
-  protected Account richBenefactor() {
-    return ethSigner.accounts().richBenefactor();
-  }
+  private final String AUTHORISED_DOMAIN = "authorised.com";
+  private final String UNAUTHORISED_DOMAIN = "UN" + AUTHORISED_DOMAIN;
 
-  protected Signer ethSigner() {
-    return ethSigner;
-  }
-
-  protected Node ethNode() {
-    return ethNode;
-  }
-
-  @BeforeClass
-  public static void setUpBase() {
-    Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
-
-    final DockerClient docker = new DockerClientFactory().create();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+  @Before
+  public void setUp() {
+    final NodeConfiguration nodeConfig =
+        new NodeConfigurationBuilder().cors(AUTHORISED_DOMAIN).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig);
-    ethNode = new PantheonNode(docker, nodeConfig);
+    ethNode = new PantheonNode(DOCKER, nodeConfig);
 
     ethNode.start();
     ethSigner.start();
@@ -61,8 +59,8 @@ public class AcceptanceTestBase {
     ethSigner.awaitStartupCompletion();
   }
 
-  @AfterClass
-  public static void tearDownBase() {
+  @After
+  public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
     }
@@ -70,5 +68,16 @@ public class AcceptanceTestBase {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
+  }
+
+  @Test
+  public void forbiddenResponseReceivedWhenHeadersDoNotMatchCorsOfNode() throws IOException {
+    final SignerResponse<JsonRpcErrorResponse> response =
+        ethSigner
+            .rawRequest()
+            .exceptionalRequest("eth_blockNumber", singletonMap("origin", UNAUTHORISED_DOMAIN));
+
+    assertThat(response.status()).isEqualTo(HttpResponseStatus.FORBIDDEN);
+    assertThat(response.jsonRpc()).isNull();
   }
 }
