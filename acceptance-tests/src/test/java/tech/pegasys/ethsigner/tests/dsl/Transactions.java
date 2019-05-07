@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.tests.Web3jHelpers;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class Transactions {
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return Web3jHelpers.parseException(e);
+      return SignerResponse.fromError(e);
     }
   }
 

@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl;
 import static org.assertj.core.api.Assertions.fail;
 
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.tests.Web3jHelpers;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
@@ -60,7 +59,7 @@ public class RawRequests {
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return Web3jHelpers.parseException(e);
+      return SignerResponse.fromError(e);
     }
   }
 
