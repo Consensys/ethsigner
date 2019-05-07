@@ -26,7 +26,7 @@ public class NodeConfiguration {
   private final String genesisFilePath;
   private final Optional<String> cors;
 
-  public NodeConfiguration(final String genesisFilePath, final String hostname, String cors) {
+  public NodeConfiguration(final String genesisFilePath, final String hostname, final String cors) {
     this.hostname = hostname;
     this.genesisFilePath = genesisFilePath;
     this.cors = Optional.ofNullable(cors);

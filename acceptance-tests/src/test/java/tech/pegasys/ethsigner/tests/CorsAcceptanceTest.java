@@ -29,6 +29,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.io.IOException;
 
 import com.github.dockerjava.api.DockerClient;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.After;
 import org.junit.Before;
@@ -75,7 +76,9 @@ public class CorsAcceptanceTest {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner
             .rawRequest()
-            .exceptionalRequest("eth_blockNumber", singletonMap("origin", UNAUTHORISED_DOMAIN));
+            .exceptionalRequest(
+                "eth_blockNumber",
+                singletonMap(HttpHeaderNames.ORIGIN.toString(), UNAUTHORISED_DOMAIN));
 
     assertThat(response.status()).isEqualTo(HttpResponseStatus.FORBIDDEN);
     assertThat(response.jsonRpc()).isNull();

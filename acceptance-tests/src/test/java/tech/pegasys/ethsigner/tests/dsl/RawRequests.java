@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,14 +31,15 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.exceptions.ClientConnectionException;
 import org.web3j.protocol.http.HttpService;
 
-public class RawRequest {
+public class RawRequests {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpService web3jHttpService;
   private final RawJsonRpcRequestFactory requestFactory;
 
-  public RawRequest(HttpService web3jHttpService, RawJsonRpcRequestFactory requestFactory) {
+  public RawRequests(
+      final HttpService web3jHttpService, final RawJsonRpcRequestFactory requestFactory) {
     this.web3jHttpService = web3jHttpService;
     this.requestFactory = requestFactory;
   }
@@ -47,7 +49,8 @@ public class RawRequest {
 
     web3jHttpService.getHeaders().clear();
     web3jHttpService.addHeaders(additionalHeaders);
-    web3jHttpService.addHeader("Content", HttpHeaderValues.APPLICATION_JSON.toString());
+    web3jHttpService.addHeader(
+        HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON.toString());
 
     final Request<?, ArbitraryResponseType> request = requestFactory.createRequest(method);
 
