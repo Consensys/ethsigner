@@ -134,7 +134,7 @@ public class EthSignerProcessRunner {
         line = in.readLine();
       }
     } catch (final IOException e) {
-      LOG.error("Failed to read output fromError process", e);
+      LOG.error("Failed to read output from process", e);
     }
   }
 
