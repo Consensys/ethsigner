@@ -28,6 +28,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.Json;
 import org.junit.Test;
+import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 
 public class FailureConditions extends AcceptanceTestBase {
@@ -36,6 +37,13 @@ public class FailureConditions extends AcceptanceTestBase {
 
   @Test
   public void sendDisabledApiReturnsBadRequest() throws IOException  {
+/*
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "invalidJsonRpcMethod", new String[0]);
+
+    JsonRpcErrorResponse
+        response = ethSigner().request().submitExceptionalRequest(header, jsonRpcRequest);
+    assertThat(Response.error).isEqualTo("blah");
+*/
     final Request<?, ArbitraryResponseType> request =
         ethSigner().createRequest(emptyMap(), "ibft_getPendingVotes");
 
@@ -47,7 +55,7 @@ public class FailureConditions extends AcceptanceTestBase {
     }catch(final Throwable t) {
      int i  =5;
       }
-/*
+
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "ibft_getPendingVotes", new String[0]);
     request.setId(new JsonRpcRequestId(1));
 
@@ -64,7 +72,7 @@ public class FailureConditions extends AcceptanceTestBase {
         () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
         */
   }
-/*
+
   @Test
   public void unknownJsonRpcMethodReturnsBadRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "invalidJsonRpcMethod", new String[0]);
@@ -79,7 +87,6 @@ public class FailureConditions extends AcceptanceTestBase {
         1,
         () -> assertThat(response.statusCode()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code()));
   }
-  */
 
   /*
 
