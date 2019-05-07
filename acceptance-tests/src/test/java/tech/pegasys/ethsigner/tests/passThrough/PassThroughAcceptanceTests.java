@@ -41,7 +41,7 @@ public class PassThroughAcceptanceTests extends AcceptanceTestBase {
     final BigInteger endTransactionCount =
         ethNode().transactions().count(richBenefactor().address());
 
-    assertThat(startTransactionCount.add(BigInteger.ONE).equals(endTransactionCount)).isTrue();
+    assertThat(startTransactionCount.add(BigInteger.ONE)).isEqualTo(endTransactionCount);
   }
 
   @Test
