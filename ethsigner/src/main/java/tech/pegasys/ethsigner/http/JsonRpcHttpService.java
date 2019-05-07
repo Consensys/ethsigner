@@ -37,12 +37,13 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import io.vertx.ext.web.handler.TimeoutHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class JsonRpcHttpService extends AbstractVerticle {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JsonRpcHttpService.class);
+  private static final Logger LOG = LogManager.getLogger();
+
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
   static {

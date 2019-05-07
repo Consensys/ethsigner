@@ -53,14 +53,14 @@ import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -68,7 +68,7 @@ import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
-  private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
+  private static final Logger LOG = LogManager.getLogger();
   private static final String LOCALHOST = "127.0.0.1";
   private static final long DEFAULT_CHAIN_ID = 9;
 

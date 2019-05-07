@@ -23,12 +23,12 @@ import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
 import java.util.Collection;
 
 import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class EthAccountsBodyProvider implements BodyProvider {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EthAccountsBodyProvider.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final String address;
 

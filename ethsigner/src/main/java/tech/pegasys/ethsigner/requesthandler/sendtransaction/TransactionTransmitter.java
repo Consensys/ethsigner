@@ -29,13 +29,14 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.RawTransaction;
 
 public class TransactionTransmitter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TransactionTransmitter.class);
+  private static final Logger LOG = LogManager.getLogger();
+
   private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
@@ -150,10 +151,10 @@ public class TransactionTransmitter {
 
     LOG.debug(
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        context.getInitialRequest().method(),
-        context.getInitialRequest().absoluteURI(),
-        context.getRawTransactionBuilder().toString(),
-        Json.encode(errorResponse));
+        context.getInitialRequest()::method,
+        context.getInitialRequest()::absoluteURI,
+        context::getRawTransactionBuilder,
+        () -> Json.encode(errorResponse));
 
     responder.create(
         context.getInitialRequest(), HttpResponseStatus.BAD_REQUEST.code(), errorResponse);
