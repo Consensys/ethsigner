@@ -41,7 +41,7 @@ theme:
     accent: teal
   favicon: favicon.ico
   logo:
-    icon: lock
+    icon: vpn_key
 nav:
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
