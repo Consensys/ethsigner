@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
-public class PassThroughAcceptanceTests extends AcceptanceTestBase {
+public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final String TRANSFER_AMOUNT_ETHER = "10";

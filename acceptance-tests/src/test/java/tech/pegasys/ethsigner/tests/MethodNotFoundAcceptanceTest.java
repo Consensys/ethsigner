@@ -21,12 +21,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.io.IOException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.http.HttpClientResponse;
 import org.junit.Test;
 
-public class MethodNotFoundAcceptanceTests extends AcceptanceTestBase {
-
-  private volatile HttpClientResponse response = null;
+public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
 
   @Test
   public void sendDisabledApiReturnsBadRequest() throws IOException {
