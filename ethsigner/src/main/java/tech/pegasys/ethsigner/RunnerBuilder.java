@@ -19,12 +19,11 @@ import java.time.Duration;
 
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RunnerBuilder {
-
-  private static final Logger LOG = LoggerFactory.getLogger(RunnerBuilder.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private TransactionSerialiser serialiser;
   private WebClientOptions clientOptions;

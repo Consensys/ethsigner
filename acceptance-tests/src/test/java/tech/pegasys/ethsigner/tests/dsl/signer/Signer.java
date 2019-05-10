@@ -19,6 +19,8 @@ import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
+import tech.pegasys.ethsigner.tests.dsl.RawRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 
@@ -38,15 +40,17 @@ public class Signer {
   private final EthSignerProcessRunner runner;
   private final Transactions transactions;
   private final Web3j jsonRpc;
+  private final RawRequests rawRequests;
 
   public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
 
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
+    final HttpService web3jHttpService = new HttpService(signerConfig.url());
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(signerConfig.url()),
+            web3jHttpService,
             signerConfig.pollingInterval().toMillis(),
             Async.defaultExecutorService());
 
@@ -54,6 +58,8 @@ public class Signer {
     this.transactions = new Transactions(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.accounts = new Accounts(eth);
+    this.rawRequests =
+        new RawRequests(web3jHttpService, new RawJsonRpcRequestFactory(web3jHttpService));
   }
 
   public void start() {
@@ -82,5 +88,9 @@ public class Signer {
     LOG.info("Waiting for Signer to become responsive...");
     waitFor(() -> assertThat(jsonRpc.ethAccounts().send().hasError()).isFalse());
     LOG.info("Signer is now responsive");
+  }
+
+  public RawRequests rawRequest() {
+    return rawRequests;
   }
 }

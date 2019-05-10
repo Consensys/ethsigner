@@ -19,14 +19,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransactionContext> {
 
   private static final int MAX_RETRIES = 5;
 
-  private static final Logger LOG = LoggerFactory.getLogger(NonceTooLowRetryMechanism.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final NonceProvider nonceProvider;
 

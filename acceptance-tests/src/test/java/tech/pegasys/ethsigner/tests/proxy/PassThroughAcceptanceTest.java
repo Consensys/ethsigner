@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.passThrough;
+package tech.pegasys.ethsigner.tests.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
-public class PassThroughAcceptanceTests extends AcceptanceTestBase {
+public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final String TRANSFER_AMOUNT_ETHER = "10";

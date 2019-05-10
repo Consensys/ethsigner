@@ -32,12 +32,12 @@ import java.net.SocketTimeoutException;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SendTransactionHandler implements JsonRpcRequestHandler {
 
-  private static final Logger LOG = LoggerFactory.getLogger(SendTransactionHandler.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private HttpResponseFactory responder;
   private final HttpClient ethNodeClient;
