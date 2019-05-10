@@ -24,9 +24,9 @@ import java.util.Optional;
 import com.google.common.base.Charsets;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -34,7 +34,7 @@ import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EthSigner.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
   private final RunnerBuilder runnerBuilder;

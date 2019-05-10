@@ -20,6 +20,7 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +50,7 @@ public class Transactions {
       return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return eth.parseException(e);
+      return SignerResponse.fromError(e);
     }
   }
 
@@ -60,5 +61,13 @@ public class Transactions {
       LOG.error("Timed out waiting for a block containing the transaction receipt hash: " + hash);
       throw new RuntimeException("No receipt found for hash: " + hash);
     }
+  }
+
+  public BigInteger count(final String address) throws IOException {
+    return eth.getTransactionCount(address);
+  }
+
+  public BigInteger count(final Account account) throws IOException {
+    return count(account.address());
   }
 }

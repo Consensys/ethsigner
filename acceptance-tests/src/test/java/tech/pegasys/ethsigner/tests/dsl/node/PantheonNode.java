@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -37,6 +38,7 @@ import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
+import com.google.common.collect.Lists;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -171,23 +173,29 @@ public class PantheonNode implements Node {
             .withBinds(genesisBinding);
 
     try {
+      final List<String> commandLineItems =
+          Lists.newArrayList(
+              "--logging",
+              "DEBUG",
+              "--miner-enabled",
+              "--miner-coinbase",
+              "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
+              "--host-whitelist",
+              "*",
+              "--rpc-http-enabled",
+              "--rpc-ws-enabled");
+
+      config
+          .getCors()
+          .ifPresent(
+              cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
+
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
               .withHostConfig(hostConfig)
               .withVolumes(genesisVolume)
-              .withCmd(
-                  "--logging",
-                  "DEBUG",
-                  "--miner-enabled",
-                  "--miner-coinbase",
-                  "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
-                  "--rpc-http-cors-origins",
-                  "all",
-                  "--host-whitelist",
-                  "*",
-                  "--rpc-http-enabled",
-                  "--rpc-ws-enabled");
+              .withCmd(commandLineItems);
 
       LOG.info("Creating the Pantheon Docker image...");
       final CreateContainerResponse pantheon = createPantheon.exec();

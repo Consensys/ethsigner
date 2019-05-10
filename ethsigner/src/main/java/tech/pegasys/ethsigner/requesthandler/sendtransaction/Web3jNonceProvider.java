@@ -15,8 +15,8 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Request;
@@ -24,7 +24,7 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
 public class Web3jNonceProvider implements NonceProvider {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Web3jNonceProvider.class);
+  private static final Logger LOG = LogManager.getLogger();
 
   private final Web3j web3j;
   private final String accountAddress;
