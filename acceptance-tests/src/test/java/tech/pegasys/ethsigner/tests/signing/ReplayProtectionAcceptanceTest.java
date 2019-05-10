@@ -24,6 +24,7 @@ import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
@@ -76,13 +77,12 @@ public class ReplayProtectionAcceptanceTest {
         new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
     ethNode = new PantheonNode(DOCKER, nodeConfig);
-
-    ethNode.start();
-    ethSigner.start();
-
+    final NodePorts nodePorts = ethNode.start(nodeConfig);
     ethNode.awaitStartupCompletion();
+
+    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
+    ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
 

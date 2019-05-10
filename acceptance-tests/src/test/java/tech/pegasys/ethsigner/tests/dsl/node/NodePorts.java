@@ -12,21 +12,21 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
-import tech.pegasys.ethsigner.tests.dsl.Transactions;
+public class NodePorts {
 
-public interface Node {
+  private final int httpRpc;
+  private final int webSocketRpc;
 
-  NodePorts start(NodeConfiguration config);
+  public NodePorts(final int tcp, final int webSocket) {
+    this.httpRpc = tcp;
+    this.webSocketRpc = webSocket;
+  }
 
-  void shutdown();
+  public int getHttpRpc() {
+    return httpRpc;
+  }
 
-  void awaitStartupCompletion();
-
-  Accounts accounts();
-
-  Contracts contracts();
-
-  Transactions transactions();
+  public int getWebSocketRpc() {
+    return webSocketRpc;
+  }
 }

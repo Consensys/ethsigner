@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 
 import java.io.BufferedReader;
@@ -48,18 +49,20 @@ public class EthSignerProcessRunner {
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
   private final String nodeHostname;
-  private final String nodeTcpPort;
+  private final String nodeHttpRpcPort;
   private final String timeoutMs;
   private final String signerHostname;
   private final String signerPort;
   private final String chainId;
 
   public EthSignerProcessRunner(
-      final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final NodePorts nodePorts) {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
     this.nodeHostname = nodeConfig.getHostname();
-    this.nodeTcpPort = String.valueOf(nodeConfig.getTcpPort());
+    this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
     this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerPort = String.valueOf(signerConfig.tcpPort());
@@ -94,7 +97,7 @@ public class EthSignerProcessRunner {
     params.add("--downstream-http-host");
     params.add(nodeHostname);
     params.add("--downstream-http-port");
-    params.add(nodeTcpPort);
+    params.add(nodeHttpRpcPort);
     params.add("--downstream-http-request-timeout");
     params.add(timeoutMs);
     params.add("--http-listen-host");

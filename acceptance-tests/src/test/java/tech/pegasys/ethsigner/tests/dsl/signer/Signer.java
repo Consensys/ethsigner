@@ -23,6 +23,7 @@ import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.RawRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,11 +43,13 @@ public class Signer {
   private final Web3j jsonRpc;
   private final RawRequests rawRequests;
 
-  public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
-
+  public Signer(
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final NodePorts nodePorts) {
     LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
 
-    this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
+    this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
     final HttpService web3jHttpService = new HttpService(signerConfig.url());
     this.jsonRpc =
         new JsonRpc2_0Web3j(

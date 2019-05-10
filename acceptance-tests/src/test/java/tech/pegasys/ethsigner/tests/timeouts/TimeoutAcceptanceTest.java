@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -43,9 +44,10 @@ public class TimeoutAcceptanceTest {
   @Before
   public void setUp() {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final NodePorts nodePorts = new NodePorts(8545, 8456);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
