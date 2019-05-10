@@ -1,4 +1,4 @@
-description: Building Ethsigner from source code
+description: Building EthSigner from source code
 <!--- END of page meta data -->
 
 # Build from Source
@@ -8,13 +8,13 @@ description: Building Ethsigner from source code
 * [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
 !!!important
-    Ethsigner requires Java 8+ to compile; earlier versions are not supported.
+    EthSigner requires Java 8+ to compile; earlier versions are not supported.
 
 * [Git](https://git-scm.com/downloads) or [GitHub Desktop](https://desktop.github.com/)
 
 ## Installation on Linux / Unix / Mac OS X
 
-###Clone the Ethsigner Repository
+### Clone the EthSigner Repository
 
 Clone the **PegaSysEng/ethsigner** repository:
 
@@ -22,11 +22,11 @@ Clone the **PegaSysEng/ethsigner** repository:
 git clone https://github.com/PegaSysEng/ethsigner.git
 ```
 
-### Build Ethsigner
+### Build EthSigner
 
 After cloning, go to the `ethsigner` directory.
 
-Build Ethsigner with the Gradle wrapper `gradlew`:
+Build EthSigner with the Gradle wrapper `gradlew`:
 
 ```bash
 ./gradlew build
@@ -42,7 +42,7 @@ Expand the distribution archive:
 tar -xzf ethsigner-<version>.tar.gz
 ```
 
-Move to the expanded folder and display the Ethsigner help to confirm installation. 
+Move to the expanded folder and display the EthSigner help to confirm installation. 
 ````bash
 cd ethsigner-<version>/
 bin/ethsigner --help
@@ -50,7 +50,7 @@ bin/ethsigner --help
 
 ## Installation on Windows
 
-### Install Ethsigner
+### Install EthSigner
 
 Clone the `PegaSysEng/ethsigner` repository:
 
@@ -58,7 +58,7 @@ Clone the `PegaSysEng/ethsigner` repository:
 git clone https://github.com/PegaSysEng/ethsigner.git
 ```
 
-### Build Ethsigner
+### Build EthSigner
 
 Go to the `ethsigner` directory:
 
@@ -66,7 +66,7 @@ Go to the `ethsigner` directory:
 cd ethsigner
 ```
 
-Build Ethsigner with the Gradle wrapper `gradlew`:
+Build EthSigner with the Gradle wrapper `gradlew`:
 
 ```bat
 .\gradlew build
@@ -86,7 +86,7 @@ Expand the distribution archive:
 tar -xzf ethsigner-<version>.tar.gz
 ```
 
-Go to the expanded folder and display the Ethsigner help to confirm installation. 
+Go to the expanded folder and display the EthSigner help to confirm installation. 
 ```bat
 cd ethsigner-<version>
 bin\ethsigner --help
