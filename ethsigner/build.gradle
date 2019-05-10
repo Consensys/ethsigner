@@ -28,10 +28,14 @@ dependencies {
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
 
+  implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
+  implementation 'com.microsoft.aad:adal4j:0.0.2'
+
   testCompile 'io.vertx:vertx-codegen'
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+  testImplementation 'com.github.stefanbirkner:system-rules:1.16.0'
 
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
