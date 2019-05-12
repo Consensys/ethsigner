@@ -43,6 +43,11 @@ theme:
   logo:
     icon: vpn_key
 nav:
+  - Installation:
+    - Install Binary Distribution: Installation/Install-Binaries.md
+    - Build from Source: Installation/Build-From-Source.md
+  - Using EthSinger:
+    - Getting Started: Using-Ethsigner/Getting-Started.md
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
 
