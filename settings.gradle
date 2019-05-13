@@ -13,6 +13,6 @@
 
 rootProject.name='ethsigner'
 include 'acceptance-tests'
-include 'ethsigner'
+include 'ethsigner:app'
 include 'ethsigner:core'
 include 'ethsigner:signingapi'

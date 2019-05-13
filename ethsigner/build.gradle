@@ -12,35 +12,4 @@
  */
 
 
-jar {
-  baseName 'ethsigner'
-  manifest {
-    attributes(
-      'Specification-Title': baseName,
-      'Specification-Version': project.version,
-      'Implementation-Title': baseName,
-      'Implementation-Version': calculateVersion()
-      )
-  }
-}
-
-
-dependencies {
-
-  implementation 'info.picocli:picocli'
-
-  implementation 'com.google.guava:guava'
-
-  implementation 'org.apache.logging.log4j:log4j-api'
-  implementation 'org.apache.logging.log4j:log4j-core'
-  implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
-
-  implementation project(':ethsigner:core')
-
-  testCompile 'io.vertx:vertx-codegen'
-
-  testImplementation project(':ethsigner:core')
-  testImplementation 'junit:junit'
-  testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.mockito:mockito-core'
-}
+jar { enabled = false }
