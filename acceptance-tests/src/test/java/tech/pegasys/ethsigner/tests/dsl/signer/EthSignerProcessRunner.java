@@ -10,17 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests;
+package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.tests.WaitUtils;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
-import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
@@ -31,10 +33,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,15 +50,18 @@ public class EthSignerProcessRunner {
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
       LogManager.getLogger("tech.pegasys.ethsigner.SubProcessLog");
+  private static final String PORTS_FILENAME = "ethsigner.ports";
 
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
+  private final Properties portsProperties;
   private final String nodeHostname;
   private final String nodeHttpRpcPort;
   private final String timeoutMs;
   private final String signerHostname;
   private final String signerPort;
   private final String chainId;
+  private final Path homeDirectory;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -65,8 +73,16 @@ public class EthSignerProcessRunner {
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
     this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
     this.signerHostname = signerConfig.hostname();
-    this.signerPort = String.valueOf(signerConfig.tcpPort());
+    this.signerPort = "0";
     this.chainId = signerConfig.chainId();
+    this.portsProperties = new Properties();
+
+    try {
+      this.homeDirectory = Files.createTempDirectory("acceptance-test");
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Failed to create the temporary directory to store the ethsigner.ports file");
+    }
   }
 
   public synchronized void shutdown() {
@@ -80,6 +96,12 @@ public class EthSignerProcessRunner {
     } catch (final InterruptedException e) {
       LOG.error("Interrupted while already shutting down", e);
       Thread.currentThread().interrupt();
+    } finally {
+      try {
+        MoreFiles.deleteRecursively(homeDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
+      } catch (final IOException e) {
+        LOG.info("Failed to clean up temporary file: {}", homeDirectory, e);
+      }
     }
   }
 
@@ -106,6 +128,8 @@ public class EthSignerProcessRunner {
     params.add(signerPort);
     params.add("--chain-id");
     params.add(chainId);
+    params.add("--data-directory");
+    params.add(homeDirectory.toAbsolutePath().toString());
 
     LOG.info("Creating EthSigner process with params {}", params);
 
@@ -122,6 +146,8 @@ public class EthSignerProcessRunner {
     } catch (final IOException e) {
       LOG.error("Error starting EthSigner process", e);
     }
+
+    loadPortsFile();
   }
 
   private String executableLocation() {
@@ -177,7 +203,6 @@ public class EthSignerProcessRunner {
     return createJsonFile("ethsigner_keyfile", data);
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   private File createJsonFile(final String tempNamePrefix, final byte[] data) {
     final Path file;
     try {
@@ -189,5 +214,23 @@ public class EthSignerProcessRunner {
     File keyFile = file.toFile();
     keyFile.deleteOnExit();
     return keyFile;
+  }
+
+  private void loadPortsFile() {
+    final File portsFile = new File(homeDirectory.toFile(), PORTS_FILENAME);
+    LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
+    WaitUtils.waitFor(() -> assertThat(portsFile).exists());
+    LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
+
+    try (final FileInputStream fis = new FileInputStream(portsFile)) {
+      portsProperties.load(fis);
+      LOG.info("Ports for EthSigner: {}", portsProperties);
+    } catch (final IOException e) {
+      throw new RuntimeException("Error reading Pantheon ports file", e);
+    }
+  }
+
+  public int httpJsonRpcPort() {
+    return Integer.parseInt(portsProperties.getProperty("http-jsonrpc"));
   }
 }

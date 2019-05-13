@@ -16,8 +16,6 @@ import java.time.Duration;
 
 public class SignerConfiguration {
 
-  private static final String HTTP_URL_FORMAT = "http://%s:%s";
-  private static final int TCP_PORT = 8845;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String chainId;
@@ -32,16 +30,8 @@ public class SignerConfiguration {
     return hostname;
   }
 
-  public int tcpPort() {
-    return TCP_PORT;
-  }
-
   public Duration pollingInterval() {
     return POLLING_INTERVAL;
-  }
-
-  public String url() {
-    return String.format(HTTP_URL_FORMAT, hostname(), tcpPort());
   }
 
   public String chainId() {

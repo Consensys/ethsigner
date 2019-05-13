@@ -22,7 +22,11 @@ import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Properties;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
@@ -42,28 +46,32 @@ public class Runner {
   private final Duration httpRequestTimeout;
   private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final Path dataDirectory;
 
   private Vertx vertx;
   private String deploymentId;
+  private JsonRpcHttpService httpService;
 
   public Runner(
       final TransactionSerialiser serialiser,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final NonceProvider nonceProvider) {
+      final NonceProvider nonceProvider,
+      final Path dataDirectory) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.nonceProvider = nonceProvider;
+    this.dataDirectory = dataDirectory;
   }
 
   public void start() {
     // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
     vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx);
-    final JsonRpcHttpService httpService =
+    httpService =
         new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
@@ -96,9 +104,31 @@ public class Runner {
     if (result.succeeded()) {
       deploymentId = result.result();
       LOG.info("Vertx deployment id is: {}", deploymentId);
+
+      if (dataDirectory != null) {
+        writePortsToFile(httpService);
+      }
     } else {
       LOG.error("Vertx deployment failed", result.cause());
       System.exit(1);
+    }
+  }
+
+  private void writePortsToFile(final JsonRpcHttpService httpService) {
+    final Properties properties = new Properties();
+
+    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
+
+    final File portsFile = new File(dataDirectory.toFile(), "ethsigner.ports");
+    portsFile.deleteOnExit();
+
+    LOG.info("Writing ethsigner.ports file: {}", portsFile.getAbsolutePath());
+    try (final FileOutputStream fileOutputStream = new FileOutputStream(portsFile)) {
+      properties.store(
+          fileOutputStream,
+          "This file contains the ports used by the running instance of Pantheon. This file will be deleted after the node is shutdown.");
+    } catch (final Exception e) {
+      LOG.warn("Error writing ports file", e);
     }
   }
 }
