@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import com.google.common.base.MoreObjects;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 
 import java.math.BigInteger;
 
+import com.google.common.base.MoreObjects;
 import org.web3j.crypto.RawTransaction;
 
 public class RawTransactionBuilder {
