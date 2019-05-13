@@ -10,26 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.main;
+package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-public class ApplicationInfo {
-  private static final String CLIENT_IDENTITY = "tech/pegasys/ethsigner" + "";
-  private static final String VERSION =
-      CLIENT_IDENTITY
-          + "/v"
-          + ApplicationInfo.class.getPackage().getImplementationVersion()
-          + "/"
-          + PlatformDetector.getOS()
-          + "/"
-          + PlatformDetector.getVM();
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientResponse;
 
-  private ApplicationInfo() {}
+public class NoRetryMechanism<T> implements RetryMechanism<T> {
 
-  public static String clientIdentity() {
-    return CLIENT_IDENTITY;
+  @Override
+  public boolean mustRetry(final HttpClientResponse response, final Buffer body) {
+    return false;
   }
 
-  public static String version() {
-    return VERSION;
-  }
+  @Override
+  public void retry(final T context, final Runnable sender) {}
 }

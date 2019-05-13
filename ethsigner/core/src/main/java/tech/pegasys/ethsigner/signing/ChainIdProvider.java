@@ -10,26 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.main;
+package tech.pegasys.ethsigner.signing;
 
-public class ApplicationInfo {
-  private static final String CLIENT_IDENTITY = "tech/pegasys/ethsigner" + "";
-  private static final String VERSION =
-      CLIENT_IDENTITY
-          + "/v"
-          + ApplicationInfo.class.getPackage().getImplementationVersion()
-          + "/"
-          + PlatformDetector.getOS()
-          + "/"
-          + PlatformDetector.getVM();
+/** Obtains the chain ID for the blockchain that transaction are being signed. */
+public interface ChainIdProvider {
 
-  private ApplicationInfo() {}
-
-  public static String clientIdentity() {
-    return CLIENT_IDENTITY;
-  }
-
-  public static String version() {
-    return VERSION;
-  }
+  long id();
 }

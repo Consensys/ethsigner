@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.main;
 
+import tech.pegasys.ethsigner.Config;
+import tech.pegasys.ethsigner.RunnerBuilder;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;

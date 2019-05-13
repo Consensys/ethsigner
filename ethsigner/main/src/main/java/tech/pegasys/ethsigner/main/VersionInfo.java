@@ -12,24 +12,12 @@
  */
 package tech.pegasys.ethsigner.main;
 
-public class ApplicationInfo {
-  private static final String CLIENT_IDENTITY = "tech/pegasys/ethsigner" + "";
-  private static final String VERSION =
-      CLIENT_IDENTITY
-          + "/v"
-          + ApplicationInfo.class.getPackage().getImplementationVersion()
-          + "/"
-          + PlatformDetector.getOS()
-          + "/"
-          + PlatformDetector.getVM();
+import picocli.CommandLine.IVersionProvider;
 
-  private ApplicationInfo() {}
+public class VersionInfo implements IVersionProvider {
 
-  public static String clientIdentity() {
-    return CLIENT_IDENTITY;
-  }
-
-  public static String version() {
-    return VERSION;
+  @Override
+  public String[] getVersion() throws Exception {
+    return new String[] {"Version 0.0.1"};
   }
 }

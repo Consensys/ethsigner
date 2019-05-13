@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2018 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,24 +12,11 @@
  */
 package tech.pegasys.ethsigner.main;
 
-public class ApplicationInfo {
-  private static final String CLIENT_IDENTITY = "tech/pegasys/ethsigner" + "";
-  private static final String VERSION =
-      CLIENT_IDENTITY
-          + "/v"
-          + ApplicationInfo.class.getPackage().getImplementationVersion()
-          + "/"
-          + PlatformDetector.getOS()
-          + "/"
-          + PlatformDetector.getVM();
+import picocli.CommandLine;
 
-  private ApplicationInfo() {}
-
-  public static String clientIdentity() {
-    return CLIENT_IDENTITY;
-  }
-
-  public static String version() {
-    return VERSION;
+public class VersionProvider implements CommandLine.IVersionProvider {
+  @Override
+  public String[] getVersion() {
+    return new String[] {ApplicationInfo.version()};
   }
 }
