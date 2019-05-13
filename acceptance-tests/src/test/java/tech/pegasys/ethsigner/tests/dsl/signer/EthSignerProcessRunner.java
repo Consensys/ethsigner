@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.tests.WaitUtils;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -37,6 +36,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
@@ -63,7 +63,7 @@ public class EthSignerProcessRunner {
   private final String signerHostname;
   private final String signerPort;
   private final String chainId;
-  private final Path homeDirectory;
+  private final Path dataDirectory;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -80,13 +80,14 @@ public class EthSignerProcessRunner {
     this.portsProperties = new Properties();
 
     try {
-      this.homeDirectory = Files.createTempDirectory("acceptance-test");
+      this.dataDirectory = Files.createTempDirectory("acceptance-test");
     } catch (IOException e) {
       throw new RuntimeException(
           "Failed to create the temporary directory to store the ethsigner.ports file");
     }
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   public synchronized void shutdown() {
     final HashMap<String, Process> localMap = new HashMap<>(processes);
     localMap.forEach(this::killProcess);
@@ -100,9 +101,9 @@ public class EthSignerProcessRunner {
       Thread.currentThread().interrupt();
     } finally {
       try {
-        MoreFiles.deleteRecursively(homeDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
+        MoreFiles.deleteRecursively(dataDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
       } catch (final IOException e) {
-        LOG.info("Failed to clean up temporary file: {}", homeDirectory, e);
+        LOG.info("Failed to clean up temporary file: {}", dataDirectory, e);
       }
     }
   }
@@ -131,7 +132,7 @@ public class EthSignerProcessRunner {
     params.add("--chain-id");
     params.add(chainId);
     params.add("--data-directory");
-    params.add(homeDirectory.toAbsolutePath().toString());
+    params.add(dataDirectory.toAbsolutePath().toString());
 
     LOG.info("Creating EthSigner process with params {}", params);
 
@@ -191,6 +192,13 @@ public class EthSignerProcessRunner {
         "ethsigner_passwordfile", Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
   }
 
+  public int httpJsonRpcPort() {
+    final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
+    LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
+    assertThat(value).isNotEmpty();
+    return Integer.parseInt(value);
+  }
+
   @SuppressWarnings("UnstableApiUsage")
   private File createKeyFile() {
     final URL resource = Resources.getResource("rich_benefactor_one.json");
@@ -219,10 +227,12 @@ public class EthSignerProcessRunner {
   }
 
   private void loadPortsFile() {
-    final File portsFile = new File(homeDirectory.toFile(), PORTS_FILENAME);
+    final File portsFile = new File(dataDirectory.toFile(), PORTS_FILENAME);
     LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
-    WaitUtils.waitFor(() -> assertThat(portsFile).exists());
+    awaitPortsFile(dataDirectory);
     LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
+
+    awaitPortsFile(dataDirectory);
 
     try (final FileInputStream fis = new FileInputStream(portsFile)) {
       portsProperties.load(fis);
@@ -232,10 +242,18 @@ public class EthSignerProcessRunner {
     }
   }
 
-  public int httpJsonRpcPort() {
-    final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
-    LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
-    assertThat(value).isNotEmpty();
-    return Integer.parseInt(value);
+  private void awaitPortsFile(final Path dataDir) {
+    final File file = new File(dataDir.toFile(), PORTS_FILENAME);
+    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+        .until(
+            () -> {
+              if (file.exists()) {
+                try (final Stream<String> s = Files.lines(file.toPath())) {
+                  return s.count() > 0;
+                }
+              } else {
+                return false;
+              }
+            });
   }
 }
