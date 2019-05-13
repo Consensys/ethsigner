@@ -35,10 +35,16 @@ public class TransactionSerialiser {
   public String serialise(final RawTransaction rawTransaction) {
     final byte[] bytesToSign = TransactionEncoder.encode(rawTransaction, chainId);
 
-    final SignatureData signature = signer.sign(bytesToSign);
+    final Signature signature = signer.sign(bytesToSign);
+
+    final SignatureData web3jSignature =
+        new SignatureData(
+            signature.getV().toByteArray(),
+            signature.getR().toByteArray(),
+            signature.getS().toByteArray());
 
     final SignatureData eip155Signature =
-        TransactionEncoder.createEip155SignatureData(signature, chainId);
+        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
 
     final byte[] serialisedBytes = encode(rawTransaction, eip155Signature);
     return Numeric.toHexString(serialisedBytes);

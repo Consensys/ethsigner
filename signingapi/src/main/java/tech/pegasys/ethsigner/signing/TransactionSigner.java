@@ -12,11 +12,9 @@
  */
 package tech.pegasys.ethsigner.signing;
 
-import org.web3j.crypto.Sign.SignatureData;
-
 public interface TransactionSigner {
 
-  SignatureData sign(final byte[] data);
+  Signature sign(final byte[] data);
 
   String getAddress();
 }

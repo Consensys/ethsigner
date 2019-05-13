@@ -16,6 +16,7 @@ jar {
 dependencies {
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
+  implementation project(':signingapi')
 
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.apache.logging.log4j:log4j-core'

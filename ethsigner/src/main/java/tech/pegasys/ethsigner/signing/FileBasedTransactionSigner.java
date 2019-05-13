@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.signing;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
@@ -36,8 +37,12 @@ public class FileBasedTransactionSigner implements TransactionSigner {
   }
 
   @Override
-  public SignatureData sign(byte[] data) {
-    return Sign.signMessage(data, credentials.getEcKeyPair());
+  public Signature sign(byte[] data) {
+    final SignatureData signature = Sign.signMessage(data, credentials.getEcKeyPair());
+    return new Signature(
+        new BigInteger(signature.getV()),
+        new BigInteger(signature.getR()),
+        new BigInteger(signature.getS()));
   }
 
   @Override

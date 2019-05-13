@@ -10,8 +10,30 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.signing;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'signingapi'
+import java.math.BigInteger;
+
+public class Signature {
+  private final BigInteger v;
+  private final BigInteger r;
+  private final BigInteger s;
+
+  public Signature(BigInteger v, BigInteger r, BigInteger s) {
+    this.v = v;
+    this.r = r;
+    this.s = s;
+  }
+
+  public BigInteger getV() {
+    return v;
+  }
+
+  public BigInteger getR() {
+    return r;
+  }
+
+  public BigInteger getS() {
+    return s;
+  }
+}
