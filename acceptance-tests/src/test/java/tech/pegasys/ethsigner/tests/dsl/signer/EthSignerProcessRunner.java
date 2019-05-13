@@ -50,7 +50,9 @@ public class EthSignerProcessRunner {
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
       LogManager.getLogger("tech.pegasys.ethsigner.SubProcessLog");
+
   private static final String PORTS_FILENAME = "ethsigner.ports";
+  private static final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
 
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
@@ -224,17 +226,16 @@ public class EthSignerProcessRunner {
 
     try (final FileInputStream fis = new FileInputStream(portsFile)) {
       portsProperties.load(fis);
-      LOG.info("Ports for EthSigner: {}", portsProperties);
+      LOG.info("EthSigner ports: {}", portsProperties);
     } catch (final IOException e) {
       throw new RuntimeException("Error reading Pantheon ports file", e);
     }
   }
 
-  private static final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
-
   public int httpJsonRpcPort() {
-    final String value = portsProperties.getProperty("http-jsonrpc");
+    final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
     LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
+    assertThat(value).isNotEmpty();
     return Integer.parseInt(value);
   }
 }
