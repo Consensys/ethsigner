@@ -230,7 +230,11 @@ public class EthSignerProcessRunner {
     }
   }
 
+  private static final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
+
   public int httpJsonRpcPort() {
-    return Integer.parseInt(portsProperties.getProperty("http-jsonrpc"));
+    final String value = portsProperties.getProperty("http-jsonrpc");
+    LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
+    return Integer.parseInt(value);
   }
 }
