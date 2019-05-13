@@ -10,10 +10,26 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.main;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'ethsigner:main'
-include 'ethsigner:core'
-include 'signingapi'
+public class ApplicationInfo {
+  private static final String CLIENT_IDENTITY = "ethsigner" + "";
+  private static final String VERSION =
+      CLIENT_IDENTITY
+          + "/v"
+          + ApplicationInfo.class.getPackage().getImplementationVersion()
+          + "/"
+          + PlatformDetector.getOS()
+          + "/"
+          + PlatformDetector.getVM();
+
+  private ApplicationInfo() {}
+
+  public static String clientIdentity() {
+    return CLIENT_IDENTITY;
+  }
+
+  public static String version() {
+    return VERSION;
+  }
+}

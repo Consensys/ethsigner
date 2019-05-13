@@ -10,10 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package ethsigner.signing;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'ethsigner:main'
-include 'ethsigner:core'
-include 'signingapi'
+public class ConfigurationChainId implements ChainIdProvider {
+
+  private final long id;
+
+  public ConfigurationChainId(final long id) {
+    this.id = id;
+  }
+
+  @Override
+  public long id() {
+    return id;
+  }
+}

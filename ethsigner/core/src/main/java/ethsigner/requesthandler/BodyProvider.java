@@ -10,10 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package ethsigner.requesthandler;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'ethsigner:main'
-include 'ethsigner:core'
-include 'signingapi'
+import ethsigner.jsonrpc.JsonRpcRequest;
+
+@FunctionalInterface
+public interface BodyProvider {
+
+  JsonRpcBody getBody(JsonRpcRequest request);
+}

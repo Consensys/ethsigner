@@ -10,10 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package ethsigner.requesthandler.sendtransaction;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'ethsigner:main'
-include 'ethsigner:core'
-include 'signingapi'
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientResponse;
+
+public interface RetryMechanism<T> {
+
+  class RetryException extends RuntimeException {};
+
+  boolean mustRetry(final HttpClientResponse response, final Buffer body);
+
+  void retry(final T context, Runnable sender) throws RetryException;
+}

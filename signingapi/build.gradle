@@ -11,9 +11,4 @@
  * specific language governing permissions and limitations under the License.
  */
 
-jar {
-  enabled = true
-  archivesBaseName = "signing"
-  archiveAppendix.set("api")
-  archiveVersion.set("0.1.0")
-}
+jar { enabled = false }

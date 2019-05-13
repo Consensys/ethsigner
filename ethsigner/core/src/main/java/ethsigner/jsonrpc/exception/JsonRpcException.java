@@ -10,10 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package ethsigner.jsonrpc.exception;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner'
-include 'ethsigner:main'
-include 'ethsigner:core'
-include 'signingapi'
+import ethsigner.jsonrpc.response.JsonRpcError;
+
+public class JsonRpcException extends RuntimeException {
+  private final JsonRpcError jsonRpcError;
+
+  public JsonRpcException(final JsonRpcError jsonRpcError) {
+    this.jsonRpcError = jsonRpcError;
+  }
+
+  public JsonRpcError getJsonRpcError() {
+    return jsonRpcError;
+  }
+}
