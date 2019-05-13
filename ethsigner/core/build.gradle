@@ -11,13 +11,26 @@
  * specific language governing permissions and limitations under the License.
  */
 
-jar { enabled = true }
+apply plugin: 'java-library'
+
+jar {
+  baseName 'ethsigner-core'
+  manifest {
+    attributes(
+      'Specification-Title': baseName,
+      'Specification-Version': project.version,
+      'Implementation-Title': baseName,
+      'Implementation-Version': calculateVersion()
+      )
+  }
+}
 
 
 dependencies {
 
+  implementation project(':ethsigner:signingapi')
+
   implementation 'com.google.guava:guava'
-  implementation project(':signingapi')
 
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.apache.logging.log4j:log4j-core'

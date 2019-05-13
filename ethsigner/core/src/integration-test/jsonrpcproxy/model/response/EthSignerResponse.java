@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcResponse;
 
 import java.util.Map;
 

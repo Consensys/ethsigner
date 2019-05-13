@@ -16,9 +16,9 @@ dependencies {
   testRuntime 'javax.activation:activation'
   testRuntime 'org.apache.logging.log4j:log4j-core'
 
-  testImplementation project(':ethsigner:main')
+  testImplementation project(':ethsigner')
   testImplementation project(':ethsigner:core')
-  testImplementation project(':signingapi')
+  testImplementation project(':ethsigner:signingapi')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'junit:junit'

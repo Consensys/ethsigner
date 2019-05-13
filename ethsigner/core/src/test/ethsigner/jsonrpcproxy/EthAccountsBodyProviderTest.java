@@ -15,12 +15,12 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;

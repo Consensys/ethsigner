@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;

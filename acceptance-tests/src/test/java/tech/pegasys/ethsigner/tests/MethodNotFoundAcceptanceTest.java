@@ -14,8 +14,8 @@ package tech.pegasys.ethsigner.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;

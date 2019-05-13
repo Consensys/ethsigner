@@ -14,9 +14,9 @@ package tech.pegasys.ethsigner.jsonrpcproxy.support;
 
 import static org.mockserver.model.HttpResponse.response;
 
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import java.math.BigInteger;
 import java.util.function.Function;
