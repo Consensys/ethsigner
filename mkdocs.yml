@@ -43,6 +43,8 @@ theme:
   logo:
     icon: vpn_key
 nav:
+  - Using EthSigner:
+    - Using EthSigner: Using-EthSigner/Using-EthSigner.md
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
 
