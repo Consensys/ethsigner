@@ -10,10 +10,8 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.main;
+package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.Config;
-import tech.pegasys.ethsigner.RunnerBuilder;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
@@ -28,7 +26,6 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -47,14 +44,8 @@ public final class EthSigner {
   }
 
   public void run() {
-    // set log level per CLI flags
-    System.out.println("Setting logging level to " + config.getLogLevel().name());
-    Configurator.setAllLevels("", config.getLogLevel());
 
-    LOG.debug("Configuration = {}", config);
-    LOG.info("Version = {}, ", ApplicationInfo.version());
-
-    Optional<String> password = readPasswordFromFile();
+    final Optional<String> password = readPasswordFromFile();
     if (!password.isPresent()) {
       LOG.error("Unable to extract password from supplied password file.");
       return;
@@ -116,15 +107,5 @@ public final class EthSigner {
       LOG.debug("Failed to read password from password file, {}", ex);
       return Optional.empty();
     }
-  }
-
-  public static void main(final String... args) {
-    final CommandLineConfig config = new CommandLineConfig(System.out);
-    if (!config.parse(args)) {
-      return;
-    }
-
-    final EthSigner ethSigner = new EthSigner(config, new RunnerBuilder());
-    ethSigner.run();
   }
 }

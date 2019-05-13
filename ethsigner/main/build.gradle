@@ -28,8 +28,6 @@ jar {
 
 dependencies {
 
-  implementation project(':signingapi')
-
   implementation 'info.picocli:picocli'
 
   implementation 'com.google.guava:guava'
@@ -38,12 +36,12 @@ dependencies {
   implementation 'org.apache.logging.log4j:log4j-core'
   implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
 
-  implementation 'io.vertx:vertx-core'
-  implementation 'io.vertx:vertx-web'
-  implementation 'io.vertx:vertx-web-client'
-
-  implementation 'org.web3j:core'
-  implementation 'org.web3j:crypto'
-
   implementation project(':ethsigner:core')
+
+  testCompile 'io.vertx:vertx-codegen'
+
+  testImplementation project(':ethsigner:core')
+  testImplementation 'junit:junit'
+  testImplementation 'org.assertj:assertj-core'
+  testImplementation 'org.mockito:mockito-core'
 }

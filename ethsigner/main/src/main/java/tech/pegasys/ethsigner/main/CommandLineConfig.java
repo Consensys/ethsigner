@@ -33,7 +33,7 @@ import picocli.CommandLine.ParameterException;
 @Command(
     description = "This command runs the EthSigner.",
     abbreviateSynopsis = true,
-    name = "tech/pegasys/ethsigner",
+    name = "ethsigner",
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
     header = "Usage:",
