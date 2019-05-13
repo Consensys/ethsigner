@@ -115,14 +115,16 @@ public class Runner {
   }
 
   private void writePortsToFile(final JsonRpcHttpService httpService) {
-    final Properties properties = new Properties();
-
-    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
-
     final File portsFile = new File(dataDirectory.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
-    LOG.info("Writing ethsigner.ports file: {}", portsFile.getAbsolutePath());
+    final Properties properties = new Properties();
+    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
+
+    LOG.info(
+        "Writing ethsigner.ports file: {}, with contents: {}",
+        portsFile.getAbsolutePath(),
+        properties);
     try (final FileOutputStream fileOutputStream = new FileOutputStream(portsFile)) {
       properties.store(
           fileOutputStream,
