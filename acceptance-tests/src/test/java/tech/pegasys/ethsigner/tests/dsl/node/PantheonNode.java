@@ -89,7 +89,7 @@ public class PantheonNode implements Node {
     final int wsRpcPort = wsRpcPort(ports);
     LOG.info("Http RPC port: {}, Web Socket RPC port: {}", httpRpcPort, wsRpcPort);
 
-    final String httpRpcUrl = config.getUrl(httpRpcPort);
+    final String httpRpcUrl = config.url(httpRpcPort);
     LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
 
     this.jsonRpc =

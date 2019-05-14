@@ -38,7 +38,7 @@ public class NodeConfiguration {
     return POLLING_INTERVAL;
   }
 
-  public String getUrl(final int port) {
+  public String url(final int port) {
     return String.format(HTTP_URL_FORMAT, getHostname(), port);
   }
 
