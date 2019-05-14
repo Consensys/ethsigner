@@ -8,11 +8,8 @@ EthSigner requires a V3 Keystore key file and a password file.
 ## Prerequisites 
 
 * [EthSigner](../Installation/Install-Binaries.md)
-
 * [Pantheon](https://docs.pantheon.pegasys.tech/en/stable/Installation/Install-Binaries/)
-
 * [Node.js](https://nodejs.org/en/download/)
-
 * [web3.js](https://github.com/ethereum/web3.js/)
 
 !!! note
