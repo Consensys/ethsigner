@@ -20,6 +20,7 @@ import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHa
 import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.TransactionFactory;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
 import java.time.Duration;
@@ -42,6 +43,7 @@ public class Runner {
   private final Duration httpRequestTimeout;
   private final NonceProvider nonceProvider;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final TransactionFactory transactionFactory = new TransactionFactory();
 
   private Vertx vertx;
   private String deploymentId;
@@ -82,7 +84,7 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            responseFactory, downStreamConnection, serialiser, nonceProvider));
+            responseFactory, downStreamConnection, serialiser, nonceProvider, transactionFactory));
 
     requestMapper.addHandler(
         "eth_accounts",

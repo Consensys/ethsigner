@@ -42,17 +42,19 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
-  private final TransactionFactory transactionFactory = new TransactionFactory();
+  private final TransactionFactory transactionFactory;
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
-      final NonceProvider nonceProvider) {
+      final NonceProvider nonceProvider,
+      final TransactionFactory transactionFactory) {
     this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
+    this.transactionFactory = transactionFactory;
   }
 
   @Override
@@ -62,11 +64,11 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     try {
       transaction = transactionFactory.createTransaction(request);
     } catch (final NumberFormatException e) {
-      LOG.debug("Parsing values failed for request: {}", request, e);
+      LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Deserialisation failed for request: {}", request, e);
+      LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
