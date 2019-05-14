@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 
 import java.math.BigInteger;
 
+import com.google.common.base.MoreObjects;
 import org.web3j.crypto.RawTransaction;
 
 public class RawTransactionBuilder {
@@ -63,21 +64,13 @@ public class RawTransactionBuilder {
 
   @Override
   public String toString() {
-    return "RawTransactionBuilder{"
-        + "nonce="
-        + nonce
-        + ", gasPrice="
-        + gasPrice
-        + ", gasLimit="
-        + gasLimit
-        + ", to='"
-        + to
-        + '\''
-        + ", value="
-        + value
-        + ", data='"
-        + data
-        + '\''
-        + '}';
+    return MoreObjects.toStringHelper(this)
+        .add("nonce", nonce)
+        .add("gasPrice", gasPrice)
+        .add("gasLimit", gasLimit)
+        .add("to", to)
+        .add("value", value)
+        .add("data", data)
+        .toString();
   }
 }
