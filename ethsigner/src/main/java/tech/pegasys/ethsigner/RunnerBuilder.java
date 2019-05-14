@@ -55,7 +55,7 @@ public class RunnerBuilder {
     return this;
   }
 
-  public RunnerBuilder withonceProvider(final NonceProvider nonceProvider) {
+  public RunnerBuilder withNonceProvider(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
     return this;
   }

@@ -95,7 +95,7 @@ public final class EthSigner {
                   .setReuseAddress(true)
                   .setReusePort(true))
           .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .withonceProvider(nonceProvider)
+          .withNonceProvider(nonceProvider)
           .withDataPath(config.getDataDirectory())
           .build()
           .start();
