@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 public interface Node {
 
-  NodePorts start(NodeConfiguration config);
+  NodePorts start();
 
   void shutdown();
 

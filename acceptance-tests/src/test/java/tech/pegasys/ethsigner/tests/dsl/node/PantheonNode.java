@@ -54,7 +54,9 @@ import org.web3j.utils.Async;
 public class PantheonNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
+
   private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
+  private static final String HTTP_URL_FORMAT = "http://%s:%s";
 
   /** Pantheon's dev.json has the hard fork at block 0 */
   private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
@@ -64,6 +66,8 @@ public class PantheonNode implements Node {
 
   private final DockerClient docker;
   private final String pantheonContainerId;
+  private final long pollingInterval;
+  private final String hostname;
 
   private Accounts accounts;
   private Contracts contracts;
@@ -74,10 +78,12 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
+    this.pollingInterval = config.getPollingInterval().toMillis();
+    this.hostname=config.getHostname();
   }
 
   @Override
-  public NodePorts start(final NodeConfiguration config) {
+  public NodePorts start() {
     LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
 
@@ -89,13 +95,13 @@ public class PantheonNode implements Node {
     final int wsRpcPort = wsRpcPort(ports);
     LOG.info("Http RPC port: {}, Web Socket RPC port: {}", httpRpcPort, wsRpcPort);
 
-    final String httpRpcUrl = config.url(httpRpcPort);
+    final String httpRpcUrl = url(httpRpcPort);
     LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             new HttpService(httpRpcUrl),
-            config.getPollingInterval().toMillis(),
+            pollingInterval,
             Async.defaultExecutorService());
     final Eth eth = new Eth(jsonRpc);
     this.accounts = new Accounts(eth);
@@ -141,6 +147,10 @@ public class PantheonNode implements Node {
   @Override
   public Transactions transactions() {
     return transactions;
+  }
+
+  private String url(final int port) {
+    return String.format(HTTP_URL_FORMAT, hostname, port);
   }
 
   private boolean hasPantheonContainer() {

@@ -17,7 +17,6 @@ import java.util.Optional;
 
 public class NodeConfiguration {
 
-  private static final String HTTP_URL_FORMAT = "http://%s:%s";
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
@@ -38,9 +37,6 @@ public class NodeConfiguration {
     return POLLING_INTERVAL;
   }
 
-  public String url(final int port) {
-    return String.format(HTTP_URL_FORMAT, getHostname(), port);
-  }
 
   public String getGenesisFilePath() {
     return genesisFilePath;
