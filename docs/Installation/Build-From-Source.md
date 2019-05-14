@@ -16,7 +16,7 @@ description: Building EthSigner from source code
 
 ### Clone the EthSigner Repository
 
-Clone the **PegaSysEng/ethsigner** repository:
+Clone the `PegaSysEng/ethsigner` repository:
 
 ```bash
 git clone https://github.com/PegaSysEng/ethsigner.git
