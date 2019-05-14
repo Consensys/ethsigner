@@ -44,7 +44,7 @@ public class TimeoutAcceptanceTest {
   @Before
   public void setUp() {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(8545, 8456);
+    final NodePorts nodePorts = new NodePorts(7007, 7008);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
