@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
+import com.google.common.base.MoreObjects;
 import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 
 import java.math.BigInteger;
@@ -54,5 +55,13 @@ public class EthTransaction implements Transaction {
   @Override
   public String sender() {
     return sendTransactionJsonParameters.sender();
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("sendTransactionJsonParameters", sendTransactionJsonParameters)
+        .add("rawTransactionBuilder", rawTransactionBuilder)
+        .toString();
   }
 }
