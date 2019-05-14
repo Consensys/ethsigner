@@ -28,7 +28,7 @@ Endpoint to which received requests are forwarded. Default is `localhost`.
 ```
 
 ```bash tab="Example"
---downstream-http-host=8.8.8.8
+--downstream-http-host=192.168.05.14
 ```
 
 ### downstream-http-port
@@ -83,7 +83,7 @@ Port on which JSON-RPC HTTP listens. Default is 8545.
 
 ### key-file
 
-File containing [key with which transactions are signed](../Using-Ethsigner/Getting-Started.md#create-password-and-key-files).  
+File containing [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
 
 ```bash tab="Syntax"
 -k, --key-file=<keyFile>
@@ -95,7 +95,7 @@ File containing [key with which transactions are signed](../Using-Ethsigner/Gett
 
 ### password-file
 
-File containing password for the [key with which transactions are signed](../Using-Ethsigner/Getting-Started.md#create-password-and-key-files).  
+File containing password for the [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
 
 ```bash tab="Syntax"
 -p, --password-file=<passwordFile>

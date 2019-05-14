@@ -7,7 +7,6 @@ EthSigner provides transaction signing and access to your keystore by implementi
 methods:   
 
 * [`eth_accounts`](#eth_accounts)
-
 * [`eth_sendTransaction`](#eth_sendtransaction)
 
 All other JSON-RPC requests are passed through EthSigner to Pantheon and the result from Pantheon returned 
@@ -18,7 +17,7 @@ by EthSigner.
 
 # eth_accounts
 
-Returns the account address with which EthSigner is signing transactions. That is, the account of the [keystore key file](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).
+Returns the account address that EthSigner uses when signing transactions. That is, the account of the [keystore key file](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).
 
 **Parameters**
 
@@ -43,7 +42,7 @@ None
 
 # eth_sendTransaction 
 
-Creates and signs a transaction using the [keystore account]((../Using-EthSigner/Getting-Started.md#create-password-and-key-files)). 
+Creates and signs a transaction using the [keystore account](../Using-EthSigner/Getting-Started.md#create-password-and-key-files). 
 EthSigner submits the signed transaction to Pantheon using [`eth_sendRawTransaction`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eth_sendrawtransaction). 
 
 **Parameters**
