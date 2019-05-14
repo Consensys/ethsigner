@@ -73,6 +73,7 @@ public class PantheonNode implements Node {
   private Contracts contracts;
   private Transactions transactions;
   private Web3j jsonRpc;
+  private NodePorts ports;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
     this.docker = docker;
@@ -83,7 +84,7 @@ public class PantheonNode implements Node {
   }
 
   @Override
-  public NodePorts start() {
+  public void start() {
     LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
 
@@ -105,8 +106,7 @@ public class PantheonNode implements Node {
     this.accounts = new Accounts(eth);
     this.contracts = new Contracts(eth, jsonRpc);
     this.transactions = new Transactions(eth);
-
-    return new NodePorts(httpRpcPort, wsRpcPort);
+    this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
 
   @Override
@@ -130,6 +130,11 @@ public class PantheonNode implements Node {
     } catch (final ConditionTimeoutException e) {
       throw new RuntimeException("Failed to start the Pantheon node", e);
     }
+  }
+
+  @Override
+  public NodePorts ports() {
+    return ports;
   }
 
   @Override

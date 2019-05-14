@@ -18,11 +18,13 @@ import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 public interface Node {
 
-  NodePorts start();
+  void start();
 
   void shutdown();
 
   void awaitStartupCompletion();
+
+  NodePorts ports();
 
   Accounts accounts();
 
