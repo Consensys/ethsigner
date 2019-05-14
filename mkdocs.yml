@@ -47,10 +47,10 @@ nav:
     - Install Binary Distribution: Installation/Install-Binaries.md
     - Build from Source: Installation/Build-From-Source.md
   - Using EthSinger:
-    - Getting Started: Using-Ethsigner/Getting-Started.md
+    - Getting Started: Using-EthSigner/Getting-Started.md
+    - Using EthSigner: Using-EthSigner/Using-EthSigner.md
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
-
 
 markdown_extensions:
   - toc:
