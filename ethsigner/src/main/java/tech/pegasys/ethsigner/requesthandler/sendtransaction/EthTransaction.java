@@ -25,9 +25,11 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EthTransaction implements Transaction {
+  private final SendTransactionJsonParameters sendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
 
   public EthTransaction(final SendTransactionJsonParameters sendTransactionJsonParameters) {
+    this.sendTransactionJsonParameters = sendTransactionJsonParameters;
     this.rawTransactionBuilder = RawTransactionBuilder.from(sendTransactionJsonParameters);
   }
 
@@ -42,5 +44,15 @@ public class EthTransaction implements Transaction {
     final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
+  }
+
+  @Override
+  public boolean hasNonce() {
+    return sendTransactionJsonParameters.nonce().isPresent();
+  }
+
+  @Override
+  public String sender() {
+    return sendTransactionJsonParameters.sender();
   }
 }

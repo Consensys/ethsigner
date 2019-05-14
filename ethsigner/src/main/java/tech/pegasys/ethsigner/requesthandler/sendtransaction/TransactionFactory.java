@@ -12,17 +12,13 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import java.math.BigInteger;
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 
-import org.web3j.crypto.Sign.SignatureData;
+public class TransactionFactory {
 
-public interface Transaction {
-
-  void updateNonce(BigInteger nonce);
-
-  byte[] rlpEncode(SignatureData signatureData);
-
-  boolean hasNonce();
-
-  String sender();
+  public Transaction createTransaction(final JsonRpcRequest request) {
+    final SendTransactionJsonParameters params = SendTransactionJsonParameters.from(request);
+    return new EthTransaction(params);
+  }
 }

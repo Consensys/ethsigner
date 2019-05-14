@@ -21,7 +21,6 @@ import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.SIGNING_FROM_
 
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 import tech.pegasys.ethsigner.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
@@ -43,6 +42,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
+  private final TransactionFactory transactionFactory = new TransactionFactory();
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
@@ -58,25 +58,23 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest request) {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
-    final SendTransactionJsonParameters params;
     final Transaction transaction;
     try {
-      params = SendTransactionJsonParameters.from(request);
-      transaction = new EthTransaction(params);
+      transaction = transactionFactory.createTransaction(request);
     } catch (final NumberFormatException e) {
-      LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
+      LOG.debug("Parsing values failed for request: {}", request, e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
+      LOG.debug("JSON Deserialisation failed for request: {}", request, e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
 
-    if (senderNotUnlockedAccount(params)) {
+    if (senderNotUnlockedAccount(transaction.sender())) {
       LOG.info(
           "From address ({}) does not match unlocked account ({})",
-          params.sender(),
+          transaction.sender(),
           serialiser.getAddress());
       context.fail(
           BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
@@ -84,7 +82,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     try {
-      sendTransaction(transaction, context.request(), request, params.nonce().isPresent());
+      sendTransaction(transaction, context.request(), request);
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
@@ -100,25 +98,23 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private void sendTransaction(
       final Transaction transaction,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request,
-      final boolean hasNonce) {
+      final JsonRpcRequest request) {
     final TransactionTransmitter transmitter =
-        createTransactionTransmitter(transaction, httpServerRequest, request, hasNonce);
+        createTransactionTransmitter(transaction, httpServerRequest, request);
     transmitter.send();
   }
 
   private TransactionTransmitter createTransactionTransmitter(
       final Transaction transaction,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request,
-      final boolean hasNonce) {
+      final JsonRpcRequest request) {
 
     final SendTransactionContext context =
         new SendTransactionContext(httpServerRequest, request.getId(), transaction);
 
     final RetryMechanism<SendTransactionContext> retryMechanism;
 
-    if (!hasNonce) {
+    if (!transaction.hasNonce()) {
       LOG.debug("Nonce not present in request {}", request.getId());
       transaction.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
@@ -130,7 +126,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
         ethNodeClient, context, serialiser, retryMechanism, responder);
   }
 
-  private boolean senderNotUnlockedAccount(final SendTransactionJsonParameters params) {
-    return !params.sender().equalsIgnoreCase(serialiser.getAddress());
+  private boolean senderNotUnlockedAccount(final String sender) {
+    return !sender.equalsIgnoreCase(serialiser.getAddress());
   }
 }
