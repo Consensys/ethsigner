@@ -39,12 +39,15 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class TimeoutAcceptanceTest {
+  private static final int UNUSED_PORT_A = 7007;
+  private static final int UNUSED_PORT_B = 7008;
+
   private Signer ethSigner;
 
   @Before
   public void setUp() {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(7007, 7008);
+    final NodePorts nodePorts = new NodePorts(UNUSED_PORT_A, UNUSED_PORT_B);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
