@@ -17,13 +17,19 @@ import java.time.Duration;
 public class SignerConfiguration {
 
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
+  public static final int UNASSIGNED_PORT = 0;
 
   private final String chainId;
   private final String hostname;
+  private final int httpRpcPort;
+  private final int webSocketPort;
 
-  public SignerConfiguration(final String chainId, final String hostname) {
+  public SignerConfiguration(
+      final String chainId, final String hostname, final int httpRpcPort, final int webSocketPort) {
     this.chainId = chainId;
     this.hostname = hostname;
+    this.httpRpcPort = httpRpcPort;
+    this.webSocketPort = webSocketPort;
   }
 
   public String hostname() {
@@ -36,5 +42,17 @@ public class SignerConfiguration {
 
   public String chainId() {
     return chainId;
+  }
+
+  public int httpRpcPort() {
+    return httpRpcPort;
+  }
+
+  public int webSocketPort() {
+    return webSocketPort;
+  }
+
+  public boolean isDynamicPortAllocation() {
+    return httpRpcPort == UNASSIGNED_PORT && webSocketPort == UNASSIGNED_PORT;
   }
 }

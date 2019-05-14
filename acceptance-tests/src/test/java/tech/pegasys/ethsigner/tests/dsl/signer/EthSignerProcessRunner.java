@@ -61,9 +61,10 @@ public class EthSignerProcessRunner {
   private final String nodeHttpRpcPort;
   private final String timeoutMs;
   private final String signerHostname;
-  private final String signerPort;
   private final String chainId;
+  private final boolean useDynamicPortAllocation;
   private final Path dataDirectory;
+  private final int signerHttpRpcPort;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -75,15 +76,21 @@ public class EthSignerProcessRunner {
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
     this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
     this.signerHostname = signerConfig.hostname();
-    this.signerPort = "0";
+    this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
     this.portsProperties = new Properties();
 
-    try {
-      this.dataDirectory = Files.createTempDirectory("acceptance-test");
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Failed to create the temporary directory to store the ethsigner.ports file");
+    this.useDynamicPortAllocation = signerConfig.isDynamicPortAllocation();
+
+    if (useDynamicPortAllocation) {
+      try {
+        this.dataDirectory = Files.createTempDirectory("acceptance-test");
+      } catch (IOException e) {
+        throw new RuntimeException(
+            "Failed to create the temporary directory to store the ethsigner.ports file");
+      }
+    } else {
+      dataDirectory = null;
     }
   }
 
@@ -100,10 +107,12 @@ public class EthSignerProcessRunner {
       LOG.error("Interrupted while already shutting down", e);
       Thread.currentThread().interrupt();
     } finally {
-      try {
-        MoreFiles.deleteRecursively(dataDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
-      } catch (final IOException e) {
-        LOG.info("Failed to clean up temporary file: {}", dataDirectory, e);
+      if (useDynamicPortAllocation) {
+        try {
+          MoreFiles.deleteRecursively(dataDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
+        } catch (final IOException e) {
+          LOG.info("Failed to clean up temporary file: {}", dataDirectory, e);
+        }
       }
     }
   }
@@ -128,11 +137,14 @@ public class EthSignerProcessRunner {
     params.add("--http-listen-host");
     params.add(signerHostname);
     params.add("--http-listen-port");
-    params.add(signerPort);
+    params.add(String.valueOf(signerHttpRpcPort));
     params.add("--chain-id");
     params.add(chainId);
-    params.add("--data-directory");
-    params.add(dataDirectory.toAbsolutePath().toString());
+
+    if (useDynamicPortAllocation) {
+      params.add("--data-directory");
+      params.add(dataDirectory.toAbsolutePath().toString());
+    }
 
     LOG.info("Creating EthSigner process with params {}", params);
 
@@ -150,7 +162,9 @@ public class EthSignerProcessRunner {
       LOG.error("Error starting EthSigner process", e);
     }
 
-    loadPortsFile();
+    if (useDynamicPortAllocation) {
+      loadPortsFile();
+    }
   }
 
   private String executableLocation() {
@@ -193,10 +207,14 @@ public class EthSignerProcessRunner {
   }
 
   public int httpJsonRpcPort() {
-    final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
-    LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
-    assertThat(value).isNotEmpty();
-    return Integer.parseInt(value);
+    if (useDynamicPortAllocation) {
+      final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
+      LOG.info("{}: {}", HTTP_JSON_RPC_KEY, value);
+      assertThat(value).isNotEmpty();
+      return Integer.parseInt(value);
+    } else {
+      return signerHttpRpcPort;
+    }
   }
 
   @SuppressWarnings("UnstableApiUsage")
