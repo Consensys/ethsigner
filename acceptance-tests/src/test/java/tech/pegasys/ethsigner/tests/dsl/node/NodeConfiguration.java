@@ -37,7 +37,6 @@ public class NodeConfiguration {
     return POLLING_INTERVAL;
   }
 
-
   public String getGenesisFilePath() {
     return genesisFilePath;
   }

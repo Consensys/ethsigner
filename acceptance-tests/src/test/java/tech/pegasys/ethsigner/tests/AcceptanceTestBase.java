@@ -53,7 +53,7 @@ public class AcceptanceTestBase {
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethNode = new PantheonNode(docker, nodeConfig);
-    final NodePorts nodePorts = ethNode.start(nodeConfig);
+    final NodePorts nodePorts = ethNode.start();
     ethNode.awaitStartupCompletion();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);

@@ -79,7 +79,7 @@ public class PantheonNode implements Node {
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
     this.pollingInterval = config.getPollingInterval().toMillis();
-    this.hostname=config.getHostname();
+    this.hostname = config.getHostname();
   }
 
   @Override
@@ -100,9 +100,7 @@ public class PantheonNode implements Node {
 
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            new HttpService(httpRpcUrl),
-            pollingInterval,
-            Async.defaultExecutorService());
+            new HttpService(httpRpcUrl), pollingInterval, Async.defaultExecutorService());
     final Eth eth = new Eth(jsonRpc);
     this.accounts = new Accounts(eth);
     this.contracts = new Contracts(eth, jsonRpc);
