@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 import org.web3j.crypto.Sign.SignatureData;
 
@@ -22,7 +23,20 @@ public interface Transaction {
 
   byte[] rlpEncode(SignatureData signatureData);
 
+  default byte[] rlpEncode(final long chainId) {
+    final SignatureData signatureData =
+        new SignatureData(longToBytes(chainId), new byte[] {}, new byte[] {});
+    return rlpEncode(signatureData);
+  }
+
   boolean hasNonce();
 
   String sender();
+
+  // NOTE: This was taken from Web3j TransactionEncode as the function is private
+  static byte[] longToBytes(final long x) {
+    final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+    buffer.putLong(x);
+    return buffer.array();
+  }
 }

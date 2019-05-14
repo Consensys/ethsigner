@@ -14,9 +14,6 @@ package tech.pegasys.ethsigner.signing;
 
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Transaction;
 
-import java.nio.ByteBuffer;
-
-import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
@@ -32,9 +29,7 @@ public class TransactionSerialiser {
   }
 
   public String serialise(final Transaction transaction) {
-    final byte[] bytesToSign =
-        transaction.rlpEncode(
-            new Sign.SignatureData(longToBytes(chainId), new byte[] {}, new byte[] {}));
+    final byte[] bytesToSign = transaction.rlpEncode(chainId);
 
     final SignatureData signature = signer.sign(bytesToSign);
 
@@ -43,13 +38,6 @@ public class TransactionSerialiser {
 
     final byte[] serialisedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serialisedBytes);
-  }
-
-  /** NOTE: This was taken from Web3j TransactionEncode as the function is private */
-  private static byte[] longToBytes(final long x) {
-    final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-    buffer.putLong(x);
-    return buffer.array();
   }
 
   public String getAddress() {
