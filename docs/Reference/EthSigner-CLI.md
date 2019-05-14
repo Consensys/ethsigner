@@ -5,25 +5,17 @@ description: EthSigner command line interface reference
 
 This reference describes the syntax of the EthSigner Command Line Interface (CLI) options.
 
-```
-EthSigner --chain-id=<chainId> --downstream-http-port=<port> --key-file=<keyFile> --password-file=<passwordFile> [options]
-```
-
-Runs EthSigner transaction signing application.
-
 ## Options
 
 ### chain-id
 
-Chain ID that is the intended recipient for the signed transactions. 
+Chain ID of the network to receive the signed transactions. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --chain-id=<chainId>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --chain-id=2017
 ```
 
@@ -31,27 +23,23 @@ Chain ID that is the intended recipient for the signed transactions.
 
 Endpoint to which received requests are forwarded. Default is `localhost`. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --downstream-http-host=<downstreamHttpHost>
 ```
 
-#### Example 
-```
---downstream-http-host=8.8.8.8
+```bash tab="Example"
+--downstream-http-host=192.168.05.14
 ```
 
 ### downstream-http-port
 
 Endpoint to which received requests are forwarded. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --downstream-http-port=<downstreamHttpPort>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --downstream-http-port=6174
 ```
 
@@ -59,13 +47,11 @@ Endpoint to which received requests are forwarded.
 
 Timeout period (in milliseconds) for downstream requests. Default is 5000. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --downstream-http-request-timeout=<downstreamHttpRequestTimeout>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --downstream-http-request-timeout=3000
 ```
 
@@ -87,42 +73,36 @@ Host on which JSON-RPC HTTP listens. Default is `localhost`.
 
 Port on which JSON-RPC HTTP listens. Default is 8545. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --http-listen-port=<httpListenPort>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --http-lisentport=6174
 ```
 
 ### key-file
 
-File containing key used to sign transactions.  
+File containing [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
 
-#### Syntax 
-```
+```bash tab="Syntax"
 -k, --key-file=<keyFile>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --key-file=/Users/me/my_node/transactionKey
 ```
 
 ### password-file
 
-File containing password to decrypt the [key used to sign transactions](#key-file).  
+File containing password for the [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
 
-#### Syntax 
-```
--k, --password-file=<passwordFile>
+```bash tab="Syntax"
+-p, --password-file=<passwordFile>
 ```
 
-#### Example 
-```
--p, --password-file=/Users/me/my_node/password
+```bash tab="Example"
+--password-file=/Users/me/my_node/password
 ```
 
 ### logging
@@ -130,17 +110,19 @@ File containing password to decrypt the [key used to sign transactions](#key-fil
 Logging verbosity levels. Options are: `OFF`, `FATAL`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. The 
 default is `INFO`.  
 
-#### Syntax 
-```
+```bash tab="Syntax"
 -l, --logging=<LOG VERBOSITY LEVEL>
+```
+
+```bash tab="Example"
+--logging=DEBUG
 ```
 
 ### help
 
 Displays the help and exits.  
 
-#### Syntax 
-```
+```bash tab="Syntax"
 -h, --help
 ```
 
@@ -148,7 +130,6 @@ Displays the help and exits.
 
 Displays the version and exits.  
 
-#### Syntax 
-```
+```bash tab="Syntax"
 -V, --version
 ```

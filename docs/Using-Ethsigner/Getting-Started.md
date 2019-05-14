@@ -7,10 +7,14 @@ EthSigner requires a V3 Keystore key file and a password file.
 
 ## Prerequisites 
 
-[EthSigner](../Installation/Install-Binaries.md)
-[Pantheon](https://docs.pantheon.pegasys.tech/en/stable/Installation/Install-Binaries/)
-[Node.js](https://nodejs.org/en/download/)
-[web3.js](https://github.com/ethereum/web3.js/)
+* [EthSigner](../Installation/Install-Binaries.md)
+* [Pantheon](https://docs.pantheon.pegasys.tech/en/stable/Installation/Install-Binaries/)
+* [Node.js](https://nodejs.org/en/download/)
+* [web3.js](https://github.com/ethereum/web3.js/)
+
+!!! note
+    The Ethereum client used in this documentation is Pantheon but EthSigner can be used with any Ethereum client.     
+
 
 ## Start Pantheon 
 
@@ -85,7 +89,7 @@ Start EthSigner with options specified as follows:
 
 ## Confirm EthSigner Passing Requests to Pantheon 
 
-Use cURL to request the current block number using [`eth_blockNumber`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eth_blocknumber) with the EthSigner JSON-RPC endpoint: 
+Request the current block number using [`eth_blockNumber`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eth_blocknumber) with the EthSigner JSON-RPC endpoint (`8545` in this example): 
 
 ```bash
 curl -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":51}' http://127.0.0.1:8545

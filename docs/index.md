@@ -2,16 +2,15 @@ title: EthSigner Transaction Signer
 description: EthSigner is an open-source private transaction manager developed under the Apache 2.0 license and written in Java. 
 <!--- END of page meta data -->
 
-# Ethsigner Transaction Signer
+# EthSigner Transaction Signer
 
 EthSigner is an open-source, client-agnostic, Ethereum transaction signer developed under the Apache 2.0 license and written in Java. 
 
-EthSigner enables key management to be seperated from transaction validation with private key signing. 
+EthSigner provides private key signing to separate key management from transaction validation. 
 
 ## What can you do with EthSigner? 
 
-EthSigner: 
+EthSigner can: 
 
-* Routes JSON-RPC API requests from Dapp to Ethereum client 
-* Signs Ethereum transactions 
-* Provides access to your key store. 
+* Sign Ethereum transactions 
+* Access your key store. 
