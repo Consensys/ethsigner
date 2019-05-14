@@ -59,8 +59,10 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   public void handle(final RoutingContext context, final JsonRpcRequest request) {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final SendTransactionJsonParameters params;
+    final Transaction transaction;
     try {
       params = SendTransactionJsonParameters.from(request);
+      transaction = new EthTransaction(params);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
@@ -82,7 +84,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     try {
-      sendTransaction(params, context.request(), request);
+      sendTransaction(transaction, context.request(), request, params.nonce().isPresent());
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
@@ -96,30 +98,29 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   }
 
   private void sendTransaction(
-      final SendTransactionJsonParameters params,
+      final Transaction transaction,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request) {
-
+      final JsonRpcRequest request,
+      final boolean hasNonce) {
     final TransactionTransmitter transmitter =
-        createTransactionTransmitter(params, httpServerRequest, request);
-
+        createTransactionTransmitter(transaction, httpServerRequest, request, hasNonce);
     transmitter.send();
   }
 
   private TransactionTransmitter createTransactionTransmitter(
-      final SendTransactionJsonParameters params,
+      final Transaction transaction,
       final HttpServerRequest httpServerRequest,
-      final JsonRpcRequest request) {
+      final JsonRpcRequest request,
+      final boolean hasNonce) {
 
-    final RawTransactionBuilder transactionBuilder = RawTransactionBuilder.from(params);
     final SendTransactionContext context =
-        new SendTransactionContext(httpServerRequest, transactionBuilder, request.getId());
+        new SendTransactionContext(httpServerRequest, request.getId(), transaction);
 
     final RetryMechanism<SendTransactionContext> retryMechanism;
 
-    if (!params.nonce().isPresent()) {
+    if (!hasNonce) {
       LOG.debug("Nonce not present in request {}", request.getId());
-      transactionBuilder.updateNonce(nonceProvider.getNonce());
+      transaction.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
     } else {
       retryMechanism = new NoRetryMechanism<>();
