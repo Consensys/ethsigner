@@ -17,9 +17,9 @@ public class NodePorts {
   private final int httpRpc;
   private final int webSocketRpc;
 
-  public NodePorts(final int tcp, final int webSocket) {
-    this.httpRpc = tcp;
-    this.webSocketRpc = webSocket;
+  public NodePorts(final int httpRpc, final int webSocketRpc) {
+    this.httpRpc = httpRpc;
+    this.webSocketRpc = webSocketRpc;
   }
 
   public int getHttpRpc() {
