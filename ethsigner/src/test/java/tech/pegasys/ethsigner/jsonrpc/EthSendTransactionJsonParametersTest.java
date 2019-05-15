@@ -21,7 +21,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
-public class SendTransactionJsonParametersTest {
+public class EthSendTransactionJsonParametersTest {
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -51,7 +51,8 @@ public class SendTransactionJsonParametersTest {
     input.put("params", inputParameters);
 
     final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final SendTransactionJsonParameters txnParams = SendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -80,7 +81,8 @@ public class SendTransactionJsonParametersTest {
     input.put("params", parameters);
 
     final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final SendTransactionJsonParameters txnParams = SendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())

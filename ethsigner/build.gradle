@@ -23,6 +23,7 @@ dependencies {
 
   implementation 'org.web3j:core'
   implementation 'org.web3j:crypto'
+  implementation 'org.web3j:eea'
 
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web'

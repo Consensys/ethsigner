@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import io.vertx.core.json.JsonObject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SendTransactionJsonParameters {
+public class EthSendTransactionJsonParameters {
 
   private static final String ENCODING_PREFIX = "0x";
   private static final int HEXADECIMAL = 16;
@@ -38,7 +38,7 @@ public class SendTransactionJsonParameters {
   private String data;
 
   @JsonCreator
-  public SendTransactionJsonParameters(@JsonProperty("from") final String sender) {
+  public EthSendTransactionJsonParameters(@JsonProperty("from") final String sender) {
     validatePrefix(sender);
     this.sender = sender;
   }
@@ -119,7 +119,7 @@ public class SendTransactionJsonParameters {
     }
   }
 
-  public static SendTransactionJsonParameters from(final JsonRpcRequest request) {
+  public static EthSendTransactionJsonParameters from(final JsonRpcRequest request) {
 
     final Object sendTransactionObject;
     final Object params = request.getParams();
@@ -138,6 +138,6 @@ public class SendTransactionJsonParameters {
 
     final JsonObject receivedParams = JsonObject.mapFrom(sendTransactionObject);
 
-    return receivedParams.mapTo(SendTransactionJsonParameters.class);
+    return receivedParams.mapTo(EthSendTransactionJsonParameters.class);
   }
 }

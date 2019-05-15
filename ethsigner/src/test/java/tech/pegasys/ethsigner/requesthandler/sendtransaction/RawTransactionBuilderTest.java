@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -33,7 +33,8 @@ public class RawTransactionBuilderTest {
     inputData.put("data", "TheData");
 
     final JsonObject input = new JsonObject(inputData);
-    final SendTransactionJsonParameters params = input.mapTo(SendTransactionJsonParameters.class);
+    final EthSendTransactionJsonParameters params =
+        input.mapTo(EthSendTransactionJsonParameters.class);
 
     final RawTransactionBuilder builder = RawTransactionBuilder.from(params);
     final RawTransaction rawTransaction = builder.build();
