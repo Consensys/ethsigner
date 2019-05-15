@@ -250,8 +250,6 @@ public class EthSignerProcessRunner {
     awaitPortsFile(dataDirectory);
     LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
 
-    awaitPortsFile(dataDirectory);
-
     try (final FileInputStream fis = new FileInputStream(portsFile)) {
       portsProperties.load(fis);
       LOG.info("EthSigner ports: {}", portsProperties);
