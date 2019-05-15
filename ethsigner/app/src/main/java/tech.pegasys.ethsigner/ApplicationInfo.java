@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner;
 
 public class ApplicationInfo {
-  private static final String CLIENT_IDENTITY = "tech/pegasys/ethsigner" + "";
+  private static final String CLIENT_IDENTITY = "ethsigner";
   private static final String VERSION =
       CLIENT_IDENTITY
           + "/v"
