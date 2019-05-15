@@ -267,9 +267,9 @@ public class EthSignerProcessRunner {
                 try (final Stream<String> s = Files.lines(file.toPath())) {
                   return s.count() > 0;
                 }
-              } else {
-                return false;
               }
+
+              return false;
             });
   }
 }
