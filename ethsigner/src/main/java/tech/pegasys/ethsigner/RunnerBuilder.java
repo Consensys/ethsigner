@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.signing.TransactionSerialiser;
 
+import java.nio.file.Path;
 import java.time.Duration;
 
 import io.vertx.core.http.HttpServerOptions;
@@ -30,31 +31,37 @@ public class RunnerBuilder {
   private HttpServerOptions serverOptions;
   private Duration requestTimeout;
   private NonceProvider nonceProvider;
+  private Path dataPath;
 
   public RunnerBuilder() {}
 
-  public RunnerBuilder setTransactionSerialiser(final TransactionSerialiser serialiser) {
+  public RunnerBuilder withTransactionSerialiser(final TransactionSerialiser serialiser) {
     this.serialiser = serialiser;
     return this;
   }
 
-  public RunnerBuilder setClientOptions(final WebClientOptions clientOptions) {
+  public RunnerBuilder withClientOptions(final WebClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     return this;
   }
 
-  public RunnerBuilder setServerOptions(final HttpServerOptions serverOptions) {
+  public RunnerBuilder withServerOptions(final HttpServerOptions serverOptions) {
     this.serverOptions = serverOptions;
     return this;
   }
 
-  public RunnerBuilder setHttpRequestTimeout(final Duration requestTimeout) {
+  public RunnerBuilder withHttpRequestTimeout(final Duration requestTimeout) {
     this.requestTimeout = requestTimeout;
     return this;
   }
 
-  public RunnerBuilder setNonceProvider(final NonceProvider nonceProvider) {
+  public RunnerBuilder withNonceProvider(final NonceProvider nonceProvider) {
     this.nonceProvider = nonceProvider;
+    return this;
+  }
+
+  public RunnerBuilder withDataPath(final Path dataPath) {
+    this.dataPath = dataPath;
     return this;
   }
 
@@ -81,6 +88,7 @@ public class RunnerBuilder {
       LOG.error("Unable to construct Runner, nonceProvider is unset.");
       return null;
     }
-    return new Runner(serialiser, clientOptions, serverOptions, requestTimeout, nonceProvider);
+    return new Runner(
+        serialiser, clientOptions, serverOptions, requestTimeout, nonceProvider, dataPath);
   }
 }

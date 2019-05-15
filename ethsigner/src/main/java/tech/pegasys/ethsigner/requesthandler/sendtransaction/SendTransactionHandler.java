@@ -73,7 +73,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
-    if (senderNotUnlockedAccount(transaction.sender())) {
+    if (senderNotUnlockedAccount(transaction)) {
       LOG.info(
           "From address ({}) does not match unlocked account ({})",
           transaction.sender(),
@@ -128,7 +128,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
         ethNodeClient, context, serialiser, retryMechanism, responder);
   }
 
-  private boolean senderNotUnlockedAccount(final String sender) {
-    return !sender.equalsIgnoreCase(serialiser.getAddress());
+  private boolean senderNotUnlockedAccount(final Transaction transaction) {
+    return !transaction.sender().equalsIgnoreCase(serialiser.getAddress());
   }
 }

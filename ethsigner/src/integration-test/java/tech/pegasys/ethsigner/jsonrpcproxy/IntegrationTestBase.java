@@ -121,7 +121,8 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             Duration.ofSeconds(1),
-            new Web3jNonceProvider(web3j, serialiser.getAddress()));
+            new Web3jNonceProvider(web3j, serialiser.getAddress()),
+            null);
     runner.start();
 
     LOG.info(
