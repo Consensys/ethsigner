@@ -39,4 +39,6 @@ public interface Config {
   Integer getHttpListenPort();
 
   ChainIdProvider getChainId();
+
+  Path getDataDirectory();
 }

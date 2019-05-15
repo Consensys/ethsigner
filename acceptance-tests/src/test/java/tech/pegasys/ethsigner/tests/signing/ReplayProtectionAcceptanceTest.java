@@ -76,13 +76,12 @@ public class ReplayProtectionAcceptanceTest {
         new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
     ethNode = new PantheonNode(DOCKER, nodeConfig);
-
     ethNode.start();
-    ethSigner.start();
-
     ethNode.awaitStartupCompletion();
+
+    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
 
