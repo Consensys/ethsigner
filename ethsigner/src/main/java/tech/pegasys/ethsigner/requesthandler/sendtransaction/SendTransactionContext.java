@@ -19,26 +19,26 @@ import io.vertx.core.http.HttpServerRequest;
 public class SendTransactionContext {
   private final HttpServerRequest initialRequest;
   private final JsonRpcRequestId id;
-  private final RawTransactionBuilder rawTransactionBuilder;
+  private Transaction transaction;
 
   public SendTransactionContext(
       final HttpServerRequest initialRequest,
-      final RawTransactionBuilder rawTransactionBuilder,
-      final JsonRpcRequestId id) {
+      final JsonRpcRequestId id,
+      final Transaction transaction) {
     this.initialRequest = initialRequest;
-    this.rawTransactionBuilder = rawTransactionBuilder;
     this.id = id;
+    this.transaction = transaction;
   }
 
   public HttpServerRequest getInitialRequest() {
     return initialRequest;
   }
 
-  public RawTransactionBuilder getRawTransactionBuilder() {
-    return rawTransactionBuilder;
-  }
-
   public JsonRpcRequestId getId() {
     return id;
+  }
+
+  public Transaction getTransaction() {
+    return transaction;
   }
 }
