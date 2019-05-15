@@ -14,34 +14,31 @@ package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Contracts {
 
+  private static final Logger LOG = LogManager.getLogger();
+
   public static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
   public static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
 
-  private static final Logger LOG = LogManager.getLogger();
-
   private final Eth eth;
-  private final Web3j jsonRpc;
 
-  public Contracts(final Eth eth, final Web3j jsonRpc) {
+  public Contracts(final Eth eth) {
     this.eth = eth;
-    this.jsonRpc = jsonRpc;
   }
 
-  public String submit(final Transaction smartContract) throws IOException {
-    return eth.sendTransaction(smartContract);
+  public String submit(final Transaction smartContract) {
+    return failOnIOException(() -> eth.sendTransaction(smartContract));
   }
 
   public void awaitBlockContaining(final String hash) {
@@ -52,21 +49,27 @@ public class Contracts {
     }
   }
 
-  public String address(final String hash) throws IOException {
-    final TransactionReceipt receipt =
-        eth.getTransactionReceipt(hash)
-            .orElseThrow(() -> new RuntimeException("No receipt found for hash: " + hash));
-    assertThat(receipt.getContractAddress()).isNotEmpty();
-    return receipt.getContractAddress();
+  public String address(final String hash) {
+    return failOnIOException(
+        () -> {
+          final TransactionReceipt receipt =
+              eth.getTransactionReceipt(hash)
+                  .orElseThrow(() -> new RuntimeException("No receipt found for hash: " + hash));
+          assertThat(receipt.getContractAddress()).isNotEmpty();
+          return receipt.getContractAddress();
+        });
   }
 
-  public String code(final String address) throws IOException {
-    final String code = eth.getCode(address);
-    assertThat(code).isNotEmpty();
-    return code;
+  public String code(final String address) {
+    return failOnIOException(
+        () -> {
+          final String code = eth.getCode(address);
+          assertThat(code).isNotEmpty();
+          return code;
+        });
   }
 
-  public String call(final Transaction contractViewOperation) throws IOException {
-    return eth.call(contractViewOperation);
+  public String call(final Transaction contractViewOperation) {
+    return failOnIOException(() -> eth.call(contractViewOperation));
   }
 }

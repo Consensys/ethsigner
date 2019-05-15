@@ -30,7 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
@@ -86,7 +85,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void wrongChainId() throws IOException {
+  public void wrongChainId() {
     setUp("eth_hash_4404.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
@@ -106,7 +105,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void unnecessaryChainId() throws IOException {
+  public void unnecessaryChainId() {
     setUp("eth_hash_2018_no_replay_protection.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =

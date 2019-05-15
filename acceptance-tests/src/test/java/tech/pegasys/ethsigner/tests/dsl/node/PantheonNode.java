@@ -104,7 +104,7 @@ public class PantheonNode implements Node {
             new HttpService(httpRpcUrl), pollingInterval, Async.defaultExecutorService());
     final Eth eth = new Eth(jsonRpc);
     this.accounts = new Accounts(eth);
-    this.contracts = new Contracts(eth, jsonRpc);
+    this.contracts = new Contracts(eth);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }

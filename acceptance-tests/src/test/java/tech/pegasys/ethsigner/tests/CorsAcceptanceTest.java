@@ -26,8 +26,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
-
 import com.github.dockerjava.api.DockerClient;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -71,7 +69,7 @@ public class CorsAcceptanceTest {
   }
 
   @Test
-  public void forbiddenResponseReceivedWhenHeadersDoNotMatchCorsOfNode() throws IOException {
+  public void forbiddenResponseReceivedWhenHeadersDoNotMatchCorsOfNode() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner
             .rawRequest()
