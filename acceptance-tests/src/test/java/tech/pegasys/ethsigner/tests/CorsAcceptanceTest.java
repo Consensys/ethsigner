@@ -50,13 +50,12 @@ public class CorsAcceptanceTest {
         new NodeConfigurationBuilder().cors(AUTHORISED_DOMAIN).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
     ethNode = new PantheonNode(DOCKER, nodeConfig);
-
     ethNode.start();
-    ethSigner.start();
-
     ethNode.awaitStartupCompletion();
+
+    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
 

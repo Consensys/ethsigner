@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -29,6 +30,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.ServerSocket;
 
 import org.junit.After;
 import org.junit.Before;
@@ -38,14 +40,20 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class TimeoutAcceptanceTest {
+  private static final int DYNAMICALLY_ASSIGN_PORT = 0;
+
   private Signer ethSigner;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
+    final int unresponsivePortA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+    final int unresponsivePortB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final NodePorts nodePorts = new NodePorts(unresponsivePortA, unresponsivePortB);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig);
+    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

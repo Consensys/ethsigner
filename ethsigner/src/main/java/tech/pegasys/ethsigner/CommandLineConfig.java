@@ -100,13 +100,19 @@ public class CommandLineConfig implements Config {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
       required = true,
       arity = "1")
   private long chainId;
+
+  @Option(
+      names = {"--data-directory"},
+      description = "Data directory to store temporary files",
+      arity = "1")
+  private Path dataDirectory;
 
   private final PrintStream output;
 
@@ -191,6 +197,11 @@ public class CommandLineConfig implements Config {
   }
 
   @Override
+  public Path getDataDirectory() {
+    return dataDirectory;
+  }
+
+  @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
@@ -208,6 +219,7 @@ public class CommandLineConfig implements Config {
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
+        .add("dataDirectory", dataDirectory)
         .add("output", output)
         .toString();
   }
