@@ -30,6 +30,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.ServerSocket;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,15 +40,17 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class TimeoutAcceptanceTest {
-  private static final int UNUSED_PORT_A = 7007;
-  private static final int UNUSED_PORT_B = 7008;
+  private static final int DYNAMICALLY_ASSIGN_PORT = 0;
 
   private Signer ethSigner;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
+    final int unresponsivePortA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+    final int unresponsivePortB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(UNUSED_PORT_A, UNUSED_PORT_B);
+    final NodePorts nodePorts = new NodePorts(unresponsivePortA, unresponsivePortB);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
