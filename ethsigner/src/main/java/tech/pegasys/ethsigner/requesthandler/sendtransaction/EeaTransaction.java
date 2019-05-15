@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
 import tech.pegasys.ethsigner.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -27,7 +26,7 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EeaTransaction implements Transaction {
-  private final EthSendTransactionJsonParameters eeaSendTransactionJsonParameters;
+  private final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters;
   private final RawPrivateTransactionBuilder rawPrivateTransactionBuilder;
 
   public EeaTransaction(final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters) {

@@ -20,7 +20,6 @@ import java.util.List;
 import com.google.common.base.MoreObjects;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 
-// TODO inherit from RawTransactionBuilder?
 public class RawPrivateTransactionBuilder {
 
   private BigInteger nonce;
@@ -73,7 +72,6 @@ public class RawPrivateTransactionBuilder {
   }
 
   public RawPrivateTransaction build() {
-    // TODO how can the value to be set?
     return RawPrivateTransaction.createTransaction(
         nonce, gasPrice, gasLimit, to, data, privateFrom, privateFor, restriction);
   }
