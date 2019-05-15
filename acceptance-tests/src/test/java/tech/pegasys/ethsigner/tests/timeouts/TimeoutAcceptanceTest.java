@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,17 +42,22 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class TimeoutAcceptanceTest {
+
+  private static final Logger LOG = LogManager.getLogger();
   private static final int DYNAMICALLY_ASSIGN_PORT = 0;
 
   private Signer ethSigner;
+  private ServerSocket unresponsiveSocketA;
+  private ServerSocket unresponsiveSocketB;
 
   @Before
   public void setUp() throws IOException {
-    final int unresponsivePortA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
-    final int unresponsivePortB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+    unresponsiveSocketA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
+    unresponsiveSocketB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(unresponsivePortA, unresponsivePortB);
+    final NodePorts nodePorts =
+        new NodePorts(unresponsiveSocketA.getLocalPort(), unresponsiveSocketB.getLocalPort());
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
@@ -64,6 +71,19 @@ public class TimeoutAcceptanceTest {
   public void tearDown() {
     if (ethSigner != null) {
       ethSigner.shutdown();
+    }
+
+    close(unresponsiveSocketA);
+    close(unresponsiveSocketB);
+  }
+
+  private void close(final ServerSocket socket) {
+    try {
+      if (!socket.isClosed()) {
+        socket.close();
+      }
+    } catch (final IOException e) {
+      LOG.warn("Problem closing unresponsive socket {}", socket.getInetAddress(), e);
     }
   }
 
