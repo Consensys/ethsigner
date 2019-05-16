@@ -14,8 +14,8 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 
 import static java.util.Collections.emptyMap;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.util.Map;
 

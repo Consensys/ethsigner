@@ -32,10 +32,10 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.signing.FileBasedTransactionSigner;
-import tech.pegasys.ethsigner.signing.TransactionSerialiser;
-import tech.pegasys.ethsigner.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
+import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;

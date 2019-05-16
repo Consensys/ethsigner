@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.PARSE_ERROR;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.PARSE_ERROR;
 
 import org.junit.Test;
 

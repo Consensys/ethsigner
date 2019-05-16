@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import java.util.Map;
 
