@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 

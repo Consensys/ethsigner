@@ -12,16 +12,16 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.http.JsonRpcHttpService;
-import tech.pegasys.ethsigner.http.RequestMapper;
-import tech.pegasys.ethsigner.requesthandler.internalresponse.EthAccountsBodyProvider;
-import tech.pegasys.ethsigner.requesthandler.internalresponse.InternalResponseHandler;
-import tech.pegasys.ethsigner.requesthandler.passthrough.PassThroughHandler;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.SendTransactionHandler;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.TransactionFactory;
-import tech.pegasys.ethsigner.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.core.http.JsonRpcHttpService;
+import tech.pegasys.ethsigner.core.http.RequestMapper;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
+import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.TransactionFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.io.File;
 import java.io.FileOutputStream;
