@@ -24,6 +24,7 @@ import java.util.Optional;
 import com.google.common.base.Charsets;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
+import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -70,13 +71,9 @@ public final class EthSigner {
     }
 
     try {
-      final String downstreamUrl =
-          "http://"
-              + config.getDownstreamHttpHost().getHostName()
-              + ":"
-              + config.getDownstreamHttpPort();
-      LOG.info("Downstream URL = {}", downstreamUrl);
-      final Web3j web3j = new JsonRpc2_0Web3j(new HttpService(downstreamUrl));
+
+      final Web3j web3j = createWebj();
+
       final FileBasedTransactionSigner signer =
           FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
 
@@ -105,6 +102,22 @@ public final class EthSigner {
     } catch (CipherException ex) {
       LOG.info("Unable to decode keyfile with supplied passwordFile.");
     }
+  }
+
+  private Web3j createWebj() {
+    final String downstreamUrl =
+        "http://"
+            + config.getDownstreamHttpHost().getHostName()
+            + ":"
+            + config.getDownstreamHttpPort();
+    LOG.info("Downstream URL = {}", downstreamUrl);
+
+    final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    builder
+        .connectTimeout(config.getDownstreamHttpRequestTimeout())
+        .readTimeout(config.getDownstreamHttpRequestTimeout());
+
+    return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
   }
 
   private Optional<String> readPasswordFromFile() {
