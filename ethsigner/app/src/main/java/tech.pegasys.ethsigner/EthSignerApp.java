@@ -18,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
-public class EthSigner {
+public class EthSignerApp {
 
   private static final Logger LOG = LogManager.getLogger();
 

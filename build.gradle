@@ -290,7 +290,7 @@ subprojects {
 jar { enabled = false }
 
 apply plugin: 'application'
-mainClassName = "tech.pegasys.ethsigner.EthSigner"
+mainClassName = "tech.pegasys.ethsigner.EthSignerApp"
 applicationDefaultJvmArgs = [
   "-Dvertx.disableFileCPResolving=true",
   // We shutdown log4j ourselves, as otherwise his shutdown hook runs before our own and whatever
