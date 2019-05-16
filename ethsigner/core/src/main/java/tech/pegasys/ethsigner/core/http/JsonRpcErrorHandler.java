@@ -12,6 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -20,7 +25,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.util.Optional;
 
-import io.netty.handler.codec.rtsp.RtspResponseStatuses;
 import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
@@ -41,9 +45,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
     final Optional<JsonRpcRequest> jsonRpcRequest = jsonRpcRequest(context);
     final JsonRpcErrorResponse errorResponse = errorResponse(context, jsonRpcRequest);
     final int statusCode =
-        context.statusCode() == -1
-            ? RtspResponseStatuses.INTERNAL_SERVER_ERROR.code()
-            : context.statusCode();
+        context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
     LOG.debug(
         "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
         context.request()::method,
@@ -75,10 +77,10 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       final JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
       return jsonRpcException.getJsonRpcError();
     } // in case of a timeout we may not have a failure exception so we use the status code
-    else if (context.statusCode() == RtspResponseStatuses.GATEWAY_TIMEOUT.code()) {
-      return JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+    else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
+      return CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
     } else {
-      return JsonRpcError.INTERNAL_ERROR;
+      return INTERNAL_ERROR;
     }
   }
 }
