@@ -25,6 +25,10 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.Runner;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
+import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
@@ -32,10 +36,6 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
