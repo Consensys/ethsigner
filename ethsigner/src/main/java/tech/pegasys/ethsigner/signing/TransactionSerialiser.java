@@ -14,9 +14,6 @@ package tech.pegasys.ethsigner.signing;
 
 import tech.pegasys.ethsigner.requesthandler.sendtransaction.Transaction;
 
-import java.nio.ByteBuffer;
-
-import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;

@@ -43,9 +43,9 @@ public class EeaSendTransactionJsonParameters {
   @JsonCreator
   public EeaSendTransactionJsonParameters(
       @JsonProperty("from") final String sender,
-      final String privateFrom,
-      final List<String> privateFor,
-      final String restriction) {
+      @JsonProperty("privateFrom") final String privateFrom,
+      @JsonProperty("privateFor") final List<String> privateFor,
+      @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
     this.privateFrom = privateFrom;
     this.privateFor = privateFor;
