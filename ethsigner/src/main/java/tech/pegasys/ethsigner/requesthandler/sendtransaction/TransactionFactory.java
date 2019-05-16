@@ -10,35 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core;
+package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.SendTransactionJsonParameters;
 
-import java.net.InetAddress;
-import java.nio.file.Path;
-import java.time.Duration;
+public class TransactionFactory {
 
-import org.apache.logging.log4j.Level;
-
-public interface Config {
-
-  Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
-
-  InetAddress getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  InetAddress getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
-
-  Path getDataDirectory();
+  public Transaction createTransaction(final JsonRpcRequest request) {
+    final SendTransactionJsonParameters params = SendTransactionJsonParameters.from(request);
+    return new EthTransaction(params);
+  }
 }

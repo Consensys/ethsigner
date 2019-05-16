@@ -10,35 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core;
+package tech.pegasys.ethsigner.tests.dsl.node;
 
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+public class NodePorts {
 
-import java.net.InetAddress;
-import java.nio.file.Path;
-import java.time.Duration;
+  private final int httpRpc;
+  private final int webSocketRpc;
 
-import org.apache.logging.log4j.Level;
+  public NodePorts(final int httpRpc, final int webSocketRpc) {
+    this.httpRpc = httpRpc;
+    this.webSocketRpc = webSocketRpc;
+  }
 
-public interface Config {
+  public int getHttpRpc() {
+    return httpRpc;
+  }
 
-  Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
-
-  InetAddress getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  InetAddress getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
-
-  Path getDataDirectory();
+  public int getWebSocketRpc() {
+    return webSocketRpc;
+  }
 }

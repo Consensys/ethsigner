@@ -12,6 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -22,12 +26,24 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
+import java.io.IOException;
+import java.math.BigInteger;
+
 import com.github.dockerjava.api.DockerClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Convert.Unit;
 
-public class AcceptanceTestBase {
+/**
+ * Sanity test to verify starting EthSigner without the data directory feature flag works, (the
+ * feature flag is leveraged by most AT).
+ */
+public class DataDirectoryFeatureFlagAcceptanceTest {
 
+  private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static Node ethNode;
   private static Signer ethSigner;
 
@@ -45,11 +61,13 @@ public class AcceptanceTestBase {
 
   @BeforeClass
   public static void setUpBase() {
-    Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(DataDirectoryFeatureFlagAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
+    final SignerConfiguration signerConfig =
+        new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 
     ethNode = new PantheonNode(docker, nodeConfig);
     ethNode.start();
@@ -69,5 +87,26 @@ public class AcceptanceTestBase {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
+  }
+
+  @Test
+  public void valueTransfer() throws IOException {
+    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
+    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            richBenefactor().address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
+    final String hash = ethSigner().transactions().submit(transaction);
+    ethNode().transactions().awaitBlockContaining(hash);
+
+    final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
+    final BigInteger actualEndBalance = ethNode().accounts().balance(RECIPIENT);
+    assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
   }
 }

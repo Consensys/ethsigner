@@ -24,6 +24,8 @@ public interface Node {
 
   void awaitStartupCompletion();
 
+  NodePorts ports();
+
   Accounts accounts();
 
   Contracts contracts();

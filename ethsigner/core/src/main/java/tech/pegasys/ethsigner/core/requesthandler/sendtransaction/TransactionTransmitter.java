@@ -31,7 +31,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.RawTransaction;
 
 public class TransactionTransmitter {
 
@@ -73,14 +72,13 @@ public class TransactionTransmitter {
     // account.
     final String signedTransactionHexString;
     try {
-      final RawTransaction rawTransaction = context.getRawTransactionBuilder().build();
-      signedTransactionHexString = transactionSerialiser.serialise(rawTransaction);
+      final Transaction transaction = context.getTransaction();
+      signedTransactionHexString = transactionSerialiser.serialise(transaction);
     } catch (final IllegalArgumentException e) {
-      LOG.debug("Failed to encode transaction: {}", context.getRawTransactionBuilder(), e);
+      LOG.debug("Failed to encode transaction: {}", context.getTransaction(), e);
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
-      LOG.debug(
-          "Failed to encode/serialise transaction: {}", context.getRawTransactionBuilder(), e);
+      LOG.debug("Failed to encode/serialise transaction: {}", context.getTransaction(), e);
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
@@ -153,7 +151,7 @@ public class TransactionTransmitter {
         "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
         context.getInitialRequest()::method,
         context.getInitialRequest()::absoluteURI,
-        context::getRawTransactionBuilder,
+        context::getTransaction,
         () -> Json.encode(errorResponse));
 
     responder.create(

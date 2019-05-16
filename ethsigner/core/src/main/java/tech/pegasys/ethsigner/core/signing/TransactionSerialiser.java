@@ -12,14 +12,10 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.util.List;
+import tech.pegasys.ethsigner.requesthandler.sendtransaction.Transaction;
 
-import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import org.web3j.utils.Numeric;
 
 public class TransactionSerialiser {
@@ -32,8 +28,8 @@ public class TransactionSerialiser {
     this.chainId = chainId;
   }
 
-  public String serialise(final RawTransaction rawTransaction) {
-    final byte[] bytesToSign = TransactionEncoder.encode(rawTransaction, chainId);
+  public String serialise(final Transaction transaction) {
+    final byte[] bytesToSign = transaction.rlpEncode(chainId);
 
     final Signature signature = signer.sign(bytesToSign);
 
@@ -46,17 +42,8 @@ public class TransactionSerialiser {
     final SignatureData eip155Signature =
         TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
 
-    final byte[] serialisedBytes = encode(rawTransaction, eip155Signature);
+    final byte[] serialisedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serialisedBytes);
-  }
-
-  /**
-   * NOTE: This was taken from Web3j TransactionEncoder as the encode with these params is private
-   */
-  private byte[] encode(final RawTransaction rawTransaction, final SignatureData signatureData) {
-    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
-    final RlpList rlpList = new RlpList(values);
-    return RlpEncoder.encode(rlpList);
   }
 
   public String getAddress() {

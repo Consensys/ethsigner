@@ -53,7 +53,7 @@ public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransaction
       throws RetryException {
     if (retriesAvailable()) {
       try {
-        context.getRawTransactionBuilder().updateNonce(nonceProvider.getNonce());
+        context.getTransaction().updateNonce(nonceProvider.getNonce());
       } catch (final RuntimeException e) {
         LOG.info("Failed to determine current nonce from web3j provider");
         throw new RetryException();

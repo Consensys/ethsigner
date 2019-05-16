@@ -76,19 +76,20 @@ public final class EthSigner {
       final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
       runnerBuilder
-          .setTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
-          .setClientOptions(
+          .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
+          .withClientOptions(
               new WebClientOptions()
                   .setDefaultPort(config.getDownstreamHttpPort())
                   .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
-          .setServerOptions(
+          .withServerOptions(
               new HttpServerOptions()
                   .setPort(config.getHttpListenPort())
                   .setHost(config.getHttpListenHost().getHostAddress())
                   .setReuseAddress(true)
                   .setReusePort(true))
-          .setHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .setNonceProvider(nonceProvider)
+          .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
+          .withNonceProvider(nonceProvider)
+          .withDataPath(config.getDataDirectory())
           .build()
           .start();
     } catch (IOException ex) {
@@ -104,7 +105,7 @@ public final class EthSigner {
       byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
       return Optional.of(new String(fileContent, Charsets.UTF_8));
     } catch (IOException ex) {
-      LOG.debug("Failed to read password from password file, {}", ex);
+      LOG.debug("Failed to read password from password file: {}", config.getPasswordFilePath(), ex);
       return Optional.empty();
     }
   }

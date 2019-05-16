@@ -19,7 +19,20 @@ public class SignerConfigurationBuilder {
 
   private static final String LOCALHOST = "127.0.0.1";
 
+  private int httpRpcPort;
+  private int webSocketPort;
+
+  public SignerConfigurationBuilder withHttpRpcPort(final int port) {
+    httpRpcPort = port;
+    return this;
+  }
+
+  public SignerConfigurationBuilder withWebSocketPort(final int port) {
+    webSocketPort = port;
+    return this;
+  }
+
   public SignerConfiguration build() {
-    return new SignerConfiguration(CHAIN_ID, LOCALHOST);
+    return new SignerConfiguration(CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort);
   }
 }

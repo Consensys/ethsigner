@@ -41,8 +41,8 @@ import org.apache.logging.log4j.Logger;
 public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LogManager.getLogger();
-
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+  private static final int UNASSIGNED_PORT = 0;
 
   static {
     // Force Jackson to fail when @JsonCreator values are missing
@@ -54,7 +54,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private final HttpResponseFactory responseFactory;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
-  private HttpServer httpServer = null;
+  private HttpServer httpServer;
 
   public JsonRpcHttpService(
       final HttpResponseFactory responseFactory,
@@ -94,6 +94,13 @@ public class JsonRpcHttpService extends AbstractVerticle {
             stopFuture.fail(result.cause());
           }
         });
+  }
+
+  public int actualPort() {
+    if (httpServer == null) {
+      return UNASSIGNED_PORT;
+    }
+    return httpServer.actualPort();
   }
 
   private Router router() {
