@@ -148,8 +148,6 @@ public class JsonRpcHttpService extends AbstractVerticle {
       handler.handle(context, request);
     } catch (final DecodeException | IllegalArgumentException e) {
       sendParseErrorResponse(context, e);
-    } catch (final Exception e) {
-      LOG.error("An unhandled error occurred while processing {}", context.getBodyAsString(), e);
     }
   }
 
