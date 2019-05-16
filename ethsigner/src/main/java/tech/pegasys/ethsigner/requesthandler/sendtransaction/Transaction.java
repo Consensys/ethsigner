@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -32,6 +35,8 @@ public interface Transaction {
   boolean hasNonce();
 
   String sender();
+
+  JsonRpcRequest jsonRpcRequest(String signedTransactionHexString, JsonRpcRequestId id);
 
   // NOTE: This was taken from Web3j TransactionEncode as the function is private
   static byte[] longToBytes(final long x) {

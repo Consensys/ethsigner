@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethsigner.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
@@ -35,9 +33,6 @@ import org.apache.logging.log4j.Logger;
 public class TransactionTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
-
-  private static final String JSON_RPC_VERSION = "2.0";
-  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser transactionSerialiser;
@@ -82,14 +77,12 @@ public class TransactionTransmitter {
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
-    final JsonRpcRequest sendRawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
-    sendRawTransaction.setParams(singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(context.getId());
-
+    final JsonRpcRequest rawTransaction =
+        context.getTransaction().jsonRpcRequest(signedTransactionHexString, context.getId());
     try {
-      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
+      return new JsonRpcBody(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
+      LOG.debug("JSON Serialisation failed for: {}", rawTransaction, e);
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
   }

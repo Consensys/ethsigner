@@ -12,7 +12,11 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
+import static java.util.Collections.singletonList;
+
 import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -26,6 +30,8 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EthTransaction implements Transaction {
+  private static final String JSON_RPC_VERSION = "2.0";
+  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
 
@@ -55,6 +61,15 @@ public class EthTransaction implements Transaction {
   @Override
   public String sender() {
     return ethSendTransactionJsonParameters.sender();
+  }
+
+  @Override
+  public JsonRpcRequest jsonRpcRequest(
+      final String signedTransactionHexString, final JsonRpcRequestId id) {
+    final JsonRpcRequest rawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
+    rawTransaction.setParams(singletonList(signedTransactionHexString));
+    rawTransaction.setId(id);
+    return rawTransaction;
   }
 
   @Override
