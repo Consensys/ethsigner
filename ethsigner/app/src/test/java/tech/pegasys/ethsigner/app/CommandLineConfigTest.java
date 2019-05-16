@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.CommandLineConfig;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
