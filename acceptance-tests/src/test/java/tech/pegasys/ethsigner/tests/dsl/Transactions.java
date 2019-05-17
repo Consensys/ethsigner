@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
