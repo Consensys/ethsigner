@@ -121,6 +121,23 @@ public class JsonRpcHttpService extends AbstractVerticle {
   }
 
   private void handleJsonRpc(final RoutingContext context) {
+    vertx.executeBlocking(
+        future -> {
+          process(context);
+          future.complete();
+        },
+        false,
+        (res) -> {
+          if (res.failed()) {
+            LOG.error(
+                "An unhandled error occurred while processing {}",
+                context.getBodyAsString(),
+                res.cause());
+          }
+        });
+  }
+
+  private void process(final RoutingContext context) {
     try {
       LOG.trace("Request body = {}", context.getBodyAsString());
 
@@ -131,8 +148,6 @@ public class JsonRpcHttpService extends AbstractVerticle {
       handler.handle(context, request);
     } catch (final DecodeException | IllegalArgumentException e) {
       sendParseErrorResponse(context, e);
-    } catch (Exception e) {
-      LOG.error("An unhandled error occurred while processing {}", context.getBodyAsString(), e);
     }
   }
 
