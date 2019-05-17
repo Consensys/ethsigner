@@ -19,12 +19,12 @@ import java.io.IOException;
 public class ExceptionUtils {
 
   @FunctionalInterface
-  public interface OperationThatMayThrowsIOException<R> {
+  public interface OperationThatMayThrowIOException<R> {
     R execute() throws IOException;
   }
 
   public static <R extends Object> R failOnIOException(
-      final OperationThatMayThrowsIOException<R> function) {
+      final OperationThatMayThrowIOException<R> function) {
     try {
       return function.execute();
     } catch (final IOException e) {
