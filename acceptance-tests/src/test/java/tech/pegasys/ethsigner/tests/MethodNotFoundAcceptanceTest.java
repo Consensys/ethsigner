@@ -18,15 +18,13 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Test;
 
 public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
 
   @Test
-  public void sendDisabledApiReturnsBadRequest() throws IOException {
+  public void sendDisabledApiReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawRequest().exceptionalRequest("ibft_getPendingVotes");
 
@@ -35,7 +33,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void unknownJsonRpcMethodReturnsBadRequest() throws IOException {
+  public void unknownJsonRpcMethodReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawRequest().exceptionalRequest("invalidJsonRpcMethod");
 

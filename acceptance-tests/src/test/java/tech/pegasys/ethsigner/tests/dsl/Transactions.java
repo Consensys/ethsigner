@@ -15,11 +15,11 @@ package tech.pegasys.ethsigner.tests.dsl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,20 +38,20 @@ public class Transactions {
     this.eth = eth;
   }
 
-  public String submit(final Transaction transaction) throws IOException {
-    return eth.sendTransaction(transaction);
+  public String submit(final Transaction transaction) {
+    return failOnIOException(() -> eth.sendTransaction(transaction));
   }
 
-  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction)
-      throws IOException {
+  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction) {
     try {
-      eth.sendTransaction(transaction);
+      failOnIOException(() -> eth.sendTransaction(transaction));
       fail("Expecting exceptional response ");
-      return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
       return SignerResponse.fromError(e);
     }
+
+    return null;
   }
 
   public void awaitBlockContaining(final String hash) {
@@ -63,11 +63,7 @@ public class Transactions {
     }
   }
 
-  public BigInteger count(final String address) throws IOException {
-    return eth.getTransactionCount(address);
-  }
-
-  public BigInteger count(final Account account) throws IOException {
-    return count(account.address());
+  public BigInteger count(final String address) {
+    return failOnIOException(() -> eth.getTransactionCount(address));
   }
 }

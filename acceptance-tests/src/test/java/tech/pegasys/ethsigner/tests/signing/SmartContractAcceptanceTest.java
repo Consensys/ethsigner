@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.tests.dsl.utils.Hex.hex;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.Test;
@@ -34,7 +33,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
       "0x60fe47b10000000000000000000000000000000000000000000000000000000000000007";
 
   @Test
-  public void deployContract() throws IOException {
+  public void deployContract() {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
@@ -55,7 +54,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void invokeContract() throws IOException {
+  public void invokeContract() {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
