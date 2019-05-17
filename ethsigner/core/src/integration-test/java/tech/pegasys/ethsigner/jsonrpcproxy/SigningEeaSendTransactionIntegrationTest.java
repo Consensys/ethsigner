@@ -345,7 +345,8 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void invalidParamsResponseWhenMissingPrivateFrom() {
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingPrivateFrom()), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransaction.missingPrivateFrom()),
+        response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
@@ -357,6 +358,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void invalidParamsResponseWhenMissingRestriction() {
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingRestriction()), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransaction.missingRestriction()),
+        response.ethSigner(INVALID_PARAMS));
   }
 }
