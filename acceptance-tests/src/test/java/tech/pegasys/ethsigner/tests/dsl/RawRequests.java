@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.fail;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
