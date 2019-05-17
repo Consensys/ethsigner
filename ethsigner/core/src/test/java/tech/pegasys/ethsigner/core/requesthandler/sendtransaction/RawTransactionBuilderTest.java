@@ -14,8 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 
 import java.math.BigInteger;
 import java.util.HashMap;

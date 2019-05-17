@@ -14,10 +14,9 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static java.util.Collections.singletonList;
 
-import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
 import java.util.List;

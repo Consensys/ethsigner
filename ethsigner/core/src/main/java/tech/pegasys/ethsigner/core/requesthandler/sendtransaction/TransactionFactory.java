@@ -12,11 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
 
 public class TransactionFactory {
 

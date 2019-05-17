@@ -10,13 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import com.google.common.base.MoreObjects;
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+
 import java.math.BigInteger;
 import java.util.List;
+
+import com.google.common.base.MoreObjects;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
-import tech.pegasys.ethsigner.jsonrpc.EeaSendTransactionJsonParameters;
 
 public class RawPrivateTransactionBuilder {
 

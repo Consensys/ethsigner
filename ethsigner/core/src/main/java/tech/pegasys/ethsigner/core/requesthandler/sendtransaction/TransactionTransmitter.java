@@ -12,15 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.requesthandler.sendtransaction.RetryMechanism.RetryException;
-import tech.pegasys.ethsigner.signing.TransactionSerialiser;
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;

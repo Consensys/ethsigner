@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

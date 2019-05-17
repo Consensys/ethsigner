@@ -12,8 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 
 import java.math.BigInteger;
 
