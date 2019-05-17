@@ -12,13 +12,11 @@
  */
 package tech.pegasys.ethsigner.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.jsonrpc.EeaSendTransactionJsonParameters;
-
+import com.google.common.base.MoreObjects;
 import java.math.BigInteger;
 import java.util.List;
-
-import com.google.common.base.MoreObjects;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
+import tech.pegasys.ethsigner.jsonrpc.EeaSendTransactionJsonParameters;
 
 public class RawPrivateTransactionBuilder {
 
