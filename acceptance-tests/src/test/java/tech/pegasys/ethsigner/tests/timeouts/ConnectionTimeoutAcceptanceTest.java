@@ -64,16 +64,6 @@ public class ConnectionTimeoutAcceptanceTest {
     }
   }
 
-  private void close(final ServerSocket socket) {
-    try {
-      if (!socket.isClosed()) {
-        socket.close();
-      }
-    } catch (final IOException e) {
-      LOG.warn("Problem closing unresponsive socket {}", socket.getInetAddress(), e);
-    }
-  }
-
   private Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
   }
