@@ -71,7 +71,7 @@ public class Signer {
 
     final Eth eth = new Eth(jsonRpc);
     this.transactions = new Transactions(eth);
-    this.contracts = new Contracts(eth, jsonRpc);
+    this.contracts = new Contracts(eth);
     this.accounts = new Accounts(eth);
     this.rawRequests =
         new RawRequests(web3jHttpService, new RawJsonRpcRequestFactory(web3jHttpService));

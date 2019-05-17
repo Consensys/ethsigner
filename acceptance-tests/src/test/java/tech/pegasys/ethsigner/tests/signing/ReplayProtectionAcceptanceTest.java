@@ -14,11 +14,11 @@ package tech.pegasys.ethsigner.tests.signing;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -30,7 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
@@ -86,7 +85,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void wrongChainId() throws IOException {
+  public void wrongChainId() {
     setUp("eth_hash_4404.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
@@ -106,7 +105,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void unnecessaryChainId() throws IOException {
+  public void unnecessaryChainId() {
     setUp("eth_hash_2018_no_replay_protection.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =

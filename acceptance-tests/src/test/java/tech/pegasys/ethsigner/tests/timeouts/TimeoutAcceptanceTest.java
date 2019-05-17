@@ -14,11 +14,11 @@ package tech.pegasys.ethsigner.tests.timeouts;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,17 +42,22 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 public class TimeoutAcceptanceTest {
+
+  private static final Logger LOG = LogManager.getLogger();
   private static final int DYNAMICALLY_ASSIGN_PORT = 0;
 
   private Signer ethSigner;
+  private ServerSocket unresponsiveSocketA;
+  private ServerSocket unresponsiveSocketB;
 
   @Before
   public void setUp() throws IOException {
-    final int unresponsivePortA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
-    final int unresponsivePortB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT).getLocalPort();
+    unresponsiveSocketA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
+    unresponsiveSocketB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(unresponsivePortA, unresponsivePortB);
+    final NodePorts nodePorts =
+        new NodePorts(unresponsiveSocketA.getLocalPort(), unresponsiveSocketB.getLocalPort());
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
@@ -65,6 +72,19 @@ public class TimeoutAcceptanceTest {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
+
+    close(unresponsiveSocketA);
+    close(unresponsiveSocketB);
+  }
+
+  private void close(final ServerSocket socket) {
+    try {
+      if (!socket.isClosed()) {
+        socket.close();
+      }
+    } catch (final IOException e) {
+      LOG.warn("Problem closing unresponsive socket {}", socket.getInetAddress(), e);
+    }
   }
 
   private Account richBenefactor() {
@@ -72,7 +92,7 @@ public class TimeoutAcceptanceTest {
   }
 
   @Test
-  public void timeoutSubmittingTransactionReturnsAGatewayTimeoutError() throws IOException {
+  public void timeoutSubmittingTransactionReturnsAGatewayTimeoutError() {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
 
@@ -92,8 +112,7 @@ public class TimeoutAcceptanceTest {
   }
 
   @Test
-  public void timeoutSubmittingTransactionWithoutNonceReturnsAGatewayTimeoutError()
-      throws IOException {
+  public void timeoutSubmittingTransactionWithoutNonceReturnsAGatewayTimeoutError() {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
 
