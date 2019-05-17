@@ -20,23 +20,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.vertx.core.json.Json;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.eea.Eea;
 
 public class EeaSendTransaction {
-  // TODO add enum or constant somewhere?
   private static final String RESTRICTED = "restricted";
   private static final int DEFAULT_ID = 77;
   private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
-
-  // TODO remove this?
-  private final Web3j eeaJsonRpc;
-
-  public EeaSendTransaction(final Eea eeaJsonRpc) {
-    this.eeaJsonRpc = eeaJsonRpc;
-  }
 
   public String withGas(final String gas) {
     return replaceParameter("gas", gas, request());
@@ -271,7 +261,6 @@ public class EeaSendTransaction {
     return matches.replaceFirst(String.format("%s\":\"%s\"", key, replacementValue));
   }
 
-  // TODO move this into a web3j factory?
   private Request<Object, EthSendTransaction> eeaSendTransaction(final Object transaction) {
     final Request<Object, EthSendTransaction> eea_sendTransaction =
         new Request<>(

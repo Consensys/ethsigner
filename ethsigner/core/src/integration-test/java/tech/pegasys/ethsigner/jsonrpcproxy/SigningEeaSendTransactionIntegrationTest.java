@@ -33,7 +33,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
 
   @Before
   public void setUp() {
-    sendTransaction = new EeaSendTransaction(eeaJsonRpc());
+    sendTransaction = new EeaSendTransaction();
     sendRawTransaction = new EeaSendRawTransaction(eeaJsonRpc());
   }
 
