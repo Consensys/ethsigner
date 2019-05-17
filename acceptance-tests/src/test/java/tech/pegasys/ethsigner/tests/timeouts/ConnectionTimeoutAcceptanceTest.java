@@ -28,9 +28,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.net.ServerSocket;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,10 +42,9 @@ public class ConnectionTimeoutAcceptanceTest {
   private Signer ethSigner;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts =
-        new NodePorts(new ServerSocket(7007).getLocalPort(), new ServerSocket(7008).getLocalPort());
+    final NodePorts nodePorts = new NodePorts(7007, 7008);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
