@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
@@ -22,6 +23,9 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -29,6 +33,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,18 +49,21 @@ public class TransactionTransmitter {
   private final SendTransactionContext context;
   private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
+  private final Duration httpRequestTimeout;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final SendTransactionContext context,
       final TransactionSerialiser transactionSerialiser,
       final RetryMechanism<SendTransactionContext> retryMechanism,
-      final HttpResponseFactory responder) {
+      final HttpResponseFactory responder,
+      final Duration httpRequestTimeout) {
     this.ethNodeClient = ethNodeClient;
     this.context = context;
     this.transactionSerialiser = transactionSerialiser;
     this.retryMechanism = retryMechanism;
     this.responder = responder;
+    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   public void send() {
@@ -100,20 +108,42 @@ public class TransactionTransmitter {
         ethNodeClient.request(
             httpServerRequest.method(), httpServerRequest.uri(), this::handleResponse);
 
+    request.setTimeout(httpRequestTimeout.toMillis());
+    request.exceptionHandler(thrown -> exceptionHandler(context.getRoutingContext(), thrown));
     request.headers().setAll(httpServerRequest.headers());
     request.headers().remove("Content-Length"); // created during 'end'.
     request.setChunked(false);
     request.end(bodyContent);
   }
 
+  private void exceptionHandler(final RoutingContext context, final Throwable thrown) {
+    if (thrown instanceof TimeoutException) {
+      context.fail(GATEWAY_TIMEOUT.code());
+    }
+    // TODO: do we need to do something here, or will it fall through to the router's handler?
+  }
+
   private void handleResponse(final HttpClientResponse response) {
-    logResponse(response);
-    response.bodyHandler(
-        body -> {
-          logResponseBody(body);
-          handleResponseBody(response, body);
+    context.getRoutingContext().vertx().executeBlocking(
+        future -> {
+          logResponse(response);
+          response.bodyHandler(
+              body -> {
+                logResponseBody(body);
+                handleResponseBody(response, body);
+              });
+        },
+        false,
+        (res) -> {
+          if (res.failed()) {
+            LOG.error(
+                "An unhandled error occurred while processing {}",
+                context.getRoutingContext().getBodyAsString(),
+                res.cause());
+          }
         });
   }
+
 
   private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
     try {

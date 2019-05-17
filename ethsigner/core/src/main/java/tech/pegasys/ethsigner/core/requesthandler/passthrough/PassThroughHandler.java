@@ -12,8 +12,14 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+
+import java.math.BigInteger;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -30,9 +36,11 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
+  private final Duration httpRequestTimeout;
 
-  public PassThroughHandler(final HttpClient ethNodeClient) {
+  public PassThroughHandler(final HttpClient ethNodeClient, final Duration httpRequestTimeout) {
     this.ethNodeClient = ethNodeClient;
+    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   @Override
@@ -43,25 +51,51 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
         ethNodeClient.request(
             httpServerRequest.method(),
             httpServerRequest.uri(),
-            proxiedResponse -> {
-              logResponse(proxiedResponse);
+            response -> handleResponse(context, response));
 
-              httpServerRequest.response().setStatusCode(proxiedResponse.statusCode());
-              httpServerRequest.response().headers().setAll(proxiedResponse.headers());
-              httpServerRequest.response().setChunked(false);
-
-              proxiedResponse.bodyHandler(
-                  data -> {
-                    logResponseBody(data);
-                    // End the sendRequest, preventing any other handler from executing
-                    httpServerRequest.response().end(data);
-                  });
-            });
-
+    //proxyRequest.setTimeout(httpRequestTimeout.toMillis());
+    //proxyRequest.exceptionHandler(thrown -> requestExceptionHandler(context, thrown));
     proxyRequest.headers().setAll(httpServerRequest.headers());
     proxyRequest.setChunked(false);
+
     proxyRequest.end(context.getBody());
     logRequest(request, httpServerRequest);
+  }
+
+  private void requestExceptionHandler(final RoutingContext context, final Throwable thrown) {
+    if (thrown instanceof TimeoutException) {
+      context.fail(GATEWAY_TIMEOUT.code());
+    }
+    // TODO: do we need to do something here, or will it fall through to the router's handler?
+  }
+
+  private void handleResponse(final RoutingContext context, final HttpClientResponse response) {
+    context.vertx().executeBlocking(
+        future -> {
+          logResponse(response);
+          response.bodyHandler(
+              body -> {
+                logResponseBody(body);
+                handleResponseBody(context, response, body);
+              });
+        },
+        false,
+        (res) -> {
+          if (res.failed()) {
+            LOG.error(
+                "An unhandled error occurred while processing {}",
+                context.getBodyAsString(),
+                res.cause());
+          }
+        });
+  }
+
+  private void handleResponseBody(
+      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
+    context.request().response().setStatusCode(response.statusCode());
+    context.request().response().headers().setAll(response.headers());
+    context.request().response().setChunked(false);
+    context.request().response().end(body);
   }
 
   private void logResponse(final HttpClientResponse response) {

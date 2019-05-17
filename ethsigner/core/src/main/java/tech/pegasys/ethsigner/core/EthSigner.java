@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import java.time.Duration;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
@@ -108,7 +109,7 @@ public final class EthSigner {
     final OkHttpClient.Builder builder = new OkHttpClient.Builder();
     builder
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
-        .readTimeout(config.getDownstreamHttpRequestTimeout());
+        .readTimeout(Duration.ofSeconds(2));
 
     return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
   }

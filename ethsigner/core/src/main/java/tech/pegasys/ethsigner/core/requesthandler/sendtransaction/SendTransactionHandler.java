@@ -27,9 +27,9 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,18 +43,21 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
   private final TransactionFactory transactionFactory;
+  private final Duration httpRequestTimeout;
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider,
-      final TransactionFactory transactionFactory) {
+      final TransactionFactory transactionFactory,
+      final Duration httpRequestTimeout) {
     this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
     this.transactionFactory = transactionFactory;
+    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   @Override
@@ -84,7 +87,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     try {
-      sendTransaction(transaction, context.request(), request);
+      sendTransaction(transaction, context, request);
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
@@ -99,20 +102,20 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private void sendTransaction(
       final Transaction transaction,
-      final HttpServerRequest httpServerRequest,
+      final RoutingContext routingContext,
       final JsonRpcRequest request) {
     final TransactionTransmitter transmitter =
-        createTransactionTransmitter(transaction, httpServerRequest, request);
+        createTransactionTransmitter(transaction, routingContext, request);
     transmitter.send();
   }
 
   private TransactionTransmitter createTransactionTransmitter(
       final Transaction transaction,
-      final HttpServerRequest httpServerRequest,
+      final RoutingContext routingContext,
       final JsonRpcRequest request) {
 
     final SendTransactionContext context =
-        new SendTransactionContext(httpServerRequest, request.getId(), transaction);
+        new SendTransactionContext(routingContext, request.getId(), transaction);
 
     final RetryMechanism<SendTransactionContext> retryMechanism;
 
@@ -125,7 +128,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     return new TransactionTransmitter(
-        ethNodeClient, context, serialiser, retryMechanism, responder);
+        ethNodeClient, context, serialiser, retryMechanism, responder, httpRequestTimeout);
   }
 
   private boolean senderNotUnlockedAccount(final Transaction transaction) {

@@ -87,12 +87,17 @@ public class Runner {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
-        new RequestMapper(new PassThroughHandler(downStreamConnection));
+        new RequestMapper(new PassThroughHandler(downStreamConnection, httpRequestTimeout));
 
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            responseFactory, downStreamConnection, serialiser, nonceProvider, transactionFactory));
+            responseFactory,
+            downStreamConnection,
+            serialiser,
+            nonceProvider,
+            transactionFactory,
+            httpRequestTimeout));
 
     requestMapper.addHandler(
         "eth_accounts",
