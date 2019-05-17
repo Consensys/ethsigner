@@ -41,7 +41,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class TimeoutAcceptanceTest {
+public class ReadTimeoutAcceptanceTest {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final int DYNAMICALLY_ASSIGN_PORT = 0;
@@ -92,7 +92,7 @@ public class TimeoutAcceptanceTest {
   }
 
   @Test
-  public void timeoutSubmittingTransactionReturnsAGatewayTimeoutError() {
+  public void submittingTransactionReturnsAGatewayTimeoutError() {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
 
@@ -112,7 +112,7 @@ public class TimeoutAcceptanceTest {
   }
 
   @Test
-  public void timeoutSubmittingTransactionWithoutNonceReturnsAGatewayTimeoutError() {
+  public void submittingTransactionWithoutNonceReturnsAGatewayTimeoutError() {
     final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
 
