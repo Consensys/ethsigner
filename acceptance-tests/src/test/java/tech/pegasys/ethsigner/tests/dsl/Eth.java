@@ -24,7 +24,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.ClientConnectionException;
 
 public class Eth {
 
@@ -48,24 +47,10 @@ public class Eth {
   }
 
   public BigInteger getTransactionCount(final String address) throws IOException {
-
-    final BigInteger result;
-    try {
-      result = jsonRpc
-          .ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
-          .send()
-          .getTransactionCount();
-    }
-    catch(ClientConnectionException e) {
-      return BigInteger.ZERO;
-    }
-    return BigInteger.ONE;
-    /*
     return jsonRpc
         .ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
         .send()
         .getTransactionCount();
-        */
   }
 
   public Optional<TransactionReceipt> getTransactionReceipt(final String hash) throws IOException {

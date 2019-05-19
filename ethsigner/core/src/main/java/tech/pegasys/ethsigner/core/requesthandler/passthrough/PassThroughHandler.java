@@ -53,8 +53,8 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
             httpServerRequest.uri(),
             response -> handleResponse(context, response));
 
-    //proxyRequest.setTimeout(httpRequestTimeout.toMillis());
-    //proxyRequest.exceptionHandler(thrown -> requestExceptionHandler(context, thrown));
+    proxyRequest.setTimeout(httpRequestTimeout.toMillis());
+    proxyRequest.exceptionHandler(thrown -> requestExceptionHandler(context, thrown));
     proxyRequest.headers().setAll(httpServerRequest.headers());
     proxyRequest.setChunked(false);
 

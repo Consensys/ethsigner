@@ -109,7 +109,7 @@ public final class EthSigner {
     final OkHttpClient.Builder builder = new OkHttpClient.Builder();
     builder
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
-        .readTimeout(Duration.ofSeconds(2));
+        .readTimeout(config.getDownstreamHttpRequestTimeout());
 
     return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
   }

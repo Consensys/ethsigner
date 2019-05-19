@@ -44,19 +44,7 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void checkNodeResponseMatchesSigner() throws InterruptedException {
-  //  final BigInteger nodeTransactionCount =
-  //      ethNode().transactions().count(richBenefactor().address());
-
-    final BigInteger signerTransactionCount =
-        ethSigner().transactions().count(richBenefactor().address());
-    Thread.sleep(1000);
-
-    //assertThat(nodeTransactionCount).isEqualTo(signerTransactionCount);
-  }
-
-  @Test
-  public void ethBalanceRequestReturnsCorrectBalance() {
+  public void ethBalanceRequesReturnsCorrectBalance() {
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     submitTransactionAndWaitForBlock();
 

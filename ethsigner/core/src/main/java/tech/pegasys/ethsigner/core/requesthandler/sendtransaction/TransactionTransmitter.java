@@ -144,7 +144,6 @@ public class TransactionTransmitter {
         });
   }
 
-
   private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
     try {
       if (response.statusCode() != HttpResponseStatus.OK.code()
