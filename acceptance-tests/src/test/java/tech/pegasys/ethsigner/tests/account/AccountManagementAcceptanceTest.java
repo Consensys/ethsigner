@@ -27,6 +27,7 @@ public class AccountManagementAcceptanceTest extends AcceptanceTestBase {
     final List<String> accounts = ethSigner().accounts().list();
     assertThat(accounts.size()).isEqualTo(1);
     assertThat(ethNode().accounts().balance(accounts.get(0))).isNotNull();
+    assertThat(accounts.get(0)).isEqualTo("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
   }
 
   @Test
