@@ -12,6 +12,10 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequest;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.optionalHex;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +24,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import io.vertx.core.json.JsonObject;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
-
-  private static final String ENCODING_PREFIX = "0x";
-  private static final int HEXADECIMAL = 16;
-  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
   private final String sender;
   private final String privateFrom;
   private final List<String> privateFor;
@@ -124,42 +123,7 @@ public class EeaSendTransactionJsonParameters {
     return restriction;
   }
 
-  private BigInteger hex(final String value) {
-    return new BigInteger(value, HEXADECIMAL);
-  }
-
-  private BigInteger optionalHex(final String value) {
-    validatePrefix(value);
-
-    return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
-  }
-
-  private void validatePrefix(final String value) {
-    if (!value.startsWith(ENCODING_PREFIX)) {
-      throw new IllegalArgumentException(
-          String.format("Prefix of '0x' is expected in value: %s", value));
-    }
-  }
-
   public static EeaSendTransactionJsonParameters from(final JsonRpcRequest request) {
-
-    final Object sendTransactionObject;
-    final Object params = request.getParams();
-    if (params instanceof List) {
-      @SuppressWarnings("unchecked")
-      final List<Object> paramList = (List<Object>) params;
-      if (paramList.size() != 1) {
-        throw new IllegalArgumentException(
-            "SendTransaction Json Rpc requires a single parameter, request contained "
-                + paramList.size());
-      }
-      sendTransactionObject = paramList.get(0);
-    } else {
-      sendTransactionObject = params;
-    }
-
-    final JsonObject receivedParams = JsonObject.mapFrom(sendTransactionObject);
-
-    return receivedParams.mapTo(EeaSendTransactionJsonParameters.class);
+    return fromRpcRequest(EeaSendTransactionJsonParameters.class, request);
   }
 }
