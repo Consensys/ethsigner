@@ -20,7 +20,7 @@ import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalRespo
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.TransactionFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.io.File;

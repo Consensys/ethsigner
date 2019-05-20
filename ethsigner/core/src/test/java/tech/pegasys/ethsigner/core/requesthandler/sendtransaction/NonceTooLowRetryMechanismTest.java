@@ -20,6 +20,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 
 import java.math.BigInteger;
 

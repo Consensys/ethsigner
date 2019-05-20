@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
@@ -18,6 +18,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RawTransactionBuilder;
 
 import java.math.BigInteger;
 import java.util.List;

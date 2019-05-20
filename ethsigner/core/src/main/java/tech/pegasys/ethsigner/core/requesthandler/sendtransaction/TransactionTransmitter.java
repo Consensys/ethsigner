@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
