@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
@@ -23,6 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
+import java.net.ConnectException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -71,6 +73,7 @@ public class TransactionTransmitter {
     if (body.hasError()) {
       reportError();
     } else {
+      LOG.info("Sending transaction to web3jProvider");
       sendTransaction(body.body());
     }
   }
@@ -117,10 +120,14 @@ public class TransactionTransmitter {
   }
 
   private void exceptionHandler(final RoutingContext context, final Throwable thrown) {
+    LOG.info("An exception was thrown by the transaction submission, {}", thrown);
     if (thrown instanceof TimeoutException) {
       context.fail(GATEWAY_TIMEOUT.code());
+    } else if (thrown instanceof ConnectException) {
+      context.fail(GATEWAY_TIMEOUT.code());
+    } else {
+      context.fail(INTERNAL_SERVER_ERROR.code());
     }
-    // TODO: do we need to do something here, or will it fall through to the router's handler?
   }
 
   private void handleResponse(final HttpClientResponse response) {
@@ -152,6 +159,7 @@ public class TransactionTransmitter {
 
   private void handleResponseBody(final HttpClientResponse response, final Buffer body) {
     try {
+      LOG.info("Handling Web3j response");
       if (response.statusCode() != HttpResponseStatus.OK.code()
           && retryMechanism.mustRetry(response, body)) {
         retryMechanism.retry(context, this::send);
@@ -159,7 +167,7 @@ public class TransactionTransmitter {
       }
     } catch (final RetryException e) {
       LOG.info("Retry mechanism failed, reporting error.");
-      reportError();
+      context.getRoutingContext().fail(GATEWAY_TIMEOUT.code());
       return;
     }
 

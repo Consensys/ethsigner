@@ -13,10 +13,12 @@
 package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
+import java.net.ConnectException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -62,10 +64,14 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   }
 
   private void requestExceptionHandler(final RoutingContext context, final Throwable thrown) {
+    LOG.info("An exception was thrown by the transaction submission, {}", thrown);
     if (thrown instanceof TimeoutException) {
       context.fail(GATEWAY_TIMEOUT.code());
+    } else if (thrown instanceof ConnectException) {
+      context.fail(GATEWAY_TIMEOUT.code());
+    } else {
+      context.fail(INTERNAL_SERVER_ERROR.code());
     }
-    // TODO: do we need to do something here, or will it fall through to the router's handler?
   }
 
   private void handleResponse(final RoutingContext context, final HttpClientResponse response) {

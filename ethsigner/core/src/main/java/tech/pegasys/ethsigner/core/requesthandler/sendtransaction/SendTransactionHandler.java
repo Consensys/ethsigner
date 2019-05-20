@@ -124,6 +124,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       transaction.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
     } else {
+      LOG.debug("Nonce supplied by client, forwarding request");
       retryMechanism = new NoRetryMechanism<>();
     }
 
