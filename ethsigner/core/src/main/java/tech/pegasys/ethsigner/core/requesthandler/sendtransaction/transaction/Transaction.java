@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
+
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
@@ -43,5 +46,13 @@ public interface Transaction {
     final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
     buffer.putLong(x);
     return buffer.array();
+  }
+
+  static JsonRpcRequest jsonRpcRequest(
+      final String signedTransactionHexString, final JsonRpcRequestId id, final String rpcMethod) {
+    final JsonRpcRequest transaction = new JsonRpcRequest(JSON_RPC_VERSION, rpcMethod);
+    transaction.setParams(singletonList(signedTransactionHexString));
+    transaction.setId(id);
+    return transaction;
   }
 }

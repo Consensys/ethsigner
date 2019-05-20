@@ -12,9 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static java.util.Collections.singletonList;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
-
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -36,7 +33,7 @@ public class EthTransaction implements Transaction {
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
 
-  public EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
+  EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
     this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
     this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
   }
@@ -67,10 +64,7 @@ public class EthTransaction implements Transaction {
   @Override
   public JsonRpcRequest jsonRpcRequest(
       final String signedTransactionHexString, final JsonRpcRequestId id) {
-    final JsonRpcRequest rawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
-    rawTransaction.setParams(singletonList(signedTransactionHexString));
-    rawTransaction.setId(id);
-    return rawTransaction;
+    return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
   }
 
   @Override

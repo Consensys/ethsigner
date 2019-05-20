@@ -16,11 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 
 import java.math.BigInteger;
 
@@ -34,6 +33,7 @@ public class NonceTooLowRetryMechanismTest {
 
   private final NonceProvider nonceProvider = mock(NonceProvider.class);
   private final HttpClientResponse httpResponse = mock(HttpClientResponse.class);
+  private final Transaction transaction = mock(Transaction.class);
   private SendTransactionContext context;
 
   private final RetryMechanism<SendTransactionContext> retryMechanism =
@@ -42,11 +42,7 @@ public class NonceTooLowRetryMechanismTest {
   @Before
   public void setup() {
     when(nonceProvider.getNonce()).thenReturn(BigInteger.ONE);
-    context =
-        new SendTransactionContext(
-            null,
-            new JsonRpcRequestId(1),
-            new EthTransaction(new EthSendTransactionJsonParameters("0x1234")));
+    context = new SendTransactionContext(null, new JsonRpcRequestId(1), transaction);
   }
 
   @Test

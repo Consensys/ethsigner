@@ -12,9 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static java.util.Collections.singletonList;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
-
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -38,7 +35,7 @@ public class EeaTransaction implements Transaction {
   private final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters;
   private final RawPrivateTransactionBuilder rawPrivateTransactionBuilder;
 
-  public EeaTransaction(final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters) {
+  EeaTransaction(final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters) {
     this.eeaSendTransactionJsonParameters = eeaSendTransactionJsonParameters;
     this.rawPrivateTransactionBuilder =
         RawPrivateTransactionBuilder.from(eeaSendTransactionJsonParameters);
@@ -57,9 +54,12 @@ public class EeaTransaction implements Transaction {
     return RlpEncoder.encode(rlpList);
   }
 
-  public static List<RlpType> asRlpValues(
+  /**
+   * Modified from Web3J PrivateTransactionEncoder to use our RawPrivateTransaction that can have
+   * non-zero values.
+   */
+  private static List<RlpType> asRlpValues(
       final RawPrivateTransaction privateTransaction, final Sign.SignatureData signatureData) {
-
     final List<RlpType> result =
         new ArrayList<>(
             TransactionEncoder.asRlpValues(privateTransaction.asRawTransaction(), signatureData));
@@ -90,10 +90,7 @@ public class EeaTransaction implements Transaction {
   @Override
   public JsonRpcRequest jsonRpcRequest(
       final String signedTransactionHexString, final JsonRpcRequestId id) {
-    final JsonRpcRequest rawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
-    rawTransaction.setParams(singletonList(signedTransactionHexString));
-    rawTransaction.setId(id);
-    return rawTransaction;
+    return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
   }
 
   @Override

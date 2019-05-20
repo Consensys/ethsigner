@@ -19,16 +19,14 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 public class TransactionFactory {
 
   public Transaction createTransaction(final JsonRpcRequest request) {
-    final String method = request.getMethod();
-    if (method.equalsIgnoreCase("eth_sendTransaction")) {
-      final EthSendTransactionJsonParameters params =
-          EthSendTransactionJsonParameters.from(request);
-      return new EthTransaction(params);
-    } else if (method.equalsIgnoreCase("eea_sendTransaction")) {
-      final EeaSendTransactionJsonParameters params =
-          EeaSendTransactionJsonParameters.from(request);
-      return new EeaTransaction(params);
+    final String method = request.getMethod().toLowerCase();
+    switch (method) {
+      case "eth_sendtransaction":
+        return new EthTransaction(EthSendTransactionJsonParameters.from(request));
+      case "eea_sendtransaction":
+        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request));
+      default:
+        throw new IllegalStateException("Unknown send transaction method " + method);
     }
-    throw new IllegalStateException("Unknown send transaction method " + method);
   }
 }
