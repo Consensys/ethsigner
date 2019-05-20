@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -30,7 +31,6 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EthTransaction implements Transaction {
-  private static final String JSON_RPC_VERSION = "2.0";
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;

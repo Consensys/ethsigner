@@ -21,6 +21,7 @@ public class RpcUtil {
   private static final String ENCODING_PREFIX = "0x";
   private static final int HEXADECIMAL = 16;
   private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
+  public static final String JSON_RPC_VERSION = "2.0";
 
   public static void validatePrefix(final String value) {
     if (!value.startsWith(ENCODING_PREFIX)) {
