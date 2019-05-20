@@ -38,9 +38,9 @@ public class RpcUtil {
     return new BigInteger(value, HEXADECIMAL);
   }
 
-  public static <T> T fromRpcRequest(final Class<T> type, final JsonRpcRequest request) {
+  public static <T> T fromRpcRequestToJsonParam(final Class<T> type, final JsonRpcRequest request) {
 
-    final Object sendTransactionObject;
+    final Object object;
     final Object params = request.getParams();
     if (params instanceof List) {
       @SuppressWarnings("unchecked")
@@ -51,12 +51,12 @@ public class RpcUtil {
                 + " json Rpc requires a single parameter, request contained "
                 + paramList.size());
       }
-      sendTransactionObject = paramList.get(0);
+      object = paramList.get(0);
     } else {
-      sendTransactionObject = params;
+      object = params;
     }
 
-    final JsonObject receivedParams = JsonObject.mapFrom(sendTransactionObject);
+    final JsonObject receivedParams = JsonObject.mapFrom(object);
 
     return receivedParams.mapTo(type);
   }

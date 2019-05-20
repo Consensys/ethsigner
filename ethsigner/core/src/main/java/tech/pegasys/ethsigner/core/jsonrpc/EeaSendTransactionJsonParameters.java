@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequest;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.optionalHex;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
@@ -124,6 +124,6 @@ public class EeaSendTransactionJsonParameters {
   }
 
   public static EeaSendTransactionJsonParameters from(final JsonRpcRequest request) {
-    return fromRpcRequest(EeaSendTransactionJsonParameters.class, request);
+    return fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
   }
 }
