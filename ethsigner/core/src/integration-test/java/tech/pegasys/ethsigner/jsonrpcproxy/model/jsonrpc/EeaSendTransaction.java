@@ -59,7 +59,7 @@ public class EeaSendTransaction {
             .withGasPrice("0x9184e72a000")
             .withGas("0x76c0")
             .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x9184e72a")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
@@ -76,7 +76,7 @@ public class EeaSendTransaction {
             .withGasPrice("0x9184e72a000")
             .withGas("0x76c0")
             .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x9184e72a")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
@@ -93,7 +93,7 @@ public class EeaSendTransaction {
             .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
             .withGasPrice("0x9184e72a000")
             .withGas("0x76c0")
-            .withValue("0x9184e72a")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
@@ -125,6 +125,7 @@ public class EeaSendTransaction {
             .withFrom(UNLOCKED_ACCOUNT)
             .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
             .withGasPrice("0x9184e72a000")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
@@ -192,7 +193,7 @@ public class EeaSendTransaction {
             .withGasPrice("0x9184e72a000")
             .withGas("0x76c0")
             .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x9184e72a")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
@@ -209,7 +210,7 @@ public class EeaSendTransaction {
             .withGasPrice("0x9184e72a000")
             .withGas("0x76c0")
             .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x9184e72a")
+            .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
             .withPrivateFrom(UNLOCKED_ACCOUNT)
