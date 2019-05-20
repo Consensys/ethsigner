@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import java.time.Duration;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;

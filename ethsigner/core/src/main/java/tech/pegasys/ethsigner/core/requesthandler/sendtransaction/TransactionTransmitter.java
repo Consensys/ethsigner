@@ -124,23 +124,29 @@ public class TransactionTransmitter {
   }
 
   private void handleResponse(final HttpClientResponse response) {
-    context.getRoutingContext().vertx().executeBlocking(
-        future -> {
-          logResponse(response);
-          response.bodyHandler(
-              body -> {
-                logResponseBody(body);
-                handleResponseBody(response, body);
-              });
-        },
-        false,
-        (res) -> {
-          if (res.failed()) {
-            LOG.error(
-                "An unhandled error occurred while processing {}",
-                context.getRoutingContext().getBodyAsString(),
-                res.cause());
-          }
+    logResponse(response);
+
+    response.bodyHandler(
+        body -> {
+          LOG.info("Executing Body Handler");
+          context
+              .getRoutingContext()
+              .vertx()
+              .executeBlocking(
+                  future -> {
+                    logResponseBody(body);
+                    handleResponseBody(response, body);
+                    future.complete();
+                  },
+                  false,
+                  (res) -> {
+                    if (res.failed()) {
+                      LOG.error(
+                          "An unhandled error occurred while processing {}",
+                          context.getRoutingContext().getBodyAsString(),
+                          res.cause());
+                    }
+                  });
         });
   }
 

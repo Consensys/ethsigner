@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
@@ -36,7 +34,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
-import io.vertx.ext.web.handler.TimeoutHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -112,7 +109,6 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .handler(TimeoutHandler.create(httpRequestTimeout.toMillis(), GATEWAY_TIMEOUT.code()))
         .failureHandler(new LogErrorHandler())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(this::handleJsonRpc);

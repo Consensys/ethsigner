@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 
-import java.math.BigInteger;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
@@ -70,23 +69,28 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   }
 
   private void handleResponse(final RoutingContext context, final HttpClientResponse response) {
-    context.vertx().executeBlocking(
-        future -> {
-          logResponse(response);
-          response.bodyHandler(
-              body -> {
-                logResponseBody(body);
-                handleResponseBody(context, response, body);
-              });
-        },
-        false,
-        (res) -> {
-          if (res.failed()) {
-            LOG.error(
-                "An unhandled error occurred while processing {}",
-                context.getBodyAsString(),
-                res.cause());
-          }
+    logResponse(response);
+
+    response.bodyHandler(
+        body -> {
+          LOG.info("Executing Body Handler");
+          context
+              .vertx()
+              .executeBlocking(
+                  future -> {
+                    logResponseBody(body);
+                    handleResponseBody(context, response, body);
+                    future.complete();
+                  },
+                  false,
+                  (res) -> {
+                    if (res.failed()) {
+                      LOG.error(
+                          "An unhandled error occurred while processing {}",
+                          context.getBodyAsString(),
+                          res.cause());
+                    }
+                  });
         });
   }
 
