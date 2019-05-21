@@ -22,7 +22,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
-import tech.pegasys.ethsigner.core.requesthandler.utils.ResponseHandler;
+import tech.pegasys.ethsigner.core.requesthandler.utils.AbstractRequestHandler;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.net.ConnectException;
@@ -40,7 +40,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TransactionTransmitter extends ResponseHandler {
+public class TransactionTransmitter extends AbstractRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -52,7 +52,6 @@ public class TransactionTransmitter extends ResponseHandler {
   private final SendTransactionContext sendTransactionContext;
   private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
-  private final Duration httpRequestTimeout;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
@@ -61,12 +60,12 @@ public class TransactionTransmitter extends ResponseHandler {
       final RetryMechanism<SendTransactionContext> retryMechanism,
       final HttpResponseFactory responder,
       final Duration httpRequestTimeout) {
+    super(httpRequestTimeout);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
     this.retryMechanism = retryMechanism;
     this.responder = responder;
-    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   public void send() {
@@ -115,13 +114,7 @@ public class TransactionTransmitter extends ResponseHandler {
             httpServerRequest.uri(),
             response -> handleResponse(sendTransactionContext.getRoutingContext(), response));
 
-    request.setTimeout(httpRequestTimeout.toMillis());
-    request.exceptionHandler(
-        thrown -> exceptionHandler(sendTransactionContext.getRoutingContext(), thrown));
-    request.headers().setAll(httpServerRequest.headers());
-    request.headers().remove("Content-Length"); // created during 'end'.
-    request.setChunked(false);
-    request.end(bodyContent);
+    sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
   }
 
   private void exceptionHandler(final RoutingContext context, final Throwable thrown) {

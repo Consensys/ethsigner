@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.core.requesthandler.utils.ResponseHandler;
+import tech.pegasys.ethsigner.core.requesthandler.utils.AbstractRequestHandler;
 
 import java.time.Duration;
 
@@ -28,16 +28,15 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PassThroughHandler extends ResponseHandler implements JsonRpcRequestHandler {
+public class PassThroughHandler extends AbstractRequestHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
-  private final Duration httpRequestTimeout;
 
   public PassThroughHandler(final HttpClient ethNodeClient, final Duration httpRequestTimeout) {
+    super(httpRequestTimeout);
     this.ethNodeClient = ethNodeClient;
-    this.httpRequestTimeout = httpRequestTimeout;
   }
 
   @Override
@@ -50,11 +49,7 @@ public class PassThroughHandler extends ResponseHandler implements JsonRpcReques
             httpServerRequest.uri(),
             response -> handleResponse(context, response));
 
-    proxyRequest.setTimeout(httpRequestTimeout.toMillis());
-    proxyRequest.exceptionHandler(thrown -> handleException(context, thrown));
-    proxyRequest.headers().setAll(httpServerRequest.headers());
-    proxyRequest.setChunked(false);
-    proxyRequest.end(context.getBody());
+    sendRequest(proxyRequest, context.getBody(), context);
     logRequest(request, httpServerRequest);
   }
 

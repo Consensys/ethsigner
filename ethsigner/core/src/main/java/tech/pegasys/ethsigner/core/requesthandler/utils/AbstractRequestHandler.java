@@ -16,17 +16,24 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
 import java.net.ConnectException;
+import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class ResponseHandler {
+public abstract class AbstractRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
+  private final Duration httpRequestTimeout;
+
+  public AbstractRequestHandler(Duration httpRequestTimeout) {
+    this.httpRequestTimeout = httpRequestTimeout;
+  }
 
   protected void handleException(final RoutingContext context, final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
@@ -60,6 +67,16 @@ public abstract class ResponseHandler {
                     }
                   });
         });
+  }
+
+  protected void sendRequest(
+      final HttpClientRequest request, final Buffer bodyContent, final RoutingContext context) {
+    request.setTimeout(httpRequestTimeout.toMillis());
+    request.exceptionHandler(thrown -> handleException(context, thrown));
+    request.headers().setAll(context.request().headers());
+    request.headers().remove("Content-Length"); // created during 'end'.
+    request.setChunked(false);
+    request.end(bodyContent);
   }
 
   protected abstract void handleResponseBody(
