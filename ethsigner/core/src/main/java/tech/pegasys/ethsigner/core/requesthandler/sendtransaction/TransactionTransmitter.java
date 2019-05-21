@@ -22,7 +22,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
-import tech.pegasys.ethsigner.core.requesthandler.utils.AbstractRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.AbstractRequestHandler;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.net.ConnectException;

@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.core.requesthandler.utils.AbstractRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.AbstractRequestHandler;
 
 import java.time.Duration;
 
