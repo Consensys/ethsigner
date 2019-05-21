@@ -35,7 +35,7 @@ public abstract class AbstractRequestHandler {
     this.httpRequestTimeout = httpRequestTimeout;
   }
 
-  protected void handleException(final RoutingContext context, final Throwable thrown) {
+  private void handleException(final RoutingContext context, final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
     } else {
