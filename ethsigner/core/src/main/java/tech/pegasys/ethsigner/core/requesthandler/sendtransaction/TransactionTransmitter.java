@@ -117,17 +117,6 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
     sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
   }
 
-  private void exceptionHandler(final RoutingContext context, final Throwable thrown) {
-    LOG.info("An exception was thrown by the transaction submission, {}", thrown);
-    if (thrown instanceof TimeoutException) {
-      context.fail(GATEWAY_TIMEOUT.code());
-    } else if (thrown instanceof ConnectException) {
-      context.fail(GATEWAY_TIMEOUT.code());
-    } else {
-      context.fail(INTERNAL_SERVER_ERROR.code());
-    }
-  }
-
   @Override
   protected void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
@@ -140,7 +129,7 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
       }
     } catch (final RetryException e) {
       LOG.info("Retry mechanism failed, reporting error.");
-      context.fail(GATEWAY_TIMEOUT.code());
+      context.fail(GATEWAY_TIMEOUT.code(), e);
       return;
     }
 

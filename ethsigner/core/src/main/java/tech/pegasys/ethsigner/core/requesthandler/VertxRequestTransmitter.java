@@ -31,7 +31,7 @@ public abstract class VertxRequestTransmitter {
   private static final Logger LOG = LogManager.getLogger();
   private final Duration httpRequestTimeout;
 
-  public VertxRequestTransmitter(Duration httpRequestTimeout) {
+  public VertxRequestTransmitter(final Duration httpRequestTimeout) {
     this.httpRequestTimeout = httpRequestTimeout;
   }
 
