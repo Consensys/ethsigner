@@ -64,6 +64,7 @@ public abstract class AbstractRequestHandler {
                           "An unhandled error occurred while processing {}",
                           context.getBodyAsString(),
                           res.cause());
+                      context.fail(res.cause());
                     }
                   });
         });
