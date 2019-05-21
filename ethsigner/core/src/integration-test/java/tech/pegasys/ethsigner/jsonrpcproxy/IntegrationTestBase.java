@@ -84,6 +84,8 @@ public class IntegrationTestBase {
 
   protected static String unlockedAccount;
 
+  protected static Duration downstreamTimeout = Duration.ofSeconds(1);
+
   @BeforeClass
   public static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);
@@ -120,7 +122,7 @@ public class IntegrationTestBase {
             serialiser,
             httpClientOptions,
             httpServerOptions,
-            Duration.ofSeconds(1),
+            downstreamTimeout,
             new Web3jNonceProvider(web3j, serialiser.getAddress()),
             null);
     runner.start();

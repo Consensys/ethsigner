@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
@@ -25,9 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
-import java.net.ConnectException;
 import java.time.Duration;
-import java.util.concurrent.TimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
