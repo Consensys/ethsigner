@@ -31,12 +31,12 @@ option set to `8590`.
 
 Create a text file containing the password for the V3 Keystore key file to be created (for example, `passwordFile`). 
 
-!!! attention "The password text file must not contain any other character that those used in your password"
-    EthSigner will read password file as binary so any character in it will be considered being part
+!!! attention "The password text file must not contain any other character than those used in your password"
+    EthSigner will read password file as binary and any character in it will be considered being part
     of your password.
     
-    Some POSIX compliant editors automatically add an end-of-line in text files but this must not be
-    the case in this file or the end-of-line will be treated as a character of your password.
+    _Some POSIX compliant editors automatically add an end-of-line in text files but this must not be
+    the case in this file or the end-of-line will be treated as a character of your password._
     
     Use the following command to safely make sure that the password file is correct :
     ```bash
