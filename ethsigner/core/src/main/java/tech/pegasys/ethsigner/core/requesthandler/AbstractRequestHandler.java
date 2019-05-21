@@ -39,7 +39,7 @@ public abstract class AbstractRequestHandler {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
     } else {
-      context.fail(INTERNAL_SERVER_ERROR.code());
+      context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
     }
   }
 
