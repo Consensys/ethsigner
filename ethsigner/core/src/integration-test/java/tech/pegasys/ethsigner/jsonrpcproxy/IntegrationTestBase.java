@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import java.util.concurrent.TimeUnit;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
@@ -172,6 +173,13 @@ public class IntegrationTestBase {
                 .withBody(response.getBody())
                 .withHeaders(headers)
                 .withStatusCode(response.getStatusCode()));
+  }
+
+  public void timeoutRequest(final EthNodeRequest request) {
+    final int ENSURE_TIMEOUT = 5;
+    clientAndServer
+        .when(request().withBody(json(request.getBody())), exactly(1)).respond(response().withDelay(
+        TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
   public void setUpEthNodeResponse(

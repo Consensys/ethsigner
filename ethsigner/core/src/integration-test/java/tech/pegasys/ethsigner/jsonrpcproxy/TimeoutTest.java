@@ -12,33 +12,38 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-
-import java.util.concurrent.TimeUnit;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.Test;
-import org.mockserver.model.Delay;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 public class TimeoutTest extends IntegrationTestBase {
 
   @Test
-  public void failsToConnectToDownStreamRaisesTimeout() {}
+  public void failsToConnectToDownStreamRaisesTimeout() {
+    clientAndServer.stop();
+    final Request<?, EthProtocolVersion> jsonRpcRequest = jsonRpc().ethProtocolVersion();
+    final String ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
+
+    final String expectedResponse =
+        Json.encode(
+            new JsonRpcErrorResponse(
+                jsonRpcRequest.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(ethProtocolVersionRequest),
+        response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
+  }
 
   @Test
   public void downstreamConnectsButDoesNotRespondReturnsGatewayTimeout() {
     final Request<?, EthProtocolVersion> jsonRpcRequest = jsonRpc().ethProtocolVersion();
     final String ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
-    final String arbitraryContent = "This Is Arbitrary";
 
-    setUpEthNodeResponse(
-        request.ethNode(ethProtocolVersionRequest),
-        response.ethNode(arbitraryContent),
-        new Delay(TimeUnit.SECONDS, 5));
+    timeoutRequest(request.ethNode(ethProtocolVersionRequest));
 
     final String expectedResponse =
         Json.encode(
