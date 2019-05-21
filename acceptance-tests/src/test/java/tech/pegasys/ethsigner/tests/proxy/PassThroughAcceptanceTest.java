@@ -44,12 +44,6 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void mySimpleTest() {
-    final BigInteger endTransactionCount =
-        ethSigner().transactions().count(richBenefactor().address());
-  }
-
-  @Test
   public void ethBalanceRequesReturnsCorrectBalance() {
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     submitTransactionAndWaitForBlock();
