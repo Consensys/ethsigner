@@ -26,12 +26,12 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractRequestHandler {
+public abstract class VertxRequestTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
   private final Duration httpRequestTimeout;
 
-  public AbstractRequestHandler(Duration httpRequestTimeout) {
+  public VertxRequestTransmitter(Duration httpRequestTimeout) {
     this.httpRequestTimeout = httpRequestTimeout;
   }
 

@@ -13,8 +13,8 @@
 package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.requesthandler.AbstractRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 
 import java.time.Duration;
 
@@ -28,7 +28,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PassThroughHandler extends AbstractRequestHandler implements JsonRpcRequestHandler {
+public class PassThroughHandler extends VertxRequestTransmitter implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
