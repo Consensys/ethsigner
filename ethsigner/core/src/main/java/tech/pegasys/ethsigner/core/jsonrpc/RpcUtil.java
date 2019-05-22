@@ -12,15 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import io.vertx.core.json.JsonObject;
 
 public class RpcUtil {
   private static final String ENCODING_PREFIX = "0x";
-  private static final int HEXADECIMAL = 16;
-  private static final int HEXADECIMAL_PREFIX_LENGTH = 2;
   public static final String JSON_RPC_VERSION = "2.0";
 
   public static void validatePrefix(final String value) {
@@ -28,15 +25,6 @@ public class RpcUtil {
       throw new IllegalArgumentException(
           String.format("Prefix of '0x' is expected in value: %s", value));
     }
-  }
-
-  public static BigInteger optionalHex(final String value) {
-    validatePrefix(value);
-    return hex(value.substring(HEXADECIMAL_PREFIX_LENGTH));
-  }
-
-  private static BigInteger hex(final String value) {
-    return new BigInteger(value, HEXADECIMAL);
   }
 
   public static <T> T fromRpcRequestToJsonParam(final Class<T> type, final JsonRpcRequest request) {

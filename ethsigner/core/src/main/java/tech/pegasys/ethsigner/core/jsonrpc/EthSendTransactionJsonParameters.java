@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
+import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.optionalHex;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
 import java.math.BigInteger;
@@ -42,17 +42,17 @@ public class EthSendTransactionJsonParameters {
 
   @JsonSetter("gas")
   public void gas(final String gas) {
-    this.gas = optionalHex(gas);
+    this.gas = decodeQuantity(gas);
   }
 
   @JsonSetter("gasPrice")
   public void gasPrice(final String gasPrice) {
-    this.gasPrice = optionalHex(gasPrice);
+    this.gasPrice = decodeQuantity(gasPrice);
   }
 
   @JsonSetter("nonce")
   public void nonce(final String nonce) {
-    this.nonce = optionalHex(nonce);
+    this.nonce = decodeQuantity(nonce);
   }
 
   @JsonSetter("to")
@@ -63,7 +63,7 @@ public class EthSendTransactionJsonParameters {
 
   @JsonSetter("value")
   public void value(final String value) {
-    this.value = optionalHex(value);
+    this.value = decodeQuantity(value);
   }
 
   @JsonSetter("data")
