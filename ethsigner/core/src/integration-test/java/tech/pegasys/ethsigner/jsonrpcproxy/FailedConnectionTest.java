@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
+
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
@@ -20,6 +22,7 @@ import io.vertx.core.json.Json;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 
 public class FailedConnectionTest extends IntegrationTestBase {
 
@@ -38,4 +41,17 @@ public class FailedConnectionTest extends IntegrationTestBase {
         request.ethSigner(ethProtocolVersionRequest),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
   }
+
+  @Test
+  public void failingToConnectWithNoNonceRaisesTimeout() {
+    // Note: This test ensures the behaviour when requesting a nonce as part of the
+    // send transaction (performed via web3j) behaves the same as a normal timeout.
+    private SendRawTransaction sendRawTransaction = new SendRawTransaction(jsonRpc());
+    final String rawTransactionWithInitialNonce =
+        sendRawTransaction.request(
+            "0xf892808609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0eab405b58d6aa7db96ebfab8c55825504090447d6209848eeca5a2a2ff909467a064712627fdf02027521a716b8e9a497d31f7c4d5ecb75840fde86ade1d726fab");
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(ethProtocolVersionRequest),
+        response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));  }
 }
