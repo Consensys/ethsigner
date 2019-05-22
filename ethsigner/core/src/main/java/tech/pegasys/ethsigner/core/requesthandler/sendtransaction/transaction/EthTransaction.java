@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RawTransactionBuilder;
 
 import java.math.BigInteger;
 import java.util.List;
