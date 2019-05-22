@@ -13,6 +13,9 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
@@ -20,6 +23,7 @@ import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.time.Duration;
@@ -38,7 +42,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
   private final TransactionFactory transactionFactory;
-  private final Duration httpRequestTimeout;
+  private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
@@ -46,13 +50,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider,
       final TransactionFactory transactionFactory,
-      final Duration httpRequestTimeout) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
     this.transactionFactory = transactionFactory;
-    this.httpRequestTimeout = httpRequestTimeout;
+    this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
 
   @Override
@@ -106,6 +110,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       preTransmitOperation = () -> transaction.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism();
     } else {
+      LOG.debug("Nonce supplied by client, forwarding request");
       retryMechanism = new NoRetryMechanism<>();
       preTransmitOperation = () -> {};
     }
@@ -115,7 +120,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
             routingContext, request.getId(), transaction, preTransmitOperation);
 
     return new TransactionTransmitter(
-        ethNodeClient, context, serialiser, retryMechanism, responder, httpRequestTimeout);
+        ethNodeClient, context, serialiser, retryMechanism, responder, vertxTransmitterFactory);
   }
 
   private boolean senderNotUnlockedAccount(final Transaction transaction) {

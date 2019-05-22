@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import org.mockserver.model.RegexBody;
 import tech.pegasys.ethsigner.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
@@ -148,8 +149,10 @@ public class IntegrationTestBase {
   @Before
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
-    clientAndServer.reset();
-    setupTransactionCountResponder();
+    if (clientAndServer.isRunning()) {
+      clientAndServer.reset();
+      setupTransactionCountResponder();
+    }
   }
 
   private void setupTransactionCountResponder() {
@@ -174,6 +177,30 @@ public class IntegrationTestBase {
                 .withHeaders(headers)
                 .withStatusCode(response.getStatusCode()));
   }
+
+  public void setupEthNodeResponse(final String bodyRegex, final EthNodeResponse response,
+      int count) {
+    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    clientAndServer
+        .when(request().withBody(new RegexBody(bodyRegex)), exactly(count))
+        .respond(
+        response()
+            .withBody(response.getBody())
+            .withHeaders(headers)
+            .withStatusCode(response.getStatusCode()));
+  }
+
+  public void timeoutRequest(final String bodyRegex) {
+    final int ENSURE_TIMEOUT = 5;
+    clientAndServer
+        .when(request().withBody(new RegexBody(bodyRegex)))
+        .respond(
+            response()
+                .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
+  }
+
+
+
 
   public void timeoutRequest(final EthNodeRequest request) {
     final int ENSURE_TIMEOUT = 5;

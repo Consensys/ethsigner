@@ -26,13 +26,16 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class VertxRequestTransmitter {
+public class VertxRequestTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
   private final Duration httpRequestTimeout;
+  private final ResponseBodyHandler bodyHandler;
 
-  public VertxRequestTransmitter(final Duration httpRequestTimeout) {
+  public VertxRequestTransmitter(
+      final Duration httpRequestTimeout, ResponseBodyHandler bodyHandler) {
     this.httpRequestTimeout = httpRequestTimeout;
+    this.bodyHandler = bodyHandler;
   }
 
   private void handleException(final RoutingContext context, final Throwable thrown) {
@@ -43,7 +46,7 @@ public abstract class VertxRequestTransmitter {
     }
   }
 
-  protected void handleResponse(final RoutingContext context, final HttpClientResponse response) {
+  public void handleResponse(final RoutingContext context, final HttpClientResponse response) {
     logResponse(response);
 
     response.bodyHandler(
@@ -54,7 +57,7 @@ public abstract class VertxRequestTransmitter {
               .executeBlocking(
                   future -> {
                     logResponseBody(body);
-                    handleResponseBody(context, response, body);
+                    bodyHandler.handleResponseBody(context, response, body);
                     future.complete();
                   },
                   false,
@@ -70,7 +73,7 @@ public abstract class VertxRequestTransmitter {
         });
   }
 
-  protected void sendRequest(
+  public void sendRequest(
       final HttpClientRequest request, final Buffer bodyContent, final RoutingContext context) {
     request.setTimeout(httpRequestTimeout.toMillis());
     request.exceptionHandler(thrown -> handleException(context, thrown));
@@ -80,14 +83,17 @@ public abstract class VertxRequestTransmitter {
     request.end(bodyContent);
   }
 
-  protected abstract void handleResponseBody(
-      final RoutingContext context, final HttpClientResponse response, final Buffer body);
-
   private void logResponse(final HttpClientResponse response) {
     LOG.debug("Response status: {}", response.statusCode());
   }
 
   private void logResponseBody(final Buffer body) {
     LOG.debug("Response body: {}", body);
+  }
+
+  @FunctionalInterface
+  public interface ResponseBodyHandler {
+    void handleResponseBody(
+        final RoutingContext context, final HttpClientResponse response, final Buffer body);
   }
 }

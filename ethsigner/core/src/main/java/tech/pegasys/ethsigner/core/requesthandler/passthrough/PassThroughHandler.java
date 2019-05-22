@@ -15,8 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
-
-import java.time.Duration;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -28,14 +27,17 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PassThroughHandler extends VertxRequestTransmitter implements JsonRpcRequestHandler {
+public class PassThroughHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
+  private final VertxRequestTransmitter transmitter;
 
-  public PassThroughHandler(final HttpClient ethNodeClient, final Duration httpRequestTimeout) {
-    super(httpRequestTimeout);
+  public PassThroughHandler(
+      final HttpClient ethNodeClient,
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
   }
 
@@ -47,14 +49,13 @@ public class PassThroughHandler extends VertxRequestTransmitter implements JsonR
         ethNodeClient.request(
             httpServerRequest.method(),
             httpServerRequest.uri(),
-            response -> handleResponse(context, response));
+            response -> transmitter.handleResponse(context, response));
 
-    sendRequest(proxyRequest, context.getBody(), context);
+    transmitter.sendRequest(proxyRequest, context.getBody(), context);
     logRequest(request, httpServerRequest);
   }
 
-  @Override
-  protected void handleResponseBody(
+  private void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
     context.request().response().setStatusCode(response.statusCode());
     context.request().response().headers().setAll(response.headers());

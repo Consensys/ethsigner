@@ -17,19 +17,6 @@ import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
-import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
-
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.time.Duration;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -38,10 +25,21 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
-public class TransactionTransmitter extends VertxRequestTransmitter {
+public class TransactionTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -53,6 +51,7 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
   private final SendTransactionContext sendTransactionContext;
   private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
+  private final VertxRequestTransmitter transmitter;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
@@ -60,8 +59,8 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
       final TransactionSerialiser transactionSerialiser,
       final RetryMechanism<SendTransactionContext> retryMechanism,
       final HttpResponseFactory responder,
-      final Duration httpRequestTimeout) {
-    super(httpRequestTimeout);
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+    this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
@@ -104,6 +103,7 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
             .getRoutingContext()
             .fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
+      // TODO(this is bad and needs to be reworked!)
       throw e;
     } catch (final Throwable e) {
       LOG.debug(
@@ -129,13 +129,13 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
         ethNodeClient.request(
             httpServerRequest.method(),
             httpServerRequest.uri(),
-            response -> handleResponse(sendTransactionContext.getRoutingContext(), response));
+            response ->
+                transmitter.handleResponse(sendTransactionContext.getRoutingContext(), response));
 
-    sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
+    transmitter.sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
   }
 
-  @Override
-  protected void handleResponseBody(
+  private void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
     if (response.statusCode() != HttpResponseStatus.OK.code()
         && retryMechanism.responseRequiresRetry(response, body)) {
@@ -145,6 +145,7 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
         return;
       } else {
         reportError(); // This needs to become a context.fail.
+        return;
       }
     }
 

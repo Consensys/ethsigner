@@ -37,6 +37,11 @@ public class EthResponseFactory {
         NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), HttpResponseStatus.BAD_REQUEST);
   }
 
+  public EthSignerResponse ethSigner(final JsonRpcError error, final HttpResponseStatus code) {
+    return new EthSignerResponse(
+        NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), code);
+  }
+
   public EthSignerResponse ethSigner(final Map<String, String> headers, final String body) {
     return new EthSignerResponse(headers, body, HttpResponseStatus.OK);
   }
