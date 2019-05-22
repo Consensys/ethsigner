@@ -32,7 +32,7 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
       Convert.toWei(TRANSFER_AMOUNT_ETHER, Convert.Unit.ETHER).toBigIntegerExact();
 
   @Test
-  public void ethGetTransactionCountReturnCorrectNumber() throws Exception {
+  public void ethGetTransactionCountReturnCorrectNumber() {
     final BigInteger pantheonTransactionCount =
         ethNode().transactions().count(richBenefactor().address());
     BigInteger ethSignerTransactionCount =
@@ -48,18 +48,18 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void ethBalanceRequesReturnsCorrectBalance() throws Exception {
+  public void ethBalanceRequestReturnsCorrectBalance() {
     final BigInteger startBalance = ethSigner().accounts().balance(RECIPIENT);
 
     submitTransactionAndWaitForBlock();
 
-    final BigInteger endBalance = ethSigner().accounts().balance(RECIPIENT);
+    final BigInteger ethSignerEndBalance = ethSigner().accounts().balance(RECIPIENT);
 
-    assertThat(endBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
+    assertThat(ethSignerEndBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
 
     final BigInteger pantheonBalance = ethNode().accounts().balance(RECIPIENT);
 
-    assertThat(pantheonBalance).isEqualTo(endBalance);
+    assertThat(pantheonBalance).isEqualTo(ethSignerEndBalance);
   }
 
   void submitTransactionAndWaitForBlock() {
