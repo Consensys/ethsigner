@@ -10,9 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 
 import java.math.BigInteger;
 
@@ -43,7 +43,7 @@ public class RawTransactionBuilder {
     this.data = data;
   }
 
-  public static RawTransactionBuilder from(final SendTransactionJsonParameters input) {
+  public static RawTransactionBuilder from(final EthSendTransactionJsonParameters input) {
     return new RawTransactionBuilder(
         input.nonce().orElse(null),
         input.gasPrice().orElse(BigInteger.ZERO),

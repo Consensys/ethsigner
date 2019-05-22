@@ -21,7 +21,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
-public class SendTransactionJsonParametersTest {
+public class EthSendTransactionJsonParametersTest {
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -31,7 +31,7 @@ public class SendTransactionJsonParametersTest {
 
   @Test
   public void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
-    JsonObject parameters = new JsonObject();
+    final JsonObject parameters = new JsonObject();
     parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
     parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     parameters.put("nonce", "0x1");
@@ -51,7 +51,8 @@ public class SendTransactionJsonParametersTest {
     input.put("params", inputParameters);
 
     final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final SendTransactionJsonParameters txnParams = SendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -80,7 +81,8 @@ public class SendTransactionJsonParametersTest {
     input.put("params", parameters);
 
     final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final SendTransactionJsonParameters txnParams = SendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
