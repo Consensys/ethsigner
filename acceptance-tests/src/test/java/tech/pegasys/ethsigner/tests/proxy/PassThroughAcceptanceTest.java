@@ -34,16 +34,15 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void ethGetTransactionCountReturnCorrectNumber() throws Exception {
     final BigInteger pantheonTransactionCount =
-            ethNode().transactions().count(richBenefactor().address());
+        ethNode().transactions().count(richBenefactor().address());
     BigInteger ethSignerTransactionCount =
-            ethSigner().transactions().count(richBenefactor().address());
+        ethSigner().transactions().count(richBenefactor().address());
 
     assertThat(pantheonTransactionCount).isEqualTo(ethSignerTransactionCount);
 
     submitTransactionAndWaitForBlock(); // should increase the transaction count by one.
 
-    ethSignerTransactionCount =
-            ethSigner().transactions().count(richBenefactor().address());
+    ethSignerTransactionCount = ethSigner().transactions().count(richBenefactor().address());
 
     assertThat(pantheonTransactionCount.add(BigInteger.ONE)).isEqualTo(ethSignerTransactionCount);
   }
@@ -62,7 +61,6 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
     assertThat(pantheonBalance).isEqualTo(endBalance);
   }
-
 
   void submitTransactionAndWaitForBlock() {
 
