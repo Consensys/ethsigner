@@ -21,14 +21,13 @@ import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 
-public class TimeoutTest extends IntegrationTestBase {
+public class FailedConnectionTest extends IntegrationTestBase {
 
   @Test
-  public void downstreamConnectsButDoesNotRespondReturnsGatewayTimeout() {
+  public void failsToConnectToDownStreamRaisesTimeout() {
+    clientAndServer.stop();
     final Request<?, EthProtocolVersion> jsonRpcRequest = jsonRpc().ethProtocolVersion();
     final String ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
-
-    timeoutRequest(request.ethNode(ethProtocolVersionRequest));
 
     final String expectedResponse =
         Json.encode(
