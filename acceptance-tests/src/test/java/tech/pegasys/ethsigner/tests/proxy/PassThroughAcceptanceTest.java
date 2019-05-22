@@ -49,13 +49,13 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
   @Test
   public void ethBalanceRequestReturnsCorrectBalance() {
-    final BigInteger startBalance = ethSigner().accounts().balance(RECIPIENT);
+    final BigInteger ethSignerStartBalance = ethSigner().accounts().balance(RECIPIENT);
 
     submitTransactionAndWaitForBlock();
 
     final BigInteger ethSignerEndBalance = ethSigner().accounts().balance(RECIPIENT);
 
-    assertThat(ethSignerEndBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
+    assertThat(ethSignerEndBalance).isEqualByComparingTo(ethSignerStartBalance.add(TRANSFER_AMOUNT_WEI));
 
     final BigInteger pantheonBalance = ethNode().accounts().balance(RECIPIENT);
 
