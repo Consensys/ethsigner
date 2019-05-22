@@ -32,26 +32,37 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
       Convert.toWei(TRANSFER_AMOUNT_ETHER, Convert.Unit.ETHER).toBigIntegerExact();
 
   @Test
-  public void ethGetTransactionCountReturnCorrectNumber() {
-    final BigInteger startTransactionCount =
-        ethNode().transactions().count(richBenefactor().address());
-    submitTransactionAndWaitForBlock();
+  public void ethGetTransactionCountReturnCorrectNumber() throws Exception {
+    final BigInteger pantheonTransactionCount =
+            ethNode().transactions().count(richBenefactor().address());
+    BigInteger ethSignerTransactionCount =
+            ethSigner().transactions().count(richBenefactor().address());
 
-    final BigInteger endTransactionCount =
-        ethNode().transactions().count(richBenefactor().address());
+    assertThat(pantheonTransactionCount).isEqualTo(ethSignerTransactionCount);
 
-    assertThat(startTransactionCount.add(BigInteger.ONE)).isEqualTo(endTransactionCount);
+    submitTransactionAndWaitForBlock(); // should increase the transaction count by one.
+
+    ethSignerTransactionCount =
+            ethSigner().transactions().count(richBenefactor().address());
+
+    assertThat(pantheonTransactionCount.add(BigInteger.ONE)).isEqualTo(ethSignerTransactionCount);
   }
 
   @Test
-  public void ethBalanceRequesReturnsCorrectBalance() {
-    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
+  public void ethBalanceRequesReturnsCorrectBalance() throws Exception {
+    final BigInteger startBalance = ethSigner().accounts().balance(RECIPIENT);
+
     submitTransactionAndWaitForBlock();
 
-    final BigInteger endBalance = ethNode().accounts().balance(RECIPIENT);
+    final BigInteger endBalance = ethSigner().accounts().balance(RECIPIENT);
 
     assertThat(endBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
+
+    final BigInteger pantheonBalance = ethNode().accounts().balance(RECIPIENT);
+
+    assertThat(pantheonBalance).isEqualTo(endBalance);
   }
+
 
   void submitTransactionAndWaitForBlock() {
 
