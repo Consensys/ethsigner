@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
@@ -22,7 +23,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -71,16 +71,10 @@ public class TransactionTransmitter {
   }
 
   public void send() {
-    final JsonRpcBody body = createSignedTransactionBody();
-    if (body.hasError()) {
-      reportError();
-    } else {
-      LOG.info("Sending transaction to web3jProvider");
-      sendTransaction(body.body());
-    }
+    createSignedTransactionBody();
   }
 
-  private JsonRpcBody createSignedTransactionBody() {
+  private void createSignedTransactionBody() {
     // This assumes the parameters have already been validated and are correct for the unlocked
     // account.
     final String signedTransactionHexString;
@@ -90,7 +84,10 @@ public class TransactionTransmitter {
       signedTransactionHexString = transactionSerialiser.serialise(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", sendTransactionContext.getTransaction(), e);
-      return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
+      sendTransactionContext
+          .getRoutingContext()
+          .fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
+      return;
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
@@ -105,12 +102,16 @@ public class TransactionTransmitter {
             .getRoutingContext()
             .fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
-      // TODO(this is bad and needs to be reworked!)
-      throw e;
-    } catch (final Throwable e) {
+      return;
+    } catch (final Throwable thrown) {
       LOG.debug(
-          "Failed to encode/serialise transaction: {}", sendTransactionContext.getTransaction(), e);
-      return new JsonRpcBody(INTERNAL_ERROR);
+          "Failed to encode/serialise transaction: {}",
+          sendTransactionContext.getTransaction(),
+          thrown);
+      sendTransactionContext
+          .getRoutingContext()
+          .fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      return;
     }
 
     final JsonRpcRequest sendRawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
@@ -118,10 +119,12 @@ public class TransactionTransmitter {
     sendRawTransaction.setId(sendTransactionContext.getId());
 
     try {
-      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
+      sendTransaction(Json.encodeToBuffer(sendRawTransaction));
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
-      return new JsonRpcBody(INTERNAL_ERROR);
+      sendTransactionContext
+          .getRoutingContext()
+          .fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
