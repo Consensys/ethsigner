@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.web3j.crypto.CipherException;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
+public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
