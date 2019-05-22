@@ -36,7 +36,7 @@ public class NonceTooLowRetryMechanismTest {
   private SendTransactionContext context;
 
   private final RetryMechanism<SendTransactionContext> retryMechanism =
-      new NonceTooLowRetryMechanism(nonceProvider);
+      new NonceTooLowRetryMechanism();
 
   @Before
   public void setup() {
@@ -45,7 +45,8 @@ public class NonceTooLowRetryMechanismTest {
         new SendTransactionContext(
             null,
             new JsonRpcRequestId(1),
-            new EthTransaction(new SendTransactionJsonParameters("0x1234")));
+            new EthTransaction(new SendTransactionJsonParameters("0x1234")),
+            () -> {});
   }
 
   @Test
@@ -55,22 +56,8 @@ public class NonceTooLowRetryMechanismTest {
     final JsonRpcErrorResponse errorResponse =
         new JsonRpcErrorResponse(JsonRpcError.INVALID_PARAMS);
 
-    assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
-        .isFalse();
-  }
-
-  @Test
-  public void retriesAreNotAttemptedAfterFiveTimes() {
-    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.BAD_REQUEST.code());
-
-    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(JsonRpcError.NONCE_TOO_LOW);
-
-    for (int i = 0; i < 5; i++) {
-      assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
-          .isTrue();
-      retryMechanism.retry(context, () -> {});
-    }
-    assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
+    assertThat(
+            retryMechanism.responseRequiresRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
         .isFalse();
   }
 }

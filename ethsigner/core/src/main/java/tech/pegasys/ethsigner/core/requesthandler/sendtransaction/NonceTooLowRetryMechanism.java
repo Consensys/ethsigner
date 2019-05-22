@@ -22,55 +22,24 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NonceTooLowRetryMechanism implements RetryMechanism<SendTransactionContext> {
-
-  private static final int MAX_RETRIES = 5;
+public class NonceTooLowRetryMechanism extends RetryMechanism<SendTransactionContext> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final NonceProvider nonceProvider;
-
-  private int retriesPerformed = 0;
-
-  public NonceTooLowRetryMechanism(final NonceProvider nonceProvider) {
-    this.nonceProvider = nonceProvider;
-  }
-
   @Override
-  public boolean mustRetry(final HttpClientResponse response, final Buffer body) {
+  public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
       if (errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
-        return retriesAvailable();
+        return true;
       }
     }
     return false;
   }
 
-  @Override
-  public void retry(final SendTransactionContext context, final Runnable sender)
-      throws RetryException {
-    if (retriesAvailable()) {
-      try {
-        context.getTransaction().updateNonce(nonceProvider.getNonce());
-      } catch (final RuntimeException e) {
-        LOG.info("Failed to determine current nonce from web3j provider");
-        throw new RetryException();
-      }
-      retriesPerformed++;
-      sender.run();
-    } else {
-      LOG.error("Attempting to resend when retries are exhausted.");
-    }
-  }
-
   private JsonRpcErrorResponse specialiseResponse(final Buffer body) {
     final JsonObject jsonBody = new JsonObject(body);
     return jsonBody.mapTo(JsonRpcErrorResponse.class);
-  }
-
-  private boolean retriesAvailable() {
-    return retriesPerformed < MAX_RETRIES;
   }
 }

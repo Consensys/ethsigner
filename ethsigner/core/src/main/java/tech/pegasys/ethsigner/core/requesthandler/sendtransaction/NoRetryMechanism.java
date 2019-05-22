@@ -15,13 +15,10 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
 
-public class NoRetryMechanism<T> implements RetryMechanism<T> {
+public class NoRetryMechanism<T> extends RetryMechanism<T> {
 
   @Override
-  public boolean mustRetry(final HttpClientResponse response, final Buffer body) {
+  public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
     return false;
   }
-
-  @Override
-  public void retry(final T context, final Runnable sender) {}
 }
