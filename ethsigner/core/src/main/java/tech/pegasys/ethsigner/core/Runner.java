@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
@@ -87,7 +88,11 @@ public class Runner {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
-        new RequestMapper(new PassThroughHandler(downStreamConnection, httpRequestTimeout));
+        new RequestMapper(
+            new PassThroughHandler(
+                downStreamConnection,
+                responseBodyHandler ->
+                    new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
 
     requestMapper.addHandler(
         "eth_sendTransaction",
@@ -97,7 +102,8 @@ public class Runner {
             serialiser,
             nonceProvider,
             transactionFactory,
-            httpRequestTimeout));
+            responseBodyHandler ->
+                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
 
     requestMapper.addHandler(
         "eth_accounts",

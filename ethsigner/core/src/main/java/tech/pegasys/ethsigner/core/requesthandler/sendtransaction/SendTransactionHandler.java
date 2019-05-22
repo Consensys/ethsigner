@@ -23,11 +23,11 @@ import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.time.Duration;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.ext.web.RoutingContext;
@@ -43,7 +43,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
   private final TransactionFactory transactionFactory;
-  private final Duration httpRequestTimeout;
+  private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
@@ -51,13 +51,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider,
       final TransactionFactory transactionFactory,
-      final Duration httpRequestTimeout) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
     this.transactionFactory = transactionFactory;
-    this.httpRequestTimeout = httpRequestTimeout;
+    this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
 
   @Override
@@ -129,7 +129,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     return new TransactionTransmitter(
-        ethNodeClient, context, serialiser, retryMechanism, responder, httpRequestTimeout);
+        ethNodeClient, context, serialiser, retryMechanism, responder, vertxTransmitterFactory);
   }
 
   private boolean senderNotUnlockedAccount(final Transaction transaction) {

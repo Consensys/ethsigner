@@ -21,10 +21,9 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
-
-import java.time.Duration;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
@@ -37,7 +36,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TransactionTransmitter extends VertxRequestTransmitter {
+public class TransactionTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -49,6 +48,7 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
   private final SendTransactionContext sendTransactionContext;
   private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
+  private final VertxRequestTransmitter transmitter;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
@@ -56,8 +56,9 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
       final TransactionSerialiser transactionSerialiser,
       final RetryMechanism<SendTransactionContext> retryMechanism,
       final HttpResponseFactory responder,
-      final Duration httpRequestTimeout) {
-    super(httpRequestTimeout);
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+
+    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
@@ -109,13 +110,13 @@ public class TransactionTransmitter extends VertxRequestTransmitter {
         ethNodeClient.request(
             httpServerRequest.method(),
             httpServerRequest.uri(),
-            response -> handleResponse(sendTransactionContext.getRoutingContext(), response));
+            response ->
+                transmitter.handleResponse(sendTransactionContext.getRoutingContext(), response));
 
-    sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
+    transmitter.sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
   }
 
-  @Override
-  protected void handleResponseBody(
+  private void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
     try {
       LOG.info("Handling Web3j response");
