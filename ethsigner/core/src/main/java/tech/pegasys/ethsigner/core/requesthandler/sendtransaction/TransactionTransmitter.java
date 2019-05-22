@@ -12,14 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -35,9 +34,6 @@ import org.apache.logging.log4j.Logger;
 public class TransactionTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
-
-  private static final String JSON_RPC_VERSION = "2.0";
-  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
 
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser transactionSerialiser;
@@ -82,14 +78,12 @@ public class TransactionTransmitter {
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
-    final JsonRpcRequest sendRawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
-    sendRawTransaction.setParams(singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(context.getId());
-
+    final JsonRpcRequest rawTransaction =
+        context.getTransaction().jsonRpcRequest(signedTransactionHexString, context.getId());
     try {
-      return new JsonRpcBody(Json.encodeToBuffer(sendRawTransaction));
+      return new JsonRpcBody(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
+      LOG.debug("JSON Serialisation failed for: {}", rawTransaction, e);
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
   }
