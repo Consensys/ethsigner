@@ -55,7 +55,8 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
     final BigInteger ethSignerEndBalance = ethSigner().accounts().balance(RECIPIENT);
 
-    assertThat(ethSignerEndBalance).isEqualByComparingTo(ethSignerStartBalance.add(TRANSFER_AMOUNT_WEI));
+    assertThat(ethSignerEndBalance)
+        .isEqualByComparingTo(ethSignerStartBalance.add(TRANSFER_AMOUNT_WEI));
 
     final BigInteger pantheonBalance = ethNode().accounts().balance(RECIPIENT);
 
