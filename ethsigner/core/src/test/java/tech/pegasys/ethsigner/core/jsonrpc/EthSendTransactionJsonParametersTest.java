@@ -31,7 +31,7 @@ public class EthSendTransactionJsonParametersTest {
 
   @Test
   public void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
-    JsonObject parameters = new JsonObject();
+    final JsonObject parameters = new JsonObject();
     parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
     parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     parameters.put("nonce", "0x1");
