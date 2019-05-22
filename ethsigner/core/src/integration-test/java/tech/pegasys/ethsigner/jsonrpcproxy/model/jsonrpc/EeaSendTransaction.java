@@ -16,6 +16,7 @@ import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.PrivateTransactionBuilder;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,9 @@ public class EeaSendTransaction {
   private static final String RESTRICTED = "restricted";
   private static final int DEFAULT_ID = 77;
   private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
+  private static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
+  private static final List<String> PRIVATE_FOR =
+      singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=");
 
   public String withGas(final String gas) {
     return replaceParameter("gas", gas, request());
@@ -62,8 +66,8 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -79,8 +83,8 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -112,8 +116,8 @@ public class EeaSendTransaction {
             .withGas("0x76c0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -128,8 +132,8 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -161,8 +165,8 @@ public class EeaSendTransaction {
             .withGas("0x76c0")
             .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
             .withValue("0x0")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -179,7 +183,7 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -213,8 +217,8 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
   }
@@ -234,8 +238,8 @@ public class EeaSendTransaction {
             .withValue("0x0")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -248,8 +252,8 @@ public class EeaSendTransaction {
             .withNonce("0x1")
             .withData(
                 "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-            .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFrom(PRIVATE_FROM)
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
