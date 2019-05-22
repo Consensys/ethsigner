@@ -12,22 +12,21 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthProtocolVersion;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
 public class FailedConnectionTest extends IntegrationTestBase {
 
   @Before
-  public void setup() {
+  public void localSetup() {
     clientAndServer.stop();
   }
 
@@ -55,7 +54,8 @@ public class FailedConnectionTest extends IntegrationTestBase {
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()),
-        response.ethSigner(JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT,
+        response.ethSigner(
+            JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT,
             HttpResponseStatus.GATEWAY_TIMEOUT));
   }
 }

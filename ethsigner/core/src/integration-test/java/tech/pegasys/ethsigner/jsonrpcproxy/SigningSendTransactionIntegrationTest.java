@@ -18,24 +18,17 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import java.util.concurrent.TimeUnit;
-import org.mockserver.model.Delay;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.RegexBody;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
 import java.io.IOException;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.CipherException;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 
-/**
- * Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node.
- */
+/** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
 
   private SendTransaction sendTransaction;
@@ -366,8 +359,8 @@ public class SigningSendTransactionIntegrationTest extends IntegrationTestBase {
     timeoutRequest(".*eth_sendRawTransaction.*");
 
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingNonce()), response
-            .ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT,
-                HttpResponseStatus.GATEWAY_TIMEOUT));
+        request.ethSigner(sendTransaction.missingNonce()),
+        response.ethSigner(
+            CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, HttpResponseStatus.GATEWAY_TIMEOUT));
   }
 }
