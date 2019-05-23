@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -30,8 +32,12 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
+  private final VertxRequestTransmitter transmitter;
 
-  public PassThroughHandler(final HttpClient ethNodeClient) {
+  public PassThroughHandler(
+      final HttpClient ethNodeClient,
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
   }
 
@@ -43,33 +49,18 @@ public class PassThroughHandler implements JsonRpcRequestHandler {
         ethNodeClient.request(
             httpServerRequest.method(),
             httpServerRequest.uri(),
-            proxiedResponse -> {
-              logResponse(proxiedResponse);
+            response -> transmitter.handleResponse(context, response));
 
-              httpServerRequest.response().setStatusCode(proxiedResponse.statusCode());
-              httpServerRequest.response().headers().setAll(proxiedResponse.headers());
-              httpServerRequest.response().setChunked(false);
-
-              proxiedResponse.bodyHandler(
-                  data -> {
-                    logResponseBody(data);
-                    // End the sendRequest, preventing any other handler from executing
-                    httpServerRequest.response().end(data);
-                  });
-            });
-
-    proxyRequest.headers().setAll(httpServerRequest.headers());
-    proxyRequest.setChunked(false);
-    proxyRequest.end(context.getBody());
+    transmitter.sendRequest(proxyRequest, context.getBody(), context);
     logRequest(request, httpServerRequest);
   }
 
-  private void logResponse(final HttpClientResponse response) {
-    LOG.debug("Response status: {}", response.statusCode());
-  }
-
-  private void logResponseBody(final Buffer body) {
-    LOG.debug("Response body: {}", body);
+  private void handleResponseBody(
+      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
+    context.request().response().setStatusCode(response.statusCode());
+    context.request().response().headers().setAll(response.headers());
+    context.request().response().setChunked(false);
+    context.request().response().end(body);
   }
 
   private void logRequest(final JsonRpcRequest jsonRequest, final HttpServerRequest httpRequest) {

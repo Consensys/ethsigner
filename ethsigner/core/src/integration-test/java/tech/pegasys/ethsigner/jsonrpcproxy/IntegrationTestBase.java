@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
@@ -84,6 +85,8 @@ public class IntegrationTestBase {
 
   protected static String unlockedAccount;
 
+  protected static Duration downstreamTimeout = Duration.ofSeconds(1);
+
   @BeforeClass
   public static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);
@@ -120,7 +123,7 @@ public class IntegrationTestBase {
             serialiser,
             httpClientOptions,
             httpServerOptions,
-            Duration.ofSeconds(1),
+            downstreamTimeout,
             new Web3jNonceProvider(web3j, serialiser.getAddress()),
             null);
     runner.start();
@@ -170,6 +173,15 @@ public class IntegrationTestBase {
                 .withBody(response.getBody())
                 .withHeaders(headers)
                 .withStatusCode(response.getStatusCode()));
+  }
+
+  public void timeoutRequest(final EthNodeRequest request) {
+    final int ENSURE_TIMEOUT = 5;
+    clientAndServer
+        .when(request().withBody(json(request.getBody())), exactly(1))
+        .respond(
+            response()
+                .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
   public void setUpEthNodeResponse(
