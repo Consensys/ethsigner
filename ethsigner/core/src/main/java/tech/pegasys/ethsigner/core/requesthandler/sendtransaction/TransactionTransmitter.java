@@ -13,13 +13,14 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static java.util.Collections.singletonList;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -31,6 +32,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,10 +45,11 @@ public class TransactionTransmitter {
   private final SendTransactionContext sendTransactionContext;
   private final RetryMechanism<SendTransactionContext> retryMechanism;
   private final HttpResponseFactory responder;
+  private final VertxRequestTransmitter transmitter;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
-      final SendTransactionContext context,
+      final SendTransactionContext sendTransactionContext,
       final TransactionSerialiser transactionSerialiser,
       final RetryMechanism<SendTransactionContext> retryMechanism,
       final HttpResponseFactory responder,
@@ -81,12 +84,15 @@ public class TransactionTransmitter {
       LOG.debug("Failed to encode transaction: {}", sendTransactionContext.getTransaction(), e);
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     } catch (final Throwable e) {
-      LOG.debug("Failed to encode/serialise transaction: {}", context.getTransaction(), e);
+      LOG.debug(
+          "Failed to encode/serialise transaction: {}", sendTransactionContext.getTransaction(), e);
       return new JsonRpcBody(JsonRpcError.INTERNAL_ERROR);
     }
 
     final JsonRpcRequest rawTransaction =
-        sendTransactionContext.getTransaction().jsonRpcRequest(signedTransactionHexString, context.getId());
+        sendTransactionContext
+            .getTransaction()
+            .jsonRpcRequest(signedTransactionHexString, sendTransactionContext.getId());
     try {
       return new JsonRpcBody(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
