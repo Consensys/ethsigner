@@ -123,7 +123,7 @@ public class JsonRpcHttpService extends AbstractVerticle {
           future.complete();
         },
         false,
-        (res) -> {
+        res -> {
           if (res.failed()) {
             LOG.error(
                 "An unhandled error occurred while processing {}",
