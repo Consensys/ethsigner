@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.web3j.crypto.RawTransaction;
 
-/** Modified from web3j RawTransaction as the web3j class doesn't allow using value as an arg */
+/** Modified from web3j RawPrivateTransaction as the web3j class doesn't allow using value as an arg */
 public class RawPrivateTransaction extends RawTransaction {
 
   private final String privateFrom;
