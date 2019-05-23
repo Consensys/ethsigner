@@ -53,7 +53,7 @@ public class RawTransactionBuilder {
         input.data().orElse(""));
   }
 
-  public RawTransactionBuilder updateNonce(final BigInteger nonce) {
+  public RawTransactionBuilder withNonce(final BigInteger nonce) {
     this.nonce = nonce;
     return this;
   }

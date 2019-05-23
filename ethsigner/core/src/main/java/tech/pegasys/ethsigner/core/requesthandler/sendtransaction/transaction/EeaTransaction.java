@@ -43,7 +43,7 @@ public class EeaTransaction implements Transaction {
 
   @Override
   public void updateNonce(final BigInteger nonce) {
-    rawPrivateTransactionBuilder.updateNonce(nonce);
+    rawPrivateTransactionBuilder.withNonce(nonce);
   }
 
   @Override

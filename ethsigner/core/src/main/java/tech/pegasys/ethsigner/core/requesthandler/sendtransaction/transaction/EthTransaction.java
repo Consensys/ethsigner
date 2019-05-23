@@ -39,7 +39,7 @@ public class EthTransaction implements Transaction {
 
   @Override
   public void updateNonce(final BigInteger nonce) {
-    rawTransactionBuilder.updateNonce(nonce);
+    rawTransactionBuilder.withNonce(nonce);
   }
 
   @Override

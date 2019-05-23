@@ -65,7 +65,7 @@ public class RawPrivateTransactionBuilder {
         input.restriction());
   }
 
-  public RawPrivateTransactionBuilder updateNonce(final BigInteger nonce) {
+  public RawPrivateTransactionBuilder withNonce(final BigInteger nonce) {
     this.nonce = nonce;
     return this;
   }
