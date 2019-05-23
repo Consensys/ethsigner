@@ -29,7 +29,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
         ethSigner().rawRequest().exceptionalRequest("ibft_getPendingVotes");
 
     assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
-    assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_FOUND);
+    assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_ENABLED);
   }
 
   @Test
