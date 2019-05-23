@@ -14,8 +14,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
 
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.PrivateTransactionBuilder;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
