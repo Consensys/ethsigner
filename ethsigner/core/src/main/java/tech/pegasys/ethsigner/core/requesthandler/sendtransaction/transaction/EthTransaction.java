@@ -10,9 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -26,12 +28,13 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EthTransaction implements Transaction {
-  private final SendTransactionJsonParameters sendTransactionJsonParameters;
+  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
+  private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
 
-  public EthTransaction(final SendTransactionJsonParameters sendTransactionJsonParameters) {
-    this.sendTransactionJsonParameters = sendTransactionJsonParameters;
-    this.rawTransactionBuilder = RawTransactionBuilder.from(sendTransactionJsonParameters);
+  EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
+    this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
+    this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
   }
 
   @Override
@@ -49,18 +52,24 @@ public class EthTransaction implements Transaction {
 
   @Override
   public boolean hasNonce() {
-    return sendTransactionJsonParameters.nonce().isPresent();
+    return ethSendTransactionJsonParameters.nonce().isPresent();
   }
 
   @Override
   public String sender() {
-    return sendTransactionJsonParameters.sender();
+    return ethSendTransactionJsonParameters.sender();
+  }
+
+  @Override
+  public JsonRpcRequest jsonRpcRequest(
+      final String signedTransactionHexString, final JsonRpcRequestId id) {
+    return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
   }
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("sendTransactionJsonParameters", sendTransactionJsonParameters)
+        .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
         .add("rawTransactionBuilder", rawTransactionBuilder)
         .toString();
   }

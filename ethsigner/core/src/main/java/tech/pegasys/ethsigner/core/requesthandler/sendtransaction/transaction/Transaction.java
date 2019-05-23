@@ -10,7 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
+
+import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
+
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -33,10 +39,20 @@ public interface Transaction {
 
   String sender();
 
+  JsonRpcRequest jsonRpcRequest(String signedTransactionHexString, JsonRpcRequestId id);
+
   // NOTE: This was taken from Web3j TransactionEncode as the function is private
   static byte[] longToBytes(final long x) {
     final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
     buffer.putLong(x);
     return buffer.array();
+  }
+
+  static JsonRpcRequest jsonRpcRequest(
+      final String signedTransactionHexString, final JsonRpcRequestId id, final String rpcMethod) {
+    final JsonRpcRequest transaction = new JsonRpcRequest(JSON_RPC_VERSION, rpcMethod);
+    transaction.setParams(singletonList(signedTransactionHexString));
+    transaction.setId(id);
+    return transaction;
   }
 }

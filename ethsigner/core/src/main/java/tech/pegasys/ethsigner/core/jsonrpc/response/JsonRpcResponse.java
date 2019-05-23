@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc.response;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -20,7 +22,7 @@ public interface JsonRpcResponse {
 
   @JsonGetter("jsonrpc")
   default String getVersion() {
-    return "2.0";
+    return JSON_RPC_VERSION;
   }
 
   JsonRpcResponseType getType();
