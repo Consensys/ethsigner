@@ -14,29 +14,27 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersion;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.Test;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 
 public class TimeoutTest extends IntegrationTestBase {
 
   @Test
   public void downstreamConnectsButDoesNotRespondReturnsGatewayTimeout() {
-    final Request<?, EthProtocolVersion> jsonRpcRequest = jsonRpc().ethProtocolVersion();
-    final String ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
+    final EthProtocolVersion request = new EthProtocolVersion(jsonRpc());
 
-    timeoutRequest(request.ethNode(ethProtocolVersionRequest));
+    timeoutRequest(this.request.ethNode(request.getEncodedRequestBody()));
 
     final String expectedResponse =
         Json.encode(
             new JsonRpcErrorResponse(
-                jsonRpcRequest.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+                request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
 
     sendRequestThenVerifyResponse(
-        request.ethSigner(ethProtocolVersionRequest),
+        this.request.ethSigner(request.getEncodedRequestBody()),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
   }
 }

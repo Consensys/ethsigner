@@ -51,22 +51,24 @@ public class VertxRequestTransmitter {
 
     response.bodyHandler(
         body ->
-            context.vertx().executeBlocking(future -> {
-                  logResponseBody(body);
-                  bodyHandler.handleResponseBody(context, response, body);
-                  future.complete();
-                },
-                false,
-                res -> {
-                  if (res.failed()) {
-                    LOG.error(
-                        "An unhandled error occurred while processing {}",
-                        context.getBodyAsString(),
-                        res.cause());
-                    context.fail(res.cause());
-                  }
-                })
-    );
+            context
+                .vertx()
+                .executeBlocking(
+                    future -> {
+                      logResponseBody(body);
+                      bodyHandler.handleResponseBody(context, response, body);
+                      future.complete();
+                    },
+                    false,
+                    res -> {
+                      if (res.failed()) {
+                        LOG.error(
+                            "An unhandled error occurred while processing {}",
+                            context.getBodyAsString(),
+                            res.cause());
+                        context.fail(res.cause());
+                      }
+                    }));
   }
 
   public void sendRequest(
