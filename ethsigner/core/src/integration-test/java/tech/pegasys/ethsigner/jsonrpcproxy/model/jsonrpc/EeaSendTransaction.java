@@ -106,7 +106,7 @@ public class EeaSendTransaction {
             .withValue(DEFAULT_VALUE)
             .withData(DEFAULT_DATA)
             .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList(DEFAULT_RECEIVER))
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -152,7 +152,7 @@ public class EeaSendTransaction {
             .withValue(DEFAULT_VALUE)
             .withData(DEFAULT_DATA)
             .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList(DEFAULT_RECEIVER))
+            .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
