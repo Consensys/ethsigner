@@ -307,24 +307,6 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWithNonZeroValue() {
-    final String sendTransactionRequest = sendTransaction.withValue("0x4");
-    final String sendRawTransactionRequest =
-        sendRawTransaction.request(
-            "0xf90114a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456704a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0fe72a92aede764ce41d06b163d28700b58e5ee8bb1af91d9d54979ea3bdb3e7ea046ae10c94c322fa44ddceb86677c2cd6cc17dfbd766924f41d10a244c512996dac5a6c617045736c3971444c50792f6538382b2f36797643554556497648383379304e3441367748754b58493dedac4756386d30565a41636359474141594d42755951744b456a3058747058656177324150636f426d744132773d8a72657374726963746564");
-    final String sendRawTransactionResponse =
-        sendRawTransaction.response(
-            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
-    setUpEthNodeResponse(
-        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
-
-    sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
-
-    verifyEthNodeReceived(sendRawTransactionRequest);
-  }
-
-  @Test
   public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(

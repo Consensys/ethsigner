@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 
 public class RawPrivateTransactionBuilder {
 
@@ -72,7 +73,7 @@ public class RawPrivateTransactionBuilder {
 
   public RawPrivateTransaction build() {
     return RawPrivateTransaction.createTransaction(
-        nonce, gasPrice, gasLimit, to, data, value, privateFrom, privateFor, restriction);
+        nonce, gasPrice, gasLimit, to, data, privateFrom, privateFor, restriction);
   }
 
   @Override
