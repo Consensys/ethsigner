@@ -14,48 +14,26 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersionRequest;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Before;
 import org.junit.Test;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 
 public class FailedConnectionTest extends IntegrationTestBase {
 
-  @Before
-  public void localSetup() {
-    clientAndServer.stop();
-  }
-
   @Test
   public void failsToConnectToDownStreamRaisesTimeout() {
-
-    final Request<?, EthProtocolVersion> jsonRpcRequest = jsonRpc().ethProtocolVersion();
-    final String ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
+    clientAndServer.stop();
+    final EthProtocolVersionRequest request = new EthProtocolVersionRequest(jsonRpc());
 
     final String expectedResponse =
         Json.encode(
             new JsonRpcErrorResponse(
-                jsonRpcRequest.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+                request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
 
     sendRequestThenVerifyResponse(
-        request.ethSigner(ethProtocolVersionRequest),
+        this.request.ethSigner(request.getEncodedRequestBody()),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
-  }
-
-  @Test
-  public void failingToConnectWithNoNonceRaisesTimeout() {
-    // Note: This test ensures the behaviour when requesting a nonce as part of the
-    // send transaction (performed via web3j) behaves the same as a normal timeout.
-    final SendTransaction sendTransaction = new SendTransaction(jsonRpc());
-
-    sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingNonce()),
-        response.ethSigner(
-            JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT,
-            HttpResponseStatus.GATEWAY_TIMEOUT));
   }
 }

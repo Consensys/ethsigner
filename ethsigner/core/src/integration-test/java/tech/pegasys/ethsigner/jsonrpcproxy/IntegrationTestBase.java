@@ -47,7 +47,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
@@ -62,7 +61,6 @@ import org.junit.BeforeClass;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
-import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;

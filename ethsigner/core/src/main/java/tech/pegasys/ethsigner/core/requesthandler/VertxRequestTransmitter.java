@@ -50,27 +50,25 @@ public class VertxRequestTransmitter {
     logResponse(response);
 
     response.bodyHandler(
-        body -> {
-          LOG.info("Handling received body");
-          context
-              .vertx()
-              .executeBlocking(
-                  future -> {
-                    logResponseBody(body);
-                    bodyHandler.handleResponseBody(context, response, body);
-                    future.complete();
-                  },
-                  false,
-                  (res) -> {
-                    if (res.failed()) {
-                      LOG.error(
-                          "An unhandled error occurred while processing {}",
-                          context.getBodyAsString(),
-                          res.cause());
-                      context.fail(res.cause());
-                    }
-                  });
-        });
+        body ->
+            context
+                .vertx()
+                .executeBlocking(
+                    future -> {
+                      logResponseBody(body);
+                      bodyHandler.handleResponseBody(context, response, body);
+                      future.complete();
+                    },
+                    false,
+                    res -> {
+                      if (res.failed()) {
+                        LOG.error(
+                            "An unhandled error occurred while processing {}",
+                            context.getBodyAsString(),
+                            res.cause());
+                        context.fail(res.cause());
+                      }
+                    }));
   }
 
   public void sendRequest(
@@ -93,6 +91,7 @@ public class VertxRequestTransmitter {
 
   @FunctionalInterface
   public interface ResponseBodyHandler {
+
     void handleResponseBody(
         final RoutingContext context, final HttpClientResponse response, final Buffer body);
   }

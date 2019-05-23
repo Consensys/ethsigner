@@ -10,15 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.SendTransactionJsonParameters;
 
 public class TransactionFactory {
 
   public Transaction createTransaction(final JsonRpcRequest request) {
-    final SendTransactionJsonParameters params = SendTransactionJsonParameters.from(request);
-    return new EthTransaction(params);
+    final String method = request.getMethod().toLowerCase();
+    switch (method) {
+      case "eth_sendtransaction":
+        return new EthTransaction(EthSendTransactionJsonParameters.from(request));
+      default:
+        throw new IllegalStateException("Unknown send transaction method " + method);
+    }
   }
 }

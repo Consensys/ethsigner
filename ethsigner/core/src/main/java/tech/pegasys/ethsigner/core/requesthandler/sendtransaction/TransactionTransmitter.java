@@ -12,23 +12,15 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.util.Collections.singletonList;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
-
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
@@ -45,9 +37,6 @@ public class TransactionTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final String JSON_RPC_VERSION = "2.0";
-  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser transactionSerialiser;
   private final SendTransactionContext sendTransactionContext;
@@ -62,7 +51,8 @@ public class TransactionTransmitter {
       final RetryMechanism<SendTransactionContext> retryMechanism,
       final HttpResponseFactory responder,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
-    this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
+
+    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
@@ -114,10 +104,10 @@ public class TransactionTransmitter {
       return;
     }
 
-    final JsonRpcRequest sendRawTransaction = new JsonRpcRequest(JSON_RPC_VERSION, JSON_RPC_METHOD);
-    sendRawTransaction.setParams(singletonList(signedTransactionHexString));
-    sendRawTransaction.setId(sendTransactionContext.getId());
-
+    final JsonRpcRequest rawTransaction =
+        sendTransactionContext
+            .getTransaction()
+            .jsonRpcRequest(signedTransactionHexString, sendTransactionContext.getId());
     try {
       sendTransaction(Json.encodeToBuffer(sendRawTransaction));
     } catch (final IllegalArgumentException e) {
@@ -147,12 +137,12 @@ public class TransactionTransmitter {
       if (retryMechanism.retriesAvailable()) {
         retryMechanism.incrementRetries();
         send();
-        return;
       } else {
-        reportError(); // This needs to become a context.fail.
-        return;
+      	context.fail(GATEWAY_TIMEOUT.code(), e);
+
       }
-    }
+     return;
+   }
 
     final HttpServerRequest httpServerRequest = context.request();
     httpServerRequest.response().setStatusCode(response.statusCode());

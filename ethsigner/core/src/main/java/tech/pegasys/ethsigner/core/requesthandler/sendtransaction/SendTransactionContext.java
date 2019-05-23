@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;

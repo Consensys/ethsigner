@@ -13,6 +13,9 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
@@ -20,10 +23,13 @@ import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
