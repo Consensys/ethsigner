@@ -15,13 +15,14 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 import io.vertx.core.json.Json;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 
-public class EthProtocolVersion {
+public class EthProtocolVersionRequest {
 
-  final Request<?, org.web3j.protocol.core.methods.response.EthProtocolVersion> jsonRpcRequest;
+  final Request<?, EthProtocolVersion> jsonRpcRequest;
   final String ethProtocolVersionRequest;
 
-  public EthProtocolVersion(final Web3j web3j) {
+  public EthProtocolVersionRequest(final Web3j web3j) {
     jsonRpcRequest = web3j.ethProtocolVersion();
     ethProtocolVersionRequest = Json.encode(jsonRpcRequest);
   }

@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersion;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersionRequest;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
@@ -25,7 +25,7 @@ public class FailedConnectionTest extends IntegrationTestBase {
   @Test
   public void failsToConnectToDownStreamRaisesTimeout() {
     clientAndServer.stop();
-    final EthProtocolVersion request = new EthProtocolVersion(jsonRpc());
+    final EthProtocolVersionRequest request = new EthProtocolVersionRequest(jsonRpc());
 
     final String expectedResponse =
         Json.encode(
