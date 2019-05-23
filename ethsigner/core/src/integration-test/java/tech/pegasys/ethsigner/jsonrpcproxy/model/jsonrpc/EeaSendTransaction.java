@@ -31,6 +31,14 @@ public class EeaSendTransaction {
   private static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
   private static final List<String> PRIVATE_FOR =
       singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=");
+  private static final String DEFAULT_NONCE =
+      "0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2";
+  private static final String DEFAULT_GAS_PRICE = "0x9184e72a000";
+  private static final String DEFAULT_GAS = "0x76c0";
+  private static final String DEFAULT_RECEIVER = "0xd46e8dd67c5d32be8058bb8eb970870f07244567";
+  private static final String DEFAULT_VALUE = "0x0";
+  private static final String DEFAULT_DATA =
+      "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675";
 
   public String withGas(final String gas) {
     return replaceParameter("gas", gas, request());
@@ -59,13 +67,12 @@ public class EeaSendTransaction {
   public String missingSender() {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -77,12 +84,11 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -94,14 +100,13 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFor(singletonList(DEFAULT_RECEIVER))
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -111,11 +116,10 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -127,11 +131,10 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -143,14 +146,13 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(UNLOCKED_ACCOUNT)
-            .withPrivateFor(singletonList("0xd46e8dd67c5d32be8058bb8eb970870f07244567"))
+            .withPrivateFor(singletonList(DEFAULT_RECEIVER))
             .withRestriction(RESTRICTED)
             .build();
     return Json.encode(eeaSendTransaction(transaction));
@@ -160,11 +162,11 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -176,13 +178,12 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
             .build();
@@ -193,13 +194,12 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(UNLOCKED_ACCOUNT)
             .withRestriction(RESTRICTED)
             .build();
@@ -210,13 +210,12 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .build();
@@ -231,13 +230,12 @@ public class EeaSendTransaction {
     final PrivateTransaction transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-            .withGasPrice("0x9184e72a000")
-            .withGas("0x76c0")
-            .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-            .withValue("0x0")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withNonce(DEFAULT_NONCE)
+            .withGasPrice(DEFAULT_GAS_PRICE)
+            .withGas(DEFAULT_GAS)
+            .withTo(DEFAULT_RECEIVER)
+            .withValue(DEFAULT_VALUE)
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
@@ -250,8 +248,7 @@ public class EeaSendTransaction {
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
             .withNonce("0x1")
-            .withData(
-                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+            .withData(DEFAULT_DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED)
