@@ -42,12 +42,7 @@ public class NonceTooLowRetryMechanismTest {
   @Before
   public void setup() {
     when(nonceProvider.getNonce()).thenReturn(BigInteger.ONE);
-    context =
-        new SendTransactionContext(
-            null,
-            new JsonRpcRequestId(1),
-            transaction,
-            () -> {});
+    context = new SendTransactionContext(null, new JsonRpcRequestId(1), transaction, () -> {});
   }
 
   @Test

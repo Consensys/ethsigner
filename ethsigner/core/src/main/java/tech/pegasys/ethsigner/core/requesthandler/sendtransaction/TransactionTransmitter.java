@@ -12,15 +12,23 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import static java.util.Collections.singletonList;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RetryMechanism.RetryException;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
@@ -109,9 +117,9 @@ public class TransactionTransmitter {
             .getTransaction()
             .jsonRpcRequest(signedTransactionHexString, sendTransactionContext.getId());
     try {
-      sendTransaction(Json.encodeToBuffer(sendRawTransaction));
+      sendTransaction(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialisation failed for: {}", sendRawTransaction, e);
+      LOG.debug("JSON Serialisation failed for: {}", rawTransaction, e);
       sendTransactionContext
           .getRoutingContext()
           .fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
@@ -138,11 +146,10 @@ public class TransactionTransmitter {
         retryMechanism.incrementRetries();
         send();
       } else {
-      	context.fail(GATEWAY_TIMEOUT.code(), e);
-
+        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       }
-     return;
-   }
+      return;
+    }
 
     final HttpServerRequest httpServerRequest = context.request();
     httpServerRequest.response().setStatusCode(response.statusCode());
@@ -162,9 +169,6 @@ public class TransactionTransmitter {
         sendTransactionContext::getTransaction,
         () -> Json.encode(errorResponse));
 
-    responder.create(
-        sendTransactionContext.getInitialRequest(),
-        HttpResponseStatus.BAD_REQUEST.code(),
-        errorResponse);
+    responder.create(sendTransactionContext.getInitialRequest(), BAD_REQUEST.code(), errorResponse);
   }
 }
