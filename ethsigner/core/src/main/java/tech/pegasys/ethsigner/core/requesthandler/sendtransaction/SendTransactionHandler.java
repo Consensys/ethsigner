@@ -23,6 +23,7 @@ import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -31,7 +32,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,18 +45,21 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
   private final TransactionFactory transactionFactory;
+  private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
   public SendTransactionHandler(
       final HttpResponseFactory responder,
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider,
-      final TransactionFactory transactionFactory) {
+      final TransactionFactory transactionFactory,
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
     this.transactionFactory = transactionFactory;
+    this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
 
   @Override
@@ -86,7 +89,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     try {
-      sendTransaction(transaction, context.request(), request);
+      sendTransaction(transaction, context, request);
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
@@ -101,20 +104,20 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private void sendTransaction(
       final Transaction transaction,
-      final HttpServerRequest httpServerRequest,
+      final RoutingContext routingContext,
       final JsonRpcRequest request) {
     final TransactionTransmitter transmitter =
-        createTransactionTransmitter(transaction, httpServerRequest, request);
+        createTransactionTransmitter(transaction, routingContext, request);
     transmitter.send();
   }
 
   private TransactionTransmitter createTransactionTransmitter(
       final Transaction transaction,
-      final HttpServerRequest httpServerRequest,
+      final RoutingContext routingContext,
       final JsonRpcRequest request) {
 
     final SendTransactionContext context =
-        new SendTransactionContext(httpServerRequest, request.getId(), transaction);
+        new SendTransactionContext(routingContext, request.getId(), transaction);
 
     final RetryMechanism<SendTransactionContext> retryMechanism;
 
@@ -123,11 +126,12 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       transaction.updateNonce(nonceProvider.getNonce());
       retryMechanism = new NonceTooLowRetryMechanism(nonceProvider);
     } else {
+      LOG.debug("Nonce supplied by client, forwarding request");
       retryMechanism = new NoRetryMechanism<>();
     }
 
     return new TransactionTransmitter(
-        ethNodeClient, context, serialiser, retryMechanism, responder);
+        ethNodeClient, context, serialiser, retryMechanism, responder, vertxTransmitterFactory);
   }
 
   private boolean senderNotUnlockedAccount(final Transaction transaction) {
