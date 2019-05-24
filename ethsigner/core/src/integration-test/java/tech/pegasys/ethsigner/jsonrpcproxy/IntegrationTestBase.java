@@ -65,6 +65,8 @@ import org.mockserver.model.Header;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
@@ -79,6 +81,7 @@ public class IntegrationTestBase {
   protected static ClientAndServer clientAndServer;
 
   private JsonRpc2_0Web3j jsonRpc;
+  private JsonRpc2_0Eea eeaJsonRpc;
 
   protected final EthRequestFactory request = new EthRequestFactory();
   protected final EthResponseFactory response = new EthResponseFactory();
@@ -145,9 +148,14 @@ public class IntegrationTestBase {
     return jsonRpc;
   }
 
+  protected Eea eeaJsonRpc() {
+    return eeaJsonRpc;
+  }
+
   @Before
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
+    eeaJsonRpc = new JsonRpc2_0Eea(null);
     clientAndServer.reset();
     setupTransactionCountResponder();
   }

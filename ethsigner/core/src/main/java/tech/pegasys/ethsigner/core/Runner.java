@@ -94,8 +94,7 @@ public class Runner {
                 responseBodyHandler ->
                     new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
 
-    requestMapper.addHandler(
-        "eth_sendTransaction",
+    final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
             responseFactory,
             downStreamConnection,
@@ -103,7 +102,9 @@ public class Runner {
             nonceProvider,
             transactionFactory,
             responseBodyHandler ->
-                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
+                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
+    requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
+    requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
 
     requestMapper.addHandler(
         "eth_accounts",

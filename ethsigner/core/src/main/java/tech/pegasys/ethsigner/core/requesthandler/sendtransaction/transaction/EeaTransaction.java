@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
@@ -20,44 +20,46 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
-import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
+import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
-public class EthTransaction implements Transaction {
-  private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-  private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
-  private final RawTransactionBuilder rawTransactionBuilder;
+public class EeaTransaction implements Transaction {
+  private static final String JSON_RPC_METHOD = "eea_sendRawTransaction";
+  private final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters;
+  private final RawPrivateTransactionBuilder rawPrivateTransactionBuilder;
 
-  EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
-    this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
-    this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
+  EeaTransaction(final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters) {
+    this.eeaSendTransactionJsonParameters = eeaSendTransactionJsonParameters;
+    this.rawPrivateTransactionBuilder =
+        RawPrivateTransactionBuilder.from(eeaSendTransactionJsonParameters);
   }
 
   @Override
   public void updateNonce(final BigInteger nonce) {
-    rawTransactionBuilder.withNonce(nonce);
+    rawPrivateTransactionBuilder.withNonce(nonce);
   }
 
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
-    final RawTransaction rawTransaction = rawTransactionBuilder.build();
-    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    final RawPrivateTransaction rawTransaction = rawPrivateTransactionBuilder.build();
+    final List<RlpType> values =
+        PrivateTransactionEncoder.asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
   }
 
   @Override
   public boolean hasNonce() {
-    return ethSendTransactionJsonParameters.nonce().isPresent();
+    return eeaSendTransactionJsonParameters.nonce().isPresent();
   }
 
   @Override
   public String sender() {
-    return ethSendTransactionJsonParameters.sender();
+    return eeaSendTransactionJsonParameters.sender();
   }
 
   @Override
@@ -69,8 +71,8 @@ public class EthTransaction implements Transaction {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
-        .add("rawTransactionBuilder", rawTransactionBuilder)
+        .add("eeaSendTransactionJsonParameters", eeaSendTransactionJsonParameters)
+        .add("rawPrivateTransactionBuilder", rawPrivateTransactionBuilder)
         .toString();
   }
 }

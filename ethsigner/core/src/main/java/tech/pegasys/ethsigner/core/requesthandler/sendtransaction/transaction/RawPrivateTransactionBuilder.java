@@ -12,14 +12,15 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import com.google.common.base.MoreObjects;
-import org.web3j.crypto.RawTransaction;
+import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 
-public class RawTransactionBuilder {
+public class RawPrivateTransactionBuilder {
 
   private BigInteger nonce;
   private BigInteger gasPrice;
@@ -27,39 +28,52 @@ public class RawTransactionBuilder {
   private String to;
   private BigInteger value;
   private String data;
+  private String privateFrom;
+  private List<String> privateFor;
+  private String restriction;
 
-  public RawTransactionBuilder(
+  public RawPrivateTransactionBuilder(
       final BigInteger nonce,
       final BigInteger gasPrice,
       final BigInteger gasLimit,
       final String to,
       final BigInteger value,
-      final String data) {
+      final String data,
+      final String privateFrom,
+      final List<String> privateFor,
+      final String restriction) {
     this.nonce = nonce;
     this.gasPrice = gasPrice;
     this.gasLimit = gasLimit;
     this.to = to;
     this.value = value;
     this.data = data;
+    this.privateFrom = privateFrom;
+    this.privateFor = privateFor;
+    this.restriction = restriction;
   }
 
-  public static RawTransactionBuilder from(final EthSendTransactionJsonParameters input) {
-    return new RawTransactionBuilder(
+  public static RawPrivateTransactionBuilder from(final EeaSendTransactionJsonParameters input) {
+    return new RawPrivateTransactionBuilder(
         input.nonce().orElse(null),
         input.gasPrice().orElse(BigInteger.ZERO),
         input.gas().orElse(BigInteger.valueOf(90000)),
         input.receiver().orElse(""),
         input.value().orElse(BigInteger.ZERO),
-        input.data().orElse(""));
+        input.data().orElse(""),
+        input.privateFrom(),
+        input.privateFor(),
+        input.restriction());
   }
 
-  public RawTransactionBuilder withNonce(final BigInteger nonce) {
+  public RawPrivateTransactionBuilder withNonce(final BigInteger nonce) {
     this.nonce = nonce;
     return this;
   }
 
-  public RawTransaction build() {
-    return RawTransaction.createTransaction(nonce, gasPrice, gasLimit, to, value, data);
+  public RawPrivateTransaction build() {
+    return RawPrivateTransaction.createTransaction(
+        nonce, gasPrice, gasLimit, to, data, privateFrom, privateFor, restriction);
   }
 
   @Override
@@ -71,6 +85,9 @@ public class RawTransactionBuilder {
         .add("to", to)
         .add("value", value)
         .add("data", data)
+        .add("privateFrom", privateFrom)
+        .add("privateFor", privateFor)
+        .add("restriction", restriction)
         .toString();
   }
 }
