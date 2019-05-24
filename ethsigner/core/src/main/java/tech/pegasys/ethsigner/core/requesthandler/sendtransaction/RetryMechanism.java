@@ -28,6 +28,6 @@ public abstract class RetryMechanism<T> {
   }
 
   public void incrementRetries() {
-    retriesPerformed ++;
+    retriesPerformed++;
   }
 }
