@@ -53,7 +53,7 @@ public class EeaTransaction implements Transaction {
   }
 
   @Override
-  public boolean hasNonce() {
+  public boolean isNonceUserSpecified() {
     return eeaSendTransactionJsonParameters.nonce().isPresent();
   }
 
