@@ -56,5 +56,6 @@ dependencyManagement {
     dependency 'org.web3j:abi:4.3.0'
     dependency 'org.web3j:core:4.3.0'
     dependency 'org.web3j:crypto:4.3.0'
+    dependency 'org.web3j:eea:4.3.0'
   }
 }

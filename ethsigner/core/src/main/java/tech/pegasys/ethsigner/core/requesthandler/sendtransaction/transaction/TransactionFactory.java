@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 
@@ -22,6 +23,8 @@ public class TransactionFactory {
     switch (method) {
       case "eth_sendtransaction":
         return new EthTransaction(EthSendTransactionJsonParameters.from(request));
+      case "eea_sendtransaction":
+        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request));
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
