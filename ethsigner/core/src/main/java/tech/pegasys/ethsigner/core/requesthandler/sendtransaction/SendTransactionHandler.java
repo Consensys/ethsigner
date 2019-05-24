@@ -95,7 +95,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       final RoutingContext routingContext,
       final JsonRpcRequest request) {
 
-    if (!transaction.hasNonce()) {
+    if (!transaction.isNonceUserSpecified()) {
       LOG.debug("Nonce not present in request {}", request.getId());
       return new RetryingTransactionTransmitter(
           ethNodeClient,

@@ -31,12 +31,10 @@ public class EthTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
-  private final boolean userSpecifiedNonce;
 
   EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
     this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
     this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
-    userSpecifiedNonce = ethSendTransactionJsonParameters.nonce().isPresent();
   }
 
   @Override
@@ -53,7 +51,7 @@ public class EthTransaction implements Transaction {
   }
 
   @Override
-  public boolean hasNonce() {
+  public boolean isNonceUserSpecified() {
     return ethSendTransactionJsonParameters.nonce().isPresent();
   }
 
@@ -74,10 +72,5 @@ public class EthTransaction implements Transaction {
         .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
         .add("rawTransactionBuilder", rawTransactionBuilder)
         .toString();
-  }
-
-  @Override
-  public boolean isNonceUserSpecified() {
-    return userSpecifiedNonce;
   }
 }

@@ -25,8 +25,6 @@ import org.web3j.crypto.Sign.SignatureData;
 
 public interface Transaction {
 
-  boolean isNonceUserSpecified();
-
   void updateNonce(BigInteger nonce);
 
   byte[] rlpEncode(SignatureData signatureData);
@@ -37,7 +35,7 @@ public interface Transaction {
     return rlpEncode(signatureData);
   }
 
-  boolean hasNonce();
+  boolean isNonceUserSpecified();
 
   String sender();
 
