@@ -97,7 +97,6 @@ public class Runner {
     requestMapper.addHandler(
         "eth_sendTransaction",
         new SendTransactionHandler(
-            responseFactory,
             downStreamConnection,
             serialiser,
             nonceProvider,

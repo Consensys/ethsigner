@@ -16,7 +16,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
-import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
@@ -34,7 +33,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final HttpResponseFactory responder;
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser serialiser;
   private final NonceProvider nonceProvider;
@@ -42,13 +40,11 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
   public SendTransactionHandler(
-      final HttpResponseFactory responder,
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
       final NonceProvider nonceProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
-    this.responder = responder;
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
     this.nonceProvider = nonceProvider;
@@ -99,25 +95,24 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       final RoutingContext routingContext,
       final JsonRpcRequest request) {
 
-    final Runnable preTransmitOperation;
-    final RetryMechanism<SendTransactionContext> retryMechanism;
-
     if (!transaction.hasNonce()) {
       LOG.debug("Nonce not present in request {}", request.getId());
-      preTransmitOperation = () -> transaction.updateNonce(nonceProvider.getNonce());
-      retryMechanism = new NonceTooLowRetryMechanism();
+      return new RetryingTransactionTransmitter(
+          ethNodeClient,
+          new SendTransactionContext(routingContext, request.getId(), transaction),
+          serialiser,
+          vertxTransmitterFactory,
+          nonceProvider,
+          new NonceTooLowRetryMechanism());
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
-      retryMechanism = new NoRetryMechanism<>();
-      preTransmitOperation = () -> {};
+      return new TransactionTransmitter(
+          ethNodeClient,
+          new SendTransactionContext(routingContext, request.getId(), transaction),
+          serialiser,
+          vertxTransmitterFactory,
+          nonceProvider);
     }
-
-    final SendTransactionContext context =
-        new SendTransactionContext(
-            routingContext, request.getId(), transaction, preTransmitOperation);
-
-    return new TransactionTransmitter(
-        ethNodeClient, context, serialiser, retryMechanism, responder, vertxTransmitterFactory);
   }
 
   private boolean senderNotUnlockedAccount(final Transaction transaction) {

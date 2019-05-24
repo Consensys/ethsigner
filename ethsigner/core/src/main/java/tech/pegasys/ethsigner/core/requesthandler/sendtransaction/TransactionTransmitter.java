@@ -17,11 +17,9 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
-import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
@@ -30,7 +28,6 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -48,24 +45,22 @@ public class TransactionTransmitter {
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser transactionSerialiser;
   private final SendTransactionContext sendTransactionContext;
-  private final RetryMechanism<SendTransactionContext> retryMechanism;
-  private final HttpResponseFactory responder;
   private final VertxRequestTransmitter transmitter;
+  private final NonceProvider nonceProvider;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final SendTransactionContext sendTransactionContext,
       final TransactionSerialiser transactionSerialiser,
-      final RetryMechanism<SendTransactionContext> retryMechanism,
-      final HttpResponseFactory responder,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory,
+      final NonceProvider nonceProvider) {
 
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
-    this.retryMechanism = retryMechanism;
-    this.responder = responder;
+
+    this.nonceProvider = nonceProvider;
   }
 
   public void send() {
@@ -73,12 +68,13 @@ public class TransactionTransmitter {
   }
 
   private void createSignedTransactionBody() {
-    // This assumes the parameters have already been validated and are correct for the unlocked
-    // account.
     final String signedTransactionHexString;
     try {
-      sendTransactionContext.getPreTransmitOperation().run();
       final Transaction transaction = sendTransactionContext.getTransaction();
+      if (!transaction.isNonceUserSpecified()) {
+        transaction.updateNonce(nonceProvider.getNonce());
+      }
+
       signedTransactionHexString = transactionSerialiser.serialise(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", sendTransactionContext.getTransaction(), e);
@@ -138,37 +134,12 @@ public class TransactionTransmitter {
     transmitter.sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
   }
 
-  private void handleResponseBody(
+  protected void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
-    if (response.statusCode() != HttpResponseStatus.OK.code()
-        && retryMechanism.responseRequiresRetry(response, body)) {
-      if (retryMechanism.retriesAvailable()) {
-        retryMechanism.incrementRetries();
-        send();
-      } else {
-        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
-      }
-      return;
-    }
-
     final HttpServerRequest httpServerRequest = context.request();
     httpServerRequest.response().setStatusCode(response.statusCode());
     httpServerRequest.response().headers().setAll(response.headers());
     httpServerRequest.response().setChunked(false);
     httpServerRequest.response().end(body);
-  }
-
-  private void reportError() {
-    final JsonRpcErrorResponse errorResponse =
-        new JsonRpcErrorResponse(sendTransactionContext.getId(), INTERNAL_ERROR);
-
-    LOG.debug(
-        "Dropping request method: {}, uri: {}, body: {}, Error body: {}",
-        sendTransactionContext.getInitialRequest()::method,
-        sendTransactionContext.getInitialRequest()::absoluteURI,
-        sendTransactionContext::getTransaction,
-        () -> Json.encode(errorResponse));
-
-    responder.create(sendTransactionContext.getInitialRequest(), BAD_REQUEST.code(), errorResponse);
   }
 }
