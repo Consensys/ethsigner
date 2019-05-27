@@ -25,6 +25,8 @@ public class NodeConfigurationBuilder {
   private final DefaultDockerClientConfig config;
   private String genesis;
   private String cors;
+  private boolean privacyEnabled;
+  private String privacyPublicKey;
 
   public NodeConfigurationBuilder() {
     this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
@@ -40,14 +42,24 @@ public class NodeConfigurationBuilder {
     return this;
   }
 
-  public NodeConfiguration build() {
-    final String hostname = dockerHost(config).orElse(LOCALHOST);
+  public NodeConfigurationBuilder withPrivacyEnabled() {
+    this.privacyEnabled = true;
+    return this;
+  }
 
-    return new NodeConfiguration(genesis, hostname, cors);
+  public NodeConfigurationBuilder withPrivacyPublicKey(final String privacyPublicKey) {
+    this.privacyPublicKey = privacyPublicKey;
+    return this;
   }
 
   public NodeConfigurationBuilder cors(final String cors) {
     this.cors = cors;
     return this;
+  }
+
+  public NodeConfiguration build() {
+    final String hostname = dockerHost(config).orElse(LOCALHOST);
+
+    return new NodeConfiguration(genesis, hostname, cors, privacyEnabled, privacyPublicKey);
   }
 }

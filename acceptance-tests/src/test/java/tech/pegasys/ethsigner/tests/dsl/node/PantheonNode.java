@@ -17,7 +17,9 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.io.UnsupportedEncodingException;
@@ -43,6 +45,7 @@ import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
@@ -99,12 +102,14 @@ public class PantheonNode implements Node {
     final String httpRpcUrl = url(httpRpcPort);
     LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
 
+    final HttpService web3jHttpService = new HttpService(httpRpcUrl);
     this.jsonRpc =
-        new JsonRpc2_0Web3j(
-            new HttpService(httpRpcUrl), pollingInterval, Async.defaultExecutorService());
+        new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
+    final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);
+    final Eea eea = new Eea(requestFactory);
     this.accounts = new Accounts(eth);
-    this.contracts = new Contracts(eth);
+    this.contracts = new Contracts(eth, eea);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
@@ -199,10 +204,7 @@ public class PantheonNode implements Node {
     LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
-    final HostConfig hostConfig =
-        HostConfig.newHostConfig()
-            .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
-            .withBinds(genesisBinding);
+    final List<Bind> bindings = Lists.newArrayList(genesisBinding);
 
     try {
       final List<String> commandLineItems =
@@ -215,13 +217,37 @@ public class PantheonNode implements Node {
               "--host-whitelist",
               "*",
               "--rpc-http-enabled",
-              "--rpc-ws-enabled");
+              "--rpc-ws-enabled",
+              "--rpc-http-apis",
+              "ETH,NET,WEB3,IBFT,MINER,ADMIN,EEA");
 
       config
           .getCors()
           .ifPresent(
               cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
 
+      if (config.isPrivacyEnabled()) {
+        commandLineItems.add("--privacy-enabled");
+      }
+
+      config
+          .getPrivacyPublicKeyPath()
+          .ifPresent(
+              privacyPublicKey -> {
+                final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
+                final Volume privacyPublicKeyVolume =
+                    new Volume("/etc/pantheon/privacy_public_key");
+                final Bind privacyPublicKeyBinding =
+                    new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
+                bindings.add(privacyPublicKeyBinding);
+              });
+
+      LOG.debug("pantheon command line {}", config);
+
+      final HostConfig hostConfig =
+          HostConfig.newHostConfig()
+              .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
+              .withBinds(bindings);
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
@@ -246,6 +272,16 @@ public class PantheonNode implements Node {
       return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
     } catch (final UnsupportedEncodingException ex) {
       LOG.error("Unsupported encoding used to decode genesis filepath.");
+      throw new RuntimeException("Illegal string decoding");
+    }
+  }
+
+  private String privacyPublicKeyFilePath(final String filename) {
+    final URL resource = Resources.getResource(filename);
+    try {
+      return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
+    } catch (final UnsupportedEncodingException ex) {
+      LOG.error("Unsupported encoding used to decode privacy public key filepath.");
       throw new RuntimeException("Illegal string decoding");
     }
   }

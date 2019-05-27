@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.RawRequests;
@@ -47,6 +48,7 @@ public class Signer {
   private Transactions transactions;
   private Web3j jsonRpc;
   private RawRequests rawRequests;
+  private Eea eea;
 
   public Signer(
       final SignerConfiguration signerConfig,
@@ -70,11 +72,12 @@ public class Signer {
             web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
 
     final Eth eth = new Eth(jsonRpc);
+    final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
     this.transactions = new Transactions(eth);
-    this.contracts = new Contracts(eth);
+    this.eea = new Eea(requestFactory);
+    this.contracts = new Contracts(eth, eea);
     this.accounts = new Accounts(eth);
-    this.rawRequests =
-        new RawRequests(web3jHttpService, new RawJsonRpcRequestFactory(web3jHttpService));
+    this.rawRequests = new RawRequests(web3jHttpService, requestFactory);
   }
 
   public void shutdown() {

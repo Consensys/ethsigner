@@ -13,8 +13,12 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
+
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
 
@@ -23,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.ClientConnectionException;
 
 public class Contracts {
 
@@ -32,13 +37,31 @@ public class Contracts {
   public static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
 
   private final Eth eth;
+  private final Eea eea;
 
-  public Contracts(final Eth eth) {
+  public Contracts(final Eth eth, final Eea eea) {
     this.eth = eth;
+    this.eea = eea;
   }
 
   public String submit(final Transaction smartContract) {
     return failOnIOException(() -> eth.sendTransaction(smartContract));
+  }
+
+  public String submitPrivateTransaction(final PrivateTransaction smartContract) {
+    return failOnIOException(() -> eea.sendTransaction(smartContract));
+  }
+
+  public SignerResponse<JsonRpcErrorResponse> submitExceptionalPrivateTransaction(
+      final PrivateTransaction smartContract) {
+    try {
+      submitPrivateTransaction(smartContract);
+      fail("Expecting exceptional response ");
+    } catch (final ClientConnectionException e) {
+      LOG.info("ClientConnectionException with message: " + e.getMessage());
+      return SignerResponse.fromError(e);
+    }
+    return null;
   }
 
   public void awaitBlockContaining(final String hash) {
