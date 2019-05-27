@@ -22,20 +22,11 @@ public class NodeConfiguration {
   private final String hostname;
   private final String genesisFilePath;
   private final Optional<String> cors;
-  private final boolean privacyEnabled;
-  private final Optional<String> privacyPublicKeyPath;
 
-  public NodeConfiguration(
-      final String genesisFilePath,
-      final String hostname,
-      final String cors,
-      final boolean privacyEnabled,
-      final String privacyPublicKeyPath) {
+  public NodeConfiguration(final String genesisFilePath, final String hostname, final String cors) {
     this.hostname = hostname;
     this.genesisFilePath = genesisFilePath;
     this.cors = Optional.ofNullable(cors);
-    this.privacyEnabled = privacyEnabled;
-    this.privacyPublicKeyPath = Optional.ofNullable(privacyPublicKeyPath);
   }
 
   public String getHostname() {
@@ -52,13 +43,5 @@ public class NodeConfiguration {
 
   public Optional<String> getCors() {
     return cors;
-  }
-
-  public boolean isPrivacyEnabled() {
-    return privacyEnabled;
-  }
-
-  public Optional<String> getPrivacyPublicKeyPath() {
-    return privacyPublicKeyPath;
   }
 }

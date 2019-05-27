@@ -214,7 +214,8 @@ public class PantheonNode implements Node {
     LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
-    final List<Bind> bindings = Lists.newArrayList(genesisBinding);
+    final Bind privacyBinding = privacyVolumeBinding("enclave_key.pub");
+    final List<Bind> bindings = Lists.newArrayList(genesisBinding, privacyBinding);
 
     try {
       final List<String> commandLineItems =
@@ -229,20 +230,13 @@ public class PantheonNode implements Node {
               "--rpc-http-enabled",
               "--rpc-ws-enabled",
               "--rpc-http-apis",
-              "ETH,NET,WEB3,IBFT,MINER,ADMIN,EEA");
+              "ETH,NET,WEB3,IBFT,MINER,ADMIN,EEA",
+              "--privacy-enabled");
 
       config
           .getCors()
           .ifPresent(
               cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
-
-      if (config.isPrivacyEnabled()) {
-        commandLineItems.add("--privacy-enabled");
-      }
-
-      config
-          .getPrivacyPublicKeyPath()
-          .ifPresent(privacyPublicKey -> bindings.add(privacyVolumeBinding(privacyPublicKey)));
 
       LOG.debug("pantheon command line {}", config);
 
