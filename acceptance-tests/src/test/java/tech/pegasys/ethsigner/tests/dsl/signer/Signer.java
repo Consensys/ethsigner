@@ -16,9 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.RawRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
@@ -44,11 +46,11 @@ public class Signer {
   private final String hostname;
 
   private Accounts accounts;
-  private Contracts contracts;
+  private PublicContracts publicContracts;
+  private PrivateContracts privateContracts;
   private Transactions transactions;
   private Web3j jsonRpc;
   private RawRequests rawRequests;
-  private Eea eea;
 
   public Signer(
       final SignerConfiguration signerConfig,
@@ -70,12 +72,14 @@ public class Signer {
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
+    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
 
     final Eth eth = new Eth(jsonRpc);
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
     this.transactions = new Transactions(eth);
-    this.eea = new Eea(requestFactory);
-    this.contracts = new Contracts(eth, eea);
+    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
+    this.publicContracts = new PublicContracts(eth);
+    this.privateContracts = new PrivateContracts(eea);
     this.accounts = new Accounts(eth);
     this.rawRequests = new RawRequests(web3jHttpService, requestFactory);
   }
@@ -89,8 +93,12 @@ public class Signer {
     return this.transactions;
   }
 
-  public Contracts contracts() {
-    return contracts;
+  public PublicContracts publicContracts() {
+    return publicContracts;
+  }
+
+  public PrivateContracts privateContracts() {
+    return privateContracts;
   }
 
   public Accounts accounts() {

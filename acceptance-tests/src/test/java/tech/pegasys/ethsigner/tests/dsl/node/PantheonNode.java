@@ -16,9 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
@@ -51,6 +52,7 @@ import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
@@ -73,10 +75,11 @@ public class PantheonNode implements Node {
   private final String hostname;
 
   private Accounts accounts;
-  private Contracts contracts;
   private Transactions transactions;
   private Web3j jsonRpc;
   private NodePorts ports;
+  private PublicContracts publicContracts;
+  private PrivateContracts privateContracts;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
     this.docker = docker;
@@ -106,10 +109,12 @@ public class PantheonNode implements Node {
     this.jsonRpc =
         new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
+    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);
-    final Eea eea = new Eea(requestFactory);
+    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
     this.accounts = new Accounts(eth);
-    this.contracts = new Contracts(eth, eea);
+    this.publicContracts = new PublicContracts(eth);
+    this.privateContracts = new PrivateContracts(eea);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
@@ -148,8 +153,13 @@ public class PantheonNode implements Node {
   }
 
   @Override
-  public Contracts contracts() {
-    return contracts;
+  public PublicContracts publicContracts() {
+    return publicContracts;
+  }
+
+  @Override
+  public PrivateContracts privateContracts() {
+    return privateContracts;
   }
 
   @Override

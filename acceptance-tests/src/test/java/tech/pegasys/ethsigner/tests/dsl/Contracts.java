@@ -20,42 +20,35 @@ import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOExce
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
-import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.ClientConnectionException;
 
-public class Contracts {
+public abstract class Contracts<T> {
 
   private static final Logger LOG = LogManager.getLogger();
 
   public static final BigInteger GAS_PRICE = BigInteger.valueOf(1000);
   public static final BigInteger GAS_LIMIT = BigInteger.valueOf(3000000);
 
-  private final Eth eth;
-  private final Eea eea;
+  public abstract String sendTransaction(T smartContract) throws IOException;
 
-  public Contracts(final Eth eth, final Eea eea) {
-    this.eth = eth;
-    this.eea = eea;
+  public abstract Optional<? extends TransactionReceipt> getTransactionReceipt(final String hash)
+      throws IOException;
+
+  public String submit(final T smartContract) {
+    return failOnIOException(() -> sendTransaction(smartContract));
   }
 
-  public String submit(final Transaction smartContract) {
-    return failOnIOException(() -> eth.sendTransaction(smartContract));
-  }
-
-  public String submitPrivateTransaction(final PrivateTransaction smartContract) {
-    return failOnIOException(() -> eea.sendTransaction(smartContract));
-  }
-
-  public SignerResponse<JsonRpcErrorResponse> submitExceptionalPrivateTransaction(
-      final PrivateTransaction smartContract) {
+  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final T smartContract) {
     try {
-      submitPrivateTransaction(smartContract);
+      submit(smartContract);
       fail("Expecting exceptional response ");
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
@@ -66,7 +59,7 @@ public class Contracts {
 
   public void awaitBlockContaining(final String hash) {
     try {
-      waitFor(() -> assertThat(eth.getTransactionReceipt(hash).isPresent()).isTrue());
+      waitFor(() -> assertThat(getTransactionReceipt(hash).isPresent()).isTrue());
     } catch (final ConditionTimeoutException e) {
       LOG.error("Timed out waiting for a block containing the transaction receipt hash: " + hash);
     }
@@ -76,23 +69,10 @@ public class Contracts {
     return failOnIOException(
         () -> {
           final TransactionReceipt receipt =
-              eth.getTransactionReceipt(hash)
+              getTransactionReceipt(hash)
                   .orElseThrow(() -> new RuntimeException("No receipt found for hash: " + hash));
           assertThat(receipt.getContractAddress()).isNotEmpty();
           return receipt.getContractAddress();
         });
-  }
-
-  public String code(final String address) {
-    return failOnIOException(
-        () -> {
-          final String code = eth.getCode(address);
-          assertThat(code).isNotEmpty();
-          return code;
-        });
-  }
-
-  public String call(final Transaction contractViewOperation) {
-    return failOnIOException(() -> eth.call(contractViewOperation));
   }
 }

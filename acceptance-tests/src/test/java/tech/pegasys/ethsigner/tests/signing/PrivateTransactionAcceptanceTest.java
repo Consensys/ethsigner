@@ -122,7 +122,7 @@ public class PrivateTransactionAcceptanceTest {
             RESTRICTED);
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
-        ethSigner.contracts().submitExceptionalPrivateTransaction(contract);
+        ethSigner.privateContracts().submitExceptional(contract);
     // We expect this to fail with enclave error as we don't have orion running. If rlp decode fails
     // then we would get a different error
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
