@@ -260,20 +260,20 @@ public class PantheonNode implements Node {
 
   private String genesisFilePath(final String filename) {
     final URL resource = PantheonNode.class.getResource(filename);
-    try {
-      return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
-    } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode genesis filepath.");
-      throw new RuntimeException("Illegal string decoding");
-    }
+    return resourceFileName(resource);
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private String privacyPublicKeyFilePath(final String filename) {
     final URL resource = Resources.getResource(filename);
+    return resourceFileName(resource);
+  }
+
+  private String resourceFileName(final URL resource) {
     try {
       return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
     } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode privacy public key filepath.");
+      LOG.error("Unsupported encoding used to decode {}, filepath.", resource);
       throw new RuntimeException("Illegal string decoding");
     }
   }
