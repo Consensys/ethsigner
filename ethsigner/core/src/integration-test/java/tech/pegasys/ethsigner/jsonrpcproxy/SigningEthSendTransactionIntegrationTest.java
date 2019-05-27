@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
@@ -23,7 +24,6 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 
 import java.io.IOException;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.CipherException;
@@ -360,7 +360,6 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()),
-        response.ethSigner(
-            CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, HttpResponseStatus.GATEWAY_TIMEOUT));
+        response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
   }
 }

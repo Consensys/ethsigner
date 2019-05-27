@@ -17,14 +17,18 @@ import io.vertx.core.http.HttpClientResponse;
 
 public abstract class RetryMechanism<T> {
 
-  private static final int MAX_RETRIES = 5;
+  private final int maxRetries;
   private int retriesPerformed = 0;
+
+  public RetryMechanism(int maxRetries) {
+    this.maxRetries = maxRetries;
+  }
 
   public abstract boolean responseRequiresRetry(
       final HttpClientResponse response, final Buffer body);
 
   public boolean retriesAvailable() {
-    return retriesPerformed < MAX_RETRIES;
+    return retriesPerformed < maxRetries;
   }
 
   public void incrementRetries() {

@@ -26,6 +26,12 @@ public class NonceTooLowRetryMechanism extends RetryMechanism<SendTransactionCon
 
   private static final Logger LOG = LogManager.getLogger();
 
+  private static final int MAX_RETRIES = 5;
+
+  public NonceTooLowRetryMechanism() {
+    super(MAX_RETRIES);
+  }
+
   @Override
   public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
