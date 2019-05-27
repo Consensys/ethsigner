@@ -233,14 +233,7 @@ public class PantheonNode implements Node {
       config
           .getPrivacyPublicKeyPath()
           .ifPresent(
-              privacyPublicKey -> {
-                final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
-                final Volume privacyPublicKeyVolume =
-                    new Volume("/etc/pantheon/privacy_public_key");
-                final Bind privacyPublicKeyBinding =
-                    new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
-                bindings.add(privacyPublicKeyBinding);
-              });
+              privacyPublicKey -> bindings.add(privacyVolumeBinding(privacyPublicKey)));
 
       LOG.debug("pantheon command line {}", config);
 
@@ -284,6 +277,13 @@ public class PantheonNode implements Node {
       LOG.error("Unsupported encoding used to decode privacy public key filepath.");
       throw new RuntimeException("Illegal string decoding");
     }
+  }
+
+  private Bind privacyVolumeBinding(final String privacyPublicKey) {
+    final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
+    final Volume privacyPublicKeyVolume =
+        new Volume("/etc/pantheon/privacy_public_key");
+    return new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
   }
 
   private PortBinding httpRpcPortBinding() {

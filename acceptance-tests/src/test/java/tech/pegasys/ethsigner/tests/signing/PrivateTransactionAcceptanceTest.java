@@ -32,6 +32,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+import tech.pegasys.ethsigner.tests.dsl.utils.FileUtils;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
 import java.math.BigInteger;
@@ -45,15 +46,22 @@ public class PrivateTransactionAcceptanceTest {
 
   private static final DockerClient DOCKER = new DockerClientFactory().create();
 
-  // TODO where should these be defined?
-  private static final String ORION_PUBLIC_KEY1 = "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=";
-  private static final String ORION_PUBLIC_KEY2 = "Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=";
+  private static final String ENCLAVE_PUBLIC_KEY1 = "enclave_key1.pub";
+  private static final String ENCLAVE_PUBLIC_KEY2 = "enclave_key2.pub";
 
   private Node ethNode;
   private Signer ethSigner;
 
   private Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
+  }
+
+  private String enclavePublicKey1() {
+    return FileUtils.readResource(ENCLAVE_PUBLIC_KEY1);
+  }
+
+  private String enclavePublicKey2() {
+    return FileUtils.readResource(ENCLAVE_PUBLIC_KEY2);
   }
 
   @Before
@@ -63,7 +71,7 @@ public class PrivateTransactionAcceptanceTest {
     final NodeConfiguration nodeConfig =
         new NodeConfigurationBuilder()
             .withPrivacyEnabled()
-            .withPrivacyPublicKey("orion_key1.pub")
+            .withPrivacyPublicKey(ENCLAVE_PUBLIC_KEY2)
             .build();
     ethNode = new PantheonNode(DOCKER, nodeConfig);
     ethNode.start();
@@ -87,7 +95,7 @@ public class PrivateTransactionAcceptanceTest {
   }
 
   @Test
-  public void submittingContractWithoutOrionFailsWithEnclaveError() {
+  public void deployContract() {
     final PrivateTransaction contract =
         PrivateTransaction.createContractTransaction(
             richBenefactor().address(),
@@ -96,12 +104,14 @@ public class PrivateTransactionAcceptanceTest {
             GAS_LIMIT,
             BigInteger.ZERO,
             SimpleStorage.BINARY,
-            ORION_PUBLIC_KEY1,
-            singletonList(ORION_PUBLIC_KEY2),
+            enclavePublicKey1(),
+            singletonList(enclavePublicKey2()),
             RESTRICTED);
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.contracts().submitExceptionalPrivateTransaction(contract);
+    // We expect this to fail with enclave error as we don't have orion running. If rlp decode fails
+    // then we would get a different error
     assertThat(signerResponse.status()).isEqualTo(BAD_REQUEST);
     assertThat(signerResponse.jsonRpc().getError()).isEqualTo(ENCLAVE_ERROR);
   }
