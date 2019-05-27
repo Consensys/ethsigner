@@ -232,8 +232,7 @@ public class PantheonNode implements Node {
 
       config
           .getPrivacyPublicKeyPath()
-          .ifPresent(
-              privacyPublicKey -> bindings.add(privacyVolumeBinding(privacyPublicKey)));
+          .ifPresent(privacyPublicKey -> bindings.add(privacyVolumeBinding(privacyPublicKey)));
 
       LOG.debug("pantheon command line {}", config);
 
@@ -281,8 +280,7 @@ public class PantheonNode implements Node {
 
   private Bind privacyVolumeBinding(final String privacyPublicKey) {
     final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
-    final Volume privacyPublicKeyVolume =
-        new Volume("/etc/pantheon/privacy_public_key");
+    final Volume privacyPublicKeyVolume = new Volume("/etc/pantheon/privacy_public_key");
     return new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
   }
 

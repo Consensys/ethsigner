@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ENCLAVE_ERROR;
@@ -32,12 +33,14 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
-import tech.pegasys.ethsigner.tests.dsl.utils.FileUtils;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URL;
 
 import com.github.dockerjava.api.DockerClient;
+import com.google.common.io.Resources;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,11 +60,21 @@ public class PrivateTransactionAcceptanceTest {
   }
 
   private String enclavePublicKey1() {
-    return FileUtils.readResource(ENCLAVE_PUBLIC_KEY1);
+    return readResource(ENCLAVE_PUBLIC_KEY1);
   }
 
   private String enclavePublicKey2() {
-    return FileUtils.readResource(ENCLAVE_PUBLIC_KEY2);
+    return readResource(ENCLAVE_PUBLIC_KEY2);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private String readResource(final String resourceName) {
+    final URL resource = Resources.getResource(resourceName);
+    try {
+      return new String(Resources.toString(resource, UTF_8).getBytes(UTF_8), UTF_8);
+    } catch (final IOException e) {
+      throw new RuntimeException("Unable to load resource " + resourceName);
+    }
   }
 
   @Before
