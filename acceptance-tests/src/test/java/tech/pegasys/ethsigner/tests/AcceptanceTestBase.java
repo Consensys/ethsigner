@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -22,7 +24,11 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
+import java.io.IOException;
+import java.net.URL;
+
 import com.github.dockerjava.api.DockerClient;
+import com.google.common.io.Resources;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -41,6 +47,20 @@ public class AcceptanceTestBase {
 
   protected Node ethNode() {
     return ethNode;
+  }
+
+  protected String enclavePublicKey1() {
+    return readResource("enclave_key.pub");
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private String readResource(final String resourceName) {
+    final URL resource = Resources.getResource(resourceName);
+    try {
+      return new String(Resources.toString(resource, UTF_8).getBytes(UTF_8), UTF_8);
+    } catch (final IOException e) {
+      throw new RuntimeException("Unable to load resource " + resourceName);
+    }
   }
 
   @BeforeClass
