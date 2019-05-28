@@ -230,7 +230,7 @@ public class PantheonNode implements Node {
               "--rpc-http-enabled",
               "--rpc-ws-enabled",
               "--rpc-http-apis",
-              "ETH,NET,WEB3,IBFT,MINER,ADMIN,EEA",
+              "ETH,NET,WEB3,EEA",
               "--privacy-enabled");
 
       config
