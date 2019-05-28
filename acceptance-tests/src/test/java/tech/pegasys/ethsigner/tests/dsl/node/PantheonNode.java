@@ -16,8 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.io.UnsupportedEncodingException;
@@ -43,11 +46,13 @@ import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
@@ -70,10 +75,11 @@ public class PantheonNode implements Node {
   private final String hostname;
 
   private Accounts accounts;
-  private Contracts contracts;
   private Transactions transactions;
   private Web3j jsonRpc;
   private NodePorts ports;
+  private PublicContracts publicContracts;
+  private PrivateContracts privateContracts;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
     this.docker = docker;
@@ -99,12 +105,16 @@ public class PantheonNode implements Node {
     final String httpRpcUrl = url(httpRpcPort);
     LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
 
+    final HttpService web3jHttpService = new HttpService(httpRpcUrl);
     this.jsonRpc =
-        new JsonRpc2_0Web3j(
-            new HttpService(httpRpcUrl), pollingInterval, Async.defaultExecutorService());
+        new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
+    final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
+    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);
+    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
     this.accounts = new Accounts(eth);
-    this.contracts = new Contracts(eth);
+    this.publicContracts = new PublicContracts(eth);
+    this.privateContracts = new PrivateContracts(eea);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
@@ -143,8 +153,13 @@ public class PantheonNode implements Node {
   }
 
   @Override
-  public Contracts contracts() {
-    return contracts;
+  public PublicContracts publicContracts() {
+    return publicContracts;
+  }
+
+  @Override
+  public PrivateContracts privateContracts() {
+    return privateContracts;
   }
 
   @Override
@@ -199,10 +214,8 @@ public class PantheonNode implements Node {
     LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
-    final HostConfig hostConfig =
-        HostConfig.newHostConfig()
-            .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
-            .withBinds(genesisBinding);
+    final Bind privacyBinding = privacyVolumeBinding("enclave_key.pub");
+    final List<Bind> bindings = Lists.newArrayList(genesisBinding, privacyBinding);
 
     try {
       final List<String> commandLineItems =
@@ -215,13 +228,22 @@ public class PantheonNode implements Node {
               "--host-whitelist",
               "*",
               "--rpc-http-enabled",
-              "--rpc-ws-enabled");
+              "--rpc-ws-enabled",
+              "--rpc-http-apis",
+              "ETH,NET,WEB3,EEA",
+              "--privacy-enabled");
 
       config
           .getCors()
           .ifPresent(
               cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
 
+      LOG.debug("pantheon command line {}", config);
+
+      final HostConfig hostConfig =
+          HostConfig.newHostConfig()
+              .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
+              .withBinds(bindings);
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
@@ -242,12 +264,28 @@ public class PantheonNode implements Node {
 
   private String genesisFilePath(final String filename) {
     final URL resource = PantheonNode.class.getResource(filename);
+    return resourceFileName(resource);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private String privacyPublicKeyFilePath(final String filename) {
+    final URL resource = Resources.getResource(filename);
+    return resourceFileName(resource);
+  }
+
+  private String resourceFileName(final URL resource) {
     try {
       return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
     } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode genesis filepath.");
+      LOG.error("Unsupported encoding used to decode {}, filepath.", resource);
       throw new RuntimeException("Illegal string decoding");
     }
+  }
+
+  private Bind privacyVolumeBinding(final String privacyPublicKey) {
+    final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
+    final Volume privacyPublicKeyVolume = new Volume("/etc/pantheon/privacy_public_key");
+    return new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
   }
 
   private PortBinding httpRpcPortBinding() {
