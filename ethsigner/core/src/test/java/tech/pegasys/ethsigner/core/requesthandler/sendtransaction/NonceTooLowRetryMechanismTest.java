@@ -16,10 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 
 import java.math.BigInteger;
 
@@ -33,16 +31,12 @@ public class NonceTooLowRetryMechanismTest {
 
   private final NonceProvider nonceProvider = mock(NonceProvider.class);
   private final HttpClientResponse httpResponse = mock(HttpClientResponse.class);
-  private final Transaction transaction = mock(Transaction.class);
-  private SendTransactionContext context;
 
-  private final RetryMechanism<SendTransactionContext> retryMechanism =
-      new NonceTooLowRetryMechanism(nonceProvider);
+  private final RetryMechanism retryMechanism = new NonceTooLowRetryMechanism(2);
 
   @Before
   public void setup() {
     when(nonceProvider.getNonce()).thenReturn(BigInteger.ONE);
-    context = new SendTransactionContext(null, new JsonRpcRequestId(1), transaction);
   }
 
   @Test
@@ -52,22 +46,19 @@ public class NonceTooLowRetryMechanismTest {
     final JsonRpcErrorResponse errorResponse =
         new JsonRpcErrorResponse(JsonRpcError.INVALID_PARAMS);
 
-    assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
+    assertThat(
+            retryMechanism.responseRequiresRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
         .isFalse();
   }
 
   @Test
-  public void retriesAreNotAttemptedAfterFiveTimes() {
-    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.BAD_REQUEST.code());
-
-    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(JsonRpcError.NONCE_TOO_LOW);
-
-    for (int i = 0; i < 5; i++) {
-      assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
-          .isTrue();
-      retryMechanism.retry(context, () -> {});
-    }
-    assertThat(retryMechanism.mustRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
-        .isFalse();
+  public void testRetryReportsFalseOnceMatchingMaxValue() {
+    assertThat(retryMechanism.retriesAvailable()).isTrue();
+    retryMechanism.incrementRetries(); // retried once
+    assertThat(retryMechanism.retriesAvailable()).isTrue();
+    retryMechanism.incrementRetries(); // retried twice
+    assertThat(retryMechanism.retriesAvailable()).isFalse();
+    retryMechanism.incrementRetries();
+    assertThat(retryMechanism.retriesAvailable()).isFalse();
   }
 }

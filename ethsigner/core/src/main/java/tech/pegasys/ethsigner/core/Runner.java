@@ -96,7 +96,6 @@ public class Runner {
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            responseFactory,
             downStreamConnection,
             serialiser,
             nonceProvider,

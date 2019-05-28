@@ -35,7 +35,7 @@ public interface Transaction {
     return rlpEncode(signatureData);
   }
 
-  boolean hasNonce();
+  boolean isNonceUserSpecified();
 
   String sender();
 

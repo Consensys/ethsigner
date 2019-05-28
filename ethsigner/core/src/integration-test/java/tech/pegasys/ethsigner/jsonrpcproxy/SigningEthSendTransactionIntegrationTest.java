@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
@@ -340,5 +343,23 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INVALID_PARAMS));
+  }
+
+  @Test
+  public void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
+    setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 6);
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INTERNAL_ERROR));
+  }
+
+  @Test
+  public void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
+    setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 3);
+    timeoutRequest(".*eth_sendRawTransaction.*");
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransaction.missingNonce()),
+        response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
   }
 }

@@ -62,6 +62,7 @@ import org.junit.BeforeClass;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
+import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
@@ -156,8 +157,10 @@ public class IntegrationTestBase {
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     eeaJsonRpc = new JsonRpc2_0Eea(null);
-    clientAndServer.reset();
-    setupTransactionCountResponder();
+    if (clientAndServer.isRunning()) {
+      clientAndServer.reset();
+      setupTransactionCountResponder();
+    }
   }
 
   private void setupTransactionCountResponder() {
@@ -181,6 +184,27 @@ public class IntegrationTestBase {
                 .withBody(response.getBody())
                 .withHeaders(headers)
                 .withStatusCode(response.getStatusCode()));
+  }
+
+  public void setupEthNodeResponse(
+      final String bodyRegex, final EthNodeResponse response, final int count) {
+    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
+    clientAndServer
+        .when(request().withBody(new RegexBody(bodyRegex)), exactly(count))
+        .respond(
+            response()
+                .withBody(response.getBody())
+                .withHeaders(headers)
+                .withStatusCode(response.getStatusCode()));
+  }
+
+  public void timeoutRequest(final String bodyRegex) {
+    final int ENSURE_TIMEOUT = 5;
+    clientAndServer
+        .when(request().withBody(new RegexBody(bodyRegex)))
+        .respond(
+            response()
+                .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
   public void timeoutRequest(final EthNodeRequest request) {

@@ -51,7 +51,7 @@ public class EthTransaction implements Transaction {
   }
 
   @Override
-  public boolean hasNonce() {
+  public boolean isNonceUserSpecified() {
     return ethSendTransactionJsonParameters.nonce().isPresent();
   }
 

@@ -15,11 +15,23 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientResponse;
 
-public interface RetryMechanism<T> {
+public abstract class RetryMechanism {
 
-  class RetryException extends RuntimeException {};
+  private final int maxRetries;
+  private int retriesPerformed = 0;
 
-  boolean mustRetry(final HttpClientResponse response, final Buffer body);
+  public RetryMechanism(int maxRetries) {
+    this.maxRetries = maxRetries;
+  }
 
-  void retry(final T context, Runnable sender) throws RetryException;
+  public abstract boolean responseRequiresRetry(
+      final HttpClientResponse response, final Buffer body);
+
+  public boolean retriesAvailable() {
+    return retriesPerformed < maxRetries;
+  }
+
+  public void incrementRetries() {
+    retriesPerformed++;
+  }
 }
