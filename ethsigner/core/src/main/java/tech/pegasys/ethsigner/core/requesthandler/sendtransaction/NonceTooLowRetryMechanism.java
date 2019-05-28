@@ -22,14 +22,12 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NonceTooLowRetryMechanism extends RetryMechanism<SendTransactionContext> {
+public class NonceTooLowRetryMechanism extends RetryMechanism {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final int MAX_RETRIES = 5;
-
-  public NonceTooLowRetryMechanism() {
-    super(MAX_RETRIES);
+  public NonceTooLowRetryMechanism(final int maxRetries) {
+    super(maxRetries);
   }
 
   @Override

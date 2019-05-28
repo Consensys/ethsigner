@@ -27,7 +27,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
-  private final RetryMechanism<SendTransactionContext> retryMechanism;
+  private final RetryMechanism retryMechanism;
 
   public RetryingTransactionTransmitter(
       final HttpClient ethNodeClient,
@@ -35,7 +35,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
       final TransactionSerialiser transactionSerialiser,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final NonceProvider nonceProvider,
-      final RetryMechanism<SendTransactionContext> retryMechanism) {
+      final RetryMechanism retryMechanism) {
 
     super(
         ethNodeClient,

@@ -39,6 +39,8 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
+  private static final int MAX_RETRIES_NONCE_RETRIES = 5;
+
   public SendTransactionHandler(
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
@@ -103,7 +105,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           serialiser,
           vertxTransmitterFactory,
           nonceProvider,
-          new NonceTooLowRetryMechanism());
+          new NonceTooLowRetryMechanism(MAX_RETRIES_NONCE_RETRIES));
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(

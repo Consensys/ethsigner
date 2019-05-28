@@ -187,7 +187,7 @@ public class IntegrationTestBase {
   }
 
   public void setupEthNodeResponse(
-      final String bodyRegex, final EthNodeResponse response, int count) {
+      final String bodyRegex, final EthNodeResponse response, final int count) {
     final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(new RegexBody(bodyRegex)), exactly(count))

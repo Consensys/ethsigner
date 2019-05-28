@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 
 import java.math.BigInteger;
 
@@ -32,10 +31,8 @@ public class NonceTooLowRetryMechanismTest {
 
   private final NonceProvider nonceProvider = mock(NonceProvider.class);
   private final HttpClientResponse httpResponse = mock(HttpClientResponse.class);
-  private final Transaction transaction = mock(Transaction.class);
 
-  private final RetryMechanism<SendTransactionContext> retryMechanism =
-      new NonceTooLowRetryMechanism();
+  private final RetryMechanism retryMechanism = new NonceTooLowRetryMechanism(2);
 
   @Before
   public void setup() {
@@ -52,5 +49,16 @@ public class NonceTooLowRetryMechanismTest {
     assertThat(
             retryMechanism.responseRequiresRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
         .isFalse();
+  }
+
+  @Test
+  public void testRetryReportsFalseOnceMatchingMaxValue() {
+    assertThat(retryMechanism.retriesAvailable()).isTrue();
+    retryMechanism.incrementRetries(); // retried once
+    assertThat(retryMechanism.retriesAvailable()).isTrue();
+    retryMechanism.incrementRetries(); // retried twice
+    assertThat(retryMechanism.retriesAvailable()).isFalse();
+    retryMechanism.incrementRetries();
+    assertThat(retryMechanism.retriesAvailable()).isFalse();
   }
 }
