@@ -19,6 +19,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthWeb3jNonceProvider;
+
 import java.io.IOException;
 import java.math.BigInteger;
 

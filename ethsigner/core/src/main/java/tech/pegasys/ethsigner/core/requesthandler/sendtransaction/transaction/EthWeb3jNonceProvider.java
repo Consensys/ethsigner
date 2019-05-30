@@ -10,30 +10,30 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
+
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.eea.Eea;
 
-public class EeaWeb3jNonceProvider implements NonceProvider {
+public class EthWeb3jNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Eea eea;
+  private final Web3j web3j;
   private final String accountAddress;
-  private String privacyGroupId;
 
-  public EeaWeb3jNonceProvider(
-      final Eea eea, final String accountAddress, final String privacyGroupId) {
-    this.eea = eea;
+  public EthWeb3jNonceProvider(final Web3j web3j, final String accountAddress) {
+    this.web3j = web3j;
     this.accountAddress = accountAddress;
-    this.privacyGroupId = privacyGroupId;
   }
 
   @Override
@@ -43,16 +43,16 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
 
   private BigInteger getNonceFromClient() {
     final Request<?, EthGetTransactionCount> request =
-        eea.eeaGetTransactionCount(accountAddress, privacyGroupId);
+        web3j.ethGetTransactionCount(accountAddress, DefaultBlockParameterName.PENDING);
     try {
-      LOG.debug("Retrieving Transaction count from eea provider for {}.", accountAddress);
+      LOG.debug("Retrieving Transaction count from web3j provider for {}.", accountAddress);
       final EthGetTransactionCount count = request.send();
       final BigInteger transactionCount = count.getTransactionCount();
       LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
       return transactionCount;
     } catch (final IOException e) {
       LOG.info("Failed to determine nonce from downstream handler.", e);
-      throw new RuntimeException("Unable to determine nonce from eea provider.", e);
+      throw new RuntimeException("Unable to determine nonce from web3j provider.", e);
     }
   }
 }
