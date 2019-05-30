@@ -74,8 +74,6 @@ public class EeaTransaction implements Transaction {
     return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
   }
 
-  // nonceRpcRequest?
-
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
