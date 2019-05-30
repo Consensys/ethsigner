@@ -15,18 +15,69 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EeaWeb3jNonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EthWeb3jNonceProvider;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.web3j.crypto.Hash;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
+import org.web3j.rlp.RlpType;
+import org.web3j.utils.Numeric;
 
 public class TransactionFactory {
+
+  private final Eea eea;
+  private final EthWeb3jNonceProvider ethNonceProvider;
+  private final String address;
+
+  public TransactionFactory(final Web3j web3j, final Eea eea, final String address) {
+    this.eea = eea;
+    this.address = address;
+    this.ethNonceProvider = new EthWeb3jNonceProvider(web3j, address);
+  }
 
   public Transaction createTransaction(final JsonRpcRequest request) {
     final String method = request.getMethod().toLowerCase();
     switch (method) {
       case "eth_sendtransaction":
-        return new EthTransaction(EthSendTransactionJsonParameters.from(request));
+        return new EthTransaction(EthSendTransactionJsonParameters.from(request), ethNonceProvider);
       case "eea_sendtransaction":
-        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request));
+        return createEeaTransaction(request);
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
+  }
+
+  private Transaction createEeaTransaction(final JsonRpcRequest request) {
+    final EeaSendTransactionJsonParameters params = EeaSendTransactionJsonParameters.from(request);
+    final String privacyGroupId = generatePrivacyGroupId(params.privateFrom(), params.privateFor());
+    return new EeaTransaction(params, new EeaWeb3jNonceProvider(eea, address, privacyGroupId));
+  }
+
+  // Taken from web3j EeaTransactionManager as method is private in that class
+  private String generatePrivacyGroupId(final String privateFrom, final List<String> privateFor) {
+    final List<byte[]> stringList = new ArrayList<>();
+    stringList.add(Base64.getDecoder().decode(privateFrom));
+    privateFor.forEach(item -> stringList.add(Base64.getDecoder().decode(item)));
+
+    final List<RlpType> rlpList =
+        stringList.stream()
+            .distinct()
+            .sorted(Comparator.comparing(Arrays::hashCode))
+            .map(RlpString::create)
+            .collect(Collectors.toList());
+
+    return Numeric.toHexString(
+        Base64.getEncoder().encode(Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)))));
   }
 }

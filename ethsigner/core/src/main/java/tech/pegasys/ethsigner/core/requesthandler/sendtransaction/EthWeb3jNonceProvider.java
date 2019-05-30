@@ -22,14 +22,14 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
-public class Web3jNonceProvider implements NonceProvider {
+public class EthWeb3jNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final Web3j web3j;
   private final String accountAddress;
 
-  public Web3jNonceProvider(final Web3j web3j, final String accountAddress) {
+  public EthWeb3jNonceProvider(final Web3j web3j, final String accountAddress) {
     this.web3j = web3j;
     this.accountAddress = accountAddress;
   }

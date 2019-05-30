@@ -32,7 +32,7 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
 @RunWith(MockitoJUnitRunner.class)
-public class Web3jNonceProviderTest {
+public class EthWeb3JNonceProviderTest {
 
   @Mock private Web3j web3j;
 
@@ -53,7 +53,7 @@ public class Web3jNonceProviderTest {
 
   @Test
   public void returnsValueAsReceivedFromWeb3jProvider() throws IOException {
-    final Web3jNonceProvider nonceProvider = new Web3jNonceProvider(web3j, accountAddress);
+    final EthWeb3jNonceProvider nonceProvider = new EthWeb3jNonceProvider(web3j, accountAddress);
 
     assertThat(nonceProvider.getNonce()).isEqualTo(priorTransactionCount);
 

@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,14 +32,19 @@ public class EthTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
+  private final NonceProvider nonceProvider;
 
-  EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
+  EthTransaction(
+      final EthSendTransactionJsonParameters ethSendTransactionJsonParameters,
+      final NonceProvider nonceProvider) {
     this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
     this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
+    this.nonceProvider = nonceProvider;
   }
 
   @Override
-  public void updateNonce(final BigInteger nonce) {
+  public void updateNonce() {
+    final BigInteger nonce = nonceProvider.getNonce();
     rawTransactionBuilder.withNonce(nonce);
   }
 

@@ -46,21 +46,17 @@ public class TransactionTransmitter {
   private final TransactionSerialiser transactionSerialiser;
   private final SendTransactionContext sendTransactionContext;
   private final VertxRequestTransmitter transmitter;
-  private final NonceProvider nonceProvider;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final SendTransactionContext sendTransactionContext,
       final TransactionSerialiser transactionSerialiser,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory,
-      final NonceProvider nonceProvider) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
 
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.sendTransactionContext = sendTransactionContext;
     this.transactionSerialiser = transactionSerialiser;
-
-    this.nonceProvider = nonceProvider;
   }
 
   public void send() {
@@ -72,7 +68,7 @@ public class TransactionTransmitter {
     try {
       final Transaction transaction = sendTransactionContext.getTransaction();
       if (!transaction.isNonceUserSpecified()) {
-        transaction.updateNonce(nonceProvider.getNonce());
+        transaction.updateNonce();
       }
 
       signedTransactionHexString = transactionSerialiser.serialise(transaction);

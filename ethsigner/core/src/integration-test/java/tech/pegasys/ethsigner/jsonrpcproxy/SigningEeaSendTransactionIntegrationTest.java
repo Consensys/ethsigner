@@ -12,12 +12,15 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static java.math.BigInteger.ONE;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.EEA_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import java.io.IOException;
 
@@ -35,6 +38,9 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   public void setUp() {
     sendTransaction = new EeaSendTransaction();
     sendRawTransaction = new EeaSendRawTransaction(eeaJsonRpc());
+    final TransactionCountResponder getTransactionResponse =
+        new TransactionCountResponder(nonce -> nonce.add(ONE), EEA_GET_TRANSACTION_COUNT);
+    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
   }
 
   @Test

@@ -13,14 +13,17 @@
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static java.math.BigInteger.ONE;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import java.io.IOException;
 
@@ -38,6 +41,9 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   public void setUp() {
     sendTransaction = new SendTransaction(jsonRpc());
     sendRawTransaction = new SendRawTransaction(jsonRpc());
+    final TransactionCountResponder getTransactionResponse =
+        new TransactionCountResponder(nonce -> nonce.add(ONE), ETH_GET_TRANSACTION_COUNT);
+    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
   }
 
   @Test

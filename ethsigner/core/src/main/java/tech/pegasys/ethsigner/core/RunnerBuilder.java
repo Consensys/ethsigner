@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import java.nio.file.Path;
@@ -30,8 +30,8 @@ public class RunnerBuilder {
   private WebClientOptions clientOptions;
   private HttpServerOptions serverOptions;
   private Duration requestTimeout;
-  private NonceProvider nonceProvider;
   private Path dataPath;
+  private TransactionFactory transactionFactory;
 
   public RunnerBuilder() {}
 
@@ -55,8 +55,8 @@ public class RunnerBuilder {
     return this;
   }
 
-  public RunnerBuilder withNonceProvider(final NonceProvider nonceProvider) {
-    this.nonceProvider = nonceProvider;
+  public RunnerBuilder withTransactionFactory(final TransactionFactory transactionFactory) {
+    this.transactionFactory = transactionFactory;
     return this;
   }
 
@@ -84,11 +84,11 @@ public class RunnerBuilder {
       return null;
     }
 
-    if (nonceProvider == null) {
-      LOG.error("Unable to construct Runner, nonceProvider is unset.");
+    if (transactionFactory == null) {
+      LOG.error("Unable to construct Runner, transactionFactory is unset.");
       return null;
     }
     return new Runner(
-        serialiser, clientOptions, serverOptions, requestTimeout, nonceProvider, dataPath);
+        serialiser, clientOptions, serverOptions, requestTimeout, transactionFactory, dataPath);
   }
 }

@@ -18,14 +18,13 @@ import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import org.web3j.crypto.Sign.SignatureData;
 
 public interface Transaction {
 
-  void updateNonce(BigInteger nonce);
+  void updateNonce();
 
   byte[] rlpEncode(SignatureData signatureData);
 

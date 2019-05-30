@@ -12,8 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
@@ -30,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
@@ -65,12 +66,12 @@ public final class EthSigner {
 
     try {
 
-      final Web3j web3j = createWebj();
+      final HttpService web3jService = createWeb3jHttpService();
+      final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
+      final Eea eea = new JsonRpc2_0Eea(web3jService);
 
       final FileBasedTransactionSigner signer =
           FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
-
-      final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
       runnerBuilder
           .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
@@ -85,19 +86,19 @@ public final class EthSigner {
                   .setReuseAddress(true)
                   .setReusePort(true))
           .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .withNonceProvider(nonceProvider)
+          .withTransactionFactory(new TransactionFactory(web3j, eea, signer.getAddress()))
           .withDataPath(config.getDataDirectory())
           .build()
           .start();
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       LOG.info(
           "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
-    } catch (CipherException ex) {
+    } catch (final CipherException ex) {
       LOG.info("Unable to decode keyfile with supplied passwordFile.");
     }
   }
 
-  private Web3j createWebj() {
+  private HttpService createWeb3jHttpService() {
     final String downstreamUrl =
         "http://"
             + config.getDownstreamHttpHost().getHostName()
@@ -109,15 +110,14 @@ public final class EthSigner {
     builder
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
         .readTimeout(config.getDownstreamHttpRequestTimeout());
-
-    return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
+    return new HttpService(downstreamUrl, builder.build());
   }
 
   private Optional<String> readPasswordFromFile() {
     try {
-      byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
+      final byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
       return Optional.of(new String(fileContent, Charsets.UTF_8));
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       LOG.debug("Failed to read password from password file: {}", config.getPasswordFilePath(), ex);
       return Optional.empty();
     }
