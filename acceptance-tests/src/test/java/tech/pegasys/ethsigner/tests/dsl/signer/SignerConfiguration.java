@@ -23,13 +23,19 @@ public class SignerConfiguration {
   private final String hostname;
   private final int httpRpcPort;
   private final int webSocketPort;
+  private final int hashicorpVaultPort;
 
   public SignerConfiguration(
-      final String chainId, final String hostname, final int httpRpcPort, final int webSocketPort) {
+      final String chainId,
+      final String hostname,
+      final int httpRpcPort,
+      final int webSocketPort,
+      final int hashicorpVaultPort) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
+    this.hashicorpVaultPort = hashicorpVaultPort;
   }
 
   public String hostname() {
@@ -50,6 +56,10 @@ public class SignerConfiguration {
 
   public int webSocketPort() {
     return webSocketPort;
+  }
+
+  public int hashicorpVaultPort() {
+    return hashicorpVaultPort;
   }
 
   public boolean isDynamicPortAllocation() {

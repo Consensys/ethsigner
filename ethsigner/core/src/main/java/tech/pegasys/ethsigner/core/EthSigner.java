@@ -14,20 +14,14 @@ package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Optional;
-
-import com.google.common.base.Charsets;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -38,19 +32,16 @@ public final class EthSigner {
 
   private final Config config;
   private final RunnerBuilder runnerBuilder;
+  private final TransactionSigner signer;
 
-  public EthSigner(final Config config, final RunnerBuilder runnerBuilder) {
+  public EthSigner(
+      final Config config, TransactionSigner signer, final RunnerBuilder runnerBuilder) {
     this.config = config;
     this.runnerBuilder = runnerBuilder;
+    this.signer = signer;
   }
 
   public void run() {
-
-    final Optional<String> password = readPasswordFromFile();
-    if (!password.isPresent()) {
-      LOG.error("Unable to extract password from supplied password file.");
-      return;
-    }
 
     if (config.getDownstreamHttpRequestTimeout().toMillis() <= 0) {
       LOG.error("Http request timeout must be greater than 0.");
@@ -63,38 +54,27 @@ public final class EthSigner {
       return;
     }
 
-    try {
+    final Web3j web3j = createWebj();
 
-      final Web3j web3j = createWebj();
+    final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
-      final FileBasedTransactionSigner signer =
-          FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
-
-      final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
-
-      runnerBuilder
-          .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
-          .withClientOptions(
-              new WebClientOptions()
-                  .setDefaultPort(config.getDownstreamHttpPort())
-                  .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
-          .withServerOptions(
-              new HttpServerOptions()
-                  .setPort(config.getHttpListenPort())
-                  .setHost(config.getHttpListenHost().getHostAddress())
-                  .setReuseAddress(true)
-                  .setReusePort(true))
-          .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .withNonceProvider(nonceProvider)
-          .withDataPath(config.getDataDirectory())
-          .build()
-          .start();
-    } catch (IOException ex) {
-      LOG.info(
-          "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
-    } catch (CipherException ex) {
-      LOG.info("Unable to decode keyfile with supplied passwordFile.");
-    }
+    runnerBuilder
+        .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
+        .withClientOptions(
+            new WebClientOptions()
+                .setDefaultPort(config.getDownstreamHttpPort())
+                .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
+        .withServerOptions(
+            new HttpServerOptions()
+                .setPort(config.getHttpListenPort())
+                .setHost(config.getHttpListenHost().getHostAddress())
+                .setReuseAddress(true)
+                .setReusePort(true))
+        .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
+        .withNonceProvider(nonceProvider)
+        .withDataPath(config.getDataDirectory())
+        .build()
+        .start();
   }
 
   private Web3j createWebj() {
@@ -111,15 +91,5 @@ public final class EthSigner {
         .readTimeout(config.getDownstreamHttpRequestTimeout());
 
     return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
-  }
-
-  private Optional<String> readPasswordFromFile() {
-    try {
-      byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
-      return Optional.of(new String(fileContent, Charsets.UTF_8));
-    } catch (IOException ex) {
-      LOG.debug("Failed to read password from password file: {}", config.getPasswordFilePath(), ex);
-      return Optional.empty();
-    }
   }
 }

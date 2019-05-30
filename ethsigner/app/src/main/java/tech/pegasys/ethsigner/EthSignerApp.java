@@ -13,6 +13,9 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.RunnerBuilder;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerHelper;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerHelper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +38,21 @@ public class EthSignerApp {
     LOG.debug("Configuration = {}", config);
     LOG.info("Version = {}, ", ApplicationInfo.version());
 
+    // create a signer based on the configuration provided
+    TransactionSigner signer = null;
+    if (config.getHashicorpSignerConfig().isConfigured()) {
+      signer = HashicorpSignerHelper.getSigner(config.getHashicorpSignerConfig());
+    } else if (config.getFileBasedSignerConfig().isConfigured()) {
+      signer = FileBasedSignerHelper.getSigner(config.getFileBasedSignerConfig());
+    }
+
+    if (signer == null) {
+      LOG.error("Cannot create a signer from the given config: " + config.toString());
+      System.exit(-1);
+    }
+
     final tech.pegasys.ethsigner.core.EthSigner ethSigner =
-        new tech.pegasys.ethsigner.core.EthSigner(config, new RunnerBuilder());
+        new tech.pegasys.ethsigner.core.EthSigner(config, signer, new RunnerBuilder());
     ethSigner.run();
   }
 }

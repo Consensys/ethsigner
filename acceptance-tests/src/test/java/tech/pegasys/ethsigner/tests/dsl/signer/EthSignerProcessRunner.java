@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.hashicorpVault.HashicorpVaultDocker;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,6 +66,7 @@ public class EthSignerProcessRunner {
   private final boolean useDynamicPortAllocation;
   private final Path dataDirectory;
   private final int signerHttpRpcPort;
+  private final int hashicorpVaultPort;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -79,6 +81,7 @@ public class EthSignerProcessRunner {
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
     this.portsProperties = new Properties();
+    this.hashicorpVaultPort = signerConfig.hashicorpVaultPort();
 
     this.useDynamicPortAllocation = signerConfig.isDynamicPortAllocation();
 
@@ -124,10 +127,6 @@ public class EthSignerProcessRunner {
     params.add(executableLocation());
     params.add("--logging");
     params.add(loggingLevel);
-    params.add("--password-file");
-    params.add(createPasswordFile().getAbsolutePath());
-    params.add("--key-file");
-    params.add(createKeyFile().getAbsolutePath());
     params.add("--downstream-http-host");
     params.add(nodeHostname);
     params.add("--downstream-http-port");
@@ -140,10 +139,22 @@ public class EthSignerProcessRunner {
     params.add(String.valueOf(signerHttpRpcPort));
     params.add("--chain-id");
     params.add(chainId);
-
     if (useDynamicPortAllocation) {
       params.add("--data-directory");
       params.add(dataDirectory.toAbsolutePath().toString());
+    }
+    if (hashicorpVaultPort == 0) {
+      params.add("file-based-signer");
+      params.add("--password-file");
+      params.add(createPasswordFile().getAbsolutePath());
+      params.add("--key-file");
+      params.add(createKeyFile().getAbsolutePath());
+    } else {
+      params.add("hashicorp-signer");
+      params.add("--auth-file");
+      params.add(createVaultAuthFile().getAbsolutePath());
+      params.add("--port");
+      params.add(String.valueOf(hashicorpVaultPort));
     }
 
     LOG.info("Creating EthSigner process with params {}", params);
@@ -231,6 +242,10 @@ public class EthSignerProcessRunner {
     return createJsonFile("ethsigner_keyfile", data);
   }
 
+  private File createVaultAuthFile() {
+    return createJsonFile("vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
+  }
+
   private File createJsonFile(final String tempNamePrefix, final byte[] data) {
     final Path file;
     try {
@@ -268,7 +283,6 @@ public class EthSignerProcessRunner {
                   return s.count() > 0;
                 }
               }
-
               return false;
             });
   }

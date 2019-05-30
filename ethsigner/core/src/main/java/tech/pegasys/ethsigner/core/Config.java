@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
 
 import java.net.InetAddress;
 import java.nio.file.Path;
@@ -23,10 +25,6 @@ import org.apache.logging.log4j.Level;
 public interface Config {
 
   Level getLogLevel();
-
-  Path getPasswordFilePath();
-
-  Path getKeyPath();
 
   InetAddress getDownstreamHttpHost();
 
@@ -41,4 +39,8 @@ public interface Config {
   ChainIdProvider getChainId();
 
   Path getDataDirectory();
+
+  HashicorpSignerConfig getHashicorpSignerConfig();
+
+  FileBasedSignerConfig getFileBasedSignerConfig();
 }

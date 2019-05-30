@@ -26,7 +26,7 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
-import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
@@ -64,6 +64,8 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -265,7 +267,8 @@ public class IntegrationTestBase {
 
   private static TransactionSigner transactionSigner() throws IOException, CipherException {
     final File keyFile = createKeyFile();
-    return FileBasedTransactionSigner.createFrom(keyFile, "password");
+    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
+    return new CredentialTransactionSigner(credentials);
   }
 
   @SuppressWarnings("UnstableApiUsage")

@@ -41,9 +41,7 @@ public class CommandLineConfigTest {
   }
 
   private String validCommandLine() {
-    return "--key-file=keyfile "
-        + "--password-file=passwordFile "
-        + "--downstream-http-host=8.8.8.8 "
+    return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
         + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
@@ -66,8 +64,6 @@ public class CommandLineConfigTest {
 
     assertThat(result).isTrue();
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
-    assertThat(config.getKeyPath().toString()).isEqualTo("keyfile");
-    assertThat(config.getPasswordFilePath().toString()).isEqualTo("passwordFile");
     assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
@@ -92,8 +88,6 @@ public class CommandLineConfigTest {
 
   @Test
   public void missingRequiredParamShowsAppropriateError() {
-    missingParameterShowsError("password-file");
-    missingParameterShowsError("key-file");
     missingParameterShowsError("downstream-http-port");
   }
 
@@ -141,9 +135,7 @@ public class CommandLineConfigTest {
   @Test
   public void domainNamesDecodeIntoAnInetAddress() {
     final String input =
-        "--key-file=keyfile "
-            + "--password-file=passwordFile "
-            + "--downstream-http-host=google.com "
+        "--downstream-http-host=google.com "
             + "--downstream-http-port=5000 "
             + "--downstream-http-request-timeout=10000 "
             + "--http-listen-port=5001 "
