@@ -81,10 +81,11 @@ public class HashicorpVaultDocker {
       LOG.error("Interruption while waiting for Hashicorp Vault to be up");
     }
 
-    //    Creating the secret in the vault is now done as part of awaitStartupCompletion()!
-    //    execCommandInVaultContainer(new String[] {"vault", "kv", "put",
-    // "secret/ethsignerSigningKey",
-    //            "value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"} );
+    // After starting the docker container with the vault we need to create the secret that contains
+    // the
+    // the private key. That is done in the awaitStartupCompletion, because we need to wait until a
+    // call to
+    // the vault succeeds to know that it is up. That call now creates the secret.
   }
 
   private ExecCreateCmdResponse getExecCreateCmdResponse(String[] commandWithArguments) {
@@ -122,6 +123,7 @@ public class HashicorpVaultDocker {
     }
   }
 
+  /** This method now also creates the secret that contains the private signing key. */
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Hashicorp Vault to become responsive...");
     final ExecCreateCmdResponse execCreateCmdResponse =

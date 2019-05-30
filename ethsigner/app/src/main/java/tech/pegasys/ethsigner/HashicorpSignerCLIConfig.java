@@ -126,6 +126,7 @@ public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig
         .add("serverHost", serverHost)
         .add("serverPort", serverPort)
         .add("authFile", authFile)
+        .add("timeout", timeout)
         .add("singingKeyPath", signingKeyPath)
         .toString();
   }

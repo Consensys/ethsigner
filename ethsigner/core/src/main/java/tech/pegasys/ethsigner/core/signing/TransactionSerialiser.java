@@ -24,8 +24,6 @@ public class TransactionSerialiser {
   private final long chainId;
 
   public TransactionSerialiser(final TransactionSigner signer, final long chainId) {
-    // TODO: I guess we should check if the signer is != null. Doesn't make sense with signer ==
-    // null!!!!
     this.signer = signer;
     this.chainId = chainId;
   }

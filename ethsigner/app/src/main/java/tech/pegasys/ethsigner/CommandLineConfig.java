@@ -110,7 +110,7 @@ public class CommandLineConfig implements Config {
 
   private HashicorpSignerCLIConfig hashicorpSignerBasedConfig;
 
-  private FileBasedSignerCLIConfig fileBasedSignerCLIConfig;
+  private FileBasedSignerCLIConfig fileBasedSignerConfig;
 
   public boolean parse(final String... args) {
 
@@ -121,8 +121,8 @@ public class CommandLineConfig implements Config {
     hashicorpSignerBasedConfig = new HashicorpSignerCLIConfig(output);
     commandLine.addSubcommand(HashicorpSignerCLIConfig.COMMAND_NAME, hashicorpSignerBasedConfig);
 
-    fileBasedSignerCLIConfig = new FileBasedSignerCLIConfig(output);
-    commandLine.addSubcommand(FileBasedSignerCLIConfig.COMMAND_NAME, fileBasedSignerCLIConfig);
+    fileBasedSignerConfig = new FileBasedSignerCLIConfig(output);
+    commandLine.addSubcommand(FileBasedSignerCLIConfig.COMMAND_NAME, fileBasedSignerConfig);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
@@ -152,10 +152,6 @@ public class CommandLineConfig implements Config {
     if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
       ex.getCommandLine().usage(output, Ansi.AUTO);
     }
-  }
-
-  public HashicorpSignerCLIConfig getHashicorpSignerBasedConfig() {
-    return this.hashicorpSignerBasedConfig;
   }
 
   @Override
@@ -200,7 +196,7 @@ public class CommandLineConfig implements Config {
 
   @Override
   public FileBasedSignerConfig getFileBasedSignerConfig() {
-    return fileBasedSignerCLIConfig;
+    return fileBasedSignerConfig;
   }
 
   @Override
@@ -222,7 +218,7 @@ public class CommandLineConfig implements Config {
         .add("dataDirectory", dataDirectory)
         .add("output", output)
         .add("hashicorpSignerConfig", hashicorpSignerBasedConfig)
-        .add("filebasedSignerConfig", fileBasedSignerCLIConfig)
+        .add("filebasedSignerConfig", fileBasedSignerConfig)
         .toString();
   }
 }
