@@ -31,8 +31,7 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
   private final String accountAddress;
   private final String privacyGroupId;
 
-  EeaWeb3jNonceProvider(
-      final Eea eea, final String accountAddress, final String privacyGroupId) {
+  EeaWeb3jNonceProvider(final Eea eea, final String accountAddress, final String privacyGroupId) {
     this.eea = eea;
     this.accountAddress = accountAddress;
     this.privacyGroupId = privacyGroupId;
