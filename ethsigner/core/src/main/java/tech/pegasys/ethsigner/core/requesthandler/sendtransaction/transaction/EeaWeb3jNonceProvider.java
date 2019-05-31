@@ -31,7 +31,7 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
   private final String accountAddress;
   private final String privacyGroupId;
 
-  public EeaWeb3jNonceProvider(
+  EeaWeb3jNonceProvider(
       final Eea eea, final String accountAddress, final String privacyGroupId) {
     this.eea = eea;
     this.accountAddress = accountAddress;
@@ -47,7 +47,10 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
     final Request<?, EthGetTransactionCount> request =
         eea.eeaGetTransactionCount(accountAddress, privacyGroupId);
     try {
-      LOG.debug("Retrieving Transaction count from eea provider for {}.", accountAddress);
+      LOG.debug(
+          "Retrieving Transaction count from eea provider for {} with privacy group id {}",
+          accountAddress,
+          privacyGroupId);
       final EthGetTransactionCount count = request.send();
       final BigInteger transactionCount = count.getTransactionCount();
       LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
