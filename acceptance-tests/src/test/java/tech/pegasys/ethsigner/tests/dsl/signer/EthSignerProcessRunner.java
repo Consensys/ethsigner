@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
+import com.google.common.io.Resources;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.awaitility.Awaitility;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -39,12 +42,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import com.google.common.io.MoreFiles;
-import com.google.common.io.RecursiveDeleteOption;
-import com.google.common.io.Resources;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EthSignerProcessRunner {
 
@@ -76,7 +75,7 @@ public class EthSignerProcessRunner {
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
-    this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
+    this.timeoutMs = String.valueOf(nodeConfig.getTimeout().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
@@ -153,6 +152,8 @@ public class EthSignerProcessRunner {
       params.add("hashicorp-signer");
       params.add("--auth-file");
       params.add(createVaultAuthFile().getAbsolutePath());
+      params.add("--host");
+      params.add(nodeHostname);
       params.add("--port");
       params.add(String.valueOf(hashicorpVaultPort));
     }
