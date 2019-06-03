@@ -12,29 +12,18 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import com.google.common.io.Resources;
-import io.restassured.RestAssured;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Delay;
-import org.mockserver.model.Header;
-import org.mockserver.model.RegexBody;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.Eea;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
-import org.web3j.protocol.http.HttpService;
+import static io.restassured.RestAssured.given;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.matchers.Times.exactly;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.JsonBody.json;
+import static org.web3j.utils.Async.defaultExecutorService;
+
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
 import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
@@ -60,17 +49,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static io.restassured.RestAssured.given;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.matchers.Times.exactly;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.JsonBody.json;
-import static org.web3j.utils.Async.defaultExecutorService;
+import com.google.common.io.Resources;
+import io.restassured.RestAssured;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.Delay;
+import org.mockserver.model.Header;
+import org.mockserver.model.RegexBody;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
+import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
