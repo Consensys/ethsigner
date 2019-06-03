@@ -106,11 +106,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(
-          ethNodeClient,
-          transaction,
-          serialiser,
-          vertxTransmitterFactory,
-          routingContext);
+          ethNodeClient, transaction, serialiser, vertxTransmitterFactory, routingContext);
     }
   }
 

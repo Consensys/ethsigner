@@ -38,7 +38,8 @@ public class TransactionFactory {
     final String method = request.getMethod().toLowerCase();
     switch (method) {
       case "eth_sendtransaction":
-        return new EthTransaction(EthSendTransactionJsonParameters.from(request), ethNonceProvider, request.getId());
+        return new EthTransaction(
+            EthSendTransactionJsonParameters.from(request), ethNonceProvider, request.getId());
       case "eea_sendtransaction":
         return createEeaTransaction(request);
       default:
@@ -49,6 +50,7 @@ public class TransactionFactory {
   private Transaction createEeaTransaction(final JsonRpcRequest request) {
     final EeaSendTransactionJsonParameters params = EeaSendTransactionJsonParameters.from(request);
     final String privacyGroupId = generatePrivacyGroupId(params.privateFrom(), params.privateFor());
-    return new EeaTransaction(params, new EeaWeb3jNonceProvider(eea, address, privacyGroupId), request.getId());
+    return new EeaTransaction(
+        params, new EeaWeb3jNonceProvider(eea, address, privacyGroupId), request.getId());
   }
 }
