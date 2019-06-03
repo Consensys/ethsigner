@@ -12,14 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.signing.hashicorp;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Credentials;
 import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -30,6 +22,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.web3j.crypto.Credentials;
 
 public class HashicorpSignerHelper {
 
