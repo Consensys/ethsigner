@@ -98,17 +98,19 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.debug("Nonce not present in request {}", request.getId());
       return new RetryingTransactionTransmitter(
           ethNodeClient,
-          new SendTransactionContext(routingContext, request.getId(), transaction),
+          transaction,
           serialiser,
           vertxTransmitterFactory,
-          new NonceTooLowRetryMechanism(MAX_RETRIES_NONCE_RETRIES));
+          new NonceTooLowRetryMechanism(MAX_RETRIES_NONCE_RETRIES),
+          routingContext);
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(
           ethNodeClient,
-          new SendTransactionContext(routingContext, request.getId(), transaction),
+          transaction,
           serialiser,
-          vertxTransmitterFactory);
+          vertxTransmitterFactory,
+          routingContext);
     }
   }
 
