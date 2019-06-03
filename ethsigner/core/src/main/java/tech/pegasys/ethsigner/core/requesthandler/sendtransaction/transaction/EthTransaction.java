@@ -31,10 +31,14 @@ public class EthTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
   private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
   private final RawTransactionBuilder rawTransactionBuilder;
+  private JsonRpcRequestId id;
 
-  EthTransaction(final EthSendTransactionJsonParameters ethSendTransactionJsonParameters) {
+  EthTransaction(
+      final EthSendTransactionJsonParameters ethSendTransactionJsonParameters,
+      final JsonRpcRequestId id) {
     this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
     this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
+    this.id = id;
   }
 
   @Override
@@ -67,10 +71,16 @@ public class EthTransaction implements Transaction {
   }
 
   @Override
+  public JsonRpcRequestId getId() {
+    return id;
+  }
+
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
         .add("rawTransactionBuilder", rawTransactionBuilder)
+        .add("id", id)
         .toString();
   }
 }
