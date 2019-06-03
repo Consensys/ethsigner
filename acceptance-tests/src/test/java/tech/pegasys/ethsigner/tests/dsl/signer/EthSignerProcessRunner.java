@@ -139,7 +139,7 @@ public class EthSignerProcessRunner {
       params.add("--data-directory");
       params.add(dataDirectory.toAbsolutePath().toString());
     }
-    params.addAll(signerConfig.transactionSignerParamsSupplier().params());
+    params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
 

@@ -101,7 +101,6 @@ public class HashicorpVaultDocker {
     LOG.info("The secret was created successfully.");
   }
 
-  // TODO: Same thing done in PantheonNode.java . Reuse? Where to put?
   private String getDockerHostIp() {
     this.dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
     final Optional<String> optional = Optional.of(dockerConfig.getDockerHost()).map(URI::getHost);

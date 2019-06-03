@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.WalletUtils;
 
-public class FileBasedSignerHelperTest {
+public class FileBasedSignerBuilderTest {
 
   private static String fileName;
 
@@ -53,7 +53,7 @@ public class FileBasedSignerHelperTest {
   private static final String MY_PASSWORD = "myPassword";
 
   @Test
-  public void testSuccess() throws IOException {
+  public void success() throws IOException {
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     final File keyFile = new File(fileName);
@@ -62,13 +62,13 @@ public class FileBasedSignerHelperTest {
     when(configMock.getPasswordFilePath()).thenReturn(pwdFile.toPath());
     when(configMock.getKeyPath()).thenReturn(keyFile.toPath());
 
-    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new FileBasedSignerBuilder(configMock).build();
 
     assertThat(signer).isNotNull();
   }
 
   @Test
-  public void testPasswordInvalid() throws IOException {
+  public void passwordInvalid() throws IOException {
 
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
@@ -78,25 +78,25 @@ public class FileBasedSignerHelperTest {
     when(configMock.getPasswordFilePath()).thenReturn(pwdFile.toPath());
     when(configMock.getKeyPath()).thenReturn(keyFile.toPath());
 
-    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new FileBasedSignerBuilder(configMock).build();
 
     assertThat(signer).isNull();
   }
 
   @Test
-  public void testPasswordFileNotAvailable() throws IOException {
+  public void passwordFileNotAvailable() throws IOException {
 
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     when(configMock.getPasswordFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new FileBasedSignerBuilder(configMock).build();
 
     assertThat(signer).isNull();
   }
 
   @Test
-  public void testKeyFileNotAvailable() throws IOException {
+  public void keyFileNotAvailable() throws IOException {
 
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
@@ -105,7 +105,7 @@ public class FileBasedSignerHelperTest {
     when(configMock.getPasswordFilePath()).thenReturn(file.toPath());
     when(configMock.getKeyPath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new FileBasedSignerBuilder(configMock).build();
 
     assertThat(signer).isNull();
   }

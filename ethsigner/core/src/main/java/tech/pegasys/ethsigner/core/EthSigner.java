@@ -17,6 +17,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProv
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
@@ -33,12 +34,17 @@ public final class EthSigner {
   private final Config config;
   private final RunnerBuilder runnerBuilder;
   private final TransactionSigner signer;
+  private final Vertx vertx;
 
   public EthSigner(
-      final Config config, TransactionSigner signer, final RunnerBuilder runnerBuilder) {
+      final Config config,
+      final TransactionSigner signer,
+      Vertx vertx,
+      final RunnerBuilder runnerBuilder) {
     this.config = config;
     this.runnerBuilder = runnerBuilder;
     this.signer = signer;
+    this.vertx = vertx;
   }
 
   public void run() {
@@ -59,6 +65,7 @@ public final class EthSigner {
     final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
     runnerBuilder
+        .withVertx(vertx)
         .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
         .withClientOptions(
             new WebClientOptions()

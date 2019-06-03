@@ -25,12 +25,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import io.vertx.core.Vertx;
 import org.junit.Test;
 
-public class HashicorpSignerHelperTest {
+public class HashicorpSignerBuilderTest {
+
+  private static final Vertx vertx = Vertx.vertx();
 
   @Test
-  public void testVaultTimingOut() throws IOException {
+  public void vaultTimingOut() throws IOException {
 
     HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
 
@@ -42,19 +45,19 @@ public class HashicorpSignerHelperTest {
     when(configMock.getServerHost()).thenReturn("serverHost");
     when(configMock.getTimeout()).thenReturn(Integer.valueOf(1));
 
-    final TransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new HashicorpSignerBuilder(configMock, vertx).build();
 
     assertThat(signer).isNull();
   }
 
   @Test
-  public void testAuthFileNotAvailable() throws IOException {
+  public void authFileNotAvailable() throws IOException {
 
     HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
 
     when(configMock.getAuthFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final TransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = new HashicorpSignerBuilder(configMock, vertx).build();
 
     assertThat(signer).isNull();
   }

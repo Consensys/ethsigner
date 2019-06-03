@@ -32,21 +32,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class HashicorpSignerHelper {
+public class HashicorpSignerBuilder {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final Vertx vertx = Vertx.vertx();
-  private static final HttpClient hashicorpVaultClient = vertx.createHttpClient();
+  private final Vertx vertx;
+  private final HttpClient hashicorpVaultClient;
+  private final HashicorpSignerConfig config;
 
-  private HashicorpSignerHelper() {}
+  public HashicorpSignerBuilder(HashicorpSignerConfig config, Vertx vertx) {
+    this.config = config;
+    this.vertx = vertx;
+    this.hashicorpVaultClient = vertx.createHttpClient();
+  }
 
-  public static TransactionSigner getSigner(HashicorpSignerConfig config) {
-    final String tokenString = readTokenFromFile(config);
+  public TransactionSigner build() {
+    final String tokenString = readTokenFromFile();
     if (tokenString == null) {
       return null;
     }
-    final String response = requestSecretFromVault(config, tokenString);
+    final String response = requestSecretFromVault(tokenString);
     if (response == null) {
       return null;
     }
@@ -57,7 +62,7 @@ public class HashicorpSignerHelper {
     return new CredentialTransactionSigner(credentials);
   }
 
-  private static String readTokenFromFile(HashicorpSignerConfig config) {
+  private String readTokenFromFile() {
     List<String> authFileLines;
     try {
       authFileLines = Files.readAllLines(config.getAuthFilePath());
@@ -72,14 +77,13 @@ public class HashicorpSignerHelper {
     return authFileLines.get(0);
   }
 
-  private static String requestSecretFromVault(HashicorpSignerConfig config, String tokenString) {
+  private String requestSecretFromVault(String tokenString) {
     final String requestURI = "/v1" + config.getSigningKeyPath();
 
-    return getVaultResponse(config, tokenString, requestURI);
+    return getVaultResponse(tokenString, requestURI);
   }
 
-  private static String getVaultResponse(
-      HashicorpSignerConfig config, String tokenString, String requestURI) {
+  private String getVaultResponse(String tokenString, String requestURI) {
     final CompletableFuture<String> future = new CompletableFuture<>();
     final HttpClientRequest request =
         hashicorpVaultClient.request(
@@ -127,7 +131,7 @@ public class HashicorpSignerHelper {
     return response;
   }
 
-  private static Credentials extractCredentialsFromJson(String response) {
+  private Credentials extractCredentialsFromJson(String response) {
     if (response == null) {
       return null;
     }

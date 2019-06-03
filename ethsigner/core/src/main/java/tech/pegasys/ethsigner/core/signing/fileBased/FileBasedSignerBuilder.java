@@ -25,11 +25,16 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 
-public class FileBasedSignerHelper {
+public class FileBasedSignerBuilder {
 
   private static final Logger LOG = LogManager.getLogger();
+  private FileBasedSignerConfig config;
 
-  public static TransactionSigner getSigner(final FileBasedSignerConfig config) {
+  public FileBasedSignerBuilder(FileBasedSignerConfig config) {
+    this.config = config;
+  }
+
+  public TransactionSigner build() {
     String password;
     try {
       password = readPasswordFromFile(config);

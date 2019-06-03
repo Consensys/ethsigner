@@ -36,7 +36,7 @@ public class TransactionSignerParamsSupplier {
     this.ipAddress = ipAddress;
   }
 
-  public Collection<String> params() {
+  public Collection<String> get() {
     final ArrayList<String> params = new ArrayList<>();
     if (hashicorpVaultPort == 0) {
       params.add("file-based-signer");

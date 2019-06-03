@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
@@ -32,8 +33,14 @@ public class RunnerBuilder {
   private Duration requestTimeout;
   private NonceProvider nonceProvider;
   private Path dataPath;
+  private Vertx vertx;
 
   public RunnerBuilder() {}
+
+  public RunnerBuilder withVertx(final Vertx vertx) {
+    this.vertx = vertx;
+    return this;
+  }
 
   public RunnerBuilder withTransactionSerialiser(final TransactionSerialiser serialiser) {
     this.serialiser = serialiser;
@@ -88,7 +95,12 @@ public class RunnerBuilder {
       LOG.error("Unable to construct Runner, nonceProvider is unset.");
       return null;
     }
+
+    if (vertx == null) {
+      LOG.error("Unable to construct Runner, vertx is unset.");
+      return null;
+    }
     return new Runner(
-        serialiser, clientOptions, serverOptions, requestTimeout, nonceProvider, dataPath);
+        serialiser, vertx, clientOptions, serverOptions, requestTimeout, nonceProvider, dataPath);
   }
 }

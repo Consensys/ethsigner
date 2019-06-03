@@ -35,6 +35,8 @@ dependencies {
   implementation 'org.apache.logging.log4j:log4j-core'
   implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
 
+  implementation 'io.vertx:vertx-core'
+
   implementation project(':ethsigner:core')
 
   testCompile 'io.vertx:vertx-codegen'

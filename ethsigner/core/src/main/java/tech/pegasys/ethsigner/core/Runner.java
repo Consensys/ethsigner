@@ -57,6 +57,7 @@ public class Runner {
 
   public Runner(
       final TransactionSerialiser serialiser,
+      Vertx vertx,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
@@ -68,20 +69,17 @@ public class Runner {
     this.httpRequestTimeout = httpRequestTimeout;
     this.nonceProvider = nonceProvider;
     this.dataDirectory = dataDirectory;
+    this.vertx = vertx;
   }
 
   public void start() {
-    // NOTE: Starting vertx spawns daemon threads, meaning the app may complete, but not terminate.
-    vertx = Vertx.vertx();
     final RequestMapper requestMapper = createRequestMapper(vertx);
     httpService =
         new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
-  public void stop() {
-    vertx.undeploy(deploymentId);
-  }
+  public void stop() {}
 
   private RequestMapper createRequestMapper(final Vertx vertx) {
 

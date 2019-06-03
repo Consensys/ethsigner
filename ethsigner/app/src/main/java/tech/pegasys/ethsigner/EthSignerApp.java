@@ -14,9 +14,10 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.RunnerBuilder;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerHelper;
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerHelper;
+import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerBuilder;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerBuilder;
 
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -24,6 +25,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 public class EthSignerApp {
 
   private static final Logger LOG = LogManager.getLogger();
+
+  private static final Vertx vertx = Vertx.vertx();
 
   public static void main(final String... args) {
     final CommandLineConfig config = new CommandLineConfig(System.out);
@@ -39,7 +42,7 @@ public class EthSignerApp {
     LOG.info("Version = {}, ", ApplicationInfo.version());
 
     // create a signer based on the configuration provided
-    TransactionSigner signer = createTransactionSigner(config);
+    final TransactionSigner signer = createTransactionSigner(config);
 
     if (signer == null) {
       LOG.error("Cannot create a signer from the given config: " + config.toString());
@@ -47,16 +50,16 @@ public class EthSignerApp {
     }
 
     final tech.pegasys.ethsigner.core.EthSigner ethSigner =
-        new tech.pegasys.ethsigner.core.EthSigner(config, signer, new RunnerBuilder());
+        new tech.pegasys.ethsigner.core.EthSigner(config, signer, vertx, new RunnerBuilder());
     ethSigner.run();
   }
 
-  private static TransactionSigner createTransactionSigner(CommandLineConfig config) {
+  private static TransactionSigner createTransactionSigner(final CommandLineConfig config) {
     TransactionSigner signer = null;
     if (config.getHashicorpSignerConfig().isConfigured()) {
-      signer = HashicorpSignerHelper.getSigner(config.getHashicorpSignerConfig());
+      signer = new HashicorpSignerBuilder(config.getHashicorpSignerConfig(), vertx).build();
     } else if (config.getFileBasedSignerConfig().isConfigured()) {
-      signer = FileBasedSignerHelper.getSigner(config.getFileBasedSignerConfig());
+      signer = new FileBasedSignerBuilder(config.getFileBasedSignerConfig()).build();
     }
     return signer;
   }
