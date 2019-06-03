@@ -82,6 +82,7 @@ public class EeaTransaction implements Transaction {
     return MoreObjects.toStringHelper(this)
         .add("eeaSendTransactionJsonParameters", eeaSendTransactionJsonParameters)
         .add("rawPrivateTransactionBuilder", rawPrivateTransactionBuilder)
+        .add("id", id)
         .toString();
   }
 }

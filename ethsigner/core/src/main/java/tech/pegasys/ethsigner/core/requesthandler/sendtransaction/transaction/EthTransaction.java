@@ -80,6 +80,7 @@ public class EthTransaction implements Transaction {
     return MoreObjects.toStringHelper(this)
         .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
         .add("rawTransactionBuilder", rawTransactionBuilder)
+        .add("id", id)
         .toString();
   }
 }
