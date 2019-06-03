@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,10 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class HashicorpSignerHelperTest {
 
   @Test
@@ -45,7 +42,7 @@ public class HashicorpSignerHelperTest {
     when(configMock.getServerHost()).thenReturn("serverHost");
     when(configMock.getTimeout()).thenReturn(Integer.valueOf(1));
 
-    final CredentialTransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNull();
   }
@@ -57,7 +54,7 @@ public class HashicorpSignerHelperTest {
 
     when(configMock.getAuthFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final CredentialTransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = HashicorpSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNull();
   }

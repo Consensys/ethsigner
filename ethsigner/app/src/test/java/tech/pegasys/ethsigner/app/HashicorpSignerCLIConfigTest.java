@@ -22,11 +22,8 @@ import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import picocli.CommandLine;
 
-@RunWith(MockitoJUnitRunner.class)
 public class HashicorpSignerCLIConfigTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
@@ -60,7 +57,7 @@ public class HashicorpSignerCLIConfigTest {
         + HTTP_HOST_COM
         + " --port="
         + PORT
-        + " --signing-key="
+        + " --signing-key-path="
         + PATH_TO_SIGNING_KEY
         + " --timeout=15";
   }

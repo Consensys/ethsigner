@@ -39,12 +39,7 @@ public class EthSignerApp {
     LOG.info("Version = {}, ", ApplicationInfo.version());
 
     // create a signer based on the configuration provided
-    TransactionSigner signer = null;
-    if (config.getHashicorpSignerConfig().isConfigured()) {
-      signer = HashicorpSignerHelper.getSigner(config.getHashicorpSignerConfig());
-    } else if (config.getFileBasedSignerConfig().isConfigured()) {
-      signer = FileBasedSignerHelper.getSigner(config.getFileBasedSignerConfig());
-    }
+    TransactionSigner signer = createTransactionSigner(config);
 
     if (signer == null) {
       LOG.error("Cannot create a signer from the given config: " + config.toString());
@@ -54,5 +49,15 @@ public class EthSignerApp {
     final tech.pegasys.ethsigner.core.EthSigner ethSigner =
         new tech.pegasys.ethsigner.core.EthSigner(config, signer, new RunnerBuilder());
     ethSigner.run();
+  }
+
+  private static TransactionSigner createTransactionSigner(CommandLineConfig config) {
+    TransactionSigner signer = null;
+    if (config.getHashicorpSignerConfig().isConfigured()) {
+      signer = HashicorpSignerHelper.getSigner(config.getHashicorpSignerConfig());
+    } else if (config.getFileBasedSignerConfig().isConfigured()) {
+      signer = FileBasedSignerHelper.getSigner(config.getFileBasedSignerConfig());
+    }
+    return signer;
   }
 }

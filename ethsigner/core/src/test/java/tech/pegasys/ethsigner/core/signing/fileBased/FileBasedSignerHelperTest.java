@@ -17,43 +17,52 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.WalletUtils;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FileBasedSignerHelperTest {
 
-  private static final String KEY_FILE_STRING =
-      "{\"address\":\"fe3b557e8fb62b89f4916b721be55ceb828dbd73\","
-          + "\"crypto\":{\"cipher\":\"aes-128-ctr\","
-          + "\"ciphertext\":\"c330870080626a6cf84c36eeb89f6376316637fbc16c86400eb6c394de5aed81\","
-          + "\"cipherparams\":{\"iv\":\"7f2526feb38ac355c644a84e78ec5692\"},"
-          + "\"kdf\":\"scrypt\","
-          + "\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":"
-          + "\"b0da609bb541df918eb55bbeaf237445aa406a0c2d6e975663c4fcb221bc54e0\"},"
-          + "\"mac\":\"1ed0ef9e2092d0f5db8d16409ee2aaee9af3f521a5eafd910ce19dbc76e67ed7\"},"
-          + "\"id\":\"43f8e00a-c6ec-4a62-b7cb-f54cb299c3db\",\"version\":3}";
+  private static String fileName;
+
+  @BeforeClass
+  public static void createKeyFile() {
+    try {
+      fileName = WalletUtils.generateFullNewWalletFile(MY_PASSWORD, null);
+    } catch (NoSuchAlgorithmException e) {
+    } catch (NoSuchProviderException e) {
+    } catch (InvalidAlgorithmParameterException e) {
+    } catch (CipherException e) {
+    } catch (IOException e) {
+    }
+    new File(fileName).deleteOnExit();
+  }
+
+  private static final String MY_PASSWORD = "myPassword";
 
   @Test
   public void testSuccess() throws IOException {
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
-    final File pwdFile = createFile("pass");
-    final File keyFile = createFile(KEY_FILE_STRING);
+    final File keyFile = new File(fileName);
+    final File pwdFile = createFile(MY_PASSWORD);
 
     when(configMock.getPasswordFilePath()).thenReturn(pwdFile.toPath());
     when(configMock.getKeyPath()).thenReturn(keyFile.toPath());
 
-    final CredentialTransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNotNull();
   }
@@ -64,12 +73,12 @@ public class FileBasedSignerHelperTest {
     FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     final File pwdFile = createFile("invalid");
-    final File keyFile = createFile(KEY_FILE_STRING);
+    final File keyFile = new File(fileName);
 
     when(configMock.getPasswordFilePath()).thenReturn(pwdFile.toPath());
     when(configMock.getKeyPath()).thenReturn(keyFile.toPath());
 
-    final CredentialTransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNull();
   }
@@ -81,7 +90,7 @@ public class FileBasedSignerHelperTest {
 
     when(configMock.getPasswordFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final CredentialTransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNull();
   }
@@ -96,7 +105,7 @@ public class FileBasedSignerHelperTest {
     when(configMock.getPasswordFilePath()).thenReturn(file.toPath());
     when(configMock.getKeyPath()).thenReturn(Paths.get("nonExistingFile"));
 
-    final CredentialTransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
+    final TransactionSigner signer = FileBasedSignerHelper.getSigner(configMock);
 
     assertThat(signer).isNull();
   }

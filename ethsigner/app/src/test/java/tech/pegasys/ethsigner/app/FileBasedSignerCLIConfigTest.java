@@ -21,11 +21,8 @@ import java.io.PrintStream;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import picocli.CommandLine;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FileBasedSignerCLIConfigTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";

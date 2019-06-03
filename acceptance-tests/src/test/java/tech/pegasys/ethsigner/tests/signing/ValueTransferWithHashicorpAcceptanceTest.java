@@ -53,8 +53,8 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     final DockerClient docker = new DockerClientFactory().create();
     hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
-    hashicorpVaultDocker
-        .awaitStartupCompletion(); // this method creates the secret containing the private key
+    hashicorpVaultDocker.awaitStartupCompletion();
+    hashicorpVaultDocker.createTestData();
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 

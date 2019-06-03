@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.signing.fileBased;
 
 import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,15 +29,15 @@ public class FileBasedSignerHelper {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  public static CredentialTransactionSigner getSigner(final FileBasedSignerConfig config) {
+  public static TransactionSigner getSigner(final FileBasedSignerConfig config) {
     String password;
     try {
       password = readPasswordFromFile(config);
     } catch (IOException e) {
       LOG.error(
-          "Error when reading the password from file using the following config:\n"
-              + config.toString()
-              + e.getMessage());
+          "Error when reading the password from file using the following path:\n {}.",
+          config.getPasswordFilePath(),
+          e);
       return null;
     }
     Credentials credentials;
@@ -44,17 +45,15 @@ public class FileBasedSignerHelper {
       credentials = WalletUtils.loadCredentials(password, config.getKeyPath().toFile());
     } catch (IOException e) {
       LOG.error(
-          "Error when reading password file for the file based signer using the following config:\n"
-              + config.toString()
-              + "\n"
-              + e.getMessage());
+          "Error when reading key file for the file based signer using the following path:\n {}.",
+          config.getKeyPath(),
+          e);
       return null;
     } catch (CipherException e) {
       LOG.error(
-          "Error when decrypting key for the file based signer using the following config:\n"
-              + config.toString()
-              + "\n"
-              + e.getMessage());
+          "Error when decrypting key for the file based signer using the following config:\n {}.",
+          config.toString(),
+          e);
       return null;
     }
     return new CredentialTransactionSigner(credentials);

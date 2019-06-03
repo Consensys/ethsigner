@@ -12,16 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.signing.hashicorp;
 
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -30,6 +20,16 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class HashicorpSignerHelper {
 
@@ -40,7 +40,7 @@ public class HashicorpSignerHelper {
 
   private HashicorpSignerHelper() {}
 
-  public static CredentialTransactionSigner getSigner(HashicorpSignerConfig config) {
+  public static TransactionSigner getSigner(HashicorpSignerConfig config) {
     final String tokenString = readTokenFromFile(config);
     if (tokenString == null) {
       return null;

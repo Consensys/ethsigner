@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class NodeConfiguration {
 
-  private static final Duration TIMEOUT = Duration.ofSeconds(1);
+  private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
   private final String genesisFilePath;
@@ -33,8 +33,8 @@ public class NodeConfiguration {
     return hostname;
   }
 
-  public Duration getTimeout() {
-    return TIMEOUT;
+  public Duration getPollingInterval() {
+    return POLLING_INTERVAL;
   }
 
   public String getGenesisFilePath() {

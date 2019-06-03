@@ -18,8 +18,6 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -32,10 +30,7 @@ import picocli.CommandLine.Spec;
     mixinStandardHelpOptions = true)
 public class FileBasedSignerCLIConfig implements Runnable, FileBasedSignerConfig {
 
-  private static final Logger LOG = LogManager.getLogger();
-
   public static final String COMMAND_NAME = "file-based-signer";
-  private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
 
   public FileBasedSignerCLIConfig(final PrintStream out) {
     this.out = out;

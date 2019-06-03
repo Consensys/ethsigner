@@ -68,7 +68,7 @@ public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig
 
   @Option(
       names = {"--timeout"},
-      description = "Timeout for requests to the Hashicorp vault server.",
+      description = "Timeout in seconds for requests to the Hashicorp vault server.",
       defaultValue = DEFAULT_TIMEOUT_STRING,
       arity = "1")
   private final Integer timeout = DEFAULT_TIMEOUT;
@@ -82,7 +82,7 @@ public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--signing-key"},
+      names = {"--signing-key-path"},
       description =
           "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
               + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 ",

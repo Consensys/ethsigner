@@ -54,7 +54,10 @@ public class HashicorpVaultDocker {
     "secret/ethsignerSigningKey",
     "value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
   };
+  private static final String[] COMMAND_TO_CHECK_VAULT_IS_UP = {"vault", "status"};
   private static final String LOCALHOST = "localhost";
+  private static final String EXPECTED_FOR_SECRET_CREATION = "created_time";
+  private static final String EXPECTED_FOR_STATUS = "Sealed";
 
   private final DockerClient docker;
   private final String vaultContainerId;
@@ -83,10 +86,19 @@ public class HashicorpVaultDocker {
     final Ports ports = containerResponse.getNetworkSettings().getPorts();
     port = httpRpcPort(ports);
     LOG.info("Http port for Hashicorp Vault: {}", port);
+  }
 
-    // After starting the docker container with the vault we need to create the secret that contains
-    // the private key. That is done in the awaitStartupCompletion, because we need to wait until a
-    // call to the vault succeeds to know that it is up. That call now creates the secret.
+  public void createTestData() {
+    LOG.info("creating the secret in vault that contains the private key.");
+    final ExecCreateCmdResponse execCreateCmdResponse =
+        getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
+    waitFor(
+        60,
+        () ->
+            assertThat(
+                    runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_SECRET_CREATION))
+                .isTrue());
+    LOG.info("The secret was created successfully.");
   }
 
   // TODO: Same thing done in PantheonNode.java . Reuse? Where to put?
@@ -122,7 +134,7 @@ public class HashicorpVaultDocker {
             "command in Hashicorp Vault returned error\n" + execStartResultCallback.toString()));
     if (expectedInStdout != null) {
       final String stdoutString = stdout.toString();
-      return stdoutString.indexOf(expectedInStdout) != -1;
+      return stdoutString.contains(expectedInStdout);
     } else {
       return true;
     }
@@ -135,19 +147,15 @@ public class HashicorpVaultDocker {
     }
   }
 
-  /** This method now also creates the secret that contains the private signing key. */
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Hashicorp Vault to become responsive...");
     final ExecCreateCmdResponse execCreateCmdResponse =
-        getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
-    LOG.info(
-        "execCreateCmdResponse with id: {}, containerId: {}",
-        execCreateCmdResponse.getId(),
-        vaultContainerId);
+        getExecCreateCmdResponse(COMMAND_TO_CHECK_VAULT_IS_UP);
     waitFor(
         60,
         () ->
-            assertThat(runCommandInVaultContainer(execCreateCmdResponse, "created_time")).isTrue());
+            assertThat(runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_STATUS))
+                .isTrue());
     LOG.info("Hashicorp Vault is now responsive");
   }
 
@@ -203,7 +211,7 @@ public class HashicorpVaultDocker {
             .withPortBindings(httpPortBinding())
             .withCapAdd(Capability.IPC_LOCK);
 
-    final List<String> enviromentVars = new ArrayList<String>();
+    final List<String> enviromentVars = new ArrayList<>();
     enviromentVars.add("VAULT_DEV_ROOT_TOKEN_ID=token");
     enviromentVars.add("VAULT_ADDR=http://127.0.0.1:8200");
     enviromentVars.add("VAULT_TOKEN=token");

@@ -71,7 +71,7 @@ public class PantheonNode implements Node {
 
   private final DockerClient docker;
   private final String pantheonContainerId;
-  private final long timeout;
+  private final long pollingInterval;
   private final String hostname;
 
   private Accounts accounts;
@@ -85,7 +85,7 @@ public class PantheonNode implements Node {
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    this.timeout = config.getTimeout().toMillis();
+    this.pollingInterval = config.getPollingInterval().toMillis();
     this.hostname = config.getHostname();
   }
 
@@ -106,7 +106,8 @@ public class PantheonNode implements Node {
     LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
 
     final HttpService web3jHttpService = new HttpService(httpRpcUrl);
-    this.jsonRpc = new JsonRpc2_0Web3j(web3jHttpService, timeout, Async.defaultExecutorService());
+    this.jsonRpc =
+        new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
     final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);

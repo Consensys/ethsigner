@@ -72,7 +72,7 @@ public class EthSignerProcessRunner {
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
-    this.timeoutMs = String.valueOf(nodeConfig.getTimeout().toMillis());
+    this.timeoutMs = String.valueOf(signerConfig.timeout().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
