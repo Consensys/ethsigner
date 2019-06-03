@@ -44,23 +44,26 @@ public class TransactionTransmitter {
 
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser transactionSerialiser;
-  private final SendTransactionContext sendTransactionContext;
+  private final Transaction transaction;
   private final VertxRequestTransmitter transmitter;
   private final NonceProvider nonceProvider;
+  private final RoutingContext routingContext;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
-      final SendTransactionContext sendTransactionContext,
+      final Transaction transaction,
       final TransactionSerialiser transactionSerialiser,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
-      final NonceProvider nonceProvider) {
+      final NonceProvider nonceProvider,
+      final RoutingContext routingContext) {
 
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
-    this.sendTransactionContext = sendTransactionContext;
+    this.transaction = transaction;
     this.transactionSerialiser = transactionSerialiser;
 
     this.nonceProvider = nonceProvider;
+    this.routingContext = routingContext;
   }
 
   public void send() {
@@ -70,68 +73,46 @@ public class TransactionTransmitter {
   private void createSignedTransactionBody() {
     final String signedTransactionHexString;
     try {
-      final Transaction transaction = sendTransactionContext.getTransaction();
       if (!transaction.isNonceUserSpecified()) {
         transaction.updateNonce(nonceProvider.getNonce());
       }
 
       signedTransactionHexString = transactionSerialiser.serialise(transaction);
     } catch (final IllegalArgumentException e) {
-      LOG.debug("Failed to encode transaction: {}", sendTransactionContext.getTransaction(), e);
-      sendTransactionContext
-          .getRoutingContext()
-          .fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
+      LOG.debug("Failed to encode transaction: {}", transaction, e);
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return;
     } catch (final RuntimeException e) {
       LOG.info("Unable to get nonce from web3j provider.");
       final Throwable cause = e.getCause();
       if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
-        sendTransactionContext
-            .getRoutingContext()
-            .fail(
-                GATEWAY_TIMEOUT.code(),
-                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+        routingContext.fail(
+            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else {
-        sendTransactionContext
-            .getRoutingContext()
-            .fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
+        routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
       return;
     } catch (final Throwable thrown) {
-      LOG.debug(
-          "Failed to encode/serialise transaction: {}",
-          sendTransactionContext.getTransaction(),
-          thrown);
-      sendTransactionContext
-          .getRoutingContext()
-          .fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      LOG.debug("Failed to encode/serialise transaction: {}", transaction, thrown);
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       return;
     }
 
     final JsonRpcRequest rawTransaction =
-        sendTransactionContext
-            .getTransaction()
-            .jsonRpcRequest(signedTransactionHexString, sendTransactionContext.getId());
+        transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId());
     try {
       sendTransaction(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
       LOG.debug("JSON Serialisation failed for: {}", rawTransaction, e);
-      sendTransactionContext
-          .getRoutingContext()
-          .fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
   private void sendTransaction(final Buffer bodyContent) {
-    final HttpServerRequest httpServerRequest = sendTransactionContext.getInitialRequest();
     final HttpClientRequest request =
-        ethNodeClient.request(
-            httpServerRequest.method(),
-            httpServerRequest.uri(),
-            response ->
-                transmitter.handleResponse(sendTransactionContext.getRoutingContext(), response));
+        ethNodeClient.post("/", response -> transmitter.handleResponse(routingContext, response));
 
-    transmitter.sendRequest(request, bodyContent, sendTransactionContext.getRoutingContext());
+    transmitter.sendRequest(request, bodyContent, routingContext);
   }
 
   protected void handleResponseBody(

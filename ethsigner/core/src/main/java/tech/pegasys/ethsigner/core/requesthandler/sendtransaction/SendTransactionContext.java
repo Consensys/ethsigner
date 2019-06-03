@@ -12,36 +12,14 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.ext.web.RoutingContext;
-
 public class SendTransactionContext {
-  private final RoutingContext routingContext;
-  private final JsonRpcRequestId id;
-  private Transaction transaction;
 
-  public SendTransactionContext(
-      final RoutingContext routingContext,
-      final JsonRpcRequestId id,
-      final Transaction transaction) {
-    this.routingContext = routingContext;
-    this.id = id;
+  private final Transaction transaction;
+
+  public SendTransactionContext(final Transaction transaction) {
     this.transaction = transaction;
-  }
-
-  public RoutingContext getRoutingContext() {
-    return routingContext;
-  }
-
-  public HttpServerRequest getInitialRequest() {
-    return routingContext.request();
-  }
-
-  public JsonRpcRequestId getId() {
-    return id;
   }
 
   public Transaction getTransaction() {

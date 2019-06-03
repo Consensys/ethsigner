@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -31,18 +32,20 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
   public RetryingTransactionTransmitter(
       final HttpClient ethNodeClient,
-      final SendTransactionContext sendTransactionContext,
+      final Transaction transaction,
       final TransactionSerialiser transactionSerialiser,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final NonceProvider nonceProvider,
-      final RetryMechanism retryMechanism) {
+      final RetryMechanism retryMechanism,
+      final RoutingContext routingContext) {
 
     super(
         ethNodeClient,
-        sendTransactionContext,
+        transaction,
         transactionSerialiser,
         vertxTransmitterFactory,
-        nonceProvider);
+        nonceProvider,
+        routingContext);
 
     this.retryMechanism = retryMechanism;
   }
