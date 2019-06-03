@@ -54,8 +54,7 @@ public class TransactionTransmitter {
       final TransactionSerialiser transactionSerialiser,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RoutingContext routingContext) {
-
-    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
+    this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.transaction = transaction;
     this.transactionSerialiser = transactionSerialiser;
