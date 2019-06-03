@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthWeb3jNonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -72,7 +74,7 @@ public final class EthSigner {
 
       final FileBasedTransactionSigner signer =
           FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
-
+      final NonceProvider ethNonceProvider = new EthWeb3jNonceProvider(web3j, signer.getAddress());
       runnerBuilder
           .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
           .withClientOptions(
@@ -86,7 +88,8 @@ public final class EthSigner {
                   .setReuseAddress(true)
                   .setReusePort(true))
           .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .withTransactionFactory(new TransactionFactory(web3j, eea, signer.getAddress()))
+          .withTransactionFactory(
+              new TransactionFactory(eea, signer.getAddress(), ethNonceProvider))
           .withDataPath(config.getDataDirectory())
           .build()
           .start();

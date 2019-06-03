@@ -17,20 +17,21 @@ import static tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transac
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.eea.Eea;
 
 public class TransactionFactory {
 
   private final Eea eea;
-  private final EthWeb3jNonceProvider ethNonceProvider;
+  private final NonceProvider ethNonceProvider;
   private final String address;
 
-  public TransactionFactory(final Web3j web3j, final Eea eea, final String address) {
+  public TransactionFactory(
+      final Eea eea, final String address, final NonceProvider ethNonceProvider) {
     this.eea = eea;
     this.address = address;
-    this.ethNonceProvider = new EthWeb3jNonceProvider(web3j, address);
+    this.ethNonceProvider = ethNonceProvider;
   }
 
   public Transaction createTransaction(final JsonRpcRequest request) {

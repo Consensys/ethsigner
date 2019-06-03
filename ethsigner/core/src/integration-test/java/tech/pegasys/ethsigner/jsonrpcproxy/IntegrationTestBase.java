@@ -25,6 +25,8 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthWeb3jNonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -118,6 +120,8 @@ public class IntegrationTestBase {
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
     final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final NonceProvider ethNonceProvider =
+        new EthWeb3jNonceProvider(web3j, serialiser.getAddress());
 
     runner =
         new Runner(
@@ -125,7 +129,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(web3j, eea, serialiser.getAddress()),
+            new TransactionFactory(eea, serialiser.getAddress(), ethNonceProvider),
             null);
     runner.start();
 
