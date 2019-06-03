@@ -55,15 +55,17 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     hashicorpVaultDocker.start();
     hashicorpVaultDocker
         .awaitStartupCompletion(); // this method creates the secret containing the private key
-    final int port = hashicorpVaultDocker.port();
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpVaultPort(port).build();
 
     ethNode = new PantheonNode(docker, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
+
+    final String ip = hashicorpVaultDocker.getIpAddress();
+    final int port = hashicorpVaultDocker.port();
+    final SignerConfiguration signerConfig =
+        new SignerConfigurationBuilder().withHashicorpVaultPort(port).withIpAddress(ip).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();

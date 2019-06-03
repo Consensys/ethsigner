@@ -16,9 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -33,6 +34,7 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
@@ -52,11 +54,14 @@ public class HashicorpVaultDocker {
     "secret/ethsignerSigningKey",
     "value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
   };
+  private static final String LOCALHOST = "localhost";
 
   private final DockerClient docker;
   private final String vaultContainerId;
 
   private int port;
+  private String ipAddress;
+  private DefaultDockerClientConfig dockerConfig;
 
   public HashicorpVaultDocker(final DockerClient docker) {
     this.docker = docker;
@@ -68,27 +73,30 @@ public class HashicorpVaultDocker {
     LOG.info("Starting Hashicorp Vault Docker container: {}", vaultContainerId);
     docker.startContainerCmd(vaultContainerId).exec();
 
+    this.ipAddress = getDockerHostIp();
+    LOG.info("Docker Host IP address: {}", ipAddress);
+
     LOG.info("Querying for the Docker dynamically allocated vault port number");
     final InspectContainerResponse containerResponse =
         docker.inspectContainerCmd(vaultContainerId).exec();
+
     final Ports ports = containerResponse.getNetworkSettings().getPorts();
     port = httpRpcPort(ports);
     LOG.info("Http port for Hashicorp Vault: {}", port);
 
-    try {
-      TimeUnit.SECONDS.sleep(10); // wait until the docker is container is all up and running.
-    } catch (InterruptedException e) {
-      LOG.error("Interruption while waiting for Hashicorp Vault to be up");
-    }
-
     // After starting the docker container with the vault we need to create the secret that contains
-    // the
     // the private key. That is done in the awaitStartupCompletion, because we need to wait until a
-    // call to
-    // the vault succeeds to know that it is up. That call now creates the secret.
+    // call to the vault succeeds to know that it is up. That call now creates the secret.
   }
 
-  private ExecCreateCmdResponse getExecCreateCmdResponse(String[] commandWithArguments) {
+  // TODO: Same thing done in PantheonNode.java . Reuse? Where to put?
+  private String getDockerHostIp() {
+    this.dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+    final Optional<String> optional = Optional.of(dockerConfig.getDockerHost()).map(URI::getHost);
+    return optional.orElse(LOCALHOST);
+  }
+
+  private ExecCreateCmdResponse getExecCreateCmdResponse(final String[] commandWithArguments) {
     return docker
         .execCreateCmd(vaultContainerId)
         .withAttachStdout(true)
@@ -98,11 +106,15 @@ public class HashicorpVaultDocker {
   }
 
   private boolean runCommandInVaultContainer(
-      ExecCreateCmdResponse execCreateCmdResponse, String expectedInStdout)
+      final ExecCreateCmdResponse execCreateCmdResponse, final String expectedInStdout)
       throws InterruptedException {
-    ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-    ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+    final ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+    final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
     final ExecStartResultCallback resultCallback = new ExecStartResultCallback(stdout, stderr);
+    LOG.info(
+        "execCreateCmdResponse with id: {}, containerId: {}",
+        execCreateCmdResponse.getId(),
+        vaultContainerId);
     final ExecStartResultCallback execStartResultCallback =
         docker.execStartCmd(execCreateCmdResponse.getId()).exec(resultCallback).awaitCompletion();
     execStartResultCallback.onError(
@@ -128,7 +140,12 @@ public class HashicorpVaultDocker {
     LOG.info("Waiting for Hashicorp Vault to become responsive...");
     final ExecCreateCmdResponse execCreateCmdResponse =
         getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
+    LOG.info(
+        "execCreateCmdResponse with id: {}, containerId: {}",
+        execCreateCmdResponse.getId(),
+        vaultContainerId);
     waitFor(
+        60,
         () ->
             assertThat(runCommandInVaultContainer(execCreateCmdResponse, "created_time")).isTrue());
     LOG.info("Hashicorp Vault is now responsive");
@@ -136,6 +153,10 @@ public class HashicorpVaultDocker {
 
   public int port() {
     return port;
+  }
+
+  public String getIpAddress() {
+    return ipAddress;
   }
 
   private boolean hasVaultContainer() {

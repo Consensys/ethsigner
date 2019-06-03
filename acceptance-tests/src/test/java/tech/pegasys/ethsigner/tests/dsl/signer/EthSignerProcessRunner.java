@@ -15,10 +15,8 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
-import tech.pegasys.ethsigner.tests.hashicorpVault.HashicorpVaultDocker;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -41,7 +38,6 @@ import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
@@ -66,7 +62,7 @@ public class EthSignerProcessRunner {
   private final boolean useDynamicPortAllocation;
   private final Path dataDirectory;
   private final int signerHttpRpcPort;
-  private final int hashicorpVaultPort;
+  private final SignerConfiguration signerConfig;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -81,7 +77,7 @@ public class EthSignerProcessRunner {
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
     this.portsProperties = new Properties();
-    this.hashicorpVaultPort = signerConfig.hashicorpVaultPort();
+    this.signerConfig = signerConfig;
 
     this.useDynamicPortAllocation = signerConfig.isDynamicPortAllocation();
 
@@ -143,21 +139,7 @@ public class EthSignerProcessRunner {
       params.add("--data-directory");
       params.add(dataDirectory.toAbsolutePath().toString());
     }
-    if (hashicorpVaultPort == 0) {
-      params.add("file-based-signer");
-      params.add("--password-file");
-      params.add(createPasswordFile().getAbsolutePath());
-      params.add("--key-file");
-      params.add(createKeyFile().getAbsolutePath());
-    } else {
-      params.add("hashicorp-signer");
-      params.add("--auth-file");
-      params.add(createVaultAuthFile().getAbsolutePath());
-      params.add("--host");
-      params.add(nodeHostname);
-      params.add("--port");
-      params.add(String.valueOf(hashicorpVaultPort));
-    }
+    params.addAll(signerConfig.transactionSignerParamsSupplier().params());
 
     LOG.info("Creating EthSigner process with params {}", params);
 
@@ -214,11 +196,6 @@ public class EthSignerProcessRunner {
             });
   }
 
-  private File createPasswordFile() {
-    return createJsonFile(
-        "ethsigner_passwordfile", Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
-  }
-
   public int httpJsonRpcPort() {
     if (useDynamicPortAllocation) {
       final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
@@ -228,37 +205,6 @@ public class EthSignerProcessRunner {
     } else {
       return signerHttpRpcPort;
     }
-  }
-
-  @SuppressWarnings("UnstableApiUsage")
-  private File createKeyFile() {
-    final URL resource = Resources.getResource("rich_benefactor_one.json");
-    final byte[] data;
-
-    try {
-      data = Resources.toString(resource, UTF_8).getBytes(UTF_8);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return createJsonFile("ethsigner_keyfile", data);
-  }
-
-  private File createVaultAuthFile() {
-    return createJsonFile("vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
-  }
-
-  private File createJsonFile(final String tempNamePrefix, final byte[] data) {
-    final Path file;
-    try {
-      file = Files.createTempFile(tempNamePrefix, ".json");
-      Files.write(file, data);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-    File keyFile = file.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
   }
 
   private void loadPortsFile() {

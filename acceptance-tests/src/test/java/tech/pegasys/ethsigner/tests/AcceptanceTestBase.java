@@ -34,8 +34,8 @@ import org.junit.BeforeClass;
 
 public class AcceptanceTestBase {
 
-  protected static Node ethNode;
-  protected static Signer ethSigner;
+  private static Node ethNode;
+  private static Signer ethSigner;
 
   protected Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
