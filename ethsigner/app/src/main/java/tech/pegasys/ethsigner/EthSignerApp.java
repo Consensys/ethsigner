@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.RunnerBuilder;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerBuilder;
 import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerBuilder;
@@ -50,7 +49,7 @@ public class EthSignerApp {
     }
 
     final tech.pegasys.ethsigner.core.EthSigner ethSigner =
-        new tech.pegasys.ethsigner.core.EthSigner(config, signer, vertx, new RunnerBuilder());
+        new tech.pegasys.ethsigner.core.EthSigner(config, signer, vertx);
     ethSigner.run();
   }
 

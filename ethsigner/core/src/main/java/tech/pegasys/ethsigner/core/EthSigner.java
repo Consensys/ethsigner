@@ -17,6 +17,9 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProv
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+import java.nio.file.Path;
+import java.time.Duration;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -32,24 +35,19 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final RunnerBuilder runnerBuilder;
   private final TransactionSigner signer;
   private final Vertx vertx;
 
-  public EthSigner(
-      final Config config,
-      final TransactionSigner signer,
-      final Vertx vertx,
-      final RunnerBuilder runnerBuilder) {
+  public EthSigner(final Config config, final TransactionSigner signer, final Vertx vertx) {
     this.config = config;
-    this.runnerBuilder = runnerBuilder;
     this.signer = signer;
     this.vertx = vertx;
   }
 
   public void run() {
 
-    if (config.getDownstreamHttpRequestTimeout().toMillis() <= 0) {
+    final Duration downstreamHttpRequestTimeout = config.getDownstreamHttpRequestTimeout();
+    if (downstreamHttpRequestTimeout.toMillis() <= 0) {
       LOG.error("Http request timeout must be greater than 0.");
       return;
     }
@@ -64,24 +62,31 @@ public final class EthSigner {
 
     final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
-    runnerBuilder
-        .withVertx(vertx)
-        .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
-        .withClientOptions(
-            new WebClientOptions()
-                .setDefaultPort(config.getDownstreamHttpPort())
-                .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
-        .withServerOptions(
-            new HttpServerOptions()
-                .setPort(config.getHttpListenPort())
-                .setHost(config.getHttpListenHost().getHostAddress())
-                .setReuseAddress(true)
-                .setReusePort(true))
-        .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-        .withNonceProvider(nonceProvider)
-        .withDataPath(config.getDataDirectory())
-        .build()
-        .start();
+    final TransactionSerialiser serialiser =
+        new TransactionSerialiser(signer, config.getChainId().id());
+    final WebClientOptions clientOptions =
+        new WebClientOptions()
+            .setDefaultPort(config.getDownstreamHttpPort())
+            .setDefaultHost(config.getDownstreamHttpHost().getHostAddress());
+    final HttpServerOptions serverOptions =
+        new HttpServerOptions()
+            .setPort(config.getHttpListenPort())
+            .setHost(config.getHttpListenHost().getHostAddress())
+            .setReuseAddress(true)
+            .setReusePort(true);
+    final Path dataDirectory = config.getDataDirectory();
+
+    final Runner runner =
+        new Runner(
+            serialiser,
+            vertx,
+            clientOptions,
+            serverOptions,
+            downstreamHttpRequestTimeout,
+            nonceProvider,
+            dataDirectory);
+
+    runner.start();
   }
 
   private Web3j createWebj() {
