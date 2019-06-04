@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 
+import java.math.BigInteger;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
