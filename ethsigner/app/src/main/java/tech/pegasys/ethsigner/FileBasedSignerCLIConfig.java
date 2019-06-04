@@ -27,7 +27,8 @@ import picocli.CommandLine.Spec;
 @Command(
     name = FileBasedSignerCLIConfig.COMMAND_NAME,
     description = "This command provides file based signer related configuration data.",
-    mixinStandardHelpOptions = true)
+    mixinStandardHelpOptions = true,
+    helpCommand = true)
 public class FileBasedSignerCLIConfig implements Runnable, FileBasedSignerConfig {
 
   public static final String COMMAND_NAME = "file-based-signer";

@@ -23,11 +23,12 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-/** Hashicorp vault authentication related sub-command */
+/** Hashicorp vault related sub-command */
 @Command(
     name = HashicorpSignerCLIConfig.COMMAND_NAME,
     description = "This command provides Hashicorp Vault signer related configuration data.",
-    mixinStandardHelpOptions = true)
+    mixinStandardHelpOptions = true,
+    helpCommand = true)
 public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig {
 
   public static final String COMMAND_NAME = "hashicorp-signer";
