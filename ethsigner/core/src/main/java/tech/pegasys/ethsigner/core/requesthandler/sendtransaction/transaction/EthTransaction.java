@@ -28,27 +28,27 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EthTransaction implements Transaction {
+
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-  private final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
-  private final RawTransactionBuilder rawTransactionBuilder;
-  private JsonRpcRequestId id;
+  private final EthSendTransactionJsonParameters transactionJsonParameters;
+  private final JsonRpcRequestId id;
+  private BigInteger nonce;
 
   EthTransaction(
-      final EthSendTransactionJsonParameters ethSendTransactionJsonParameters,
-      final JsonRpcRequestId id) {
-    this.ethSendTransactionJsonParameters = ethSendTransactionJsonParameters;
-    this.rawTransactionBuilder = RawTransactionBuilder.from(ethSendTransactionJsonParameters);
+      final EthSendTransactionJsonParameters transactionJsonParameters, final JsonRpcRequestId id) {
+    this.transactionJsonParameters = transactionJsonParameters;
     this.id = id;
+    this.nonce = transactionJsonParameters.nonce().orElse(null);
   }
 
   @Override
   public void updateNonce(final BigInteger nonce) {
-    rawTransactionBuilder.withNonce(nonce);
+    this.nonce = nonce;
   }
 
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
-    final RawTransaction rawTransaction = rawTransactionBuilder.build();
+    final RawTransaction rawTransaction = createTransaction();
     final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
@@ -56,12 +56,12 @@ public class EthTransaction implements Transaction {
 
   @Override
   public boolean isNonceUserSpecified() {
-    return ethSendTransactionJsonParameters.nonce().isPresent();
+    return transactionJsonParameters.nonce().isPresent();
   }
 
   @Override
   public String sender() {
-    return ethSendTransactionJsonParameters.sender();
+    return transactionJsonParameters.sender();
   }
 
   @Override
@@ -78,9 +78,19 @@ public class EthTransaction implements Transaction {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("ethSendTransactionJsonParameters", ethSendTransactionJsonParameters)
-        .add("rawTransactionBuilder", rawTransactionBuilder)
+        .add("transactionJsonParameters", transactionJsonParameters)
+        .add("nonce", nonce)
         .add("id", id)
         .toString();
+  }
+
+  private RawTransaction createTransaction() {
+    return RawTransaction.createTransaction(
+        nonce,
+        transactionJsonParameters.gasPrice().orElse(DEFAULT_GAS_PRICE),
+        transactionJsonParameters.gas().orElse(DEFAULT_GAS),
+        transactionJsonParameters.receiver().orElse(DEFAULT_TO),
+        transactionJsonParameters.value().orElse(DEFAULT_VALUE),
+        transactionJsonParameters.data().orElse(DEFAULT_DATA));
   }
 }
