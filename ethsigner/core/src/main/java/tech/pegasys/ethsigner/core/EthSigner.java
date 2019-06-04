@@ -58,7 +58,7 @@ public final class EthSigner {
       return;
     }
 
-    final Web3j web3j = createWebj();
+    final Web3j web3j = createWeb3j();
 
     final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
 
@@ -89,7 +89,7 @@ public final class EthSigner {
     runner.start();
   }
 
-  private Web3j createWebj() {
+  private Web3j createWeb3j() {
     final String downstreamUrl =
         "http://"
             + config.getDownstreamHttpHost().getHostName()

@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
@@ -23,28 +22,20 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-/** Hashicorp vault authentication related sub-command */
+/** File-based authentication related sub-command */
 @Command(
-    name = FileBasedSignerCLIConfig.COMMAND_NAME,
-    description = "This command provides file based signer related configuration data.",
+    name = FileBasedSignerCliConfig.COMMAND_NAME,
+    description =
+        "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedSignerCLIConfig implements Runnable, FileBasedSignerConfig {
+public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedSignerCLIConfig(final PrintStream out) {
-    this.out = out;
-  }
+  public FileBasedSignerCliConfig() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
-
-  private final PrintStream out;
-
-  @Override
-  public void run() {
-    spec.commandLine().usage(out);
-  }
 
   @Option(
       names = {"-p", "--password-file"},

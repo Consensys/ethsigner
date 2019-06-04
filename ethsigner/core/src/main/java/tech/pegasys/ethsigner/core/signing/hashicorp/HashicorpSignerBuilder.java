@@ -63,7 +63,7 @@ public class HashicorpSignerBuilder {
   }
 
   private String readTokenFromFile() {
-    List<String> authFileLines;
+    final List<String> authFileLines;
     try {
       authFileLines = Files.readAllLines(config.getAuthFilePath());
     } catch (IOException e) {
@@ -110,22 +110,18 @@ public class HashicorpSignerBuilder {
     }
     request.setChunked(false);
     request.end();
+    return getResponse(future);
+  }
+
+  private String getResponse(final CompletableFuture<String> future) {
     String response;
     try {
       response = future.get(config.getTimeout(), TimeUnit.SECONDS);
     } catch (InterruptedException | ExecutionException e) {
-      LOG.error(
-          "Unable to retrieve private key from Hashicorp Vault.\n"
-              + config.toString()
-              + "\n"
-              + e.getMessage());
+      LOG.error("Unable to retrieve private key from Hashicorp Vault.", config.toString(), e);
       return null;
     } catch (TimeoutException e) {
-      LOG.error(
-          "Timeout while retrieving private key from Hashicorp Vault.\n"
-              + config.toString()
-              + "\n"
-              + e.getMessage());
+      LOG.error("Timeout while retrieving private key from Hashicorp Vault.", config.toString(), e);
       return null;
     }
     return response;

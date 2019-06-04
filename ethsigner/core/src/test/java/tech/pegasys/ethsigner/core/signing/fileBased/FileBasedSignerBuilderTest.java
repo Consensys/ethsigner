@@ -24,13 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.WalletUtils;
 
 public class FileBasedSignerBuilderTest {
@@ -41,11 +37,7 @@ public class FileBasedSignerBuilderTest {
   public static void createKeyFile() {
     try {
       fileName = WalletUtils.generateFullNewWalletFile(MY_PASSWORD, null);
-    } catch (NoSuchAlgorithmException e) {
-    } catch (NoSuchProviderException e) {
-    } catch (InvalidAlgorithmParameterException e) {
-    } catch (CipherException e) {
-    } catch (IOException e) {
+    } catch (Exception e) {
     }
     new File(fileName).deleteOnExit();
   }

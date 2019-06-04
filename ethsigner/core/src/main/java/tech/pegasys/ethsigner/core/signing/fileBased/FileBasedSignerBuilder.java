@@ -28,9 +28,9 @@ import org.web3j.crypto.WalletUtils;
 public class FileBasedSignerBuilder {
 
   private static final Logger LOG = LogManager.getLogger();
-  private FileBasedSignerConfig config;
+  private final FileBasedSignerConfig config;
 
-  public FileBasedSignerBuilder(FileBasedSignerConfig config) {
+  public FileBasedSignerBuilder(final FileBasedSignerConfig config) {
     this.config = config;
   }
 

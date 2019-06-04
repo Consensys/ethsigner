@@ -38,6 +38,7 @@ dependencies {
   implementation 'io.vertx:vertx-core'
 
   implementation project(':ethsigner:core')
+  implementation project(':ethsigner:signingapi')
 
   testCompile 'io.vertx:vertx-codegen'
 

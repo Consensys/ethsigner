@@ -108,9 +108,9 @@ public class CommandLineConfig implements Config {
     this.output = output;
   }
 
-  private HashicorpSignerCLIConfig hashicorpSignerBasedConfig;
+  private HashicorpSignerCliConfig hashicorpSignerBasedConfig;
 
-  private FileBasedSignerCLIConfig fileBasedSignerConfig;
+  private FileBasedSignerCliConfig fileBasedSignerConfig;
 
   public boolean parse(final String... args) {
 
@@ -118,11 +118,11 @@ public class CommandLineConfig implements Config {
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
-    hashicorpSignerBasedConfig = new HashicorpSignerCLIConfig(output);
-    commandLine.addSubcommand(HashicorpSignerCLIConfig.COMMAND_NAME, hashicorpSignerBasedConfig);
+    hashicorpSignerBasedConfig = new HashicorpSignerCliConfig();
+    commandLine.addSubcommand(HashicorpSignerCliConfig.COMMAND_NAME, hashicorpSignerBasedConfig);
 
-    fileBasedSignerConfig = new FileBasedSignerCLIConfig(output);
-    commandLine.addSubcommand(FileBasedSignerCLIConfig.COMMAND_NAME, fileBasedSignerConfig);
+    fileBasedSignerConfig = new FileBasedSignerCliConfig();
+    commandLine.addSubcommand(FileBasedSignerCliConfig.COMMAND_NAME, fileBasedSignerConfig);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)

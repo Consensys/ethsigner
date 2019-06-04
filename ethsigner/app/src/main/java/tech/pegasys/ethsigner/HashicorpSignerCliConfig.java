@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
@@ -25,11 +24,12 @@ import picocli.CommandLine.Spec;
 
 /** Hashicorp vault related sub-command */
 @Command(
-    name = HashicorpSignerCLIConfig.COMMAND_NAME,
-    description = "This command provides Hashicorp Vault signer related configuration data.",
+    name = HashicorpSignerCliConfig.COMMAND_NAME,
+    description =
+        "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig {
+public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
 
   public static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
@@ -39,18 +39,9 @@ public class HashicorpSignerCLIConfig implements Runnable, HashicorpSignerConfig
   private static final String DEFAULT_TIMEOUT_STRING = "5";
   private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
 
-  public HashicorpSignerCLIConfig(final PrintStream out) {
-    this.out = out;
-  }
+  public HashicorpSignerCliConfig() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
-
-  private final PrintStream out;
-
-  @Override
-  public void run() {
-    spec.commandLine().usage(out);
-  }
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(

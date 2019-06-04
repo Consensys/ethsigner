@@ -14,29 +14,27 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.HashicorpSignerCLIConfig;
+import tech.pegasys.ethsigner.HashicorpSignerCliConfig;
 
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class HashicorpSignerCLIConfigTest {
+public class HashicorpSignerCliConfigTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
   private static final String HTTP_HOST_COM = "http://host.com";
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
   private CommandLine commandLine;
-  private HashicorpSignerCLIConfig hashiConfig;
+  private HashicorpSignerCliConfig hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpSignerCLIConfig(outPrintStream);
+    hashiConfig = new HashicorpSignerCliConfig();
     commandLine = new CommandLine(hashiConfig);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -44,7 +42,6 @@ public class HashicorpSignerCLIConfigTest {
     try {
       commandLine.parse(cmdLine.split(" "));
     } catch (CommandLine.ParameterException e) {
-      outPrintStream.println(e.getMessage());
       return false;
     }
     return true;
@@ -87,7 +84,6 @@ public class HashicorpSignerCLIConfigTest {
     final String cmdLine = modifyField(validCommandLine(), "port", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--port", "'noInteger' is not an int");
   }
 
   @Test
@@ -95,7 +91,6 @@ public class HashicorpSignerCLIConfigTest {
     final String cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--timeout", "'noInteger' is not an int");
   }
 
   @Test
@@ -107,14 +102,14 @@ public class HashicorpSignerCLIConfigTest {
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
     // object.
-    HashicorpSignerCLIConfig hcConfig = new HashicorpSignerCLIConfig(outPrintStream);
+    HashicorpSignerCliConfig hcConfig = new HashicorpSignerCliConfig();
     missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::getServerHost, "localhost");
 
-    hcConfig = new HashicorpSignerCLIConfig(outPrintStream);
+    hcConfig = new HashicorpSignerCliConfig();
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::getServerPort, Integer.valueOf(8200));
 
-    hcConfig = new HashicorpSignerCLIConfig(outPrintStream);
+    hcConfig = new HashicorpSignerCliConfig();
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::getSigningKeyPath, "/secret/data/ethsignerSigningKey");
   }
@@ -123,7 +118,6 @@ public class HashicorpSignerCLIConfigTest {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(

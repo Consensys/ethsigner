@@ -14,25 +14,20 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.FileBasedSignerCLIConfig;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import tech.pegasys.ethsigner.FileBasedSignerCliConfig;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class FileBasedSignerCLIConfigTest {
+public class FileBasedSignerCliConfigTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
   private CommandLine commandLine;
-  private FileBasedSignerCLIConfig config;
+  private FileBasedSignerCliConfig config;
 
   private boolean parseCommand(final String cmdLine) {
-    config = new FileBasedSignerCLIConfig(outPrintStream);
+    config = new FileBasedSignerCliConfig();
     commandLine = new CommandLine(config);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -40,7 +35,6 @@ public class FileBasedSignerCLIConfigTest {
     try {
       commandLine.parse(cmdLine.split(" "));
     } catch (CommandLine.ParameterException e) {
-      outPrintStream.println(e.getMessage());
       return false;
     }
     return true;
@@ -76,6 +70,5 @@ public class FileBasedSignerCLIConfigTest {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
   }
 }
