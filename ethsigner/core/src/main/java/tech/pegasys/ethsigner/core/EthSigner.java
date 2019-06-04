@@ -39,7 +39,7 @@ public final class EthSigner {
   public EthSigner(
       final Config config,
       final TransactionSigner signer,
-      Vertx vertx,
+      final Vertx vertx,
       final RunnerBuilder runnerBuilder) {
     this.config = config;
     this.runnerBuilder = runnerBuilder;

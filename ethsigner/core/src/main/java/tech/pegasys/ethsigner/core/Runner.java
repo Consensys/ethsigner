@@ -57,7 +57,7 @@ public class Runner {
 
   public Runner(
       final TransactionSerialiser serialiser,
-      Vertx vertx,
+      final Vertx vertx,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
