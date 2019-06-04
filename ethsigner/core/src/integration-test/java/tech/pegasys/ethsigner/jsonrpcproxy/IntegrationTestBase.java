@@ -25,8 +25,6 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthWeb3jNonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
