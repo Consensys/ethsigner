@@ -31,11 +31,15 @@ public class EeaTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eea_sendRawTransaction";
   private final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters;
   private final RawPrivateTransactionBuilder rawPrivateTransactionBuilder;
+  private final JsonRpcRequestId id;
 
-  EeaTransaction(final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters) {
+  EeaTransaction(
+      final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters,
+      final JsonRpcRequestId id) {
     this.eeaSendTransactionJsonParameters = eeaSendTransactionJsonParameters;
     this.rawPrivateTransactionBuilder =
         RawPrivateTransactionBuilder.from(eeaSendTransactionJsonParameters);
+    this.id = id;
   }
 
   @Override
@@ -69,10 +73,16 @@ public class EeaTransaction implements Transaction {
   }
 
   @Override
+  public JsonRpcRequestId getId() {
+    return id;
+  }
+
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("eeaSendTransactionJsonParameters", eeaSendTransactionJsonParameters)
         .add("rawPrivateTransactionBuilder", rawPrivateTransactionBuilder)
+        .add("id", id)
         .toString();
   }
 }
