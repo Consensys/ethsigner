@@ -22,9 +22,9 @@ public class TransactionFactory {
     final String method = request.getMethod().toLowerCase();
     switch (method) {
       case "eth_sendtransaction":
-        return new EthTransaction(EthSendTransactionJsonParameters.from(request));
+        return new EthTransaction(EthSendTransactionJsonParameters.from(request), request.getId());
       case "eea_sendtransaction":
-        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request));
+        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request), request.getId());
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }

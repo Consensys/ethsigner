@@ -55,4 +55,6 @@ public interface Transaction {
     transaction.setId(id);
     return transaction;
   }
+
+  JsonRpcRequestId getId();
 }
