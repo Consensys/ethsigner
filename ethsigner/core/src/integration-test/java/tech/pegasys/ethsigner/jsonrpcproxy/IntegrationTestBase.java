@@ -120,8 +120,6 @@ public class IntegrationTestBase {
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
     final Eea eea = new JsonRpc2_0Eea(web3jService);
-    final NonceProvider ethNonceProvider =
-        new EthWeb3jNonceProvider(web3j, serialiser.getAddress());
 
     runner =
         new Runner(
@@ -129,7 +127,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(eea, serialiser.getAddress(), ethNonceProvider),
+            new TransactionFactory(eea, web3j),
             null);
     runner.start();
 
