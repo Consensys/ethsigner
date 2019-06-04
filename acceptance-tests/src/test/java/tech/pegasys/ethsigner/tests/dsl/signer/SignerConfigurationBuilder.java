@@ -39,7 +39,7 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withIpAddress(final String address) {
+  public SignerConfigurationBuilder withHashicorpIpAddress(final String address) {
     ipAddress = address;
     return this;
   }

@@ -65,7 +65,10 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     final String ip = hashicorpVaultDocker.getIpAddress();
     final int port = hashicorpVaultDocker.port();
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpVaultPort(port).withIpAddress(ip).build();
+        new SignerConfigurationBuilder()
+            .withHashicorpVaultPort(port)
+            .withHashicorpIpAddress(ip)
+            .build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();

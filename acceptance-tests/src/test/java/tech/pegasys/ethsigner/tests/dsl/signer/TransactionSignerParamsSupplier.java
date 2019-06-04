@@ -31,7 +31,7 @@ public class TransactionSignerParamsSupplier {
   private final int hashicorpVaultPort;
   private final String ipAddress;
 
-  public TransactionSignerParamsSupplier(int hashicorpVaultPort, String ipAddress) {
+  public TransactionSignerParamsSupplier(final int hashicorpVaultPort, final String ipAddress) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
   }
