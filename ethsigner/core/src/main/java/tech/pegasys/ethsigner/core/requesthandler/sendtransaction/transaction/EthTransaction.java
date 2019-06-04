@@ -84,8 +84,9 @@ public class EthTransaction implements Transaction {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("transactionJsonParameters", transactionJsonParameters)
-        .add("nonce", nonce)
+        .add("nonceProvider", nonceProvider)
         .add("id", id)
+        .add("nonce", nonce)
         .toString();
   }
 

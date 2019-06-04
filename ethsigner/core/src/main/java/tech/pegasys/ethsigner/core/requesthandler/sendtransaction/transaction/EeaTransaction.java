@@ -84,8 +84,9 @@ public class EeaTransaction implements Transaction {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("transactionJsonParameters", transactionJsonParameters)
-        .add("nonce", nonce)
         .add("id", id)
+        .add("nonceProvider", nonceProvider)
+        .add("nonce", nonce)
         .toString();
   }
 
