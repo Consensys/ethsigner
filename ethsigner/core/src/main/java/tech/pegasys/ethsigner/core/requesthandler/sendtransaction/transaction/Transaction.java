@@ -23,6 +23,11 @@ import java.nio.ByteBuffer;
 import org.web3j.crypto.Sign.SignatureData;
 
 public interface Transaction {
+  BigInteger DEFAULT_GAS_PRICE = BigInteger.ZERO;
+  BigInteger DEFAULT_GAS = BigInteger.valueOf(90000);
+  BigInteger DEFAULT_VALUE = BigInteger.ZERO;
+  String DEFAULT_DATA = "";
+  String DEFAULT_TO = "";
 
   void updateNonce();
 

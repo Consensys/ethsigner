@@ -30,31 +30,29 @@ import org.web3j.rlp.RlpType;
 
 public class EeaTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eea_sendRawTransaction";
-  private final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters;
-  private final RawPrivateTransactionBuilder rawPrivateTransactionBuilder;
+  private final EeaSendTransactionJsonParameters transactionJsonParameters;
   private final JsonRpcRequestId id;
   private final NonceProvider nonceProvider;
+  private BigInteger nonce;
 
   EeaTransaction(
-      final EeaSendTransactionJsonParameters eeaSendTransactionJsonParameters,
+      final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
-    this.eeaSendTransactionJsonParameters = eeaSendTransactionJsonParameters;
-    this.rawPrivateTransactionBuilder =
-        RawPrivateTransactionBuilder.from(eeaSendTransactionJsonParameters);
+    this.transactionJsonParameters = transactionJsonParameters;
     this.nonceProvider = nonceProvider;
     this.id = id;
+    this.nonce = transactionJsonParameters.nonce().orElse(null);
   }
 
   @Override
   public void updateNonce() {
-    final BigInteger nonce = nonceProvider.getNonce();
-    rawPrivateTransactionBuilder.withNonce(nonce);
+      this.nonce = nonceProvider.getNonce();
   }
 
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
-    final RawPrivateTransaction rawTransaction = rawPrivateTransactionBuilder.build();
+    final RawPrivateTransaction rawTransaction = createTransaction();
     final List<RlpType> values =
         PrivateTransactionEncoder.asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
@@ -63,12 +61,12 @@ public class EeaTransaction implements Transaction {
 
   @Override
   public boolean isNonceUserSpecified() {
-    return eeaSendTransactionJsonParameters.nonce().isPresent();
+    return transactionJsonParameters.nonce().isPresent();
   }
 
   @Override
   public String sender() {
-    return eeaSendTransactionJsonParameters.sender();
+    return transactionJsonParameters.sender();
   }
 
   @Override
@@ -85,9 +83,21 @@ public class EeaTransaction implements Transaction {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("eeaSendTransactionJsonParameters", eeaSendTransactionJsonParameters)
-        .add("rawPrivateTransactionBuilder", rawPrivateTransactionBuilder)
+        .add("transactionJsonParameters", transactionJsonParameters)
+        .add("nonce", nonce)
         .add("id", id)
         .toString();
+  }
+
+  private RawPrivateTransaction createTransaction() {
+    return RawPrivateTransaction.createTransaction(
+        nonce,
+        transactionJsonParameters.gasPrice().orElse(DEFAULT_GAS_PRICE),
+        transactionJsonParameters.gas().orElse(DEFAULT_GAS),
+        transactionJsonParameters.receiver().orElse(DEFAULT_TO),
+        transactionJsonParameters.data().orElse(DEFAULT_DATA),
+        transactionJsonParameters.privateFrom(),
+        transactionJsonParameters.privateFor(),
+        transactionJsonParameters.restriction());
   }
 }
