@@ -60,7 +60,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void valueTransferFromAccountWithInsufficientFunds() {
+  public void valueTransferFromAccountWithInsufficientFunds() throws IOException {
     final String recipientAddress = "0x1b11ba11ca11bb11aa11bc11be11ac11ca11da11";
     final BigInteger senderStartBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
@@ -87,7 +87,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void senderIsNotUnlockedAccount() {
+  public void senderIsNotUnlockedAccount() throws IOException {
     final Account sender = new Account("0x223b55228fb22b89f2216b7222e5522b8222bd22");
     final String recipientAddress = "0x1b22ba22ca22bb22aa22bc22be22ac22ca22da22";
     final BigInteger senderStartBalance = ethNode().accounts().balance(sender);

@@ -27,6 +27,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.hashicorpVault.HashicorpVaultDocker;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
@@ -103,7 +104,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   }
 
   @Test
-  public void valueTransfer() {
+  public void valueTransfer() throws IOException {
     final BigInteger transferAmountWei =
         Convert.toWei("1.75", Convert.Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
