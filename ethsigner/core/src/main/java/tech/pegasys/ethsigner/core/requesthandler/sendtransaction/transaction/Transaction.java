@@ -30,7 +30,7 @@ public interface Transaction {
   String DEFAULT_DATA = "";
   String DEFAULT_TO = "";
 
-  void updateNonce(BigInteger nonce);
+  void updateNonce();
 
   byte[] rlpEncode(SignatureData signatureData);
 

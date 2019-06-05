@@ -12,21 +12,49 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import static tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EeaUtils.generatePrivacyGroupId;
+
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.eea.Eea;
 
 public class TransactionFactory {
+
+  private final Eea eea;
+  private final Web3j web3j;
+
+  public TransactionFactory(final Eea eea, final Web3j web3j) {
+    this.eea = eea;
+    this.web3j = web3j;
+  }
 
   public Transaction createTransaction(final JsonRpcRequest request) {
     final String method = request.getMethod().toLowerCase();
     switch (method) {
       case "eth_sendtransaction":
-        return new EthTransaction(EthSendTransactionJsonParameters.from(request), request.getId());
+        return createEthTransaction(request);
       case "eea_sendtransaction":
-        return new EeaTransaction(EeaSendTransactionJsonParameters.from(request), request.getId());
+        return createEeaTransaction(request);
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
+  }
+
+  private Transaction createEeaTransaction(final JsonRpcRequest request) {
+    final EeaSendTransactionJsonParameters params = EeaSendTransactionJsonParameters.from(request);
+    final String privacyGroupId = generatePrivacyGroupId(params.privateFrom(), params.privateFor());
+    final NonceProvider nonceProvider =
+        new EeaWeb3jNonceProvider(eea, params.sender(), privacyGroupId);
+    return new EeaTransaction(params, nonceProvider, request.getId());
+  }
+
+  private Transaction createEthTransaction(final JsonRpcRequest request) {
+    final EthSendTransactionJsonParameters params = EthSendTransactionJsonParameters.from(request);
+    final NonceProvider ethNonceProvider = new EthWeb3jNonceProvider(web3j, params.sender());
+    return new EthTransaction(params, ethNonceProvider, request.getId());
   }
 }

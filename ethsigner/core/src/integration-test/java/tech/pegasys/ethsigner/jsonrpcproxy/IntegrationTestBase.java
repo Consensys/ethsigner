@@ -25,7 +25,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -35,11 +35,9 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.EthTransactionCountResponder;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -112,15 +110,14 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(serverSocket.getLocalPort());
     httpServerOptions.setHost("localhost");
 
-    final Web3j web3j =
-        new JsonRpc2_0Web3j(
-            new HttpService(
-                "http://"
-                    + httpClientOptions.getDefaultHost()
-                    + ":"
-                    + httpClientOptions.getDefaultPort()),
-            2000,
-            defaultExecutorService());
+    final HttpService web3jService =
+        new HttpService(
+            "http://"
+                + httpClientOptions.getDefaultHost()
+                + ":"
+                + httpClientOptions.getDefaultPort());
+    final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
+    final Eea eea = new JsonRpc2_0Eea(web3jService);
 
     runner =
         new Runner(
@@ -128,7 +125,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new Web3jNonceProvider(web3j, serialiser.getAddress()),
+            new TransactionFactory(eea, web3j),
             null);
     runner.start();
 
@@ -159,14 +156,7 @@ public class IntegrationTestBase {
     eeaJsonRpc = new JsonRpc2_0Eea(null);
     if (clientAndServer.isRunning()) {
       clientAndServer.reset();
-      setupTransactionCountResponder();
     }
-  }
-
-  private void setupTransactionCountResponder() {
-    final EthTransactionCountResponder getTransactionResponse =
-        new EthTransactionCountResponder(nonce -> nonce.add(BigInteger.ONE));
-    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
   }
 
   @AfterClass
