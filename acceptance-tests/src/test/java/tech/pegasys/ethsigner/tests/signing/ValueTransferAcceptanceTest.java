@@ -25,6 +25,7 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.Test;
@@ -35,10 +36,10 @@ import org.web3j.utils.Convert.Unit;
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-  private static final long FIFTY_TRANSACTIONS = 50;
+  private static final long NO_OF_TRANSACTIONS = 50;
 
   @Test
-  public void valueTransfer() {
+  public void valueTransfer() throws IOException {
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
@@ -113,7 +114,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void multipleValueTransfers() {
+  public void multipleValueTransfers() throws IOException {
     final BigInteger transferAmountWei = Convert.toWei("1", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
@@ -126,19 +127,19 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             transferAmountWei);
 
     String hash = null;
-    for (int i = 0; i < FIFTY_TRANSACTIONS; i++) {
+    for (int i = 0; i < NO_OF_TRANSACTIONS; i++) {
       hash = ethSigner().transactions().submit(transaction);
     }
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger endBalance = ethNode().accounts().balance(RECIPIENT);
-    final BigInteger numberOfTransactions = BigInteger.valueOf(FIFTY_TRANSACTIONS);
+    final BigInteger numberOfTransactions = BigInteger.valueOf(NO_OF_TRANSACTIONS);
     assertThat(endBalance)
         .isEqualTo(startBalance.add(transferAmountWei.multiply(numberOfTransactions)));
   }
 
   @Test
-  public void valueTransferNonceTooLow() {
+  public void valueTransferNonceTooLow() throws IOException {
     valueTransfer(); // call this test to increment the nonce
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
     final Transaction transaction =
