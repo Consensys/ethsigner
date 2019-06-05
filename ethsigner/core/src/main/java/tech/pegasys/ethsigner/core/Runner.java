@@ -79,7 +79,9 @@ public class Runner {
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
-  public void stop() {}
+  public void stop() {
+    vertx.undeploy(deploymentId);
+  }
 
   private RequestMapper createRequestMapper(final Vertx vertx) {
 

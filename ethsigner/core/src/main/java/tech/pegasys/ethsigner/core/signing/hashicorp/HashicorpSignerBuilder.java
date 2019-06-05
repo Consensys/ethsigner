@@ -35,6 +35,7 @@ import org.web3j.crypto.Credentials;
 public class HashicorpSignerBuilder {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
 
   private final Vertx vertx;
   private final HttpClient hashicorpVaultClient;
@@ -78,7 +79,7 @@ public class HashicorpSignerBuilder {
   }
 
   private String requestSecretFromVault(String tokenString) {
-    final String requestURI = "/v1" + config.getSigningKeyPath();
+    final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + config.getSigningKeyPath();
 
     return getVaultResponse(tokenString, requestURI);
   }

@@ -22,7 +22,8 @@ import picocli.CommandLine;
 
 public class FileBasedSignerCliConfigTest {
 
-  private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
+  private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
+  private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
   private CommandLine commandLine;
   private FileBasedSignerCliConfig config;
 
@@ -41,10 +42,7 @@ public class FileBasedSignerCliConfigTest {
   }
 
   private String validCommandLine() {
-    return "--password-file="
-        + THIS_IS_THE_PATH_TO_THE_FILE
-        + " --key-file="
-        + THIS_IS_THE_PATH_TO_THE_FILE;
+    return "--password-file=" + PASSWORD_FILE + " --key-file=" + KEY_FILE;
   }
 
   private String removeFieldFrom(final String input, final String fieldname) {
@@ -56,8 +54,8 @@ public class FileBasedSignerCliConfigTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    assertThat(config.getPasswordFilePath().toString()).isEqualTo(THIS_IS_THE_PATH_TO_THE_FILE);
-    assertThat(config.getKeyPath().toString()).isEqualTo(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(config.getPasswordFilePath().toString()).isEqualTo(PASSWORD_FILE);
+    assertThat(config.getKeyPath().toString()).isEqualTo(KEY_FILE);
   }
 
   @Test

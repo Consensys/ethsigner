@@ -24,7 +24,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 public class EthSignerApp {
 
   private static final Logger LOG = LogManager.getLogger();
-
   private static final Vertx vertx = Vertx.vertx();
 
   public static void main(final String... args) {
@@ -32,6 +31,8 @@ public class EthSignerApp {
     if (!config.parse(args)) {
       return;
     }
+
+    Runtime.getRuntime().addShutdownHook(new Cleanup());
 
     // set log level per CLI flags
     System.out.println("Setting logging level to " + config.getLogLevel().name());
@@ -61,5 +62,15 @@ public class EthSignerApp {
       signer = new FileBasedSignerBuilder(config.getFileBasedSignerConfig()).build();
     }
     return signer;
+  }
+
+  private static class Cleanup extends Thread {
+
+    @Override
+    public void run() {
+      if (vertx != null) {
+        vertx.close();
+      }
+    }
   }
 }
