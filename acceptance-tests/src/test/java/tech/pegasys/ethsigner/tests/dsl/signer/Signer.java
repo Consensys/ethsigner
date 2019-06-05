@@ -15,50 +15,73 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import tech.pegasys.ethsigner.tests.EthSignerProcessRunner;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
+import tech.pegasys.ethsigner.tests.dsl.RawRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+
+import java.time.Duration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
 public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String HTTP_URL_FORMAT = "http://%s:%s";
 
-  private final Accounts accounts;
-  private final Contracts contracts;
   private final EthSignerProcessRunner runner;
-  private final Transactions transactions;
-  private final Web3j jsonRpc;
+  private final Duration pollingInverval;
+  private final String hostname;
 
-  public Signer(final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig) {
+  private Accounts accounts;
+  private PublicContracts publicContracts;
+  private PrivateContracts privateContracts;
+  private Transactions transactions;
+  private Web3j jsonRpc;
+  private RawRequests rawRequests;
 
-    LOG.info("EthSigner Web3j service targeting: : " + signerConfig.url());
-
-    this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig);
-    this.jsonRpc =
-        new JsonRpc2_0Web3j(
-            new HttpService(signerConfig.url()),
-            signerConfig.pollingInterval().toMillis(),
-            Async.defaultExecutorService());
-
-    final Eth eth = new Eth(jsonRpc);
-    this.transactions = new Transactions(eth);
-    this.contracts = new Contracts(eth, jsonRpc);
-    this.accounts = new Accounts(eth);
+  public Signer(
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final NodePorts nodePorts) {
+    this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
+    this.pollingInverval = signerConfig.pollingInterval();
+    this.hostname = signerConfig.hostname();
   }
 
   public void start() {
     LOG.info("Starting EthSigner");
     runner.start("EthSigner");
+
+    final String httpJsonRpcUrl = url(runner.httpJsonRpcPort());
+
+    LOG.info("EthSigner Web3j service targeting: : {} ", httpJsonRpcUrl);
+    final HttpService web3jHttpService = new HttpService(httpJsonRpcUrl);
+    this.jsonRpc =
+        new JsonRpc2_0Web3j(
+            web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
+    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
+
+    final Eth eth = new Eth(jsonRpc);
+    final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
+    this.transactions = new Transactions(eth);
+    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
+    this.publicContracts = new PublicContracts(eth);
+    this.privateContracts = new PrivateContracts(eea);
+    this.accounts = new Accounts(eth);
+    this.rawRequests = new RawRequests(web3jHttpService, requestFactory);
   }
 
   public void shutdown() {
@@ -70,8 +93,12 @@ public class Signer {
     return this.transactions;
   }
 
-  public Contracts contracts() {
-    return contracts;
+  public PublicContracts publicContracts() {
+    return publicContracts;
+  }
+
+  public PrivateContracts privateContracts() {
+    return privateContracts;
   }
 
   public Accounts accounts() {
@@ -82,5 +109,13 @@ public class Signer {
     LOG.info("Waiting for Signer to become responsive...");
     waitFor(() -> assertThat(jsonRpc.ethAccounts().send().hasError()).isFalse());
     LOG.info("Signer is now responsive");
+  }
+
+  public RawRequests rawRequest() {
+    return rawRequests;
+  }
+
+  private String url(final int port) {
+    return String.format(HTTP_URL_FORMAT, hostname, port);
   }
 }

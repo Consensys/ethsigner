@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.tests.dsl.utils.Hex.hex;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.Test;
@@ -34,7 +33,7 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
       "0x60fe47b10000000000000000000000000000000000000000000000000000000000000007";
 
   @Test
-  public void deployContract() throws IOException {
+  public void deployContract() {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
@@ -44,18 +43,18 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             BigInteger.ZERO,
             SIMPLE_STORAGE_BINARY);
 
-    final String hash = ethSigner().contracts().submit(contract);
-    ethNode().contracts().awaitBlockContaining(hash);
+    final String hash = ethSigner().publicContracts().submit(contract);
+    ethNode().publicContracts().awaitBlockContaining(hash);
 
-    final String address = ethNode().contracts().address(hash);
-    final String code = ethNode().contracts().code(address);
+    final String address = ethNode().publicContracts().address(hash);
+    final String code = ethNode().publicContracts().code(address);
     assertThat(code)
         .isEqualTo(
             "0x60806040526004361060485763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166360fe47b18114604d5780636d4ce63c146075575b600080fd5b348015605857600080fd5b50607360048036036020811015606d57600080fd5b50356099565b005b348015608057600080fd5b506087609e565b60408051918252519081900360200190f35b600055565b6000549056fea165627a7a72305820cb1d0935d14b589300b12fcd0ab849a7e9019c81da24d6daa4f6b2f003d1b0180029");
   }
 
   @Test
-  public void invokeContract() throws IOException {
+  public void invokeContract() {
     final Transaction contract =
         Transaction.createContractTransaction(
             richBenefactor().address(),
@@ -65,14 +64,14 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             BigInteger.ZERO,
             SIMPLE_STORAGE_BINARY);
 
-    final String hash = ethSigner().contracts().submit(contract);
-    ethNode().contracts().awaitBlockContaining(hash);
+    final String hash = ethSigner().publicContracts().submit(contract);
+    ethNode().publicContracts().awaitBlockContaining(hash);
 
-    final String contractAddress = ethNode().contracts().address(hash);
+    final String contractAddress = ethNode().publicContracts().address(hash);
     final Transaction valueBeforeChange =
         Transaction.createEthCallTransaction(
             richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
-    final BigInteger startingValue = hex(ethSigner().contracts().call(valueBeforeChange));
+    final BigInteger startingValue = hex(ethSigner().publicContracts().call(valueBeforeChange));
     final Transaction changeValue =
         Transaction.createFunctionCallTransaction(
             richBenefactor().address(),
@@ -82,13 +81,13 @@ public class SmartContractAcceptanceTest extends AcceptanceTestBase {
             contractAddress,
             SIMPLE_STORAGE_SET_7);
 
-    final String valueUpdate = ethSigner().contracts().submit(changeValue);
-    ethNode().contracts().awaitBlockContaining(valueUpdate);
+    final String valueUpdate = ethSigner().publicContracts().submit(changeValue);
+    ethNode().publicContracts().awaitBlockContaining(valueUpdate);
 
     final Transaction valueAfterChange =
         Transaction.createEthCallTransaction(
             richBenefactor().address(), contractAddress, SIMPLE_STORAGE_GET);
-    final BigInteger endValue = hex(ethSigner().contracts().call(valueAfterChange));
+    final BigInteger endValue = hex(ethSigner().publicContracts().call(valueAfterChange));
     assertThat(endValue).isEqualTo(startingValue.add(BigInteger.valueOf(7)));
   }
 }

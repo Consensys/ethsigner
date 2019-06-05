@@ -16,8 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 import java.io.UnsupportedEncodingException;
@@ -25,63 +28,95 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
 public class PantheonNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
 
-  /** Pantheon's dev.json has the hard fork at block 0. */
+  private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
+  private static final String HTTP_URL_FORMAT = "http://%s:%s";
+
+  /** Pantheon's dev.json has the hard fork at block 0 */
   private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
+
+  private static final int DEFAULT_HTTP_RPC_PORT = 8545;
+  private static final int DEFAULT_WS_RPC_PORT = 8546;
 
   private final DockerClient docker;
   private final String pantheonContainerId;
-  private final Accounts accounts;
-  private final Contracts contracts;
-  private final Transactions transactions;
-  private final Web3j jsonRpc;
+  private final long pollingInterval;
+  private final String hostname;
+
+  private Accounts accounts;
+  private Transactions transactions;
+  private Web3j jsonRpc;
+  private NodePorts ports;
+  private PublicContracts publicContracts;
+  private PrivateContracts privateContracts;
 
   public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
-    LOG.info("Pantheon Web3j service targeting: {} ", config.getUrl());
-
-    this.jsonRpc =
-        new JsonRpc2_0Web3j(
-            new HttpService(config.getUrl()),
-            config.getPollingInterval().toMillis(),
-            Async.defaultExecutorService());
-
     this.docker = docker;
     pullPantheonImage();
     this.pantheonContainerId = createPantheonContainer(config);
-    final Eth eth = new Eth(jsonRpc);
-    this.accounts = new Accounts(eth);
-    this.contracts = new Contracts(eth, jsonRpc);
-    this.transactions = new Transactions(eth);
+    this.pollingInterval = config.getPollingInterval().toMillis();
+    this.hostname = config.getHostname();
   }
 
   @Override
   public void start() {
     LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
     docker.startContainerCmd(pantheonContainerId).exec();
+
+    LOG.info("Querying for the Docker dynamically allocated RPC port numbers");
+    final InspectContainerResponse containerResponse =
+        docker.inspectContainerCmd(pantheonContainerId).exec();
+    final Ports ports = containerResponse.getNetworkSettings().getPorts();
+    final int httpRpcPort = httpRpcPort(ports);
+    final int wsRpcPort = wsRpcPort(ports);
+    LOG.info("Http RPC port: {}, Web Socket RPC port: {}", httpRpcPort, wsRpcPort);
+
+    final String httpRpcUrl = url(httpRpcPort);
+    LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
+
+    final HttpService web3jHttpService = new HttpService(httpRpcUrl);
+    this.jsonRpc =
+        new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
+    final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
+    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
+    final Eth eth = new Eth(jsonRpc);
+    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
+    this.accounts = new Accounts(eth);
+    this.publicContracts = new PublicContracts(eth);
+    this.privateContracts = new PrivateContracts(eea);
+    this.transactions = new Transactions(eth);
+    this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
 
   @Override
@@ -108,18 +143,32 @@ public class PantheonNode implements Node {
   }
 
   @Override
+  public NodePorts ports() {
+    return ports;
+  }
+
+  @Override
   public Accounts accounts() {
     return accounts;
   }
 
   @Override
-  public Contracts contracts() {
-    return contracts;
+  public PublicContracts publicContracts() {
+    return publicContracts;
+  }
+
+  @Override
+  public PrivateContracts privateContracts() {
+    return privateContracts;
   }
 
   @Override
   public Transactions transactions() {
     return transactions;
+  }
+
+  private String url(final int port) {
+    return String.format(HTTP_URL_FORMAT, hostname, port);
   }
 
   private boolean hasPantheonContainer() {
@@ -161,37 +210,50 @@ public class PantheonNode implements Node {
   }
 
   private String createPantheonContainer(final NodeConfiguration config) {
-    final String genesisFilePath = getGenesisFilePath(config.getGenesisFilePath());
+    final String genesisFilePath = genesisFilePath(config.getGenesisFilePath());
     LOG.info("Path to Genesis file: {}", genesisFilePath);
     final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
-    final HostConfig hostConfig =
-        HostConfig.newHostConfig()
-            .withPortBindings(tcpPortBinding(config), wsPortBinding(config))
-            .withBinds(genesisBinding);
+    final Bind privacyBinding = privacyVolumeBinding("enclave_key.pub");
+    final List<Bind> bindings = Lists.newArrayList(genesisBinding, privacyBinding);
 
     try {
+      final List<String> commandLineItems =
+          Lists.newArrayList(
+              "--logging",
+              "DEBUG",
+              "--miner-enabled",
+              "--miner-coinbase",
+              "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
+              "--host-whitelist",
+              "*",
+              "--rpc-http-enabled",
+              "--rpc-ws-enabled",
+              "--rpc-http-apis",
+              "ETH,NET,WEB3,EEA",
+              "--privacy-enabled");
+
+      config
+          .getCors()
+          .ifPresent(
+              cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
+
+      LOG.debug("pantheon command line {}", config);
+
+      final HostConfig hostConfig =
+          HostConfig.newHostConfig()
+              .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
+              .withBinds(bindings);
       final CreateContainerCmd createPantheon =
           docker
               .createContainerCmd(PANTHEON_IMAGE)
               .withHostConfig(hostConfig)
               .withVolumes(genesisVolume)
-              .withCmd(
-                  "--logging",
-                  "DEBUG",
-                  "--miner-enabled",
-                  "--miner-coinbase",
-                  "1b23ba34ca45bb56aa67bc78be89ac00ca00da00",
-                  "--rpc-http-cors-origins",
-                  "all",
-                  "--host-whitelist",
-                  "*",
-                  "--rpc-http-enabled",
-                  "--rpc-ws-enabled");
+              .withCmd(commandLineItems);
 
-      LOG.info("Creating the Pantheon Docker image...");
+      LOG.info("Creating the Pantheon Docker container...");
       final CreateContainerResponse pantheon = createPantheon.exec();
-      LOG.info("Created Pantheon Docker image, id: " + pantheon.getId());
+      LOG.info("Created Pantheon Docker container, id: " + pantheon.getId());
       return pantheon.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(
@@ -200,21 +262,53 @@ public class PantheonNode implements Node {
     }
   }
 
-  private String getGenesisFilePath(final String filename) {
+  private String genesisFilePath(final String filename) {
     final URL resource = PantheonNode.class.getResource(filename);
+    return resourceFileName(resource);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private String privacyPublicKeyFilePath(final String filename) {
+    final URL resource = Resources.getResource(filename);
+    return resourceFileName(resource);
+  }
+
+  private String resourceFileName(final URL resource) {
     try {
       return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
     } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode genesis filepath.");
+      LOG.error("Unsupported encoding used to decode {}, filepath.", resource);
       throw new RuntimeException("Illegal string decoding");
     }
   }
 
-  private PortBinding tcpPortBinding(final NodeConfiguration config) {
-    return PortBinding.parse(config.getTcpPort() + ":8545");
+  private Bind privacyVolumeBinding(final String privacyPublicKey) {
+    final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
+    final Volume privacyPublicKeyVolume = new Volume("/etc/pantheon/privacy_public_key");
+    return new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
   }
 
-  private PortBinding wsPortBinding(final NodeConfiguration config) {
-    return PortBinding.parse(config.getWsPort() + ":8546");
+  private PortBinding httpRpcPortBinding() {
+    return new PortBinding(new Binding(null, null), ExposedPort.tcp(DEFAULT_HTTP_RPC_PORT));
+  }
+
+  private PortBinding wsRpcPortBinding() {
+    return new PortBinding(new Binding(null, null), ExposedPort.tcp(DEFAULT_WS_RPC_PORT));
+  }
+
+  private int wsRpcPort(final Ports ports) {
+    return portSpec(ports, DEFAULT_WS_RPC_PORT);
+  }
+
+  private int httpRpcPort(final Ports ports) {
+    return portSpec(ports, DEFAULT_HTTP_RPC_PORT);
+  }
+
+  private int portSpec(final Ports ports, final int exposedPort) {
+    final Binding[] tcpPorts = ports.getBindings().get(ExposedPort.tcp(exposedPort));
+    assertThat(tcpPorts).isNotEmpty();
+    assertThat(tcpPorts.length).isEqualTo(1);
+
+    return Integer.parseInt(tcpPorts[0].getHostPortSpec());
   }
 }

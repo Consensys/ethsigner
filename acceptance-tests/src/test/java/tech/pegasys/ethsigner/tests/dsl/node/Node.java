@@ -13,7 +13,8 @@
 package tech.pegasys.ethsigner.tests.dsl.node;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.Contracts;
+import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
+import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 
 public interface Node {
@@ -24,9 +25,13 @@ public interface Node {
 
   void awaitStartupCompletion();
 
+  NodePorts ports();
+
   Accounts accounts();
 
-  Contracts contracts();
+  PublicContracts publicContracts();
+
+  PrivateContracts privateContracts();
 
   Transactions transactions();
 }

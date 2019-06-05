@@ -24,6 +24,7 @@ public class NodeConfigurationBuilder {
 
   private final DefaultDockerClientConfig config;
   private String genesis;
+  private String cors;
 
   public NodeConfigurationBuilder() {
     this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
@@ -39,9 +40,14 @@ public class NodeConfigurationBuilder {
     return this;
   }
 
+  public NodeConfigurationBuilder cors(final String cors) {
+    this.cors = cors;
+    return this;
+  }
+
   public NodeConfiguration build() {
     final String hostname = dockerHost(config).orElse(LOCALHOST);
 
-    return new NodeConfiguration(genesis, hostname);
+    return new NodeConfiguration(genesis, hostname, cors);
   }
 }

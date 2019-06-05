@@ -15,8 +15,9 @@ package tech.pegasys.ethsigner.tests.dsl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.io.IOException;
@@ -38,20 +39,20 @@ public class Transactions {
     this.eth = eth;
   }
 
-  public String submit(final Transaction transaction) throws IOException {
-    return eth.sendTransaction(transaction);
+  public String submit(final Transaction transaction) {
+    return failOnIOException(() -> eth.sendTransaction(transaction));
   }
 
-  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction)
-      throws IOException {
+  public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction) {
     try {
-      eth.sendTransaction(transaction);
+      failOnIOException(() -> eth.sendTransaction(transaction));
       fail("Expecting exceptional response ");
-      return null;
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
-      return eth.parseException(e);
+      return SignerResponse.fromError(e);
     }
+
+    return null;
   }
 
   public void awaitBlockContaining(final String hash) {

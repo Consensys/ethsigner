@@ -13,43 +13,35 @@
 package tech.pegasys.ethsigner.tests.dsl.node;
 
 import java.time.Duration;
+import java.util.Optional;
 
 public class NodeConfiguration {
 
-  private static final String HTTP_URL_FORMAT = "http://%s:%s";
-  private static final int TCP_PORT = 8547;
-  private static final int WS_PORT = 8548;
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
 
   private final String hostname;
   private final String genesisFilePath;
+  private final Optional<String> cors;
 
-  public NodeConfiguration(final String genesisFilePath, final String hostname) {
+  public NodeConfiguration(final String genesisFilePath, final String hostname, final String cors) {
     this.hostname = hostname;
     this.genesisFilePath = genesisFilePath;
+    this.cors = Optional.ofNullable(cors);
   }
 
   public String getHostname() {
     return hostname;
   }
 
-  public int getTcpPort() {
-    return TCP_PORT;
-  }
-
-  public int getWsPort() {
-    return WS_PORT;
-  }
-
   public Duration getPollingInterval() {
     return POLLING_INTERVAL;
   }
 
-  public String getUrl() {
-    return String.format(HTTP_URL_FORMAT, getHostname(), getTcpPort());
-  }
-
   public String getGenesisFilePath() {
     return genesisFilePath;
+  }
+
+  public Optional<String> getCors() {
+    return cors;
   }
 }
