@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -46,10 +45,9 @@ public class Runner {
   private final HttpClientOptions clientOptions;
   private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
-  private final NonceProvider nonceProvider;
+  private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final Path dataDirectory;
-  private final TransactionFactory transactionFactory = new TransactionFactory();
 
   private Vertx vertx;
   private String deploymentId;
@@ -61,13 +59,13 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final NonceProvider nonceProvider,
+      final TransactionFactory transactionFactory,
       final Path dataDirectory) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
-    this.nonceProvider = nonceProvider;
+    this.transactionFactory = transactionFactory;
     this.dataDirectory = dataDirectory;
     this.vertx = vertx;
   }
@@ -98,7 +96,6 @@ public class Runner {
         new SendTransactionHandler(
             downStreamConnection,
             serialiser,
-            nonceProvider,
             transactionFactory,
             responseBodyHandler ->
                 new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));

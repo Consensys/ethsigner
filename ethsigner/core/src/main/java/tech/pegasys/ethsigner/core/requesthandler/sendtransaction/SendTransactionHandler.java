@@ -35,7 +35,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private final HttpClient ethNodeClient;
   private final TransactionSerialiser serialiser;
-  private final NonceProvider nonceProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
@@ -44,12 +43,10 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   public SendTransactionHandler(
       final HttpClient ethNodeClient,
       final TransactionSerialiser serialiser,
-      final NonceProvider nonceProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.ethNodeClient = ethNodeClient;
     this.serialiser = serialiser;
-    this.nonceProvider = nonceProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
@@ -104,18 +101,12 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           transaction,
           serialiser,
           vertxTransmitterFactory,
-          nonceProvider,
           new NonceTooLowRetryMechanism(MAX_RETRIES_NONCE_RETRIES),
           routingContext);
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(
-          ethNodeClient,
-          transaction,
-          serialiser,
-          vertxTransmitterFactory,
-          nonceProvider,
-          routingContext);
+          ethNodeClient, transaction, serialiser, vertxTransmitterFactory, routingContext);
     }
   }
 

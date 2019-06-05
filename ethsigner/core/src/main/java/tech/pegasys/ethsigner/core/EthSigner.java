@@ -12,8 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.Web3jNonceProvider;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -28,6 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
@@ -58,10 +59,10 @@ public final class EthSigner {
       return;
     }
 
-    final Web3j web3j = createWeb3j();
-
-    final NonceProvider nonceProvider = new Web3jNonceProvider(web3j, signer.getAddress());
-
+    final HttpService web3jService = createWeb3jHttpService();
+    final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
+    final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final TransactionFactory transactionFactory = new TransactionFactory(eea, web3j);
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(signer, config.getChainId().id());
     final WebClientOptions clientOptions =
@@ -83,13 +84,13 @@ public final class EthSigner {
             clientOptions,
             serverOptions,
             downstreamHttpRequestTimeout,
-            nonceProvider,
+            transactionFactory,
             dataDirectory);
 
     runner.start();
   }
 
-  private Web3j createWeb3j() {
+  private HttpService createWeb3jHttpService() {
     final String downstreamUrl =
         "http://"
             + config.getDownstreamHttpHost().getHostName()
@@ -101,7 +102,6 @@ public final class EthSigner {
     builder
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
         .readTimeout(config.getDownstreamHttpRequestTimeout());
-
-    return new JsonRpc2_0Web3j(new HttpService(downstreamUrl, builder.build()));
+    return new HttpService(downstreamUrl, builder.build());
   }
 }

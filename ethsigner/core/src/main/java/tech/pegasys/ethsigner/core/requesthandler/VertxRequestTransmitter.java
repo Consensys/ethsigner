@@ -33,7 +33,7 @@ public class VertxRequestTransmitter {
   private final ResponseBodyHandler bodyHandler;
 
   public VertxRequestTransmitter(
-      final Duration httpRequestTimeout, ResponseBodyHandler bodyHandler) {
+      final Duration httpRequestTimeout, final ResponseBodyHandler bodyHandler) {
     this.httpRequestTimeout = httpRequestTimeout;
     this.bodyHandler = bodyHandler;
   }

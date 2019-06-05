@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.jsonrpcproxy.support;
 
 import static org.mockserver.model.HttpResponse.response;
+import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -29,17 +30,27 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.RegexBody;
 
-public class EthTransactionCountResponder implements ExpectationResponseCallback {
+public class TransactionCountResponder implements ExpectationResponseCallback {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final String REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
+  public enum TRANSACTION_COUNT_METHOD {
+    ETH_GET_TRANSACTION_COUNT,
+    EEA_GET_TRANSACTION_COUNT
+  }
+
+  private static final String ETH_REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
+  private static final String EEA_REQUEST_REGEX_PATTERN = ".*eea_getTransactionCount.*";
 
   private BigInteger nonce = BigInteger.ZERO;
-  private Function<BigInteger, BigInteger> nonceMutator;
+  private final Function<BigInteger, BigInteger> nonceMutator;
+  private final String regexPattern;
 
-  public EthTransactionCountResponder(Function<BigInteger, BigInteger> nonceMutator) {
+  public TransactionCountResponder(
+      final Function<BigInteger, BigInteger> nonceMutator, final TRANSACTION_COUNT_METHOD method) {
     this.nonceMutator = nonceMutator;
+    this.regexPattern =
+        method == ETH_GET_TRANSACTION_COUNT ? ETH_REQUEST_REGEX_PATTERN : EEA_REQUEST_REGEX_PATTERN;
   }
 
   @Override
@@ -63,7 +74,6 @@ public class EthTransactionCountResponder implements ExpectationResponseCallback
   }
 
   public HttpRequest request() {
-    return HttpRequest.request()
-        .withBody(new RegexBody(EthTransactionCountResponder.REQUEST_REGEX_PATTERN));
+    return HttpRequest.request().withBody(new RegexBody(regexPattern));
   }
 }

@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,18 +32,22 @@ public class EeaTransaction implements Transaction {
   private static final String JSON_RPC_METHOD = "eea_sendRawTransaction";
   private final EeaSendTransactionJsonParameters transactionJsonParameters;
   private final JsonRpcRequestId id;
+  private final NonceProvider nonceProvider;
   private BigInteger nonce;
 
   EeaTransaction(
-      final EeaSendTransactionJsonParameters transactionJsonParameters, final JsonRpcRequestId id) {
+      final EeaSendTransactionJsonParameters transactionJsonParameters,
+      final NonceProvider nonceProvider,
+      final JsonRpcRequestId id) {
     this.transactionJsonParameters = transactionJsonParameters;
+    this.nonceProvider = nonceProvider;
     this.id = id;
     this.nonce = transactionJsonParameters.nonce().orElse(null);
   }
 
   @Override
-  public void updateNonce(final BigInteger nonce) {
-    this.nonce = nonce;
+  public void updateNonce() {
+    this.nonce = nonceProvider.getNonce();
   }
 
   @Override
@@ -79,8 +84,9 @@ public class EeaTransaction implements Transaction {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("transactionJsonParameters", transactionJsonParameters)
-        .add("nonce", nonce)
         .add("id", id)
+        .add("nonceProvider", nonceProvider)
+        .add("nonce", nonce)
         .toString();
   }
 
