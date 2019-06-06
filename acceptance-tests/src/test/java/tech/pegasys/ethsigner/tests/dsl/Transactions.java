@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOExce
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,11 +63,7 @@ public class Transactions {
     }
   }
 
-  public BigInteger count(final String address) throws IOException {
-    return eth.getTransactionCount(address);
-  }
-
-  public BigInteger count(final Account account) throws IOException {
-    return count(account.address());
+  public BigInteger count(final String address) {
+    return failOnIOException(() -> eth.getTransactionCount(address));
   }
 }

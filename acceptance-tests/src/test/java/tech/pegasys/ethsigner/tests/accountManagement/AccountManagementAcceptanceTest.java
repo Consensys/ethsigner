@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
@@ -24,14 +23,14 @@ import org.junit.Test;
 public class AccountManagementAcceptanceTest extends AcceptanceTestBase {
 
   @Test
-  public void ethSignerAccountsReturnsAccountForPrivKey() throws Exception {
+  public void ethSignerAccountsReturnsAccountForPrivKey() {
     List<String> accounts = ethSigner().accounts().list();
     assertThat(accounts.size()).isEqualTo(1);
     assertThat(ethNode().accounts().balance(accounts.get(0))).isNotNull();
   }
 
   @Test
-  public void ethAccountsReturnsNoAccounts() throws IOException {
+  public void ethAccountsReturnsNoAccounts() {
     assertThat(ethNode().accounts().list()).isEmpty();
   }
 }

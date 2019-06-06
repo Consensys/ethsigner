@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
-import java.io.IOException;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -36,15 +37,15 @@ public class Accounts {
     return benefactor;
   }
 
-  public BigInteger balance(final Account account) throws IOException {
+  public BigInteger balance(final Account account) {
     return balance(account.address());
   }
 
-  public BigInteger balance(final String address) throws IOException {
-    return eth.getBalance(address);
+  public BigInteger balance(final String address) {
+    return failOnIOException(() -> eth.getBalance(address));
   }
 
-  public List<String> list() throws IOException {
-    return eth.getAccounts();
+  public List<String> list() {
+    return failOnIOException(eth::getAccounts);
   }
 }

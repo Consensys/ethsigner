@@ -26,7 +26,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
@@ -90,7 +89,7 @@ public class DataDirectoryFeatureFlagAcceptanceTest {
   }
 
   @Test
-  public void valueTransfer() throws IOException {
+  public void valueTransfer() {
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
