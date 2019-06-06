@@ -41,7 +41,7 @@ public class HashicorpSignerBuilder {
   private final HttpClient hashicorpVaultClient;
   private final HashicorpSignerConfig config;
 
-  public HashicorpSignerBuilder(final HashicorpSignerConfig config, Vertx vertx) {
+  public HashicorpSignerBuilder(final HashicorpSignerConfig config, final Vertx vertx) {
     this.config = config;
     this.vertx = vertx;
     this.hashicorpVaultClient = vertx.createHttpClient();

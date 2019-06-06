@@ -52,7 +52,6 @@ import io.restassured.RestAssured;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
@@ -272,14 +271,5 @@ public class IntegrationTestBase {
     File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
-  }
-
-  protected static String generateTransactionCountResponse() {
-    final JsonObject json = new JsonObject();
-    json.put("id", 1);
-    json.put("jsonrpc", "2.0");
-    json.put("result", "0x0");
-
-    return json.encode();
   }
 }
