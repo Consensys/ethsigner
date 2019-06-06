@@ -49,7 +49,7 @@ public class Runner {
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final Path dataDirectory;
 
-  private Vertx vertx;
+  private final Vertx vertx;
   private String deploymentId;
   private JsonRpcHttpService httpService;
 

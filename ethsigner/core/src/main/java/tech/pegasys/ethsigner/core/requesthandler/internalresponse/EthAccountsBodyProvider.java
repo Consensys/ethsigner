@@ -56,9 +56,9 @@ public class EthAccountsBodyProvider implements BodyProvider {
 
   private boolean isNotEmptyArray(final Object params) {
     boolean arrayIsEmpty = false;
-    boolean paramsIsArray = (params instanceof Collection);
+    final boolean paramsIsArray = (params instanceof Collection);
     if (paramsIsArray) {
-      Collection<?> collection = (Collection<?>) params;
+      final Collection<?> collection = (Collection<?>) params;
       arrayIsEmpty = collection.isEmpty();
     }
 

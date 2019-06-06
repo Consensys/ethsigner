@@ -37,13 +37,11 @@ public class HashicorpSignerBuilder {
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
 
-  private final Vertx vertx;
   private final HttpClient hashicorpVaultClient;
   private final HashicorpSignerConfig config;
 
   public HashicorpSignerBuilder(final HashicorpSignerConfig config, final Vertx vertx) {
     this.config = config;
-    this.vertx = vertx;
     this.hashicorpVaultClient = vertx.createHttpClient();
   }
 
@@ -67,12 +65,11 @@ public class HashicorpSignerBuilder {
     final List<String> authFileLines;
     try {
       authFileLines = Files.readAllLines(config.getAuthFilePath());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.error(
-          "Unable to read file containing the authentication information for Hashicorp Vault.\n"
-              + config.getAuthFilePath()
-              + "\n"
-              + e.getMessage());
+          "Unable to read file containing the authentication information for Hashicorp Vault: "
+              + config.getAuthFilePath(),
+          e);
       return null;
     }
     return authFileLines.get(0);
@@ -84,7 +81,7 @@ public class HashicorpSignerBuilder {
     return getVaultResponse(tokenString, requestURI);
   }
 
-  private String getVaultResponse(String tokenString, String requestURI) {
+  private String getVaultResponse(final String tokenString, final String requestURI) {
     final CompletableFuture<String> future = new CompletableFuture<>();
     final HttpClientRequest request =
         hashicorpVaultClient.request(
@@ -92,20 +89,19 @@ public class HashicorpSignerBuilder {
             config.getServerPort(),
             config.getServerHost(),
             requestURI,
-            rh -> {
-              rh.bodyHandler(
-                  bh -> {
-                    if (rh.statusCode() == 200) {
-                      future.complete(bh.toString());
-                    } else {
-                      future.completeExceptionally(
-                          new Exception(
-                              "Hashicorp vault responded with status code {"
-                                  + rh.statusCode()
-                                  + "}"));
-                    }
-                  });
-            });
+            rh ->
+                rh.bodyHandler(
+                    bh -> {
+                      if (rh.statusCode() == 200) {
+                        future.complete(bh.toString());
+                      } else {
+                        future.completeExceptionally(
+                            new Exception(
+                                "Hashicorp vault responded with status code {"
+                                    + rh.statusCode()
+                                    + "}"));
+                      }
+                    }));
     if (tokenString != null) {
       request.headers().set("X-Vault-Token", tokenString);
     }
@@ -115,14 +111,17 @@ public class HashicorpSignerBuilder {
   }
 
   private String getResponse(final CompletableFuture<String> future) {
-    String response;
+    final String response;
     try {
       response = future.get(config.getTimeout(), TimeUnit.SECONDS);
-    } catch (InterruptedException | ExecutionException e) {
-      LOG.error("Unable to retrieve private key from Hashicorp Vault.", config.toString(), e);
+    } catch (final InterruptedException | ExecutionException e) {
+      LOG.error(
+          "Unable to retrieve private key from Hashicorp Vault with this config: \n" + config, e);
       return null;
-    } catch (TimeoutException e) {
-      LOG.error("Timeout while retrieving private key from Hashicorp Vault.", config.toString(), e);
+    } catch (final TimeoutException e) {
+      LOG.error(
+          "Timeout while retrieving private key from Hashicorp Vault with this config: \n" + config,
+          e);
       return null;
     }
     return response;

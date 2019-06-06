@@ -45,7 +45,7 @@ public class EthSignerApp {
     final TransactionSigner signer = createTransactionSigner(config);
 
     if (signer == null) {
-      LOG.error("Cannot create a signer from the given config: " + config.toString());
+      LOG.error("Cannot create a signer from the given config: " + config);
       System.exit(-1);
     }
 

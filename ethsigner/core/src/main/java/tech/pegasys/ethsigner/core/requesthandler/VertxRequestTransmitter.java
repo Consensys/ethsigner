@@ -63,8 +63,8 @@ public class VertxRequestTransmitter {
                     res -> {
                       if (res.failed()) {
                         LOG.error(
-                            "An unhandled error occurred while processing {}",
-                            context.getBodyAsString(),
+                            "An unhandled error occurred while processing "
+                                + context.getBodyAsString(),
                             res.cause());
                         context.fail(res.cause());
                       }

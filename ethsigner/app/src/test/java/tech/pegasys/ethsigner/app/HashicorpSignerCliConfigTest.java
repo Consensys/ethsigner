@@ -30,18 +30,17 @@ public class HashicorpSignerCliConfigTest {
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private CommandLine commandLine;
   private HashicorpSignerCliConfig hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
     hashiConfig = new HashicorpSignerCliConfig();
-    commandLine = new CommandLine(hashiConfig);
+    final CommandLine commandLine = new CommandLine(hashiConfig);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     try {
       commandLine.parse(cmdLine.split(" "));
-    } catch (CommandLine.ParameterException e) {
+    } catch (final CommandLine.ParameterException e) {
       return false;
     }
     return true;

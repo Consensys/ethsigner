@@ -35,29 +35,29 @@ public class FileBasedSignerBuilder {
   }
 
   public TransactionSigner build() {
-    String password;
+    final String password;
     try {
       password = readPasswordFromFile(config);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.error(
-          "Error when reading the password from file using the following path:\n {}.",
-          config.getPasswordFilePath(),
+          "Error when reading the password from file using the following path: "
+              + config.getPasswordFilePath(),
           e);
       return null;
     }
-    Credentials credentials;
+    final Credentials credentials;
     try {
       credentials = WalletUtils.loadCredentials(password, config.getKeyPath().toFile());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.error(
-          "Error when reading key file for the file based signer using the following path:\n {}.",
-          config.getKeyPath(),
+          "Error when reading key file for the file based signer using the following path: "
+              + config.getKeyPath(),
           e);
       return null;
-    } catch (CipherException e) {
+    } catch (final CipherException e) {
       LOG.error(
-          "Error when decrypting key for the file based signer using the following config:\n {}.",
-          config.toString(),
+          "Error when decrypting key for the file based signer using the following config:\n"
+              + config,
           e);
       return null;
     }
@@ -66,7 +66,7 @@ public class FileBasedSignerBuilder {
 
   private static String readPasswordFromFile(final FileBasedSignerConfig config)
       throws IOException {
-    byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
+    final byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
     return new String(fileContent, Charsets.UTF_8);
   }
 }

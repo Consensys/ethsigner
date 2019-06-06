@@ -64,7 +64,6 @@ public class HashicorpVaultDocker {
 
   private int port;
   private String ipAddress;
-  private DefaultDockerClientConfig dockerConfig;
 
   public HashicorpVaultDocker(final DockerClient docker) {
     this.docker = docker;
@@ -102,7 +101,8 @@ public class HashicorpVaultDocker {
   }
 
   private String getDockerHostIp() {
-    this.dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+    final DefaultDockerClientConfig dockerConfig =
+        DefaultDockerClientConfig.createDefaultConfigBuilder().build();
     final Optional<String> optional = Optional.of(dockerConfig.getDockerHost()).map(URI::getHost);
     return optional.orElse(LOCALHOST);
   }

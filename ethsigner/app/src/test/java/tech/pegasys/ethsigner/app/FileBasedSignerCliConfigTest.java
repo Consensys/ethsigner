@@ -24,18 +24,17 @@ public class FileBasedSignerCliConfigTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
-  private CommandLine commandLine;
   private FileBasedSignerCliConfig config;
 
   private boolean parseCommand(final String cmdLine) {
     config = new FileBasedSignerCliConfig();
-    commandLine = new CommandLine(config);
+    final CommandLine commandLine = new CommandLine(config);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     try {
       commandLine.parse(cmdLine.split(" "));
-    } catch (CommandLine.ParameterException e) {
+    } catch (final CommandLine.ParameterException e) {
       return false;
     }
     return true;

@@ -268,7 +268,7 @@ public class IntegrationTestBase {
     final URL walletResource = Resources.getResource("keyfile.json");
     final Path wallet = Files.createTempFile("ethsigner_intg_keyfile", ".json");
     Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
-    File keyFile = wallet.toFile();
+    final File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
   }

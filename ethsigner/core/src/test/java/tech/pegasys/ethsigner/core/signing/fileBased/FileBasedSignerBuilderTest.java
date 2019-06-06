@@ -37,7 +37,8 @@ public class FileBasedSignerBuilderTest {
   public static void createKeyFile() {
     try {
       fileName = WalletUtils.generateFullNewWalletFile(MY_PASSWORD, null);
-    } catch (Exception e) {
+    } catch (final Exception e) {
+      // intentionally empty
     }
     new File(fileName).deleteOnExit();
   }
@@ -46,7 +47,7 @@ public class FileBasedSignerBuilderTest {
 
   @Test
   public void success() throws IOException {
-    FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
+    final FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     final File keyFile = new File(fileName);
     final File pwdFile = createFile(MY_PASSWORD);
@@ -62,7 +63,7 @@ public class FileBasedSignerBuilderTest {
   @Test
   public void passwordInvalid() throws IOException {
 
-    FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
+    final FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     final File pwdFile = createFile("invalid");
     final File keyFile = new File(fileName);
@@ -76,9 +77,9 @@ public class FileBasedSignerBuilderTest {
   }
 
   @Test
-  public void passwordFileNotAvailable() throws IOException {
+  public void passwordFileNotAvailable() {
 
-    FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
+    final FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     when(configMock.getPasswordFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
@@ -90,7 +91,7 @@ public class FileBasedSignerBuilderTest {
   @Test
   public void keyFileNotAvailable() throws IOException {
 
-    FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
+    final FileBasedSignerConfig configMock = mock(FileBasedSignerConfig.class);
 
     final File file = createFile("doesNotMatter");
 
@@ -102,11 +103,10 @@ public class FileBasedSignerBuilderTest {
     assertThat(signer).isNull();
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   private static File createFile(final String s) throws IOException {
     final Path path = Files.createTempFile("file", ".file");
     Files.write(path, s.getBytes(UTF_8));
-    File file = path.toFile();
+    final File file = path.toFile();
     file.deleteOnExit();
     return file;
   }

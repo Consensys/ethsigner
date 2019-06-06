@@ -35,7 +35,7 @@ public class HashicorpSignerBuilderTest {
   @Test
   public void vaultTimingOut() throws IOException {
 
-    HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
+    final HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
 
     final File authFile = createFile();
 
@@ -51,9 +51,9 @@ public class HashicorpSignerBuilderTest {
   }
 
   @Test
-  public void authFileNotAvailable() throws IOException {
+  public void authFileNotAvailable() {
 
-    HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
+    final HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
 
     when(configMock.getAuthFilePath()).thenReturn(Paths.get("nonExistingFile"));
 
@@ -66,7 +66,7 @@ public class HashicorpSignerBuilderTest {
   private static File createFile() throws IOException {
     final Path path = Files.createTempFile("file", ".file");
     Files.write(path, "something".getBytes(UTF_8));
-    File keyFile = path.toFile();
+    final File keyFile = path.toFile();
     keyFile.deleteOnExit();
     return keyFile;
   }
