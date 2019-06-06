@@ -36,7 +36,7 @@ public class CommandLineConfigTest {
 
   private CommandLineConfig config = new CommandLineConfig(outPrintStream);
 
-  private boolean parseCommand(String cmdLine) {
+  private boolean parseCommand(final String cmdLine) {
     return config.parse(cmdLine.split(" "));
   }
 

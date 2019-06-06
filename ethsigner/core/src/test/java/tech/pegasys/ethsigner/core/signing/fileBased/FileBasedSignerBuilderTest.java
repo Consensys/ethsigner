@@ -103,7 +103,7 @@ public class FileBasedSignerBuilderTest {
   }
 
   @SuppressWarnings("UnstableApiUsage")
-  private static File createFile(String s) throws IOException {
+  private static File createFile(final String s) throws IOException {
     final Path path = Files.createTempFile("file", ".file");
     Files.write(path, s.getBytes(UTF_8));
     File file = path.toFile();

@@ -41,7 +41,7 @@ public class HashicorpSignerBuilder {
   private final HttpClient hashicorpVaultClient;
   private final HashicorpSignerConfig config;
 
-  public HashicorpSignerBuilder(HashicorpSignerConfig config, Vertx vertx) {
+  public HashicorpSignerBuilder(final HashicorpSignerConfig config, Vertx vertx) {
     this.config = config;
     this.vertx = vertx;
     this.hashicorpVaultClient = vertx.createHttpClient();
@@ -78,7 +78,7 @@ public class HashicorpSignerBuilder {
     return authFileLines.get(0);
   }
 
-  private String requestSecretFromVault(String tokenString) {
+  private String requestSecretFromVault(final String tokenString) {
     final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + config.getSigningKeyPath();
 
     return getVaultResponse(tokenString, requestURI);
@@ -128,7 +128,7 @@ public class HashicorpSignerBuilder {
     return response;
   }
 
-  private Credentials extractCredentialsFromJson(String response) {
+  private Credentials extractCredentialsFromJson(final String response) {
     if (response == null) {
       return null;
     }

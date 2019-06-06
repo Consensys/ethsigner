@@ -27,7 +27,7 @@ public class CredentialTransactionSigner implements TransactionSigner {
   }
 
   @Override
-  public Signature sign(byte[] data) {
+  public Signature sign(final byte[] data) {
     final SignatureData signature = Sign.signMessage(data, credentials.getEcKeyPair());
     return new Signature(
         new BigInteger(signature.getV()),
