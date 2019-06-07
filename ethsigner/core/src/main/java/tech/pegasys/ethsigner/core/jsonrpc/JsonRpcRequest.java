@@ -95,8 +95,8 @@ public class JsonRpcRequest {
       if (!otherParams.getClass().isArray()) {
         return false;
       }
-      Object[] paramsArray = (Object[]) params;
-      Object[] thatParamsArray = (Object[]) otherParams;
+      final Object[] paramsArray = (Object[]) params;
+      final Object[] thatParamsArray = (Object[]) otherParams;
       return Arrays.equals(paramsArray, thatParamsArray);
     } else if (otherParams.getClass().isArray()) {
       return false;

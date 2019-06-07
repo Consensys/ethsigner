@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
@@ -25,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
@@ -65,6 +62,7 @@ public class EthSignerProcessRunner {
   private final boolean useDynamicPortAllocation;
   private final Path dataDirectory;
   private final int signerHttpRpcPort;
+  private final SignerConfiguration signerConfig;
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
@@ -74,11 +72,12 @@ public class EthSignerProcessRunner {
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
-    this.timeoutMs = String.valueOf(nodeConfig.getPollingInterval().toMillis());
+    this.timeoutMs = String.valueOf(signerConfig.timeout().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
     this.portsProperties = new Properties();
+    this.signerConfig = signerConfig;
 
     this.useDynamicPortAllocation = signerConfig.isDynamicPortAllocation();
 
@@ -124,10 +123,6 @@ public class EthSignerProcessRunner {
     params.add(executableLocation());
     params.add("--logging");
     params.add(loggingLevel);
-    params.add("--password-file");
-    params.add(createPasswordFile().getAbsolutePath());
-    params.add("--key-file");
-    params.add(createKeyFile().getAbsolutePath());
     params.add("--downstream-http-host");
     params.add(nodeHostname);
     params.add("--downstream-http-port");
@@ -140,11 +135,11 @@ public class EthSignerProcessRunner {
     params.add(String.valueOf(signerHttpRpcPort));
     params.add("--chain-id");
     params.add(chainId);
-
     if (useDynamicPortAllocation) {
       params.add("--data-directory");
       params.add(dataDirectory.toAbsolutePath().toString());
     }
+    params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
 
@@ -201,11 +196,6 @@ public class EthSignerProcessRunner {
             });
   }
 
-  private File createPasswordFile() {
-    return createJsonFile(
-        "ethsigner_passwordfile", Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
-  }
-
   public int httpJsonRpcPort() {
     if (useDynamicPortAllocation) {
       final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
@@ -215,33 +205,6 @@ public class EthSignerProcessRunner {
     } else {
       return signerHttpRpcPort;
     }
-  }
-
-  @SuppressWarnings("UnstableApiUsage")
-  private File createKeyFile() {
-    final URL resource = Resources.getResource("rich_benefactor_one.json");
-    final byte[] data;
-
-    try {
-      data = Resources.toString(resource, UTF_8).getBytes(UTF_8);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return createJsonFile("ethsigner_keyfile", data);
-  }
-
-  private File createJsonFile(final String tempNamePrefix, final byte[] data) {
-    final Path file;
-    try {
-      file = Files.createTempFile(tempNamePrefix, ".json");
-      Files.write(file, data);
-    } catch (final IOException e) {
-      throw new RuntimeException(e);
-    }
-    File keyFile = file.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
   }
 
   private void loadPortsFile() {
@@ -268,7 +231,6 @@ public class EthSignerProcessRunner {
                   return s.count() > 0;
                 }
               }
-
               return false;
             });
   }

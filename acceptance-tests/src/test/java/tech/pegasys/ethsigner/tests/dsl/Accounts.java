@@ -17,12 +17,7 @@ import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOExce
 import java.math.BigInteger;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class Accounts {
-
-  private static final Logger LOG = LogManager.getLogger();
 
   /** Private key: 8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63 */
   private static final String GENESIS_ACCOUNT_ONE_PUBLIC_KEY =

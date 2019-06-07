@@ -26,7 +26,7 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
@@ -49,9 +49,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
@@ -62,6 +62,8 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -100,6 +102,7 @@ public class IntegrationTestBase {
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(transactionSigner(), chainId);
 
+    final Vertx vertx = Vertx.vertx();
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
     httpClientOptions.setDefaultPort(clientAndServer.getLocalPort());
@@ -122,6 +125,7 @@ public class IntegrationTestBase {
     runner =
         new Runner(
             serialiser,
+            vertx,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
@@ -255,7 +259,8 @@ public class IntegrationTestBase {
 
   private static TransactionSigner transactionSigner() throws IOException, CipherException {
     final File keyFile = createKeyFile();
-    return FileBasedTransactionSigner.createFrom(keyFile, "password");
+    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
+    return new CredentialTransactionSigner(credentials);
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -263,17 +268,8 @@ public class IntegrationTestBase {
     final URL walletResource = Resources.getResource("keyfile.json");
     final Path wallet = Files.createTempFile("ethsigner_intg_keyfile", ".json");
     Files.write(wallet, Resources.toString(walletResource, UTF_8).getBytes(UTF_8));
-    File keyFile = wallet.toFile();
+    final File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
-  }
-
-  protected static String generateTransactionCountResponse() {
-    final JsonObject json = new JsonObject();
-    json.put("id", 1);
-    json.put("jsonrpc", "2.0");
-    json.put("result", "0x0");
-
-    return json.encode();
   }
 }

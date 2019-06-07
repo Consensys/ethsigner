@@ -32,7 +32,7 @@ public class RequestMapperTest {
 
   @Test
   public void returnsHandleForAssociatedRpcMethod() {
-    RequestMapper requestMapper = new RequestMapper(defaultHandler);
+    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("foo", handler1);
     requestMapper.addHandler("bar", handler2);
     requestMapper.addHandler("default", defaultHandler);
@@ -42,7 +42,7 @@ public class RequestMapperTest {
 
   @Test
   public void returnsDefaultHandlerForUnknownRpcMethod() {
-    RequestMapper requestMapper = new RequestMapper(defaultHandler);
+    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     assertThat(requestMapper.getMatchingHandler("")).isEqualTo(defaultHandler);
     assertThat(requestMapper.getMatchingHandler("nothing")).isEqualTo(defaultHandler);
   }

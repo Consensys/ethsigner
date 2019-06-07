@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
 
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -54,25 +56,10 @@ public class CommandLineConfig implements Config {
   private final Level logLevel = Level.INFO;
 
   @Option(
-      names = {"-p", "--password-file"},
-      description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
-      required = true,
-      arity = "1")
-  private Path passwordFilePath;
-
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = {"-k", "--key-file"},
-      description = "The path to a file containing the key used to sign transactions.",
-      required = true,
-      arity = "1")
-  private Path keyFile;
-
-  @Option(
       names = "--downstream-http-host",
       description = "The endpoint to which received requests are forwarded",
       arity = "1")
-  private InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
+  private final InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = "--downstream-http-port",
@@ -93,7 +80,7 @@ public class CommandLineConfig implements Config {
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private InetAddress httpListenHost = InetAddress.getLoopbackAddress();
+  private final InetAddress httpListenHost = InetAddress.getLoopbackAddress();
 
   @Option(
       names = {"--http-listen-port"},
@@ -121,11 +108,21 @@ public class CommandLineConfig implements Config {
     this.output = output;
   }
 
+  private HashicorpSignerCliConfig hashicorpSignerBasedConfig;
+
+  private FileBasedSignerCliConfig fileBasedSignerConfig;
+
   public boolean parse(final String... args) {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
+
+    hashicorpSignerBasedConfig = new HashicorpSignerCliConfig();
+    commandLine.addSubcommand(HashicorpSignerCliConfig.COMMAND_NAME, hashicorpSignerBasedConfig);
+
+    fileBasedSignerConfig = new FileBasedSignerCliConfig();
+    commandLine.addSubcommand(FileBasedSignerCliConfig.COMMAND_NAME, fileBasedSignerConfig);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
@@ -163,16 +160,6 @@ public class CommandLineConfig implements Config {
   }
 
   @Override
-  public Path getPasswordFilePath() {
-    return passwordFilePath;
-  }
-
-  @Override
-  public Path getKeyPath() {
-    return keyFile;
-  }
-
-  @Override
   public InetAddress getDownstreamHttpHost() {
     return downstreamHttpHost;
   }
@@ -203,6 +190,16 @@ public class CommandLineConfig implements Config {
   }
 
   @Override
+  public HashicorpSignerConfig getHashicorpSignerConfig() {
+    return hashicorpSignerBasedConfig;
+  }
+
+  @Override
+  public FileBasedSignerConfig getFileBasedSignerConfig() {
+    return fileBasedSignerConfig;
+  }
+
+  @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
@@ -212,8 +209,6 @@ public class CommandLineConfig implements Config {
     return MoreObjects.toStringHelper(this)
         .add("commandLine", commandLine)
         .add("logLevel", logLevel)
-        .add("passwordFilePath", passwordFilePath)
-        .add("keyFile", keyFile)
         .add("downstreamHttpHost", downstreamHttpHost)
         .add("downstreamHttpPort", downstreamHttpPort)
         .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
@@ -222,6 +217,8 @@ public class CommandLineConfig implements Config {
         .add("chainId", chainId)
         .add("dataDirectory", dataDirectory)
         .add("output", output)
+        .add("hashicorpSignerConfig", hashicorpSignerBasedConfig)
+        .add("filebasedSignerConfig", fileBasedSignerConfig)
         .toString();
   }
 }

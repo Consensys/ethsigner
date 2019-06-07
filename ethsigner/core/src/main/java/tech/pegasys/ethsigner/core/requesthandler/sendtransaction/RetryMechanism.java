@@ -20,7 +20,7 @@ public abstract class RetryMechanism {
   private final int maxRetries;
   private int retriesPerformed = 0;
 
-  public RetryMechanism(int maxRetries) {
+  public RetryMechanism(final int maxRetries) {
     this.maxRetries = maxRetries;
   }
 

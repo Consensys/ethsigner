@@ -21,6 +21,8 @@ public class SignerConfigurationBuilder {
 
   private int httpRpcPort;
   private int webSocketPort;
+  private int hashicorpVaultPort;
+  private String ipAddress;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -32,7 +34,20 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withHashicorpVaultPort(final int port) {
+    hashicorpVaultPort = port;
+    return this;
+  }
+
+  public SignerConfigurationBuilder withHashicorpIpAddress(final String address) {
+    ipAddress = address;
+    return this;
+  }
+
   public SignerConfiguration build() {
-    return new SignerConfiguration(CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort);
+    final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
+        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress);
+    return new SignerConfiguration(
+        CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }
 }

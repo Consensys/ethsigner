@@ -12,32 +12,22 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.WalletUtils;
 
-public class FileBasedTransactionSigner implements TransactionSigner {
+public class CredentialTransactionSigner implements TransactionSigner {
 
   private final Credentials credentials;
 
-  private FileBasedTransactionSigner(final Credentials credentials) {
+  public CredentialTransactionSigner(final Credentials credentials) {
     this.credentials = credentials;
   }
 
-  public static FileBasedTransactionSigner createFrom(final File keyFile, final String password)
-      throws CipherException, IOException {
-    final Credentials credentials = WalletUtils.loadCredentials(password, keyFile);
-    return new FileBasedTransactionSigner(credentials);
-  }
-
   @Override
-  public Signature sign(byte[] data) {
+  public Signature sign(final byte[] data) {
     final SignatureData signature = Sign.signMessage(data, credentials.getEcKeyPair());
     return new Signature(
         new BigInteger(signature.getV()),

@@ -17,19 +17,26 @@ import java.time.Duration;
 public class SignerConfiguration {
 
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
+  private static final Duration TIMEOUT = Duration.ofSeconds(1);
   public static final int UNASSIGNED_PORT = 0;
 
   private final String chainId;
   private final String hostname;
   private final int httpRpcPort;
   private final int webSocketPort;
+  private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
 
   public SignerConfiguration(
-      final String chainId, final String hostname, final int httpRpcPort, final int webSocketPort) {
+      final String chainId,
+      final String hostname,
+      final int httpRpcPort,
+      final int webSocketPort,
+      final TransactionSignerParamsSupplier transactionSignerParamsSupplier) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
+    this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
   }
 
   public String hostname() {
@@ -38,6 +45,10 @@ public class SignerConfiguration {
 
   public Duration pollingInterval() {
     return POLLING_INTERVAL;
+  }
+
+  public Duration timeout() {
+    return TIMEOUT;
   }
 
   public String chainId() {
@@ -50,6 +61,10 @@ public class SignerConfiguration {
 
   public int webSocketPort() {
     return webSocketPort;
+  }
+
+  public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
+    return transactionSignerParamsSupplier;
   }
 
   public boolean isDynamicPortAllocation() {

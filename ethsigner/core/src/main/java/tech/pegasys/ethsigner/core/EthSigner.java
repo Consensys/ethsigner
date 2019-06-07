@@ -13,20 +13,18 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Optional;
+import java.nio.file.Path;
+import java.time.Duration;
 
-import com.google.common.base.Charsets;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -38,22 +36,19 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final RunnerBuilder runnerBuilder;
+  private final TransactionSigner signer;
+  private final Vertx vertx;
 
-  public EthSigner(final Config config, final RunnerBuilder runnerBuilder) {
+  public EthSigner(final Config config, final TransactionSigner signer, final Vertx vertx) {
     this.config = config;
-    this.runnerBuilder = runnerBuilder;
+    this.signer = signer;
+    this.vertx = vertx;
   }
 
   public void run() {
 
-    final Optional<String> password = readPasswordFromFile();
-    if (!password.isPresent()) {
-      LOG.error("Unable to extract password from supplied password file.");
-      return;
-    }
-
-    if (config.getDownstreamHttpRequestTimeout().toMillis() <= 0) {
+    final Duration downstreamHttpRequestTimeout = config.getDownstreamHttpRequestTimeout();
+    if (downstreamHttpRequestTimeout.toMillis() <= 0) {
       LOG.error("Http request timeout must be greater than 0.");
       return;
     }
@@ -64,38 +59,35 @@ public final class EthSigner {
       return;
     }
 
-    try {
+    final HttpService web3jService = createWeb3jHttpService();
+    final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
+    final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final TransactionFactory transactionFactory = new TransactionFactory(eea, web3j);
+    final TransactionSerialiser serialiser =
+        new TransactionSerialiser(signer, config.getChainId().id());
+    final WebClientOptions clientOptions =
+        new WebClientOptions()
+            .setDefaultPort(config.getDownstreamHttpPort())
+            .setDefaultHost(config.getDownstreamHttpHost().getHostAddress());
+    final HttpServerOptions serverOptions =
+        new HttpServerOptions()
+            .setPort(config.getHttpListenPort())
+            .setHost(config.getHttpListenHost().getHostAddress())
+            .setReuseAddress(true)
+            .setReusePort(true);
+    final Path dataDirectory = config.getDataDirectory();
 
-      final HttpService web3jService = createWeb3jHttpService();
-      final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
-      final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final Runner runner =
+        new Runner(
+            serialiser,
+            vertx,
+            clientOptions,
+            serverOptions,
+            downstreamHttpRequestTimeout,
+            transactionFactory,
+            dataDirectory);
 
-      final FileBasedTransactionSigner signer =
-          FileBasedTransactionSigner.createFrom(config.getKeyPath().toFile(), password.get());
-
-      runnerBuilder
-          .withTransactionSerialiser(new TransactionSerialiser(signer, config.getChainId().id()))
-          .withClientOptions(
-              new WebClientOptions()
-                  .setDefaultPort(config.getDownstreamHttpPort())
-                  .setDefaultHost(config.getDownstreamHttpHost().getHostAddress()))
-          .withServerOptions(
-              new HttpServerOptions()
-                  .setPort(config.getHttpListenPort())
-                  .setHost(config.getHttpListenHost().getHostAddress())
-                  .setReuseAddress(true)
-                  .setReusePort(true))
-          .withHttpRequestTimeout(config.getDownstreamHttpRequestTimeout())
-          .withTransactionFactory(new TransactionFactory(eea, web3j))
-          .withDataPath(config.getDataDirectory())
-          .build()
-          .start();
-    } catch (final IOException ex) {
-      LOG.info(
-          "Unable to access supplied keyfile, or file does not conform to V3 keystore standard.");
-    } catch (final CipherException ex) {
-      LOG.info("Unable to decode keyfile with supplied passwordFile.");
-    }
+    runner.start();
   }
 
   private HttpService createWeb3jHttpService() {
@@ -111,15 +103,5 @@ public final class EthSigner {
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
         .readTimeout(config.getDownstreamHttpRequestTimeout());
     return new HttpService(downstreamUrl, builder.build());
-  }
-
-  private Optional<String> readPasswordFromFile() {
-    try {
-      final byte[] fileContent = Files.readAllBytes(config.getPasswordFilePath());
-      return Optional.of(new String(fileContent, Charsets.UTF_8));
-    } catch (final IOException ex) {
-      LOG.debug("Failed to read password from password file: {}", config.getPasswordFilePath(), ex);
-      return Optional.empty();
-    }
   }
 }
