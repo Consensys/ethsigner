@@ -131,12 +131,8 @@ public class HashicorpVaultDocker {
     execStartResultCallback.onError(
         new RuntimeException(
             "command in Hashicorp Vault returned error\n" + execStartResultCallback.toString()));
-    if (expectedInStdout != null) {
-      final String stdoutString = stdout.toString();
-      return stdoutString.contains(expectedInStdout);
-    } else {
-      return true;
-    }
+    final String stdoutString = stdout.toString();
+    return stdoutString.contains(expectedInStdout);
   }
 
   public void shutdown() {
