@@ -35,7 +35,7 @@ import org.web3j.utils.Convert.Unit;
 public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-  private static final long NO_OF_TRANSACTIONS = 50;
+  private static final long FIFTY_TRANSACTIONS = 50;
 
   @Test
   public void valueTransfer() {
@@ -126,13 +126,13 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
             transferAmountWei);
 
     String hash = null;
-    for (int i = 0; i < NO_OF_TRANSACTIONS; i++) {
+    for (int i = 0; i < FIFTY_TRANSACTIONS; i++) {
       hash = ethSigner().transactions().submit(transaction);
     }
     ethNode().transactions().awaitBlockContaining(hash);
 
     final BigInteger endBalance = ethNode().accounts().balance(RECIPIENT);
-    final BigInteger numberOfTransactions = BigInteger.valueOf(NO_OF_TRANSACTIONS);
+    final BigInteger numberOfTransactions = BigInteger.valueOf(FIFTY_TRANSACTIONS);
     assertThat(endBalance)
         .isEqualTo(startBalance.add(transferAmountWei.multiply(numberOfTransactions)));
   }
