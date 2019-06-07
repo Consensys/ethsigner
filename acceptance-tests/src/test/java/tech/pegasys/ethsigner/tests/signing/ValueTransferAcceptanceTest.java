@@ -25,7 +25,6 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   private static final long NO_OF_TRANSACTIONS = 50;
 
   @Test
-  public void valueTransfer() throws IOException {
+  public void valueTransfer() {
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
@@ -60,7 +59,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void valueTransferFromAccountWithInsufficientFunds() throws IOException {
+  public void valueTransferFromAccountWithInsufficientFunds() {
     final String recipientAddress = "0x1b11ba11ca11bb11aa11bc11be11ac11ca11da11";
     final BigInteger senderStartBalance = ethNode().accounts().balance(richBenefactor());
     final BigInteger recipientStartBalance = ethNode().accounts().balance(recipientAddress);
@@ -87,7 +86,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void senderIsNotUnlockedAccount() throws IOException {
+  public void senderIsNotUnlockedAccount() {
     final Account sender = new Account("0x223b55228fb22b89f2216b7222e5522b8222bd22");
     final String recipientAddress = "0x1b22ba22ca22bb22aa22bc22be22ac22ca22da22";
     final BigInteger senderStartBalance = ethNode().accounts().balance(sender);
@@ -114,7 +113,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void multipleValueTransfers() throws IOException {
+  public void multipleValueTransfers() {
     final BigInteger transferAmountWei = Convert.toWei("1", Unit.ETHER).toBigIntegerExact();
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
@@ -139,7 +138,7 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
   }
 
   @Test
-  public void valueTransferNonceTooLow() throws IOException {
+  public void valueTransferNonceTooLow() {
     valueTransfer(); // call this test to increment the nonce
     final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
     final Transaction transaction =

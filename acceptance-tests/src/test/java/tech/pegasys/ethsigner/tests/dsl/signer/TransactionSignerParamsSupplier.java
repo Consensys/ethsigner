@@ -87,7 +87,7 @@ public class TransactionSignerParamsSupplier {
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-    File keyFile = file.toFile();
+    final File keyFile = file.toFile();
     keyFile.deleteOnExit();
     return keyFile;
   }
