@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.Request;
@@ -31,5 +32,10 @@ public class RawJsonRpcRequestFactory {
   public Request<?, ArbitraryResponseType> createRequest(final String method) {
     return new Request<>(
         method, Collections.emptyList(), web3jService, ArbitraryResponseType.class);
+  }
+
+  public <S, T extends Response<?>> Request<S, T> createRequest(
+      final String method, final List<S> params, final Class<T> type) {
+    return new Request<>(method, params, web3jService, type);
   }
 }

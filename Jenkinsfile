@@ -60,7 +60,7 @@ try {
                         sh './gradlew --no-daemon --parallel integrationTest'
                     }
                     stage('Acceptance Test') {
-                        sh './gradlew --no-daemon --parallel --max-workers=1 acceptanceTest'
+                        sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
                 } finally {
                     archiveArtifacts '**/build/reports/**'

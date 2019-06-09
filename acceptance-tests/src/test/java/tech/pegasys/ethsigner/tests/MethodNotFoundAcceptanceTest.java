@@ -14,11 +14,9 @@ package tech.pegasys.ethsigner.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
-
-import java.io.IOException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.Test;
@@ -26,16 +24,16 @@ import org.junit.Test;
 public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
 
   @Test
-  public void sendDisabledApiReturnsBadRequest() throws IOException {
+  public void sendDisabledApiReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawRequest().exceptionalRequest("ibft_getPendingVotes");
 
     assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
-    assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_FOUND);
+    assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_ENABLED);
   }
 
   @Test
-  public void unknownJsonRpcMethodReturnsBadRequest() throws IOException {
+  public void unknownJsonRpcMethodReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawRequest().exceptionalRequest("invalidJsonRpcMethod");
 

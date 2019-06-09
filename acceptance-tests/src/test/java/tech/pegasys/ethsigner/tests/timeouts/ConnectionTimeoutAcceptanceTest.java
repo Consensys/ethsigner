@@ -1,0 +1,107 @@
+/*
+ * Copyright 2019 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package tech.pegasys.ethsigner.tests.timeouts;
+
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.Account;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
+import java.math.BigInteger;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Convert.Unit;
+
+public class ConnectionTimeoutAcceptanceTest {
+
+  private Signer ethSigner;
+
+  @Before
+  public void setUp() {
+    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final NodePorts nodePorts = new NodePorts(7007, 7008);
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
+
+    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+
+    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
+  }
+
+  @After
+  public void tearDown() {
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+  }
+
+  private Account richBenefactor() {
+    return ethSigner.accounts().richBenefactor();
+  }
+
+  @Test
+  public void submittingTransactionReturnsAGatewayTimeoutError() {
+    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+    final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
+
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            richBenefactor().address(),
+            richBenefactor().nextNonceAndIncrement(),
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            recipient,
+            transferAmountWei);
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner.transactions().submitExceptional(transaction);
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
+    assertThat(signerResponse.jsonRpc().getError())
+        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+  }
+
+  @Test
+  public void submittingTransactionWithoutNonceReturnsAGatewayTimeoutError() {
+    final String recipient = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+    final BigInteger transferAmountWei = Convert.toWei("15.5", Unit.ETHER).toBigIntegerExact();
+
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            richBenefactor().address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            recipient,
+            transferAmountWei);
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner.transactions().submitExceptional(transaction);
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
+    assertThat(signerResponse.jsonRpc().getError())
+        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+  }
+}

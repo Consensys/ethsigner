@@ -19,7 +19,35 @@ public class SignerConfigurationBuilder {
 
   private static final String LOCALHOST = "127.0.0.1";
 
+  private int httpRpcPort;
+  private int webSocketPort;
+  private int hashicorpVaultPort;
+  private String ipAddress;
+
+  public SignerConfigurationBuilder withHttpRpcPort(final int port) {
+    httpRpcPort = port;
+    return this;
+  }
+
+  public SignerConfigurationBuilder withWebSocketPort(final int port) {
+    webSocketPort = port;
+    return this;
+  }
+
+  public SignerConfigurationBuilder withHashicorpVaultPort(final int port) {
+    hashicorpVaultPort = port;
+    return this;
+  }
+
+  public SignerConfigurationBuilder withHashicorpIpAddress(final String address) {
+    ipAddress = address;
+    return this;
+  }
+
   public SignerConfiguration build() {
-    return new SignerConfiguration(CHAIN_ID, LOCALHOST);
+    final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
+        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress);
+    return new SignerConfiguration(
+        CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }
 }

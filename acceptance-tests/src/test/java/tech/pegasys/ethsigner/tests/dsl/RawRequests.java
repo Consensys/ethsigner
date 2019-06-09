@@ -13,12 +13,12 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.fail;
+import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
-import tech.pegasys.ethsigner.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory.ArbitraryResponseType;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class RawRequests {
   }
 
   public SignerResponse<JsonRpcErrorResponse> exceptionalRequest(
-      final String method, final Map<String, String> additionalHeaders) throws IOException {
+      final String method, final Map<String, String> additionalHeaders) {
 
     web3jHttpService.getHeaders().clear();
     web3jHttpService.addHeaders(additionalHeaders);
@@ -54,7 +54,7 @@ public class RawRequests {
     final Request<?, ArbitraryResponseType> request = requestFactory.createRequest(method);
 
     try {
-      request.send();
+      failOnIOException(request::send);
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
@@ -63,8 +63,7 @@ public class RawRequests {
     }
   }
 
-  public SignerResponse<JsonRpcErrorResponse> exceptionalRequest(final String method)
-      throws IOException {
+  public SignerResponse<JsonRpcErrorResponse> exceptionalRequest(final String method) {
     return exceptionalRequest(method, Collections.emptyMap());
   }
 }
