@@ -17,8 +17,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
-import java.time.Duration;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -52,17 +50,14 @@ public class JsonRpcHttpService extends AbstractVerticle {
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
   private final HttpServerOptions serverOptions;
-  private final Duration httpRequestTimeout;
   private HttpServer httpServer;
 
   public JsonRpcHttpService(
       final HttpResponseFactory responseFactory,
       final HttpServerOptions serverOptions,
-      final Duration httpRequestTimeout,
       final RequestMapper requestHandlerMapper) {
     this.responseFactory = responseFactory;
     this.serverOptions = serverOptions;
-    this.httpRequestTimeout = httpRequestTimeout;
     this.requestHandlerMapper = requestHandlerMapper;
   }
 
