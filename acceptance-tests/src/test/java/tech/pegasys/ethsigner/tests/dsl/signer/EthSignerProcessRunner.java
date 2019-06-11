@@ -223,7 +223,7 @@ public class EthSignerProcessRunner {
 
   private void awaitPortsFile(final Path dataDir) {
     final File file = new File(dataDir.toFile(), PORTS_FILENAME);
-    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+    Awaitility.waitAtMost(30, TimeUnit.MINUTES)
         .until(
             () -> {
               if (file.exists()) {

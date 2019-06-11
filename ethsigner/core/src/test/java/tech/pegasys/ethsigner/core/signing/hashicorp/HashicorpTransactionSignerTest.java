@@ -13,53 +13,59 @@
 package tech.pegasys.ethsigner.core.signing.hashicorp;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
-public class HashicorpSignerBuilderTest {
+public class HashicorpTransactionSignerTest {
 
-  private static final Vertx vertx = Vertx.vertx();
-
-  @Test
+  @Test(expected = TransactionSignerInitializationException.class)
   public void vaultTimingOut() throws IOException {
 
-    final HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
+    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
 
     final File authFile = createFile();
 
-    when(configMock.getAuthFilePath()).thenReturn(authFile.toPath());
-    when(configMock.getSigningKeyPath()).thenReturn("signingKeyPath");
-    when(configMock.getServerPort()).thenReturn(Integer.valueOf(877));
-    when(configMock.getServerHost()).thenReturn("serverHost");
-    when(configMock.getTimeout()).thenReturn(Integer.valueOf(1));
+    final JsonObject jsonObject =
+        new JsonObject()
+            .put("authFilePath", authFile.getAbsolutePath())
+            .put("signingKeyPath", "signingKeyPath")
+            .put("serverPort", "877")
+            .put("serverHost", "serverHost")
+            .put("timeout", "1");
 
-    final TransactionSigner signer = new HashicorpSignerBuilder(configMock, vertx).build();
+    when(configMock.jsonString()).thenReturn(jsonObject.encode());
 
-    assertThat(signer).isNull();
+    final TransactionSigner signer = new HashicorpTransactionSigner(configMock);
   }
 
-  @Test
+  @Test(expected = TransactionSignerInitializationException.class)
   public void authFileNotAvailable() {
 
-    final HashicorpSignerConfig configMock = mock(HashicorpSignerConfig.class);
+    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
 
-    when(configMock.getAuthFilePath()).thenReturn(Paths.get("nonExistingFile"));
+    final JsonObject jsonObject =
+        new JsonObject()
+            .put("authFilePath", "nonExistingFile")
+            .put("signingKeyPath", "signingKeyPath")
+            .put("serverPort", "877")
+            .put("serverHost", "serverHost")
+            .put("timeout", "1");
 
-    final TransactionSigner signer = new HashicorpSignerBuilder(configMock, vertx).build();
+    when(configMock.jsonString()).thenReturn(jsonObject.encode());
 
-    assertThat(signer).isNull();
+    final TransactionSigner signer = new HashicorpTransactionSigner(configMock);
   }
 
   @SuppressWarnings("UnstableApiUsage")

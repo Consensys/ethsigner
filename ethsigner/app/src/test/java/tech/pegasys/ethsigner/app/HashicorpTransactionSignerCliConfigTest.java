@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.HashicorpSignerCliConfig;
+import tech.pegasys.ethsigner.HashicorpTransactionSignerCliConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.util.function.Supplier;
@@ -23,17 +23,18 @@ import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class HashicorpSignerCliConfigTest {
+public class HashicorpTransactionSignerCliConfigTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
   private static final String HTTP_HOST_COM = "http://host.com";
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
+  private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private HashicorpSignerCliConfig hashiConfig;
+  private HashicorpTransactionSignerCliConfig hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpSignerCliConfig();
+    hashiConfig = new HashicorpTransactionSignerCliConfig();
     final CommandLine commandLine = new CommandLine(hashiConfig);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -55,7 +56,8 @@ public class HashicorpSignerCliConfigTest {
         + PORT
         + " --signing-key-path="
         + PATH_TO_SIGNING_KEY
-        + " --timeout=15";
+        + " --timeout="
+        + FIFTEEN;
   }
 
   private String removeFieldFrom(final String input, final String fieldname) {
@@ -71,11 +73,11 @@ public class HashicorpSignerCliConfigTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    assertThat(hashiConfig.getAuthFilePath().toString()).isEqualTo(THIS_IS_THE_PATH_TO_THE_FILE);
-    assertThat(hashiConfig.getServerHost()).isEqualTo(HTTP_HOST_COM);
-    assertThat(hashiConfig.getServerPort()).isEqualTo(Integer.valueOf(PORT));
-    assertThat(hashiConfig.getSigningKeyPath()).isEqualTo(PATH_TO_SIGNING_KEY);
-    assertThat(hashiConfig.getTimeout()).isEqualTo(Integer.valueOf(15));
+    assertThat(hashiConfig.jsonString()).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(hashiConfig.jsonString()).contains(HTTP_HOST_COM);
+    assertThat(hashiConfig.jsonString()).contains(PORT);
+    assertThat(hashiConfig.jsonString()).contains(PATH_TO_SIGNING_KEY);
+    assertThat(hashiConfig.jsonString()).contains(FIFTEEN);
   }
 
   @Test
@@ -101,16 +103,15 @@ public class HashicorpSignerCliConfigTest {
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
     // object.
-    HashicorpSignerCliConfig hcConfig = new HashicorpSignerCliConfig();
-    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::getServerHost, "localhost");
+    HashicorpTransactionSignerCliConfig hcConfig = new HashicorpTransactionSignerCliConfig();
+    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::jsonString, "localhost");
 
-    hcConfig = new HashicorpSignerCliConfig();
-    missingOptionalParameterIsValidAndMeetsDefault(
-        "host", hcConfig::getServerPort, Integer.valueOf(8200));
+    hcConfig = new HashicorpTransactionSignerCliConfig();
+    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::jsonString, "8200");
 
-    hcConfig = new HashicorpSignerCliConfig();
+    hcConfig = new HashicorpTransactionSignerCliConfig();
     missingOptionalParameterIsValidAndMeetsDefault(
-        "host", hcConfig::getSigningKeyPath, "/secret/data/ethsignerSigningKey");
+        "host", hcConfig::jsonString, "/secret/data/ethsignerSigningKey");
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
@@ -120,11 +121,13 @@ public class HashicorpSignerCliConfigTest {
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
-      final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
+      final String paramToRemove,
+      final Supplier<String> actualValueGetter,
+      final String expectedValue) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
-    assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
+    assertThat(actualValueGetter.get()).toString().contains(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
   }
 }

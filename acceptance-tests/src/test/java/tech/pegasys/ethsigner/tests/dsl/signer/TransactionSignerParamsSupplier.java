@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.hashicorpVault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class TransactionSignerParamsSupplier {
   }
 
   private File createPasswordFile() {
-    return createJsonFile(
+    return createTmpFile(
         "ethsigner_passwordfile", Accounts.GENESIS_ACCOUNT_ONE_PASSWORD.getBytes(UTF_8));
   }
 
@@ -72,23 +72,23 @@ public class TransactionSignerParamsSupplier {
       throw new RuntimeException(e);
     }
 
-    return createJsonFile("ethsigner_keyfile", data);
+    return createTmpFile("ethsigner_keyfile", data);
   }
 
   private File createVaultAuthFile() {
-    return createJsonFile("vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
+    return createTmpFile("vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
   }
 
-  private File createJsonFile(final String tempNamePrefix, final byte[] data) {
+  private File createTmpFile(final String tempNamePrefix, final byte[] data) {
     final Path file;
     try {
-      file = Files.createTempFile(tempNamePrefix, ".json");
+      file = Files.createTempFile(tempNamePrefix, ".file");
       Files.write(file, data);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-    final File keyFile = file.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
+    final File tmpFile = file.toFile();
+    tmpFile.deleteOnExit();
+    return tmpFile;
   }
 }

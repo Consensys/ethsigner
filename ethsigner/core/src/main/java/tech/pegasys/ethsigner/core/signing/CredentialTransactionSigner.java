@@ -18,13 +18,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 
-public class CredentialTransactionSigner implements TransactionSigner {
+public abstract class CredentialTransactionSigner implements TransactionSigner {
 
-  private final Credentials credentials;
-
-  public CredentialTransactionSigner(final Credentials credentials) {
-    this.credentials = credentials;
-  }
+  protected Credentials credentials;
 
   @Override
   public Signature sign(final byte[] data) {

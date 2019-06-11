@@ -15,8 +15,9 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
 
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -68,6 +69,7 @@ public class CommandLineConfig implements Config {
       arity = "1")
   private Integer downstreamHttpPort;
 
+  @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
       description =
@@ -104,13 +106,13 @@ public class CommandLineConfig implements Config {
 
   private final PrintStream output;
 
-  public CommandLineConfig(PrintStream output) {
+  public CommandLineConfig(final PrintStream output) {
     this.output = output;
   }
 
-  private HashicorpSignerCliConfig hashicorpSignerBasedConfig;
+  private HashicorpTransactionSignerCliConfig hashiTransactionSignerCongig;
 
-  private FileBasedSignerCliConfig fileBasedSignerConfig;
+  private FileBasedTransactionSignerCliConfig fileBasedTransactionSignerConfig;
 
   public boolean parse(final String... args) {
 
@@ -118,17 +120,19 @@ public class CommandLineConfig implements Config {
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
-    hashicorpSignerBasedConfig = new HashicorpSignerCliConfig();
-    commandLine.addSubcommand(HashicorpSignerCliConfig.COMMAND_NAME, hashicorpSignerBasedConfig);
+    hashiTransactionSignerCongig = new HashicorpTransactionSignerCliConfig();
+    commandLine.addSubcommand(
+        HashicorpTransactionSignerCliConfig.COMMAND_NAME, hashiTransactionSignerCongig);
 
-    fileBasedSignerConfig = new FileBasedSignerCliConfig();
-    commandLine.addSubcommand(FileBasedSignerCliConfig.COMMAND_NAME, fileBasedSignerConfig);
+    fileBasedTransactionSignerConfig = new FileBasedTransactionSignerCliConfig();
+    commandLine.addSubcommand(
+        FileBasedTransactionSignerCliConfig.COMMAND_NAME, fileBasedTransactionSignerConfig);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
     try {
       commandLine.parse(args);
-    } catch (ParameterException ex) {
+    } catch (final ParameterException ex) {
       handleParseException(ex);
       return false;
     }
@@ -190,13 +194,16 @@ public class CommandLineConfig implements Config {
   }
 
   @Override
-  public HashicorpSignerConfig getHashicorpSignerConfig() {
-    return hashicorpSignerBasedConfig;
-  }
-
-  @Override
-  public FileBasedSignerConfig getFileBasedSignerConfig() {
-    return fileBasedSignerConfig;
+  public TransactionSigner getSigner() {
+    final TransactionSignerConfig sc;
+    if (hashiTransactionSignerCongig.isConfigured()) {
+      sc = hashiTransactionSignerCongig;
+    } else if (fileBasedTransactionSignerConfig.isConfigured()) {
+      sc = fileBasedTransactionSignerConfig;
+    } else {
+      throw new RuntimeException();
+    }
+    return TransactionSignerFactory.create(sc);
   }
 
   @Override
@@ -217,8 +224,8 @@ public class CommandLineConfig implements Config {
         .add("chainId", chainId)
         .add("dataDirectory", dataDirectory)
         .add("output", output)
-        .add("hashicorpSignerConfig", hashicorpSignerBasedConfig)
-        .add("filebasedSignerConfig", fileBasedSignerConfig)
+        .add("hashicorpTransactionSignerConfig", hashiTransactionSignerCongig)
+        .add("filebasedTransactionSignerConfig", fileBasedTransactionSignerConfig)
         .toString();
   }
 }

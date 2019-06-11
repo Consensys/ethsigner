@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
 
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.json.JsonObject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -24,12 +25,12 @@ import picocli.CommandLine.Spec;
 
 /** Hashicorp vault related sub-command */
 @Command(
-    name = HashicorpSignerCliConfig.COMMAND_NAME,
+    name = HashicorpTransactionSignerCliConfig.COMMAND_NAME,
     description =
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
+public class HashicorpTransactionSignerCliConfig implements TransactionSignerConfig {
 
   public static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
@@ -39,7 +40,7 @@ public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
   private static final String DEFAULT_TIMEOUT_STRING = "5";
   private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
 
-  public HashicorpSignerCliConfig() {}
+  public HashicorpTransactionSignerCliConfig() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -70,7 +71,7 @@ public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
       description = "Path to a File containing authentication data for Hashicorp vault.",
       required = true,
       arity = "1")
-  private final Path authFile = null;
+  private final Path authFilePath = null;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -82,34 +83,8 @@ public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
-  @Override
-  public String getServerHost() {
-    return serverHost;
-  }
-
-  @Override
-  public Integer getServerPort() {
-    return serverPort;
-  }
-
-  @Override
-  public Integer getTimeout() {
-    return timeout;
-  }
-
-  @Override
-  public Path getAuthFilePath() {
-    return authFile;
-  }
-
-  @Override
-  public String getSigningKeyPath() {
-    return signingKeyPath;
-  }
-
-  @Override
   public boolean isConfigured() {
-    return authFile != null;
+    return authFilePath != null;
   }
 
   @Override
@@ -117,9 +92,25 @@ public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
     return MoreObjects.toStringHelper(this)
         .add("serverHost", serverHost)
         .add("serverPort", serverPort)
-        .add("authFile", authFile)
+        .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
+        .toString();
+  }
+
+  @Override
+  public String className() {
+    return "tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner";
+  }
+
+  @Override
+  public String jsonString() {
+    return new JsonObject()
+        .put("serverHost", serverHost)
+        .put("serverPort", Integer.valueOf(serverPort).toString())
+        .put("authFilePath", authFilePath != null ? authFilePath.toString() : "null")
+        .put("timeout", timeout.toString())
+        .put("signingKeyPath", signingKeyPath)
         .toString();
   }
 }

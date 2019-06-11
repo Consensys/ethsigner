@@ -26,9 +26,10 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
@@ -52,6 +53,7 @@ import io.restassured.RestAssured;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
@@ -62,8 +64,6 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -257,10 +257,14 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner() throws IOException, CipherException {
+  private static TransactionSigner transactionSigner() throws IOException {
     final File keyFile = createKeyFile();
-    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
-    return new CredentialTransactionSigner(credentials);
+    final File passwordFile = createFile("password");
+    final TestTransactionSignerConfig config =
+        new TestTransactionSignerConfig(passwordFile.toString(), keyFile.toString());
+    final FileBasedTransactionSigner fileBasedTransactionSigner =
+        new FileBasedTransactionSigner(config);
+    return fileBasedTransactionSigner;
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -271,5 +275,36 @@ public class IntegrationTestBase {
     final File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
+  }
+
+  private static File createFile(final String s) throws IOException {
+    final Path path = Files.createTempFile("file", ".file");
+    Files.write(path, s.getBytes(UTF_8));
+    final File file = path.toFile();
+    file.deleteOnExit();
+    return file;
+  }
+
+  private static class TestTransactionSignerConfig implements TransactionSignerConfig {
+    private final String passwordFile;
+    private final String keyFile;
+
+    public TestTransactionSignerConfig(final String passwordFile, final String keyFile) {
+      this.passwordFile = passwordFile;
+      this.keyFile = keyFile;
+    }
+
+    @Override
+    public String className() {
+      return null;
+    }
+
+    @Override
+    public String jsonString() {
+      return new JsonObject()
+          .put("passwordFilePath", passwordFile)
+          .put("keyFilePath", keyFile)
+          .encode();
+    }
   }
 }

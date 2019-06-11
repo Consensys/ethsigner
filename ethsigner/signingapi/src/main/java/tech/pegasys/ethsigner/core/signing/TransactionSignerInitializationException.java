@@ -10,21 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.signing.hashicorp;
+package tech.pegasys.ethsigner.core.signing;
 
-import java.nio.file.Path;
+public class TransactionSignerInitializationException extends RuntimeException {
+  public TransactionSignerInitializationException() {
+    super();
+  }
 
-public interface HashicorpSignerConfig {
+  public TransactionSignerInitializationException(final String message) {
+    super(message);
+  }
 
-  String getServerHost();
+  public TransactionSignerInitializationException(final String message, final Throwable e) {
+    super(message, e);
+  }
 
-  Integer getServerPort();
-
-  Integer getTimeout();
-
-  Path getAuthFilePath();
-
-  String getSigningKeyPath();
-
-  boolean isConfigured();
+  public TransactionSignerInitializationException(final Throwable e) {
+    super(e);
+  }
 }

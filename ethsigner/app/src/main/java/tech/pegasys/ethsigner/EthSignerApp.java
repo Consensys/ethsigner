@@ -12,9 +12,8 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.core.EthSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerBuilder;
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerBuilder;
 
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
@@ -42,26 +41,10 @@ public class EthSignerApp {
     LOG.info("Version = {}, ", ApplicationInfo.version());
 
     // create a signer based on the configuration provided
-    final TransactionSigner signer = createTransactionSigner(config);
+    final TransactionSigner signer = config.getSigner();
 
-    if (signer == null) {
-      LOG.error("Cannot create a signer from the given config: " + config);
-      System.exit(-1);
-    }
-
-    final tech.pegasys.ethsigner.core.EthSigner ethSigner =
-        new tech.pegasys.ethsigner.core.EthSigner(config, signer, vertx);
+    final EthSigner ethSigner = new EthSigner(config, signer, vertx);
     ethSigner.run();
-  }
-
-  private static TransactionSigner createTransactionSigner(final CommandLineConfig config) {
-    TransactionSigner signer = null;
-    if (config.getHashicorpSignerConfig().isConfigured()) {
-      signer = new HashicorpSignerBuilder(config.getHashicorpSignerConfig(), vertx).build();
-    } else if (config.getFileBasedSignerConfig().isConfigured()) {
-      signer = new FileBasedSignerBuilder(config.getFileBasedSignerConfig()).build();
-    }
-    return signer;
   }
 
   private static class Cleanup extends Thread {

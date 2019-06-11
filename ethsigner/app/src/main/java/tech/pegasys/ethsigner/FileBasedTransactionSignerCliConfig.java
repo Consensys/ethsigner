@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
 
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.json.JsonObject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -24,16 +25,16 @@ import picocli.CommandLine.Spec;
 
 /** File-based authentication related sub-command */
 @Command(
-    name = FileBasedSignerCliConfig.COMMAND_NAME,
+    name = FileBasedTransactionSignerCliConfig.COMMAND_NAME,
     description =
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
+public class FileBasedTransactionSignerCliConfig implements TransactionSignerConfig {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedSignerCliConfig() {}
+  public FileBasedTransactionSignerCliConfig() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -52,17 +53,6 @@ public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
       arity = "1")
   private Path keyFile;
 
-  @Override
-  public Path getPasswordFilePath() {
-    return passwordFilePath;
-  }
-
-  @Override
-  public Path getKeyPath() {
-    return keyFile;
-  }
-
-  @Override
   public boolean isConfigured() {
     return passwordFilePath != null && keyFile != null;
   }
@@ -71,7 +61,20 @@ public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("passwordFilePath", passwordFilePath)
-        .add("keyFile", keyFile)
+        .add("keyFilePath", keyFile)
+        .toString();
+  }
+
+  @Override
+  public String className() {
+    return "tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner";
+  }
+
+  @Override
+  public String jsonString() {
+    return new JsonObject()
+        .put("passwordFilePath", passwordFilePath.toString())
+        .put("keyFilePath", keyFile.toString())
         .toString();
   }
 }
