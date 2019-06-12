@@ -28,7 +28,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
   private static final String TIMEOUT_MESSAGE = "timeout";
 
   @Test
-  public void getRequestWithWrongPathMustRespond() {
+  public void getRequestWithWrongPathMustTimeout() {
     final SocketTimeoutException reply =
         ethSigner().httpRequests().getExceptingTimeout(UP_CHECK_PATH + "Noise");
 
