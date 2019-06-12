@@ -73,11 +73,12 @@ public class HashicorpTransactionSignerCliConfigTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    assertThat(hashiConfig.jsonString()).contains(THIS_IS_THE_PATH_TO_THE_FILE);
-    assertThat(hashiConfig.jsonString()).contains(HTTP_HOST_COM);
-    assertThat(hashiConfig.jsonString()).contains(PORT);
-    assertThat(hashiConfig.jsonString()).contains(PATH_TO_SIGNING_KEY);
-    assertThat(hashiConfig.jsonString()).contains(FIFTEEN);
+    final String jsonString = hashiConfig.jsonString();
+    assertThat(jsonString).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(jsonString).contains(HTTP_HOST_COM);
+    assertThat(jsonString).contains(PORT);
+    assertThat(jsonString).contains(PATH_TO_SIGNING_KEY);
+    assertThat(jsonString).contains(FIFTEEN);
   }
 
   @Test
@@ -127,7 +128,7 @@ public class HashicorpTransactionSignerCliConfigTest {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
-    assertThat(actualValueGetter.get()).toString().contains(expectedValue);
+    assertThat(actualValueGetter.get()).contains(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
   }
 }
