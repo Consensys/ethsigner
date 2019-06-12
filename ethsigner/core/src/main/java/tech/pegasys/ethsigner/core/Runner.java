@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.core.http.HttpService;
 import tech.pegasys.ethsigner.core.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
@@ -50,8 +51,10 @@ public class Runner {
   private final Path dataDirectory;
 
   private final Vertx vertx;
-  private String deploymentId;
-  private JsonRpcHttpService httpService;
+  private String jsonRpcHttpServiceId;
+  private String httpServiceId;
+  private JsonRpcHttpService jsonRpcHttpService;
+  private HttpService httpService;
 
   public Runner(
       final TransactionSerialiser serialiser,
@@ -72,12 +75,15 @@ public class Runner {
 
   public void start() {
     final RequestMapper requestMapper = createRequestMapper(vertx);
-    httpService = new JsonRpcHttpService(responseFactory, serverOptions, requestMapper);
-    vertx.deployVerticle(httpService, this::handleDeployResult);
+    jsonRpcHttpService = new JsonRpcHttpService(responseFactory, serverOptions, requestMapper);
+    httpService = new HttpService(serverOptions);
+    vertx.deployVerticle(jsonRpcHttpService, this::jsonRpcServiceDeployment);
+    vertx.deployVerticle(httpService, this::httpServiceDeployment);
   }
 
   public void stop() {
-    vertx.undeploy(deploymentId);
+    vertx.undeploy(jsonRpcHttpServiceId);
+    vertx.undeploy(httpServiceId);
   }
 
   private RequestMapper createRequestMapper(final Vertx vertx) {
@@ -109,18 +115,32 @@ public class Runner {
     return requestMapper;
   }
 
-  private void handleDeployResult(final AsyncResult<String> result) {
+  private void jsonRpcServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {
-      deploymentId = result.result();
-      LOG.info("Vertx deployment id is: {}", deploymentId);
+      jsonRpcHttpServiceId = result.result();
+      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", jsonRpcHttpServiceId);
 
       if (dataDirectory != null) {
-        writePortsToFile(httpService);
+        writePortsToFile(jsonRpcHttpService);
       }
     } else {
-      LOG.error("Vertx deployment failed", result.cause());
-      System.exit(1);
+      verticleDeploymentFailed(result.cause());
     }
+  }
+
+  private void httpServiceDeployment(final AsyncResult<String> result) {
+    if (result.succeeded()) {
+      httpServiceId = result.result();
+      LOG.info("HttpService Vertx deployment id is: {}", httpServiceId);
+
+    } else {
+      verticleDeploymentFailed(result.cause());
+    }
+  }
+
+  private void verticleDeploymentFailed(final Throwable cause) {
+    LOG.error("Vertx deployment failed", cause);
+    System.exit(1);
   }
 
   private void writePortsToFile(final JsonRpcHttpService httpService) {

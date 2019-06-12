@@ -39,7 +39,6 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
-  private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
   private static final int UNASSIGNED_PORT = 0;
 
   static {
@@ -110,17 +109,6 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .failureHandler(new LogErrorHandler())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(this::handleJsonRpc);
-
-    // TODO should UPCHECK be it's own service / verticle?
-
-    // Handler for UpCheck endpoint
-    router
-        .route(HttpMethod.GET, "/upcheck")
-        .produces(TEXT)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new LogErrorHandler())
-        .handler(new UpcheckHandler());
 
     // Default route handler does nothing: no response
     router.route().handler(context -> {});
