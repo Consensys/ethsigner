@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
-
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
@@ -29,7 +27,7 @@ import picocli.CommandLine.Spec;
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
+public class FileBasedSignerCliConfig {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
@@ -52,17 +50,6 @@ public class FileBasedSignerCliConfig implements FileBasedSignerConfig {
       arity = "1")
   private Path keyFile;
 
-  @Override
-  public Path getPasswordFilePath() {
-    return passwordFilePath;
-  }
-
-  @Override
-  public Path getKeyPath() {
-    return keyFile;
-  }
-
-  @Override
   public boolean isConfigured() {
     return passwordFilePath != null && keyFile != null;
   }

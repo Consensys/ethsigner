@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
-
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
@@ -29,7 +27,7 @@ import picocli.CommandLine.Spec;
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
+public class HashicorpSignerCliConfig {
 
   public static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
@@ -82,32 +80,6 @@ public class HashicorpSignerCliConfig implements HashicorpSignerConfig {
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
-  @Override
-  public String getServerHost() {
-    return serverHost;
-  }
-
-  @Override
-  public Integer getServerPort() {
-    return serverPort;
-  }
-
-  @Override
-  public Integer getTimeout() {
-    return timeout;
-  }
-
-  @Override
-  public Path getAuthFilePath() {
-    return authFile;
-  }
-
-  @Override
-  public String getSigningKeyPath() {
-    return signingKeyPath;
-  }
-
-  @Override
   public boolean isConfigured() {
     return authFile != null;
   }
