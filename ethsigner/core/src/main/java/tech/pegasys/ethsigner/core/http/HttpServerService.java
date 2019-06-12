@@ -12,52 +12,40 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class JsonRpcHttpService extends AbstractVerticle {
+public class HttpServerService extends AbstractVerticle {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
-  private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
   private static final int UNASSIGNED_PORT = 0;
 
   private final HttpServerOptions serverOptions;
+  private final Router routes;
   private HttpServer httpServer;
 
-  private final JsonRpcHandler jsonRpcHandler;
-
-  public JsonRpcHttpService(
-      final HttpResponseFactory responseFactory,
-      final HttpServerOptions serverOptions,
-      final RequestMapper requestHandlerMapper) {
+  public HttpServerService(final Router routes, final HttpServerOptions serverOptions) {
     this.serverOptions = serverOptions;
-
-    // TODO promote
-    jsonRpcHandler = new JsonRpcHandler(responseFactory, requestHandlerMapper);
+    this.routes = routes;
   }
 
   @Override
   public void start(final Future<Void> startFuture) {
     httpServer = vertx.createHttpServer(serverOptions);
     httpServer
-        .requestHandler(router())
+        .requestHandler(routes)
         .listen(
             result -> {
               if (result.succeeded()) {
-                LOG.info("Json RPC server started on {}", httpServer.actualPort());
+                LOG.info("HTTP server service started on {}", httpServer.actualPort());
                 startFuture.complete();
               } else {
-                LOG.error("Json RPC server failed to listen", result.cause());
+                LOG.error("HTTP server service failed to listen", result.cause());
                 startFuture.fail(result.cause());
               }
             });
@@ -80,32 +68,5 @@ public class JsonRpcHttpService extends AbstractVerticle {
       return UNASSIGNED_PORT;
     }
     return httpServer.actualPort();
-  }
-
-  private Router router() {
-    final Router router = Router.router(vertx);
-
-    // Handler for JSON-RPC requests
-    router
-        .route(HttpMethod.POST, "/")
-        .produces(JSON)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new LogErrorHandler())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
-        .handler(jsonRpcHandler);
-
-    // Handler for UpCheck endpoint
-    router
-        .route(HttpMethod.GET, "/upcheck")
-        .produces(TEXT)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new LogErrorHandler())
-        .handler(new UpcheckHandler());
-
-    // Default route handler does nothing: no response
-    router.route().handler(context -> {});
-    return router;
   }
 }
