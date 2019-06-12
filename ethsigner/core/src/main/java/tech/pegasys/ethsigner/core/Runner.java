@@ -54,7 +54,6 @@ public class Runner {
   private String jsonRpcHttpServiceId;
   private String httpServiceId;
   private JsonRpcHttpService jsonRpcHttpService;
-  private HttpService httpService;
 
   public Runner(
       final TransactionSerialiser serialiser,
@@ -76,9 +75,8 @@ public class Runner {
   public void start() {
     final RequestMapper requestMapper = createRequestMapper(vertx);
     jsonRpcHttpService = new JsonRpcHttpService(responseFactory, serverOptions, requestMapper);
-    httpService = new HttpService(serverOptions);
     vertx.deployVerticle(jsonRpcHttpService, this::jsonRpcServiceDeployment);
-    vertx.deployVerticle(httpService, this::httpServiceDeployment);
+    vertx.deployVerticle(new HttpService(serverOptions), this::httpServiceDeployment);
   }
 
   public void stop() {
