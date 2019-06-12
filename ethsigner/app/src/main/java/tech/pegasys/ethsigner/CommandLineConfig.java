@@ -69,7 +69,6 @@ public class CommandLineConfig implements Config {
       arity = "1")
   private Integer downstreamHttpPort;
 
-  @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
       description =

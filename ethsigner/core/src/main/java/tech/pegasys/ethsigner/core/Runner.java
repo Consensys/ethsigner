@@ -72,8 +72,7 @@ public class Runner {
 
   public void start() {
     final RequestMapper requestMapper = createRequestMapper(vertx);
-    httpService =
-        new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
+    httpService = new JsonRpcHttpService(responseFactory, serverOptions, requestMapper);
     vertx.deployVerticle(httpService, this::handleDeployResult);
   }
 
