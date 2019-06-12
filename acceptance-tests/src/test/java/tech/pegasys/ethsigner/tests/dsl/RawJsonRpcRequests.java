@@ -30,14 +30,14 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.exceptions.ClientConnectionException;
 import org.web3j.protocol.http.HttpService;
 
-public class RawRequests {
+public class RawJsonRpcRequests {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpService web3jHttpService;
   private final RawJsonRpcRequestFactory requestFactory;
 
-  public RawRequests(
+  public RawJsonRpcRequests(
       final HttpService web3jHttpService, final RawJsonRpcRequestFactory requestFactory) {
     this.web3jHttpService = web3jHttpService;
     this.requestFactory = requestFactory;

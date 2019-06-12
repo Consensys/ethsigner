@@ -21,8 +21,9 @@ import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
 import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
-import tech.pegasys.ethsigner.tests.dsl.RawRequests;
+import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
+import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
@@ -50,7 +51,8 @@ public class Signer {
   private PrivateContracts privateContracts;
   private Transactions transactions;
   private Web3j jsonRpc;
-  private RawRequests rawRequests;
+  private RawJsonRpcRequests rawJsonRpcRequests;
+  private HttpRequest rawHttpRequests;
 
   public Signer(
       final SignerConfiguration signerConfig,
@@ -81,7 +83,8 @@ public class Signer {
     this.publicContracts = new PublicContracts(eth);
     this.privateContracts = new PrivateContracts(eea);
     this.accounts = new Accounts(eth);
-    this.rawRequests = new RawRequests(web3jHttpService, requestFactory);
+    this.rawJsonRpcRequests = new RawJsonRpcRequests(web3jHttpService, requestFactory);
+    this.rawHttpRequests = new HttpRequest(httpJsonRpcUrl);
   }
 
   public void shutdown() {
@@ -111,8 +114,12 @@ public class Signer {
     LOG.info("Signer is now responsive");
   }
 
-  public RawRequests rawRequest() {
-    return rawRequests;
+  public RawJsonRpcRequests rawJsonRpcRequests() {
+    return rawJsonRpcRequests;
+  }
+
+  public HttpRequest httpRequests() {
+    return rawHttpRequests;
   }
 
   private String url(final int port) {
