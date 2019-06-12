@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.http.HttpService;
 import tech.pegasys.ethsigner.core.http.JsonRpcHttpService;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
@@ -52,7 +51,6 @@ public class Runner {
 
   private final Vertx vertx;
   private String jsonRpcHttpServiceId;
-  private String httpServiceId;
   private JsonRpcHttpService jsonRpcHttpService;
 
   public Runner(
@@ -76,12 +74,10 @@ public class Runner {
     final RequestMapper requestMapper = createRequestMapper(vertx);
     jsonRpcHttpService = new JsonRpcHttpService(responseFactory, serverOptions, requestMapper);
     vertx.deployVerticle(jsonRpcHttpService, this::jsonRpcServiceDeployment);
-    vertx.deployVerticle(new HttpService(serverOptions), this::httpServiceDeployment);
   }
 
   public void stop() {
     vertx.undeploy(jsonRpcHttpServiceId);
-    vertx.undeploy(httpServiceId);
   }
 
   private RequestMapper createRequestMapper(final Vertx vertx) {
@@ -121,16 +117,6 @@ public class Runner {
       if (dataDirectory != null) {
         writePortsToFile(jsonRpcHttpService);
       }
-    } else {
-      verticleDeploymentFailed(result.cause());
-    }
-  }
-
-  private void httpServiceDeployment(final AsyncResult<String> result) {
-    if (result.succeeded()) {
-      httpServiceId = result.result();
-      LOG.info("HttpService Vertx deployment id is: {}", httpServiceId);
-
     } else {
       verticleDeploymentFailed(result.cause());
     }

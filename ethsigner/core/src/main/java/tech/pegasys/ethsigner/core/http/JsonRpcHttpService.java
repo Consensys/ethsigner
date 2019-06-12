@@ -12,24 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
@@ -39,26 +28,22 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+  private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
   private static final int UNASSIGNED_PORT = 0;
 
-  static {
-    // Force Jackson to fail when @JsonCreator values are missing
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-  }
-
-  private final RequestMapper requestHandlerMapper;
-  private final HttpResponseFactory responseFactory;
   private final HttpServerOptions serverOptions;
   private HttpServer httpServer;
+
+  private final JsonRpcHandler jsonRpcHandler;
 
   public JsonRpcHttpService(
       final HttpResponseFactory responseFactory,
       final HttpServerOptions serverOptions,
       final RequestMapper requestHandlerMapper) {
-    this.responseFactory = responseFactory;
     this.serverOptions = serverOptions;
-    this.requestHandlerMapper = requestHandlerMapper;
+
+    // TODO promote
+    jsonRpcHandler = new JsonRpcHandler(responseFactory, requestHandlerMapper);
   }
 
   @Override
@@ -108,49 +93,19 @@ public class JsonRpcHttpService extends AbstractVerticle {
         .handler(ResponseContentTypeHandler.create())
         .failureHandler(new LogErrorHandler())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
-        .handler(this::handleJsonRpc);
+        .handler(jsonRpcHandler);
+
+    // Handler for UpCheck endpoint
+    router
+        .route(HttpMethod.GET, "/upcheck")
+        .produces(TEXT)
+        .handler(BodyHandler.create())
+        .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new LogErrorHandler())
+        .handler(new UpcheckHandler());
 
     // Default route handler does nothing: no response
     router.route().handler(context -> {});
     return router;
-  }
-
-  private void handleJsonRpc(final RoutingContext context) {
-    vertx.executeBlocking(
-        future -> {
-          process(context);
-          future.complete();
-        },
-        false,
-        res -> {
-          if (res.failed()) {
-            LOG.error(
-                "An unhandled error occurred while processing " + context.getBodyAsString(),
-                res.cause());
-          }
-        });
-  }
-
-  private void process(final RoutingContext context) {
-    try {
-      LOG.trace("Request body = {}", context.getBodyAsString());
-
-      final JsonObject requestJson = context.getBodyAsJson();
-      final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
-      final JsonRpcRequestHandler handler =
-          requestHandlerMapper.getMatchingHandler(request.getMethod());
-      handler.handle(context, request);
-    } catch (final DecodeException | IllegalArgumentException e) {
-      sendParseErrorResponse(context, e);
-    }
-  }
-
-  private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
-    LOG.info("Dropping request from {}", context.request().remoteAddress());
-    LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-    responseFactory.create(
-        context.request(),
-        HttpResponseStatus.BAD_REQUEST.code(),
-        new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR));
   }
 }
