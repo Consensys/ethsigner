@@ -82,7 +82,7 @@ public class Runner {
   }
 
   public void start() {
-    httpServerService = new HttpServerService(routes(), serverOptions);
+    httpServerService = new HttpServerService(router(), serverOptions);
     vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
   }
 
@@ -119,7 +119,7 @@ public class Runner {
     return requestMapper;
   }
 
-  private Router routes() {
+  private Router router() {
     final Router router = Router.router(vertx);
     final RequestMapper requestMapper = createRequestMapper(vertx);
 

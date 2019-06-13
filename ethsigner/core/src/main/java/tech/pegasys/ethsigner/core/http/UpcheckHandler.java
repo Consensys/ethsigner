@@ -18,7 +18,7 @@ import io.vertx.ext.web.RoutingContext;
 public class UpcheckHandler implements Handler<RoutingContext> {
 
   @Override
-  public void handle(RoutingContext routingContext) {
+  public void handle(final RoutingContext routingContext) {
     routingContext.response().end("I'm up!");
   }
 }
