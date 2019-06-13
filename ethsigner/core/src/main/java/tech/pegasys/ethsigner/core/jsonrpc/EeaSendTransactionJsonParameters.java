@@ -75,13 +75,8 @@ public class EeaSendTransactionJsonParameters {
 
   @JsonSetter("value")
   public void value(final String value) {
-    final BigInteger decodedValue = decodeQuantity(value);
-    if (decodedValue.equals(BigInteger.ZERO)) {
-      this.value = decodedValue;
-    } else {
-      throw new IllegalArgumentException(
-          "Non-zero value, private transactions cannot transfer ether");
-    }
+    validateValue(value);
+    this.value = decodeQuantity(value);
   }
 
   @JsonSetter("data")
@@ -131,5 +126,12 @@ public class EeaSendTransactionJsonParameters {
 
   public static EeaSendTransactionJsonParameters from(final JsonRpcRequest request) {
     return fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
+  }
+
+  private void validateValue(final String value) {
+    if (!decodeQuantity(value).equals(BigInteger.ZERO)) {
+      throw new IllegalArgumentException(
+          "Non-zero value, private transactions cannot transfer ether");
+    }
   }
 }
