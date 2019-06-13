@@ -35,7 +35,8 @@ public class EthSendTransactionJsonParameters {
   private String data;
 
   @JsonCreator
-  public EthSendTransactionJsonParameters(@JsonProperty("from") final String sender) {
+  public EthSendTransactionJsonParameters(
+      @JsonProperty(value = "from", required = true) final String sender) {
     validatePrefix(sender);
     this.sender = sender;
   }

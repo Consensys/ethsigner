@@ -75,7 +75,13 @@ public class EeaSendTransactionJsonParameters {
 
   @JsonSetter("value")
   public void value(final String value) {
-    this.value = decodeQuantity(value);
+    final BigInteger decodedValue = decodeQuantity(value);
+    if (decodedValue.equals(BigInteger.ZERO)) {
+      this.value = decodedValue;
+    } else {
+      throw new IllegalArgumentException(
+          "Non-zero value, private transactions cannot transfer ether");
+    }
   }
 
   @JsonSetter("data")
