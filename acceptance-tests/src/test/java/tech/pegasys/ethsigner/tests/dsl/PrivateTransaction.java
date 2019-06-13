@@ -80,6 +80,29 @@ public class PrivateTransaction {
         restriction);
   }
 
+  public static PrivateTransaction createEtherTransaction(
+      final String from,
+      final BigInteger nonce,
+      final BigInteger gasPrice,
+      final BigInteger gasLimit,
+      final String to,
+      final BigInteger value,
+      final String privateFrom,
+      final List<String> privateFor,
+      final String restriction) {
+    return new PrivateTransaction(
+        from,
+        encodeQuantity(nonce),
+        encodeQuantity(gasPrice),
+        encodeQuantity(gasLimit),
+        to,
+        encodeQuantity(value),
+        null,
+        privateFrom,
+        privateFor,
+        restriction);
+  }
+
   public String getFrom() {
     return from;
   }
