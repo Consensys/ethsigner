@@ -25,6 +25,6 @@ jar {
 
 dependencies {
   implementation 'org.apache.logging.log4j:log4j-api'
-  implementation 'org.apache.logging.log4j:log4j-core'
-  implementation 'org.apache.logging.log4j:log4j-slf4j-impl'
+  runtime 'org.apache.logging.log4j:log4j-core'
+  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 }
