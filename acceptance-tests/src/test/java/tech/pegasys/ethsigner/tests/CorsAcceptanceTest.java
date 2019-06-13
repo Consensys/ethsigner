@@ -72,7 +72,7 @@ public class CorsAcceptanceTest {
   public void forbiddenResponseReceivedWhenHeadersDoNotMatchCorsOfNode() {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner
-            .rawRequest()
+            .rawJsonRpcRequests()
             .exceptionalRequest(
                 "eth_blockNumber",
                 singletonMap(HttpHeaderNames.ORIGIN.toString(), UNAUTHORISED_DOMAIN));
