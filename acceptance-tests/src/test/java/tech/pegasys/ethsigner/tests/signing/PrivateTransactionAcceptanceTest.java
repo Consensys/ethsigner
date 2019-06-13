@@ -56,7 +56,7 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
 
   @Test
   public void valueTransferWithNonZeroValue() {
-    final PrivateTransaction contract =
+    final PrivateTransaction transaction =
         PrivateTransaction.createEtherTransaction(
             richBenefactor().address(),
             richBenefactor().nextNonceAndIncrement(),
@@ -69,7 +69,7 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
             RESTRICTED);
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
-        ethSigner().privateContracts().submitExceptional(contract);
+        ethSigner().privateContracts().submitExceptional(transaction);
     assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
   }
 }
