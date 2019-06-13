@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 
 import java.nio.file.Path;
 
@@ -66,8 +67,8 @@ public class FileBasedTransactionSignerCliConfig implements TransactionSignerCon
   }
 
   @Override
-  public String className() {
-    return "tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner";
+  public String name() {
+    return FileBasedTransactionSigner.class.getName();
   }
 
   @Override

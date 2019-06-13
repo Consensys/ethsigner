@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.lang.reflect.InvocationTargetException;
+import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,18 +23,14 @@ public class TransactionSignerFactory {
   private static final Logger LOG = LogManager.getLogger();
 
   public static TransactionSigner create(final TransactionSignerConfig config) {
-    try {
-      return Class.forName(config.className())
-          .asSubclass(TransactionSigner.class)
-          .getDeclaredConstructor(TransactionSignerConfig.class)
-          .newInstance(config);
-    } catch (final InstantiationException
-        | IllegalAccessException
-        | InvocationTargetException
-        | NoSuchMethodException
-        | ClassNotFoundException e) {
-      LOG.error("Problem creating TransactionSigner instance.", e);
-      throw new TransactionSignerInitializationException(e);
+    if (config.name().equals(HashicorpTransactionSigner.class.getName())) {
+      return new HashicorpTransactionSigner(config);
+    } else if (config.name().equals(FileBasedTransactionSigner.class.getName())) {
+      return new FileBasedTransactionSigner(config);
+    } else {
+      final String message = "Don't know about TransactionSigner with name: " + config.name();
+      LOG.error(message);
+      throw new TransactionSignerInitializationException(message);
     }
   }
 }

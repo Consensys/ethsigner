@@ -110,7 +110,7 @@ public class CommandLineConfig implements Config {
     this.output = output;
   }
 
-  private HashicorpTransactionSignerCliConfig hashiTransactionSignerConfig;
+  private HashicorpTransactionSignerCliConfig hashicorpTransactionSignerConfig;
 
   private FileBasedTransactionSignerCliConfig fileBasedTransactionSignerConfig;
 
@@ -120,9 +120,9 @@ public class CommandLineConfig implements Config {
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
-    hashiTransactionSignerConfig = new HashicorpTransactionSignerCliConfig();
+    hashicorpTransactionSignerConfig = new HashicorpTransactionSignerCliConfig();
     commandLine.addSubcommand(
-        HashicorpTransactionSignerCliConfig.COMMAND_NAME, hashiTransactionSignerConfig);
+        HashicorpTransactionSignerCliConfig.COMMAND_NAME, hashicorpTransactionSignerConfig);
 
     fileBasedTransactionSignerConfig = new FileBasedTransactionSignerCliConfig();
     commandLine.addSubcommand(
@@ -196,8 +196,8 @@ public class CommandLineConfig implements Config {
   @Override
   public TransactionSigner getSigner() {
     final TransactionSignerConfig sc;
-    if (hashiTransactionSignerConfig.isConfigured()) {
-      sc = hashiTransactionSignerConfig;
+    if (hashicorpTransactionSignerConfig.isConfigured()) {
+      sc = hashicorpTransactionSignerConfig;
     } else if (fileBasedTransactionSignerConfig.isConfigured()) {
       sc = fileBasedTransactionSignerConfig;
     } else {
@@ -224,7 +224,7 @@ public class CommandLineConfig implements Config {
         .add("chainId", chainId)
         .add("dataDirectory", dataDirectory)
         .add("output", output)
-        .add("hashicorpTransactionSignerConfig", hashiTransactionSignerConfig)
+        .add("hashicorpTransactionSignerConfig", hashicorpTransactionSignerConfig)
         .add("filebasedTransactionSignerConfig", fileBasedTransactionSignerConfig)
         .toString();
   }

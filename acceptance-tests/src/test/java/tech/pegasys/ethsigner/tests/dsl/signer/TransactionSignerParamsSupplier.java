@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.hashicorpVault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,14 +80,14 @@ public class TransactionSignerParamsSupplier {
   }
 
   private File createTmpFile(final String tempNamePrefix, final byte[] data) {
-    final Path file;
+    final Path path;
     try {
-      file = Files.createTempFile(tempNamePrefix, ".file");
-      Files.write(file, data);
+      path = Files.createTempFile(tempNamePrefix, null);
+      Files.write(path, data);
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-    final File tmpFile = file.toFile();
+    final File tmpFile = path.toFile();
     tmpFile.deleteOnExit();
     return tmpFile;
   }

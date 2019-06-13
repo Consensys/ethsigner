@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.core.signing;
 
 public interface TransactionSignerConfig {
-  String className();
+  String name();
 
   String jsonString();
 }

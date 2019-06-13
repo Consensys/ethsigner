@@ -295,7 +295,7 @@ public class IntegrationTestBase {
     }
 
     @Override
-    public String className() {
+    public String name() {
       return null;
     }
 

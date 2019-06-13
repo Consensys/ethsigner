@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
 
 import java.nio.file.Path;
 
@@ -99,8 +100,8 @@ public class HashicorpTransactionSignerCliConfig implements TransactionSignerCon
   }
 
   @Override
-  public String className() {
-    return "tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner";
+  public String name() {
+    return HashicorpTransactionSigner.class.getName();
   }
 
   @Override
