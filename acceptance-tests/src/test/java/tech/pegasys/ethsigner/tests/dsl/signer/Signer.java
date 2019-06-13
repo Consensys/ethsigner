@@ -29,6 +29,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
 import java.time.Duration;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -110,7 +111,9 @@ public class Signer {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Signer to become responsive...");
-    waitFor(() -> assertThat(jsonRpc.ethAccounts().send().hasError()).isFalse());
+    waitFor(
+        () ->
+            assertThat(rawHttpRequests.get("/upcheck").status()).isEqualTo(HttpResponseStatus.OK));
     LOG.info("Signer is now responsive");
   }
 
