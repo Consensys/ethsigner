@@ -12,13 +12,16 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
+import tech.pegasys.ethsigner.core.EthSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
 
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -26,12 +29,15 @@ import picocli.CommandLine.Spec;
 
 /** Hashicorp vault related sub-command */
 @Command(
-    name = HashicorpTransactionSignerCliConfig.COMMAND_NAME,
+    name = HashicorpTransactionSignerCommand.COMMAND_NAME,
     description =
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpTransactionSignerCliConfig implements TransactionSignerConfig {
+public class HashicorpTransactionSignerCommand extends TransactionSignerCommand
+    implements Runnable {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   public static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
@@ -41,7 +47,9 @@ public class HashicorpTransactionSignerCliConfig implements TransactionSignerCon
   private static final String DEFAULT_TIMEOUT_STRING = "5";
   private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
 
-  public HashicorpTransactionSignerCliConfig() {}
+  public HashicorpTransactionSignerCommand() {}
+
+  @CommandLine.ParentCommand private CommandLineConfig parentCommand;
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -84,8 +92,17 @@ public class HashicorpTransactionSignerCliConfig implements TransactionSignerCon
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
-  public boolean isConfigured() {
-    return authFilePath != null;
+  @Override
+  public void run() {
+    setupLogging(parentCommand);
+
+    final Vertx vertx = Vertx.vertx();
+
+    final TransactionSigner transactionSigner =
+        new HashicorpTransactionSigner(
+            vertx, signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+    final EthSigner signer = new EthSigner(parentCommand, transactionSigner, vertx);
+    signer.run();
   }
 
   @Override
@@ -96,22 +113,6 @@ public class HashicorpTransactionSignerCliConfig implements TransactionSignerCon
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
-        .toString();
-  }
-
-  @Override
-  public String name() {
-    return HashicorpTransactionSigner.class.getName();
-  }
-
-  @Override
-  public String jsonString() {
-    return new JsonObject()
-        .put("serverHost", serverHost)
-        .put("serverPort", Integer.valueOf(serverPort).toString())
-        .put("authFilePath", authFilePath != null ? authFilePath.toString() : "null")
-        .put("timeout", timeout.toString())
-        .put("signingKeyPath", signingKeyPath)
         .toString();
   }
 }

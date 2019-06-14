@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.HashicorpTransactionSignerCliConfig;
+import tech.pegasys.ethsigner.HashicorpTransactionSignerCommand;
 
 import java.io.ByteArrayOutputStream;
 import java.util.function.Supplier;
@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class HashicorpTransactionSignerCliConfigTest {
+public class HashicorpTransactionSignerCommandTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
   private static final String HTTP_HOST_COM = "http://host.com";
@@ -31,10 +31,10 @@ public class HashicorpTransactionSignerCliConfigTest {
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private HashicorpTransactionSignerCliConfig hashiConfig;
+  private HashicorpTransactionSignerCommand hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpTransactionSignerCliConfig();
+    hashiConfig = new HashicorpTransactionSignerCommand();
     final CommandLine commandLine = new CommandLine(hashiConfig);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -73,12 +73,12 @@ public class HashicorpTransactionSignerCliConfigTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    final String jsonString = hashiConfig.jsonString();
-    assertThat(jsonString).contains(THIS_IS_THE_PATH_TO_THE_FILE);
-    assertThat(jsonString).contains(HTTP_HOST_COM);
-    assertThat(jsonString).contains(PORT);
-    assertThat(jsonString).contains(PATH_TO_SIGNING_KEY);
-    assertThat(jsonString).contains(FIFTEEN);
+    final String string = hashiConfig.toString();
+    assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(string).contains(HTTP_HOST_COM);
+    assertThat(string).contains(PORT);
+    assertThat(string).contains(PATH_TO_SIGNING_KEY);
+    assertThat(string).contains(FIFTEEN);
   }
 
   @Test
@@ -104,15 +104,15 @@ public class HashicorpTransactionSignerCliConfigTest {
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
     // object.
-    HashicorpTransactionSignerCliConfig hcConfig = new HashicorpTransactionSignerCliConfig();
-    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::jsonString, "localhost");
+    HashicorpTransactionSignerCommand hcConfig = new HashicorpTransactionSignerCommand();
+    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "localhost");
 
-    hcConfig = new HashicorpTransactionSignerCliConfig();
-    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::jsonString, "8200");
+    hcConfig = new HashicorpTransactionSignerCommand();
+    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "8200");
 
-    hcConfig = new HashicorpTransactionSignerCliConfig();
+    hcConfig = new HashicorpTransactionSignerCommand();
     missingOptionalParameterIsValidAndMeetsDefault(
-        "host", hcConfig::jsonString, "/secret/data/ethsignerSigningKey");
+        "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
   }
 
   private void missingParameterShowsError(final String paramToRemove) {

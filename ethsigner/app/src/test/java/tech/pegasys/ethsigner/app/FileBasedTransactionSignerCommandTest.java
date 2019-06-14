@@ -14,20 +14,20 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.FileBasedTransactionSignerCliConfig;
+import tech.pegasys.ethsigner.FileBasedTransactionSignerCommand;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class FileBasedTransactionSignerCliConfigTest {
+public class FileBasedTransactionSignerCommandTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
-  private FileBasedTransactionSignerCliConfig config;
+  private FileBasedTransactionSignerCommand config;
 
   private boolean parseCommand(final String cmdLine) {
-    config = new FileBasedTransactionSignerCliConfig();
+    config = new FileBasedTransactionSignerCommand();
     final CommandLine commandLine = new CommandLine(config);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -53,8 +53,8 @@ public class FileBasedTransactionSignerCliConfigTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    assertThat(config.jsonString()).contains(PASSWORD_FILE);
-    assertThat(config.jsonString()).contains(KEY_FILE);
+    assertThat(config.toString()).contains(PASSWORD_FILE);
+    assertThat(config.toString()).contains(KEY_FILE);
   }
 
   @Test

@@ -15,14 +15,12 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
 
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
@@ -110,28 +108,29 @@ public class CommandLineConfig implements Config {
     this.output = output;
   }
 
-  private HashicorpTransactionSignerCliConfig hashicorpTransactionSignerConfig;
+  private HashicorpTransactionSignerCommand hashicorpTransactionSignerConfig;
 
-  private FileBasedTransactionSignerCliConfig fileBasedTransactionSignerConfig;
+  private FileBasedTransactionSignerCommand fileBasedTransactionSignerConfig;
 
-  public boolean parse(final String... args) {
+  public boolean parse(
+      final CommandLine.IParseResultHandler2<List<Object>> resultHandler, final String... args) {
 
     commandLine = new CommandLine(this);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
-    hashicorpTransactionSignerConfig = new HashicorpTransactionSignerCliConfig();
+    hashicorpTransactionSignerConfig = new HashicorpTransactionSignerCommand();
     commandLine.addSubcommand(
-        HashicorpTransactionSignerCliConfig.COMMAND_NAME, hashicorpTransactionSignerConfig);
+        HashicorpTransactionSignerCommand.COMMAND_NAME, hashicorpTransactionSignerConfig);
 
-    fileBasedTransactionSignerConfig = new FileBasedTransactionSignerCliConfig();
+    fileBasedTransactionSignerConfig = new FileBasedTransactionSignerCommand();
     commandLine.addSubcommand(
-        FileBasedTransactionSignerCliConfig.COMMAND_NAME, fileBasedTransactionSignerConfig);
+        FileBasedTransactionSignerCommand.COMMAND_NAME, fileBasedTransactionSignerConfig);
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
     try {
-      commandLine.parse(args);
+      commandLine.parseWithHandlers(resultHandler, new MyExceptionHandler<List<Object>>(), args);
     } catch (final ParameterException ex) {
       handleParseException(ex);
       return false;
@@ -194,19 +193,6 @@ public class CommandLineConfig implements Config {
   }
 
   @Override
-  public TransactionSigner getSigner() {
-    final TransactionSignerConfig sc;
-    if (hashicorpTransactionSignerConfig.isConfigured()) {
-      sc = hashicorpTransactionSignerConfig;
-    } else if (fileBasedTransactionSignerConfig.isConfigured()) {
-      sc = fileBasedTransactionSignerConfig;
-    } else {
-      throw new RuntimeException();
-    }
-    return TransactionSignerFactory.create(sc);
-  }
-
-  @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
@@ -227,5 +213,19 @@ public class CommandLineConfig implements Config {
         .add("hashicorpTransactionSignerConfig", hashicorpTransactionSignerConfig)
         .add("filebasedTransactionSignerConfig", fileBasedTransactionSignerConfig)
         .toString();
+  }
+
+  private static class MyExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
+
+    @Override
+    public R handleParseException(final ParameterException ex, final String[] args) {
+      throw ex;
+    }
+
+    @Override
+    public R handleExecutionException(
+        final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
+      throw ex;
+    }
   }
 }

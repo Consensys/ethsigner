@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2018 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,19 +12,20 @@
  */
 package tech.pegasys.ethsigner;
 
-import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import picocli.CommandLine;
+import org.apache.logging.log4j.core.config.Configurator;
 
-public class EthSignerApp {
+public abstract class TransactionSignerCommand {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final Vertx vertx = Vertx.vertx();
 
-  public static void main(final String... args) {
-    final CommandLineConfig config = new CommandLineConfig(System.out);
+  public void setupLogging(final CommandLineConfig parentCommand) {
+    // set log level per CLI flags
+    System.out.println("Setting logging level to " + parentCommand.getLogLevel().name());
+    Configurator.setAllLevels("", parentCommand.getLogLevel());
 
-    config.parse(new CommandLine.RunLast(), args);
+    LOG.debug("Configuration = {}", parentCommand);
+    LOG.info("Version = {}, ", ApplicationInfo.version());
   }
 }

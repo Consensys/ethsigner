@@ -13,12 +13,11 @@
 package tech.pegasys.ethsigner.core.signing.hashicorp;
 
 import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,8 +25,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
@@ -41,38 +42,55 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
   private static final String AUTH_FILE_MESSAGE =
       "Unable to read file containing the authentication information for Hashicorp Vault: ";
   private static final String RETRIEVE_PRIVATE_KEY_MESSGAE =
-      "Unable to retrieve private key from Hashicorp Vault with this config: \n";
+      "Unable to retrieve private key from Hashicorp Vault.";
   private static final String TIMEOUT_MESSGAE =
-      "Timeout while retrieving private key from Hashicorp Vault with this config: \n";
+      "Timeout while retrieving private key from Hashicorp Vault.";
 
-  public HashicorpTransactionSigner(final TransactionSignerConfig config) {
-    final JsonObject jsonObject = new JsonObject(config.jsonString());
+  public HashicorpTransactionSigner(
+      final Vertx vertx,
+      final String signingKeyPath,
+      final Integer serverPort,
+      final String serverHost,
+      final Path authFilePath,
+      final Integer timeout) {
 
-    final String response = requestSecretFromVault(jsonObject);
+    final String response =
+        requestSecretFromVault(
+            vertx, signingKeyPath, serverPort, serverHost, authFilePath, timeout);
     this.credentials = extractCredentialsFromJson(response);
   }
 
-  private String requestSecretFromVault(final JsonObject config) {
-    final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + config.getString("signingKeyPath");
+  private String requestSecretFromVault(
+      final Vertx vertx,
+      final String signingKeyPath,
+      final Integer serverPort,
+      final String serverHost,
+      final Path authFilePath,
+      final Integer timeout) {
+    final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + signingKeyPath;
 
-    return getVaultResponse(config, requestURI);
+    return getVaultResponse(vertx, serverPort, serverHost, authFilePath, requestURI, timeout);
   }
 
-  private String getVaultResponse(final JsonObject config, final String requestURI) {
-    Vertx vertx = null;
+  private String getVaultResponse(
+      final Vertx vertx,
+      final Integer serverPort,
+      final String serverHost,
+      final Path authFilePath,
+      final String requestURI,
+      final Integer timeout) {
     try {
-      vertx = Vertx.vertx();
       final HttpClient httpClient = vertx.createHttpClient();
       final CompletableFuture<String> future = new CompletableFuture<>();
       final HttpClientRequest request =
           httpClient.request(
               HttpMethod.GET,
-              Integer.parseInt(config.getString("serverPort")),
-              config.getString("serverHost"),
+              serverPort,
+              serverHost,
               requestURI,
-              rh ->
+              (HttpClientResponse rh) ->
                   rh.bodyHandler(
-                      bh -> {
+                      (Buffer bh) -> {
                         if (rh.statusCode() == 200) {
                           future.complete(bh.toString());
                         } else {
@@ -83,10 +101,10 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
                                       + "}"));
                         }
                       }));
-      request.headers().set("X-Vault-Token", readTokenFromFile(config.getString("authFilePath")));
+      request.headers().set("X-Vault-Token", readTokenFromFile(authFilePath));
       request.setChunked(false);
       request.end();
-      return getResponse(future, config);
+      return getResponse(future, timeout);
     } finally {
       if (vertx != null) {
         vertx.close();
@@ -94,10 +112,10 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     }
   }
 
-  private String readTokenFromFile(final String path) {
+  private String readTokenFromFile(final Path path) {
     final List<String> authFileLines;
     try {
-      authFileLines = Files.readAllLines(Paths.get(path));
+      authFileLines = Files.readAllLines(path);
     } catch (final IOException e) {
       final String message = AUTH_FILE_MESSAGE + path;
       LOG.error(message, e);
@@ -106,16 +124,16 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     return authFileLines.get(0);
   }
 
-  private String getResponse(final CompletableFuture<String> future, final JsonObject config) {
+  private String getResponse(final CompletableFuture<String> future, final Integer timeout) {
     final String response;
     try {
-      response = future.get(Long.parseLong(config.getString("timeout")), TimeUnit.SECONDS);
+      response = future.get(timeout, TimeUnit.SECONDS);
     } catch (final InterruptedException | ExecutionException e) {
-      final String message = RETRIEVE_PRIVATE_KEY_MESSGAE + config;
+      final String message = RETRIEVE_PRIVATE_KEY_MESSGAE;
       LOG.error(message, e);
       throw new TransactionSignerInitializationException(message, e);
     } catch (final TimeoutException e) {
-      final String message = TIMEOUT_MESSGAE + config;
+      final String message = TIMEOUT_MESSGAE;
       LOG.error(message, e);
       throw new TransactionSignerInitializationException(message, e);
     }

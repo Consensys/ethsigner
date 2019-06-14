@@ -21,12 +21,14 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import picocli.CommandLine;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandLineConfigTest {
@@ -37,7 +39,7 @@ public class CommandLineConfigTest {
   private CommandLineConfig config = new CommandLineConfig(outPrintStream);
 
   private boolean parseCommand(final String cmdLine) {
-    return config.parse(cmdLine.split(" "));
+    return config.parse(new MyHandler<List<Object>>(), cmdLine.split(" "));
   }
 
   private String validCommandLine() {
@@ -146,5 +148,13 @@ public class CommandLineConfigTest {
     final boolean result = parseCommand(input);
     assertThat(result).isTrue();
     assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
+  }
+
+  private static class MyHandler<R> implements CommandLine.IParseResultHandler2<R> {
+    @Override
+    public R handleParseResult(final CommandLine.ParseResult parseResult)
+        throws CommandLine.ExecutionException {
+      return null;
+    }
   }
 }

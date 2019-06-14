@@ -12,9 +12,14 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.core.EthSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
+
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.Vertx;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -22,16 +27,19 @@ import picocli.CommandLine.Spec;
 
 /** File-based authentication related sub-command */
 @Command(
-    name = FileBasedSignerCliConfig.COMMAND_NAME,
+    name = FileBasedTransactionSignerCommand.COMMAND_NAME,
     description =
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedSignerCliConfig {
+public class FileBasedTransactionSignerCommand extends TransactionSignerCommand
+    implements Runnable {
+
+  @CommandLine.ParentCommand private CommandLineConfig parentCommand;
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedSignerCliConfig() {}
+  public FileBasedTransactionSignerCommand() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -48,17 +56,25 @@ public class FileBasedSignerCliConfig {
       description = "The path to a file containing the key used to sign transactions.",
       required = true,
       arity = "1")
-  private Path keyFile;
-
-  public boolean isConfigured() {
-    return passwordFilePath != null && keyFile != null;
-  }
+  private Path keyFilePath;
 
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("passwordFilePath", passwordFilePath)
-        .add("keyFile", keyFile)
+        .add("keyFilePath", keyFilePath)
         .toString();
+  }
+
+  @Override
+  public void run() {
+    setupLogging(parentCommand);
+
+    final Vertx vertx = Vertx.vertx();
+
+    final TransactionSigner transactionSigner =
+        new FileBasedTransactionSigner(keyFilePath, passwordFilePath);
+    final EthSigner signer = new EthSigner(parentCommand, transactionSigner, vertx);
+    signer.run();
   }
 }

@@ -28,7 +28,6 @@ import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
 import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -53,7 +52,6 @@ import io.restassured.RestAssured;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
@@ -253,17 +251,15 @@ public class IntegrationTestBase {
 
   private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
     return headers.entrySet().stream()
-        .map(e -> new Header(e.getKey(), e.getValue()))
+        .map((Map.Entry<String, String> e) -> new Header(e.getKey(), e.getValue()))
         .collect(toList());
   }
 
   private static TransactionSigner transactionSigner() throws IOException {
     final File keyFile = createKeyFile();
     final File passwordFile = createFile("password");
-    final TestTransactionSignerConfig config =
-        new TestTransactionSignerConfig(passwordFile.toString(), keyFile.toString());
     final FileBasedTransactionSigner fileBasedTransactionSigner =
-        new FileBasedTransactionSigner(config);
+        new FileBasedTransactionSigner(keyFile.toPath(), passwordFile.toPath());
     return fileBasedTransactionSigner;
   }
 
@@ -283,28 +279,5 @@ public class IntegrationTestBase {
     final File file = path.toFile();
     file.deleteOnExit();
     return file;
-  }
-
-  private static class TestTransactionSignerConfig implements TransactionSignerConfig {
-    private final String passwordFile;
-    private final String keyFile;
-
-    public TestTransactionSignerConfig(final String passwordFile, final String keyFile) {
-      this.passwordFile = passwordFile;
-      this.keyFile = keyFile;
-    }
-
-    @Override
-    public String name() {
-      return null;
-    }
-
-    @Override
-    public String jsonString() {
-      return new JsonObject()
-          .put("passwordFilePath", passwordFile)
-          .put("keyFilePath", keyFile)
-          .encode();
-    }
   }
 }

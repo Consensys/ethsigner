@@ -14,19 +14,16 @@ package tech.pegasys.ethsigner.core.signing.filebased;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerConfig;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import io.vertx.core.json.JsonObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.crypto.WalletUtils;
@@ -53,16 +50,8 @@ public class FileBasedTransactionSignerTest {
     final File keyFile = new File(fileName);
     final File pwdFile = createFile(MY_PASSWORD);
 
-    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
-
-    final JsonObject jsonObject =
-        new JsonObject()
-            .put("passwordFilePath", pwdFile.getAbsolutePath())
-            .put("keyFilePath", keyFile.getAbsolutePath());
-
-    when(configMock.jsonString()).thenReturn(jsonObject.encode());
-
-    final TransactionSigner signer = new FileBasedTransactionSigner(configMock);
+    final TransactionSigner signer =
+        new FileBasedTransactionSigner(keyFile.toPath(), pwdFile.toPath());
 
     assertThat(signer).isNotNull();
     assertThat(signer.getAddress()).isNotEmpty();
@@ -74,16 +63,8 @@ public class FileBasedTransactionSignerTest {
     final File pwdFile = createFile(INVALID_PASSWORD);
     final File keyFile = new File(fileName);
 
-    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
-
-    final JsonObject jsonObject =
-        new JsonObject()
-            .put("passwordFilePath", pwdFile.getAbsolutePath())
-            .put("keyFilePath", keyFile.getAbsolutePath());
-
-    when(configMock.jsonString()).thenReturn(jsonObject.encode());
-
-    final TransactionSigner signer = new FileBasedTransactionSigner(configMock);
+    final TransactionSigner signer =
+        new FileBasedTransactionSigner(keyFile.toPath(), pwdFile.toPath());
   }
 
   @Test(expected = TransactionSignerInitializationException.class)
@@ -91,33 +72,17 @@ public class FileBasedTransactionSignerTest {
 
     final File keyFile = new File(fileName);
 
-    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
-
-    final JsonObject jsonObject =
-        new JsonObject()
-            .put("passwordFilePath", "nonExistingFile")
-            .put("keyFilePath", keyFile.getAbsolutePath());
-
-    when(configMock.jsonString()).thenReturn(jsonObject.encode());
-
-    final TransactionSigner signer = new FileBasedTransactionSigner(configMock);
+    final TransactionSigner signer =
+        new FileBasedTransactionSigner(keyFile.toPath(), Paths.get("nonExistingFile"));
   }
 
   @Test(expected = TransactionSignerInitializationException.class)
   public void keyFileNotAvailable() throws IOException {
 
-    final File file = createFile("doesNotMatter");
+    final File pwdFile = createFile(MY_PASSWORD);
 
-    final TransactionSignerConfig configMock = mock(TransactionSignerConfig.class);
-
-    final JsonObject jsonObject =
-        new JsonObject()
-            .put("passwordFilePath", file.getAbsolutePath())
-            .put("keyFilePath", "nonExistingFile");
-
-    when(configMock.jsonString()).thenReturn(jsonObject.encode());
-
-    final TransactionSigner signer = new FileBasedTransactionSigner(configMock);
+    final TransactionSigner signer =
+        new FileBasedTransactionSigner(Paths.get("nonExistingFile"), pwdFile.toPath());
   }
 
   private static File createFile(final String s) throws IOException {
