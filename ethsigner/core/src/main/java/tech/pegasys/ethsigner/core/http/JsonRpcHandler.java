@@ -18,28 +18,18 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class JsonRpcHttpService extends AbstractVerticle {
+public class JsonRpcHandler implements Handler<RoutingContext> {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
-  private static final int UNASSIGNED_PORT = 0;
 
   static {
     // Force Jackson to fail when @JsonCreator values are missing
@@ -49,82 +39,31 @@ public class JsonRpcHttpService extends AbstractVerticle {
 
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
-  private final HttpServerOptions serverOptions;
-  private HttpServer httpServer;
 
-  public JsonRpcHttpService(
-      final HttpResponseFactory responseFactory,
-      final HttpServerOptions serverOptions,
-      final RequestMapper requestHandlerMapper) {
+  public JsonRpcHandler(
+      final HttpResponseFactory responseFactory, final RequestMapper requestHandlerMapper) {
     this.responseFactory = responseFactory;
-    this.serverOptions = serverOptions;
     this.requestHandlerMapper = requestHandlerMapper;
   }
 
   @Override
-  public void start(final Future<Void> startFuture) {
-    httpServer = vertx.createHttpServer(serverOptions);
-    httpServer
-        .requestHandler(router())
-        .listen(
-            result -> {
-              if (result.succeeded()) {
-                LOG.info("Json RPC server started on {}", httpServer.actualPort());
-                startFuture.complete();
-              } else {
-                LOG.error("Json RPC server failed to listen", result.cause());
-                startFuture.fail(result.cause());
+  public void handle(final RoutingContext context) {
+
+    context
+        .vertx()
+        .executeBlocking(
+            future -> {
+              process(context);
+              future.complete();
+            },
+            false,
+            res -> {
+              if (res.failed()) {
+                LOG.error(
+                    "An unhandled error occurred while processing " + context.getBodyAsString(),
+                    res.cause());
               }
             });
-  }
-
-  @Override
-  public void stop(final Future<Void> stopFuture) {
-    httpServer.close(
-        result -> {
-          if (result.succeeded()) {
-            stopFuture.complete();
-          } else {
-            stopFuture.fail(result.cause());
-          }
-        });
-  }
-
-  public int actualPort() {
-    if (httpServer == null) {
-      return UNASSIGNED_PORT;
-    }
-    return httpServer.actualPort();
-  }
-
-  private Router router() {
-    final Router router = Router.router(vertx);
-    router
-        .route(HttpMethod.POST, "/")
-        .produces(JSON)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new LogErrorHandler())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
-        .handler(this::handleJsonRpc);
-    router.route().handler(context -> {});
-    return router;
-  }
-
-  private void handleJsonRpc(final RoutingContext context) {
-    vertx.executeBlocking(
-        future -> {
-          process(context);
-          future.complete();
-        },
-        false,
-        res -> {
-          if (res.failed()) {
-            LOG.error(
-                "An unhandled error occurred while processing " + context.getBodyAsString(),
-                res.cause());
-          }
-        });
   }
 
   private void process(final RoutingContext context) {

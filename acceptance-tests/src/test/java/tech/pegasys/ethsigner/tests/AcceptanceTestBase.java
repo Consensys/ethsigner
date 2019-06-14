@@ -49,7 +49,7 @@ public class AcceptanceTestBase {
     return ethNode;
   }
 
-  protected String enclavePublicKey1() {
+  protected String enclavePublicKey() {
     return readResource("enclave_key.pub");
   }
 
