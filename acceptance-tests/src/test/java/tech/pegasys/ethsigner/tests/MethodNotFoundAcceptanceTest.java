@@ -26,7 +26,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void sendDisabledApiReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
-        ethSigner().rawRequest().exceptionalRequest("ibft_getPendingVotes");
+        ethSigner().rawJsonRpcRequests().exceptionalRequest("ibft_getPendingVotes");
 
     assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
     assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_ENABLED);
@@ -35,7 +35,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void unknownJsonRpcMethodReturnsBadRequest() {
     final SignerResponse<JsonRpcErrorResponse> response =
-        ethSigner().rawRequest().exceptionalRequest("invalidJsonRpcMethod");
+        ethSigner().rawJsonRpcRequests().exceptionalRequest("invalidJsonRpcMethod");
 
     assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
     assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_FOUND);

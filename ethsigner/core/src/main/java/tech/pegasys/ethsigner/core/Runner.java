@@ -13,8 +13,12 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.http.JsonRpcHttpService;
+import tech.pegasys.ethsigner.core.http.HttpServerService;
+import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
+import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
+import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
+import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
@@ -29,17 +33,24 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Properties;
 
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Runner {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
+  private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
   private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
@@ -50,8 +61,8 @@ public class Runner {
   private final Path dataDirectory;
 
   private final Vertx vertx;
-  private String deploymentId;
-  private JsonRpcHttpService httpService;
+  private String jsonRpcHttpServiceId;
+  private HttpServerService httpServerService;
 
   public Runner(
       final TransactionSerialiser serialiser,
@@ -71,14 +82,12 @@ public class Runner {
   }
 
   public void start() {
-    final RequestMapper requestMapper = createRequestMapper(vertx);
-    httpService =
-        new JsonRpcHttpService(responseFactory, serverOptions, httpRequestTimeout, requestMapper);
-    vertx.deployVerticle(httpService, this::handleDeployResult);
+    httpServerService = new HttpServerService(router(), serverOptions);
+    vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
   }
 
   public void stop() {
-    vertx.undeploy(deploymentId);
+    vertx.undeploy(jsonRpcHttpServiceId);
   }
 
   private RequestMapper createRequestMapper(final Vertx vertx) {
@@ -110,21 +119,53 @@ public class Runner {
     return requestMapper;
   }
 
-  private void handleDeployResult(final AsyncResult<String> result) {
+  private Router router() {
+    final Router router = Router.router(vertx);
+    final RequestMapper requestMapper = createRequestMapper(vertx);
+
+    // Handler for JSON-RPC requests
+    router
+        .route(HttpMethod.POST, "/")
+        .produces(JSON)
+        .handler(BodyHandler.create())
+        .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new LogErrorHandler())
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
+        .handler(new JsonRpcHandler(responseFactory, requestMapper));
+
+    // Handler for UpCheck endpoint
+    router
+        .route(HttpMethod.GET, "/upcheck")
+        .produces(TEXT)
+        .handler(BodyHandler.create())
+        .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new LogErrorHandler())
+        .handler(new UpcheckHandler());
+
+    // Default route handler does nothing: no response
+    router.route().handler(context -> {});
+    return router;
+  }
+
+  private void httpServerServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {
-      deploymentId = result.result();
-      LOG.info("Vertx deployment id is: {}", deploymentId);
+      jsonRpcHttpServiceId = result.result();
+      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", jsonRpcHttpServiceId);
 
       if (dataDirectory != null) {
-        writePortsToFile(httpService);
+        writePortsToFile(httpServerService);
       }
     } else {
-      LOG.error("Vertx deployment failed", result.cause());
-      System.exit(1);
+      deploymentFailed(result.cause());
     }
   }
 
-  private void writePortsToFile(final JsonRpcHttpService httpService) {
+  private void deploymentFailed(final Throwable cause) {
+    LOG.error("Vertx deployment failed", cause);
+    System.exit(1);
+  }
+
+  private void writePortsToFile(final HttpServerService httpService) {
     final File portsFile = new File(dataDirectory.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
