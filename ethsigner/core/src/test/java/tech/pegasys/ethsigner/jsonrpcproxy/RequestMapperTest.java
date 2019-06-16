@@ -17,8 +17,6 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
-import com.google.common.collect.ImmutableMap;
-import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -45,9 +43,5 @@ public class RequestMapperTest {
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     assertThat(requestMapper.getMatchingHandler("")).isEqualTo(defaultHandler);
     assertThat(requestMapper.getMatchingHandler("nothing")).isEqualTo(defaultHandler);
-  }
-
-  private JsonObject rpcJson(final String methodName) {
-    return new JsonObject(ImmutableMap.of("method", methodName));
   }
 }

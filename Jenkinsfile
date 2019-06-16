@@ -77,7 +77,7 @@ try {
     // If we're on master and it failed, notify slack
     if (env.BRANCH_NAME == "master") {
         def currentResult = currentBuild.result ?: 'SUCCESS'
-        def channel = '#team-dropbear-priv'
+        def channel = '#priv-pegasys-prod-dev'
         if (currentResult == 'SUCCESS') {
             def previousResult = currentBuild.previousBuild?.result
             if (previousResult != null && (previousResult == 'FAILURE' || previousResult == 'UNSTABLE')) {
