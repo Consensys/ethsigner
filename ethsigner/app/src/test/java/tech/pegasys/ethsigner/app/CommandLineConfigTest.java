@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import tech.pegasys.ethsigner.CommandLineConfig;
 
@@ -83,9 +84,12 @@ public class CommandLineConfigTest {
   @Test
   public void nonIntegerInputForDownstreamPortShowsError() {
     final String cmdLine = modifyField(validCommandLine(), "downstream-http-port", "abc");
-    final boolean result = parseCommand(cmdLine);
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
+    try {
+      parseCommand(cmdLine);
+      fail();
+    } catch (final Exception e) {
+      assertThat(e.getCause().toString()).contains("--downstream-http-port", "'abc' is not an int");
+    }
   }
 
   @Test
@@ -120,9 +124,12 @@ public class CommandLineConfigTest {
 
   private void missingParameterShowsError(final String paramToRemove) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
-    final boolean result = parseCommand(cmdLine);
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+    try {
+      parseCommand(cmdLine);
+      fail();
+    } catch (final Exception e) {
+      assertThat(e.getCause().toString()).contains("--" + paramToRemove, "Missing");
+    }
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(

@@ -123,7 +123,6 @@ public class IntegrationTestBase {
     runner =
         new Runner(
             serialiser,
-            vertx,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,

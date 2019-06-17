@@ -47,7 +47,6 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
       "Timeout while retrieving private key from Hashicorp Vault.";
 
   public HashicorpTransactionSigner(
-      final Vertx vertx,
       final String signingKeyPath,
       final Integer serverPort,
       final String serverHost,
@@ -55,13 +54,14 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
       final Integer timeout) {
 
     final String response =
-        requestSecretFromVault(
-            vertx, signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+        requestSecretFromVault(signingKeyPath, serverPort, serverHost, authFilePath, timeout);
     this.credentials = extractCredentialsFromJson(response);
+    if (credentials.getAddress() != null) {
+      LOG.debug("Successfully retrieved the credentials from the Hashicorp vault.");
+    }
   }
 
   private String requestSecretFromVault(
-      final Vertx vertx,
       final String signingKeyPath,
       final Integer serverPort,
       final String serverHost,
@@ -69,16 +69,16 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
       final Integer timeout) {
     final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + signingKeyPath;
 
-    return getVaultResponse(vertx, serverPort, serverHost, authFilePath, requestURI, timeout);
+    return getVaultResponse(serverPort, serverHost, authFilePath, requestURI, timeout);
   }
 
   private String getVaultResponse(
-      final Vertx vertx,
       final Integer serverPort,
       final String serverHost,
       final Path authFilePath,
       final String requestURI,
       final Integer timeout) {
+    final Vertx vertx = Vertx.vertx();
     try {
       final HttpClient httpClient = vertx.createHttpClient();
       final CompletableFuture<String> future = new CompletableFuture<>();

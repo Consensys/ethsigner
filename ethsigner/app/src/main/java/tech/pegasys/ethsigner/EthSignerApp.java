@@ -12,15 +12,9 @@
  */
 package tech.pegasys.ethsigner;
 
-import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
 public class EthSignerApp {
-
-  private static final Logger LOG = LogManager.getLogger();
-  private static final Vertx vertx = Vertx.vertx();
 
   public static void main(final String... args) {
     final CommandLineConfig config = new CommandLineConfig(System.out);

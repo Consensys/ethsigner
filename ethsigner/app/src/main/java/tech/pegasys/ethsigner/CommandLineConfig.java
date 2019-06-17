@@ -219,13 +219,13 @@ public class CommandLineConfig implements Config {
 
     @Override
     public R handleParseException(final ParameterException ex, final String[] args) {
-      throw ex;
+      throw new RuntimeException("Exception handled in handleParseException.", ex);
     }
 
     @Override
     public R handleExecutionException(
         final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
-      throw ex;
+      throw new RuntimeException("Exception handled in handleParseException.", ex);
     }
   }
 }

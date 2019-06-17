@@ -94,15 +94,16 @@ public class HashicorpTransactionSignerCommand extends TransactionSignerCommand
 
   @Override
   public void run() {
+    LOG.debug("Running the HashicorpTransactionSigner command.");
     setupLogging(parentCommand);
 
     final Vertx vertx = Vertx.vertx();
 
     final TransactionSigner transactionSigner =
         new HashicorpTransactionSigner(
-            vertx, signingKeyPath, serverPort, serverHost, authFilePath, timeout);
-    final EthSigner signer = new EthSigner(parentCommand, transactionSigner, vertx);
-    signer.run();
+            signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+    final EthSigner ethSigner = new EthSigner(parentCommand, transactionSigner);
+    ethSigner.run();
   }
 
   @Override

@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import io.vertx.core.Vertx;
 import org.junit.Test;
 
 public class HashicorpTransactionSignerTest {
@@ -35,7 +34,6 @@ public class HashicorpTransactionSignerTest {
 
     final TransactionSigner signer =
         new HashicorpTransactionSigner(
-            Vertx.vertx(),
             "signingKeyPath",
             Integer.valueOf(877),
             "serverHost",
@@ -48,7 +46,6 @@ public class HashicorpTransactionSignerTest {
 
     final TransactionSigner signer =
         new HashicorpTransactionSigner(
-            Vertx.vertx(),
             "signingKeyPath",
             Integer.valueOf(877),
             "serverHost",

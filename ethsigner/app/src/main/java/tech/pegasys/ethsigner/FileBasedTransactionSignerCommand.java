@@ -74,7 +74,7 @@ public class FileBasedTransactionSignerCommand extends TransactionSignerCommand
 
     final TransactionSigner transactionSigner =
         new FileBasedTransactionSigner(keyFilePath, passwordFilePath);
-    final EthSigner signer = new EthSigner(parentCommand, transactionSigner, vertx);
+    final EthSigner signer = new EthSigner(parentCommand, transactionSigner);
     signer.run();
   }
 }
