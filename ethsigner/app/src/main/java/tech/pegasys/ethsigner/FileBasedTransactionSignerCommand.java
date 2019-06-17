@@ -70,8 +70,6 @@ public class FileBasedTransactionSignerCommand extends TransactionSignerCommand
   public void run() {
     setupLogging(parentCommand);
 
-    final Vertx vertx = Vertx.vertx();
-
     final TransactionSigner transactionSigner =
         new FileBasedTransactionSigner(keyFilePath, passwordFilePath);
     final EthSigner signer = new EthSigner(parentCommand, transactionSigner);

@@ -97,8 +97,6 @@ public class HashicorpTransactionSignerCommand extends TransactionSignerCommand
     LOG.debug("Running the HashicorpTransactionSigner command.");
     setupLogging(parentCommand);
 
-    final Vertx vertx = Vertx.vertx();
-
     final TransactionSigner transactionSigner =
         new HashicorpTransactionSigner(
             signingKeyPath, serverPort, serverHost, authFilePath, timeout);

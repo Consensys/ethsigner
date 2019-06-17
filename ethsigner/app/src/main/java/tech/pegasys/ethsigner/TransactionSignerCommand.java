@@ -26,6 +26,6 @@ public abstract class TransactionSignerCommand {
     Configurator.setAllLevels("", parentCommand.getLogLevel());
 
     LOG.debug("Configuration = {}", parentCommand);
-    LOG.info("Version = {}, ", ApplicationInfo.version());
+    LOG.info("Version = {}", ApplicationInfo.version());
   }
 }

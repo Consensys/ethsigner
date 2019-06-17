@@ -93,7 +93,7 @@ public class Runner {
     }
   }
 
-  private RequestMapper createRequestMapper(final Vertx vertx) {
+  private RequestMapper createRequestMapper() {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
@@ -124,7 +124,7 @@ public class Runner {
 
   private Router router() {
     final Router router = Router.router(vertx);
-    final RequestMapper requestMapper = createRequestMapper(vertx);
+    final RequestMapper requestMapper = createRequestMapper();
 
     // Handler for JSON-RPC requests
     router
