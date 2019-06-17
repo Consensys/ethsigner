@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
-import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;

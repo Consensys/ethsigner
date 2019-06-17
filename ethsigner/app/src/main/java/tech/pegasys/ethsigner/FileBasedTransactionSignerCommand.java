@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 import java.nio.file.Path;
 
 import com.google.common.base.MoreObjects;
-import io.vertx.core.Vertx;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
