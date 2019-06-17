@@ -100,6 +100,19 @@ Start EthSigner with options specified as follows:
     ethsigner --chain-id=2018 --downstream-http-port=8590 --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
     ```
 
+## Confirm EthSigner is Up
+
+Use the upcheck endpoint to confirm EthSigner is running.
+
+!!! example
+    ```bash tab="curl HTTP request"
+    curl -X GET http://127.0.0.1:8545/upcheck
+    ```
+   
+    ```json tab="Result"
+    I'm up
+    ```
+
 ## Confirm EthSigner Passing Requests to Pantheon 
 
 Request the current block number using [`eth_blockNumber`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eth_blocknumber) with the EthSigner JSON-RPC endpoint (`8545` in this example): 
