@@ -40,7 +40,9 @@ public class CommandLineConfigTest {
   private CommandLineConfig config = new CommandLineConfig(outPrintStream);
 
   private boolean parseCommand(final String cmdLine) {
-    return config.parse(new MyHandler<List<Object>>(), cmdLine.split(" "));
+    return false;
+    // TODO(tmm): THIS NEEDS TO BE RECREATED COMPLETELY!
+    //return config.parse(new MyHandler<List<Object>>(), cmdLine.split(" "));
   }
 
   private String validCommandLine() {

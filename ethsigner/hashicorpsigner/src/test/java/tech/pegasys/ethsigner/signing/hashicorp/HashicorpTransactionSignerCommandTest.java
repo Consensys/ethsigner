@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.app;
+package tech.pegasys.ethsigner.signing.hashicorp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.HashicorpTransactionSignerCommand;
+import tech.pegasys.ethsigner.signing.hashicorp.HashicorpTransactionSignerCommand;
 
 import java.io.ByteArrayOutputStream;
 import java.util.function.Supplier;

@@ -11,9 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
+apply plugin: 'java-library'
 
 jar {
-  baseName 'ethsigner'
+  baseName 'ethsigner-core'
   manifest {
     attributes(
       'Specification-Title': baseName,
@@ -27,27 +28,32 @@ jar {
 
 dependencies {
 
-  implementation project(':ethsigner:hashicorpsigner')
   implementation project(':ethsigner:subcommandapi')
-
+  implementation project(':ethsigner:signingapi')
+  implementation project(':ethsigner:core')
 
   implementation 'info.picocli:picocli'
-
   implementation 'com.google.guava:guava'
 
   implementation 'org.apache.logging.log4j:log4j-api'
   runtime 'org.apache.logging.log4j:log4j-core'
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 
-  implementation 'io.vertx:vertx-core'
+  implementation 'org.web3j:core'
+  implementation 'org.web3j:crypto'
+  implementation 'org.web3j:eea'
 
-  implementation project(':ethsigner:core')
-  implementation project(':ethsigner:signingapi')
+  implementation 'io.vertx:vertx-core'
+  implementation 'io.vertx:vertx-web'
+  implementation 'io.vertx:vertx-web-client'
 
   testCompile 'io.vertx:vertx-codegen'
-
-  testImplementation project(':ethsigner:core')
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+
+  integrationTestImplementation 'io.rest-assured:rest-assured'
+  integrationTestImplementation 'org.assertj:assertj-core'
+  integrationTestImplementation 'org.mock-server:mockserver-netty'
+  integrationTestImplementation 'org.mockito:mockito-core'
 }

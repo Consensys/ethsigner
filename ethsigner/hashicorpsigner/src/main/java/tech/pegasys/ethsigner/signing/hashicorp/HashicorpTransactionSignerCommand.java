@@ -10,9 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner;
+package tech.pegasys.ethsigner.signing.hashicorp;
 
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
+import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.nio.file.Path;
 
@@ -31,7 +32,7 @@ import picocli.CommandLine.Spec;
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpTransactionSignerCommand implements Runnable {
+public class HashicorpTransactionSignerCommand extends SignerSubCommand {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -44,8 +45,6 @@ public class HashicorpTransactionSignerCommand implements Runnable {
   private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
 
   public HashicorpTransactionSignerCommand() {}
-
-  @CommandLine.ParentCommand private CommandLineConfig parentCommand;
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -89,11 +88,9 @@ public class HashicorpTransactionSignerCommand implements Runnable {
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @Override
-  public void run() {
-    final HashicorpTransactionSigner transactionSigner =
-        new HashicorpTransactionSigner(
-            signingKeyPath, serverPort, serverHost, authFilePath, timeout);
-    parentCommand.startEthSigner(transactionSigner);
+  public TransactionSigner createSigner() {
+    return  new HashicorpTransactionSigner(
+        signingKeyPath, serverPort, serverHost, authFilePath, timeout);
   }
 
   @Override
