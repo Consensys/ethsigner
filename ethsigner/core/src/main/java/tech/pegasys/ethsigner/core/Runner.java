@@ -41,7 +41,6 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +73,6 @@ public class Runner {
       final Path dataDirectory) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
-    LOG.debug("CLIENT OPTIONS: clientOptions.toString(): " + clientOptions.toString());
     this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
@@ -101,7 +99,7 @@ public class Runner {
         new RequestMapper(
             new PassThroughHandler(
                 downStreamConnection,
-                (VertxRequestTransmitter.ResponseBodyHandler responseBodyHandler) ->
+                responseBodyHandler ->
                     new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
 
     final SendTransactionHandler sendTransactionHandler =
@@ -109,7 +107,7 @@ public class Runner {
             downStreamConnection,
             serialiser,
             transactionFactory,
-            (VertxRequestTransmitter.ResponseBodyHandler responseBodyHandler) ->
+            responseBodyHandler ->
                 new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
@@ -146,7 +144,7 @@ public class Runner {
         .handler(new UpcheckHandler());
 
     // Default route handler does nothing: no response
-    router.route().handler((RoutingContext context) -> {});
+    router.route().handler(context -> {});
     return router;
   }
 

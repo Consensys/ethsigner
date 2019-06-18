@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.Config;
+import tech.pegasys.ethsigner.core.EthSigner;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -24,6 +26,9 @@ import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Help.Ansi;
@@ -44,6 +49,8 @@ import picocli.CommandLine.ParameterException;
     footerHeading = "%n",
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class CommandLineConfig implements Config {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   private CommandLine commandLine;
 
@@ -130,7 +137,7 @@ public class CommandLineConfig implements Config {
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
     try {
-      commandLine.parseWithHandlers(resultHandler, new MyExceptionHandler<List<Object>>(), args);
+      commandLine.parseWithHandlers(resultHandler, new ExceptionHandler<List<Object>>(), args);
     } catch (final ParameterException ex) {
       handleParseException(ex);
       return false;
@@ -215,7 +222,23 @@ public class CommandLineConfig implements Config {
         .toString();
   }
 
-  private static class MyExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
+  public void startEthSigner(final TransactionSigner transactionSigner) {
+    if (transactionSigner == null) {
+      LOG.error("EthSigner cannot be started without a TransactionSigner. Config = {}", this);
+      throw new RuntimeException("EthSigner cannot be started without a TransactionSigner.");
+    }
+    // set log level per CLI flags
+    System.out.println("Setting logging level to " + getLogLevel().name());
+    Configurator.setAllLevels("", getLogLevel());
+
+    LOG.debug("Configuration = {}", this);
+    LOG.info("Version = {}", ApplicationInfo.version());
+
+    final EthSigner signer = new EthSigner(this, transactionSigner);
+    signer.run();
+  }
+
+  private static class ExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
 
     @Override
     public R handleParseException(final ParameterException ex, final String[] args) {

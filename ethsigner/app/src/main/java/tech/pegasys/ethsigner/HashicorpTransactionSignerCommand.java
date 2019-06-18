@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.EthSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpTransactionSigner;
 
 import java.nio.file.Path;
@@ -33,8 +31,7 @@ import picocli.CommandLine.Spec;
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpTransactionSignerCommand extends TransactionSignerCommand
-    implements Runnable {
+public class HashicorpTransactionSignerCommand implements Runnable {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -93,14 +90,10 @@ public class HashicorpTransactionSignerCommand extends TransactionSignerCommand
 
   @Override
   public void run() {
-    LOG.debug("Running the HashicorpTransactionSigner command.");
-    setupLogging(parentCommand);
-
-    final TransactionSigner transactionSigner =
+    final HashicorpTransactionSigner transactionSigner =
         new HashicorpTransactionSigner(
             signingKeyPath, serverPort, serverHost, authFilePath, timeout);
-    final EthSigner ethSigner = new EthSigner(parentCommand, transactionSigner);
-    ethSigner.run();
+    parentCommand.startEthSigner(transactionSigner);
   }
 
   @Override

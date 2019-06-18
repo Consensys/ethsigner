@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.EthSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 
 import java.nio.file.Path;
@@ -31,8 +29,7 @@ import picocli.CommandLine.Spec;
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedTransactionSignerCommand extends TransactionSignerCommand
-    implements Runnable {
+public class FileBasedTransactionSignerCommand implements Runnable {
 
   @CommandLine.ParentCommand private CommandLineConfig parentCommand;
 
@@ -67,11 +64,9 @@ public class FileBasedTransactionSignerCommand extends TransactionSignerCommand
 
   @Override
   public void run() {
-    setupLogging(parentCommand);
 
-    final TransactionSigner transactionSigner =
+    final FileBasedTransactionSigner transactionSigner =
         new FileBasedTransactionSigner(keyFilePath, passwordFilePath);
-    final EthSigner signer = new EthSigner(parentCommand, transactionSigner);
-    signer.run();
+    parentCommand.startEthSigner(transactionSigner);
   }
 }

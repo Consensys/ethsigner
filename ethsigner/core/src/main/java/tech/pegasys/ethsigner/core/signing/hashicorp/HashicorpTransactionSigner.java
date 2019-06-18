@@ -25,10 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
@@ -88,9 +86,9 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
               serverPort,
               serverHost,
               requestURI,
-              (HttpClientResponse rh) ->
+              rh ->
                   rh.bodyHandler(
-                      (Buffer bh) -> {
+                      bh -> {
                         if (rh.statusCode() == 200) {
                           future.complete(bh.toString());
                         } else {
