@@ -12,13 +12,16 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.signers.filebased.FileBasedTransactionSignerCommand;
+import tech.pegasys.ethsigner.signing.hashicorp.HashicorpTransactionSignerCommand;
+
 import java.io.PrintStream;
 import java.util.List;
+
 import org.apache.logging.log4j.Level;
 import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.RunLast;
-import tech.pegasys.ethsigner.signing.hashicorp.HashicorpTransactionSignerCommand;
 
 public class EthSignerApp {
 
@@ -31,9 +34,10 @@ public class EthSignerApp {
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
-
-    commandLine.addSubcommand(HashicorpTransactionSignerCommand.COMMAND_NAME, new HashicorpTransactionSignerCommand());
-    commandLine.addSubcommand(FileBasedTransactionSignerCommand.COMMAND_NAME, new FileBasedTransactionSignerCommand());
+    commandLine.addSubcommand(
+        HashicorpTransactionSignerCommand.COMMAND_NAME, new HashicorpTransactionSignerCommand());
+    commandLine.addSubcommand(
+        FileBasedTransactionSignerCommand.COMMAND_NAME, new FileBasedTransactionSignerCommand());
 
     // Must manually show the usage/version info, as per the design of picocli
     // (https://picocli.info/#_printing_help_automatically)
@@ -51,7 +55,7 @@ public class EthSignerApp {
   }
 
   public static void handleParseException(final ParameterException ex) {
-      /*
+    /*
       if (logLevel != null && Level.DEBUG.isMoreSpecificThan(logLevel)) {
         ex.printStackTrace(output);
       } else {

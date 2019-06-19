@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.FileBasedTransactionSignerCommand;
+import tech.pegasys.ethsigner.signers.filebased.FileBasedTransactionSignerCommand;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;

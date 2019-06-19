@@ -22,7 +22,6 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -42,7 +41,7 @@ public class CommandLineConfigTest {
   private boolean parseCommand(final String cmdLine) {
     return false;
     // TODO(tmm): THIS NEEDS TO BE RECREATED COMPLETELY!
-    //return config.parse(new MyHandler<List<Object>>(), cmdLine.split(" "));
+    // return config.parse(new MyHandler<List<Object>>(), cmdLine.split(" "));
   }
 
   private String validCommandLine() {

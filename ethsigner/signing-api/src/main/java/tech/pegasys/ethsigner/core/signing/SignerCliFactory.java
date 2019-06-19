@@ -10,12 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.core.signing;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner:app'
-include 'ethsigner:core'
-include 'ethsigner:signing-api'
-include 'ethsigner:signers:hashicorp'
-include 'ethsigner:signers:file-based'
-include 'ethsigner:commandline'
+public interface SignerCliFactory {
+
+  TransactionSigner createSigner();
+
+  String getSubCommand();
+}
