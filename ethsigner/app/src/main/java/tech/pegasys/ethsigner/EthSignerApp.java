@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.signers.filebased.FilebasedSubCommand;
-import tech.pegasys.ethsigner.signing.hashicorp.HashicorpSubCommand;
+import tech.pegasys.ethsigner.signer.filebased.FilebasedSubCommand;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand;
 
 public class EthSignerApp {
 

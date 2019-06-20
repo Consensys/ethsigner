@@ -34,7 +34,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
-import tech.pegasys.ethsigner.signers.filebased.FileBasedSignerFactory;
+import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 import java.io.File;
 import java.io.IOException;

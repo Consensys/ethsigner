@@ -29,8 +29,8 @@ dependencies {
 
   implementation project(':ethsigner:core')
   implementation project(':ethsigner:signing-api')
-  implementation project(':ethsigner:signers:hashicorp')
-  implementation project(':ethsigner:signers:file-based')
+  implementation project(':ethsigner:signer:hashicorp')
+  implementation project(':ethsigner:signer:file-based')
   implementation project(':ethsigner:commandline')
 
 
