@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.signer.filebased.FilebasedSubCommand;
+import tech.pegasys.ethsigner.signer.filebased.FileBasedSubCommand;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand;
 
 public class EthSignerApp {
@@ -22,7 +22,7 @@ public class EthSignerApp {
     final EthSignerBaseCommand baseCommand = new EthSignerBaseCommand();
     final CommandlineParser cmdLineParser = new CommandlineParser(baseCommand, System.out);
     cmdLineParser.registerSigner(new HashicorpSubCommand());
-    cmdLineParser.registerSigner(new FilebasedSubCommand());
+    cmdLineParser.registerSigner(new FileBasedSubCommand());
 
     cmdLineParser.parseCommandLine(args);
   }

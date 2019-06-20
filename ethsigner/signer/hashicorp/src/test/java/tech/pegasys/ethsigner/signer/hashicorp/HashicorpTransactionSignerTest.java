@@ -13,8 +13,8 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
 import java.io.File;
@@ -27,30 +27,26 @@ import org.junit.Test;
 
 public class HashicorpTransactionSignerTest {
 
-  @Test(expected = TransactionSignerInitializationException.class)
+  @Test
   public void vaultTimingOut() throws IOException {
 
     final File authFile = createFile();
 
-    final TransactionSigner signer =
-        HashicorpSignerFactory.createSigner(
-            "signingKeyPath",
-            Integer.valueOf(877),
-            "serverHost",
-            authFile.toPath(),
-            Integer.valueOf(1));
+    assertThatThrownBy(
+            () ->
+                HashicorpSignerFactory.createSigner(
+                    "signingKeyPath", 877, "serverHost", authFile.toPath(), 1))
+        .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
-  @Test(expected = TransactionSignerInitializationException.class)
+  @Test
   public void authFileNotAvailable() {
 
-    final TransactionSigner signer =
-        HashicorpSignerFactory.createSigner(
-            "signingKeyPath",
-            Integer.valueOf(877),
-            "serverHost",
-            Paths.get("nonExistingFile"),
-            Integer.valueOf(1));
+    assertThatThrownBy(
+            () ->
+                HashicorpSignerFactory.createSigner(
+                    "signingKeyPath", 877, "serverHost", Paths.get("nonExistingFile"), 1))
+        .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
   @SuppressWarnings("UnstableApiUsage")

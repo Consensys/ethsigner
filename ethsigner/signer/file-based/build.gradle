@@ -39,14 +39,7 @@ dependencies {
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 
   implementation 'org.web3j:core'
-  implementation 'org.web3j:crypto'
-  implementation 'org.web3j:eea'
 
-  implementation 'io.vertx:vertx-core'
-  implementation 'io.vertx:vertx-web'
-  implementation 'io.vertx:vertx-web-client'
-
-  testCompile 'io.vertx:vertx-codegen'
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'

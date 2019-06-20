@@ -45,7 +45,7 @@ dependencies {
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
 
-  testCompile 'io.vertx:vertx-codegen'
+  testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'

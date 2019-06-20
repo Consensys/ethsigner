@@ -25,16 +25,16 @@ import picocli.CommandLine.Spec;
 
 /** File-based authentication related sub-command */
 @Command(
-    name = FilebasedSubCommand.COMMAND_NAME,
+    name = FileBasedSubCommand.COMMAND_NAME,
     description =
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FilebasedSubCommand extends SignerSubCommand {
+public class FileBasedSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FilebasedSubCommand() {}
+  public FileBasedSubCommand() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 

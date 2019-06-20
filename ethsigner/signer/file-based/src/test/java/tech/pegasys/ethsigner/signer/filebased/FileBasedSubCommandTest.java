@@ -18,14 +18,14 @@ import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class FilebasedSubCommandTest {
+public class FileBasedSubCommandTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
-  private FilebasedSubCommand config;
+  private FileBasedSubCommand config;
 
   private boolean parseCommand(final String cmdLine) {
-    config = new FilebasedSubCommand();
+    config = new FileBasedSubCommand();
     final CommandLine commandLine = new CommandLine(config);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);

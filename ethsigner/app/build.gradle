@@ -33,19 +33,12 @@ dependencies {
   implementation project(':ethsigner:signer:file-based')
   implementation project(':ethsigner:commandline')
 
-
-  implementation 'info.picocli:picocli'
-
   implementation 'com.google.guava:guava'
 
   implementation 'org.apache.logging.log4j:log4j-api'
   runtime 'org.apache.logging.log4j:log4j-core'
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 
-  implementation 'io.vertx:vertx-core'
-
-
-  testCompile 'io.vertx:vertx-codegen'
 
   testImplementation project(':ethsigner:core')
   testImplementation 'junit:junit'

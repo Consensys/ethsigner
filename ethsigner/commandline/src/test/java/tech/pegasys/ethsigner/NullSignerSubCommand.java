@@ -38,7 +38,5 @@ public class NullSignerSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public void run() {
-    int i = 5;
-  }
+  public void run() {}
 }

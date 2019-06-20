@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.signer.filebased;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
@@ -57,32 +58,37 @@ public class FileBasedTransactionSignerTest {
     assertThat(signer.getAddress()).isNotEmpty();
   }
 
-  @Test(expected = TransactionSignerInitializationException.class)
+  @Test
   public void passwordInvalid() throws IOException {
 
     final File pwdFile = createFile(INVALID_PASSWORD);
     final File keyFile = new File(fileName);
 
-    final TransactionSigner signer =
-        FileBasedSignerFactory.createSigner(keyFile.toPath(), pwdFile.toPath());
+    assertThatThrownBy(
+            () -> FileBasedSignerFactory.createSigner(keyFile.toPath(), pwdFile.toPath()))
+        .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
-  @Test(expected = TransactionSignerInitializationException.class)
+  @Test
   public void passwordFileNotAvailable() {
 
     final File keyFile = new File(fileName);
 
-    final TransactionSigner signer =
-        FileBasedSignerFactory.createSigner(keyFile.toPath(), Paths.get("nonExistingFile"));
+    assertThatThrownBy(
+            () ->
+                FileBasedSignerFactory.createSigner(keyFile.toPath(), Paths.get("nonExistingFile")))
+        .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
-  @Test(expected = TransactionSignerInitializationException.class)
+  @Test
   public void keyFileNotAvailable() throws IOException {
 
     final File pwdFile = createFile(MY_PASSWORD);
 
-    final TransactionSigner signer =
-        FileBasedSignerFactory.createSigner(Paths.get("nonExistingFile"), pwdFile.toPath());
+    assertThatThrownBy(
+            () ->
+                FileBasedSignerFactory.createSigner(Paths.get("nonExistingFile"), pwdFile.toPath()))
+        .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
   private static File createFile(final String s) throws IOException {

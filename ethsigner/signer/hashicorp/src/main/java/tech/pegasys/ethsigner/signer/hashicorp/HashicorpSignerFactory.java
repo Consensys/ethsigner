@@ -47,10 +47,10 @@ public class HashicorpSignerFactory {
 
   public static TransactionSigner createSigner(
       final String signingKeyPath,
-      final Integer serverPort,
+      final int serverPort,
       final String serverHost,
       final Path authFilePath,
-      final Integer timeout) {
+      final int timeout) {
     final String response =
         requestSecretFromVault(signingKeyPath, serverPort, serverHost, authFilePath, timeout);
     final Credentials credentials = extractCredentialsFromJson(response);
@@ -62,21 +62,21 @@ public class HashicorpSignerFactory {
 
   private static String requestSecretFromVault(
       final String signingKeyPath,
-      final Integer serverPort,
+      final int serverPort,
       final String serverHost,
       final Path authFilePath,
-      final Integer timeout) {
+      final int timeout) {
     final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + signingKeyPath;
 
     return getVaultResponse(serverPort, serverHost, authFilePath, requestURI, timeout);
   }
 
   private static String getVaultResponse(
-      final Integer serverPort,
+      final int serverPort,
       final String serverHost,
       final Path authFilePath,
       final String requestURI,
-      final Integer timeout) {
+      final int timeout) {
     final Vertx vertx = Vertx.vertx();
     try {
       final HttpClient httpClient = vertx.createHttpClient();
@@ -123,7 +123,7 @@ public class HashicorpSignerFactory {
     return authFileLines.get(0);
   }
 
-  private static String getResponse(final CompletableFuture<String> future, final Integer timeout) {
+  private static String getResponse(final CompletableFuture<String> future, final int timeout) {
     final String response;
     try {
       response = future.get(timeout, TimeUnit.SECONDS);
