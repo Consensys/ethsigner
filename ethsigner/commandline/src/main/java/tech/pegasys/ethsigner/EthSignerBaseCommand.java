@@ -16,16 +16,12 @@ import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
-import java.io.PrintStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -42,11 +38,7 @@ import picocli.CommandLine.Option;
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
     footer = "EthSigner is licensed under the Apache License 2.0")
-public class CommandLineConfig implements Config {
-
-  private static final Logger LOG = LogManager.getLogger();
-
-  private CommandLine commandLine;
+public class EthSignerBaseCommand implements Config {
 
   @Option(
       names = {"--logging", "-l"},
@@ -103,12 +95,6 @@ public class CommandLineConfig implements Config {
       arity = "1")
   private Path dataDirectory;
 
-  private final PrintStream output;
-
-  public CommandLineConfig(final PrintStream output) {
-    this.output = output;
-  }
-
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -152,7 +138,6 @@ public class CommandLineConfig implements Config {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("commandLine", commandLine)
         .add("logLevel", logLevel)
         .add("downstreamHttpHost", downstreamHttpHost)
         .add("downstreamHttpPort", downstreamHttpPort)
@@ -161,7 +146,6 @@ public class CommandLineConfig implements Config {
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
         .add("dataDirectory", dataDirectory)
-        .add("output", output)
         .toString();
   }
 }

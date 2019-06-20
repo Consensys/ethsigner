@@ -28,13 +28,13 @@ import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.filebased.FileBasedTransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.signers.filebased.FileBasedSignerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -257,8 +257,8 @@ public class IntegrationTestBase {
   private static TransactionSigner transactionSigner() throws IOException {
     final File keyFile = createKeyFile();
     final File passwordFile = createFile("password");
-    final FileBasedTransactionSigner fileBasedTransactionSigner =
-        new FileBasedTransactionSigner(keyFile.toPath(), passwordFile.toPath());
+    final TransactionSigner fileBasedTransactionSigner =
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
     return fileBasedTransactionSigner;
   }
 

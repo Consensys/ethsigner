@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.signing.filebased;
+package tech.pegasys.ethsigner.signers.filebased;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +51,7 @@ public class FileBasedTransactionSignerTest {
     final File pwdFile = createFile(MY_PASSWORD);
 
     final TransactionSigner signer =
-        new FileBasedTransactionSigner(keyFile.toPath(), pwdFile.toPath());
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), pwdFile.toPath());
 
     assertThat(signer).isNotNull();
     assertThat(signer.getAddress()).isNotEmpty();
@@ -64,7 +64,7 @@ public class FileBasedTransactionSignerTest {
     final File keyFile = new File(fileName);
 
     final TransactionSigner signer =
-        new FileBasedTransactionSigner(keyFile.toPath(), pwdFile.toPath());
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), pwdFile.toPath());
   }
 
   @Test(expected = TransactionSignerInitializationException.class)
@@ -73,7 +73,7 @@ public class FileBasedTransactionSignerTest {
     final File keyFile = new File(fileName);
 
     final TransactionSigner signer =
-        new FileBasedTransactionSigner(keyFile.toPath(), Paths.get("nonExistingFile"));
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), Paths.get("nonExistingFile"));
   }
 
   @Test(expected = TransactionSignerInitializationException.class)
@@ -82,7 +82,7 @@ public class FileBasedTransactionSignerTest {
     final File pwdFile = createFile(MY_PASSWORD);
 
     final TransactionSigner signer =
-        new FileBasedTransactionSigner(Paths.get("nonExistingFile"), pwdFile.toPath());
+        FileBasedSignerFactory.createSigner(Paths.get("nonExistingFile"), pwdFile.toPath());
   }
 
   private static File createFile(final String s) throws IOException {

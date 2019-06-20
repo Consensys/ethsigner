@@ -10,7 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.signing;
+package tech.pegasys.ethsigner.signers.filebased;
+
+import tech.pegasys.ethsigner.core.signing.Signature;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.math.BigInteger;
 
@@ -18,9 +21,13 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 
-public abstract class CredentialTransactionSigner implements TransactionSigner {
+public class CredentialTransactionSigner implements TransactionSigner {
 
-  protected Credentials credentials;
+  private final Credentials credentials;
+
+  public CredentialTransactionSigner(final Credentials credentials) {
+    this.credentials = credentials;
+  }
 
   @Override
   public Signature sign(final byte[] data) {

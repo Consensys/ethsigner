@@ -23,12 +23,12 @@ import picocli.CommandLine.Option;
 
 /** Hashicorp vault related sub-command */
 @Command(
-    name = HashicorpTransactionSignerCommand.COMMAND_NAME,
+    name = HashicorpSubCommand.COMMAND_NAME,
     description =
         "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class HashicorpTransactionSignerCommand extends SignerSubCommand {
+public class HashicorpSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
@@ -79,8 +79,13 @@ public class HashicorpTransactionSignerCommand extends SignerSubCommand {
 
   @Override
   public TransactionSigner createSigner() {
-    return new HashicorpTransactionSigner(
+    return HashicorpSignerFactory.createSigner(
         signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+  }
+
+  @Override
+  public String getCommandName() {
+    return COMMAND_NAME;
   }
 
   @Override

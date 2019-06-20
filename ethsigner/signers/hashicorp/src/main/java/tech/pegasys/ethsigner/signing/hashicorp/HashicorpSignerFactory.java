@@ -10,21 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signing.hashicorp; /*
-                                                   * Copyright 2019 ConsenSys AG.
-                                                   *
-                                                   * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
-                                                   * the License. You may obtain a copy of the License at
-                                                   *
-                                                   * http://www.apache.org/licenses/LICENSE-2.0
-                                                   *
-                                                   * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-                                                   * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-                                                   * specific language governing permissions and limitations under the License.
-                                                   */
+package tech.pegasys.ethsigner.signing.hashicorp;
 
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.signers.filebased.CredentialTransactionSigner;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class HashicorpTransactionSigner extends CredentialTransactionSigner {
+public class HashicorpSignerFactory {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
@@ -55,22 +45,22 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
   private static final String TIMEOUT_MESSGAE =
       "Timeout while retrieving private key from Hashicorp Vault.";
 
-  public HashicorpTransactionSigner(
+  public static TransactionSigner createSigner(
       final String signingKeyPath,
       final Integer serverPort,
       final String serverHost,
       final Path authFilePath,
       final Integer timeout) {
-
     final String response =
         requestSecretFromVault(signingKeyPath, serverPort, serverHost, authFilePath, timeout);
-    this.credentials = extractCredentialsFromJson(response);
+    final Credentials credentials = extractCredentialsFromJson(response);
     if (credentials.getAddress() != null) {
       LOG.debug("Successfully retrieved the credentials from the Hashicorp vault.");
     }
+    return new CredentialTransactionSigner(credentials);
   }
 
-  private String requestSecretFromVault(
+  private static String requestSecretFromVault(
       final String signingKeyPath,
       final Integer serverPort,
       final String serverHost,
@@ -81,7 +71,7 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     return getVaultResponse(serverPort, serverHost, authFilePath, requestURI, timeout);
   }
 
-  private String getVaultResponse(
+  private static String getVaultResponse(
       final Integer serverPort,
       final String serverHost,
       final Path authFilePath,
@@ -121,7 +111,7 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     }
   }
 
-  private String readTokenFromFile(final Path path) {
+  private static String readTokenFromFile(final Path path) {
     final List<String> authFileLines;
     try {
       authFileLines = Files.readAllLines(path);
@@ -133,7 +123,7 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     return authFileLines.get(0);
   }
 
-  private String getResponse(final CompletableFuture<String> future, final Integer timeout) {
+  private static String getResponse(final CompletableFuture<String> future, final Integer timeout) {
     final String response;
     try {
       response = future.get(timeout, TimeUnit.SECONDS);
@@ -149,7 +139,7 @@ public class HashicorpTransactionSigner extends CredentialTransactionSigner {
     return response;
   }
 
-  private Credentials extractCredentialsFromJson(final String response) {
+  private static Credentials extractCredentialsFromJson(final String response) {
     if (response == null) {
       return null;
     }

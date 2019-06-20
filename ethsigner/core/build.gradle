@@ -50,6 +50,7 @@ dependencies {
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
 
+  integrationTestImplementation project(':ethsigner:signers:file-based')
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'

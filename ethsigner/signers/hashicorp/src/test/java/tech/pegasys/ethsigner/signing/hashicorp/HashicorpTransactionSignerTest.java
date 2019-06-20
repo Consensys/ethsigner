@@ -33,7 +33,7 @@ public class HashicorpTransactionSignerTest {
     final File authFile = createFile();
 
     final TransactionSigner signer =
-        new HashicorpTransactionSigner(
+        HashicorpSignerFactory.createSigner(
             "signingKeyPath",
             Integer.valueOf(877),
             "serverHost",
@@ -45,7 +45,7 @@ public class HashicorpTransactionSignerTest {
   public void authFileNotAvailable() {
 
     final TransactionSigner signer =
-        new HashicorpTransactionSigner(
+        HashicorpSignerFactory.createSigner(
             "signingKeyPath",
             Integer.valueOf(877),
             "serverHost",

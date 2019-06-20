@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class HashicorpTransactionSignerCommandTest {
+public class HashicorpSubCommandTest {
 
   private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
   private static final String HTTP_HOST_COM = "http://host.com";
@@ -29,10 +29,10 @@ public class HashicorpTransactionSignerCommandTest {
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private HashicorpTransactionSignerCommand hashiConfig;
+  private HashicorpSubCommand hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpTransactionSignerCommand();
+    hashiConfig = new HashicorpSubCommand();
     final CommandLine commandLine = new CommandLine(hashiConfig);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -102,13 +102,13 @@ public class HashicorpTransactionSignerCommandTest {
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
     // object.
-    HashicorpTransactionSignerCommand hcConfig = new HashicorpTransactionSignerCommand();
+    HashicorpSubCommand hcConfig = new HashicorpSubCommand();
     missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "localhost");
 
-    hcConfig = new HashicorpTransactionSignerCommand();
+    hcConfig = new HashicorpSubCommand();
     missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "8200");
 
-    hcConfig = new HashicorpTransactionSignerCommand();
+    hcConfig = new HashicorpSubCommand();
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
   }

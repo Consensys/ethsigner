@@ -10,24 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.app;
+package tech.pegasys.ethsigner.signers.filebased;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import tech.pegasys.ethsigner.signers.filebased.FileBasedTransactionSignerCommand;
 
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
 
-public class FileBasedTransactionSignerCommandTest {
+public class FilebasedSubCommandTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
-  private FileBasedTransactionSignerCommand config;
+  private FilebasedSubCommand config;
 
   private boolean parseCommand(final String cmdLine) {
-    config = new FileBasedTransactionSignerCommand();
+    config = new FilebasedSubCommand();
     final CommandLine commandLine = new CommandLine(config);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);

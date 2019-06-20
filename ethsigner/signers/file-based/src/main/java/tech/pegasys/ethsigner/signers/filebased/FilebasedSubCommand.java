@@ -25,16 +25,16 @@ import picocli.CommandLine.Spec;
 
 /** File-based authentication related sub-command */
 @Command(
-    name = FileBasedTransactionSignerCommand.COMMAND_NAME,
+    name = FilebasedSubCommand.COMMAND_NAME,
     description =
         "This command ensures that received transactions are signed by a key stored in an encrypted file.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
-public class FileBasedTransactionSignerCommand extends SignerSubCommand {
+public class FilebasedSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedTransactionSignerCommand() {}
+  public FilebasedSubCommand() {}
 
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
@@ -54,15 +54,20 @@ public class FileBasedTransactionSignerCommand extends SignerSubCommand {
   private Path keyFilePath;
 
   @Override
+  public TransactionSigner createSigner() {
+    return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
+  }
+
+  @Override
+  public String getCommandName() {
+    return COMMAND_NAME;
+  }
+
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("passwordFilePath", passwordFilePath)
         .add("keyFilePath", keyFilePath)
         .toString();
-  }
-
-  @Override
-  public TransactionSigner createSigner() {
-    return new FileBasedTransactionSigner(keyFilePath, passwordFilePath);
   }
 }
