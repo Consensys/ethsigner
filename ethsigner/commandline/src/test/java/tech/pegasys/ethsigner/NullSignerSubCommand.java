@@ -19,8 +19,7 @@ import picocli.CommandLine.Command;
 /** Hashicorp vault related sub-command */
 @Command(
     name = NullSignerSubCommand.COMMAND_NAME,
-    description =
-        "This is a signer which creates, and runs nothing.",
+    description = "This is a signer which creates, and runs nothing.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
 public class NullSignerSubCommand extends SignerSubCommand {

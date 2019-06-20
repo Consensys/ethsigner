@@ -138,8 +138,7 @@ public class Runner {
         .handler(new UpcheckHandler());
 
     // Default route handler does nothing: no response
-    router.route().handler(context -> {
-    });
+    router.route().handler(context -> {});
     return router;
   }
 
