@@ -11,8 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-apply plugin: 'java-library'
-
 jar {
   baseName 'ethsigner-signer-hashicorp'
   manifest {

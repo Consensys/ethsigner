@@ -27,7 +27,6 @@ jar {
 
 
 dependencies {
-  1
 
   implementation project(':ethsigner:signing-api')
 

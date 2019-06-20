@@ -20,7 +20,7 @@ import picocli.CommandLine.Command;
 @Command(
     name = NullSignerSubCommand.COMMAND_NAME,
     description =
-        "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
+        "This is a signer which creates, and runs nothing.",
     mixinStandardHelpOptions = true,
     helpCommand = true)
 public class NullSignerSubCommand extends SignerSubCommand {

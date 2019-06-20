@@ -54,15 +54,12 @@ public class Runner {
 
   private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
-  private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final Path dataDirectory;
-
-  private Vertx vertx;
-  private String jsonRpcHttpServiceId;
-  private HttpServerService httpServerService;
+  private final Vertx vertx;
+  private final HttpServerService httpServerService;
 
   public Runner(
       final TransactionSerialiser serialiser,
@@ -73,22 +70,19 @@ public class Runner {
       final Path dataDirectory) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
-    this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
     this.dataDirectory = dataDirectory;
+    this.vertx = Vertx.vertx();
+    this.httpServerService = new HttpServerService(router(), serverOptions);
   }
 
   public void start() {
-    this.vertx = Vertx.vertx();
-    httpServerService = new HttpServerService(router(), serverOptions);
     vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
   }
 
   public void stop() {
-    if (vertx != null) {
-      vertx.close();
-    }
+    vertx.close();
   }
 
   private RequestMapper createRequestMapper() {
@@ -144,14 +138,14 @@ public class Runner {
         .handler(new UpcheckHandler());
 
     // Default route handler does nothing: no response
-    router.route().handler(context -> {});
+    router.route().handler(context -> {
+    });
     return router;
   }
 
   private void httpServerServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {
-      jsonRpcHttpServiceId = result.result();
-      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", jsonRpcHttpServiceId);
+      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
 
       if (dataDirectory != null) {
         writePortsToFile(httpServerService);

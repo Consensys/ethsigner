@@ -17,6 +17,7 @@ dependencies {
   testRuntime 'org.apache.logging.log4j:log4j-core'
 
   testImplementation project(':ethsigner:core')
+
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'junit:junit'
   testImplementation 'io.vertx:vertx-core'
