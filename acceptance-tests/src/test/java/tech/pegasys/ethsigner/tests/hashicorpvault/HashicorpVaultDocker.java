@@ -96,7 +96,7 @@ public class HashicorpVaultDocker {
           final ExecCreateCmdResponse execCreateCmdResponse =
               getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
           assertThat(
-              runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_SECRET_CREATION))
+                  runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_SECRET_CREATION))
               .isTrue();
         });
     LOG.info("The secret was created successfully.");
