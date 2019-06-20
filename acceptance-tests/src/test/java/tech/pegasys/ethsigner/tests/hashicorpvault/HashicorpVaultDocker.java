@@ -89,14 +89,16 @@ public class HashicorpVaultDocker {
 
   public void createTestData() {
     LOG.info("creating the secret in vault that contains the private key.");
-    final ExecCreateCmdResponse execCreateCmdResponse =
-        getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
+
     waitFor(
         60,
-        () ->
-            assertThat(
-                    runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_SECRET_CREATION))
-                .isTrue());
+        () -> {
+          final ExecCreateCmdResponse execCreateCmdResponse =
+              getExecCreateCmdResponse(CREATE_ETHSIGNER_SIGNING_KEY_SECRET);
+          assertThat(
+              runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_SECRET_CREATION))
+              .isTrue();
+        });
     LOG.info("The secret was created successfully.");
   }
 
@@ -144,13 +146,15 @@ public class HashicorpVaultDocker {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Hashicorp Vault to become responsive...");
-    final ExecCreateCmdResponse execCreateCmdResponse =
-        getExecCreateCmdResponse(COMMAND_TO_CHECK_VAULT_IS_UP);
+
     waitFor(
         60,
-        () ->
-            assertThat(runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_STATUS))
-                .isTrue());
+        () -> {
+          final ExecCreateCmdResponse execCreateCmdResponse =
+              getExecCreateCmdResponse(COMMAND_TO_CHECK_VAULT_IS_UP);
+          assertThat(runCommandInVaultContainer(execCreateCmdResponse, EXPECTED_FOR_STATUS))
+              .isTrue();
+        });
     LOG.info("Hashicorp Vault is now responsive");
   }
 
