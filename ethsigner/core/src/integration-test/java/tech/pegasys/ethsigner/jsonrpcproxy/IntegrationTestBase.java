@@ -26,7 +26,6 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.CredentialTransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
@@ -35,6 +34,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,8 +62,6 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -125,7 +123,6 @@ public class IntegrationTestBase {
     runner =
         new Runner(
             serialiser,
-            vertx,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
@@ -253,14 +250,16 @@ public class IntegrationTestBase {
 
   private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
     return headers.entrySet().stream()
-        .map(e -> new Header(e.getKey(), e.getValue()))
+        .map((Map.Entry<String, String> e) -> new Header(e.getKey(), e.getValue()))
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner() throws IOException, CipherException {
+  private static TransactionSigner transactionSigner() throws IOException {
     final File keyFile = createKeyFile();
-    final Credentials credentials = WalletUtils.loadCredentials("password", keyFile);
-    return new CredentialTransactionSigner(credentials);
+    final File passwordFile = createFile("password");
+    final TransactionSigner fileBasedTransactionSigner =
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
+    return fileBasedTransactionSigner;
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -271,5 +270,13 @@ public class IntegrationTestBase {
     final File keyFile = wallet.toFile();
     keyFile.deleteOnExit();
     return keyFile;
+  }
+
+  private static File createFile(final String s) throws IOException {
+    final Path path = Files.createTempFile("file", ".file");
+    Files.write(path, s.getBytes(UTF_8));
+    final File file = path.toFile();
+    file.deleteOnExit();
+    return file;
   }
 }

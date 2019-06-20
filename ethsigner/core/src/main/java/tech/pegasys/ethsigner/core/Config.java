@@ -13,8 +13,6 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
-import tech.pegasys.ethsigner.core.signing.fileBased.FileBasedSignerConfig;
-import tech.pegasys.ethsigner.core.signing.hashicorp.HashicorpSignerConfig;
 
 import java.net.InetAddress;
 import java.nio.file.Path;
@@ -39,8 +37,4 @@ public interface Config {
   ChainIdProvider getChainId();
 
   Path getDataDirectory();
-
-  HashicorpSignerConfig getHashicorpSignerConfig();
-
-  FileBasedSignerConfig getFileBasedSignerConfig();
 }
