@@ -35,7 +35,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
-  private static final String DEFAULT_TIMEOUT_STRING = "5";
+  private static final String DEFAULT_TIMEOUT_STRING = "10";
   private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
