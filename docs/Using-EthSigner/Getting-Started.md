@@ -102,7 +102,7 @@ Start EthSigner with options specified as follows:
 
 ## Confirm EthSigner is Up
 
-Use the upcheck endpoint to confirm EthSigner is running.
+Use the `upcheck` endpoint to confirm EthSigner is running.
 
 !!! example
     ```bash tab="curl HTTP request"
