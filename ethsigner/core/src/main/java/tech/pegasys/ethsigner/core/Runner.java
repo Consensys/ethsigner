@@ -54,19 +54,15 @@ public class Runner {
 
   private final TransactionSerialiser serialiser;
   private final HttpClientOptions clientOptions;
-  private final HttpServerOptions serverOptions;
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final Path dataDirectory;
-
   private final Vertx vertx;
-  private String jsonRpcHttpServiceId;
-  private HttpServerService httpServerService;
+  private final HttpServerService httpServerService;
 
   public Runner(
       final TransactionSerialiser serialiser,
-      final Vertx vertx,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
@@ -74,23 +70,22 @@ public class Runner {
       final Path dataDirectory) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
-    this.serverOptions = serverOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
     this.dataDirectory = dataDirectory;
-    this.vertx = vertx;
+    this.vertx = Vertx.vertx();
+    this.httpServerService = new HttpServerService(router(), serverOptions);
   }
 
   public void start() {
-    httpServerService = new HttpServerService(router(), serverOptions);
     vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
   }
 
   public void stop() {
-    vertx.undeploy(jsonRpcHttpServiceId);
+    vertx.close();
   }
 
-  private RequestMapper createRequestMapper(final Vertx vertx) {
+  private RequestMapper createRequestMapper() {
 
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
@@ -121,7 +116,7 @@ public class Runner {
 
   private Router router() {
     final Router router = Router.router(vertx);
-    final RequestMapper requestMapper = createRequestMapper(vertx);
+    final RequestMapper requestMapper = createRequestMapper();
 
     // Handler for JSON-RPC requests
     router
@@ -149,8 +144,7 @@ public class Runner {
 
   private void httpServerServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {
-      jsonRpcHttpServiceId = result.result();
-      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", jsonRpcHttpServiceId);
+      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
 
       if (dataDirectory != null) {
         writePortsToFile(httpServerService);

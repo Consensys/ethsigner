@@ -1,0 +1,34 @@
+
+jar {
+  baseName 'ethsigner-commandline'
+  manifest {
+    attributes(
+      'Specification-Title': baseName,
+      'Specification-Version': project.version,
+      'Implementation-Title': baseName,
+      'Implementation-Version': calculateVersion()
+      )
+  }
+}
+
+dependencies {
+
+  implementation project(':ethsigner:signing-api')
+  implementation project(':ethsigner:core')
+
+  implementation 'info.picocli:picocli'
+  implementation 'com.google.guava:guava'
+
+  implementation 'org.apache.logging.log4j:log4j-api'
+  runtime 'org.apache.logging.log4j:log4j-core'
+  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
+
+  testImplementation 'junit:junit'
+  testImplementation 'org.assertj:assertj-core'
+  testImplementation 'org.mockito:mockito-core'
+
+  integrationTestImplementation 'io.rest-assured:rest-assured'
+  integrationTestImplementation 'org.assertj:assertj-core'
+  integrationTestImplementation 'org.mock-server:mockserver-netty'
+  integrationTestImplementation 'org.mockito:mockito-core'
+}

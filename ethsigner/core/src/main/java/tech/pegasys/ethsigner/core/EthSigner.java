@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import java.nio.file.Path;
 import java.time.Duration;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
@@ -37,12 +36,10 @@ public final class EthSigner {
 
   private final Config config;
   private final TransactionSigner signer;
-  private final Vertx vertx;
 
-  public EthSigner(final Config config, final TransactionSigner signer, final Vertx vertx) {
+  public EthSigner(final Config config, final TransactionSigner signer) {
     this.config = config;
     this.signer = signer;
-    this.vertx = vertx;
   }
 
   public void run() {
@@ -80,7 +77,6 @@ public final class EthSigner {
     final Runner runner =
         new Runner(
             serialiser,
-            vertx,
             clientOptions,
             serverOptions,
             downstreamHttpRequestTimeout,

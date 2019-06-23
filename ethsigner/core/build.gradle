@@ -28,7 +28,7 @@ jar {
 
 dependencies {
 
-  implementation project(':ethsigner:signingapi')
+  implementation project(':ethsigner:signing-api')
 
   implementation 'com.google.guava:guava'
 
@@ -44,11 +44,12 @@ dependencies {
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
 
-  testCompile 'io.vertx:vertx-codegen'
+  testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
 
+  integrationTestImplementation project(':ethsigner:signer:file-based')
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
