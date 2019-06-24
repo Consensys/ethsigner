@@ -91,7 +91,7 @@ None
 
 # eth_sendTransaction 
 
-Creates and signs a transaction using the [keystore account]((../Using-EthSigner/Getting-Started.md#create-password-and-key-files)). 
+Creates and signs a transaction using the [keystore account](../Using-EthSigner/Getting-Started.md#create-password-and-key-files). 
 
 EthSigner submits the signed transaction to Pantheon using [`eth_sendRawTransaction`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eth_sendrawtransaction). 
 
