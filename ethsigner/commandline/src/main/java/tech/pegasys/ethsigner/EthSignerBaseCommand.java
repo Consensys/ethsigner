@@ -90,10 +90,10 @@ public class EthSignerBaseCommand implements Config {
   private long chainId;
 
   @Option(
-      names = {"--data-directory"},
-      description = "Data directory to store temporary files",
+      names = {"--data-path"},
+      description = "The path to EthSigner data directory to store temporary files",
       arity = "1")
-  private Path dataDirectory;
+  private Path dataPath;
 
   @Override
   public Level getLogLevel() {
@@ -126,8 +126,8 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Path getDataDirectory() {
-    return dataDirectory;
+  public Path getDataPath() {
+    return dataPath;
   }
 
   @Override
@@ -145,7 +145,7 @@ public class EthSignerBaseCommand implements Config {
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
-        .add("dataDirectory", dataDirectory)
+        .add("dataPath", dataPath)
         .toString();
   }
 }

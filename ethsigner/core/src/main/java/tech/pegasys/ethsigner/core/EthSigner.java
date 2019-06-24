@@ -72,7 +72,7 @@ public final class EthSigner {
             .setHost(config.getHttpListenHost().getHostAddress())
             .setReuseAddress(true)
             .setReusePort(true);
-    final Path dataDirectory = config.getDataDirectory();
+    final Path dataDirectory = config.getDataPath();
 
     final Runner runner =
         new Runner(
