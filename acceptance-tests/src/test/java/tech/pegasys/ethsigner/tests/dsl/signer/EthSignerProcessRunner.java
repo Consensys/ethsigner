@@ -60,7 +60,7 @@ public class EthSignerProcessRunner {
   private final String signerHostname;
   private final String chainId;
   private final boolean useDynamicPortAllocation;
-  private final Path dataDirectory;
+  private final Path dataPath;
   private final int signerHttpRpcPort;
   private final SignerConfiguration signerConfig;
 
@@ -83,13 +83,13 @@ public class EthSignerProcessRunner {
 
     if (useDynamicPortAllocation) {
       try {
-        this.dataDirectory = Files.createTempDirectory("acceptance-test");
+        this.dataPath = Files.createTempDirectory("acceptance-test");
       } catch (IOException e) {
         throw new RuntimeException(
             "Failed to create the temporary directory to store the ethsigner.ports file");
       }
     } else {
-      dataDirectory = null;
+      dataPath = null;
     }
   }
 
@@ -108,9 +108,9 @@ public class EthSignerProcessRunner {
     } finally {
       if (useDynamicPortAllocation) {
         try {
-          MoreFiles.deleteRecursively(dataDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
+          MoreFiles.deleteRecursively(dataPath, RecursiveDeleteOption.ALLOW_INSECURE);
         } catch (final IOException e) {
-          LOG.info("Failed to clean up temporary file: {}", dataDirectory, e);
+          LOG.info("Failed to clean up temporary file: {}", dataPath, e);
         }
       }
     }
@@ -137,7 +137,7 @@ public class EthSignerProcessRunner {
     params.add(chainId);
     if (useDynamicPortAllocation) {
       params.add("--data-path");
-      params.add(dataDirectory.toAbsolutePath().toString());
+      params.add(dataPath.toAbsolutePath().toString());
     }
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
@@ -208,9 +208,9 @@ public class EthSignerProcessRunner {
   }
 
   private void loadPortsFile() {
-    final File portsFile = new File(dataDirectory.toFile(), PORTS_FILENAME);
+    final File portsFile = new File(dataPath.toFile(), PORTS_FILENAME);
     LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
-    awaitPortsFile(dataDirectory);
+    awaitPortsFile(dataPath);
     LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
 
     try (final FileInputStream fis = new FileInputStream(portsFile)) {
