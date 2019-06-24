@@ -49,7 +49,8 @@ public class EthSignerBaseCommand implements Config {
 
   @Option(
       names = "--downstream-http-host",
-      description = "The endpoint to which received requests are forwarded",
+      description =
+          "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
       arity = "1")
   private final InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
 

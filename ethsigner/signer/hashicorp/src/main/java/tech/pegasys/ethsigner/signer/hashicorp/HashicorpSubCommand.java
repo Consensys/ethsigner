@@ -41,28 +41,29 @@ public class HashicorpSubCommand extends SignerSubCommand {
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--host"},
-      description = "URL of the Hashicorp vault server.",
+      description = "Host for the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       defaultValue = DEFAULT_HASHICORP_VAULT_HOST,
       arity = "1")
   private String serverHost = DEFAULT_HASHICORP_VAULT_HOST;
 
   @Option(
       names = {"--port"},
-      description = "Port of the Hashicorp vault server.",
+      description = "Port of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       defaultValue = DEFAULT_PORT_STRING,
       arity = "1")
   private final Integer serverPort = DEFAULT_PORT;
 
   @Option(
       names = {"--timeout"},
-      description = "Timeout in seconds for requests to the Hashicorp vault server.",
+      description =
+          "Timeout in seconds for requests to the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       defaultValue = DEFAULT_TIMEOUT_STRING,
       arity = "1")
   private final Integer timeout = DEFAULT_TIMEOUT;
 
   @Option(
       names = {"--auth-file"},
-      description = "Path to a File containing authentication data for Hashicorp vault.",
+      description = "Path to a File containing authentication data for Hashicorp vault",
       required = true,
       arity = "1")
   private final Path authFilePath = null;
@@ -72,7 +73,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
       names = {"--signing-key-path"},
       description =
           "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
-              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 ",
+              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
       defaultValue = DEFAULT_KEY_PATH,
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
