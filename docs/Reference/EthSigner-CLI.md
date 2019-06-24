@@ -3,7 +3,17 @@ description: EthSigner command line interface reference
 
 # EthSigner Command Line
 
-This reference describes the syntax of the EthSigner Command Line Interface (CLI) options.
+This reference describes the syntax of the EthSigner Command Line Interface (CLI) options. EthSigner 
+signs transaction with a key stored in an encrypted file or a Hashicorp Vault: 
+
+* `ethsigner [Options] file-based-signer [File Options]`
+* `ethsigner [Options] hashicorp-signer [Hashicorp Options]`
+
+!!! tip
+    To view the command line help for the subcommands use: 
+    
+    * `ethsigner help file-based-signer`
+    * `ethsigner help hashicorp-signer` 
 
 ## Options
 
@@ -17,6 +27,18 @@ Chain ID of the network to receive the signed transactions.
 
 ```bash tab="Example"
 --chain-id=2017
+```
+
+### data-directory
+
+Directory in which to store temporary files.  
+
+```bash tab="Syntax"
+--data-directory
+```
+
+```bash tab="Example"
+--data-directory=/Users/me/my_node/data
 ```
 
 ### downstream-http-host
@@ -59,13 +81,11 @@ Timeout period (in milliseconds) for downstream requests. Default is 5000.
 
 Host on which JSON-RPC HTTP listens. Default is `localhost`. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --http-listen-host=<httpListenHost>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --http-listen-host=8.8.8.8
 ```
 
@@ -79,30 +99,6 @@ Port on which JSON-RPC HTTP listens. Default is 8545.
 
 ```bash tab="Example"
 --http-lisentport=6174
-```
-
-### key-file
-
-File containing [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
-
-```bash tab="Syntax"
--k, --key-file=<keyFile>
-```
-
-```bash tab="Example"
---key-file=/Users/me/my_node/transactionKey
-```
-
-### password-file
-
-File containing password for the [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
-
-```bash tab="Syntax"
--p, --password-file=<passwordFile>
-```
-
-```bash tab="Example"
---password-file=/Users/me/my_node/password
 ```
 
 ### logging
@@ -132,4 +128,93 @@ Displays the version and exits.
 
 ```bash tab="Syntax"
 -V, --version
+```
+
+## File Options 
+
+### key-file
+
+File containing [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
+
+```bash tab="Syntax"
+-k, --key-file=<keyFile>
+```
+
+```bash tab="Example"
+--key-file=/Users/me/my_node/transactionKey
+```
+
+### password-file
+
+File containing password for the [key with which transactions are signed](../Using-EthSigner/Getting-Started.md#create-password-and-key-files).  
+
+```bash tab="Syntax"
+-p, --password-file=<passwordFile>
+```
+
+```bash tab="Example"
+--password-file=/Users/me/my_node/password
+```
+
+## Hashicorp Options 
+
+### auth-file
+
+File containing authentication data for Hashicorp Vault.  
+
+```bash tab="Syntax"
+--auth-file=<authFile>
+```
+
+```bash tab="Example"
+--auth-file=/Users/me/my_node/auth_file
+```
+
+### host
+
+URL of the Hashicorp Vault server. 
+
+```bash tab="Syntax"
+--host=<serverHost>
+```
+
+```bash tab="Example"
+--host="http://host.com"
+```
+
+### port
+
+Port of the Hashicorp Vault server. 
+
+```bash tab="Syntax"
+--port=<serverPort>
+```
+
+```bash tab="Example"
+--port=23000
+```
+
+### signing-key-path
+
+Path to secret in the Hashicorp Vault containing the private key for signing transactions. The key 
+must be a base64 encoded private key for ECDSA for curve secp256k1. 
+
+```bash tab="Syntax"
+--signing-key-path=<signingKeyPath>
+```
+
+```bash tab="Example"
+--signing-key-path=/my_secret/ethsignerSigningKey
+```
+
+### timeout
+
+Timeout in seconds for requests to the Hashicorp Vault server. 
+
+```bash tab="Syntax"
+--timeout=<timeout>
+```
+
+```bash tab="Example"
+--timeout=5
 ```

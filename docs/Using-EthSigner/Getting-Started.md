@@ -1,9 +1,13 @@
-description: Install EthSigner from binary distribution
+description: Getting started with EthSigner
 <!--- END of page meta data -->
 
 # Getting Started 
 
-EthSigner requires a V3 Keystore key file and a password file. 
+EthSigner requires a V3 Keystore key file and a password file for signing transactions
+with a key stored in an encrypted file.
+
+!!! tip 
+    EthSigner also supports signing transactions with a key stored in a Hashicorp Vault.  
 
 ## Prerequisites 
 
@@ -97,7 +101,7 @@ Start EthSigner with options specified as follows:
 
 !!! example
     ```
-    ethsigner --chain-id=2018 --downstream-http-port=8590 --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
+    ethsigner --chain-id=2018 --downstream-http-port=8590 file-based-signer --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
     ```
 
 ## Confirm EthSigner Passing Requests to Pantheon 
