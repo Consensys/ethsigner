@@ -41,7 +41,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--host"},
-      description = "Host for the Hashicorp vault server (default: ${DEFAULT-VALUE})",
+      description = "Host of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       defaultValue = DEFAULT_HASHICORP_VAULT_HOST,
       arity = "1")
   private String serverHost = DEFAULT_HASHICORP_VAULT_HOST;
