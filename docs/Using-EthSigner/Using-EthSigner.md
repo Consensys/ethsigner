@@ -19,13 +19,13 @@ by EthSigner.
 # eea_sendTransaction 
 
 Creates and signs a [private transaction](https://docs.pantheon.pegasys.tech/en/stable/Privacy/Privacy-Overview/)
-using the [keystore account]((../Using-EthSigner/Getting-Started.md#create-password-and-key-files)). 
+using the [keystore account](../Using-EthSigner/Getting-Started.md#create-password-and-key-files). 
 
-EthSigner submits the signed transaction to Pantheon using [`eea_sendRawTransaction`](https://docs.pantheon.pegasys.tech/en/stable/Reference/JSON-RPC-API-Methods/#eea_sendrawtransaction). 
+EthSigner submits the signed transaction to Pantheon using [`eea_sendRawTransaction`](https://docs.pantheon.pegasys.tech/en/stable/Reference/Pantheon-API-Methods/#eea_sendrawtransaction). 
 
 **Parameters**
 
-Transaction object: 
+Transaction object for private transactions: 
 
 | Key             | Type                | Required/Optional                  | Value                                                                                                                         |
 |-----------------|--:-:----------------|----------------------------------- |-------------------------------------------------------------------------------------------------------------------------------|
@@ -33,16 +33,16 @@ Transaction object:
 | **to**          | Data, 20&nbsp;bytes | Not required for contract creation | `null` for contract creation transaction. Contract address for contract invocation transactions.                                                           |
 | **gas**         | Quantity            | Optional                           | Gas provided by the sender. Default is `90000`.                                                                               |
 | **gasPrice**    | Quantity            | Optional                           | Gas price provided by the sender in Wei. Default is `0`.                                                                      |
-| **nonce**       | Quantity            | Optional                           | Number of transactions made by the sender before this one.                                                                    |
+| **nonce**       | Quantity            | Optional                           | Number of transactions sent from the `from` account before this one.                                                                    |
 | **data**        | Quantity            | Optional                           | Compiled contract code or hash of the invoked method signature and encoded parameters.                                        |
 | **privateFrom** | Data, 20&nbsp;bytes | Required                           | Orion address of the sender                                                                                                         |
 | **privateFor**  | Array of data       | Required                           | Orion addresses of recipients                                                                                                       |
-| **restriction** | String              | Required for private transactions  | Must be [`restricted`](https://docs.pantheon.pegasys.tech/en/stable/Privacy/Privacy-Overview/#private-transaction-attributes) |
+| **restriction** | String              | Required                           | Must be [`restricted`](https://docs.pantheon.pegasys.tech/en/stable/Privacy/Privacy-Overview/#private-transaction-attributes) |
 
 !!! tip
     Submitting a transaction with the same nonce as a pending transaction and a higher gas price replaces 
     the pending transaction with the new one. If not attempting to replace a pending transaction, do not 
-    include the `nonce` in the private transaction object and the nonce management is handled automatically. 
+    include the `nonce` in the private transaction object and nonce management is handled automatically. 
 
 !!! note
     If a `value` is included in the transaction object, an error is returned.  Ether transfers cannot 
@@ -50,7 +50,7 @@ Transaction object:
 
 **Returns**
 
-`result` : `data` - 32-byte transaction hash
+`result` : `data` - Transaction hash
 
 !!! example
     ```bash tab="curl HTTP request"
