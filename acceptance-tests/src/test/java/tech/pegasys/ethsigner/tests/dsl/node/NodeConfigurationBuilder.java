@@ -40,14 +40,14 @@ public class NodeConfigurationBuilder {
     return this;
   }
 
+  public NodeConfigurationBuilder cors(final String cors) {
+    this.cors = cors;
+    return this;
+  }
+
   public NodeConfiguration build() {
     final String hostname = dockerHost(config).orElse(LOCALHOST);
 
     return new NodeConfiguration(genesis, hostname, cors);
-  }
-
-  public NodeConfigurationBuilder cors(final String cors) {
-    this.cors = cors;
-    return this;
   }
 }

@@ -134,7 +134,9 @@ downloadLicenses {
   ]
 
   licenses = [
-          (group('ethsigner'))            : apache,
+          (group('ethsigner'))       : apache,
+          (group('ethsigner.ethsigner'))       : apache,
+          (group('ethsigner.ethsigner.signer'))       : apache,
 
           // https://checkerframework.org/manual/#license
           // The more permissive MIT License applies to code that you might want

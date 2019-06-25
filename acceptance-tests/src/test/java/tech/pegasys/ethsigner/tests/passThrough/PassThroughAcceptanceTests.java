@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class PassThroughAcceptanceTests extends AcceptanceTestBase {
       Convert.toWei(TRANSFER_AMOUNT_ETHER, Convert.Unit.ETHER).toBigIntegerExact();
 
   @Test
-  public void ethGetTransactionCountReturnCorrectNumber() throws Exception {
+  public void ethGetTransactionCountReturnCorrectNumber() {
     final BigInteger startTransactionCount =
         ethNode().transactions().count(richBenefactor().address());
     submitTransactionAndWaitForBlock();
@@ -45,7 +44,7 @@ public class PassThroughAcceptanceTests extends AcceptanceTestBase {
   }
 
   @Test
-  public void ethBalanceRequesReturnsCorrectBalance() throws Exception {
+  public void ethBalanceRequesReturnsCorrectBalance() {
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     submitTransactionAndWaitForBlock();
 
@@ -54,7 +53,7 @@ public class PassThroughAcceptanceTests extends AcceptanceTestBase {
     assertThat(endBalance).isEqualByComparingTo(startBalance.add(TRANSFER_AMOUNT_WEI));
   }
 
-  void submitTransactionAndWaitForBlock() throws IOException {
+  void submitTransactionAndWaitForBlock() {
 
     final Transaction transaction =
         Transaction.createEtherTransaction(

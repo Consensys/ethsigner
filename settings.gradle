@@ -13,4 +13,9 @@
 
 rootProject.name='ethsigner'
 include 'acceptance-tests'
-include 'ethsigner'
+include 'ethsigner:app'
+include 'ethsigner:core'
+include 'ethsigner:signing-api'
+include 'ethsigner:signer:hashicorp'
+include 'ethsigner:signer:file-based'
+include 'ethsigner:commandline'
