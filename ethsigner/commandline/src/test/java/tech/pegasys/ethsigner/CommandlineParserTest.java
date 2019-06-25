@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
 import java.io.ByteArrayOutputStream;
@@ -55,7 +54,6 @@ public class CommandlineParserTest {
     nullCommandHelp =
         commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
-
   private String validCommandLine() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
@@ -100,7 +98,7 @@ public class CommandlineParserTest {
   public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelpWithoutDashes() {
     final boolean result = parser.parseCommandLine("help");
     assertThat(result).isTrue();
-    assertThat(commandOutput.toString()).contains(defaultUsageText);
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   @Test
@@ -112,7 +110,7 @@ public class CommandlineParserTest {
 
   @Test
   public void missingSubCommandShowsErrorAndUsageText() {
-    final boolean result = parser.parseCommandLine(validCommandLine());
+    final boolean result = parser.parseCommandLine(validCommandLine().split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString())
         .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
@@ -124,6 +122,7 @@ public class CommandlineParserTest {
     final boolean result = parser.parseCommandLine(args.split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
     assertThat(commandOutput.toString()).endsWith(defaultUsageText);
   }
 
@@ -166,28 +165,30 @@ public class CommandlineParserTest {
 
   @Test
   public void illegalSubCommandDisplaysErrorMessage() {
-    parser.registerSigner(subCommand);
     //NOTE: all required params must be specified
-    parser.parseCommandLine("--downstream-http-port=8500 --chain-id=1 illegalSubCommand");
-    assertThat(commandOutput.toString()).startsWith(MISSING_SUBCOMMAND_ERROR);
-    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
-    assertThat(commandOutput.toString()).contains(expectedOutputStart);
+    final boolean result =
+        parser.parseCommandLine(
+            "illegalSubCommand");
+    final String expectedFailureMessage = MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText;
+    assertThat(commandOutput.toString()).isEqualTo(expectedFailureMessage);
   }
 
   @Test
   public void misspeltCommandLineOptionDisplaysErrorMessage() {
-    parser.registerSigner(subCommand);
     final boolean result =
-        parser.parseCommandLine("--nonExistentOption=9 " + subCommand.getCommandName());
+        parser.parseCommandLine("--downstream-http-port=8500",
+            "--chain-id=1",
+            "--nonExistentOption=9", subCommand.getCommandName());
     assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
-
 
   private void missingParameterShowsError(final String paramToRemove) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parser.parseCommandLine(cmdLine);
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(

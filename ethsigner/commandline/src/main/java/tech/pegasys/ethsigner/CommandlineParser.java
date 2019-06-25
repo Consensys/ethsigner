@@ -17,12 +17,18 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
+import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.PicocliException;
 import picocli.CommandLine.RunLast;
 
 public class CommandlineParser {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   private final List<SignerSubCommand> signers = Lists.newArrayList();
   private final EthSignerBaseCommand baseCommand;
@@ -43,26 +49,29 @@ public class CommandlineParser {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    commandLine.setUnmatchedArgumentsAllowed(true);
+    //commandLine.setUnmatchedArgumentsAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     for (final SignerSubCommand subcommand : signers) {
       commandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
 
-    // Must manually show the usage/version info, as per the design of picocli
-    // (https://picocli.info/#_printing_help_automatically)
     try {
       commandLine.parseWithHandlers(
           new RunLast().useOut(output), new ExceptionHandler<List<Object>>(), args);
       return true;
     } catch (final ParameterException ex) {
-      handleParseException(ex);
-      return false;
+      handleParameterException(ex);
+    } catch (final ExecutionException ex) {
+      commandLine.usage(output);
+    } catch(final Exception ex) {
+      LOG.error("Ethsigner has failed", ex);
+      output.println("Ethsigner has failed " + ex.toString());
     }
+    return false;
   }
 
-  public void handleParseException(final ParameterException ex) {
+  public void handleParameterException(final ParameterException ex) {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
       ex.printStackTrace(output);
@@ -87,8 +96,6 @@ public class CommandlineParser {
         final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
       if (!parseResult.hasSubcommand()) {
         output.println(MISSING_SUBCOMMAND_ERROR);
-        ex.getCommandLine().usage(output, Ansi.AUTO);
-        return null;
       }
       throw ex;
     }
