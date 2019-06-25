@@ -27,7 +27,7 @@ public abstract class SignerSubCommand implements Runnable {
 
   @CommandLine.ParentCommand private EthSignerBaseCommand config;
 
-  @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
+ //@Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
   public abstract TransactionSigner createSigner();
 

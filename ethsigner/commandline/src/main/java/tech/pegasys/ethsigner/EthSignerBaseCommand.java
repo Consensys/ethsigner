@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import picocli.CommandLine.HelpCommand;
 import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
@@ -37,6 +38,7 @@ import picocli.CommandLine.Option;
     descriptionHeading = "%nDescription:%n%n",
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
+    subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 

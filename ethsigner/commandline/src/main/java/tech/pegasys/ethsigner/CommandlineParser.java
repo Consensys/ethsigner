@@ -43,6 +43,7 @@ public class CommandlineParser {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
+    commandLine.setUnmatchedArgumentsAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     for (final SignerSubCommand subcommand : signers) {
@@ -56,12 +57,7 @@ public class CommandlineParser {
           new RunLast().useOut(output), new ExceptionHandler<List<Object>>(), args);
     } catch (final ParameterException ex) {
       handleParseException(ex);
-    }
-
-    if (commandLine.isUsageHelpRequested()) {
-      commandLine.usage(output);
-    } else if (commandLine.isVersionHelpRequested()) {
-      commandLine.printVersionHelp(output);
+      throw ex;
     }
   }
 
@@ -69,9 +65,11 @@ public class CommandlineParser {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
       ex.printStackTrace(output);
-    } else {
-      output.println(ex.getMessage());
     }
+
+    output.println(ex.getMessage());
+    ex.getCommandLine().usage(output, Ansi.AUTO);
+
     if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
       ex.getCommandLine().usage(output, Ansi.AUTO);
     }
@@ -81,7 +79,7 @@ public class CommandlineParser {
 
     @Override
     public R handleParseException(final ParameterException ex, final String[] args) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
+      throw ex;
     }
 
     @Override
@@ -92,7 +90,7 @@ public class CommandlineParser {
         ex.getCommandLine().usage(output, Ansi.AUTO);
         return null;
       }
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
+      throw ex;
     }
   }
 }

@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -27,8 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import picocli.CommandLine;
-import picocli.CommandLine.ParameterException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandlineParserTest {
@@ -39,6 +38,9 @@ public class CommandlineParserTest {
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
   private NullSignerSubCommand subCommand;
+
+  private static final String HELP_HEADER_LINE =
+      String.format("Usage:%n%nethsigner [OPTIONS] [COMMAND]");
 
   @Before
   public void setup() {
@@ -84,16 +86,30 @@ public class CommandlineParserTest {
   }
 
   @Test
-  public void helpMessageIsShown() {
+  public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelp() {
     parseCommand("--help");
-    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
-    assertThat(commandOutput.toString()).startsWith(expectedOutputStart);
+    assertThat(commandOutput.toString()).startsWith(HELP_HEADER_LINE);
+  }
+
+  @Test
+  public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelpWithoutDashes() {
+    parseCommand("help");
+    assertThat(commandOutput.toString()).startsWith(HELP_HEADER_LINE);
+  }
+
+
+  @Test
+  public void reverseHelpRequestShowsSubCommandHelp() {
+    parser.registerSigner(subCommand); // this is required to allow parsing to complete correctly
+    parseCommand("help " + subCommand.getCommandName());
+    assertThat(commandOutput.toString())
+        .contains("This is a signer which creates, and runs nothing.");
   }
 
   @Test
   public void missingSubCommandShowsErrorAndUsageText() {
     parseCommand(validCommandLine());
-    assertThat(commandOutput.toString()).startsWith(CommandlineParser.MISSING_SUBCOMMAND_ERROR);
+    assertThat(commandOutput.toString()).startsWith(MISSING_SUBCOMMAND_ERROR);
     final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
     assertThat(commandOutput.toString()).contains(expectedOutputStart);
   }
@@ -147,6 +163,28 @@ public class CommandlineParserTest {
         "http-listen-host", config::getHttpListenHost, InetAddress.getLoopbackAddress());
   }
 
+  @Test
+  public void illegalSubCommandDisplaysErrorMessage() {
+    parser.registerSigner(subCommand);
+    //NOTE: all required params must be specified
+    parseCommand("--downstream-http-port=8500 --chain-id=1 illegalSubCommand");
+    assertThat(commandOutput.toString()).startsWith(MISSING_SUBCOMMAND_ERROR);
+    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
+    assertThat(commandOutput.toString()).contains(expectedOutputStart);
+  }
+
+  @Test
+  public void missingRequiredOptionDisplayErrorMessage() {
+
+  }
+
+  @Test
+  public void misspeltCommandLineOptionDisplaysErrorMessage() {
+    parser.registerSigner(subCommand);
+    parseCommand("--nonExistentOption=9 " + subCommand.getCommandName());
+  }
+
+
   private void missingParameterShowsError(final String paramToRemove) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     try {
@@ -183,28 +221,5 @@ public class CommandlineParserTest {
     final boolean result = parseCommand(input);
     assertThat(result).isTrue();
     assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
-  }
-
-  private static class MyHandler<R> implements CommandLine.IParseResultHandler2<R> {
-
-    @Override
-    public R handleParseResult(final CommandLine.ParseResult parseResult)
-        throws CommandLine.ExecutionException {
-      return null;
-    }
-  }
-
-  private static class ExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
-
-    @Override
-    public R handleParseException(final ParameterException ex, final String[] args) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
-    }
-
-    @Override
-    public R handleExecutionException(
-        final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
-    }
   }
 }
