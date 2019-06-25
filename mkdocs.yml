@@ -46,9 +46,11 @@ nav:
   - Installation:
     - Install Binary Distribution: Installation/Install-Binaries.md
     - Build from Source: Installation/Build-From-Source.md
-  - Using EthSinger:
+  - Using EthSigner:
     - Getting Started: Using-EthSigner/Getting-Started.md
     - Using EthSigner: Using-EthSigner/Using-EthSigner.md
+  - Extending EthSigner:
+    - Creaing an External Signer: Extending-EthSigner/Adding-Signer.md
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
 
