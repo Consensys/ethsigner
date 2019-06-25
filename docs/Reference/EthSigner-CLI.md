@@ -10,7 +10,7 @@ signs transaction with a key stored in an encrypted file or a Hashicorp Vault:
 * `ethsigner [Options] hashicorp-signer [Hashicorp Options]`
 
 !!! tip
-    To view the command line help for the subcommands use: 
+    To view the command line help for the subcommands: 
     
     * `ethsigner help file-based-signer`
     * `ethsigner help hashicorp-signer` 
@@ -29,16 +29,16 @@ Chain ID of the network to receive the signed transactions.
 --chain-id=2017
 ```
 
-### data-directory
+### data-path
 
 Directory in which to store temporary files.  
 
 ```bash tab="Syntax"
---data-directory
+--data-path=<PATH>
 ```
 
 ```bash tab="Example"
---data-directory=/Users/me/my_node/data
+--data-path=/Users/me/my_node/data
 ```
 
 ### downstream-http-host
@@ -67,14 +67,14 @@ Endpoint to which received requests are forwarded.
 
 ### downstream-http-request-timeout
 
-Timeout period (in milliseconds) for downstream requests. Default is 5000. 
+Timeout period (in seconds) for downstream requests. Default is 5. 
 
 ```bash tab="Syntax"
 --downstream-http-request-timeout=<downstreamHttpRequestTimeout>
 ```
 
 ```bash tab="Example"
---downstream-http-request-timeout=3000
+--downstream-http-request-timeout=10
 ```
 
 ### http-listen-host
@@ -103,8 +103,8 @@ Port on which JSON-RPC HTTP listens. Default is 8545.
 
 ### logging
 
-Logging verbosity levels. Options are: `OFF`, `FATAL`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. The 
-default is `INFO`.  
+Logging verbosity levels. Options are: `OFF`, `FATAL`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. 
+Default is `INFO`.  
 
 ```bash tab="Syntax"
 -l, --logging=<LOG VERBOSITY LEVEL>
@@ -160,7 +160,8 @@ File containing password for the [key with which transactions are signed](../Usi
 
 ### auth-file
 
-File containing authentication data for Hashicorp Vault.  
+File containing authentication data for Hashicorp Vault. The authentication data is the [root token displayed by
+the Hashicorp Vault server](../Using-EthSigner/Hashicorp.md#storing-private-key-in-hashcorp-vault). 
 
 ```bash tab="Syntax"
 --auth-file=<authFile>
@@ -172,7 +173,7 @@ File containing authentication data for Hashicorp Vault.
 
 ### host
 
-URL of the Hashicorp Vault server. 
+Host of the Hashicorp Vault server. Default is `localhost`. 
 
 ```bash tab="Syntax"
 --host=<serverHost>
@@ -184,7 +185,7 @@ URL of the Hashicorp Vault server.
 
 ### port
 
-Port of the Hashicorp Vault server. 
+Port of the Hashicorp Vault server. Default is 8200. 
 
 ```bash tab="Syntax"
 --port=<serverPort>
@@ -196,8 +197,8 @@ Port of the Hashicorp Vault server.
 
 ### signing-key-path
 
-Path to secret in the Hashicorp Vault containing the private key for signing transactions. The key 
-must be a base64 encoded private key for ECDSA for curve secp256k1. 
+Path to secret in the Hashicorp Vault containing the private key for signing transactions. Default is
+` /secret/data/ethsignerSigningKey`. 
 
 ```bash tab="Syntax"
 --signing-key-path=<signingKeyPath>
@@ -209,7 +210,7 @@ must be a base64 encoded private key for ECDSA for curve secp256k1.
 
 ### timeout
 
-Timeout in seconds for requests to the Hashicorp Vault server. 
+Timeout in seconds for requests to the Hashicorp Vault server. Default is 10. 
 
 ```bash tab="Syntax"
 --timeout=<timeout>
