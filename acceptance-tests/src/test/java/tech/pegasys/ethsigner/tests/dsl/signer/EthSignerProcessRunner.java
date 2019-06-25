@@ -56,7 +56,7 @@ public class EthSignerProcessRunner {
   private final Properties portsProperties;
   private final String nodeHostname;
   private final String nodeHttpRpcPort;
-  private final String timeout;
+  private final String timeoutSeconds;
   private final String signerHostname;
   private final String chainId;
   private final boolean useDynamicPortAllocation;
@@ -72,7 +72,7 @@ public class EthSignerProcessRunner {
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
-    this.timeout = String.valueOf(signerConfig.timeout().getSeconds());
+    this.timeoutSeconds = String.valueOf(signerConfig.timeout().getSeconds());
     this.signerHostname = signerConfig.hostname();
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
@@ -128,7 +128,7 @@ public class EthSignerProcessRunner {
     params.add("--downstream-http-port");
     params.add(nodeHttpRpcPort);
     params.add("--downstream-http-request-timeout");
-    params.add(timeout);
+    params.add(timeoutSeconds);
     params.add("--http-listen-host");
     params.add(signerHostname);
     params.add("--http-listen-port");

@@ -65,7 +65,7 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {"--downstream-http-request-timeout"},
       description =
-          "Timeout in seconds to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
+          "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).getSeconds();
 
@@ -92,7 +92,7 @@ public class EthSignerBaseCommand implements Config {
 
   @Option(
       names = {"--data-path"},
-      description = "The path to EthSigner data directory to store temporary files",
+      description = "The path to a directory to store temporary files",
       arity = "1")
   private Path dataPath;
 
