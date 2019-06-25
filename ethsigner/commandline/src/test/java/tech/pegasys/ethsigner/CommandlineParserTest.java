@@ -55,7 +55,7 @@ public class CommandlineParserTest {
         commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
 
-  private String validCommandLine() {
+  private String parentCommandOptionsOnly() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
         + "--downstream-http-request-timeout=10 "
@@ -76,7 +76,8 @@ public class CommandlineParserTest {
   @Test
   public void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
     final boolean result =
-        parser.parseCommandLine((validCommandLine() + subCommand.getCommandName()).split(" "));
+        parser.parseCommandLine(
+            (parentCommandOptionsOnly() + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
 
@@ -111,7 +112,7 @@ public class CommandlineParserTest {
 
   @Test
   public void missingSubCommandShowsErrorAndUsageText() {
-    final boolean result = parser.parseCommandLine(validCommandLine().split(" "));
+    final boolean result = parser.parseCommandLine(parentCommandOptionsOnly().split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString())
         .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
@@ -119,7 +120,7 @@ public class CommandlineParserTest {
 
   @Test
   public void nonIntegerInputForDownstreamPortShowsError() {
-    final String args = modifyField(validCommandLine(), "downstream-http-port", "abc");
+    final String args = modifyField(parentCommandOptionsOnly(), "downstream-http-port", "abc");
     final boolean result = parser.parseCommandLine(args.split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
@@ -187,7 +188,7 @@ public class CommandlineParserTest {
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = removeFieldFrom(parentCommandOptionsOnly(), paramToRemove);
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
@@ -197,7 +198,7 @@ public class CommandlineParserTest {
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
       final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
 
-    String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    String cmdLine = removeFieldFrom(parentCommandOptionsOnly(), paramToRemove);
     cmdLine += subCommand.getCommandName();
 
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));

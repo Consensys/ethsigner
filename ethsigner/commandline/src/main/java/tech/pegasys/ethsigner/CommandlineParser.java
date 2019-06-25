@@ -48,7 +48,6 @@ public class CommandlineParser {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    // commandLine.setUnmatchedArgumentsAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     for (final SignerSubCommand subcommand : signers) {
@@ -56,8 +55,7 @@ public class CommandlineParser {
     }
 
     try {
-      commandLine.parseWithHandlers(
-          new RunLast().useOut(output), new ExceptionHandler<List<Object>>(), args);
+      commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
       return true;
     } catch (final ParameterException ex) {
       handleParameterException(ex);
@@ -70,7 +68,7 @@ public class CommandlineParser {
     return false;
   }
 
-  public void handleParameterException(final ParameterException ex) {
+  private void handleParameterException(final ParameterException ex) {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
       ex.printStackTrace(output);
