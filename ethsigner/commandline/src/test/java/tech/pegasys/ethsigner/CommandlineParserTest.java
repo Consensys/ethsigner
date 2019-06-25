@@ -22,12 +22,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.function.Supplier;
-
 import org.apache.logging.log4j.Level;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import picocli.CommandLine;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandlineParserTest {
@@ -38,20 +38,22 @@ public class CommandlineParserTest {
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
   private NullSignerSubCommand subCommand;
+  private String defaultUsageText;
+  private String nullCommandHelp;
 
-  private static final String HELP_HEADER_LINE =
-      String.format("Usage:%n%nethsigner [OPTIONS] [COMMAND]");
 
   @Before
   public void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
     parser = new CommandlineParser(config, outPrintStream);
-  }
+    parser.registerSigner(subCommand);
 
-  private boolean parseCommand(final String cmdLine) {
-    parser.parseCommandLine(cmdLine.split(" "));
-    return true;
+    final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
+    commandLine.addSubcommand(subCommand.getCommandName(), subCommand);
+    defaultUsageText = commandLine.getUsageMessage();
+    nullCommandHelp =
+        commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
 
   private String validCommandLine() {
@@ -74,9 +76,11 @@ public class CommandlineParserTest {
 
   @Test
   public void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
-    final boolean result = parseCommand(validCommandLine());
+    final boolean result =
+        parser.parseCommandLine((validCommandLine() + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
+
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
@@ -87,43 +91,40 @@ public class CommandlineParserTest {
 
   @Test
   public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelp() {
-    parseCommand("--help");
-    assertThat(commandOutput.toString()).startsWith(HELP_HEADER_LINE);
+    final boolean result = parser.parseCommandLine("--help");
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).isEqualTo(defaultUsageText);
   }
 
   @Test
   public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelpWithoutDashes() {
-    parseCommand("help");
-    assertThat(commandOutput.toString()).startsWith(HELP_HEADER_LINE);
+    final boolean result = parser.parseCommandLine("help");
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).contains(defaultUsageText);
   }
-
 
   @Test
   public void reverseHelpRequestShowsSubCommandHelp() {
-    parser.registerSigner(subCommand); // this is required to allow parsing to complete correctly
-    parseCommand("help " + subCommand.getCommandName());
-    assertThat(commandOutput.toString())
-        .contains("This is a signer which creates, and runs nothing.");
+    final boolean result = parser.parseCommandLine("help ", subCommand.getCommandName());
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).isEqualTo(nullCommandHelp);
   }
 
   @Test
   public void missingSubCommandShowsErrorAndUsageText() {
-    parseCommand(validCommandLine());
-    assertThat(commandOutput.toString()).startsWith(MISSING_SUBCOMMAND_ERROR);
-    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
-    assertThat(commandOutput.toString()).contains(expectedOutputStart);
+    final boolean result = parser.parseCommandLine(validCommandLine());
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString())
+        .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
   }
 
   @Test
   public void nonIntegerInputForDownstreamPortShowsError() {
-    parser.registerSigner(subCommand); // this is required to allow parsing to complete correctly
-    final String cmdLine = modifyField(validCommandLine(), "downstream-http-port", "abc");
-    try {
-      parseCommand(cmdLine);
-      fail();
-    } catch (final Exception e) {
-      assertThat(e.getCause().toString()).contains("--downstream-http-port", "'abc' is not an int");
-    }
+    final String args = modifyField(validCommandLine(), "downstream-http-port", "abc");
+    final boolean result = parser.parseCommandLine(args.split(" "));
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandOutput.toString()).endsWith(defaultUsageText);
   }
 
   @Test
@@ -167,41 +168,35 @@ public class CommandlineParserTest {
   public void illegalSubCommandDisplaysErrorMessage() {
     parser.registerSigner(subCommand);
     //NOTE: all required params must be specified
-    parseCommand("--downstream-http-port=8500 --chain-id=1 illegalSubCommand");
+    parser.parseCommandLine("--downstream-http-port=8500 --chain-id=1 illegalSubCommand");
     assertThat(commandOutput.toString()).startsWith(MISSING_SUBCOMMAND_ERROR);
     final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
     assertThat(commandOutput.toString()).contains(expectedOutputStart);
   }
 
   @Test
-  public void missingRequiredOptionDisplayErrorMessage() {
-
-  }
-
-  @Test
   public void misspeltCommandLineOptionDisplaysErrorMessage() {
     parser.registerSigner(subCommand);
-    parseCommand("--nonExistentOption=9 " + subCommand.getCommandName());
+    final boolean result =
+        parser.parseCommandLine("--nonExistentOption=9 " + subCommand.getCommandName());
+    assertThat(result).isFalse();
   }
 
 
   private void missingParameterShowsError(final String paramToRemove) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
-    try {
-      parseCommand(cmdLine);
-      fail();
-    } catch (final Exception e) {
-      assertThat(e.getCause().toString()).contains("--" + paramToRemove, "Missing");
-    }
+    final boolean result = parser.parseCommandLine(cmdLine);
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
       final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
-    parser.registerSigner(subCommand);
 
     String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     cmdLine += subCommand.getCommandName();
-    final boolean result = parseCommand(cmdLine);
+
+    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
@@ -217,9 +212,9 @@ public class CommandlineParserTest {
             + "--http-listen-host=localhost "
             + "--chain-id=6 "
             + "--logging=INFO";
+    final String[] inputArgs = input.split(" ");
 
-    final boolean result = parseCommand(input);
-    assertThat(result).isTrue();
+    parser.parseCommandLine(inputArgs);
     assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
   }
 }

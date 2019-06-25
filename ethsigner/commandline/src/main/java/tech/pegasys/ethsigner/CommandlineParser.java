@@ -39,7 +39,7 @@ public class CommandlineParser {
     signers.add(signerSubCommand);
   }
 
-  public void parseCommandLine(final String... args) {
+  public boolean parseCommandLine(final String... args) {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
@@ -55,9 +55,10 @@ public class CommandlineParser {
     try {
       commandLine.parseWithHandlers(
           new RunLast().useOut(output), new ExceptionHandler<List<Object>>(), args);
+      return true;
     } catch (final ParameterException ex) {
       handleParseException(ex);
-      throw ex;
+      return false;
     }
   }
 
@@ -68,7 +69,6 @@ public class CommandlineParser {
     }
 
     output.println(ex.getMessage());
-    ex.getCommandLine().usage(output, Ansi.AUTO);
 
     if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
       ex.getCommandLine().usage(output, Ansi.AUTO);
