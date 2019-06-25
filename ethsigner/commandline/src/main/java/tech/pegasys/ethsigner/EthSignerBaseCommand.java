@@ -64,8 +64,7 @@ public class EthSignerBaseCommand implements Config {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
-      description =
-          "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      description = "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).getSeconds();
 
