@@ -23,7 +23,6 @@ import picocli.CommandLine;
 import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.ParameterException;
-import picocli.CommandLine.PicocliException;
 import picocli.CommandLine.RunLast;
 
 public class CommandlineParser {
@@ -49,7 +48,7 @@ public class CommandlineParser {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    //commandLine.setUnmatchedArgumentsAllowed(true);
+    // commandLine.setUnmatchedArgumentsAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     for (final SignerSubCommand subcommand : signers) {
@@ -64,7 +63,7 @@ public class CommandlineParser {
       handleParameterException(ex);
     } catch (final ExecutionException ex) {
       commandLine.usage(output);
-    } catch(final Exception ex) {
+    } catch (final Exception ex) {
       LOG.error("Ethsigner has failed", ex);
       output.println("Ethsigner has failed " + ex.toString());
     }

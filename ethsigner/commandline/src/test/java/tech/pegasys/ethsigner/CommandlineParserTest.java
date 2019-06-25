@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.function.Supplier;
+
 import org.apache.logging.log4j.Level;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,6 @@ public class CommandlineParserTest {
   private String defaultUsageText;
   private String nullCommandHelp;
 
-
   @Before
   public void setup() {
     subCommand = new NullSignerSubCommand();
@@ -54,6 +54,7 @@ public class CommandlineParserTest {
     nullCommandHelp =
         commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
+
   private String validCommandLine() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
@@ -103,7 +104,7 @@ public class CommandlineParserTest {
 
   @Test
   public void reverseHelpRequestShowsSubCommandHelp() {
-    final boolean result = parser.parseCommandLine("help ", subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine("help", subCommand.getCommandName());
     assertThat(result).isTrue();
     assertThat(commandOutput.toString()).isEqualTo(nullCommandHelp);
   }
@@ -165,27 +166,29 @@ public class CommandlineParserTest {
 
   @Test
   public void illegalSubCommandDisplaysErrorMessage() {
-    //NOTE: all required params must be specified
+    // NOTE: all required params must be specified
     final boolean result =
-        parser.parseCommandLine(
-            "illegalSubCommand");
-    final String expectedFailureMessage = MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText;
-    assertThat(commandOutput.toString()).isEqualTo(expectedFailureMessage);
+        parser.parseCommandLine("--downstream-http-port=8500", "--chain-id=1", "illegalSubCommand");
+    assertThat(commandOutput.toString())
+        .containsOnlyOnce("Did you mean: " + subCommand.getCommandName());
+    assertThat(commandOutput.toString()).doesNotContain(defaultUsageText);
   }
 
   @Test
   public void misspeltCommandLineOptionDisplaysErrorMessage() {
     final boolean result =
-        parser.parseCommandLine("--downstream-http-port=8500",
+        parser.parseCommandLine(
+            "--downstream-http-port=8500",
             "--chain-id=1",
-            "--nonExistentOption=9", subCommand.getCommandName());
+            "--nonExistentOption=9",
+            subCommand.getCommandName());
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
     final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
-    final boolean result = parser.parseCommandLine(cmdLine);
+    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import picocli.CommandLine.HelpCommand;
 import tech.pegasys.ethsigner.core.Config;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
@@ -24,6 +23,7 @@ import java.time.Duration;
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
