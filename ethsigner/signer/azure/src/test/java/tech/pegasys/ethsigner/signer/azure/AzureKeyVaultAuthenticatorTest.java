@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signing;
+package tech.pegasys.ethsigner.signer.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +28,7 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKey;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyCurveName;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 public class AzureKeyVaultAuthenticatorTest {
   @Rule
@@ -72,7 +73,8 @@ public class AzureKeyVaultAuthenticatorTest {
     System.setProperty("AZURE_CLIENT_ID", "add your client ID here");
     System.setProperty("AZURE_CLIENT_SECRET", "add your client secret here");
 
-    AzureKeyVaultTransactionSigner signer = AzureKeyVaultTransactionSigner.createFrom("photic-kv-test", null, null);
+    TransactionSigner
+        signer = AzureKeyVaultTransactionSigner.createFrom("photic-kv-test", null, null);
     assertThat(signer.getAddress()).isEqualTo("0xbbde9116b300e92e2798e28a90acb3b16b357179");
 
     byte[] data = { 1, 2, 3};

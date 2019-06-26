@@ -10,13 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signing;
-
-import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+package tech.pegasys.ethsigner.signer.azure;
 
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
@@ -24,6 +18,11 @@ import com.microsoft.aad.adal4j.ClientCredential;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Authenticates to Azure Key Vault by providing a callback to authenticate using adal.
@@ -39,8 +38,6 @@ public class AzureKeyVaultAuthenticator {
 
   /**
    * Creates a new KeyVaultCredential based on the access token obtained.
-   *
-   * @return
    */
   private static ServiceClientCredentials createCredentials() {
     return new KeyVaultCredentials() {
@@ -48,9 +45,10 @@ public class AzureKeyVaultAuthenticator {
       // Callback that supplies the token type and access token on request.
       @Override
       @SuppressWarnings("CatchAndPrintStackTrace")
-      public String doAuthenticate(String authorization, String resource, String scope) {
+      public String doAuthenticate(final String authorization, final String resource,
+          final String scope) {
 
-        AuthenticationResult authResult;
+        final AuthenticationResult authResult;
         try {
           authResult = getAccessToken(authorization, resource);
           return authResult.getAccessToken();
@@ -65,20 +63,13 @@ public class AzureKeyVaultAuthenticator {
   /**
    * Private helper method that gets the access token for the authorization and resource depending
    * on which variables are supplied in the environment.
-   *
-   * @param authorization
-   * @param resource
-   * @return
-   * @throws ExecutionException
-   * @throws InterruptedException
-   * @throws MalformedURLException
-   * @throws Exception
    */
-  private static AuthenticationResult getAccessToken(String authorization, String resource)
+  private static AuthenticationResult getAccessToken(final String authorization,
+      final String resource)
       throws InterruptedException, ExecutionException, MalformedURLException {
 
-    String clientId = System.getProperty("AZURE_CLIENT_ID");
-    String clientKey = System.getProperty("AZURE_CLIENT_SECRET");
+    final String clientId = System.getProperty("AZURE_CLIENT_ID");
+    final String clientKey = System.getProperty("AZURE_CLIENT_SECRET");
 
     AuthenticationResult result = null;
 
@@ -86,13 +77,14 @@ public class AzureKeyVaultAuthenticator {
     ExecutorService service = null;
     try {
       service = Executors.newFixedThreadPool(1);
-      AuthenticationContext context = new AuthenticationContext(authorization, false, service);
+      final AuthenticationContext context =
+          new AuthenticationContext(authorization, false, service);
 
       Future<AuthenticationResult> future = null;
 
       // Acquires token based on client ID and client secret.
       if (clientId != null && clientKey != null) {
-        ClientCredential credentials = new ClientCredential(clientId, clientKey);
+        final ClientCredential credentials = new ClientCredential(clientId, clientKey);
         future = context.acquireToken(resource, credentials, null);
       }
 
