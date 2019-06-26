@@ -17,12 +17,17 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
+import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.RunLast;
 
 public class CommandlineParser {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   private final List<SignerSubCommand> signers = Lists.newArrayList();
   private final EthSignerBaseCommand baseCommand;
@@ -39,7 +44,7 @@ public class CommandlineParser {
     signers.add(signerSubCommand);
   }
 
-  public void parseCommandLine(final String... args) {
+  public boolean parseCommandLine(final String... args) {
 
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
@@ -49,29 +54,28 @@ public class CommandlineParser {
       commandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
 
-    // Must manually show the usage/version info, as per the design of picocli
-    // (https://picocli.info/#_printing_help_automatically)
     try {
-      commandLine.parseWithHandlers(
-          new RunLast().useOut(output), new ExceptionHandler<List<Object>>(), args);
+      commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
+      return true;
     } catch (final ParameterException ex) {
-      handleParseException(ex);
-    }
-
-    if (commandLine.isUsageHelpRequested()) {
+      handleParameterException(ex);
+    } catch (final ExecutionException ex) {
       commandLine.usage(output);
-    } else if (commandLine.isVersionHelpRequested()) {
-      commandLine.printVersionHelp(output);
+    } catch (final Exception ex) {
+      LOG.error("Ethsigner has failed", ex);
+      output.println("Ethsigner has failed " + ex.toString());
     }
+    return false;
   }
 
-  public void handleParseException(final ParameterException ex) {
+  private void handleParameterException(final ParameterException ex) {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
       ex.printStackTrace(output);
-    } else {
-      output.println(ex.getMessage());
     }
+
+    output.println(ex.getMessage());
+
     if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
       ex.getCommandLine().usage(output, Ansi.AUTO);
     }
@@ -81,7 +85,7 @@ public class CommandlineParser {
 
     @Override
     public R handleParseException(final ParameterException ex, final String[] args) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
+      throw ex;
     }
 
     @Override
@@ -89,10 +93,8 @@ public class CommandlineParser {
         final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
       if (!parseResult.hasSubcommand()) {
         output.println(MISSING_SUBCOMMAND_ERROR);
-        ex.getCommandLine().usage(output, Ansi.AUTO);
-        return null;
       }
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
+      throw ex;
     }
   }
 }
