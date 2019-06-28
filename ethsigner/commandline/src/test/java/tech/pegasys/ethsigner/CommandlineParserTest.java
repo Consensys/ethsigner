@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import picocli.CommandLine;
-import picocli.CommandLine.ParameterException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandlineParserTest {
@@ -39,23 +38,27 @@ public class CommandlineParserTest {
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
   private NullSignerSubCommand subCommand;
+  private String defaultUsageText;
+  private String nullCommandHelp;
 
   @Before
   public void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
     parser = new CommandlineParser(config, outPrintStream);
+    parser.registerSigner(subCommand);
+
+    final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
+    commandLine.addSubcommand(subCommand.getCommandName(), subCommand);
+    defaultUsageText = commandLine.getUsageMessage();
+    nullCommandHelp =
+        commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
 
-  private boolean parseCommand(final String cmdLine) {
-    parser.parseCommandLine(cmdLine.split(" "));
-    return true;
-  }
-
-  private String validCommandLine() {
+  private String parentCommandOptionsOnly() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
-        + "--downstream-http-request-timeout=10000 "
+        + "--downstream-http-request-timeout=10 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "
         + "--chain-id=6 "
@@ -72,9 +75,12 @@ public class CommandlineParserTest {
 
   @Test
   public void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
-    final boolean result = parseCommand(validCommandLine());
+    final boolean result =
+        parser.parseCommandLine(
+            (parentCommandOptionsOnly() + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
+
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
@@ -84,30 +90,42 @@ public class CommandlineParserTest {
   }
 
   @Test
-  public void helpMessageIsShown() {
-    parseCommand("--help");
-    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
-    assertThat(commandOutput.toString()).startsWith(expectedOutputStart);
+  public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelp() {
+    final boolean result = parser.parseCommandLine("--help");
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).isEqualTo(defaultUsageText);
+  }
+
+  @Test
+  public void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelpWithoutDashes() {
+    final boolean result = parser.parseCommandLine("help");
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+  }
+
+  @Test
+  public void reverseHelpRequestShowsSubCommandHelp() {
+    final boolean result = parser.parseCommandLine("help", subCommand.getCommandName());
+    assertThat(result).isTrue();
+    assertThat(commandOutput.toString()).isEqualTo(nullCommandHelp);
   }
 
   @Test
   public void missingSubCommandShowsErrorAndUsageText() {
-    parseCommand(validCommandLine());
-    assertThat(commandOutput.toString()).startsWith(CommandlineParser.MISSING_SUBCOMMAND_ERROR);
-    final String expectedOutputStart = String.format("Usage:%n%nethsigner [OPTIONS]");
-    assertThat(commandOutput.toString()).contains(expectedOutputStart);
+    final boolean result = parser.parseCommandLine(parentCommandOptionsOnly().split(" "));
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString())
+        .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
   }
 
   @Test
   public void nonIntegerInputForDownstreamPortShowsError() {
-    parser.registerSigner(subCommand); // this is required to allow parsing to complete correctly
-    final String cmdLine = modifyField(validCommandLine(), "downstream-http-port", "abc");
-    try {
-      parseCommand(cmdLine);
-      fail();
-    } catch (final Exception e) {
-      assertThat(e.getCause().toString()).contains("--downstream-http-port", "'abc' is not an int");
-    }
+    final String args = modifyField(parentCommandOptionsOnly(), "downstream-http-port", "abc");
+    final boolean result = parser.parseCommandLine(args.split(" "));
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandOutput.toString()).endsWith(defaultUsageText);
   }
 
   @Test
@@ -147,23 +165,43 @@ public class CommandlineParserTest {
         "http-listen-host", config::getHttpListenHost, InetAddress.getLoopbackAddress());
   }
 
+  @Test
+  public void illegalSubCommandDisplaysErrorMessage() {
+    // NOTE: all required params must be specified
+    final boolean result =
+        parser.parseCommandLine("--downstream-http-port=8500", "--chain-id=1", "illegalSubCommand");
+    assertThat(commandOutput.toString())
+        .containsOnlyOnce("Did you mean: " + subCommand.getCommandName());
+    assertThat(commandOutput.toString()).doesNotContain(defaultUsageText);
+  }
+
+  @Test
+  public void misspeltCommandLineOptionDisplaysErrorMessage() {
+    final boolean result =
+        parser.parseCommandLine(
+            "--downstream-http-port=8500",
+            "--chain-id=1",
+            "--nonExistentOption=9",
+            subCommand.getCommandName());
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+  }
+
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
-    try {
-      parseCommand(cmdLine);
-      fail();
-    } catch (final Exception e) {
-      assertThat(e.getCause().toString()).contains("--" + paramToRemove, "Missing");
-    }
+    final String cmdLine = removeFieldFrom(parentCommandOptionsOnly(), paramToRemove);
+    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
       final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
-    parser.registerSigner(subCommand);
 
-    String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    String cmdLine = removeFieldFrom(parentCommandOptionsOnly(), paramToRemove);
     cmdLine += subCommand.getCommandName();
-    final boolean result = parseCommand(cmdLine);
+
+    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
@@ -179,32 +217,9 @@ public class CommandlineParserTest {
             + "--http-listen-host=localhost "
             + "--chain-id=6 "
             + "--logging=INFO";
+    final String[] inputArgs = input.split(" ");
 
-    final boolean result = parseCommand(input);
-    assertThat(result).isTrue();
+    parser.parseCommandLine(inputArgs);
     assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
-  }
-
-  private static class MyHandler<R> implements CommandLine.IParseResultHandler2<R> {
-
-    @Override
-    public R handleParseResult(final CommandLine.ParseResult parseResult)
-        throws CommandLine.ExecutionException {
-      return null;
-    }
-  }
-
-  private static class ExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
-
-    @Override
-    public R handleParseException(final ParameterException ex, final String[] args) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
-    }
-
-    @Override
-    public R handleExecutionException(
-        final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
-      throw new RuntimeException("Exception handled in handleParseException.", ex);
-    }
   }
 }

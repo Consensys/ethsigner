@@ -23,6 +23,7 @@ import java.time.Duration;
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
@@ -37,6 +38,7 @@ import picocli.CommandLine.Option;
     descriptionHeading = "%nDescription:%n%n",
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
+    subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
@@ -49,7 +51,8 @@ public class EthSignerBaseCommand implements Config {
 
   @Option(
       names = "--downstream-http-host",
-      description = "The endpoint to which received requests are forwarded",
+      description =
+          "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
       arity = "1")
   private final InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
 
@@ -63,10 +66,9 @@ public class EthSignerBaseCommand implements Config {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
-      description =
-          "Timeout (in milliseconds) to wait for downstream request to timeout (default: ${DEFAULT-VALUE})",
+      description = "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).getSeconds();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -90,10 +92,10 @@ public class EthSignerBaseCommand implements Config {
   private long chainId;
 
   @Option(
-      names = {"--data-directory"},
-      description = "Data directory to store temporary files",
+      names = {"--data-path"},
+      description = "The path to a directory to store temporary files",
       arity = "1")
-  private Path dataDirectory;
+  private Path dataPath;
 
   @Override
   public Level getLogLevel() {
@@ -126,13 +128,13 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Path getDataDirectory() {
-    return dataDirectory;
+  public Path getDataPath() {
+    return dataPath;
   }
 
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
-    return Duration.ofMillis(downstreamHttpRequestTimeout);
+    return Duration.ofSeconds(downstreamHttpRequestTimeout);
   }
 
   @Override
@@ -145,7 +147,7 @@ public class EthSignerBaseCommand implements Config {
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
-        .add("dataDirectory", dataDirectory)
+        .add("dataPath", dataPath)
         .toString();
   }
 }

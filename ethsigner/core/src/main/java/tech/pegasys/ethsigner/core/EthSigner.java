@@ -72,7 +72,7 @@ public final class EthSigner {
             .setHost(config.getHttpListenHost().getHostAddress())
             .setReuseAddress(true)
             .setReusePort(true);
-    final Path dataDirectory = config.getDataDirectory();
+    final Path dataPath = config.getDataPath();
 
     final Runner runner =
         new Runner(
@@ -81,7 +81,7 @@ public final class EthSigner {
             serverOptions,
             downstreamHttpRequestTimeout,
             transactionFactory,
-            dataDirectory);
+            dataPath);
 
     runner.start();
   }
