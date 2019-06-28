@@ -19,7 +19,7 @@ After installing [Hashicorp Vault](https://learn.hashicorp.com/vault/getting-sta
     export VAULT_ADDR='http://127.0.0.1:8200'
     ```
 
-2. Save the root token displayed after started the server in a file called `authFile`. 
+2. Save the root token displayed after starting the server in a file called `authFile`. 
 
 3. Put your signing key into the Hashicorp Vault: 
 
@@ -37,7 +37,7 @@ After installing [Hashicorp Vault](https://learn.hashicorp.com/vault/getting-sta
 
 [Start Pantheon](https://docs.pantheon.pegasys.tech/en/stable/Getting-Started/Starting-Pantheon/) with the 
 [`--rpc-http-port`](https://docs.pantheon.pegasys.tech/en/stable/Reference/Pantheon-CLI-Syntax/#rpc-http-port)
-option set to `8590`. 
+option set to `8590` to avoid conflict with the default EthSigner listening port (`8545`). 
 
 !!! example
     ```bash
@@ -52,5 +52,9 @@ Start EthSigner.
     ```bash
     ethsigner --chain-id=2018 --downstream-http-port=8590 hashicorp-signer --host=127.0.0.1 --port=8200 --auth-file=authFile
     ```
+
+!!! tip
+    Use the [--http-listen-port](../Reference/EthSigner-CLI.md#http-listen-port) option to change the
+    EthSigner listening port if `8545` is in use.  
 
 You can now [use EthSigner to sign transactions](Using-EthSigner.md) with the key stored in the Hashicorp Vault.  
