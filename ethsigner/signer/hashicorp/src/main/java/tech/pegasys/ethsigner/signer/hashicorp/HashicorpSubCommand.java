@@ -25,7 +25,7 @@ import picocli.CommandLine.Option;
 @Command(
     name = HashicorpSubCommand.COMMAND_NAME,
     description =
-        "This command ensures that transactions are signed by a key retrieved from Hashicorp Vault.",
+        "This command ensures transactions are signed by a key retrieved from a Hashicorp Vault.",
     mixinStandardHelpOptions = true)
 public class HashicorpSubCommand extends SignerSubCommand {
 

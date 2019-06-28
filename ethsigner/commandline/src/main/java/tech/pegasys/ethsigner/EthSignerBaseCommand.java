@@ -23,6 +23,7 @@ import java.time.Duration;
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
@@ -37,6 +38,7 @@ import picocli.CommandLine.Option;
     descriptionHeading = "%nDescription:%n%n",
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
+    subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
