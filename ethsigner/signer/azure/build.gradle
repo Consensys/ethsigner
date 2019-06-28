@@ -28,7 +28,6 @@ dependencies {
 
   implementation project(':ethsigner:commandline')
   implementation project(':ethsigner:signing-api')
-  implementation project(':ethsigner:signer:file-based')
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
@@ -39,16 +38,12 @@ dependencies {
 
   implementation 'org.web3j:core'
 
-  implementation 'io.vertx:vertx-core'
-
   implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
   implementation 'com.microsoft.aad:adal4j:0.0.2'
 
-  testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'junit:junit'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
-  testImplementation 'com.github.stefanbirkner:system-rules:1.16.0'
   testImplementation 'org.mockito:mockito-inline:2.13.0'
 
   integrationTestImplementation 'io.rest-assured:rest-assured'

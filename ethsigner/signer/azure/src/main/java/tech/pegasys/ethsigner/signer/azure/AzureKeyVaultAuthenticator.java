@@ -24,6 +24,8 @@ import com.microsoft.aad.adal4j.ClientCredential;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Authenticates to Azure Key Vault by providing a callback to authenticate using adal.
@@ -31,6 +33,8 @@ import com.microsoft.rest.credentials.ServiceClientCredentials;
  * @author tifchen
  */
 public class AzureKeyVaultAuthenticator {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   public static KeyVaultClient getAuthenticatedClient(
       final String clientId, final String clientSecret) {
@@ -53,7 +57,8 @@ public class AzureKeyVaultAuthenticator {
         try {
           authResult = getAccessToken(authorization, resource, clientId, clientSecret);
           return authResult.getAccessToken();
-        } catch (Exception e) {
+        } catch (final Exception e) {
+          LOG.error("Failed to get token from Azure vault", e);
           e.printStackTrace();
         }
         return "";

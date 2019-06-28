@@ -49,7 +49,7 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
 
   @Override
   public Signature sign(final byte[] data) {
-    byte[] hash = Hash.sha3(data);
+    final byte[] hash = Hash.sha3(data);
     final KeyOperationResult result = client.sign(keyId, signingAlgo, hash);
     final byte[] signature = result.result();
 

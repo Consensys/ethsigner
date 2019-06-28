@@ -12,14 +12,21 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.google.common.base.Charsets;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
-/** Hashicorp vault related sub-command */
+/**
+ * Hashicorp vault related sub-command
+ */
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
     description =
@@ -55,13 +62,23 @@ public class AzureSubCommand extends SignerSubCommand {
   private String clientId;
 
   @Option(
-      names = {"--client-secret"},
-      description = "The secret used to access the vault (along with client-id)",
+      names = {"--client-secret-path"},
+      description = "Path to a file containing the secret used to access the vault (along with client-id)",
       required = true)
-  private String clientSecret;
+  private Path clientSecretPath;
+
+
+  private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
 
   @Override
   public TransactionSigner createSigner() {
+    final String clientSecret;
+    try {
+      clientSecret = readSecretFromFile(clientSecretPath);
+    } catch (final IOException e) {
+      throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
+    }
+    
     final KeyVaultClient client =
         AzureKeyVaultAuthenticator.getAuthenticatedClient(clientId, clientSecret);
     final AzureKeyVaultTransactionSignerFactory factory =
@@ -73,4 +90,11 @@ public class AzureSubCommand extends SignerSubCommand {
   public String getCommandName() {
     return COMMAND_NAME;
   }
+
+  private static String readSecretFromFile(final Path path) throws IOException {
+    final byte[] fileContent = Files.readAllBytes(path);
+    return new String(fileContent, Charsets.UTF_8);
+  }
+
+
 }
