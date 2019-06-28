@@ -12,7 +12,7 @@
  */
 
 jar {
-  baseName 'ethsigner-signer-hashicorp'
+  baseName 'ethsigner-signer-azure'
   manifest {
     attributes(
       'Specification-Title': baseName,
