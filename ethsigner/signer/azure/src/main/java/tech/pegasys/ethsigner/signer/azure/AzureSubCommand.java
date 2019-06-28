@@ -1,10 +1,22 @@
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.microsoft.azure.keyvault.KeyVaultClient;
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+/**
+ * Hashicorp vault related sub-command
+ */
+@Command(
+    name = AzureSubCommand.COMMAND_NAME,
+    description =
+        "This command ensures that transactions are signed by a key retrieved from Azure KMS.",
+    mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
+
+  public static final String COMMAND_NAME = "azure-signer";
 
   @Option(
       names = {"--keyvault-name"},
@@ -28,13 +40,31 @@ public class AzureSubCommand extends SignerSubCommand {
   )
   private String keyVersion;
 
+
+  @Option(
+      names = {"--client-id"},
+      required = true
+  )
+  private String clientId;
+
+
+  @Option(
+      names = {"--client-secret"},
+      required = true
+  )
+  private String clientSecret;
+
   @Override
   public TransactionSigner createSigner() {
-    return AzureKeyVaultTransactionSigner.createFrom(keyvaultName, keyName, keyVersion);
+    final KeyVaultClient client =
+        AzureKeyVaultAuthenticator.getAuthenticatedClient(clientId, clientSecret);
+    final AzureKeyVaultTransactionSignerFactory factory = new AzureKeyVaultTransactionSignerFactory(
+        keyvaultName, client);
+    return factory.createSigner(keyName, keyVersion);
   }
 
   @Override
   public String getCommandName() {
-    return null;
+    return COMMAND_NAME;
   }
 }

@@ -31,15 +31,15 @@ import java.util.concurrent.Future;
  */
 public class AzureKeyVaultAuthenticator {
 
-  public static KeyVaultClient getAuthenticatedClient() {
+  public static KeyVaultClient getAuthenticatedClient(final String clientId, final String clientSecret) {
     // Creates the KeyVaultClient using the created credentials.
-    return new KeyVaultClient(createCredentials());
+    return new KeyVaultClient(createCredentials(clientId, clientSecret));
   }
 
   /**
    * Creates a new KeyVaultCredential based on the access token obtained.
    */
-  private static ServiceClientCredentials createCredentials() {
+  private static ServiceClientCredentials createCredentials(final String clientId, final String clientSecret) {
     return new KeyVaultCredentials() {
 
       // Callback that supplies the token type and access token on request.
@@ -50,7 +50,7 @@ public class AzureKeyVaultAuthenticator {
 
         final AuthenticationResult authResult;
         try {
-          authResult = getAccessToken(authorization, resource);
+          authResult = getAccessToken(authorization, resource, clientId, clientSecret);
           return authResult.getAccessToken();
         } catch (Exception e) {
           e.printStackTrace();
@@ -65,11 +65,8 @@ public class AzureKeyVaultAuthenticator {
    * on which variables are supplied in the environment.
    */
   private static AuthenticationResult getAccessToken(final String authorization,
-      final String resource)
+      final String resource, final String clientId, final String clientSecret)
       throws InterruptedException, ExecutionException, MalformedURLException {
-
-    final String clientId = System.getProperty("AZURE_CLIENT_ID");
-    final String clientKey = System.getProperty("AZURE_CLIENT_SECRET");
 
     AuthenticationResult result = null;
 
@@ -83,8 +80,8 @@ public class AzureKeyVaultAuthenticator {
       Future<AuthenticationResult> future = null;
 
       // Acquires token based on client ID and client secret.
-      if (clientId != null && clientKey != null) {
-        final ClientCredential credentials = new ClientCredential(clientId, clientKey);
+      if (clientId != null && clientSecret != null) {
+        final ClientCredential credentials = new ClientCredential(clientId, clientSecret);
         future = context.acquireToken(resource, credentials, null);
       }
 
