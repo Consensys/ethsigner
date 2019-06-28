@@ -12,25 +12,13 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.keyvault.KeyIdentifier;
-import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.keyvault.models.KeyBundle;
-import com.microsoft.azure.keyvault.models.KeyItem;
-import com.microsoft.azure.keyvault.webkey.JsonWebKeyCurveName;
-import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
-import org.junit.Test;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-
 public class AzureKeyVaultAuthenticatorTest {
-
+  /*
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
-    KeyVaultClient client = AzureKeyVaultAuthenticator.getAuthenticatedClient(
-        "add your client ID here",
-        "add your client secret here");
+    KeyVaultClient client =
+        AzureKeyVaultAuthenticator.getAuthenticatedClient(
+            "add your client ID here", "add your client secret here");
 
     assertThat(client.apiVersion()).isEqualTo("7.0");
 
@@ -49,8 +37,9 @@ public class AzureKeyVaultAuthenticatorTest {
     assertThat(keyVersions.size()).isEqualTo(1);
 
     KeyItem keyVersion = keyVersions.get(0);
-    assertThat(keyVersion.kid()).isEqualTo(
-        "https://photic-kv-test.vault.azure.net/keys/eth-signing-key-1/3c63feb0d41d458b9c02c8d23a6b3e88");
+    assertThat(keyVersion.kid())
+        .isEqualTo(
+            "https://photic-kv-test.vault.azure.net/keys/eth-signing-key-1/3c63feb0d41d458b9c02c8d23a6b3e88");
 
     kid = new KeyIdentifier(keyVersion.kid());
     assertThat(kid.version()).isEqualTo("3c63feb0d41d458b9c02c8d23a6b3e88");
@@ -66,9 +55,9 @@ public class AzureKeyVaultAuthenticatorTest {
 
   @Test
   public void ensureCanFindKeysAndSign() {
-    final KeyVaultClient client = AzureKeyVaultAuthenticator.getAuthenticatedClient(
-        "add your client ID here",
-        "add your client secret here");
+    final KeyVaultClient client =
+        AzureKeyVaultAuthenticator.getAuthenticatedClient(
+            "add your client ID here", "add your client secret here");
 
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory("photic-kv-test", client);
@@ -79,12 +68,5 @@ public class AzureKeyVaultAuthenticatorTest {
     byte[] data = {1, 2, 3};
     signer.sign(data);
   }
-
-  private String bytesToHex(byte[] bytes) {
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      sb.append(String.format("%02x", b));
-    }
-    return sb.toString();
-  }
+  */
 }
