@@ -12,21 +12,20 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import com.google.common.base.Charsets;
+import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+import com.google.common.base.Charsets;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
 
-/**
- * Hashicorp vault related sub-command
- */
+/** Hashicorp vault related sub-command */
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
     description =
@@ -63,10 +62,10 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"--client-secret-path"},
-      description = "Path to a file containing the secret used to access the vault (along with client-id)",
+      description =
+          "Path to a file containing the secret used to access the vault (along with client-id)",
       required = true)
   private Path clientSecretPath;
-
 
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
 
@@ -78,7 +77,7 @@ public class AzureSubCommand extends SignerSubCommand {
     } catch (final IOException e) {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
-    
+
     final KeyVaultClient client =
         AzureKeyVaultAuthenticator.getAuthenticatedClient(clientId, clientSecret);
     final AzureKeyVaultTransactionSignerFactory factory =
@@ -95,6 +94,4 @@ public class AzureSubCommand extends SignerSubCommand {
     final byte[] fileContent = Files.readAllBytes(path);
     return new String(fileContent, Charsets.UTF_8);
   }
-
-
 }
