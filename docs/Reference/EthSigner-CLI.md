@@ -67,7 +67,7 @@ Endpoint to which received requests are forwarded.
 
 ### downstream-http-request-timeout
 
-Timeout period (in milliseconds) for downstream requests. Default is 5. 
+Timeout period (in milliseconds) for downstream requests. Default is 5000. 
 
 ```bash tab="Syntax"
 --downstream-http-request-timeout=<downstreamHttpRequestTimeout>
@@ -210,7 +210,7 @@ Path to secret in the Hashicorp Vault containing the private key for signing tra
 
 ### timeout
 
-Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 10. 
+Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 10000. 
 
 ```bash tab="Syntax"
 --timeout=<timeout>
