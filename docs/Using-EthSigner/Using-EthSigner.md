@@ -23,6 +23,10 @@ using the [keystore account](../Using-EthSigner/Getting-Started.md#create-passwo
 
 EthSigner submits the signed transaction to Pantheon using [`eea_sendRawTransaction`](https://docs.pantheon.pegasys.tech/en/stable/Reference/Pantheon-API-Methods/#eea_sendrawtransaction). 
 
+!!! note 
+    Pantheon uses a Transaction Manager to implement privacy. [Orion](http://docs.orion.pegasys.tech) is
+    the Transaction Manager used in this documentation but EthSigner can be used with other Transaction Managers.  
+
 **Parameters**
 
 Transaction object for private transactions: 
@@ -45,7 +49,7 @@ Transaction object for private transactions:
     include the `nonce` in the private transaction object and nonce management is handled automatically. 
 
 !!! note
-    If a `value` is included in the transaction object, an error is returned.  Ether transfers cannot 
+    If a non-zero `value` is included in the transaction object, an error is returned.  Ether transfers cannot 
     be private transactions. 
 
 **Returns**
