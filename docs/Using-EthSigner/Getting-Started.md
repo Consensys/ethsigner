@@ -3,11 +3,11 @@ description: Getting started with EthSigner
 
 # Getting Started 
 
-EthSigner requires a V3 Keystore key file and a password file for signing transactions
-with a key stored in an encrypted file.
+For file-based signing, EthSigner requires a V3 Keystore key file and a password file.
 
 !!! tip 
-    EthSigner also supports signing transactions with a key stored in an external vault (for example, Hashicorp Vault).  
+    EthSigner also supports signing transactions with a key stored in an external vault (for example, 
+    [Hashicorp Vault](Hashicorp.md)).  
 
 ## Prerequisites 
 
