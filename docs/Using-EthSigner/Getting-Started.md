@@ -1,4 +1,4 @@
-description: Install EthSigner from binary distribution
+description: Getting Started with EthSigner
 <!--- END of page meta data -->
 
 # Getting Started 

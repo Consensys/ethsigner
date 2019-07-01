@@ -36,5 +36,5 @@ public interface Config {
 
   ChainIdProvider getChainId();
 
-  Path getDataDirectory();
+  Path getDataPath();
 }

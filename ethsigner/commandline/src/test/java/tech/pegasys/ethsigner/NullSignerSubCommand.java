@@ -15,16 +15,19 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 /** Hashicorp vault related sub-command */
 @Command(
     name = NullSignerSubCommand.COMMAND_NAME,
     description = "This is a signer which creates, and runs nothing.",
-    mixinStandardHelpOptions = true,
-    helpCommand = true)
+    mixinStandardHelpOptions = true)
 public class NullSignerSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "NullSigner";
+
+  @Option(names = "--the-data", description = "Some data required for this subcommand", arity = "1")
+  private Integer downstreamHttpPort;
 
   @Override
   public TransactionSigner createSigner() {

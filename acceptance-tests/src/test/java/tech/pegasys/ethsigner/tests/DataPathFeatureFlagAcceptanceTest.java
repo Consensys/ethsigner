@@ -40,7 +40,7 @@ import org.web3j.utils.Convert.Unit;
  * Sanity test to verify starting EthSigner without the data directory feature flag works, (the
  * feature flag is leveraged by most AT).
  */
-public class DataDirectoryFeatureFlagAcceptanceTest {
+public class DataPathFeatureFlagAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static Node ethNode;
@@ -61,7 +61,7 @@ public class DataDirectoryFeatureFlagAcceptanceTest {
   @BeforeClass
   public static void setUpBase() {
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(DataDirectoryFeatureFlagAcceptanceTest::tearDownBase));
+        .addShutdownHook(new Thread(DataPathFeatureFlagAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

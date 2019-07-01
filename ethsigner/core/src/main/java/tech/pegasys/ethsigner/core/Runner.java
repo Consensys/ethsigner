@@ -57,7 +57,7 @@ public class Runner {
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private final Path dataDirectory;
+  private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
 
@@ -67,12 +67,12 @@ public class Runner {
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final TransactionFactory transactionFactory,
-      final Path dataDirectory) {
+      final Path dataPath) {
     this.serialiser = serialiser;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
-    this.dataDirectory = dataDirectory;
+    this.dataPath = dataPath;
     this.vertx = Vertx.vertx();
     this.httpServerService = new HttpServerService(router(), serverOptions);
   }
@@ -146,7 +146,7 @@ public class Runner {
     if (result.succeeded()) {
       LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
 
-      if (dataDirectory != null) {
+      if (dataPath != null) {
         writePortsToFile(httpServerService);
       }
     } else {
@@ -160,7 +160,7 @@ public class Runner {
   }
 
   private void writePortsToFile(final HttpServerService httpService) {
-    final File portsFile = new File(dataDirectory.toFile(), "ethsigner.ports");
+    final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
     final Properties properties = new Properties();
