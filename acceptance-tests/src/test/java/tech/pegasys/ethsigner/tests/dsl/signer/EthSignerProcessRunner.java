@@ -56,11 +56,11 @@ public class EthSignerProcessRunner {
   private final Properties portsProperties;
   private final String nodeHostname;
   private final String nodeHttpRpcPort;
-  private final String timeoutMs;
+  private final String timeoutMilliseconds;
   private final String signerHostname;
   private final String chainId;
   private final boolean useDynamicPortAllocation;
-  private final Path dataDirectory;
+  private final Path dataPath;
   private final int signerHttpRpcPort;
   private final SignerConfiguration signerConfig;
 
@@ -72,7 +72,7 @@ public class EthSignerProcessRunner {
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
-    this.timeoutMs = String.valueOf(signerConfig.timeout().toMillis());
+    this.timeoutMilliseconds = String.valueOf(signerConfig.timeout().toMillis());
     this.signerHostname = signerConfig.hostname();
     this.signerHttpRpcPort = signerConfig.httpRpcPort();
     this.chainId = signerConfig.chainId();
@@ -83,13 +83,13 @@ public class EthSignerProcessRunner {
 
     if (useDynamicPortAllocation) {
       try {
-        this.dataDirectory = Files.createTempDirectory("acceptance-test");
+        this.dataPath = Files.createTempDirectory("acceptance-test");
       } catch (IOException e) {
         throw new RuntimeException(
             "Failed to create the temporary directory to store the ethsigner.ports file");
       }
     } else {
-      dataDirectory = null;
+      dataPath = null;
     }
   }
 
@@ -108,9 +108,9 @@ public class EthSignerProcessRunner {
     } finally {
       if (useDynamicPortAllocation) {
         try {
-          MoreFiles.deleteRecursively(dataDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
+          MoreFiles.deleteRecursively(dataPath, RecursiveDeleteOption.ALLOW_INSECURE);
         } catch (final IOException e) {
-          LOG.info("Failed to clean up temporary file: {}", dataDirectory, e);
+          LOG.info("Failed to clean up temporary file: {}", dataPath, e);
         }
       }
     }
@@ -128,7 +128,7 @@ public class EthSignerProcessRunner {
     params.add("--downstream-http-port");
     params.add(nodeHttpRpcPort);
     params.add("--downstream-http-request-timeout");
-    params.add(timeoutMs);
+    params.add(timeoutMilliseconds);
     params.add("--http-listen-host");
     params.add(signerHostname);
     params.add("--http-listen-port");
@@ -136,8 +136,8 @@ public class EthSignerProcessRunner {
     params.add("--chain-id");
     params.add(chainId);
     if (useDynamicPortAllocation) {
-      params.add("--data-directory");
-      params.add(dataDirectory.toAbsolutePath().toString());
+      params.add("--data-path");
+      params.add(dataPath.toAbsolutePath().toString());
     }
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
@@ -208,9 +208,9 @@ public class EthSignerProcessRunner {
   }
 
   private void loadPortsFile() {
-    final File portsFile = new File(dataDirectory.toFile(), PORTS_FILENAME);
+    final File portsFile = new File(dataPath.toFile(), PORTS_FILENAME);
     LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
-    awaitPortsFile(dataDirectory);
+    awaitPortsFile(dataPath);
     LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
 
     try (final FileInputStream fis = new FileInputStream(portsFile)) {
