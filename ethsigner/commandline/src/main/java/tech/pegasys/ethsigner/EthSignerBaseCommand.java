@@ -23,6 +23,7 @@ import java.time.Duration;
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
@@ -37,6 +38,7 @@ import picocli.CommandLine.Option;
     descriptionHeading = "%nDescription:%n%n",
     optionListHeading = "%nOptions:%n",
     footerHeading = "%n",
+    subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
@@ -64,9 +66,10 @@ public class EthSignerBaseCommand implements Config {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
-      description = "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      description =
+          "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).getSeconds();
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -132,7 +135,7 @@ public class EthSignerBaseCommand implements Config {
 
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
-    return Duration.ofSeconds(downstreamHttpRequestTimeout);
+    return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
 
   @Override
