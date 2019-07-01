@@ -58,7 +58,7 @@ public class CommandlineParserTest {
   private String parentCommandOptionsOnly() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
-        + "--downstream-http-request-timeout=10 "
+        + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "
         + "--chain-id=6 "

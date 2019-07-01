@@ -66,9 +66,10 @@ public class EthSignerBaseCommand implements Config {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
-      description = "Timeout in seconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      description =
+          "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).getSeconds();
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -134,7 +135,7 @@ public class EthSignerBaseCommand implements Config {
 
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
-    return Duration.ofSeconds(downstreamHttpRequestTimeout);
+    return Duration.ofMillis(downstreamHttpRequestTimeout);
   }
 
   @Override

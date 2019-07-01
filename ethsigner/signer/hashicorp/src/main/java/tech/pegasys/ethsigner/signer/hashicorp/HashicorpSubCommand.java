@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 import com.google.common.base.MoreObjects;
 import picocli.CommandLine.Command;
@@ -34,31 +35,27 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
-  private static final String DEFAULT_TIMEOUT_STRING = "10";
-  private static final Integer DEFAULT_TIMEOUT = Integer.valueOf(DEFAULT_TIMEOUT_STRING);
+  private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--host"},
       description = "Host of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      defaultValue = DEFAULT_HASHICORP_VAULT_HOST,
       arity = "1")
   private String serverHost = DEFAULT_HASHICORP_VAULT_HOST;
 
   @Option(
       names = {"--port"},
       description = "Port of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      defaultValue = DEFAULT_PORT_STRING,
       arity = "1")
   private final Integer serverPort = DEFAULT_PORT;
 
   @Option(
       names = {"--timeout"},
       description =
-          "Timeout in seconds for requests to the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      defaultValue = DEFAULT_TIMEOUT_STRING,
+          "Timeout in milliseconds for requests to the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final Integer timeout = DEFAULT_TIMEOUT;
+  private final Long timeout = DEFAULT_TIMEOUT;
 
   @Option(
       names = {"--auth-file"},
@@ -73,7 +70,6 @@ public class HashicorpSubCommand extends SignerSubCommand {
       description =
           "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
               + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
-      defaultValue = DEFAULT_KEY_PATH,
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
