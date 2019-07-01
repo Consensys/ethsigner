@@ -4,7 +4,7 @@ description: EthSigner command line interface reference
 # EthSigner Command Line
 
 This reference describes the syntax of the EthSigner Command Line Interface (CLI) options. EthSigner 
-signs transaction with a key stored in an encrypted file or a Hashicorp Vault: 
+signs transaction with a key stored in an encrypted file or an external vault (for example, Hashicorp): 
 
 * `ethsigner [Options] file-based-signer [File Options]`
 * `ethsigner [Options] hashicorp-signer [Hashicorp Options]`
@@ -67,7 +67,7 @@ Endpoint to which received requests are forwarded.
 
 ### downstream-http-request-timeout
 
-Timeout period (in seconds) for downstream requests. Default is 5. 
+Timeout period (in milliseconds) for downstream requests. Default is 5. 
 
 ```bash tab="Syntax"
 --downstream-http-request-timeout=<downstreamHttpRequestTimeout>
@@ -210,7 +210,7 @@ Path to secret in the Hashicorp Vault containing the private key for signing tra
 
 ### timeout
 
-Timeout in seconds for requests to the Hashicorp Vault server. Default is 10. 
+Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 10. 
 
 ```bash tab="Syntax"
 --timeout=<timeout>
