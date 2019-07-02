@@ -61,7 +61,6 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -90,11 +89,11 @@ public class IntegrationTestBase {
   protected static Duration downstreamTimeout = Duration.ofSeconds(1);
 
   @BeforeClass
-  public static void setupEthSigner() throws IOException, CipherException {
+  public static void setupEthSigner() throws IOException {
     setupEthSigner(DEFAULT_CHAIN_ID);
   }
 
-  protected static void setupEthSigner(final long chainId) throws IOException, CipherException {
+  protected static void setupEthSigner(final long chainId) throws IOException {
     clientAndServer = startClientAndServer();
 
     final TransactionSerialiser serialiser =
@@ -139,7 +138,7 @@ public class IntegrationTestBase {
     unlockedAccount = serialiser.getAddress();
   }
 
-  protected static void resetEthSigner() throws IOException, CipherException {
+  protected static void resetEthSigner() throws IOException {
     setupEthSigner();
   }
 
