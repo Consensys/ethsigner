@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import java.io.PrintStream;
 import tech.pegasys.ethsigner.core.EthSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -26,12 +27,12 @@ public abstract class SignerSubCommand implements Runnable {
 
   @CommandLine.ParentCommand private EthSignerBaseCommand config;
 
-  public abstract TransactionSigner createSigner();
+  public abstract TransactionSigner createSigner() throws TransactionSignerInitializationException;
 
   public abstract String getCommandName();
 
   @Override
-  public void run() {
+  public void run() throws TransactionSignerInitializationException {
     // set log level per CLI flags
     System.out.println("Setting logging level to " + config.getLogLevel().name());
     Configurator.setAllLevels("", config.getLogLevel());
@@ -42,6 +43,7 @@ public abstract class SignerSubCommand implements Runnable {
     final TransactionSigner transactionSigner = createSigner();
 
     final EthSigner signer = new EthSigner(config, transactionSigner);
+
     signer.run();
   }
 }

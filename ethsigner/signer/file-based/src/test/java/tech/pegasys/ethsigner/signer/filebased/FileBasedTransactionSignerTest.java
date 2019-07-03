@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 
 import java.io.File;
 import java.io.IOException;

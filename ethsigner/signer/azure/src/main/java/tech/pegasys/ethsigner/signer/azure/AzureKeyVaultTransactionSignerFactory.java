@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.UnknownHostException;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.math.BigInteger;
@@ -29,6 +31,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AzureKeyVaultTransactionSignerFactory {
+
+  public static class AzureException extends RuntimeException {
+    AzureException(final String message) { super(message); }
+  }
+
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -52,17 +59,26 @@ public class AzureKeyVaultTransactionSignerFactory {
       kid = new KeyIdentifier(baseUrl, keyName, keyVersion);
       key = client.getKey(kid.toString()).key();
     } catch (final KeyVaultErrorException ex) {
-      LOG.error("Unable to access key in vault ", ex);
-      throw ex;
+      final String errorMsg = "Unable to access key in vault";
+      LOG.debug(errorMsg, ex);
+      throw new TransactionSignerInitializationException(errorMsg, ex);
     } catch (final IllegalArgumentException ex) {
-      LOG.error("Supplied key arguments failed validation.", ex);
-      throw ex;
+      final String errorMsg = String.format("Supplied key arguments failed validation");
+      LOG.debug(errorMsg, ex);
+      throw new TransactionSignerInitializationException(errorMsg, ex);
     } catch (final RuntimeException ex) {
-      LOG.error("Failed to access the Azure key vault", ex);
-      throw ex;
+      String errorMsg;
+      if(ex.getCause() instanceof UnknownHostException) {
+        errorMsg = String.format("Specified key vault (%s) does not exist.", baseUrl);
+      } else {
+        errorMsg = "Failed to access the Azure key vault";
+      }
+      LOG.debug(errorMsg, ex);
+      throw new TransactionSignerInitializationException(errorMsg, ex);
     }
 
-    final BigInteger publicKey = new BigInteger(Bytes.concat(key.x(), key.y()));
+    final byte[] rawPublicKey = Bytes.concat(key.x(), key.y());
+    final BigInteger publicKey = new BigInteger(1, rawPublicKey);
     return new AzureKeyVaultTransactionSigner(client, kid.toString(), publicKey);
   }
 

@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.signer.filebased;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.apache.logging.log4j.Level;
 import org.junit.Test;
 import picocli.CommandLine;
@@ -22,6 +24,7 @@ public class FileBasedSubCommandTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
+
   private FileBasedSubCommand config;
 
   private boolean parseCommand(final String cmdLine) {

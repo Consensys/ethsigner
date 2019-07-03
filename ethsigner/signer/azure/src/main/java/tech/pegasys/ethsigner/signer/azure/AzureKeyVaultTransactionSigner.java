@@ -62,8 +62,8 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
     // https://tomislav.tech/2018-02-05-ethereum-keyvault-signing-transactions/
     // The output of this will be a 64 byte array. The first 32 are the value for R and the rest is
     // S.
-    final BigInteger R = new BigInteger(Arrays.copyOfRange(signature, 0, 32));
-    final BigInteger S = new BigInteger(Arrays.copyOfRange(signature, 32, 32));
+    final BigInteger R = new BigInteger(1, Arrays.copyOfRange(signature, 0, 32));
+    final BigInteger S = new BigInteger(1, Arrays.copyOfRange(signature, 32, 64));
 
     // Now we have to work backwards to figure out the recId needed to recover the signature.
     int recId = recoverKeyIndex(new ECDSASignature(R, S), hash);

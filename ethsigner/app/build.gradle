@@ -40,9 +40,7 @@ dependencies {
   runtime 'org.apache.logging.log4j:log4j-core'
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 
+  integrationTestImplementation 'org.assertj:assertj-core'
+  integrationTestImplementation 'junit:junit'
 
-  testImplementation project(':ethsigner:core')
-  testImplementation 'junit:junit'
-  testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.mockito:mockito-core'
 }

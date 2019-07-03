@@ -12,7 +12,9 @@
  */
 package tech.pegasys.ethsigner.signer.filebased;
 
+import java.io.PrintStream;
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.nio.file.Path;
@@ -33,8 +35,6 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedSubCommand() {}
-
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
   @Option(
@@ -53,7 +53,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   private Path keyFilePath;
 
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
   }
 

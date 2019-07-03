@@ -30,7 +30,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
   private Integer downstreamHttpPort;
 
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return null;
   }
 

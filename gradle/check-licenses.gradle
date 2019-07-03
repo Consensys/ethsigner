@@ -43,7 +43,6 @@ ext.acceptedLicenses = [
         'Mozilla Public License 1.0',
         'Mozilla Public License Version 1.1',
         'Mozilla Public License Version 2.0',
-        'No license found',
         'CC0 1.0 Universal License',
         'Common Development and Distribution License 1.0',
         'Unicode/ICU License',
@@ -152,7 +151,8 @@ downloadLicenses {
           (group('org.glassfish.jersey.bundles.repackaged')): apache,
           (group('org.glassfish.jersey.connectors')): apache,
           (group('com.github.jnr')): epl_2,
-          (group('javax.mail')): cddl
+          (group('javax.mail')): cddl,
+          (group('net.jcip')): apache
   ]
 }
 

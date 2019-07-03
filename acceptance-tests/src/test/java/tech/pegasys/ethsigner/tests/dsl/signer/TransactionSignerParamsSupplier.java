@@ -30,21 +30,18 @@ import com.google.common.io.Resources;
 public class TransactionSignerParamsSupplier {
   private final int hashicorpVaultPort;
   private final String ipAddress;
+  private final String azureKeyVault;
 
-  public TransactionSignerParamsSupplier(final int hashicorpVaultPort, final String ipAddress) {
+  public TransactionSignerParamsSupplier(final int hashicorpVaultPort, final String ipAddress,
+      final String azureKeyVault) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
+    this.azureKeyVault = azureKeyVault;
   }
 
   public Collection<String> get() {
     final ArrayList<String> params = new ArrayList<>();
-    if (hashicorpVaultPort == 0) {
-      params.add("file-based-signer");
-      params.add("--password-file");
-      params.add(createPasswordFile().getAbsolutePath());
-      params.add("--key-file");
-      params.add(createKeyFile().getAbsolutePath());
-    } else {
+    if (hashicorpVaultPort != 0) {
       params.add("hashicorp-signer");
       params.add("--auth-file");
       params.add(createVaultAuthFile().getAbsolutePath());
@@ -52,8 +49,30 @@ public class TransactionSignerParamsSupplier {
       params.add(ipAddress);
       params.add("--port");
       params.add(String.valueOf(hashicorpVaultPort));
+    } else if(azureKeyVault != null) {
+      params.add("azure-signer");
+      params.add("--keyvault-name");
+      params.add(azureKeyVault);
+      params.add("--key-name");
+      params.add("TestKey");
+      params.add("--key-version");
+      params.add("449e655872f145a795f0849828685848");
+      params.add("--client-id");
+      params.add("47efee5c-8079-4b48-96a7-31bb4f2e9ae2");
+      params.add("--client-secret-path");
+      params.add(createAzureSecretFile().getAbsolutePath());
+    } else {
+      params.add("file-based-signer");
+      params.add("--password-file");
+      params.add(createPasswordFile().getAbsolutePath());
+      params.add("--key-file");
+      params.add(createKeyFile().getAbsolutePath());
     }
     return params;
+  }
+
+  private File createAzureSecretFile() {
+    return createTmpFile("azure_secret", "TW_3Uc/GLDdpLp5*om@MGcdlT29MuP*5".getBytes(UTF_8));
   }
 
   private File createPasswordFile() {

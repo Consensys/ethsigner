@@ -34,6 +34,8 @@ public class CommandlineParser {
   private final PrintStream output;
 
   public static final String MISSING_SUBCOMMAND_ERROR = "Signer subcommand must be defined.";
+  public static final String SIGNER_CREATION_ERROR =
+      "Failed to construct a signer from supplied arguments.";
 
   public CommandlineParser(final EthSignerBaseCommand baseCommand, final PrintStream output) {
     this.baseCommand = baseCommand;
@@ -61,6 +63,8 @@ public class CommandlineParser {
       handleParameterException(ex);
     } catch (final ExecutionException ex) {
       commandLine.usage(output);
+    } catch (final TransactionSignerInitializationException ex) {
+      output.println("Failed to construct a signer from specified parameters.");
     } catch (final Exception ex) {
       LOG.error("Ethsigner has failed", ex);
       output.println("Ethsigner has failed " + ex.toString());
@@ -93,6 +97,12 @@ public class CommandlineParser {
         final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
       if (!parseResult.hasSubcommand()) {
         output.println(MISSING_SUBCOMMAND_ERROR);
+      } else {
+        if (ex.getCause() instanceof TransactionSignerInitializationException) {
+          output.println(SIGNER_CREATION_ERROR);
+          output.println("Cause: " + ex.getCause().getMessage());
+          ex.getCommandLine().usage(output);
+        }
       }
       throw ex;
     }

@@ -12,9 +12,10 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import java.io.PrintStream;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -70,7 +71,7 @@ public class AzureSubCommand extends SignerSubCommand {
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
 
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final String clientSecret;
     try {
       clientSecret = readSecretFromFile(clientSecretPath);

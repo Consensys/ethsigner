@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.signer.filebased;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 
 import java.io.IOException;
 import java.nio.file.Files;

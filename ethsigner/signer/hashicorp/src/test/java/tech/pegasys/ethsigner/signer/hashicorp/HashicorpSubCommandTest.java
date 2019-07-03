@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -28,6 +29,7 @@ public class HashicorpSubCommandTest {
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
   private static final String FIFTEEN = "15";
+
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private HashicorpSubCommand hashiConfig;
 
