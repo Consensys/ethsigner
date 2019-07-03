@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.signer.azure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.BeforeClass;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -26,6 +25,7 @@ import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AzureKeyVaultAuthenticatorTest {
