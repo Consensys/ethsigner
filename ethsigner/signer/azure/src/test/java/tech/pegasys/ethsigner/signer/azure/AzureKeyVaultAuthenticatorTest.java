@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.azure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.BeforeClass;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -36,6 +37,12 @@ public class AzureKeyVaultAuthenticatorTest {
 
   private final KeyVaultClient client =
       AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
+
+  @BeforeClass
+  public void setup() {
+    System.out.println("ClientID = " + clientID);
+    System.out.println("clientSecret = " + clientSecret);
+  }
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
