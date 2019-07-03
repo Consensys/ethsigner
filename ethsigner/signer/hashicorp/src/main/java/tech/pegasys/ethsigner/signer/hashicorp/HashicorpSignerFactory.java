@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.hashicorp;
 
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
 
 import java.io.IOException;

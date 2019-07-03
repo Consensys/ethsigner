@@ -54,13 +54,29 @@ try {
                         sh './gradlew --no-daemon --parallel build'
                     }
                     stage('Test') {
-                        sh './gradlew --no-daemon --parallel test'
+                        withCredentials([
+                                usernamePassword(
+                                        credentialsId: 'ethsigner-azure',
+                                        usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
+                                        passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
+                                )
+                        ]) {
+                            sh './gradlew --no-daemon --parallel test'
+                        }
                     }
                     stage('Integration Test') {
                         sh './gradlew --no-daemon --parallel integrationTest'
                     }
                     stage('Acceptance Test') {
-                        sh './gradlew --no-daemon --parallel acceptanceTest'
+                        withCredentials([
+                                usernamePassword(
+                                        credentialsId: 'ethsigner-azure',
+                                        usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
+                                        passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
+                                )
+                        ]) {
+                            sh './gradlew --no-daemon --parallel acceptanceTest'
+                        }
                     }
                 } finally {
                     archiveArtifacts '**/build/reports/**'

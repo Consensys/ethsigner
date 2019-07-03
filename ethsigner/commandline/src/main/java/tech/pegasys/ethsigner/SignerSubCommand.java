@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import java.io.PrintStream;
 import tech.pegasys.ethsigner.core.EthSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 

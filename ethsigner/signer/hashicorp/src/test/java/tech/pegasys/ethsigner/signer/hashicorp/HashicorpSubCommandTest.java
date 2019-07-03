@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;

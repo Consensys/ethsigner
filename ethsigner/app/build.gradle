@@ -42,5 +42,4 @@ dependencies {
 
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'junit:junit'
-
 }

@@ -13,8 +13,7 @@
 package tech.pegasys.ethsigner.signer.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.keyvault.KeyIdentifier;
@@ -24,11 +23,15 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 public class AzureKeyVaultAuthenticatorTest {
 
-  private static final String clientID = "47efee5c-8079-4b48-96a7-31bb4f2e9ae2";
-  private static final String clientSecret = "TW_3Uc/GLDdpLp5*om@MGcdlT29MuP*5";
+  private static final String clientID = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
+  private static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
+
+  private static final String validKeyVersion = "63242cd20e7144039611d56054feff9e";
 
   private final KeyVaultClient client =
       AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
@@ -53,18 +56,18 @@ public class AzureKeyVaultAuthenticatorTest {
     KeyItem keyVersion = keyVersions.get(0);
     assertThat(keyVersion.kid())
         .isEqualTo(
-            "https://ethsignertestkey.vault.azure.net/keys/TestKey/449e655872f145a795f0849828685848");
+            "https://ethsignertestkey.vault.azure.net/keys/TestKey/63242cd20e7144039611d56054feff9e");
 
     kid = new KeyIdentifier(keyVersion.kid());
-    assertThat(kid.version()).isEqualTo("449e655872f145a795f0849828685848");
+    assertThat(kid.version()).isEqualTo(validKeyVersion);
 
     final KeyBundle key = client.getKey(keyVersion.kid());
     assertThat(key.key().kty()).isEqualTo(JsonWebKeyType.EC);
     assertThat(key.key().crv().toString()).isEqualTo("SECP256K1");
     assertThat(Hex.encodeHexString(key.key().x()))
-        .isEqualTo("f12426be201197a20a9ac966c4222acad79a3d61d7ec7b2a52d7320422354e95");
+        .isEqualTo("09b02f8a5fddd222ade4ea4528faefc399623af3f736be3c44f03e2df22fb792");
     assertThat(Hex.encodeHexString(key.key().y()))
-        .isEqualTo("36741ae914de1aae3aa344da1dce53a07a1b76d59035a0c7e29049574969a17a");
+        .isEqualTo("f3931a4d9573d333ca74343305762a753388c3422a86d98b713fc91c1ea04842");
   }
 
   @Test
@@ -73,11 +76,91 @@ public class AzureKeyVaultAuthenticatorTest {
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", client);
 
-    final TransactionSigner signer =
-        factory.createSigner("TestKey", "449e655872f145a795f0849828685848");
-    assertThat(signer.getAddress()).isEqualTo("0x8c22e8c8665f3b574e45ae89fc0434eddc286409");
+    final TransactionSigner signer = factory.createSigner("TestKey", validKeyVersion);
+    assertThat(signer.getAddress()).isEqualTo("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
 
     byte[] data = {1, 2, 3};
     signer.sign(data);
   }
+
+  @Test
+  public void accessingNonExistentKeyVaultThrowsExceptionWithMessage() {
+    final String vaultName = "invalidKeyVault";
+    final AzureKeyVaultTransactionSignerFactory nonExistentKeyVaultFactory =
+        new AzureKeyVaultTransactionSignerFactory(vaultName, client);
+
+    final String expectedMessage =
+        String.format(
+            AzureKeyVaultTransactionSignerFactory.INVALID_VAULT_PARAMETERS_ERROR_PATTERN,
+            AzureKeyVaultTransactionSignerFactory.constructAzureKeyVaultUrl(vaultName));
+
+    assertThatThrownBy(
+            () ->
+                nonExistentKeyVaultFactory.createSigner(
+                    "TestKey", validKeyVersion))
+        .isInstanceOf(TransactionSignerInitializationException.class)
+        .hasMessage(expectedMessage);
+  }
+
+  @Test
+  public void accessingIncorrectKeyNameOrValueThrowsExceptionWithMessage() {
+    final AzureKeyVaultTransactionSignerFactory validFactory =
+        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", client);
+
+    assertThatThrownBy(() -> validFactory.createSigner("TestKey", "invalid_version"))
+        .isInstanceOf(TransactionSignerInitializationException.class)
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
+
+    assertThatThrownBy(
+            () -> validFactory.createSigner("invalid_keyname", validKeyVersion))
+        .isInstanceOf(TransactionSignerInitializationException.class)
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
+  }
+
+  @Test
+  public void invalidClientCredentialsResultInException() {
+    final KeyVaultClient clientWithInvalidId =
+        AzureKeyVaultAuthenticator.getAuthenticatedClient("Invalid_id", clientSecret);
+    final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientId =
+        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidId);
+
+    assertThatThrownBy(
+            () ->
+                factoryWithInvalidClientId.createSigner(
+                    "TestKey", validKeyVersion))
+        .isInstanceOf(TransactionSignerInitializationException.class)
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+
+    final KeyVaultClient clientWithInvalidSecret =
+        AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, "invalid_secret");
+    final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientSecret =
+        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidSecret);
+
+    assertThatThrownBy(
+            () ->
+                factoryWithInvalidClientSecret.createSigner(
+                    "TestKey", validKeyVersion))
+        .isInstanceOf(TransactionSignerInitializationException.class)
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+  }
+/*
+  @Test
+  public void importKeyToAzure() {
+    final String privKeyStr = "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
+
+    final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
+    final ECKeyPair keyPair = ECKeyPair.create(privKey);
+
+    JsonWebKey webKey = new JsonWebKey();
+    webKey.withD(keyPair.getPrivateKey().toByteArray());
+    webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
+    webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
+    webKey.withKty(JsonWebKeyType.EC);
+    webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
+    webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
+
+//    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
+  }
+  */
+
 }

@@ -64,10 +64,10 @@ public class CommandlineParser {
     } catch (final ExecutionException ex) {
       commandLine.usage(output);
     } catch (final TransactionSignerInitializationException ex) {
-      output.println("Failed to construct a signer from specified parameters.");
+      // perform no-op.
     } catch (final Exception ex) {
-      LOG.error("Ethsigner has failed", ex);
-      output.println("Ethsigner has failed " + ex.toString());
+      LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
+      output.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
     }
     return false;
   }
@@ -102,6 +102,7 @@ public class CommandlineParser {
           output.println(SIGNER_CREATION_ERROR);
           output.println("Cause: " + ex.getCause().getMessage());
           ex.getCommandLine().usage(output);
+          throw (TransactionSignerInitializationException) ex.getCause();
         }
       }
       throw ex;

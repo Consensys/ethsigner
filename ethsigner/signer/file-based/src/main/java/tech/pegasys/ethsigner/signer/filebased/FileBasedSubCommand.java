@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.signer.filebased;
 
-import java.io.PrintStream;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;

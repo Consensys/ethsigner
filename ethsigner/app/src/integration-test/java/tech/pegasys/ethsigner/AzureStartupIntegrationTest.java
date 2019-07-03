@@ -1,9 +1,22 @@
+/*
+ * Copyright 2019 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package tech.pegasys.ethsigner;
 
-
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.Lists;
+import tech.pegasys.ethsigner.signer.azure.AzureSubCommand;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,10 +26,10 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
-import static org.assertj.core.api.Assertions.assertThat;
-import tech.pegasys.ethsigner.signer.azure.AzureSubCommand;
 
 public class AzureStartupIntegrationTest {
 
@@ -31,7 +44,7 @@ public class AzureStartupIntegrationTest {
     parser.registerSigner(azureSubCommand);
   }
 
-  Map<String, String> validStartupParameters() {
+  private Map<String, String> validStartupParameters() {
     final Map<String, String> params = new LinkedHashMap<>();
     params.put("--downstream-http-port", "7545");
     params.put("--chain-id", "1");
@@ -46,11 +59,11 @@ public class AzureStartupIntegrationTest {
     return params;
   }
 
-  public <T> List<T> mapToString(final Map<T, T> input) {
+  private <T> List<T> mapToString(final Map<T, T> input) {
     List<T> result = Lists.newArrayList();
-    for(final Map.Entry<T, T> entry: input.entrySet()) {
+    for (final Map.Entry<T, T> entry : input.entrySet()) {
       result.add(entry.getKey());
-      if(entry.getValue() != null) {
+      if (entry.getValue() != null) {
         result.add(entry.getValue());
       }
     }
@@ -67,9 +80,29 @@ public class AzureStartupIntegrationTest {
   }
 
   @Test
-  public void illegalAzureCommandLineShowsError() {
+  public void inaccessibleKeyVaultNameDisplaysError() {
     final Map<String, String> paramsKeyValues = validStartupParameters();
     paramsKeyValues.replace("--keyvault-name", "invalid_key_vault");
+    String[] cmdLineParams = mapToString(paramsKeyValues).toArray(new String[0]);
+
+    parser.parseCommandLine(cmdLineParams);
+    assertThat(commandOutput.toString()).startsWith(CommandlineParser.SIGNER_CREATION_ERROR);
+  }
+
+  @Test
+  public void inaccessibleKeyInVaultDisplaysError() {
+    final Map<String, String> paramsKeyValues = validStartupParameters();
+    paramsKeyValues.replace("--key-name", "invalid_key_name");
+    String[] cmdLineParams = mapToString(paramsKeyValues).toArray(new String[0]);
+
+    parser.parseCommandLine(cmdLineParams);
+    assertThat(commandOutput.toString()).startsWith(CommandlineParser.SIGNER_CREATION_ERROR);
+  }
+
+  @Test
+  public void invalidSigninCredentialsDisplayError() {
+    final Map<String, String> paramsKeyValues = validStartupParameters();
+    paramsKeyValues.replace("--key-name", "invalid_key_name");
     String[] cmdLineParams = mapToString(paramsKeyValues).toArray(new String[0]);
 
     parser.parseCommandLine(cmdLineParams);

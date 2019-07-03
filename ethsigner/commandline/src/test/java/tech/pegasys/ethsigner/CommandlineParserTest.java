@@ -222,4 +222,26 @@ public class CommandlineParserTest {
     parser.parseCommandLine(inputArgs);
     assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
   }
+
+  @Test
+  public void creatingSignerThrowsDisplaysFailureToCreateSignerText() {
+    subCommand = new NullSignerSubCommand(true);
+    config = new EthSignerBaseCommand();
+    parser = new CommandlineParser(config, outPrintStream);
+    parser.registerSigner(subCommand);
+
+    final boolean result =
+        parser.parseCommandLine(
+            (parentCommandOptionsOnly() + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString())
+        .isEqualTo(
+            CommandlineParser.SIGNER_CREATION_ERROR
+                + "\n"
+                + "Cause: "
+                + NullSignerSubCommand.ERROR_MSG
+                + "\n"
+                + nullCommandHelp);
+  }
 }

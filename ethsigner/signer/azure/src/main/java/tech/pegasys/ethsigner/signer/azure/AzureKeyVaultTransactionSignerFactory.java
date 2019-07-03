@@ -14,17 +14,15 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.UnknownHostException;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.net.UnknownHostException;
 
 import com.google.common.primitives.Bytes;
 import com.microsoft.azure.keyvault.KeyIdentifier;
 import com.microsoft.azure.keyvault.KeyVaultClient;
-import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.models.KeyVaultErrorException;
 import com.microsoft.azure.keyvault.webkey.JsonWebKey;
 import org.apache.logging.log4j.LogManager;
@@ -32,14 +30,16 @@ import org.apache.logging.log4j.Logger;
 
 public class AzureKeyVaultTransactionSignerFactory {
 
-  public static class AzureException extends RuntimeException {
-    AzureException(final String message) { super(message); }
-  }
-
+  public static final String INACCESSIBLE_KEY_ERROR = "Failed to authenticate to vault.";
+  public static final String INVALID_KEY_PARAMETERS_ERROR =
+      "Keyvault does not contain key with specified parameters";
+  public static final String INVALID_VAULT_PARAMETERS_ERROR_PATTERN =
+      "Specified key vault (%s) does not exist.";
+  public static final String UNKNOWN_VAULT_ACCESS_ERROR = "Failed to access the Azure key vault";
 
   private static final Logger LOG = LogManager.getLogger();
 
-  final String AZURE_URL_PATTERN = "https://%s.vault.azure.net";
+  private static final String AZURE_URL_PATTERN = "https://%s.vault.azure.net";
 
   private final KeyVaultClient client;
   private final String baseUrl;
@@ -47,7 +47,7 @@ public class AzureKeyVaultTransactionSignerFactory {
   public AzureKeyVaultTransactionSignerFactory(
       final String keyVaultName, final KeyVaultClient client) {
     this.client = client;
-    this.baseUrl = String.format(AZURE_URL_PATTERN, keyVaultName);
+    this.baseUrl = constructAzureKeyVaultUrl(keyVaultName);
   }
 
   public TransactionSigner createSigner(final String keyName, final String keyVersion) {
@@ -59,21 +59,24 @@ public class AzureKeyVaultTransactionSignerFactory {
       kid = new KeyIdentifier(baseUrl, keyName, keyVersion);
       key = client.getKey(kid.toString()).key();
     } catch (final KeyVaultErrorException ex) {
-      final String errorMsg = "Unable to access key in vault";
-      LOG.debug(errorMsg, ex);
-      throw new TransactionSignerInitializationException(errorMsg, ex);
-    } catch (final IllegalArgumentException ex) {
-      final String errorMsg = String.format("Supplied key arguments failed validation");
-      LOG.debug(errorMsg, ex);
-      throw new TransactionSignerInitializationException(errorMsg, ex);
+      if (ex.response().raw().code() == 401) {
+        LOG.debug(INACCESSIBLE_KEY_ERROR);
+        LOG.trace(ex);
+        throw new TransactionSignerInitializationException(INACCESSIBLE_KEY_ERROR, ex);
+      } else {
+        LOG.debug(INVALID_KEY_PARAMETERS_ERROR);
+        LOG.trace(ex);
+        throw new TransactionSignerInitializationException(INVALID_KEY_PARAMETERS_ERROR, ex);
+      }
     } catch (final RuntimeException ex) {
       String errorMsg;
-      if(ex.getCause() instanceof UnknownHostException) {
-        errorMsg = String.format("Specified key vault (%s) does not exist.", baseUrl);
+      if (ex.getCause() instanceof UnknownHostException) {
+        errorMsg = String.format(INVALID_VAULT_PARAMETERS_ERROR_PATTERN, baseUrl);
       } else {
-        errorMsg = "Failed to access the Azure key vault";
+        errorMsg = UNKNOWN_VAULT_ACCESS_ERROR;
       }
-      LOG.debug(errorMsg, ex);
+      LOG.debug(errorMsg);
+      LOG.trace(ex);
       throw new TransactionSignerInitializationException(errorMsg, ex);
     }
 
@@ -82,12 +85,7 @@ public class AzureKeyVaultTransactionSignerFactory {
     return new AzureKeyVaultTransactionSigner(client, kid.toString(), publicKey);
   }
 
-  private TransactionSigner createSigner(final String keyName) {
-    List<KeyItem> keyVersions = client.listKeyVersions(baseUrl, keyName);
-    if (keyVersions.isEmpty()) {
-      LOG.error("No versions of the specified key ({}) exist in the vault ({})", keyName, baseUrl);
-      throw new IllegalArgumentException("No keys of the requested name exist in the vault.");
-    }
-    return createSigner(keyName, keyVersions.get(keyVersions.size() - 1).toString());
+  public static String constructAzureKeyVaultUrl(final String keyVaultName) {
+    return String.format(AZURE_URL_PATTERN, keyVaultName);
   }
 }

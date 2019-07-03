@@ -12,10 +12,9 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import java.io.PrintStream;
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -28,12 +28,13 @@ import java.util.Collection;
 import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
+
   private final int hashicorpVaultPort;
   private final String ipAddress;
   private final String azureKeyVault;
 
-  public TransactionSignerParamsSupplier(final int hashicorpVaultPort, final String ipAddress,
-      final String azureKeyVault) {
+  public TransactionSignerParamsSupplier(
+      final int hashicorpVaultPort, final String ipAddress, final String azureKeyVault) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
     this.azureKeyVault = azureKeyVault;
@@ -49,16 +50,16 @@ public class TransactionSignerParamsSupplier {
       params.add(ipAddress);
       params.add("--port");
       params.add(String.valueOf(hashicorpVaultPort));
-    } else if(azureKeyVault != null) {
+    } else if (azureKeyVault != null) {
       params.add("azure-signer");
       params.add("--keyvault-name");
       params.add(azureKeyVault);
       params.add("--key-name");
       params.add("TestKey");
       params.add("--key-version");
-      params.add("449e655872f145a795f0849828685848");
+      params.add("63242cd20e7144039611d56054feff9e");
       params.add("--client-id");
-      params.add("47efee5c-8079-4b48-96a7-31bb4f2e9ae2");
+      params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
     } else {
@@ -72,7 +73,8 @@ public class TransactionSignerParamsSupplier {
   }
 
   private File createAzureSecretFile() {
-    return createTmpFile("azure_secret", "TW_3Uc/GLDdpLp5*om@MGcdlT29MuP*5".getBytes(UTF_8));
+    return createTmpFile(
+        "azure_secret", System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET").getBytes(UTF_8));
   }
 
   private File createPasswordFile() {
