@@ -39,7 +39,7 @@ public class AzureKeyVaultAuthenticatorTest {
       AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
 
   @BeforeClass
-  public void setup() {
+  public static void setup() {
     System.out.println("ClientID = " + clientID);
     System.out.println("clientSecret = " + clientSecret);
   }
