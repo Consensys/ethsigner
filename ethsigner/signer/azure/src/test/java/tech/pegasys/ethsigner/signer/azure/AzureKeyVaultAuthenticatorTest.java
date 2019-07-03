@@ -15,6 +15,9 @@ package tech.pegasys.ethsigner.signer.azure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.keyvault.KeyIdentifier;
 import com.microsoft.azure.keyvault.KeyVaultClient;
@@ -23,8 +26,6 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 public class AzureKeyVaultAuthenticatorTest {
 
@@ -94,10 +95,7 @@ public class AzureKeyVaultAuthenticatorTest {
             AzureKeyVaultTransactionSignerFactory.INVALID_VAULT_PARAMETERS_ERROR_PATTERN,
             AzureKeyVaultTransactionSignerFactory.constructAzureKeyVaultUrl(vaultName));
 
-    assertThatThrownBy(
-            () ->
-                nonExistentKeyVaultFactory.createSigner(
-                    "TestKey", validKeyVersion))
+    assertThatThrownBy(() -> nonExistentKeyVaultFactory.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(expectedMessage);
   }
@@ -111,8 +109,7 @@ public class AzureKeyVaultAuthenticatorTest {
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
 
-    assertThatThrownBy(
-            () -> validFactory.createSigner("invalid_keyname", validKeyVersion))
+    assertThatThrownBy(() -> validFactory.createSigner("invalid_keyname", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
   }
@@ -124,10 +121,7 @@ public class AzureKeyVaultAuthenticatorTest {
     final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientId =
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidId);
 
-    assertThatThrownBy(
-            () ->
-                factoryWithInvalidClientId.createSigner(
-                    "TestKey", validKeyVersion))
+    assertThatThrownBy(() -> factoryWithInvalidClientId.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
 
@@ -137,30 +131,28 @@ public class AzureKeyVaultAuthenticatorTest {
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidSecret);
 
     assertThatThrownBy(
-            () ->
-                factoryWithInvalidClientSecret.createSigner(
-                    "TestKey", validKeyVersion))
+            () -> factoryWithInvalidClientSecret.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
   }
-/*
-  @Test
-  public void importKeyToAzure() {
-    final String privKeyStr = "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
+  /*
+    @Test
+    public void importKeyToAzure() {
+      final String privKeyStr = "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
 
-    final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
-    final ECKeyPair keyPair = ECKeyPair.create(privKey);
+      final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
+      final ECKeyPair keyPair = ECKeyPair.create(privKey);
 
-    JsonWebKey webKey = new JsonWebKey();
-    webKey.withD(keyPair.getPrivateKey().toByteArray());
-    webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
-    webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
-    webKey.withKty(JsonWebKeyType.EC);
-    webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
-    webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
+      JsonWebKey webKey = new JsonWebKey();
+      webKey.withD(keyPair.getPrivateKey().toByteArray());
+      webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
+      webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
+      webKey.withKty(JsonWebKeyType.EC);
+      webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
+      webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
 
-//    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
-  }
-  */
+  //    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
+    }
+    */
 
 }
