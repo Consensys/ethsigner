@@ -30,10 +30,12 @@ import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
+@Ignore
 public class ValueTransferWithAzureAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";

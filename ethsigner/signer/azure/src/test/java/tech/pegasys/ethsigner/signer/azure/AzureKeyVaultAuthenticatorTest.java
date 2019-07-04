@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import com.microsoft.azure.PagedList;
@@ -26,23 +27,22 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class AzureKeyVaultAuthenticatorTest {
 
   private static final String clientID = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   private static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
 
-  private static final String validKeyVersion = "63242cd20e7144039611d56054feff9e";
+  private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
   private final KeyVaultClient client =
       AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
 
   @BeforeClass
-  public static void setup() {
-    System.out.println("ClientID = " + clientID);
-    System.out.println("clientSecret = " + clientSecret);
-  }
+  public static void setup() {}
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
@@ -63,8 +63,7 @@ public class AzureKeyVaultAuthenticatorTest {
 
     KeyItem keyVersion = keyVersions.get(0);
     assertThat(keyVersion.kid())
-        .isEqualTo(
-            "https://ethsignertestkey.vault.azure.net/keys/TestKey/63242cd20e7144039611d56054feff9e");
+        .isEqualTo("https://ethsignertestkey.vault.azure.net/keys/TestKey/" + validKeyVersion);
 
     kid = new KeyIdentifier(keyVersion.kid());
     assertThat(kid.version()).isEqualTo(validKeyVersion);
@@ -88,7 +87,7 @@ public class AzureKeyVaultAuthenticatorTest {
     assertThat(signer.getAddress()).isEqualTo("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
 
     byte[] data = {1, 2, 3};
-    signer.sign(data);
+    final Signature signature = signer.sign(data);
   }
 
   @Test
@@ -143,23 +142,21 @@ public class AzureKeyVaultAuthenticatorTest {
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
   }
   /*
-    @Test
-    public void importKeyToAzure() {
-      final String privKeyStr = "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
+  @Test
+  public void importKeyToAzure() {
+    final String privKeyStr =
+        "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
 
-      final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
-      final ECKeyPair keyPair = ECKeyPair.create(privKey);
+    final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
+    final ECKeyPair keyPair = ECKeyPair.create(privKey);
 
-      JsonWebKey webKey = new JsonWebKey();
-      webKey.withD(keyPair.getPrivateKey().toByteArray());
-      webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
-      webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
-      webKey.withKty(JsonWebKeyType.EC);
-      webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
-      webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
-
-  //    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
-    }
-    */
-
+    JsonWebKey webKey = new JsonWebKey();
+    webKey.withD(keyPair.getPrivateKey().toByteArray());
+    webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
+    webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
+    webKey.withKty(JsonWebKeyType.EC);
+    webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
+    webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
+    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
+  }*/
 }

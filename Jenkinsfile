@@ -50,31 +50,23 @@ try {
         docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
             docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
-                    stage('Build') {
-                        sh './gradlew --no-daemon --parallel build'
-                    }
-                    stage('Test') {
-                        withCredentials([
-                                usernamePassword(
-                                        credentialsId: 'ethsigner-azure',
-                                        usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
-                                        passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
-                                )
-                        ]) {
+                    withCredentials([
+                            usernamePassword(
+                                    credentialsId: 'ethsigner-azure',
+                                    usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
+                                    passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
+                            )
+                    ]) {
+                        stage('Build') {
+                            sh './gradlew --no-daemon --parallel build -x test'
+                        }
+                        stage('Test') {
                             sh './gradlew --no-daemon --parallel test'
                         }
-                    }
-                    stage('Integration Test') {
-                        sh './gradlew --no-daemon --parallel integrationTest'
-                    }
-                    stage('Acceptance Test') {
-                        withCredentials([
-                                usernamePassword(
-                                        credentialsId: 'ethsigner-azure',
-                                        usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
-                                        passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
-                                )
-                        ]) {
+                        stage('Integration Test') {
+                            sh './gradlew --no-daemon --parallel integrationTest'
+                        }
+                        stage('Acceptance Test') {
                             sh './gradlew --no-daemon --parallel acceptanceTest'
                         }
                     }

@@ -65,15 +65,21 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
     final BigInteger R = new BigInteger(1, Arrays.copyOfRange(signature, 0, 32));
     final BigInteger S = new BigInteger(1, Arrays.copyOfRange(signature, 32, 64));
 
+    // The Azure Signature MAY be in the "top" of the curve, which is illegal in Ethereum
+    // thus it must be transposed to the lower intersection.
+    final ECDSASignature initialSignature = new ECDSASignature(R, S);
+    final ECDSASignature canonicalSignature = initialSignature.toCanonicalised();
+
     // Now we have to work backwards to figure out the recId needed to recover the signature.
-    int recId = recoverKeyIndex(new ECDSASignature(R, S), hash);
+    int recId = recoverKeyIndex(canonicalSignature, hash);
     if (recId == -1) {
       throw new RuntimeException(
           "Could not construct a recoverable key. Are your credentials valid?");
     }
 
     int headerByte = recId + 27;
-    return new Signature(BigInteger.valueOf(headerByte), R, S);
+    return new Signature(
+        BigInteger.valueOf(headerByte), canonicalSignature.r, canonicalSignature.s);
   }
 
   private int recoverKeyIndex(final ECDSASignature sig, final byte[] hash) {
