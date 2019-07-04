@@ -13,6 +13,8 @@
 
 import net.ltgt.gradle.errorprone.CheckSeverity
 
+import java.text.SimpleDateFormat
+
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.17.0'
   id 'com.jfrog.bintray' version '1.8.4'
@@ -357,6 +359,36 @@ distZip {
     delete fileTree(dir: 'build/distributions', include: '*.zip')
   }
 }
+
+// rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
+// simple for use in docker
+tasks.register("dockerDistUntar") {
+  dependsOn distTar
+  def dockerBuildDir = "docker/"
+  def distTarFile = distTar.outputs.files.singleFile
+  def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
+
+  doFirst {
+    new File(dockerBuildDir).mkdir()
+    copy {
+      from tarTree(distTarFile)
+      into(dockerBuildDir)
+    }
+    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/ethsigner")
+  }
+}
+
+task distDocker(type: Exec) {
+  dependsOn dockerDistUntar
+  def image_tag = "develop"
+  def image="pegasyseng/ethsigner:${image_tag}"
+  def dockerBuildDir = "docker/"
+  workingDir "${dockerBuildDir}"
+
+  executable "sh"
+  args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${rootProject.version} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+}
+
 /*
  task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
  additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
@@ -387,6 +419,14 @@ configurations { annotationProcessor }
  }
  }
  */
+
+// http://label-schema.org/rc1/
+// using the RFC3339 format "2016-04-12T23:20:50.52Z"
+def buildTime() {
+  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+  df.setTimeZone(TimeZone.getTimeZone("UTC"))
+  return df.format(new Date())
+}
 
 // Takes the version, and if -SNAPSHOT is part of it replaces SNAPSHOT
 // with the git commit version.
