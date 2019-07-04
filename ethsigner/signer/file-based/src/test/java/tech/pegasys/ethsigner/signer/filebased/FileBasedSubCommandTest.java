@@ -22,7 +22,6 @@ public class FileBasedSubCommandTest {
 
   private static final String PASSWORD_FILE = "/this/is/the/path/to/the/password/file";
   private static final String KEY_FILE = "/this/is/the/path/to/the/key/file";
-
   private FileBasedSubCommand config;
 
   private boolean parseCommand(final String cmdLine) {

@@ -34,6 +34,8 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
+  public FileBasedSubCommand() {}
+
   @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
   @Option(

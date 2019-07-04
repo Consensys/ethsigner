@@ -23,7 +23,6 @@ jar {
   }
 }
 
-
 dependencies {
 
   implementation project(':ethsigner:commandline')
@@ -45,9 +44,4 @@ dependencies {
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-inline:2.13.0'
-
-  integrationTestImplementation 'io.rest-assured:rest-assured'
-  integrationTestImplementation 'org.assertj:assertj-core'
-  integrationTestImplementation 'org.mock-server:mockserver-netty'
-  integrationTestImplementation 'org.mockito:mockito-core'
 }

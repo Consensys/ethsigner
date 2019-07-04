@@ -33,8 +33,6 @@ import picocli.CommandLine.Option;
     mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
 
-  public static final String COMMAND_NAME = "azure-signer";
-
   @Option(
       names = {"--keyvault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
@@ -68,6 +66,7 @@ public class AzureSubCommand extends SignerSubCommand {
   private Path clientSecretPath;
 
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
+  public static final String COMMAND_NAME = "azure-signer";
 
   @Override
   public TransactionSigner createSigner() throws TransactionSignerInitializationException {

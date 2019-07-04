@@ -17,21 +17,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.google.common.io.BaseEncoding;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletUtils;
 
 public class FileBasedTransactionSignerTest {
@@ -99,30 +94,8 @@ public class FileBasedTransactionSignerTest {
   private static File createFile(final String s) throws IOException {
     final Path path = Files.createTempFile("file", ".file");
     Files.write(path, s.getBytes(UTF_8));
-
     final File file = path.toFile();
     file.deleteOnExit();
     return file;
-  }
-
-  @Test
-  public void web3jSigningOutputs() {
-    final String privKeyStr =
-        "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
-
-    final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
-    final ECKeyPair keyPair = ECKeyPair.create(privKey);
-
-    Credentials creds = Credentials.create(keyPair);
-
-    CredentialTransactionSigner signer = new CredentialTransactionSigner(creds);
-
-    byte[] data = {1, 2, 3};
-    final Signature signature1 = signer.sign(data);
-    final Signature signature2 = signer.sign(data);
-    final Signature signature3 = signer.sign(data);
-
-    assertThat(signature1).isEqualToComparingFieldByField(signature2);
-    assertThat(signature2).isEqualToComparingFieldByField(signature3);
   }
 }

@@ -42,7 +42,6 @@ public abstract class SignerSubCommand implements Runnable {
     final TransactionSigner transactionSigner = createSigner();
 
     final EthSigner signer = new EthSigner(config, transactionSigner);
-
     signer.run();
   }
 }

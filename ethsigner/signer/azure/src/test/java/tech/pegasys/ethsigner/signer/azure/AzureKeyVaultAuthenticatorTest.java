@@ -141,22 +141,4 @@ public class AzureKeyVaultAuthenticatorTest {
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
   }
-  /*
-  @Test
-  public void importKeyToAzure() {
-    final String privKeyStr =
-        "8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63".toUpperCase();
-
-    final BigInteger privKey = new BigInteger(1, BaseEncoding.base16().decode(privKeyStr));
-    final ECKeyPair keyPair = ECKeyPair.create(privKey);
-
-    JsonWebKey webKey = new JsonWebKey();
-    webKey.withD(keyPair.getPrivateKey().toByteArray());
-    webKey.withX(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 0, 32));
-    webKey.withY(Arrays.copyOfRange(keyPair.getPublicKey().toByteArray(), 32, 64));
-    webKey.withKty(JsonWebKeyType.EC);
-    webKey.withCrv(new JsonWebKeyCurveName("SECP256K1"));
-    webKey.withKeyOps(Lists.newArrayList(JsonWebKeyOperation.SIGN, JsonWebKeyOperation.VERIFY));
-    client.importKey("https://ethsignertestkey.vault.azure.net", "TestKey", webKey);
-  }*/
 }
