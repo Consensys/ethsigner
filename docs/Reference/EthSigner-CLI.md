@@ -74,7 +74,7 @@ Timeout period (in milliseconds) for downstream requests. Default is 5000.
 ```
 
 ```bash tab="Example"
---downstream-http-request-timeout=10
+--downstream-http-request-timeout=3000
 ```
 
 ### http-listen-host
@@ -217,5 +217,5 @@ Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 1
 ```
 
 ```bash tab="Example"
---timeout=5
+--timeout=5000
 ```
