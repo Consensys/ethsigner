@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -32,7 +33,7 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final KeyVaultClient client;
+  private final KeyVaultClientCustom client;
   private final String keyId;
   private final BigInteger publicKey;
   private final String address;
@@ -40,7 +41,7 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
       new JsonWebKeySignatureAlgorithm("ECDSA256");
 
   public AzureKeyVaultTransactionSigner(
-      final KeyVaultClient client, final String keyId, final BigInteger publicKey) {
+      final KeyVaultClientCustom client, final String keyId, final BigInteger publicKey) {
     this.client = client;
     this.keyId = keyId;
     this.publicKey = publicKey;

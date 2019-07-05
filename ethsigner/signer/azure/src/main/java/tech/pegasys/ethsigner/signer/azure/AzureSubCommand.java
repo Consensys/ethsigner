@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -77,7 +78,7 @@ public class AzureSubCommand extends SignerSubCommand {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
 
-    final KeyVaultClient client =
+    final KeyVaultClientCustom client =
         AzureKeyVaultAuthenticator.getAuthenticatedClient(clientId, clientSecret);
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory(keyvaultName, client);

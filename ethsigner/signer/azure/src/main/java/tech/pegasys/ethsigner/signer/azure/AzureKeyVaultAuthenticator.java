@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
+import com.microsoft.azure.keyvault.implementation.KeyVaultClientCustomImpl;
 import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -36,14 +38,14 @@ public class AzureKeyVaultAuthenticator {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  public static KeyVaultClient getAuthenticatedClient(
+  public KeyVaultClientCustom getAuthenticatedClient(
       final String clientId, final String clientSecret) {
     // Creates the KeyVaultClient using the created credentials.
     return new KeyVaultClient(createCredentials(clientId, clientSecret));
   }
 
   /** Creates a new KeyVaultCredential based on the access token obtained. */
-  private static ServiceClientCredentials createCredentials(
+  private ServiceClientCredentials createCredentials(
       final String clientId, final String clientSecret) {
     return new KeyVaultCredentials() {
 
@@ -70,7 +72,7 @@ public class AzureKeyVaultAuthenticator {
    * Private helper method that gets the access token for the authorization and resource depending
    * on which variables are supplied in the environment.
    */
-  private static AuthenticationResult getAccessToken(
+  private AuthenticationResult getAccessToken(
       final String authorization,
       final String resource,
       final String clientId,

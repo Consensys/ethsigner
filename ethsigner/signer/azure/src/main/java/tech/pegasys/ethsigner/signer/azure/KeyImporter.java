@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -33,7 +34,7 @@ public class KeyImporter {
     final String keyVaultName = "ethsignertestkey";
     final String keyName = "TestKey";
 
-    final KeyVaultClient client =
+    final KeyVaultClientCustom client =
         AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
 
     final String privKeyStr =

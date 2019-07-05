@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
+import com.microsoft.azure.keyvault.implementation.KeyVaultClientCustomImpl;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -41,11 +43,11 @@ public class AzureKeyVaultTransactionSignerFactory {
 
   private static final String AZURE_URL_PATTERN = "https://%s.vault.azure.net";
 
-  private final KeyVaultClient client;
+  private final KeyVaultClientCustom client;
   private final String baseUrl;
 
   public AzureKeyVaultTransactionSignerFactory(
-      final String keyVaultName, final KeyVaultClient client) {
+      final String keyVaultName, final KeyVaultClientCustom client) {
     this.client = client;
     this.baseUrl = constructAzureKeyVaultUrl(keyVaultName);
   }
