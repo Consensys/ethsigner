@@ -357,23 +357,22 @@ distZip {
     delete fileTree(dir: 'build/distributions', include: '*.zip')
   }
 }
-/*
- task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
- additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
- sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
- classDirectories.from files(subprojects.sourceSets.main.output)
- executionData.from files(subprojects.jacocoTestReport.executionData) //how to exclude some package/classes com.test.**
- reports {
- xml.enabled true
- csv.enabled true
- html.destination file("build/reports/jacocoHtml")
- }
- onlyIf = { true }
- doFirst {
- executionData = files(executionData.findAll { it.exists() })
- }
- }
- */
+
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+  additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+  sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+  classDirectories.from files(subprojects.sourceSets.main.output)
+  executionData.from files(subprojects.jacocoTestReport.executionData) //how to exclude some package/classes com.test.**
+  reports {
+    xml.enabled true
+    csv.enabled true
+    html.destination file("build/reports/jacocoHtml")
+  }
+  onlyIf = { true }
+  doFirst {
+    executionData = files(executionData.findAll { it.exists() })
+  }
+}
 
 configurations { annotationProcessor }
 
