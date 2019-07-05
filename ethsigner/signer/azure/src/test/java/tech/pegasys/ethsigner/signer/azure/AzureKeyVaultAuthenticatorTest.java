@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import com.microsoft.azure.PagedList;
@@ -84,7 +83,7 @@ public class AzureKeyVaultAuthenticatorTest {
     assertThat(signer.getAddress()).isEqualTo("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
 
     byte[] data = {1, 2, 3};
-    final Signature signature = signer.sign(data);
+    assertThat(signer.sign(data)).isNotNull();
   }
 
   @Test
