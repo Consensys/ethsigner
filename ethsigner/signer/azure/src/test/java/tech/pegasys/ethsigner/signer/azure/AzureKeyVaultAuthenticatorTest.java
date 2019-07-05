@@ -15,37 +15,37 @@ package tech.pegasys.ethsigner.signer.azure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.keyvault.KeyIdentifier;
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
-import com.microsoft.azure.keyvault.implementation.KeyVaultClientCustomImpl;
-import com.microsoft.azure.keyvault.models.KeyBundle;
-import com.microsoft.azure.keyvault.models.KeyItem;
-import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
-import org.apache.commons.codec.binary.Hex;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+import com.microsoft.azure.PagedList;
+import com.microsoft.azure.keyvault.KeyIdentifier;
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
+import com.microsoft.azure.keyvault.models.KeyBundle;
+import com.microsoft.azure.keyvault.models.KeyItem;
+import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
+import org.apache.commons.codec.binary.Hex;
+import org.junit.Ignore;
+import org.junit.Test;
+
 @Ignore
 public class AzureKeyVaultAuthenticatorTest {
 
-  private static final String clientID = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
+  private static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   private static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
 
   private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
+  private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
   private final KeyVaultClientCustom client =
-      AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, clientSecret);
+      authenticator.getAuthenticatedClient(clientId, clientSecret);
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
     assertThat(client.apiVersion()).isEqualTo("7.0");
 
-    PagedList<KeyItem> keys = client.listKeys("https://ethsignertestkey.vault.azure.net");
+    final PagedList<KeyItem> keys = client.listKeys("https://ethsignertestkey.vault.azure.net");
     assertThat(keys.size()).isEqualTo(1);
 
     final KeyItem keyItem = keys.get(0);
@@ -120,7 +120,7 @@ public class AzureKeyVaultAuthenticatorTest {
   @Test
   public void invalidClientCredentialsResultInException() {
     final KeyVaultClientCustom clientWithInvalidId =
-        AzureKeyVaultAuthenticator.getAuthenticatedClient("Invalid_id", clientSecret);
+        authenticator.getAuthenticatedClient("Invalid_id", clientSecret);
     final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientId =
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidId);
 
@@ -129,7 +129,7 @@ public class AzureKeyVaultAuthenticatorTest {
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
 
     final KeyVaultClientCustom clientWithInvalidSecret =
-        AzureKeyVaultAuthenticator.getAuthenticatedClient(clientID, "invalid_secret");
+        authenticator.getAuthenticatedClient(clientId, "invalid_secret");
     final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientSecret =
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidSecret);
 

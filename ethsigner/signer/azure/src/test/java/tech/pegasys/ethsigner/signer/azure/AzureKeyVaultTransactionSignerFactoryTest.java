@@ -41,9 +41,9 @@ public class AzureKeyVaultTransactionSignerFactoryTest {
 
     final String keyName = "keyName";
     final String keyVersion = "keyVersion";
-    KeyVaultClient mockClient = mock(KeyVaultClient.class);
-    KeyBundle mockKeyBundle = mock(KeyBundle.class);
-    JsonWebKey mockWebKey = mock(JsonWebKey.class);
+    final KeyVaultClient mockClient = mock(KeyVaultClient.class);
+    final KeyBundle mockKeyBundle = mock(KeyBundle.class);
+    final JsonWebKey mockWebKey = mock(JsonWebKey.class);
     when(mockWebKey.x())
         .thenReturn(Arrays.copyOfRange(web3jKeyPair.getPublicKey().toByteArray(), 0, 32));
     when(mockWebKey.y())

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -22,11 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.base.Charsets;
-import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-/** Hashicorp vault related sub-command */
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
     description =
@@ -78,8 +76,9 @@ public class AzureSubCommand extends SignerSubCommand {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
 
+    final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
     final KeyVaultClientCustom client =
-        AzureKeyVaultAuthenticator.getAuthenticatedClient(clientId, clientSecret);
+        authenticator.getAuthenticatedClient(clientId, clientSecret);
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory(keyvaultName, client);
     return factory.createSigner(keyName, keyVersion);

@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
-import com.microsoft.azure.keyvault.implementation.KeyVaultClientCustomImpl;
 import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,27 +22,21 @@ import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
 import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Authenticates to Azure Key Vault by providing a callback to authenticate using adal.
- *
- * @author tifchen
- */
 public class AzureKeyVaultAuthenticator {
 
   private static final Logger LOG = LogManager.getLogger();
 
   public KeyVaultClientCustom getAuthenticatedClient(
       final String clientId, final String clientSecret) {
-    // Creates the KeyVaultClient using the created credentials.
     return new KeyVaultClient(createCredentials(clientId, clientSecret));
   }
 
-  /** Creates a new KeyVaultCredential based on the access token obtained. */
   private ServiceClientCredentials createCredentials(
       final String clientId, final String clientSecret) {
     return new KeyVaultCredentials() {

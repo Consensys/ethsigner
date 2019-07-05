@@ -14,8 +14,6 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
-import com.microsoft.azure.keyvault.implementation.KeyVaultClientCustomImpl;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
@@ -24,7 +22,7 @@ import java.net.UnknownHostException;
 
 import com.google.common.primitives.Bytes;
 import com.microsoft.azure.keyvault.KeyIdentifier;
-import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import com.microsoft.azure.keyvault.models.KeyVaultErrorException;
 import com.microsoft.azure.keyvault.webkey.JsonWebKey;
 import org.apache.logging.log4j.LogManager;

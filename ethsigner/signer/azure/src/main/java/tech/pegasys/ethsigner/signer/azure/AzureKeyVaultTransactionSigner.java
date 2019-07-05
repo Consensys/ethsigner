@@ -12,14 +12,13 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import com.microsoft.azure.keyvault.KeyVaultClient;
+import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import com.microsoft.azure.keyvault.models.KeyOperationResult;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeySignatureAlgorithm;
 import org.apache.logging.log4j.LogManager;
