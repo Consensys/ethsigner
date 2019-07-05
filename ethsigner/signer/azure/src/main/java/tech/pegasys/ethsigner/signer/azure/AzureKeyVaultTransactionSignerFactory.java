@@ -69,7 +69,7 @@ public class AzureKeyVaultTransactionSignerFactory {
         throw new TransactionSignerInitializationException(INVALID_KEY_PARAMETERS_ERROR, ex);
       }
     } catch (final RuntimeException ex) {
-      String errorMsg;
+      final String errorMsg;
       if (ex.getCause() instanceof UnknownHostException) {
         errorMsg = String.format(INVALID_VAULT_PARAMETERS_ERROR_PATTERN, baseUrl);
       } else {

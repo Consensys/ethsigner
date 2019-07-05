@@ -71,13 +71,13 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
     final ECDSASignature canonicalSignature = initialSignature.toCanonicalised();
 
     // Now we have to work backwards to figure out the recId needed to recover the signature.
-    int recId = recoverKeyIndex(canonicalSignature, hash);
+    final int recId = recoverKeyIndex(canonicalSignature, hash);
     if (recId == -1) {
       throw new RuntimeException(
           "Could not construct a recoverable key. Are your credentials valid?");
     }
 
-    int headerByte = recId + 27;
+    final int headerByte = recId + 27;
     return new Signature(
         BigInteger.valueOf(headerByte), canonicalSignature.r, canonicalSignature.s);
   }
