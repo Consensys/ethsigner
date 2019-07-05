@@ -364,7 +364,8 @@ distZip {
 // simple for use in docker
 tasks.register("dockerDistUntar") {
   dependsOn distTar
-  def dockerBuildDir = "docker/"
+  dependsOn distZip
+  def dockerBuildDir = "build/docker-ethsigner/"
   def distTarFile = distTar.outputs.files.singleFile
   def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
 
@@ -382,8 +383,15 @@ task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def image_tag = "develop"
   def image="pegasyseng/ethsigner:${image_tag}"
-  def dockerBuildDir = "docker/"
+  def dockerBuildDir = "build/docker-ethsigner/"
   workingDir "${dockerBuildDir}"
+
+  doFirst {
+    copy {
+      from file("${projectDir}/docker/Dockerfile")
+      into(workingDir)
+    }
+  }
 
   executable "sh"
   args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${rootProject.version} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
