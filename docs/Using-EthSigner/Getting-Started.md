@@ -1,9 +1,13 @@
-description: Getting Started with EthSigner
+description: Getting started with EthSigner
 <!--- END of page meta data -->
 
 # Getting Started 
 
-EthSigner requires a V3 Keystore key file and a password file. 
+For file-based signing, EthSigner requires a V3 Keystore key file and a password file.
+
+!!! tip 
+    EthSigner also supports signing transactions with a key stored in an external vault (for example, 
+    [Hashicorp Vault](Hashicorp.md)).  
 
 ## Prerequisites 
 
@@ -97,7 +101,7 @@ Start EthSigner with options specified as follows:
 
 !!! example
     ```
-    ethsigner --chain-id=2018 --downstream-http-port=8590 --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
+    ethsigner --chain-id=2018 --downstream-http-port=8590 file-based-signer --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
     ```
 
 ## Confirm EthSigner is Up
