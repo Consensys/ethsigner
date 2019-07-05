@@ -8,8 +8,6 @@ WORKDIR /opt/ethsigner
 # 8545 HTTP JSON-RPC
 EXPOSE 8545
 
-ENV ETHSIGNER_OPTS="-Dethsigner.docker=true"
-
 ENTRYPOINT ["/opt/ethsigner/bin/ethsigner"]
 
 # Build-time metadata as defined at http://label-schema.org
