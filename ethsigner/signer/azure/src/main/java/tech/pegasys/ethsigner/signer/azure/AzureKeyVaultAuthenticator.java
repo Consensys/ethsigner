@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+
 import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,14 +33,16 @@ import org.apache.logging.log4j.Logger;
 public class AzureKeyVaultAuthenticator {
 
   private static final Logger LOG = LogManager.getLogger();
+  public static final String AUTHENTICATION_FAILURE_MESSAGE =
+      "Failed to get token from Azure vault";
 
   public KeyVaultClientCustom getAuthenticatedClient(
       final String clientId, final String clientSecret) {
-    return new KeyVaultClient(createCredentials(clientId, clientSecret));
+    final ClientCredential credentials = new ClientCredential(clientId, clientSecret);
+    return new KeyVaultClient(createKeyVaultClient(credentials));
   }
 
-  private ServiceClientCredentials createCredentials(
-      final String clientId, final String clientSecret) {
+  private ServiceClientCredentials createKeyVaultClient(final ClientCredential credentials) {
     return new KeyVaultCredentials() {
 
       // Callback that supplies the token type and access token on request.
@@ -47,15 +51,14 @@ public class AzureKeyVaultAuthenticator {
       public String doAuthenticate(
           final String authorization, final String resource, final String scope) {
 
-        final AuthenticationResult authResult;
         try {
-          authResult = getAccessToken(authorization, resource, clientId, clientSecret);
+          final AuthenticationResult authResult =
+              getAccessToken(authorization, resource, credentials);
           return authResult.getAccessToken();
         } catch (final Exception e) {
-          LOG.error("Failed to get token from Azure vault", e);
-          e.printStackTrace();
+          LOG.error(AUTHENTICATION_FAILURE_MESSAGE, e);
+          throw new TransactionSignerInitializationException(AUTHENTICATION_FAILURE_MESSAGE, e);
         }
-        return "";
       }
     };
   }
@@ -65,29 +68,17 @@ public class AzureKeyVaultAuthenticator {
    * on which variables are supplied in the environment.
    */
   private AuthenticationResult getAccessToken(
-      final String authorization,
-      final String resource,
-      final String clientId,
-      final String clientSecret)
+      final String authorization, final String resource, final ClientCredential credentials)
       throws InterruptedException, ExecutionException, MalformedURLException {
 
     AuthenticationResult result = null;
 
     // Starts a service to fetch access token.
-    ExecutorService service = null;
+    final ExecutorService service = Executors.newFixedThreadPool(1);
     try {
-      service = Executors.newFixedThreadPool(1);
       final AuthenticationContext context =
           new AuthenticationContext(authorization, false, service);
-
-      Future<AuthenticationResult> future = null;
-
-      // Acquires token based on client ID and client secret.
-      if (clientId != null && clientSecret != null) {
-        final ClientCredential credentials = new ClientCredential(clientId, clientSecret);
-        future = context.acquireToken(resource, credentials, null);
-      }
-
+      final Future<AuthenticationResult> future = context.acquireToken(resource, credentials, null);
       result = future.get();
     } finally {
       service.shutdown();

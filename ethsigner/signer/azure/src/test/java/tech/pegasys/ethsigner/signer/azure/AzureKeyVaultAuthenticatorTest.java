@@ -138,4 +138,10 @@ public class AzureKeyVaultAuthenticatorTest {
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
   }
+
+  @Test
+  public void nullClientAndOrSecretAreHandledCleanly() {
+    assertThatThrownBy(() -> authenticator.getAuthenticatedClient(null, null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
 }
