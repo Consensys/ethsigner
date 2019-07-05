@@ -62,6 +62,53 @@ try {
                     stage('Acceptance Test') {
                         sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
+                    {
+                        def stage_name = 'Docker image node: '
+                        def image = imageRepos + '/pantheon-kubernetes:' + imageTag
+                        def kubernetes_folder = 'docker'
+                        def version_property_file = 'gradle.properties'
+                        def reports_folder = kubernetes_folder + '/reports'
+                        def dockerfile = kubernetes_folder + '/Dockerfile'
+
+                        stage(stage_name + 'Dockerfile lint') {
+                            sh "docker run --rm -i hadolint/hadolint < ${dockerfile}"
+                        }
+
+                        stage(stage_name + 'Build image') {
+                            sh './gradlew distDocker'
+                        }
+
+                        stage(stage_name + "Test image labels") {
+                            shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+                            version = sh(returnStdout: true, script: "grep -oE \"version=(.*)\" ${version_property_file} | cut -d= -f2").trim()
+                            sh "docker image inspect \
+    --format='{{index .Config.Labels \"org.label-schema.vcs-ref\"}}' \
+    ${image} \
+    | grep ${shortCommit}"
+                            sh "docker image inspect \
+    --format='{{index .Config.Labels \"org.label-schema.version\"}}' \
+    ${image} \
+    | grep ${version}"
+                        }
+
+                        try {
+                            stage(stage_name + 'Test image') {
+                                sh "mkdir -p ${reports_folder}"
+                                sh "cd ${kubernetes_folder} && bash test.sh ${image}"
+                            }
+                        } finally {
+                            junit "${reports_folder}/*.xml"
+                            sh "rm -rf ${reports_folder}"
+                        }
+
+                        if (env.BRANCH_NAME == "master") {
+                            stage(stage_name + 'Push image') {
+                                docker.withRegistry(registry, userAccount) {
+                                    docker.image(image).push()
+                                }
+                            }
+                        }
+                    }
                 } finally {
                     archiveArtifacts '**/build/reports/**'
                     archiveArtifacts '**/build/test-results/**'
