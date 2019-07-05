@@ -14,9 +14,13 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.web3j.crypto.Keys.getAddress;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+
+import java.math.BigInteger;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.keyvault.KeyIdentifier;
@@ -27,6 +31,9 @@ import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.web3j.crypto.ECDSASignature;
+import org.web3j.crypto.Hash;
+import org.web3j.crypto.Sign;
 
 @Ignore
 public class AzureKeyVaultAuthenticatorTest {
@@ -75,15 +82,26 @@ public class AzureKeyVaultAuthenticatorTest {
 
   @Test
   public void ensureCanFindKeysAndSign() {
+    final String EXPECTED_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", client);
 
     final TransactionSigner signer = factory.createSigner("TestKey", validKeyVersion);
-    assertThat(signer.getAddress()).isEqualTo("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73");
+    assertThat(signer.getAddress()).isEqualTo(EXPECTED_ADDRESS);
 
     byte[] data = {1, 2, 3};
-    assertThat(signer.sign(data)).isNotNull();
+    final Signature signature = signer.sign(data);
+    assertThat(signature).isNotNull();
+
+    byte[] dataHash = Hash.sha3(data);
+    final BigInteger publicKey =
+        Sign.recoverFromSignature(
+            signature.getV().intValue() - 27,
+            new ECDSASignature(signature.getR(), signature.getS()),
+            dataHash);
+
+    assertThat("0x" + getAddress(publicKey)).isEqualTo(signer.getAddress());
   }
 
   @Test
