@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -11,9 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-
 jar {
-  baseName 'ethsigner'
+  baseName 'ethsigner-signer-azure'
   manifest {
     attributes(
       'Specification-Title': baseName,
@@ -24,19 +23,25 @@ jar {
   }
 }
 
-
 dependencies {
 
-  implementation project(':ethsigner:core')
-  implementation project(':ethsigner:signing-api')
-  implementation project(':ethsigner:signer:hashicorp')
-  implementation project(':ethsigner:signer:file-based')
-  implementation project(':ethsigner:signer:azure')
   implementation project(':ethsigner:commandline')
+  implementation project(':ethsigner:signing-api')
 
+  implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
 
   implementation 'org.apache.logging.log4j:log4j-api'
   runtime 'org.apache.logging.log4j:log4j-core'
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
+
+  implementation 'org.web3j:core'
+
+  implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
+  implementation 'com.microsoft.aad:adal4j:0.0.2'
+
+  testImplementation 'junit:junit'
+  testImplementation 'org.assertj:assertj-core'
+  testImplementation 'org.mockito:mockito-core'
+  testImplementation 'org.mockito:mockito-inline:2.13.0'
 }
