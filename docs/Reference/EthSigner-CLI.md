@@ -3,7 +3,17 @@ description: EthSigner command line interface reference
 
 # EthSigner Command Line
 
-This reference describes the syntax of the EthSigner Command Line Interface (CLI) options.
+This reference describes the syntax of the EthSigner Command Line Interface (CLI) options. EthSigner 
+signs transaction with a key stored in an encrypted file or an external vault (for example, Hashicorp): 
+
+* `ethsigner [Options] file-based-signer [File Options]`
+* `ethsigner [Options] hashicorp-signer [Hashicorp Options]`
+
+!!! tip
+    To view the command line help for the subcommands: 
+    
+    * `ethsigner help file-based-signer`
+    * `ethsigner help hashicorp-signer` 
 
 ## Options
 
@@ -17,6 +27,18 @@ Chain ID of the network to receive the signed transactions.
 
 ```bash tab="Example"
 --chain-id=2017
+```
+
+### data-path
+
+Directory in which to store temporary files.  
+
+```bash tab="Syntax"
+--data-path=<PATH>
+```
+
+```bash tab="Example"
+--data-path=/Users/me/my_node/data
 ```
 
 ### downstream-http-host
@@ -59,13 +81,11 @@ Timeout period (in milliseconds) for downstream requests. Default is 5000.
 
 Host on which JSON-RPC HTTP listens. Default is `localhost`. 
 
-#### Syntax 
-```
+```bash tab="Syntax"
 --http-listen-host=<httpListenHost>
 ```
 
-#### Example 
-```
+```bash tab="Example"
 --http-listen-host=8.8.8.8
 ```
 
@@ -80,6 +100,37 @@ Port on which JSON-RPC HTTP listens. Default is 8545.
 ```bash tab="Example"
 --http-lisentport=6174
 ```
+
+### logging
+
+Logging verbosity levels. Options are: `OFF`, `FATAL`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. 
+Default is `INFO`.  
+
+```bash tab="Syntax"
+-l, --logging=<LOG VERBOSITY LEVEL>
+```
+
+```bash tab="Example"
+--logging=DEBUG
+```
+
+### help
+
+Displays the help and exits.  
+
+```bash tab="Syntax"
+-h, --help
+```
+
+### version
+
+Displays the version and exits.  
+
+```bash tab="Syntax"
+-V, --version
+```
+
+## File Options 
 
 ### key-file
 
@@ -105,31 +156,66 @@ File containing password for the [key with which transactions are signed](../Usi
 --password-file=/Users/me/my_node/password
 ```
 
-### logging
+## Hashicorp Options 
 
-Logging verbosity levels. Options are: `OFF`, `FATAL`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`. The 
-default is `INFO`.  
+### auth-file
+
+File containing authentication data for Hashicorp Vault. The authentication data is the [root token displayed by
+the Hashicorp Vault server](../Using-EthSigner/Hashicorp.md#storing-private-key-in-hashcorp-vault). 
 
 ```bash tab="Syntax"
--l, --logging=<LOG VERBOSITY LEVEL>
+--auth-file=<authFile>
 ```
 
 ```bash tab="Example"
---logging=DEBUG
+--auth-file=/Users/me/my_node/auth_file
 ```
 
-### help
+### host
 
-Displays the help and exits.  
+Host of the Hashicorp Vault server. Default is `localhost`. 
 
 ```bash tab="Syntax"
--h, --help
+--host=<serverHost>
 ```
 
-### version
+```bash tab="Example"
+--host="http://host.com"
+```
 
-Displays the version and exits.  
+### port
+
+Port of the Hashicorp Vault server. Default is 8200. 
 
 ```bash tab="Syntax"
--V, --version
+--port=<serverPort>
+```
+
+```bash tab="Example"
+--port=23000
+```
+
+### signing-key-path
+
+Path to secret in the Hashicorp Vault containing the private key for signing transactions. Default is
+` /secret/data/ethsignerSigningKey`. 
+
+```bash tab="Syntax"
+--signing-key-path=<signingKeyPath>
+```
+
+```bash tab="Example"
+--signing-key-path=/my_secret/ethsignerSigningKey
+```
+
+### timeout
+
+Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 10000. 
+
+```bash tab="Syntax"
+--timeout=<timeout>
+```
+
+```bash tab="Example"
+--timeout=5000
 ```

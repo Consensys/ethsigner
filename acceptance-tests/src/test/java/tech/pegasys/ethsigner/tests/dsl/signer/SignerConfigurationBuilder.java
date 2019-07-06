@@ -23,6 +23,7 @@ public class SignerConfigurationBuilder {
   private int webSocketPort;
   private int hashicorpVaultPort;
   private String ipAddress;
+  private String keyVaultName;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -44,9 +45,14 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withAzureKeyVault(final String keyVaultName) {
+    this.keyVaultName = keyVaultName;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress);
+        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress, keyVaultName);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }

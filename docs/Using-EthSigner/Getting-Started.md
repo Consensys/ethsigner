@@ -1,9 +1,13 @@
-description: Getting Started with EthSigner
+description: Getting started with EthSigner
 <!--- END of page meta data -->
 
 # Getting Started 
 
-EthSigner requires a V3 Keystore key file and a password file. 
+For file-based signing, EthSigner requires a V3 Keystore key file and a password file.
+
+!!! tip 
+    EthSigner also supports signing transactions with a key stored in an external vault (for example, 
+    [Hashicorp Vault](Hashicorp.md)).  
 
 ## Prerequisites 
 
@@ -31,14 +35,14 @@ option set to `8590`.
 
 Create a text file containing the password for the V3 Keystore key file to be created (for example, `passwordFile`). 
 
-!!! attention "The password text file must not contain any other character than those used in your password"
-    EthSigner will read password file as binary and any character in it will be considered being part
+!!! attention "Password text file must not contain characters other than those used in your password"
+    EthSigner reads the password file as binary and any character in the file is considered part
     of your password.
     
-    _Some POSIX compliant editors automatically add an end-of-line in text files but this must not be
-    the case in this file or the end-of-line will be treated as a character of your password._
+    _Some POSIX compliant editors automatically add an end-of-line in text files. If your editor adds an
+    end-of-line character, the end-of-line is considered part of your password._
     
-    Use the following command to safely make sure that the password file is correct :
+    Use the following command to ensure the password file is correct:
     ```bash
     echo -n "Type your password:";read -s password;echo -ne $password > passwordFile;
     ```
@@ -97,7 +101,7 @@ Start EthSigner with options specified as follows:
 
 !!! example
     ```
-    ethsigner --chain-id=2018 --downstream-http-port=8590 --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
+    ethsigner --chain-id=2018 --downstream-http-port=8590 file-based-signer --key-file=/mydirectory/keyFile --password-file=/mydirectory/passwordFile
     ```
 
 ## Confirm EthSigner is Up
