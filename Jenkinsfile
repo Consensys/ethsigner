@@ -56,7 +56,7 @@ try {
     node {
         checkout scm
         docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
-            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+            docker.image('pegasyseng/pantheon-build:0.0.5-jdk11').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
                     stage('Build') {
                         sh './gradlew --no-daemon --parallel build'
@@ -71,7 +71,7 @@ try {
                         sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
                     stage('Docker') {
-                        def image = imageRepos + '/pantheon-kubernetes:' + imageTag
+                        def image = imageRepos + '/ethsigner:' + imageTag
                         def docker_folder = 'docker'
                         def version_property_file = 'gradle.properties'
                         def reports_folder = docker_folder + '/reports'
