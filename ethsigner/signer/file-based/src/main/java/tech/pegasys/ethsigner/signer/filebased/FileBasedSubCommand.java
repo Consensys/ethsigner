@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.signer.filebased;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.nio.file.Path;
@@ -53,7 +54,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   private Path keyFilePath;
 
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
   }
 

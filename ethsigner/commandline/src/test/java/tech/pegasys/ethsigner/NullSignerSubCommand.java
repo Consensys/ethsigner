@@ -29,8 +29,17 @@ public class NullSignerSubCommand extends SignerSubCommand {
   @Option(names = "--the-data", description = "Some data required for this subcommand", arity = "1")
   private Integer downstreamHttpPort;
 
+  private boolean shouldThrow = false;
+  public static final String ERROR_MSG = "Null Signer Failed";
+
+  public NullSignerSubCommand() {}
+
+  public NullSignerSubCommand(boolean shouldThrow) {
+    this.shouldThrow = shouldThrow;
+  }
+
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return null;
   }
 
@@ -40,5 +49,9 @@ public class NullSignerSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public void run() {}
+  public void run() {
+    if (shouldThrow) {
+      throw new TransactionSignerInitializationException(ERROR_MSG);
+    }
+  }
 }

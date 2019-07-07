@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
 import java.nio.file.Path;
@@ -74,7 +75,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @Override
-  public TransactionSigner createSigner() {
+  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return HashicorpSignerFactory.createSigner(
         signingKeyPath, serverPort, serverHost, authFilePath, timeout);
   }

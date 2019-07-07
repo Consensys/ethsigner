@@ -360,6 +360,22 @@ distZip {
   }
 }
 
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+  additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+  sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+  classDirectories.from files(subprojects.sourceSets.main.output)
+  executionData.from files(subprojects.jacocoTestReport.executionData) //how to exclude some package/classes com.test.**
+  reports {
+    xml.enabled true
+    csv.enabled true
+    html.destination file("build/reports/jacocoHtml")
+  }
+  onlyIf = { true }
+  doFirst {
+    executionData = files(executionData.findAll { it.exists() })
+  }
+}
+
 // rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
 // simple for use in docker
 tasks.register("dockerDistUntar") {
