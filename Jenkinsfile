@@ -101,6 +101,7 @@ try {
                             sh "rm -rf ${reports_folder}"
                         }
 
+                        // push image
                         if (env.BRANCH_NAME == "master") {
                             docker.withRegistry(registry, userAccount) {
                                 docker.image(image).push()
