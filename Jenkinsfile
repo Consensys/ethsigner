@@ -101,11 +101,11 @@ try {
                             sh "rm -rf ${reports_folder}"
                         }
 
-//                        if (env.BRANCH_NAME == "master") {
+                        if (env.BRANCH_NAME == "master") {
                             docker.withRegistry(registry, userAccount) {
                                 docker.image(image).push()
                             }
-//                        }
+                        }
                     }
                 } finally {
                     archiveArtifacts '**/build/reports/**'
