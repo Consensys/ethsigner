@@ -57,10 +57,10 @@ try {
                     )
                 ]) {
                     try {
-                        stage('Azure Test') {
+                        stage('Test') {
                             sh './gradlew --no-daemon --parallel :ethsigner:signer:azure:test'
                         }
-                        stage('Azure Acceptance Test') {
+                        stage('Acceptance Test') {
                             sh './gradlew --no-daemon --parallel acceptanceTest --tests *Azure*'
                         }
                     } finally {
