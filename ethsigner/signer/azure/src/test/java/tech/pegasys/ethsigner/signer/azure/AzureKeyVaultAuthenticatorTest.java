@@ -29,13 +29,13 @@ import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Ignore;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 
-@Ignore
 public class AzureKeyVaultAuthenticatorTest {
 
   private static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
@@ -44,8 +44,15 @@ public class AzureKeyVaultAuthenticatorTest {
   private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
   private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-  private final KeyVaultClientCustom client =
-      authenticator.getAuthenticatedClient(clientId, clientSecret);
+  private KeyVaultClientCustom client;
+
+  @Before
+  public void checkAzureEnvSetup() {
+    Assume.assumeTrue(
+        "Ensure Azure client id and client secret env variables are set",
+        clientId != null && clientSecret != null);
+    client = authenticator.getAuthenticatedClient(clientId, clientSecret);
+  }
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
