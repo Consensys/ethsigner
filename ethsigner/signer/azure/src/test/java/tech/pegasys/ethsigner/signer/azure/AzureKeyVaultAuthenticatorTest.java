@@ -30,7 +30,7 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Assume;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Hash;
@@ -44,14 +44,14 @@ public class AzureKeyVaultAuthenticatorTest {
   private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
   private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-  private KeyVaultClientCustom client;
+  private final KeyVaultClientCustom client =
+      authenticator.getAuthenticatedClient(clientId, clientSecret);
 
-  @Before
-  public void checkAzureEnvSetup() {
+  @BeforeClass
+  public static void setup() {
     Assume.assumeTrue(
         "Ensure Azure client id and client secret env variables are set",
         clientId != null && clientSecret != null);
-    client = authenticator.getAuthenticatedClient(clientId, clientSecret);
   }
 
   @Test
