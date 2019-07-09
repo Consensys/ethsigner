@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -28,7 +29,7 @@ public class HttpRequest {
 
   public HttpRequest(final String contextRoot) {
     this.contextRoot = contextRoot;
-    this.client = new OkHttpClient();
+    this.client = new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(2)).build();
   }
 
   public HttpResponse get(final String path) {
