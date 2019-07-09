@@ -269,7 +269,7 @@ Version of the specified key to use.
 ```
 
 ```bash tab="Example"
---key-name="1.0"
+--key-version="7c01fe58d68148bba5824ce418241092"
 ```
 
 ### keyvault-name
