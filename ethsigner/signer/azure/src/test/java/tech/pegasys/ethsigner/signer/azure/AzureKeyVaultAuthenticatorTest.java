@@ -150,7 +150,7 @@ public class AzureKeyVaultAuthenticatorTest {
 
     assertThatThrownBy(() -> factoryWithInvalidClientId.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
-        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
 
     final KeyVaultClientCustom clientWithInvalidSecret =
         authenticator.getAuthenticatedClient(clientId, "invalid_secret");
