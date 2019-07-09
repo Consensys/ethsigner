@@ -160,7 +160,7 @@ public class AzureKeyVaultAuthenticatorTest {
     assertThatThrownBy(
             () -> factoryWithInvalidClientSecret.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
-        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
   }
 
   @Test
