@@ -136,7 +136,7 @@ public class EthSignerProcessRunner {
     params.add("--chain-id");
     params.add(chainId);
     if (useDynamicPortAllocation) {
-      params.add("--data-directory");
+      params.add("--data-path");
       params.add(dataPath.toAbsolutePath().toString());
     }
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
