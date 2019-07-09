@@ -29,13 +29,13 @@ import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Ignore;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 
-@Ignore
 public class AzureKeyVaultAuthenticatorTest {
 
   private static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
@@ -46,6 +46,13 @@ public class AzureKeyVaultAuthenticatorTest {
   private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
   private final KeyVaultClientCustom client =
       authenticator.getAuthenticatedClient(clientId, clientSecret);
+
+  @BeforeClass
+  public static void setup() {
+    Assume.assumeTrue(
+        "Ensure Azure client id and client secret env variables are set",
+        clientId != null && clientSecret != null);
+  }
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
@@ -143,7 +150,7 @@ public class AzureKeyVaultAuthenticatorTest {
 
     assertThatThrownBy(() -> factoryWithInvalidClientId.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
-        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
 
     final KeyVaultClientCustom clientWithInvalidSecret =
         authenticator.getAuthenticatedClient(clientId, "invalid_secret");
@@ -153,7 +160,7 @@ public class AzureKeyVaultAuthenticatorTest {
     assertThatThrownBy(
             () -> factoryWithInvalidClientSecret.createSigner("TestKey", validKeyVersion))
         .isInstanceOf(TransactionSignerInitializationException.class)
-        .hasMessage(AzureKeyVaultTransactionSignerFactory.INACCESSIBLE_KEY_ERROR);
+        .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
   }
 
   @Test
