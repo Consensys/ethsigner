@@ -13,13 +13,14 @@
 
 dependencies {
 
-  testRuntime 'javax.activation:activation'
-  testRuntime 'org.apache.logging.log4j:log4j-core'
+  testRuntimeOnly 'javax.activation:activation'
+  testRuntimeOnly 'org.apache.logging.log4j:log4j-core'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
   testImplementation project(':ethsigner:core')
 
   testImplementation 'com.github.docker-java:docker-java'
-  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-core'
   testImplementation 'org.web3j:core'
   testImplementation 'org.web3j:crypto'
