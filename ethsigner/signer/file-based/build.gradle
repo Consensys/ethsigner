@@ -39,7 +39,7 @@ dependencies {
   implementation 'org.web3j:core'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
-  testImplementation 'org.mockito:mockito-junit-jupiter'
+  testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.assertj:assertj-core'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

@@ -48,6 +48,7 @@ dependencyManagement {
 
     dependency 'org.assertj:assertj-core:3.11.1'
 
+    dependency 'org.mockito:mockito-core:3.0.0'
     dependency 'org.mockito:mockito-junit-jupiter:3.0.0'
 
     dependency 'org.awaitility:awaitility:3.1.6'
