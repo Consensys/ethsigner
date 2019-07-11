@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.signer.filebased;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.logging.log4j.Level;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 public class FileBasedSubCommandTest {

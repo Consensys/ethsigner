@@ -24,8 +24,8 @@ import java.math.BigInteger;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.Json;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class NonceTooLowRetryMechanismTest {
 
@@ -34,7 +34,7 @@ public class NonceTooLowRetryMechanismTest {
 
   private final RetryMechanism retryMechanism = new NonceTooLowRetryMechanism(2);
 
-  @Before
+  @BeforeEach
   public void setup() {
     when(nonceProvider.getNonce()).thenReturn(BigInteger.ONE);
   }

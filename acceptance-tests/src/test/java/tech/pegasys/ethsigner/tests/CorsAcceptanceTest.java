@@ -29,9 +29,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import com.github.dockerjava.api.DockerClient;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class CorsAcceptanceTest {
 
@@ -42,7 +42,7 @@ public class CorsAcceptanceTest {
   private final String AUTHORISED_DOMAIN = "authorised.com";
   private final String UNAUTHORISED_DOMAIN = "UN" + AUTHORISED_DOMAIN;
 
-  @Before
+  @BeforeAll
   public void setUp() {
     final NodeConfiguration nodeConfig =
         new NodeConfigurationBuilder().cors(AUTHORISED_DOMAIN).build();
@@ -57,7 +57,7 @@ public class CorsAcceptanceTest {
     ethSigner.awaitStartupCompletion();
   }
 
-  @After
+  @AfterAll
   public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();

@@ -45,9 +45,11 @@ dependencies {
   implementation 'io.vertx:vertx-web-client'
 
   testImplementation 'io.vertx:vertx-codegen'
-  testImplementation 'junit:junit'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.assertj:assertj-core'
+  // TODO can this be removed?
   testImplementation 'org.mockito:mockito-core'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
 
   integrationTestImplementation project(':ethsigner:signer:file-based')
   integrationTestImplementation 'io.rest-assured:rest-assured'

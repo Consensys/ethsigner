@@ -29,9 +29,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
@@ -42,12 +42,12 @@ public class ValueTransferWithAzureAcceptanceTest {
   private static Node ethNode;
   private static Signer ethSigner;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBase() {
-    Assume.assumeTrue(
-        "Ensure Azure client id and client secret env variables are set",
+    Assumptions.assumeTrue(
         System.getenv("ETHSIGNER_AZURE_CLIENT_ID") != null
-            && System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET") != null);
+            && System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET") != null,
+        "Ensure Azure client id and client secret env variables are set");
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

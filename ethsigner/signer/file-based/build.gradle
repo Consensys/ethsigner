@@ -38,12 +38,12 @@ dependencies {
 
   implementation 'org.web3j:core'
 
-  testImplementation 'junit:junit'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
 
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
-  integrationTestImplementation 'org.mockito:mockito-core'
 }

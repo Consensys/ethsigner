@@ -29,8 +29,8 @@ import java.net.URL;
 
 import com.github.dockerjava.api.DockerClient;
 import com.google.common.io.Resources;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public class AcceptanceTestBase {
 
@@ -63,7 +63,7 @@ public class AcceptanceTestBase {
     }
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
@@ -80,7 +80,7 @@ public class AcceptanceTestBase {
     ethSigner.awaitStartupCompletion();
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();

@@ -24,8 +24,8 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionDecoder;
 import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
@@ -34,7 +34,7 @@ import org.web3j.utils.Numeric;
 public class EeaTransactionTest {
   private EeaTransaction eeaTransaction;
 
-  @Before
+  @BeforeEach
   public void setup() {
     final EeaSendTransactionJsonParameters params =
         new EeaSendTransactionJsonParameters(

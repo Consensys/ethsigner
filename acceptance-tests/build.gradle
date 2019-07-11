@@ -19,7 +19,7 @@ dependencies {
   testImplementation project(':ethsigner:core')
 
   testImplementation 'com.github.docker-java:docker-java'
-  testImplementation 'junit:junit'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'io.vertx:vertx-core'
   testImplementation 'org.web3j:core'
   testImplementation 'org.web3j:crypto'

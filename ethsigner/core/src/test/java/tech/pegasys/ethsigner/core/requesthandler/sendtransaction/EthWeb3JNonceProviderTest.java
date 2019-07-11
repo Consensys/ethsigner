@@ -24,16 +24,16 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Et
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EthWeb3JNonceProviderTest {
 
   @Mock private Web3j web3j;
@@ -46,7 +46,7 @@ public class EthWeb3JNonceProviderTest {
 
   private final BigInteger priorTransactionCount = BigInteger.TEN;
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     when(ethGetTransactionCount.getTransactionCount()).thenReturn(priorTransactionCount);
     when(request.send()).thenReturn(ethGetTransactionCount);

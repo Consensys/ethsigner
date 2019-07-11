@@ -41,8 +41,9 @@ dependencies {
 
   implementation 'io.vertx:vertx-core'
 
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'io.vertx:vertx-codegen'
-  testImplementation 'junit:junit'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
 
