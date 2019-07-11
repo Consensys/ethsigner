@@ -19,7 +19,7 @@ import tech.pegasys.ethsigner.tests.dsl.http.HttpResponse;
 import java.net.SocketTimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UpCheckAcceptanceTest extends AcceptanceTestBase {
 

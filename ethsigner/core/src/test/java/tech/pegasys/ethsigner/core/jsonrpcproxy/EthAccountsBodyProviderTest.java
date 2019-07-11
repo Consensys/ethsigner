@@ -23,7 +23,7 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 
 import io.vertx.core.json.JsonObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EthAccountsBodyProviderTest {
 

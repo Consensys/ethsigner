@@ -38,8 +38,9 @@ dependencyManagement {
     dependency 'io.rest-assured:rest-assured:3.0.7'
 
     dependency 'javax.activation:activation:1.1.1'
-    
-    dependency 'junit:junit:4.12'
+
+    dependency 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
+    dependency 'org.junit.jupiter:junit-jupiter-api:5.5.0'
 
     dependency 'org.apache.logging.log4j:log4j-api:2.11.1'
     dependency 'org.apache.logging.log4j:log4j-core:2.11.1'
@@ -47,7 +48,8 @@ dependencyManagement {
 
     dependency 'org.assertj:assertj-core:3.11.1'
 
-    dependency 'org.mockito:mockito-core:2.23.4'
+    dependency 'org.mockito:mockito-core:3.0.0'
+    dependency 'org.mockito:mockito-junit-jupiter:3.0.0'
 
     dependency 'org.awaitility:awaitility:3.1.6'
 
