@@ -51,7 +51,7 @@ nav:
     - Using EthSigner: Using-EthSigner/Using-EthSigner.md
     - Using Hashicorp Vault: Using-EthSigner/Hashicorp.md
   - Extending EthSigner:
-    - Creaing an External Signer: Extending-EthSigner/Adding-Signer.md
+    - Creating an External Signer: Extending-EthSigner/Adding-Signer.md
   - Reference:
     - EthSigner Command Line: Reference/EthSigner-CLI.md
 
