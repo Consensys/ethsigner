@@ -40,8 +40,11 @@ dependencies {
   implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
   implementation 'com.microsoft.aad:adal4j:0.0.2'
 
-  testImplementation 'junit:junit'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-inline:2.13.0'
+  testImplementation 'org.mockito:mockito-core'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

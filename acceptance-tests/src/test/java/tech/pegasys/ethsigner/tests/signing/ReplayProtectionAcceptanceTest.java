@@ -33,9 +33,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
@@ -54,12 +54,12 @@ public class ReplayProtectionAcceptanceTest {
     return ethSigner.accounts().richBenefactor();
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
