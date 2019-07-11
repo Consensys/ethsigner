@@ -1,0 +1,78 @@
+#!/usr/bin/env groovy
+
+import hudson.model.Result
+import hudson.model.Run
+import jenkins.model.CauseOfInterruption.UserInterruption
+
+if (env.BRANCH_NAME == "master") {
+    properties([
+        buildDiscarder(
+            logRotator(
+                daysToKeepStr: '90'
+            )
+        )
+    ])
+} else {
+    properties([
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '10'
+            )
+        )
+    ])
+}
+
+def abortPreviousBuilds() {
+    Run previousBuild = currentBuild.rawBuild.getPreviousBuildInProgress()
+
+    while (previousBuild != null) {
+        if (previousBuild.isInProgress()) {
+            def executor = previousBuild.getExecutor()
+            if (executor != null) {
+                echo ">> Aborting older build #${previousBuild.number}"
+                executor.interrupt(Result.ABORTED, new UserInterruption(
+                    "Aborted by newer build #${currentBuild.number}"
+                ))
+            }
+        }
+
+        previousBuild = previousBuild.getPreviousBuildInProgress()
+    }
+}
+
+if (env.BRANCH_NAME != "master") {
+    abortPreviousBuilds()
+}
+
+try {
+    node {
+        checkout scm
+        docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
+            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'ethsigner-azure',
+                        usernameVariable: 'ETHSIGNER_AZURE_CLIENT_ID',
+                        passwordVariable: 'ETHSIGNER_AZURE_CLIENT_SECRET'
+                    )
+                ]) {
+                    try {
+                        stage('Test') {
+                            sh './gradlew --no-daemon --parallel :ethsigner:signer:azure:test'
+                        }
+                        stage('Acceptance Test') {
+                            sh './gradlew --no-daemon --parallel acceptanceTest --tests *Azure*'
+                        }
+                    } finally {
+                        archiveArtifacts '**/build/reports/**'
+                        archiveArtifacts '**/build/test-results/**'
+
+                        junit allowEmptyResults: true, testResults: '**/build/test-results/**/*.xml'
+                    }
+                }
+            }
+        }
+    }
+} catch (e) {
+    currentBuild.result = 'FAILURE'
+}
