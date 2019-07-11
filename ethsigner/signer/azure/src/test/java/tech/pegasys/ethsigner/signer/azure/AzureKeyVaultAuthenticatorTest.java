@@ -30,14 +30,12 @@ import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 
-@EnabledIfEnvironmentVariable(named = "ETHSIGNER_AZURE_CLIENT_ID", matches = "nothing")
 public class AzureKeyVaultAuthenticatorTest {
 
   private static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
@@ -46,17 +44,17 @@ public class AzureKeyVaultAuthenticatorTest {
   private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
   private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-  private KeyVaultClientCustom client;
+  private final KeyVaultClientCustom client =
+      authenticator.getAuthenticatedClient(clientId, clientSecret);
 
-  @BeforeEach
-  public void setup() {
+  @BeforeAll
+  public static void setup() {
     Assumptions.assumeTrue(
         clientId != null && clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
   }
 
   @Test
-  @EnabledIfEnvironmentVariable(named = "ETHSIGNER_AZURE_CLIENT_ID", matches = "nothing")
   public void ensureCanAuthenticateAndFindKeys() {
     assertThat(client.apiVersion()).isEqualTo("7.0");
 
