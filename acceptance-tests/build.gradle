@@ -35,5 +35,7 @@ task acceptanceTest(type: Test) {
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs EthSigner acceptance tests.'
   group = 'verification'
+
+  useJUnitPlatform()
 }
 acceptanceTest.dependsOn(rootProject.installDist)

@@ -156,9 +156,6 @@ allprojects {
     options.encoding = 'UTF-8'
   }
 
-  // use junit 5 for tests
-  tasks.withType(Test) { useJUnitPlatform() }
-
   /*
    * Pass some system properties provided on the gradle command line to test executions for
    * convenience.
@@ -192,6 +189,7 @@ allprojects {
       }
     }
 
+    useJUnitPlatform()
   }
 
   // Normalise Xdoclint behaviour across JDKs (OpenJDK 8 is more lenient than Oracle JDK by default).
