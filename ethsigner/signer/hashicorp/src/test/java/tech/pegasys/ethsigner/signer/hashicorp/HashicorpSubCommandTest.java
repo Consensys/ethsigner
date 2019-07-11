@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -23,10 +24,11 @@ import picocli.CommandLine;
 
 public class HashicorpSubCommandTest {
 
-  private static final String THIS_IS_THE_PATH_TO_THE_FILE = "/this/is/the/path/to/the/file";
+  private static final String THIS_IS_THE_PATH_TO_THE_FILE =
+      Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
   private static final String PORT = "23000";
-  private static final String PATH_TO_SIGNING_KEY = "/path/to/signing/key";
+  private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
   private HashicorpSubCommand hashiConfig;
