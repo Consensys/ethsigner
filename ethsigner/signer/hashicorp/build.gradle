@@ -41,11 +41,12 @@ dependencies {
 
   implementation 'io.vertx:vertx-core'
 
-  testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.mockito:mockito-core'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
