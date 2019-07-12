@@ -25,8 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.WalletUtils;
 
 public class FileBasedTransactionSignerTest {
@@ -34,7 +34,7 @@ public class FileBasedTransactionSignerTest {
   private static final String INVALID_PASSWORD = "invalid";
   private static String fileName;
 
-  @BeforeClass
+  @BeforeAll
   public static void createKeyFile() {
     try {
       fileName = WalletUtils.generateFullNewWalletFile(MY_PASSWORD, null);

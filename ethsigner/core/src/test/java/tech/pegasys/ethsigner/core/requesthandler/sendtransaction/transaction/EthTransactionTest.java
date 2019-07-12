@@ -23,8 +23,8 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.SignedRawTransaction;
 import org.web3j.crypto.TransactionDecoder;
@@ -34,7 +34,7 @@ public class EthTransactionTest {
 
   private EthTransaction ethTransaction;
 
-  @Before
+  @BeforeEach
   public void setup() {
     final EthSendTransactionJsonParameters params =
         new EthSendTransactionJsonParameters("0x7577919ae5df4941180eac211965f275cdce314d");

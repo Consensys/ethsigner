@@ -190,6 +190,8 @@ allprojects {
         systemProperty name, System.getProperty(name)
       }
     }
+
+    useJUnitPlatform()
   }
 
   // Normalise Xdoclint behaviour across JDKs (OpenJDK 8 is more lenient than Oracle JDK by default).

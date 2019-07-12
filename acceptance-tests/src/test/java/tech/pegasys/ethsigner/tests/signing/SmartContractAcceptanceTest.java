@@ -22,7 +22,7 @@ import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
 import java.math.BigInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 
 public class SmartContractAcceptanceTest extends AcceptanceTestBase {

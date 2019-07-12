@@ -29,9 +29,9 @@ import com.microsoft.azure.keyvault.models.KeyBundle;
 import com.microsoft.azure.keyvault.models.KeyItem;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeyType;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
@@ -47,11 +47,11 @@ public class AzureKeyVaultAuthenticatorTest {
   private final KeyVaultClientCustom client =
       authenticator.getAuthenticatedClient(clientId, clientSecret);
 
-  @BeforeClass
+  @BeforeAll
   public static void setup() {
-    Assume.assumeTrue(
-        "Ensure Azure client id and client secret env variables are set",
-        clientId != null && clientSecret != null);
+    Assumptions.assumeTrue(
+        clientId != null && clientSecret != null,
+        "Ensure Azure client id and client secret env variables are set");
   }
 
   @Test
