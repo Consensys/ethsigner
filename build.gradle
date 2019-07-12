@@ -360,7 +360,7 @@ distZip {
   }
 }
 
-// rename the top level dir from pantheon-<version> to pantheon and this makes it really
+// rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
 // simple for use in docker
 tasks.register("dockerDistUntar") {
   dependsOn distTar
