@@ -11,7 +11,7 @@ DOCKER_TEST_IMAGE=ethsigner_goss
 
 # create test docker image that includes the test key file and password files
 TEST_CONTAINER_ID=$(docker create ${DOCKER_IMAGE})
-docker cp ./tests/test_keyfile.json ${TEST_CONTAINER_ID}/:tmp/test_keyfile.json
+docker cp ./tests/test_keyfile.json ${TEST_CONTAINER_ID}:/tmp/test_keyfile.json
 docker cp ./tests/test_password ${TEST_CONTAINER_ID}:/tmp/test_password
 docker commit ${TEST_CONTAINER_ID} ${DOCKER_TEST_IMAGE}
 
