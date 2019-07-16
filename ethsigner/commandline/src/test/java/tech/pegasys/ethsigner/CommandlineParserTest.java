@@ -112,7 +112,7 @@ public class CommandlineParserTest {
     final boolean result = parser.parseCommandLine(parentCommandOptionsOnly().split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString())
-        .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
+        .contains(MISSING_SUBCOMMAND_ERROR + System.lineSeparator() + defaultUsageText);
   }
 
   @Test
@@ -235,10 +235,10 @@ public class CommandlineParserTest {
     assertThat(commandOutput.toString())
         .isEqualTo(
             CommandlineParser.SIGNER_CREATION_ERROR
-                + "\n"
+                + System.lineSeparator()
                 + "Cause: "
                 + NullSignerSubCommand.ERROR_MSG
-                + "\n"
+                + System.lineSeparator()
                 + nullCommandHelp);
   }
 }
