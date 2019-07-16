@@ -44,6 +44,8 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
 
+  // TODO remove me, added dummy change to trigger build
+
   @BeforeAll
   public static void setUpBase() {
 
