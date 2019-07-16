@@ -23,13 +23,10 @@ import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CommandlineParserTest {
 
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
@@ -41,7 +38,7 @@ public class CommandlineParserTest {
   private String defaultUsageText;
   private String nullCommandHelp;
 
-  @Before
+  @BeforeEach
   public void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();

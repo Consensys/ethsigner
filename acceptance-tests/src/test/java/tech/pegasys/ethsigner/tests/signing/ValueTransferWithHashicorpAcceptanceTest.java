@@ -30,9 +30,9 @@ import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
@@ -44,7 +44,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBase() {
 
     Runtime.getRuntime()
@@ -75,7 +75,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethSigner.awaitStartupCompletion();
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
