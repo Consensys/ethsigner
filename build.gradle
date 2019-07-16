@@ -26,6 +26,12 @@ plugins {
   id 'net.researchgate.release' version '2.7.0'
 }
 
+if (!JavaVersion.current().java11Compatible) {
+  throw new GradleException("Java 11 or later is required to build EthSigner.\n" +
+  "  Detected version ${JavaVersion.current()}")
+}
+
+
 group = 'tech.pegasys.ethsigner'
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
@@ -76,8 +82,8 @@ allprojects {
 
   jacoco { toolVersion = '0.8.2' }
 
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+  sourceCompatibility = 11
+  targetCompatibility = 11
 
   repositories {
     if ("$System.env.JENKINS_URL" == 'https://jenkins.pegasys.tech/') {
@@ -90,12 +96,7 @@ allprojects {
     }
   }
 
-  dependencies {
-    errorprone("com.google.errorprone:error_prone_core")
-    if (JavaVersion.current().isJava8()) {
-      errorproneJavac("com.google.errorprone:javac")
-    }
-  }
+  dependencies { errorprone("com.google.errorprone:error_prone_core") }
 
   apply plugin: 'com.diffplug.gradle.spotless'
   spotless {
@@ -179,7 +180,13 @@ allprojects {
   test {
     jvmArgs = [
       '-Xmx4g',
-      '-XX:-UseGCOverheadLimit'
+      '-XX:-UseGCOverheadLimit',
+      // Mockito and jackson-databind do some strange reflection during tests.
+      // This suppresses an illegal access warning.
+      '--add-opens',
+      'java.base/java.util=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.util.concurrent=ALL-UNNAMED'
     ]
     Set toImport = [
       'root.log.level',
@@ -194,14 +201,9 @@ allprojects {
     useJUnitPlatform()
   }
 
-  // Normalise Xdoclint behaviour across JDKs (OpenJDK 8 is more lenient than Oracle JDK by default).
   javadoc {
     options.addStringOption('Xdoclint:all', '-quiet')
-    if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
-      options.addStringOption('Xwerror', '-quiet')
-    } else {
-      options.addStringOption('Xwerror', '-html5')
-    }
+    options.addStringOption('Xwerror', '-html5')
     options.encoding = 'UTF-8'
   }
 
