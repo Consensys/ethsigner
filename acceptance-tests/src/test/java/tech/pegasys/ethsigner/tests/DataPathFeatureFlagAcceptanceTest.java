@@ -29,9 +29,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
@@ -58,7 +58,7 @@ public class DataPathFeatureFlagAcceptanceTest {
     return ethNode;
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBase() {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(DataPathFeatureFlagAcceptanceTest::tearDownBase));
@@ -77,7 +77,7 @@ public class DataPathFeatureFlagAcceptanceTest {
     ethSigner.awaitStartupCompletion();
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();

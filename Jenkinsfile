@@ -22,6 +22,11 @@ if (env.BRANCH_NAME == "master") {
     ])
 }
 
+def registry = 'https://registry.hub.docker.com'
+def userAccount = 'dockerhub-pegasysengci'
+def imageRepos = 'pegasyseng'
+def imageTag = 'develop'
+
 def abortPreviousBuilds() {
     Run previousBuild = currentBuild.rawBuild.getPreviousBuildInProgress()
 
@@ -48,7 +53,7 @@ try {
     node {
         checkout scm
         docker.image('docker:18.06.3-ce-dind').withRun('--privileged -v /volumes/jenkins-slave-workspace:/var/jenkins-slave-workspace') { d ->
-            docker.image('openjdk:11-jdk-stretch').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
+            docker.image('pegasyseng/pantheon-build:0.0.7-jdk11').inside("-e DOCKER_HOST=tcp://docker:2375 --link ${d.id}:docker") {
                 try {
                     stage('Build') {
                         sh './gradlew --no-daemon --parallel build'
@@ -62,6 +67,47 @@ try {
                     stage('Acceptance Test') {
                         sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
+                    stage('Docker') {
+                        def image = imageRepos + '/ethsigner:' + imageTag
+                        def docker_folder = 'docker'
+                        def version_property_file = 'gradle.properties'
+                        def reports_folder = docker_folder + '/reports'
+                        def dockerfile = docker_folder + '/Dockerfile'
+
+                        // dockerfile lint
+                        sh "docker run --rm -i hadolint/hadolint < ${dockerfile}"
+
+                        // build image
+                        sh './gradlew distDocker'
+
+                        // test image labels
+                        shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+                        version = sh(returnStdout: true, script: "grep -oE \"version=(.*)\" ${version_property_file} | cut -d= -f2").trim()
+                        sh "docker image inspect \
+    --format='{{index .Config.Labels \"org.label-schema.vcs-ref\"}}' \
+    ${image} \
+    | grep ${shortCommit}"
+                        sh "docker image inspect \
+    --format='{{index .Config.Labels \"org.label-schema.version\"}}' \
+    ${image} \
+    | grep ${version}"
+
+                        // test image
+                        try {
+                            sh "mkdir -p ${reports_folder}"
+                            sh "cd ${docker_folder} && bash test.sh ${image}"
+                        } finally {
+                            junit "${reports_folder}/*.xml"
+                            sh "rm -rf ${reports_folder}"
+                        }
+
+                        // push image
+                        if (env.BRANCH_NAME == "master") {
+                            docker.withRegistry(registry, userAccount) {
+                                docker.image(image).push()
+                            }
+                        }
+                    }
                 } finally {
                     archiveArtifacts '**/build/reports/**'
                     archiveArtifacts '**/build/test-results/**'
@@ -71,7 +117,7 @@ try {
             }
         }
     }
-} catch (e) {
+} catch (ignored) {
     currentBuild.result = 'FAILURE'
 } finally {
     // If we're on master and it failed, notify slack

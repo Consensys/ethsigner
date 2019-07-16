@@ -19,7 +19,7 @@ import java.util.Optional;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EthSendTransactionJsonParametersTest {
 

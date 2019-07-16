@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AccountManagementAcceptanceTest extends AcceptanceTestBase {
 
