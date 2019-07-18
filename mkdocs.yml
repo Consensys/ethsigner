@@ -50,6 +50,7 @@ nav:
     - Getting Started: Using-EthSigner/Getting-Started.md
     - Using EthSigner: Using-EthSigner/Using-EthSigner.md
     - Using Hashicorp Vault: Using-EthSigner/Hashicorp.md
+    - Using Azure Key Vault: Using-EthSigner/Azure.md
   - Extending EthSigner:
     - Creating an External Signer: Extending-EthSigner/Adding-Signer.md
   - Reference:

@@ -11,26 +11,17 @@ EthSigner supports storing the signing key in a [Azure Key Vault](https://azure.
 
 ## Storing Private Key in Azure Key Vault 
 
-After :
+Create a signing key in the [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/)
+and register EthSigner as an application for the key. The key must be a base 64 encoded private key for 
+ECDSA for curve secp256k1.
 
-1.  Set the `VAULT_ADDR` environment variable using the command displayed after starting the server: 
-    ```bash
-    export VAULT_ADDR='http://127.0.0.1:8200'
-    ```
+Take note of the following to specify when starting EthSigner: 
 
-2. Save the root token displayed after starting the server in a file called `authFile`. 
-
-3. Put your signing key into the Hashicorp Vault: 
-
-    ```bash tab="Command"
-    vault kv put secret/ethsignerSigningKey value=<Private Key ex 0x)
-    ```
-       
-    ```bash tab="Example"
-    vault kv put secret/ethsignerSigningKey value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63
-    ```
-
-    The private key is stored in the default location for EthSigner. 
+* Key vault name 
+* Key name 
+* Key version 
+* Client ID 
+* File containing client secret for the client ID 
 
 ## Start Pantheon 
 
@@ -43,17 +34,17 @@ option set to `8590` to avoid conflict with the default EthSigner listening port
     pantheon --network=dev --miner-enabled --miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73 --rpc-http-cors-origins="all" --host-whitelist=* --rpc-http-enabled --rpc-http-port=8590 --data-path=/tmp/tmpDatdir
     ```
 
-## Start EthSigner with Hashicorp Vault Signing 
+## Start EthSigner with Azure Key Vault Signing 
 
 Start EthSigner.
 
 !!! example  
     ```bash
-    ethsigner --chain-id=2018 --downstream-http-port=8590 hashicorp-signer --host=127.0.0.1 --port=8200 --auth-file=authFile
+    ethsigner --chain-id=2018 --downstream-http-port=8590 azure-signer --client-id=<ClientID> --client-secret-path=mypath/mysecretfile --key-name=<KeyName> --key-version=<KeyVersion> --keyvault-name=<KeyVaultName>
     ```
 
 !!! tip
     Use the [--http-listen-port](../Reference/EthSigner-CLI.md#http-listen-port) option to change the
     EthSigner listening port if `8545` is in use.  
 
-You can now [use EthSigner to sign transactions](Using-EthSigner.md) with the key stored in the Hashicorp Vault.  
+You can now [use EthSigner to sign transactions](Using-EthSigner.md) with the key stored in the Azure Key Vault.  
