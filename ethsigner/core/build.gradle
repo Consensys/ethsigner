@@ -45,13 +45,17 @@ dependencies {
   implementation 'io.vertx:vertx-web-client'
 
   testImplementation 'io.vertx:vertx-codegen'
-  testImplementation 'junit:junit'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+  testImplementation 'org.mockito:mockito-junit-jupiter'
+
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
   integrationTestImplementation project(':ethsigner:signer:file-based')
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
   integrationTestImplementation 'org.mockito:mockito-core'
+  integrationTestImplementation 'org.mockito:mockito-junit-jupiter'
 }

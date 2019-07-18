@@ -19,7 +19,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
 

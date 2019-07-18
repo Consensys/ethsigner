@@ -23,13 +23,10 @@ import java.time.Duration;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CommandlineParserTest {
 
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
@@ -41,7 +38,7 @@ public class CommandlineParserTest {
   private String defaultUsageText;
   private String nullCommandHelp;
 
-  @Before
+  @BeforeEach
   public void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
@@ -115,7 +112,7 @@ public class CommandlineParserTest {
     final boolean result = parser.parseCommandLine(parentCommandOptionsOnly().split(" "));
     assertThat(result).isFalse();
     assertThat(commandOutput.toString())
-        .contains(MISSING_SUBCOMMAND_ERROR + "\n" + defaultUsageText);
+        .contains(MISSING_SUBCOMMAND_ERROR + System.lineSeparator() + defaultUsageText);
   }
 
   @Test
@@ -238,10 +235,10 @@ public class CommandlineParserTest {
     assertThat(commandOutput.toString())
         .isEqualTo(
             CommandlineParser.SIGNER_CREATION_ERROR
-                + "\n"
+                + System.lineSeparator()
                 + "Cause: "
                 + NullSignerSubCommand.ERROR_MSG
-                + "\n"
+                + System.lineSeparator()
                 + nullCommandHelp);
   }
 }

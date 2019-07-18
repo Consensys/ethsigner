@@ -13,6 +13,8 @@
 
 import net.ltgt.gradle.errorprone.CheckSeverity
 
+import java.text.SimpleDateFormat
+
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.17.0'
   id 'com.jfrog.bintray' version '1.8.4'
@@ -23,6 +25,12 @@ plugins {
   id 'net.ltgt.errorprone' version '0.6.1'
   id 'net.researchgate.release' version '2.7.0'
 }
+
+if (!JavaVersion.current().java11Compatible) {
+  throw new GradleException("Java 11 or later is required to build EthSigner.\n" +
+  "  Detected version ${JavaVersion.current()}")
+}
+
 
 group = 'tech.pegasys.ethsigner'
 
@@ -74,8 +82,8 @@ allprojects {
 
   jacoco { toolVersion = '0.8.2' }
 
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+  sourceCompatibility = 11
+  targetCompatibility = 11
 
   repositories {
     if ("$System.env.JENKINS_URL" == 'https://jenkins.pegasys.tech/') {
@@ -88,12 +96,7 @@ allprojects {
     }
   }
 
-  dependencies {
-    errorprone("com.google.errorprone:error_prone_core")
-    if (JavaVersion.current().isJava8()) {
-      errorproneJavac("com.google.errorprone:javac")
-    }
-  }
+  dependencies { errorprone("com.google.errorprone:error_prone_core") }
 
   apply plugin: 'com.diffplug.gradle.spotless'
   spotless {
@@ -177,7 +180,13 @@ allprojects {
   test {
     jvmArgs = [
       '-Xmx4g',
-      '-XX:-UseGCOverheadLimit'
+      '-XX:-UseGCOverheadLimit',
+      // Mockito and jackson-databind do some strange reflection during tests.
+      // This suppresses an illegal access warning.
+      '--add-opens',
+      'java.base/java.util=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.util.concurrent=ALL-UNNAMED'
     ]
     Set toImport = [
       'root.log.level',
@@ -188,16 +197,13 @@ allprojects {
         systemProperty name, System.getProperty(name)
       }
     }
+
+    useJUnitPlatform()
   }
 
-  // Normalise Xdoclint behaviour across JDKs (OpenJDK 8 is more lenient than Oracle JDK by default).
   javadoc {
     options.addStringOption('Xdoclint:all', '-quiet')
-    if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
-      options.addStringOption('Xwerror', '-quiet')
-    } else {
-      options.addStringOption('Xwerror', '-html5')
-    }
+    options.addStringOption('Xwerror', '-html5')
     options.encoding = 'UTF-8'
   }
 
@@ -358,6 +364,44 @@ distZip {
   }
 }
 
+// rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
+// simple for use in docker
+tasks.register("dockerDistUntar") {
+  dependsOn distTar
+  dependsOn distZip
+  def dockerBuildDir = "build/docker-ethsigner/"
+  def distTarFile = distTar.outputs.files.singleFile
+  def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
+
+  doFirst {
+    new File(dockerBuildDir).mkdir()
+    copy {
+      from tarTree(distTarFile)
+      into(dockerBuildDir)
+    }
+    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/ethsigner")
+  }
+}
+
+task distDocker(type: Exec) {
+  dependsOn dockerDistUntar
+  def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
+  def image="pegasyseng/ethsigner:develop"
+  def dockerBuildDir = "build/docker-ethsigner/"
+  workingDir "${dockerBuildDir}"
+
+
+  doFirst {
+    copy {
+      from file("${projectDir}/docker/Dockerfile")
+      into(workingDir)
+    }
+  }
+
+  executable "sh"
+  args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+}
+
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
   additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
   sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
@@ -386,6 +430,14 @@ configurations { annotationProcessor }
  }
  }
  */
+
+// http://label-schema.org/rc1/
+// using the RFC3339 format "2016-04-12T23:20:50.52Z"
+def buildTime() {
+  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+  df.setTimeZone(TimeZone.getTimeZone("UTC"))
+  return df.format(new Date())
+}
 
 // Takes the version, and if -SNAPSHOT is part of it replaces SNAPSHOT
 // with the git commit version.

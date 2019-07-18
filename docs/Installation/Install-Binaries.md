@@ -8,7 +8,7 @@ description: Install EthSigner from binary distribution
 * [Java JDK](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
 !!!important
-    EthSigner requires Java 8+ to compile; earlier versions are not supported.
+    EthSigner is supported on Java 11+. Java 8 support is deprecated and will be removed in a future release.
     
 ## Install Binaries
 

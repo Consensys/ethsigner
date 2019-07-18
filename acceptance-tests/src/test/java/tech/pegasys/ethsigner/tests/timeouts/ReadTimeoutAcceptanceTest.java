@@ -34,9 +34,9 @@ import java.net.ServerSocket;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
@@ -50,7 +50,7 @@ public class ReadTimeoutAcceptanceTest {
   private ServerSocket unresponsiveSocketA;
   private ServerSocket unresponsiveSocketB;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     unresponsiveSocketA = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
     unresponsiveSocketB = new ServerSocket(DYNAMICALLY_ASSIGN_PORT);
@@ -67,7 +67,7 @@ public class ReadTimeoutAcceptanceTest {
     Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (ethSigner != null) {
       ethSigner.shutdown();
