@@ -18,9 +18,13 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.io.BaseEncoding;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
@@ -29,6 +33,7 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
 
 public class EeaTransaction implements Transaction {
+
   private static final String JSON_RPC_METHOD = "eea_sendRawTransaction";
   private final EeaSendTransactionJsonParameters transactionJsonParameters;
   private final JsonRpcRequestId id;
@@ -97,8 +102,26 @@ public class EeaTransaction implements Transaction {
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
-        transactionJsonParameters.privateFrom(),
-        transactionJsonParameters.privateFor(),
+        encodeStringToIso8559(transactionJsonParameters.privateFrom()),
+        transactionJsonParameters.privateFor().stream()
+            .map(EeaTransaction::encodeStringToIso8559)
+            .collect(Collectors.toList()),
         transactionJsonParameters.restriction());
+  }
+
+  private static String encodeStringToIso8559(final String input) {
+    return input.startsWith("0x")
+        ? hexStringToStringOfBytes(input)
+        : base64EncodedToStringOfBytes(input);
+  }
+
+  private static String base64EncodedToStringOfBytes(final String input) {
+    final byte[] byteRepresentation = Base64.getDecoder().decode(input);
+    return new String(byteRepresentation, StandardCharsets.ISO_8859_1);
+  }
+
+  private static String hexStringToStringOfBytes(final String input) {
+    final byte[] byteRepresentation = BaseEncoding.base16().decode(input.substring(2));
+    return new String(byteRepresentation, StandardCharsets.ISO_8859_1);
   }
 }
