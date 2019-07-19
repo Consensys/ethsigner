@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import org.web3j.utils.Numeric;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -25,13 +24,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.io.BaseEncoding;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
+import org.web3j.utils.Numeric;
 
 public class EeaTransaction implements Transaction {
 
