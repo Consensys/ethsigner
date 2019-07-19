@@ -8,12 +8,14 @@ signs transaction with a key stored in an encrypted file or an external vault (f
 
 * `ethsigner [Options] file-based-signer [File Options]`
 * `ethsigner [Options] hashicorp-signer [Hashicorp Options]`
+* `ethsigner [Options] azure-signer [Azure Options]`
 
 !!! tip
     To view the command line help for the subcommands: 
     
-    * `ethsigner help file-based-signer`
-    * `ethsigner help hashicorp-signer` 
+    * [`ethsigner help file-based-signer`](#file-options)
+    * [`ethsigner help hashicorp-signer`](#hashicorp-options) 
+    * [`ethsigner help azure-signer`](#azure-options)
 
 ## Options
 
@@ -218,4 +220,66 @@ Timeout in milliseconds for requests to the Hashicorp Vault server. Default is 1
 
 ```bash tab="Example"
 --timeout=5000
+```
+
+## Azure Options 
+
+### client-id
+
+ID used to authenticate with Azure Key Vault. 
+
+```bash tab="Syntax"
+--client-id=<clientID>
+```
+
+```bash tab="Example"
+--client-id="MyClientID"
+```
+
+### client-secret-path
+
+Path to file containing secret used to access the vault. 
+
+```bash tab="Syntax"
+--client-secret-path=<clientSecretPath>
+```
+
+```bash tab="Example"
+--client-secret-path=/Path/MySecret
+```
+
+### key-name
+
+Name of key to be used. 
+
+```bash tab="Syntax"
+--key-name=<keyName>
+```
+
+```bash tab="Example"
+--key-name="MyKey"
+```
+
+### key-version
+
+Version of the specified key to use. 
+
+```bash tab="Syntax"
+--key-version=<keyVersion>
+```
+
+```bash tab="Example"
+--key-version="7c01fe58d68148bba5824ce418241092"
+```
+
+### keyvault-name
+
+Name of the vault to access. Sub-domain of `vault.azure.net`. 
+
+```bash tab="Syntax"
+--keyvault-name=<keyVaultName>
+```
+
+```bash tab="Example"
+--keyvault-name="MyKeyVault" 
 ```
