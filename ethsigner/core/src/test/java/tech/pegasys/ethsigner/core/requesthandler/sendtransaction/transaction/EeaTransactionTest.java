@@ -72,10 +72,8 @@ public class EeaTransactionTest {
     assertThat(decodedTransaction.getData())
         .isEqualTo(
             "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    //    assertThat(decodedTransaction.getPrivateFrom())
-    //        .isEqualTo("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
-    //    assertThat(decodedTransaction.getPrivateFor())
-    //        .isEqualTo(singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="));
+    assertThat(decodedTransaction.getPrivateFrom().length()).isEqualTo(32);
+    assertThat(decodedTransaction.getPrivateFor().get(0).length()).isEqualTo(32);
     assertThat(decodedTransaction.getRestriction()).isEqualTo("restricted");
 
     final SignatureData decodedSignatureData = decodedTransaction.getSignatureData();

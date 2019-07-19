@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import org.web3j.utils.Numeric;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -121,7 +122,7 @@ public class EeaTransaction implements Transaction {
   }
 
   private static String hexStringToStringOfBytes(final String input) {
-    final byte[] byteRepresentation = BaseEncoding.base16().decode(input.substring(2));
+    final byte[] byteRepresentation = Numeric.hexStringToByteArray(input);
     return new String(byteRepresentation, StandardCharsets.ISO_8859_1);
   }
 }
