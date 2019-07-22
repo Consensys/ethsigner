@@ -16,6 +16,8 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.PrivacyIdentifier;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -71,13 +73,11 @@ public class EeaSendTransactionJsonParametersTest {
     assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
     assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
     assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
-    assertThat(txnParams.privateFrom().getBytes(StandardCharsets.ISO_8859_1))
+    assertThat(txnParams.privateFrom().getRaw())
         .isEqualTo(Base64.getDecoder().decode(parameters.getString("privateFrom")));
     assertThat(txnParams.privateFor())
         .containsExactly(
-            new String(
-                Base64.getDecoder().decode(parameters.getJsonArray("privateFor").getString(0)),
-                StandardCharsets.ISO_8859_1));
+            PrivacyIdentifier.fromBase64String(parameters.getJsonArray("privateFor").getString(0)));
     assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
   }
 
@@ -95,13 +95,11 @@ public class EeaSendTransactionJsonParametersTest {
     assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
     assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
     assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
-    assertThat(txnParams.privateFrom().getBytes(StandardCharsets.ISO_8859_1))
+    assertThat(txnParams.privateFrom().getRaw())
         .isEqualTo(Base64.getDecoder().decode(parameters.getString("privateFrom")));
     assertThat(txnParams.privateFor())
         .containsExactly(
-            new String(
-                Base64.getDecoder().decode(parameters.getJsonArray("privateFor").getString(0)),
-                StandardCharsets.ISO_8859_1));
+            PrivacyIdentifier.fromBase64String(parameters.getJsonArray("privateFor").getString(0)));
     assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
   }
 
@@ -160,10 +158,8 @@ public class EeaSendTransactionJsonParametersTest {
 
     assertThat(txnParams.privateFor())
         .containsOnly(
-            iso8559PrivateFor,
-            new String(
-                Base64.getDecoder().decode(parameters.getJsonArray("privateFor").getString(0)),
-                StandardCharsets.ISO_8859_1));
+            PrivacyIdentifier.fromHexString(hexPrivateFor),
+            PrivacyIdentifier.fromBase64String(parameters.getJsonArray("privateFor").getString(0)));
   }
 
   @Test

@@ -30,13 +30,13 @@ public class EeaUtils {
 
   // Taken from web3j EeaTransactionManager as method is private in that class
   public static String generatePrivacyGroupId(
-      final String privateFrom, final List<String> privateFor) {
-    final List<byte[]> stringList = new ArrayList<>();
-    stringList.add(Base64.getDecoder().decode(privateFrom));
-    privateFor.forEach(item -> stringList.add(Base64.getDecoder().decode(item)));
+      final PrivacyIdentifier privateFrom, final List<PrivacyIdentifier> privateFor) {
+    final List<byte[]> identifierList = new ArrayList<>();
+    identifierList.add(privateFrom.getRaw());
+    privateFor.forEach(item -> identifierList.add(privateFrom.getRaw()));
 
     final List<RlpType> rlpList =
-        stringList.stream()
+        identifierList.stream()
             .distinct()
             .sorted(Comparator.comparing(Arrays::hashCode))
             .map(RlpString::create)

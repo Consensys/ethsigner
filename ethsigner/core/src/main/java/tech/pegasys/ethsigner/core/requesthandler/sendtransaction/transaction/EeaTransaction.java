@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
 import org.web3j.crypto.Sign.SignatureData;
@@ -98,8 +99,10 @@ public class EeaTransaction implements Transaction {
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
-        transactionJsonParameters.privateFrom(),
-        transactionJsonParameters.privateFor(),
+        transactionJsonParameters.privateFrom().asIso8559String(),
+        transactionJsonParameters.privateFor().stream()
+            .map(privateFor -> privateFor.asIso8559String())
+            .collect(Collectors.toList()),
         transactionJsonParameters.restriction());
   }
 }
