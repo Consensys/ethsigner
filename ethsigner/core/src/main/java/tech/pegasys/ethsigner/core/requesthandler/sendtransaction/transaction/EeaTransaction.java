@@ -18,10 +18,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
 import org.web3j.crypto.Sign.SignatureData;
@@ -30,7 +27,6 @@ import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
-import org.web3j.utils.Numeric;
 
 public class EeaTransaction implements Transaction {
 
@@ -102,26 +98,8 @@ public class EeaTransaction implements Transaction {
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
-        encodeStringToIso8559(transactionJsonParameters.privateFrom()),
-        transactionJsonParameters.privateFor().stream()
-            .map(EeaTransaction::encodeStringToIso8559)
-            .collect(Collectors.toList()),
+        transactionJsonParameters.privateFrom(),
+        transactionJsonParameters.privateFor(),
         transactionJsonParameters.restriction());
-  }
-
-  private static String encodeStringToIso8559(final String input) {
-    return input.startsWith("0x")
-        ? hexStringToStringOfBytes(input)
-        : base64EncodedToStringOfBytes(input);
-  }
-
-  private static String base64EncodedToStringOfBytes(final String input) {
-    final byte[] byteRepresentation = Base64.getDecoder().decode(input);
-    return new String(byteRepresentation, StandardCharsets.ISO_8859_1);
-  }
-
-  private static String hexStringToStringOfBytes(final String input) {
-    final byte[] byteRepresentation = Numeric.hexStringToByteArray(input);
-    return new String(byteRepresentation, StandardCharsets.ISO_8859_1);
   }
 }

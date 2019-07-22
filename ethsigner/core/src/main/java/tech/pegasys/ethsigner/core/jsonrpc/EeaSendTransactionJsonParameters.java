@@ -17,16 +17,22 @@ import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonPa
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import org.web3j.utils.Numeric;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
+
+  private static int BYTES_IN_PUBLIC_KEY = 32;
   private final String sender;
   private final String privateFrom;
   private final List<String> privateFor;
@@ -46,8 +52,11 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("privateFor") final List<String> privateFor,
       @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
-    this.privateFrom = privateFrom;
-    this.privateFor = privateFor;
+    this.privateFrom = encodeStringToIso8559(privateFrom);
+    this.privateFor =
+        privateFor.stream()
+            .map(EeaSendTransactionJsonParameters::encodeStringToIso8559)
+            .collect(Collectors.toList());
     this.restriction = restriction;
     this.sender = sender;
   }
@@ -133,5 +142,29 @@ public class EeaSendTransactionJsonParameters {
       throw new IllegalArgumentException(
           "Non-zero value, private transactions cannot transfer ether");
     }
+  }
+
+  private static String encodeStringToIso8559(final String input) {
+    return input.startsWith("0x")
+        ? hexStringToStringOfBytes(input)
+        : base64EncodedToStringOfBytes(input);
+  }
+
+  private static String base64EncodedToStringOfBytes(final String input) {
+    final byte[] byteRepresentation = Base64.getDecoder().decode(input);
+    return bytesToStringOfBytes(input, byteRepresentation);
+  }
+
+  private static String hexStringToStringOfBytes(final String input) {
+    final byte[] byteRepresentation = Numeric.hexStringToByteArray(input);
+    return bytesToStringOfBytes(input, byteRepresentation);
+  }
+
+  private static String bytesToStringOfBytes(final String inputString, final byte[] inputBytes) {
+    if (inputBytes.length != BYTES_IN_PUBLIC_KEY) {
+      throw new IllegalArgumentException(
+          String.format("Public key did not contain 32 bytes: %s", inputString));
+    }
+    return new String(inputBytes, StandardCharsets.ISO_8859_1);
   }
 }
