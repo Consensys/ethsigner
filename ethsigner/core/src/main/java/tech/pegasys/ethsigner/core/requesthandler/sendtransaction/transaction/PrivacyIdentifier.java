@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 
 import org.web3j.utils.Numeric;
@@ -52,5 +53,22 @@ public class PrivacyIdentifier {
 
   public String asIso8559String() {
     return new String(identifier, StandardCharsets.ISO_8859_1);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    PrivacyIdentifier that = (PrivacyIdentifier) o;
+    return Arrays.equals(identifier, that.identifier);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(identifier);
   }
 }

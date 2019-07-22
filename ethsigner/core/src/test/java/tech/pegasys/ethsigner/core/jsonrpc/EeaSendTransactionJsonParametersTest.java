@@ -130,14 +130,13 @@ public class EeaSendTransactionJsonParametersTest {
     byte[] rawPrivateFrom = new byte[32];
     new Random().nextBytes(rawPrivateFrom);
     final String hexPrivateFrom = Numeric.toHexString(rawPrivateFrom);
-    final String iso8559PrivateFrom = new String(rawPrivateFrom, StandardCharsets.ISO_8859_1);
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("privateFrom", hexPrivateFrom);
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
         EeaSendTransactionJsonParameters.from(request);
 
-    assertThat(txnParams.privateFrom()).isEqualTo(iso8559PrivateFrom);
+    assertThat(txnParams.privateFrom()).isEqualTo(PrivacyIdentifier.fromHexString(hexPrivateFrom));
   }
 
   @Test
