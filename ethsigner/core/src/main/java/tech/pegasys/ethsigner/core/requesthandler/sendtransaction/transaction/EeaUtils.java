@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -43,6 +44,6 @@ public class EeaUtils {
 
     final byte[] hash = Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)));
 
-    return new String(Base64.getEncoder().encode(hash));
+    return new String(Base64.getEncoder().encode(hash), StandardCharsets.UTF_8);
   }
 }
