@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -24,25 +25,25 @@ import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
-import org.web3j.utils.Numeric;
 
 public class EeaUtils {
 
   // Taken from web3j EeaTransactionManager as method is private in that class
   public static String generatePrivacyGroupId(
-      final String privateFrom, final List<String> privateFor) {
-    final List<byte[]> stringList = new ArrayList<>();
-    stringList.add(Base64.getDecoder().decode(privateFrom));
-    privateFor.forEach(item -> stringList.add(Base64.getDecoder().decode(item)));
+      final PrivacyIdentifier privateFrom, final List<PrivacyIdentifier> privateFor) {
+    final List<byte[]> identifierList = new ArrayList<>();
+    identifierList.add(privateFrom.getRaw());
+    privateFor.forEach(item -> identifierList.add(item.getRaw()));
 
     final List<RlpType> rlpList =
-        stringList.stream()
+        identifierList.stream()
             .distinct()
             .sorted(Comparator.comparing(Arrays::hashCode))
             .map(RlpString::create)
             .collect(Collectors.toList());
 
-    return Numeric.toHexString(
-        Base64.getEncoder().encode(Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)))));
+    final byte[] hash = Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)));
+
+    return new String(Base64.getEncoder().encode(hash), StandardCharsets.UTF_8);
   }
 }
