@@ -115,7 +115,7 @@ public class EeaTransaction implements Transaction {
   TAKEN FROM WEB3J TO OVERCOME CHARACTER ENCODING PROBLEMS
    */
 
-  public static List<RlpType> asRlpValues(
+  private static List<RlpType> asRlpValues(
       final RawPrivateTransaction privateTransaction, final Sign.SignatureData signatureData) {
 
     final List<RlpType> result =
