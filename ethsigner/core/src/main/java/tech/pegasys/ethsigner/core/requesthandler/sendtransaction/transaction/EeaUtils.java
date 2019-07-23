@@ -18,13 +18,11 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.web3j.crypto.Hash;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
-import org.web3j.utils.Numeric;
 
 public class EeaUtils {
 
@@ -33,7 +31,7 @@ public class EeaUtils {
       final PrivacyIdentifier privateFrom, final List<PrivacyIdentifier> privateFor) {
     final List<byte[]> identifierList = new ArrayList<>();
     identifierList.add(privateFrom.getRaw());
-    privateFor.forEach(item -> identifierList.add(privateFrom.getRaw()));
+    privateFor.forEach(item -> identifierList.add(item.getRaw()));
 
     final List<RlpType> rlpList =
         identifierList.stream()
@@ -42,7 +40,8 @@ public class EeaUtils {
             .map(RlpString::create)
             .collect(Collectors.toList());
 
-    return Numeric.toHexString(
-        Base64.getEncoder().encode(Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)))));
+    final byte[] hash = Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)));
+
+    return new String(Base64.getEncoder().encode(hash));
   }
 }

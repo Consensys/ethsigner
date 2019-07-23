@@ -20,11 +20,11 @@ import org.web3j.utils.Numeric;
 
 public class PrivacyIdentifier {
 
-  public static final int IDENTIFIER_LENGTH = 32;
+  private static final int IDENTIFIER_LENGTH = 32;
 
   private final byte[] identifier;
 
-  public PrivacyIdentifier(byte[] identifier) {
+  private PrivacyIdentifier(byte[] identifier) {
     this.identifier = identifier;
   }
 

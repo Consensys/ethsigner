@@ -50,10 +50,10 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("privateFor") final List<String> privateFor,
       @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
-    this.privateFrom = encodeStringToIso8559(privateFrom);
+    this.privateFrom = createPrivacyIdentifier(privateFrom);
     this.privateFor =
         privateFor.stream()
-            .map(EeaSendTransactionJsonParameters::encodeStringToIso8559)
+            .map(EeaSendTransactionJsonParameters::createPrivacyIdentifier)
             .collect(Collectors.toList());
     this.restriction = restriction;
     this.sender = sender;
@@ -142,7 +142,7 @@ public class EeaSendTransactionJsonParameters {
     }
   }
 
-  private static PrivacyIdentifier encodeStringToIso8559(final String input) {
+  private static PrivacyIdentifier createPrivacyIdentifier(final String input) {
     return input.startsWith("0x")
         ? PrivacyIdentifier.fromHexString(input)
         : PrivacyIdentifier.fromBase64String(input);
