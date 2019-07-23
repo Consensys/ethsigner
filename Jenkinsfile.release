@@ -64,54 +64,54 @@ node {
                     }
                 }
             }
-            stage('Docker') {
-                script {
-                    def docker_folder = 'docker'
-                    def reports_folder = docker_folder + '/reports'
-                    def ethsigner = "pegasyseng/ethsigner:develop"
-                    def releaseVersion = "${params.RELEASE_VERSION.trim()}"
-                    def shortReleaseVersion = getShortVersion(releaseVersion)
-                    def additionalTags = [releaseVersion]
-
-                    stage(stage_name + 'Build image') {
-                        sh "echo Building docker image for release ${releaseVersion} with short version ${shortReleaseVersion}"
-                        sh "./gradlew distDocker -x test -Prelease.releaseVersion=${releaseVersion} "
-                    }
-
-                    try {
-                        stage(stage_name + 'Test image') {
-                            sh "mkdir -p ${reports_folder}"
-                            sh "cd ${docker_folder} && bash test.sh ${ethsigner}"
-                        }
-                    } finally {
-                        junit "${reports_folder}/*.xml"
-                        sh "rm -rf ${reports_folder}"
-                    }
-
-                    stage(stage_name + 'Push image') {
-
-                        def dockerImage = docker.image(ethsigner)
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-pegasysengci') {
-                            dockerImage.push()
-
-                            // if this is a stable release add extra docker image tags
-                            if (!releaseVersion.contains('-')) {
-                                additionalTags.add('latest')
-                                if (shortReleaseVersion != "") {
-                                    additionalTags.add(shortReleaseVersion)
-                                }
-                            }
-
-                            additionalTags.each { tag ->
-                                dockerImage.push tag.trim()
-                            }
-
-                        }
-
-                    }
-
-                }
-            }
+//            stage('Docker') {
+//                script {
+//                    def docker_folder = 'docker'
+//                    def reports_folder = docker_folder + '/reports'
+//                    def ethsigner = "pegasyseng/ethsigner:develop"
+//                    def releaseVersion = "${params.RELEASE_VERSION.trim()}"
+//                    def shortReleaseVersion = getShortVersion(releaseVersion)
+//                    def additionalTags = [releaseVersion]
+//
+//                    stage(stage_name + 'Build image') {
+//                        sh "echo Building docker image for release ${releaseVersion} with short version ${shortReleaseVersion}"
+//                        sh "./gradlew distDocker -x test -Prelease.releaseVersion=${releaseVersion} "
+//                    }
+//
+//                    try {
+//                        stage(stage_name + 'Test image') {
+//                            sh "mkdir -p ${reports_folder}"
+//                            sh "cd ${docker_folder} && bash test.sh ${ethsigner}"
+//                        }
+//                    } finally {
+//                        junit "${reports_folder}/*.xml"
+//                        sh "rm -rf ${reports_folder}"
+//                    }
+//
+//                    stage(stage_name + 'Push image') {
+//
+//                        def dockerImage = docker.image(ethsigner)
+//                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-pegasysengci') {
+//                            dockerImage.push()
+//
+//                            // if this is a stable release add extra docker image tags
+//                            if (!releaseVersion.contains('-')) {
+//                                additionalTags.add('latest')
+//                                if (shortReleaseVersion != "") {
+//                                    additionalTags.add(shortReleaseVersion)
+//                                }
+//                            }
+//
+//                            additionalTags.each { tag ->
+//                                dockerImage.push tag.trim()
+//                            }
+//
+//                        }
+//
+//                    }
+//
+//                }
+//            }
         }
     }
 }
