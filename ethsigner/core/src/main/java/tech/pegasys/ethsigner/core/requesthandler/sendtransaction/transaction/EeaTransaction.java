@@ -18,15 +18,20 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
 
 public class EeaTransaction implements Transaction {
@@ -55,8 +60,8 @@ public class EeaTransaction implements Transaction {
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
     final RawPrivateTransaction rawTransaction = createTransaction();
-    final List<RlpType> values =
-        PrivateTransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    // NOTE: asRlpValues has been extracted, and modified to handle character encoding.
+    final List<RlpType> values = asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
   }
@@ -105,4 +110,47 @@ public class EeaTransaction implements Transaction {
             .collect(Collectors.toList()),
         transactionJsonParameters.restriction());
   }
+
+  /*
+  TAKEN FROM WEB3J TO OVERCOME CHARACTER ENCODING PROBLEMS
+   */
+
+  public static List<RlpType> asRlpValues(
+      final RawPrivateTransaction privateTransaction, final Sign.SignatureData signatureData) {
+
+    final List<RlpType> result =
+        new ArrayList<>(
+            TransactionEncoder.asRlpValues(asRawTransaction(privateTransaction), signatureData));
+
+    result.add(
+        RlpString.create(
+            privateTransaction.getPrivateFrom().getBytes(StandardCharsets.ISO_8859_1)));
+
+    result.add(
+        new RlpList(
+            privateTransaction.getPrivateFor().stream()
+                .map(
+                    privateFor ->
+                        RlpString.create(privateFor.getBytes(StandardCharsets.ISO_8859_1)))
+                .collect(Collectors.toList())));
+
+    result.add(RlpString.create(privateTransaction.getRestriction()));
+
+    return result;
+  }
+
+  private static RawTransaction asRawTransaction(
+      final RawPrivateTransaction rawPrivateTransaction) {
+    return RawTransaction.createTransaction(
+        rawPrivateTransaction.getNonce(),
+        rawPrivateTransaction.getGasPrice(),
+        rawPrivateTransaction.getGasLimit(),
+        rawPrivateTransaction.getTo(),
+        BigInteger.ZERO,
+        rawPrivateTransaction.getData());
+  }
+  /*
+  END WEB3J
+   */
+
 }
