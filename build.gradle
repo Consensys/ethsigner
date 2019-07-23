@@ -247,7 +247,6 @@ subprojects {
           version "${project.version}"
           from components.java
           artifact sourcesJar
-          //          artifact javadocJar
           versionMapping {
             usage('java-api') { fromResolutionOf('runtimeClasspath') }
             usage('java-runtime') { fromResolutionResult() }
@@ -568,7 +567,7 @@ release {
   ]
 
   git {
-    requireBranch = project.hasProperty('release.branch') ? project.property('release.branch') : 'release_jars'
+    requireBranch = project.hasProperty('release.branch') ? project.property('release.branch') : 'master'
   }
 }
 
@@ -587,7 +586,6 @@ bintray {
   publish = true
 
   pkg = bintrayPackage
-
 }
 
 afterReleaseBuild.dependsOn bintrayUpload
