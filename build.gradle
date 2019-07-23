@@ -247,7 +247,7 @@ subprojects {
           version "${project.version}"
           from components.java
           artifact sourcesJar
-//          artifact javadocJar
+          //          artifact javadocJar
           versionMapping {
             usage('java-api') { fromResolutionOf('runtimeClasspath') }
             usage('java-runtime') { fromResolutionResult() }
@@ -577,7 +577,7 @@ apply plugin: 'com.jfrog.bintray'
 bintray {
   user = bintrayUser
   key = bintrayKey
-  
+
   filesSpec {
     from distTar.destinationDir.path
     from distZip.destinationDir.path
