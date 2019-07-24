@@ -16,9 +16,12 @@ import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.PrivacyIdentifier;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,9 +30,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
+
   private final String sender;
-  private final String privateFrom;
-  private final List<String> privateFor;
+  private final PrivacyIdentifier privateFrom;
+  private final List<PrivacyIdentifier> privateFor;
   private final String restriction;
 
   private BigInteger gas;
@@ -46,8 +50,11 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("privateFor") final List<String> privateFor,
       @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
-    this.privateFrom = privateFrom;
-    this.privateFor = privateFor;
+    this.privateFrom = createPrivacyIdentifier(privateFrom);
+    this.privateFor =
+        privateFor.stream()
+            .map(EeaSendTransactionJsonParameters::createPrivacyIdentifier)
+            .collect(Collectors.toList());
     this.restriction = restriction;
     this.sender = sender;
   }
@@ -112,11 +119,11 @@ public class EeaSendTransactionJsonParameters {
     return sender;
   }
 
-  public String privateFrom() {
+  public PrivacyIdentifier privateFrom() {
     return privateFrom;
   }
 
-  public List<String> privateFor() {
+  public List<PrivacyIdentifier> privateFor() {
     return privateFor;
   }
 
@@ -133,5 +140,11 @@ public class EeaSendTransactionJsonParameters {
       throw new IllegalArgumentException(
           "Non-zero value, private transactions cannot transfer ether");
     }
+  }
+
+  private static PrivacyIdentifier createPrivacyIdentifier(final String input) {
+    return input.startsWith("0x")
+        ? PrivacyIdentifier.fromHexString(input)
+        : PrivacyIdentifier.fromBase64String(input);
   }
 }
