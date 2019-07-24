@@ -292,7 +292,6 @@ subprojects {
     options.fork = true
     options.incremental = true
   }
-  apply plugin: 'maven-publish'
 
   sourceSets {
     // test-support can be consumed as a library by other projects in their tests
