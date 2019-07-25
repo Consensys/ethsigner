@@ -104,6 +104,11 @@ allprojects {
     from sourceSets.main.allSource
   }
 
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
   sourceCompatibility = 11
   targetCompatibility = 11
 
@@ -247,6 +252,7 @@ subprojects {
           version "${project.version}"
           from components.java
           artifact sourcesJar
+          artifact javadocJar
           versionMapping {
             usage('java-api') { fromResolutionOf('runtimeClasspath') }
             usage('java-runtime') { fromResolutionResult() }
