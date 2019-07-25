@@ -5,15 +5,10 @@ description: Signing transactions with key stored in Azure Key Vault
 
 EthSigner supports storing the signing key in a [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/). 
 
-!!! caution 
-    EthSigner with Azure Key Vault does not support TLS. If using a remote Azure Key Vault, apply appropriate 
-    security. 
-
 ## Storing Private Key in Azure Key Vault 
 
-Create a signing key in the [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/)
-and register EthSigner as an application for the key. The key must be a base 64 encoded private key for 
-ECDSA for curve secp256k1.
+Create a SECP256k1 key in the [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/)
+and register EthSigner as an application for the key. 
 
 Take note of the following to specify when starting EthSigner: 
 
