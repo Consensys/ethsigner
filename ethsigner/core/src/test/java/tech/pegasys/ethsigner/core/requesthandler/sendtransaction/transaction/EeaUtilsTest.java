@@ -12,23 +12,22 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
 class EeaUtilsTest {
 
   @Test
-  void createsPrivacyGroupIdWithSameFromAndTo() {
-    final PrivacyIdentifier sender =
+  void createsPrivacyGroupIdWithSamePrivateFromAndPrivateFor() {
+    final PrivacyIdentifier privateFrom =
         PrivacyIdentifier.fromBase64String("negmDcN2P4ODpqn/6WkJ02zT/0w0bjhGpkZ8UP6vARk=");
-    final PrivacyIdentifier to =
+    final PrivacyIdentifier privateFor =
         PrivacyIdentifier.fromBase64String("negmDcN2P4ODpqn/6WkJ02zT/0w0bjhGpkZ8UP6vARk=");
 
     final String privacyGroupId =
-        EeaUtils.generatePrivacyGroupId(sender, Collections.singletonList(to));
+        EeaUtils.generatePrivacyGroupId(privateFrom, singletonList(privateFor));
     assertThat(privacyGroupId).isEqualTo("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=");
   }
 }
