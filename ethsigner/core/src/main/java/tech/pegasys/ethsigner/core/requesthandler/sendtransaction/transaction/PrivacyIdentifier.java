@@ -18,7 +18,7 @@ import java.util.Base64;
 
 import org.web3j.utils.Numeric;
 
-public class PrivacyIdentifier {
+public class PrivacyIdentifier implements Comparable<byte[]> {
 
   private static final int IDENTIFIER_LENGTH = 32;
 
@@ -70,5 +70,10 @@ public class PrivacyIdentifier {
   @Override
   public int hashCode() {
     return Arrays.hashCode(identifier);
+  }
+
+  @Override
+  public int compareTo(byte[] o) {
+    return Arrays.compare(identifier, o);
   }
 }
