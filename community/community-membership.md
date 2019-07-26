@@ -1,5 +1,4 @@
-description: Community organisation and members responsibilities
-<!--- END of page meta data -->
+#Community organisation and members responsibilities
 
 !!!note
     This document is in progress

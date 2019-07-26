@@ -1,5 +1,4 @@
-description: Code review guidelines for EthSigner developers
-<!--- END of page meta data -->
+#Code review guidelines for EthSigner developers
 
 All changes must be code reviewed. For non-approvers this is obvious, since
 you can't commit anyway. But even for approvers, we want all changes to get at
