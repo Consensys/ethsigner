@@ -31,7 +31,8 @@ After installing [Hashicorp Vault](https://learn.hashicorp.com/vault/getting-sta
     vault kv put secret/ethsignerSigningKey value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63
     ```
 
-    The private key is stored in the default location for EthSigner. 
+    The private key is stored in the default location for EthSigner. The key must be a base 64 encoded private 
+    key for ECDSA for curve secp256k1.  
 
 ## Start Pantheon 
 
