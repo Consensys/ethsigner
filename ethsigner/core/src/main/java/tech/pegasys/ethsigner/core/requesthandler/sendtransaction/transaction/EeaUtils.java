@@ -37,9 +37,10 @@ public class EeaUtils {
 
     final List<RlpType> rlpList =
         identifierList.stream()
-            .distinct()
             .sorted(Comparator.comparing(Arrays::hashCode))
             .map(RlpString::create)
+            .distinct() // do this last so we have an Object to the comparison on. Otherwise default
+            // equals will be used on a byte array which doesn't work
             .collect(Collectors.toList());
 
     final byte[] hash = Hash.sha3(RlpEncoder.encode(new RlpList(rlpList)));
