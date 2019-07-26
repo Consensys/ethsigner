@@ -3,7 +3,7 @@ description: Signing transactions with key stored in Azure Key Vault
 
 # Using EthSigner with Azure Key Vault 
 
-EthSigner supports storing the signing key in a [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/). 
+EthSigner supports storing the signing key in an [Azure Key Vault](https://azure.microsoft.com/en-au/services/key-vault/). 
 
 ## Storing Private Key in Azure Key Vault 
 
