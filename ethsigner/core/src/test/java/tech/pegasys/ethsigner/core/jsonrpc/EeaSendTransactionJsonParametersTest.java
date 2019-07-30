@@ -38,6 +38,11 @@ public class EeaSendTransactionJsonParametersTest {
     return Optional.of(new BigInteger(value.substring(2), 16));
   }
 
+  private BigInteger getStringAsBigInteger(final JsonObject object, final String key) {
+    final String value = object.getString(key);
+    return new BigInteger(value.substring(2), 16);
+  }
+
   private JsonObject validEeaTransactionParameters() {
     final JsonObject parameters = new JsonObject();
     parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
@@ -70,7 +75,7 @@ public class EeaSendTransactionJsonParametersTest {
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
         .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
-    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
+    assertThat(txnParams.nonce()).isEqualTo(getStringAsBigInteger(parameters, "nonce"));
     assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
     assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
     assertThat(txnParams.privateFrom().getRaw())
@@ -92,7 +97,7 @@ public class EeaSendTransactionJsonParametersTest {
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
         .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
-    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
+    assertThat(txnParams.nonce()).isEqualTo(getStringAsBigInteger(parameters, "nonce"));
     assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
     assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
     assertThat(txnParams.privateFrom().getRaw())
