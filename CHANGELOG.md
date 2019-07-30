@@ -6,7 +6,7 @@
 - When a private transaction is submitted without a nonce, then transaction will be rejected. Ethsigner is unable to derive an appropriate nonce for a private transaction, as such the `nonce` field of `eea_SendTransaction` is mandatory - if a private transaction is submitted without a nonce an error will be returned. DApps can use the [`priv_getTransactionCount`]( (https://docs.pantheon.pegasys.tech/en/latest/Reference/Pantheon-API-Methods/#priv_gettransactioncount)) JSON RPC to determine the correct nonce prior to transaction transmission.
 
 ### Breaking Changes
-- Command line reworked with sub-commands
+- Command line reworked to specify the source of the key used for transaction signing.
 - EthSigner is supported on Java 11+ only; Java 8 is no longer supported.
 
 ### Features Added
