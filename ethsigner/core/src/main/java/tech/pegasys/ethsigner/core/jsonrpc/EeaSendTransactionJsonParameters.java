@@ -50,11 +50,9 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("privateFor") final List<String> privateFor,
       @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
-    this.privateFrom = createPrivacyIdentifier(privateFrom);
+    this.privateFrom = PrivacyIdentifier.fromBase64String(privateFrom);
     this.privateFor =
-        privateFor.stream()
-            .map(EeaSendTransactionJsonParameters::createPrivacyIdentifier)
-            .collect(Collectors.toList());
+        privateFor.stream().map(PrivacyIdentifier::fromBase64String).collect(Collectors.toList());
     this.restriction = restriction;
     this.sender = sender;
   }
@@ -140,11 +138,5 @@ public class EeaSendTransactionJsonParameters {
       throw new IllegalArgumentException(
           "Non-zero value, private transactions cannot transfer ether");
     }
-  }
-
-  private static PrivacyIdentifier createPrivacyIdentifier(final String input) {
-    return input.startsWith("0x")
-        ? PrivacyIdentifier.fromHexString(input)
-        : PrivacyIdentifier.fromBase64String(input);
   }
 }

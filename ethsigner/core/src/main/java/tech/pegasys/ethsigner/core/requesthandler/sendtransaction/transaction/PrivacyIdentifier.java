@@ -16,8 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 
-import org.web3j.utils.Numeric;
-
 public class PrivacyIdentifier {
 
   private static final int IDENTIFIER_LENGTH = 32;
@@ -30,11 +28,6 @@ public class PrivacyIdentifier {
 
   public static PrivacyIdentifier fromBase64String(final String input) {
     final byte[] byteRepresentation = Base64.getDecoder().decode(input);
-    return createPrivacyIdentifier(input, byteRepresentation);
-  }
-
-  public static PrivacyIdentifier fromHexString(final String input) {
-    final byte[] byteRepresentation = Numeric.hexStringToByteArray(input);
     return createPrivacyIdentifier(input, byteRepresentation);
   }
 
