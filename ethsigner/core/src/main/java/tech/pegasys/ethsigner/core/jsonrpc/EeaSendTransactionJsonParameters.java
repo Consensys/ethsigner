@@ -48,13 +48,15 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("from") final String sender,
       @JsonProperty("privateFrom") final String privateFrom,
       @JsonProperty("privateFor") final List<String> privateFor,
-      @JsonProperty("restriction") final String restriction) {
+      @JsonProperty("restriction") final String restriction,
+      @JsonProperty("nonce") final String nonce) {
     validatePrefix(sender);
     this.privateFrom = PrivacyIdentifier.fromBase64String(privateFrom);
     this.privateFor =
         privateFor.stream().map(PrivacyIdentifier::fromBase64String).collect(Collectors.toList());
     this.restriction = restriction;
     this.sender = sender;
+    this.nonce = decodeQuantity(nonce);
   }
 
   @JsonSetter("gas")
@@ -65,11 +67,6 @@ public class EeaSendTransactionJsonParameters {
   @JsonSetter("gasPrice")
   public void gasPrice(final String gasPrice) {
     this.gasPrice = decodeQuantity(gasPrice);
-  }
-
-  @JsonSetter("nonce")
-  public void nonce(final String nonce) {
-    this.nonce = decodeQuantity(nonce);
   }
 
   @JsonSetter("to")
@@ -109,8 +106,8 @@ public class EeaSendTransactionJsonParameters {
     return Optional.ofNullable(value);
   }
 
-  public Optional<BigInteger> nonce() {
-    return Optional.ofNullable(nonce);
+  public BigInteger nonce() {
+    return nonce;
   }
 
   public String sender() {
