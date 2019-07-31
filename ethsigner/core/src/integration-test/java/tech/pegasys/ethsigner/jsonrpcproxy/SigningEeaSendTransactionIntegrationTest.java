@@ -305,8 +305,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
-  //  TODO: Once the eea_getTransactionCount (now priv_getTransactionCount functionality is fixed we
-  // can reinstate this test
+  //  TODO: re-instate this once ES-21 is fixed:
   //  @Test
   //  public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
   //    final String rawTransactionWithInitialNonce =
