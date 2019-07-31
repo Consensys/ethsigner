@@ -32,7 +32,6 @@ public class UpCheckAcceptanceTest {
 
   private static final String UP_CHECK_PATH = "/upcheck";
   private static final String UP_CHECK_MESSAGE = "I'm up!";
-  private static final String TIMEOUT_MESSAGE = "timeout";
 
   private static Signer ethSigner;
 
