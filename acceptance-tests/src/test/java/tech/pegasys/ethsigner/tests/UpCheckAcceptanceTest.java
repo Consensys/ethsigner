@@ -19,9 +19,12 @@ import tech.pegasys.ethsigner.tests.dsl.http.HttpResponse;
 import java.net.SocketTimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 public class UpCheckAcceptanceTest extends AcceptanceTestBase {
+  private static final Logger LOG = LogManager.getLogger();
 
   private static final String UP_CHECK_PATH = "/upcheck";
   private static final String UP_CHECK_MESSAGE = "I'm up!";
@@ -32,6 +35,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
     final SocketTimeoutException reply =
         ethSigner().httpRequests().getExceptingTimeout(UP_CHECK_PATH + "Noise");
 
+    LOG.info("timeout exception", reply);
     assertThat(reply).isNotNull();
     assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
   }
@@ -39,7 +43,6 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void getRequestMustRespond() {
     final HttpResponse reply = ethSigner().httpRequests().get(UP_CHECK_PATH);
-
     assertThat(reply.status()).isEqualTo(HttpResponseStatus.OK);
     assertThat(reply.body()).isEqualTo(UP_CHECK_MESSAGE);
   }
@@ -49,6 +52,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
     final SocketTimeoutException reply =
         ethSigner().httpRequests().postExceptingTimeout(UP_CHECK_PATH);
 
+    LOG.info("timeout exception", reply);
     assertThat(reply).isNotNull();
     assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
   }
@@ -58,6 +62,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
     final SocketTimeoutException reply =
         ethSigner().httpRequests().putExceptingTimeout(UP_CHECK_PATH);
 
+    LOG.info("timeout exception", reply);
     assertThat(reply).isNotNull();
     assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
   }
@@ -67,6 +72,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
     final SocketTimeoutException reply =
         ethSigner().httpRequests().deleteExceptingTimeout(UP_CHECK_PATH);
 
+    LOG.info("timeout exception", reply);
     assertThat(reply).isNotNull();
     assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
   }
