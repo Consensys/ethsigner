@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.math.BigInteger.ONE;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.EEA_GET_TRANSACTION_COUNT;
 
@@ -61,12 +60,6 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
 
   @Test
   public void missingNonceResultsInEthNodeRespondingUnsuccessfully() {
-    final String ethNodeResponseBody = "VALID_RESPONSE";
-    final String requestBody =
-        sendRawTransaction.request(
-            "0xf8dc018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a039231358760e94952178f2963c32a977cbca58e9ebfbbd6263f8ca32b280516ea01d12666bea8dc7d4fb747c6dea691a7b90098c921e7f4adac8afd6178cbeb5a7a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
-    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
-
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INVALID_PARAMS));
   }
@@ -312,27 +305,32 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
     verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
-  @Test
-  public void missingNonceResultsInEthNodeRespondingUnsuccessfully2() {
-    final String rawTransactionWithInitialNonce =
-        sendRawTransaction.request(
-            "0xf8dc018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a039231358760e94952178f2963c32a977cbca58e9ebfbbd6263f8ca32b280516ea01d12666bea8dc7d4fb747c6dea691a7b90098c921e7f4adac8afd6178cbeb5a7a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
-
-    final String rawTransactionWithNextNonce =
-        sendRawTransaction.request(
-            "0xf8dc028609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a03b1a326e4faf907cd4a618eb64c1bc434cda522e71f7ac2f8b5066bcf7f76d12a07a8d535de9df4a3e500a6698f477ca0d022eccd44a6a3a8e5acc5fccea549d45a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
-
-    setUpEthNodeResponse(
-        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
-
-    final String successResponseFromWeb3Provider = "VALID_RESULT";
-    setUpEthNodeResponse(
-        request.ethNode(rawTransactionWithNextNonce),
-        response.ethNode(successResponseFromWeb3Provider));
-
-    sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(INVALID_PARAMS));
-  }
+  //  TODO: Once the eea_getTransactionCount (now priv_getTransactionCount functionality is fixed we
+  // can reinstate this test
+  //  @Test
+  //  public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
+  //    final String rawTransactionWithInitialNonce =
+  //        sendRawTransaction.request(
+  //
+  // "0xf8dc018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a039231358760e94952178f2963c32a977cbca58e9ebfbbd6263f8ca32b280516ea01d12666bea8dc7d4fb747c6dea691a7b90098c921e7f4adac8afd6178cbeb5a7a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
+  //
+  //    final String rawTransactionWithNextNonce =
+  //        sendRawTransaction.request(
+  //
+  // "0xf8dc028609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a03b1a326e4faf907cd4a618eb64c1bc434cda522e71f7ac2f8b5066bcf7f76d12a07a8d535de9df4a3e500a6698f477ca0d022eccd44a6a3a8e5acc5fccea549d45a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
+  //
+  //    setUpEthNodeResponse(
+  //        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
+  //
+  //    final String successResponseFromWeb3Provider = "VALID_RESULT";
+  //    setUpEthNodeResponse(
+  //        request.ethNode(rawTransactionWithNextNonce),
+  //        response.ethNode(successResponseFromWeb3Provider));
+  //
+  //    sendRequestThenVerifyResponse(
+  //        request.ethSigner(sendTransaction.missingNonce()),
+  //        response.ethSigner(successResponseFromWeb3Provider));
+  //  }
 
   @Test
   public void transactionWithMissingNonceReturnsErrorsOtherThanLowNonceToCaller() {
