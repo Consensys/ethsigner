@@ -45,11 +45,11 @@ public class EeaTransactionTest {
             "0x7577919ae5df4941180eac211965f275cdce314d",
             "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=",
             singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="),
-            "restricted");
+            "restricted",
+            "0x1");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
-    params.nonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2");
     params.value("0x0");
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
@@ -69,9 +69,7 @@ public class EeaTransactionTest {
     assertThat(decodedTransaction.getTo()).isEqualTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     assertThat(decodedTransaction.getGasLimit()).isEqualTo(decodeQuantity("0x76c0"));
     assertThat(decodedTransaction.getGasPrice()).isEqualTo(decodeQuantity("0x9184e72a000"));
-    assertThat(decodedTransaction.getNonce())
-        .isEqualTo(
-            decodeQuantity("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"));
+    assertThat(decodedTransaction.getNonce()).isEqualTo(decodeQuantity("0x1"));
     assertThat(decodedTransaction.getValue()).isEqualTo(decodeQuantity("0x0"));
     assertThat(decodedTransaction.getData())
         .isEqualTo(
