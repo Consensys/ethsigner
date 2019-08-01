@@ -108,9 +108,6 @@ public class UpCheckAcceptanceTest {
   private void verifyOkHttpResponse(final SocketTimeoutException reply) {
     // OkHttp appears to have a race condition whereby the thrown exception can have either
     // of 2 possible messages - it is non-deterministic.
-    assertThat(
-            reply.getMessage().equals(TIMEOUT_MESSAGE)
-                || reply.getMessage().equals(READ_TIMED_OUT_MESSAGE))
-        .isTrue();
+    assertThat(reply.getMessage()).isIn(TIMEOUT_MESSAGE, READ_TIMED_OUT_MESSAGE);
   }
 }
