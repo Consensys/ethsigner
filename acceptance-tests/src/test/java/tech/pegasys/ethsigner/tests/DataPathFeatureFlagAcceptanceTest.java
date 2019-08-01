@@ -65,7 +65,8 @@ public class DataPathFeatureFlagAcceptanceTest {
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
+    final SignerConfiguration signerConfig =
+        new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 
     ethNode = new PantheonNode(docker, nodeConfig);
     ethNode.start();

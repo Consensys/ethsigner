@@ -15,8 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl.node;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.core.command.LogContainerResultCallback;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
@@ -140,22 +138,8 @@ public class PantheonNode implements Node {
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
-      PantheonNode
-          .showLog(docker, pantheonContainerId, true, 500, new LogContainerResultCallback() {
-            @Override
-            public void onNext(Frame item) {
-              LOG.info(item.toString());
-            }
-          });
       throw new RuntimeException("Failed to start the Pantheon node", e);
     }
-  }
-
-
-  private static void showLog(DockerClient dockerClient, String containerId, boolean follow,
-      int numberOfLines, LogContainerResultCallback logCallback) {
-    dockerClient.logContainerCmd(containerId).withStdOut(true).withStdErr(true)
-        .withFollowStream(follow).withTail(numberOfLines).exec(logCallback);
   }
 
   @Override
