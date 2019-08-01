@@ -38,11 +38,13 @@ import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.WaitContainerResultCallback;
 import com.google.common.collect.Lists;
@@ -138,8 +140,25 @@ public class PantheonNode implements Node {
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
+      showLogFromPantheonContainer();
       throw new RuntimeException("Failed to start the Pantheon node", e);
     }
+  }
+
+  private void showLogFromPantheonContainer() {
+    docker
+        .logContainerCmd(pantheonContainerId)
+        .withStdOut(true)
+        .withStdErr(true)
+        .withFollowStream(true)
+        .withTail(500)
+        .exec(
+            new LogContainerResultCallback() {
+              @Override
+              public void onNext(Frame item) {
+                LOG.info(item.toString());
+              }
+            });
   }
 
   @Override
@@ -220,6 +239,8 @@ public class PantheonNode implements Node {
     try {
       final List<String> commandLineItems =
           Lists.newArrayList(
+              "--genesis-file",
+              genesisVolume.getPath(),
               "--logging",
               "DEBUG",
               "--miner-enabled",
@@ -231,7 +252,9 @@ public class PantheonNode implements Node {
               "--rpc-ws-enabled",
               "--rpc-http-apis",
               "ETH,NET,WEB3,EEA",
-              "--privacy-enabled");
+              "--privacy-enabled",
+              "--privacy-public-key-file",
+              privacyBinding.getVolume().getPath());
 
       config
           .getCors()
