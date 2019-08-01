@@ -239,6 +239,8 @@ public class PantheonNode implements Node {
     try {
       final List<String> commandLineItems =
           Lists.newArrayList(
+              "--genesis-file",
+              genesisVolume.getPath(),
               "--logging",
               "DEBUG",
               "--miner-enabled",
