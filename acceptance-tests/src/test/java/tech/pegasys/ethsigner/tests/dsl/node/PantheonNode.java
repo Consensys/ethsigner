@@ -250,7 +250,9 @@ public class PantheonNode implements Node {
               "--rpc-ws-enabled",
               "--rpc-http-apis",
               "ETH,NET,WEB3,EEA",
-              "--privacy-enabled");
+              "--privacy-enabled",
+              "--privacy-public-key-file",
+              privacyBinding.getVolume().getPath());
 
       config
           .getCors()

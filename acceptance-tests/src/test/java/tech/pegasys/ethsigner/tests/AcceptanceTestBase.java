@@ -34,6 +34,8 @@ import org.junit.jupiter.api.BeforeAll;
 
 public class AcceptanceTestBase {
 
+  private static String ENCLAVE_PUBLIC_KEY_FILENAME = "enclave_key.pub";
+
   private static Node ethNode;
   private static Signer ethSigner;
 
@@ -50,7 +52,7 @@ public class AcceptanceTestBase {
   }
 
   protected String enclavePublicKey() {
-    return readResource("enclave_key.pub");
+    return readResource(ENCLAVE_PUBLIC_KEY_FILENAME);
   }
 
   @SuppressWarnings("UnstableApiUsage")
