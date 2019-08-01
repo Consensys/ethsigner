@@ -15,17 +15,51 @@ package tech.pegasys.ethsigner.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.tests.dsl.http.HttpResponse;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import java.net.SocketTimeoutException;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class UpCheckAcceptanceTest extends AcceptanceTestBase {
+public class UpCheckAcceptanceTest {
 
   private static final String UP_CHECK_PATH = "/upcheck";
   private static final String UP_CHECK_MESSAGE = "I'm up!";
   private static final String TIMEOUT_MESSAGE = "timeout";
+  private static final String READ_TIMED_OUT_MESSAGE = "Read timed out";
+
+  private static Signer ethSigner;
+
+  private Signer ethSigner() {
+    return ethSigner;
+  }
+
+  @BeforeAll
+  public static void setUpBase() {
+    Runtime.getRuntime().addShutdownHook(new Thread(UpCheckAcceptanceTest::tearDownBase));
+
+    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
+
+    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+  }
+
+  @AfterAll
+  static void tearDownBase() {
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+  }
 
   @Test
   public void getRequestWithWrongPathMustTimeout() {
@@ -33,7 +67,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
         ethSigner().httpRequests().getExceptingTimeout(UP_CHECK_PATH + "Noise");
 
     assertThat(reply).isNotNull();
-    assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
+    verifyOkHttpResponse(reply);
   }
 
   @Test
@@ -50,7 +84,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
         ethSigner().httpRequests().postExceptingTimeout(UP_CHECK_PATH);
 
     assertThat(reply).isNotNull();
-    assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
+    verifyOkHttpResponse(reply);
   }
 
   @Test
@@ -59,7 +93,7 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
         ethSigner().httpRequests().putExceptingTimeout(UP_CHECK_PATH);
 
     assertThat(reply).isNotNull();
-    assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
+    verifyOkHttpResponse(reply);
   }
 
   @Test
@@ -68,6 +102,12 @@ public class UpCheckAcceptanceTest extends AcceptanceTestBase {
         ethSigner().httpRequests().deleteExceptingTimeout(UP_CHECK_PATH);
 
     assertThat(reply).isNotNull();
-    assertThat(reply.getMessage()).isEqualTo(TIMEOUT_MESSAGE);
+    verifyOkHttpResponse(reply);
+  }
+
+  private void verifyOkHttpResponse(final SocketTimeoutException reply) {
+    // OkHttp appears to have a race condition whereby the thrown exception can have either
+    // of 2 possible messages - it is non-deterministic.
+    assertThat(reply.getMessage()).isIn(TIMEOUT_MESSAGE, READ_TIMED_OUT_MESSAGE);
   }
 }
