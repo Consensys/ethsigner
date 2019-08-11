@@ -37,8 +37,8 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 /**
- * Sanity test to verify starting EthSigner without the data directory feature flag works, (the
- * feature flag is leveraged by most AT).
+ * Sanity test to verify starting EthSigner without the data path feature flag works (the data
+ * directory feature flag is leveraged by most ATs).
  */
 public class DataPathFeatureFlagAcceptanceTest {
 
@@ -65,6 +65,12 @@ public class DataPathFeatureFlagAcceptanceTest {
 
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+
+    /*
+     * Dynamic port allocation for either the RPC or WS ports triggers use of the data path.
+     * use_data_path = (httpRpcPort == 0 || webSocketPort == 0)
+     * By defining a value for those ports, no data path is present when launching EthSigner.
+     */
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 

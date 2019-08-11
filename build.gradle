@@ -460,10 +460,9 @@ tasks.register("dockerDistUntar") {
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def image="pegasyseng/ethsigner:develop"
+  def image = project.hasProperty('release.releaseVersion') ? "pegasyseng/ethsigner:" + project.property('release.releaseVersion') : "pegasyseng/ethsigner:develop"
   def dockerBuildDir = "build/docker-ethsigner/"
   workingDir "${dockerBuildDir}"
-
 
   doFirst {
     copy {

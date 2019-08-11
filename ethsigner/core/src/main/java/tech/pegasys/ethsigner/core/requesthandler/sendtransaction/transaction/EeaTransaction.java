@@ -49,7 +49,7 @@ public class EeaTransaction implements Transaction {
     this.transactionJsonParameters = transactionJsonParameters;
     this.nonceProvider = nonceProvider;
     this.id = id;
-    this.nonce = transactionJsonParameters.nonce().orElse(null);
+    this.nonce = transactionJsonParameters.nonce();
   }
 
   @Override
@@ -68,7 +68,9 @@ public class EeaTransaction implements Transaction {
 
   @Override
   public boolean isNonceUserSpecified() {
-    return transactionJsonParameters.nonce().isPresent();
+    return true;
+    // TODO: re-instate this once ES-21 is fixed:
+    //  return transactionJsonParameters.nonce().isPresent();
   }
 
   @Override

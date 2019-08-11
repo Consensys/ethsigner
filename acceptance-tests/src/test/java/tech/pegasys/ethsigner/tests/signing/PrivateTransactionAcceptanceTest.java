@@ -27,6 +27,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import tech.pegasys.ethsigner.tests.signing.contract.generated.SimpleStorage;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -59,11 +60,30 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
     final PrivateTransaction transaction =
         PrivateTransaction.createEtherTransaction(
             richBenefactor().address(),
-            richBenefactor().nextNonceAndIncrement(),
+            Optional.of(richBenefactor().nextNonceAndIncrement()),
             GAS_PRICE,
             GAS_LIMIT,
             RECIPIENT,
             BigInteger.ONE,
+            enclavePublicKey(),
+            singletonList(enclavePublicKey()),
+            RESTRICTED);
+
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner().privateContracts().submitExceptional(transaction);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INVALID_PARAMS);
+  }
+
+  @Test
+  public void valueTransferWithoutNonce() {
+    final PrivateTransaction transaction =
+        PrivateTransaction.createEtherTransaction(
+            richBenefactor().address(),
+            Optional.empty(),
+            GAS_PRICE,
+            GAS_LIMIT,
+            RECIPIENT,
+            BigInteger.ZERO,
             enclavePublicKey(),
             singletonList(enclavePublicKey()),
             RESTRICTED);
