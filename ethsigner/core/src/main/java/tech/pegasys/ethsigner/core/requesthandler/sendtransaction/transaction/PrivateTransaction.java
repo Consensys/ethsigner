@@ -18,11 +18,15 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpType;
 
 public abstract class PrivateTransaction implements Transaction {
 
@@ -50,7 +54,10 @@ public abstract class PrivateTransaction implements Transaction {
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
     final RawPrivateTransaction rawTransaction = createTransaction();
-    return PrivateTransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    final List<RlpType> values =
+        PrivateTransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    final RlpList rlpList = new RlpList(values);
+    return RlpEncoder.encode(rlpList);
   }
 
   @Override

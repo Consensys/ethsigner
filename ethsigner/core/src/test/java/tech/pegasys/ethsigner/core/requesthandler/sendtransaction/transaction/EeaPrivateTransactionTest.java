@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionDecoder;
 import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
-import org.web3j.rlp.RlpString;
+import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
+import org.web3j.utils.Restriction;
 
 public class EeaPrivateTransactionTest {
 
@@ -75,15 +75,13 @@ public class EeaPrivateTransactionTest {
     assertThat(decodedTransaction.getData())
         .isEqualTo(
             "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    assertThat(decodedTransaction.getRestriction()).isEqualTo("restricted");
+    assertThat(decodedTransaction.getRestriction()).isEqualTo(Restriction.RESTRICTED);
 
-    final String expectedDecodedPrivateFrom =
-        new String(
-            RlpString.create(params.privateFrom().getRaw()).getBytes(), StandardCharsets.UTF_8);
-    final String expectedDecodedPrivateFor =
-        new String(
-            RlpString.create(params.privateFor().get().get(0).getRaw()).getBytes(),
-            StandardCharsets.UTF_8);
+    final Base64String expectedDecodedPrivateFrom =
+        Base64String.wrap(params.privateFrom().getRaw());
+
+    final Base64String expectedDecodedPrivateFor =
+        Base64String.wrap(params.privateFor().get().get(0).getRaw());
 
     assertThat(decodedTransaction.getPrivateFrom()).isEqualTo(expectedDecodedPrivateFrom);
     assertThat(decodedTransaction.getPrivateFor().get().get(0))
