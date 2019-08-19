@@ -125,7 +125,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(eea, web3j),
+            new TransactionFactory(eea, web3j, web3jService),
             null);
     runner.start();
 

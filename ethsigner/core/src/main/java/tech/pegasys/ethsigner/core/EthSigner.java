@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import org.web3j.protocol.pantheon.Pantheon;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -58,8 +59,9 @@ public final class EthSigner {
 
     final HttpService web3jService = createWeb3jHttpService();
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
-    final Eea eea = new JsonRpc2_0Eea(web3jService);
-    final TransactionFactory transactionFactory = new TransactionFactory(eea, web3j);
+    final Pantheon pantheon = Pantheon.build(web3jService);
+    final TransactionFactory transactionFactory =
+        new TransactionFactory(pantheon, web3j, web3jService);
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(signer, config.getChainId().id());
     final WebClientOptions clientOptions =

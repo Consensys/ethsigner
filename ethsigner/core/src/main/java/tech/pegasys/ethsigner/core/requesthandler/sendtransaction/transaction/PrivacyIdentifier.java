@@ -44,9 +44,6 @@ public class PrivacyIdentifier {
     return identifier;
   }
 
-  public String asIso8559String() {
-    return new String(identifier, StandardCharsets.ISO_8859_1);
-  }
 
   @Override
   public boolean equals(Object o) {

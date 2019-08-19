@@ -12,29 +12,35 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.pantheon.Pantheon;
 import org.web3j.utils.Base64String;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
-public class EeaWeb3jNonceProvider implements NonceProvider {
+public class EeaLegacyNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Pantheon pantheon;
+  protected final Web3jService web3jService;
   private final String accountAddress;
-  private final PrivacyIdentifier privacyGroupId; // this is required to be Base64 encoded.
+  private final PrivacyIdentifier privateFrom;
+  private final List<PrivacyIdentifier> privateFor;
 
-  EeaWeb3jNonceProvider(final Pantheon pantheon, final String accountAddress,
-      final PrivacyIdentifier privacyGroupId) {
-    this.pantheon = pantheon;
+  public EeaLegacyNonceProvider(
+      final Web3jService web3jService, final String accountAddress,
+      final PrivacyIdentifier privateFrom,
+      final List<PrivacyIdentifier> privateFor) {
+    this.web3jService = web3jService;
     this.accountAddress = accountAddress;
-    this.privacyGroupId = privacyGroupId;
+    this.privateFrom = privateFrom;
+    this.privateFor = privateFor;
   }
 
   @Override
@@ -44,14 +50,19 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
 
   private BigInteger getNonceFromClient() {
 
-    final Request<?, EthGetTransactionCount> request =
-        pantheon.privGetTransactionCount(accountAddress,
-            Base64String.wrap(privacyGroupId.getRaw()));
+    final Request<?, EthGetTransactionCount> request = new Request<>(
+        "eea_getTransactionCount",
+        Lists.newArrayList(
+            accountAddress,
+            Base64String.wrap(privateFrom.getRaw()),
+            privateFor.stream().map(pf -> Base64String.wrap(pf.getRaw()))),
+        web3jService,
+        EthGetTransactionCount.class);
+
     try {
-      LOG.debug(
-          "Retrieving Transaction count from eea provider for {} with privacy group id {}",
-          accountAddress,
-          privacyGroupId);
+      LOG.trace(
+          "Retrieving Transaction count from eea provider for account {}; privateFrom {}; privateFor {}. ",
+          accountAddress, privateFrom, privateFor);
       final EthGetTransactionCount count = request.send();
       final BigInteger transactionCount = count.getTransactionCount();
       LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
