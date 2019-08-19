@@ -12,15 +12,17 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+
 import java.io.IOException;
 import java.math.BigInteger;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.pantheon.Pantheon;
 import org.web3j.utils.Base64String;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 public class EeaWeb3jNonceProvider implements NonceProvider {
 
@@ -30,7 +32,9 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
   private final String accountAddress;
   private final PrivacyIdentifier privacyGroupId; // this is required to be Base64 encoded.
 
-  EeaWeb3jNonceProvider(final Pantheon pantheon, final String accountAddress,
+  EeaWeb3jNonceProvider(
+      final Pantheon pantheon,
+      final String accountAddress,
       final PrivacyIdentifier privacyGroupId) {
     this.pantheon = pantheon;
     this.accountAddress = accountAddress;
@@ -45,8 +49,8 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
   private BigInteger getNonceFromClient() {
 
     final Request<?, EthGetTransactionCount> request =
-        pantheon.privGetTransactionCount(accountAddress,
-            Base64String.wrap(privacyGroupId.getRaw()));
+        pantheon.privGetTransactionCount(
+            accountAddress, Base64String.wrap(privacyGroupId.getRaw()));
     try {
       LOG.debug(
           "Retrieving Transaction count from eea provider for {} with privacy group id {}",

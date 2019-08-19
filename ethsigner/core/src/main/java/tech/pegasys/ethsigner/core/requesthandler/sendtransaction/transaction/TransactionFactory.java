@@ -12,23 +12,20 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EeaUtils.generatePrivacyGroupId;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.web3j.protocol.Web3jService;
-import org.web3j.protocol.pantheon.Pantheon;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.pantheon.Pantheon;
 
 public class TransactionFactory {
 
   private static final Logger LOG = LogManager.getLogger();
-
 
   private final Pantheon pantheon;
   private final Web3j web3j;
@@ -36,8 +33,8 @@ public class TransactionFactory {
   // TODO(tmm): Remove this once eea_GetTransaction is viable from eea namespace
   private final Web3jService web3jService;
 
-  public TransactionFactory(final Pantheon pantheon, final Web3j web3j,
-      final Web3jService web3jService) {
+  public TransactionFactory(
+      final Pantheon pantheon, final Web3j web3j, final Web3jService web3jService) {
     this.pantheon = pantheon;
     this.web3j = web3j;
     this.web3jService = web3jService;
@@ -72,8 +69,9 @@ public class TransactionFactory {
       return PantheonPrivateTransaction.from(params, nonceProvider, request.getId());
     }
 
-    final NonceProvider nonceProvider = new EeaLegacyNonceProvider(web3jService, params.sender(),
-        params.privateFrom(), params.privateFor().get());
+    final NonceProvider nonceProvider =
+        new EeaLegacyNonceProvider(
+            web3jService, params.sender(), params.privateFrom(), params.privateFor().get());
     return EeaPrivateTransaction.from(params, nonceProvider, request.getId());
   }
 

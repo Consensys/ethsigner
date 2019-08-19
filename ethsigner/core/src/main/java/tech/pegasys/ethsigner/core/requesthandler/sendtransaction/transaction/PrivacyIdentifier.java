@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -43,7 +42,6 @@ public class PrivacyIdentifier {
   public byte[] getRaw() {
     return identifier;
   }
-
 
   @Override
   public boolean equals(Object o) {

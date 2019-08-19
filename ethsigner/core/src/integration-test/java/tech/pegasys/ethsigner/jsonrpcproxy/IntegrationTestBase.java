@@ -24,7 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import org.web3j.protocol.pantheon.Pantheon;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -67,6 +66,7 @@ import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.pantheon.Pantheon;
 
 public class IntegrationTestBase {
 

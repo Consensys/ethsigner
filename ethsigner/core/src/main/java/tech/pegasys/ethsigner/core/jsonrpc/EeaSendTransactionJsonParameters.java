@@ -16,7 +16,6 @@ import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
-import com.google.common.collect.Lists;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.PrivacyIdentifier;
 
 import java.math.BigInteger;
@@ -28,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.common.collect.Lists;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
@@ -94,8 +94,9 @@ public class EeaSendTransactionJsonParameters {
   @JsonSetter("privateFor")
   public void privateFor(final String[] privateFor) {
     this.privateFor =
-        Lists.newArrayList(privateFor).stream().map(PrivacyIdentifier::fromBase64String).collect(
-            Collectors.toList());
+        Lists.newArrayList(privateFor).stream()
+            .map(PrivacyIdentifier::fromBase64String)
+            .collect(Collectors.toList());
   }
 
   @JsonSetter("privacyGroupId")

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import org.web3j.protocol.pantheon.Pantheon;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -27,9 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.Eea;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.pantheon.Pantheon;
 
 public final class EthSigner {
 

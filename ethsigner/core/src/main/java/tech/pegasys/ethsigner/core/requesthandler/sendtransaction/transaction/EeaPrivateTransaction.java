@@ -12,19 +12,17 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import com.google.common.base.MoreObjects;
-import java.math.BigInteger;
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+
 import java.util.List;
 import java.util.stream.Collectors;
-import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
+
+import com.google.common.base.MoreObjects;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Restriction;
-import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 public class EeaPrivateTransaction extends PrivateTransaction {
 
@@ -38,8 +36,8 @@ public class EeaPrivateTransaction extends PrivateTransaction {
       throw new RuntimeException("Transaction does not contain a valid privateFor list.");
     }
 
-    return new EeaPrivateTransaction(transactionJsonParameters, nonceProvider, id,
-        transactionJsonParameters.privateFor().get());
+    return new EeaPrivateTransaction(
+        transactionJsonParameters, nonceProvider, id, transactionJsonParameters.privateFor().get());
   }
 
   private EeaPrivateTransaction(
@@ -70,7 +68,8 @@ public class EeaPrivateTransaction extends PrivateTransaction {
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
         Base64String.wrap(transactionJsonParameters.privateFrom().getRaw()),
-        privateFor.stream().map(value -> Base64String.wrap(value.getRaw()))
+        privateFor.stream()
+            .map(value -> Base64String.wrap(value.getRaw()))
             .collect(Collectors.toList()),
         Restriction.fromString(transactionJsonParameters.restriction()));
   }
