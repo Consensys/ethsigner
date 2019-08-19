@@ -33,7 +33,7 @@ import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
 import org.web3j.rlp.RlpString;
 import org.web3j.utils.Numeric;
 
-public class PrivateTransactionTest {
+public class EeaPrivateTransactionTest {
 
   private PrivateTransaction privateTransaction;
   private EeaSendTransactionJsonParameters params;
@@ -54,7 +54,8 @@ public class PrivateTransactionTest {
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
 
-    privateTransaction = new PrivateTransaction(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
+    privateTransaction = EeaPrivateTransaction.from(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
+
   }
 
   @Test
@@ -76,21 +77,16 @@ public class PrivateTransactionTest {
             "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     assertThat(decodedTransaction.getRestriction()).isEqualTo("restricted");
 
-    // PrivateTransactionDecoder incorrectly decodes the PrivateFrom/For as it decodes bytes into
-    // UTF_8...
-    // Thus, the original data cannot be compared against the output, rather an incorrectly
-    // converted string becomes the expected value (to match the error in
-    // PrivateTransactionDecoder).
     final String expectedDecodedPrivateFrom =
         new String(
             RlpString.create(params.privateFrom().getRaw()).getBytes(), StandardCharsets.UTF_8);
     final String expectedDecodedPrivateFor =
         new String(
-            RlpString.create(params.privateFor().get(0).getRaw()).getBytes(),
+            RlpString.create(params.privateFor().get().get(0).getRaw()).getBytes(),
             StandardCharsets.UTF_8);
 
     assertThat(decodedTransaction.getPrivateFrom()).isEqualTo(expectedDecodedPrivateFrom);
-    assertThat(decodedTransaction.getPrivateFor().get(0)).isEqualTo(expectedDecodedPrivateFor);
+    assertThat(decodedTransaction.getPrivateFor().get().get(0)).isEqualTo(expectedDecodedPrivateFor);
 
     final SignatureData decodedSignatureData = decodedTransaction.getSignatureData();
     assertThat(trimLeadingZeroes(decodedSignatureData.getV())).isEqualTo(new byte[] {1});

@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import org.web3j.protocol.pantheon.Pantheon;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
@@ -117,7 +118,7 @@ public class IntegrationTestBase {
                 + ":"
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final Pantheon eea = Pantheon.build(web3jService);
 
     runner =
         new Runner(
