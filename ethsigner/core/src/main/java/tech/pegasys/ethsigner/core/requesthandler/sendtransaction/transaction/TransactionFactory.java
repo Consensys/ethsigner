@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.pantheon.Pantheon;
 
 public class TransactionFactory {
@@ -30,7 +31,7 @@ public class TransactionFactory {
   private final Pantheon pantheon;
   private final Web3j web3j;
 
-  // TODO(tmm): Remove this once eea_GetTransaction is viable from eea namespace
+  // TODO(tmm): Remove this once eea_GetTransaction is available from eea namespace in web3j
   private final Web3jService web3jService;
 
   public TransactionFactory(
@@ -38,6 +39,13 @@ public class TransactionFactory {
     this.pantheon = pantheon;
     this.web3j = web3j;
     this.web3jService = web3jService;
+  }
+
+  public static TransactionFactory createFrom(final Web3jService web3jService) {
+    final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
+    final Pantheon pantheon = Pantheon.build(web3jService);
+
+    return new TransactionFactory(pantheon, web3j, web3jService);
   }
 
   public Transaction createTransaction(final JsonRpcRequest request) {
@@ -50,6 +58,12 @@ public class TransactionFactory {
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
+  }
+
+  private Transaction createEthTransaction(final JsonRpcRequest request) {
+    final EthSendTransactionJsonParameters params = EthSendTransactionJsonParameters.from(request);
+    final NonceProvider ethNonceProvider = new EthWeb3jNonceProvider(web3j, params.sender());
+    return new EthTransaction(params, ethNonceProvider, request.getId());
   }
 
   private Transaction createEeaTransaction(final JsonRpcRequest request) {
@@ -65,19 +79,14 @@ public class TransactionFactory {
 
     if (params.privacyGroupId().isPresent()) {
       final NonceProvider nonceProvider =
-          new EeaWeb3jNonceProvider(pantheon, params.sender(), params.privacyGroupId().get());
+          new PantheonPrivateNonceProvider(
+              pantheon, params.sender(), params.privacyGroupId().get());
       return PantheonPrivateTransaction.from(params, nonceProvider, request.getId());
     }
 
     final NonceProvider nonceProvider =
-        new EeaLegacyNonceProvider(
+        new EeaPrivateNonceProvider(
             web3jService, params.sender(), params.privateFrom(), params.privateFor().get());
     return EeaPrivateTransaction.from(params, nonceProvider, request.getId());
-  }
-
-  private Transaction createEthTransaction(final JsonRpcRequest request) {
-    final EthSendTransactionJsonParameters params = EthSendTransactionJsonParameters.from(request);
-    final NonceProvider ethNonceProvider = new EthWeb3jNonceProvider(web3j, params.sender());
-    return new EthTransaction(params, ethNonceProvider, request.getId());
   }
 }

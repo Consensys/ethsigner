@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
@@ -100,7 +99,6 @@ public class IntegrationTestBase {
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(transactionSigner(), chainId);
 
-    final Vertx vertx = Vertx.vertx();
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
     httpClientOptions.setDefaultPort(clientAndServer.getLocalPort());
