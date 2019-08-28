@@ -44,7 +44,6 @@ public class EeaPrivateTransactionTest {
         new EeaSendTransactionJsonParameters(
             "0x7577919ae5df4941180eac211965f275cdce314d",
             "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=",
-            singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="),
             "restricted");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
@@ -53,6 +52,7 @@ public class EeaPrivateTransactionTest {
     params.nonce("0x1");
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+    params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
 
     privateTransaction =
         EeaPrivateTransaction.from(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
@@ -77,11 +77,8 @@ public class EeaPrivateTransactionTest {
             "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     assertThat(decodedTransaction.getRestriction()).isEqualTo(Restriction.RESTRICTED);
 
-    final Base64String expectedDecodedPrivateFrom =
-        Base64String.wrap(params.privateFrom().getRaw());
-
-    final Base64String expectedDecodedPrivateFor =
-        Base64String.wrap(params.privateFor().get().get(0).getRaw());
+    final Base64String expectedDecodedPrivateFrom = params.privateFrom();
+    final Base64String expectedDecodedPrivateFor = params.privateFor().get().get(0);
 
     assertThat(decodedTransaction.getPrivateFrom()).isEqualTo(expectedDecodedPrivateFrom);
     assertThat(decodedTransaction.getPrivateFor().get().get(0))

@@ -30,12 +30,10 @@ public class PantheonPrivateNonceProvider implements NonceProvider {
 
   private final Pantheon pantheon;
   private final String accountAddress;
-  private final PrivacyIdentifier privacyGroupId; // this is required to be Base64 encoded.
+  private final Base64String privacyGroupId;
 
   PantheonPrivateNonceProvider(
-      final Pantheon pantheon,
-      final String accountAddress,
-      final PrivacyIdentifier privacyGroupId) {
+      final Pantheon pantheon, final String accountAddress, final Base64String privacyGroupId) {
     this.pantheon = pantheon;
     this.accountAddress = accountAddress;
     this.privacyGroupId = privacyGroupId;
@@ -49,8 +47,7 @@ public class PantheonPrivateNonceProvider implements NonceProvider {
   private BigInteger getNonceFromClient() {
 
     final Request<?, EthGetTransactionCount> request =
-        pantheon.privGetTransactionCount(
-            accountAddress, Base64String.wrap(privacyGroupId.getRaw()));
+        pantheon.privGetTransactionCount(accountAddress, privacyGroupId);
     try {
       LOG.debug(
           "Retrieving Transaction count from eea provider for {} with privacy group id {}",

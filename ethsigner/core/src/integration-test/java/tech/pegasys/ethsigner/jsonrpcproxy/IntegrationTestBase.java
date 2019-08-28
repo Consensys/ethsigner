@@ -116,7 +116,7 @@ public class IntegrationTestBase {
                 + ":"
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Pantheon eea = Pantheon.build(web3jService);
+    final Pantheon pantheon = Pantheon.build(web3jService);
 
     runner =
         new Runner(
@@ -124,7 +124,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(eea, web3j, web3jService),
+            new TransactionFactory(pantheon, web3j, web3jService),
             null);
     runner.start();
 

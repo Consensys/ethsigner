@@ -35,7 +35,6 @@ public class PrivateTransaction {
   private final String privateFrom;
   private final List<String> privateFor;
   private final String restriction;
-  private final String privacyGroupId;
 
   public PrivateTransaction(
       final String from,
@@ -47,7 +46,6 @@ public class PrivateTransaction {
       final String data,
       final String privateFrom,
       final List<String> privateFor,
-      final String privacyGroupId,
       final String restriction) {
     this.from = from;
     this.nonce = nonce;
@@ -58,7 +56,6 @@ public class PrivateTransaction {
     this.data = data;
     this.privateFrom = privateFrom;
     this.privateFor = privateFor;
-    this.privacyGroupId = privacyGroupId;
     this.restriction = restriction;
   }
 
@@ -83,7 +80,6 @@ public class PrivateTransaction {
         init,
         privateFrom,
         privateFor,
-        privacyGroupId,
         restriction);
   }
 
@@ -108,7 +104,6 @@ public class PrivateTransaction {
         null,
         privateFrom,
         privateFor,
-        privacyGroupId,
         restriction);
   }
 

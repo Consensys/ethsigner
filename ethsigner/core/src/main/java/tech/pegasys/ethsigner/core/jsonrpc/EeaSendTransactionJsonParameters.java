@@ -16,9 +16,8 @@ import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
 
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.PrivacyIdentifier;
-
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,13 +26,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.google.common.collect.Lists;
+import org.web3j.utils.Base64String;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
 
   private final String sender;
-  private final PrivacyIdentifier privateFrom;
+  private final Base64String privateFrom;
   private final String restriction;
 
   private BigInteger gas;
@@ -42,19 +41,16 @@ public class EeaSendTransactionJsonParameters {
   private BigInteger value;
   private String receiver;
   private String data;
-  private PrivacyIdentifier privacyGroupId;
-  private List<PrivacyIdentifier> privateFor;
+  private Base64String privacyGroupId;
+  private List<Base64String> privateFor;
 
   @JsonCreator
   public EeaSendTransactionJsonParameters(
       @JsonProperty("from") final String sender,
       @JsonProperty("privateFrom") final String privateFrom,
-      @JsonProperty("privateFor") final List<String> privateFor,
       @JsonProperty("restriction") final String restriction) {
     validatePrefix(sender);
-    this.privateFrom = PrivacyIdentifier.fromBase64String(privateFrom);
-    this.privateFor =
-        privateFor.stream().map(PrivacyIdentifier::fromBase64String).collect(Collectors.toList());
+    this.privateFrom = Base64String.wrap(privateFrom);
     this.restriction = restriction;
     this.sender = sender;
   }
@@ -94,14 +90,12 @@ public class EeaSendTransactionJsonParameters {
   @JsonSetter("privateFor")
   public void privateFor(final String[] privateFor) {
     this.privateFor =
-        Lists.newArrayList(privateFor).stream()
-            .map(PrivacyIdentifier::fromBase64String)
-            .collect(Collectors.toList());
+        Arrays.stream(privateFor).map(Base64String::wrap).collect(Collectors.toList());
   }
 
   @JsonSetter("privacyGroupId")
   public void privacyGroupId(final String privacyGroupId) {
-    this.privacyGroupId = PrivacyIdentifier.fromBase64String(privacyGroupId);
+    this.privacyGroupId = Base64String.wrap(privacyGroupId);
   }
 
   public Optional<String> data() {
@@ -128,11 +122,11 @@ public class EeaSendTransactionJsonParameters {
     return Optional.ofNullable(nonce);
   }
 
-  public Optional<List<PrivacyIdentifier>> privateFor() {
+  public Optional<List<Base64String>> privateFor() {
     return Optional.ofNullable(privateFor);
   }
 
-  public Optional<PrivacyIdentifier> privacyGroupId() {
+  public Optional<Base64String> privacyGroupId() {
     return Optional.ofNullable(privacyGroupId);
   }
 
@@ -140,7 +134,7 @@ public class EeaSendTransactionJsonParameters {
     return sender;
   }
 
-  public PrivacyIdentifier privateFrom() {
+  public Base64String privateFrom() {
     return privateFrom;
   }
 

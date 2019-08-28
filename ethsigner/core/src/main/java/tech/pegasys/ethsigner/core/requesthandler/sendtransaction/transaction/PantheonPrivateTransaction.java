@@ -26,24 +26,25 @@ public class PantheonPrivateTransaction extends PrivateTransaction {
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
-    if (!transactionJsonParameters.privacyGroupId().isPresent()) {
-      throw new RuntimeException("Transaction does not contain a valid privacyGroup.");
-    }
 
-    return new PantheonPrivateTransaction(
-        transactionJsonParameters,
-        nonceProvider,
-        id,
-        transactionJsonParameters.privacyGroupId().get());
+    Base64String privacyId =
+        transactionJsonParameters
+            .privacyGroupId()
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Transaction does not contain a valid privacyGroup."));
+
+    return new PantheonPrivateTransaction(transactionJsonParameters, nonceProvider, id, privacyId);
   }
 
-  private final PrivacyIdentifier privacyGroupId;
+  private final Base64String privacyGroupId;
 
   private PantheonPrivateTransaction(
-      EeaSendTransactionJsonParameters transactionJsonParameters,
-      NonceProvider nonceProvider,
-      JsonRpcRequestId id,
-      PrivacyIdentifier privacyGroupId) {
+      final EeaSendTransactionJsonParameters transactionJsonParameters,
+      final NonceProvider nonceProvider,
+      final JsonRpcRequestId id,
+      final Base64String privacyGroupId) {
     super(transactionJsonParameters, nonceProvider, id);
     this.privacyGroupId = privacyGroupId;
   }
@@ -56,8 +57,8 @@ public class PantheonPrivateTransaction extends PrivateTransaction {
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
-        Base64String.wrap(transactionJsonParameters.privateFrom().getRaw()),
-        Base64String.wrap(privacyGroupId.getRaw()),
+        transactionJsonParameters.privateFrom(),
+        privacyGroupId,
         Restriction.fromString(transactionJsonParameters.restriction()));
   }
 }

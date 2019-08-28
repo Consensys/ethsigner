@@ -32,14 +32,14 @@ public class EeaPrivateNonceProvider implements NonceProvider {
 
   private final Web3jService web3jService;
   private final String accountAddress;
-  private final PrivacyIdentifier privateFrom;
-  private final List<PrivacyIdentifier> privateFor;
+  private final Base64String privateFrom;
+  private final List<Base64String> privateFor;
 
   public EeaPrivateNonceProvider(
       final Web3jService web3jService,
       final String accountAddress,
-      final PrivacyIdentifier privateFrom,
-      final List<PrivacyIdentifier> privateFor) {
+      final Base64String privateFrom,
+      final List<Base64String> privateFor) {
     this.web3jService = web3jService;
     this.accountAddress = accountAddress;
     this.privateFrom = privateFrom;
@@ -56,10 +56,7 @@ public class EeaPrivateNonceProvider implements NonceProvider {
     final Request<?, EthGetTransactionCount> request =
         new Request<>(
             "eea_getTransactionCount",
-            Lists.newArrayList(
-                accountAddress,
-                Base64String.wrap(privateFrom.getRaw()),
-                privateFor.stream().map(pf -> Base64String.wrap(pf.getRaw()))),
+            Lists.newArrayList(accountAddress, privateFrom, privateFor),
             web3jService,
             EthGetTransactionCount.class);
 
@@ -74,7 +71,6 @@ public class EeaPrivateNonceProvider implements NonceProvider {
       LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
       return transactionCount;
     } catch (final IOException e) {
-      LOG.info("Failed to determine nonce from downstream handler.", e);
       throw new RuntimeException("Unable to determine nonce from eea provider.", e);
     }
   }

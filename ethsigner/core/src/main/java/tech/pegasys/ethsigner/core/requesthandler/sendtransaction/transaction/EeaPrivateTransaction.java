@@ -17,7 +17,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
@@ -26,14 +25,14 @@ import org.web3j.utils.Restriction;
 
 public class EeaPrivateTransaction extends PrivateTransaction {
 
-  private final List<PrivacyIdentifier> privateFor;
+  private final List<Base64String> privateFor;
 
   public static EeaPrivateTransaction from(
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
-    if (!transactionJsonParameters.privateFor().isPresent()) {
-      throw new RuntimeException("Transaction does not contain a valid privateFor list.");
+    if (transactionJsonParameters.privateFor().isEmpty()) {
+      throw new IllegalArgumentException("Transaction does not contain a valid privateFor list.");
     }
 
     return new EeaPrivateTransaction(
@@ -44,7 +43,7 @@ public class EeaPrivateTransaction extends PrivateTransaction {
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id,
-      final List<PrivacyIdentifier> privateFor) {
+      final List<Base64String> privateFor) {
     super(transactionJsonParameters, nonceProvider, id);
     this.privateFor = privateFor;
   }
@@ -67,10 +66,8 @@ public class EeaPrivateTransaction extends PrivateTransaction {
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
         transactionJsonParameters.data().orElse(DEFAULT_DATA),
-        Base64String.wrap(transactionJsonParameters.privateFrom().getRaw()),
-        privateFor.stream()
-            .map(value -> Base64String.wrap(value.getRaw()))
-            .collect(Collectors.toList()),
+        transactionJsonParameters.privateFrom(),
+        privateFor,
         Restriction.fromString(transactionJsonParameters.restriction()));
   }
 }

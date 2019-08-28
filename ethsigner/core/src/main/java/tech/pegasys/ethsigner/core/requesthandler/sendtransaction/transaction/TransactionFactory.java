@@ -74,7 +74,7 @@ public class TransactionFactory {
           "Illegal private transaction received; privacyGroup (present = {}) and privateFor (present = {}) are mutually exclusive.",
           params.privacyGroupId().isPresent(),
           params.privateFor().isPresent());
-      throw new RuntimeException("PrivacyGroup and PrivateFor are mutually exclusive.");
+      throw new IllegalArgumentException("PrivacyGroup and PrivateFor are mutually exclusive.");
     }
 
     if (params.privacyGroupId().isPresent()) {
