@@ -27,14 +27,11 @@ public class PantheonPrivateTransaction extends PrivateTransaction {
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
 
-    Base64String privacyId =
-        transactionJsonParameters
-            .privacyGroupId()
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Transaction does not contain a valid privacyGroup."));
+    if (transactionJsonParameters.privacyGroupId().isEmpty()) {
+      throw new IllegalArgumentException("Transaction does not contain a valid privacyGroup.");
+    }
 
+    final Base64String privacyId = transactionJsonParameters.privacyGroupId().get();
     return new PantheonPrivateTransaction(transactionJsonParameters, nonceProvider, id, privacyId);
   }
 
