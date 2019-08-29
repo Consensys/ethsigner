@@ -68,6 +68,7 @@ public class PrivateTransaction {
       final String init,
       final String privateFrom,
       final List<String> privateFor,
+      final String privacyGroupId,
       final String restriction) {
     return new PrivateTransaction(
         from,
@@ -91,6 +92,7 @@ public class PrivateTransaction {
       final BigInteger value,
       final String privateFrom,
       final List<String> privateFor,
+      final String privacyGroupId,
       final String restriction) {
     return new PrivateTransaction(
         from,

@@ -24,10 +24,6 @@ import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.Eea;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
@@ -57,9 +53,7 @@ public final class EthSigner {
     }
 
     final HttpService web3jService = createWeb3jHttpService();
-    final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
-    final Eea eea = new JsonRpc2_0Eea(web3jService);
-    final TransactionFactory transactionFactory = new TransactionFactory(eea, web3j);
+    final TransactionFactory transactionFactory = TransactionFactory.createFrom(web3jService);
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(signer, config.getChainId().id());
     final WebClientOptions clientOptions =

@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,12 +29,13 @@ import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionDecoder;
 import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
-import org.web3j.rlp.RlpString;
+import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
+import org.web3j.utils.Restriction;
 
-public class EeaTransactionTest {
+public class EeaPrivateTransactionTest {
 
-  private EeaTransaction eeaTransaction;
+  private PrivateTransaction privateTransaction;
   private EeaSendTransactionJsonParameters params;
 
   @BeforeEach
@@ -44,24 +44,25 @@ public class EeaTransactionTest {
         new EeaSendTransactionJsonParameters(
             "0x7577919ae5df4941180eac211965f275cdce314d",
             "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=",
-            singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="),
-            "restricted",
-            "0x1");
+            "restricted");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
     params.value("0x0");
+    params.nonce("0x1");
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+    params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
 
-    eeaTransaction = new EeaTransaction(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
+    privateTransaction =
+        EeaPrivateTransaction.from(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
   }
 
   @Test
   public void rlpEncodesTransaction() {
     final SignatureData signatureData =
         new SignatureData(new byte[] {1}, new byte[] {2}, new byte[] {3});
-    final byte[] rlpEncodedBytes = eeaTransaction.rlpEncode(signatureData);
+    final byte[] rlpEncodedBytes = privateTransaction.rlpEncode(signatureData);
     final String rlpString = Numeric.toHexString(rlpEncodedBytes);
 
     final SignedRawPrivateTransaction decodedTransaction =
@@ -74,23 +75,14 @@ public class EeaTransactionTest {
     assertThat(decodedTransaction.getData())
         .isEqualTo(
             "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    assertThat(decodedTransaction.getRestriction()).isEqualTo("restricted");
+    assertThat(decodedTransaction.getRestriction()).isEqualTo(Restriction.RESTRICTED);
 
-    // PrivateTransactionDecoder incorrectly decodes the PrivateFrom/For as it decodes bytes into
-    // UTF_8...
-    // Thus, the original data cannot be compared against the output, rather an incorrectly
-    // converted string becomes the expected value (to match the error in
-    // PrivateTransactionDecoder).
-    final String expectedDecodedPrivateFrom =
-        new String(
-            RlpString.create(params.privateFrom().getRaw()).getBytes(), StandardCharsets.UTF_8);
-    final String expectedDecodedPrivateFor =
-        new String(
-            RlpString.create(params.privateFor().get(0).getRaw()).getBytes(),
-            StandardCharsets.UTF_8);
+    final Base64String expectedDecodedPrivateFrom = params.privateFrom();
+    final Base64String expectedDecodedPrivateFor = params.privateFor().get().get(0);
 
     assertThat(decodedTransaction.getPrivateFrom()).isEqualTo(expectedDecodedPrivateFrom);
-    assertThat(decodedTransaction.getPrivateFor().get(0)).isEqualTo(expectedDecodedPrivateFor);
+    assertThat(decodedTransaction.getPrivateFor().get().get(0))
+        .isEqualTo(expectedDecodedPrivateFor);
 
     final SignatureData decodedSignatureData = decodedTransaction.getSignatureData();
     assertThat(trimLeadingZeroes(decodedSignatureData.getV())).isEqualTo(new byte[] {1});
@@ -104,7 +96,7 @@ public class EeaTransactionTest {
     final JsonRpcRequestId id = new JsonRpcRequestId(2);
     final String transactionString =
         "0xf90114a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456704a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0fe72a92aede764ce41d06b163d28700b58e5ee8bb1af91d9d54979ea3bdb3e7ea046ae10c94c322fa44ddceb86677c2cd6cc17dfbd766924f41d10a244c512996dac5a6c617045736c3971444c50792f6538382b2f36797643554556497648383379304e3441367748754b58493dedac4756386d30565a41636359474141594d42755951744b456a3058747058656177324150636f426d744132773d8a72657374726963746564";
-    final JsonRpcRequest jsonRpcRequest = eeaTransaction.jsonRpcRequest(transactionString, id);
+    final JsonRpcRequest jsonRpcRequest = privateTransaction.jsonRpcRequest(transactionString, id);
 
     assertThat(jsonRpcRequest.getMethod()).isEqualTo("eea_sendRawTransaction");
     assertThat(jsonRpcRequest.getVersion()).isEqualTo("2.0");

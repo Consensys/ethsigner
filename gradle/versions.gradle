@@ -54,9 +54,8 @@ dependencyManagement {
 
     dependency 'org.mock-server:mockserver-netty:5.5.1'
 
-    dependency 'org.web3j:abi:4.3.0'
-    dependency 'org.web3j:core:4.3.0'
-    dependency 'org.web3j:crypto:4.3.0'
-    dependency 'org.web3j:eea:4.3.0'
+    dependency 'org.web3j:core:4.5.0'
+    dependency 'org.web3j:crypto:4.5.0'
+    dependency 'org.web3j:pantheon:4.5.0'
   }
 }

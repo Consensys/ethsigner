@@ -21,18 +21,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.pantheon.Pantheon;
+import org.web3j.utils.Base64String;
 
-public class EeaWeb3jNonceProvider implements NonceProvider {
+public class PantheonPrivateNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Eea eea;
+  private final Pantheon pantheon;
   private final String accountAddress;
-  private final String privacyGroupId;
+  private final Base64String privacyGroupId;
 
-  EeaWeb3jNonceProvider(final Eea eea, final String accountAddress, final String privacyGroupId) {
-    this.eea = eea;
+  PantheonPrivateNonceProvider(
+      final Pantheon pantheon, final String accountAddress, final Base64String privacyGroupId) {
+    this.pantheon = pantheon;
     this.accountAddress = accountAddress;
     this.privacyGroupId = privacyGroupId;
   }
@@ -43,8 +45,9 @@ public class EeaWeb3jNonceProvider implements NonceProvider {
   }
 
   private BigInteger getNonceFromClient() {
+
     final Request<?, EthGetTransactionCount> request =
-        eea.eeaGetTransactionCount(accountAddress, privacyGroupId);
+        pantheon.privGetTransactionCount(accountAddress, privacyGroupId);
     try {
       LOG.debug(
           "Retrieving Transaction count from eea provider for {} with privacy group id {}",
