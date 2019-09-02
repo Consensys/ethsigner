@@ -12,7 +12,7 @@
 - Accepts Private Transactions addressed with "PrivacyGroupId", not just "PrivateFor"
 
 ### Bugs Fixed
-- Private Transactions without nonces are now accepted, and the nonce populated (however, see "Known Issues")
+- Private Transactions without nonces are now accepted and the nonce populated (see "Known Issues")
 
 
 ## 0.2.0
