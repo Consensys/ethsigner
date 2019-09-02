@@ -4,7 +4,7 @@
 ## 0.3.0
 
 ### Known Issues
-- When a private transaction is submitted without a nonce, a nonce will be generated and inserted - however, if the supplied nonce is too low, the transaction will not be re-submitted with a new nonce. Rather an error is returned to the caller.
+- When a private transaction is submitted without a nonce, a nonce is generated and inserted. However, if the supplied nonce is too low, the transaction is not resubmitted with a new nonce. Rather an error is returned to the caller.
 
 
 ### Features Added
