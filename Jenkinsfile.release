@@ -68,8 +68,8 @@ node {
                 script {
                     def docker_folder = 'docker'
                     def reports_folder = docker_folder + '/reports'
-                    def ethsigner = "pegasyseng/ethsigner:" + releaseVersion
                     def releaseVersion = "${params.RELEASE_VERSION.trim()}"
+                    def ethsigner = "pegasyseng/ethsigner:" + releaseVersion
                     def shortReleaseVersion = getShortVersion(releaseVersion)
                     def additionalTags = []
 
