@@ -61,4 +61,30 @@ public class NonceTooLowRetryMechanismTest {
     retryMechanism.incrementRetries();
     assertThat(retryMechanism.retriesAvailable()).isFalse();
   }
+
+  @Test
+  public void retriesIfResponseIsNonceTooLow() {
+    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.BAD_REQUEST.code());
+
+    final JsonRpcErrorResponse lowNonceResponse =
+        new JsonRpcErrorResponse(JsonRpcError.NONCE_TOO_LOW);
+
+    assertThat(
+            retryMechanism.responseRequiresRetry(
+                httpResponse, Json.encodeToBuffer(lowNonceResponse)))
+        .isTrue();
+  }
+
+  @Test
+  public void retriesIfResponseIsPrivateNonceTooLow() {
+    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.BAD_REQUEST.code());
+
+    final JsonRpcErrorResponse lowNonceResponse =
+        new JsonRpcErrorResponse(JsonRpcError.PRIVATE_NONCE_TOO_LOW);
+
+    assertThat(
+            retryMechanism.responseRequiresRetry(
+                httpResponse, Json.encodeToBuffer(lowNonceResponse)))
+        .isTrue();
+  }
 }

@@ -34,12 +34,17 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
   public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
-      if (errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)) {
+      if (nonceTooLow(errorResponse)) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
         return true;
       }
     }
     return false;
+  }
+
+  private boolean nonceTooLow(JsonRpcErrorResponse errorResponse) {
+    return errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)
+        || errorResponse.getError().equals(JsonRpcError.PRIVATE_NONCE_TOO_LOW);
   }
 
   private JsonRpcErrorResponse specialiseResponse(final Buffer body) {
