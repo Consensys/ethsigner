@@ -1,5 +1,20 @@
 # Changelog
 
+
+## 0.3.0
+
+### Known Issues
+- When a private transaction is submitted without a nonce, a nonce is generated and inserted. However, if the supplied nonce is too low, the transaction is not resubmitted with a new nonce. Rather an error is returned to the caller.
+
+
+### Features Added
+- Updated to use Web3j 4.5.0
+- Accepts Private Transactions addressed with "PrivacyGroupId", not just "PrivateFor"
+
+### Bugs Fixed
+- Private Transactions without nonces are now accepted and the nonce populated (see "Known Issues")
+
+
 ## 0.2.0
 
 ### Known Issues

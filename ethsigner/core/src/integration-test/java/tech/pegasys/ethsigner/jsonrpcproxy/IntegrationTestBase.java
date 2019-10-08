@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
@@ -66,6 +65,7 @@ import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.pantheon.Pantheon;
 
 public class IntegrationTestBase {
 
@@ -99,7 +99,6 @@ public class IntegrationTestBase {
     final TransactionSerialiser serialiser =
         new TransactionSerialiser(transactionSigner(), chainId);
 
-    final Vertx vertx = Vertx.vertx();
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
     httpClientOptions.setDefaultPort(clientAndServer.getLocalPort());
@@ -117,7 +116,7 @@ public class IntegrationTestBase {
                 + ":"
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Eea eea = new JsonRpc2_0Eea(web3jService);
+    final Pantheon pantheon = Pantheon.build(web3jService);
 
     runner =
         new Runner(
@@ -125,7 +124,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(eea, web3j),
+            new TransactionFactory(pantheon, web3j, web3jService),
             null);
     runner.start();
 
