@@ -280,8 +280,7 @@ public class BesuNode implements Node {
       return besu.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(
-          "Before you run the acceptance tests, execute 'docker pull hyperledger/besu:latest'",
-          e);
+          "Before you run the acceptance tests, execute 'docker pull hyperledger/besu:latest'", e);
     }
   }
 
