@@ -25,7 +25,7 @@ import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalRespo
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,7 +52,8 @@ public class Runner {
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
   private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
-  private final TransactionSerialiser serialiser;
+  private final long chainId;
+  private final TransactionSignerFactory transactionSignerFactory;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
@@ -62,13 +63,15 @@ public class Runner {
   private final HttpServerService httpServerService;
 
   public Runner(
-      final TransactionSerialiser serialiser,
+      final long chainId,
+      final TransactionSignerFactory transactionSignerFactory,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final TransactionFactory transactionFactory,
       final Path dataPath) {
-    this.serialiser = serialiser;
+    this.chainId = chainId;
+    this.transactionSignerFactory = transactionSignerFactory;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
@@ -98,8 +101,9 @@ public class Runner {
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
+            chainId,
             downStreamConnection,
-            serialiser,
+            transactionSignerFactory,
             transactionFactory,
             responseBodyHandler ->
                 new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
@@ -109,7 +113,8 @@ public class Runner {
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory, new EthAccountsBodyProvider(serialiser.getAddress())));
+            responseFactory,
+            new EthAccountsBodyProvider(transactionSignerFactory.availableAddresses())));
 
     return requestMapper;
   }

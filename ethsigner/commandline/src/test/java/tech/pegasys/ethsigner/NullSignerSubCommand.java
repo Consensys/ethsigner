@@ -13,6 +13,11 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -39,8 +44,9 @@ public class NullSignerSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    return null;
+  public TransactionSignerFactory createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new EmptyTransactionSignerFactory();
   }
 
   @Override
@@ -52,6 +58,19 @@ public class NullSignerSubCommand extends SignerSubCommand {
   public void run() {
     if (shouldThrow) {
       throw new TransactionSignerInitializationException(ERROR_MSG);
+    }
+  }
+
+  public static class EmptyTransactionSignerFactory implements TransactionSignerFactory {
+
+    @Override
+    public Optional<TransactionSigner> getSigner(final String address) {
+      return Optional.empty();
+    }
+
+    @Override
+    public Collection<String> availableAddresses() {
+      return Collections.emptySet();
     }
   }
 }

@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -74,10 +76,15 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
-  @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return HashicorpSignerFactory.createSigner(
         signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+  }
+
+  @Override
+  public TransactionSignerFactory createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new SingleTransactionSignerFactory(createSigner());
   }
 
   @Override

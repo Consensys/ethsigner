@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,8 +69,7 @@ public class AzureSubCommand extends SignerSubCommand {
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
   public static final String COMMAND_NAME = "azure-signer";
 
-  @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final String clientSecret;
     try {
       clientSecret = readSecretFromFile(clientSecretPath);
@@ -82,6 +83,12 @@ public class AzureSubCommand extends SignerSubCommand {
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory(keyvaultName, client);
     return factory.createSigner(keyName, keyVersion);
+  }
+
+  @Override
+  public TransactionSignerFactory createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new SingleTransactionSignerFactory(createSigner());
   }
 
   @Override
