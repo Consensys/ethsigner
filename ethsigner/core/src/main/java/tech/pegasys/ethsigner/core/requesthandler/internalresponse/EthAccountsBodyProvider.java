@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
-import static java.util.Collections.singletonList;
-
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
@@ -21,6 +19,7 @@ import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
@@ -30,10 +29,10 @@ public class EthAccountsBodyProvider implements BodyProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final String address;
+  private final Collection<String> addresses = new HashSet<>();
 
-  public EthAccountsBodyProvider(final String address) {
-    this.address = address;
+  public EthAccountsBodyProvider(final Collection<String> address) {
+    this.addresses.addAll(address);
   }
 
   @Override
@@ -45,8 +44,7 @@ public class EthAccountsBodyProvider implements BodyProvider {
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     }
 
-    final JsonRpcSuccessResponse response =
-        new JsonRpcSuccessResponse(request.getId(), singletonList(address));
+    final JsonRpcSuccessResponse response = new JsonRpcSuccessResponse(request.getId(), addresses);
     return new JsonRpcBody(Json.encodeToBuffer(response));
   }
 
