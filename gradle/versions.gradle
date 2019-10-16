@@ -40,6 +40,7 @@ dependencyManagement {
 
     dependency 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
     dependency 'org.junit.jupiter:junit-jupiter-api:5.5.0'
+    dependency 'org.junit.jupiter:junit-jupiter-params:5.5.0'
 
     dependency 'org.apache.logging.log4j:log4j-api:2.11.1'
     dependency 'org.apache.logging.log4j:log4j-core:2.11.1'
