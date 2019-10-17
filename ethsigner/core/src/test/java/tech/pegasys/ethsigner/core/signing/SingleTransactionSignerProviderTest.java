@@ -44,7 +44,7 @@ class SingleTransactionSignerProviderTest {
   void whenSignerAddressIsNullFactoryAvailableAddressesShouldReturnEmptySet() {
     when(transactionSigner.getAddress()).thenReturn(null);
 
-    Collection<String> addresses = signerFactory.availableAddresses();
+    final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).isEmpty();
   }
 
@@ -52,7 +52,7 @@ class SingleTransactionSignerProviderTest {
   void whenSignerAddressIsNullFactoryGetSignerShouldReturnEmpty() {
     when(transactionSigner.getAddress()).thenReturn(null);
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isEmpty();
   }
 
@@ -60,7 +60,7 @@ class SingleTransactionSignerProviderTest {
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isNotEmpty();
   }
 
@@ -81,7 +81,7 @@ class SingleTransactionSignerProviderTest {
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
     assertThat(signer).isEmpty();
   }
 
@@ -89,7 +89,7 @@ class SingleTransactionSignerProviderTest {
   void whenGetAvailableAddressesShouldReturnSignerAddress() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Collection<String> addresses = signerFactory.availableAddresses();
+    final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).containsExactly("0x0");
   }
 }

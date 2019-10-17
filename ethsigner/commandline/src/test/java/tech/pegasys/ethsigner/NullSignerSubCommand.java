@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import java.util.Set;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
@@ -69,7 +70,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
     }
 
     @Override
-    public Collection<String> availableAddresses() {
+    public Set<String> availableAddresses() {
       return Collections.emptySet();
     }
   }

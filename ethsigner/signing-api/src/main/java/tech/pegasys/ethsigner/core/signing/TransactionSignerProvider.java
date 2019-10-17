@@ -14,10 +14,11 @@ package tech.pegasys.ethsigner.core.signing;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TransactionSignerProvider {
 
   Optional<TransactionSigner> getSigner(String address);
 
-  Collection<String> availableAddresses();
+  Set<String> availableAddresses();
 }

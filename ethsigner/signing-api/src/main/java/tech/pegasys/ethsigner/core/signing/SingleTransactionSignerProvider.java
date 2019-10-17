@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class SingleTransactionSignerProvider implements TransactionSignerProvider {
 
-  private TransactionSigner signer;
+  private final TransactionSigner signer;
 
   public SingleTransactionSignerProvider(final TransactionSigner signer) {
     if (signer == null) {
@@ -39,7 +39,7 @@ public class SingleTransactionSignerProvider implements TransactionSignerProvide
   }
 
   @Override
-  public Collection<String> availableAddresses() {
+  public Set<String> availableAddresses() {
     if (signer.getAddress() != null) {
       return Set.of(signer.getAddress());
     } else {
