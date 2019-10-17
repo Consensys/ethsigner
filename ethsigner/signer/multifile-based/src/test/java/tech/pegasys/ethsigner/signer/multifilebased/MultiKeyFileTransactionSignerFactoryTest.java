@@ -104,7 +104,7 @@ class MultiKeyFileTransactionSignerFactoryTest {
   }
 
   @Test
-  void handleDeletedKeyFileWithLoadedSignerUnloadsIt() {
+  void handleDeletedKeyFileWithLoadedSignerUnloadsSigner() {
     final String address = ADDRESS_1;
     final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
     signerFactory.addTransactionSigner(createTransactionSigner(address));
@@ -115,7 +115,7 @@ class MultiKeyFileTransactionSignerFactoryTest {
   }
 
   @Test
-  void handleDeletedPasswordFileWithLoadedSignerUnloadsIt() {
+  void handleDeletedPasswordFileWithLoadedSignerUnloadsSigner() {
     final String address = ADDRESS_1;
     final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
     signerFactory.addTransactionSigner(createTransactionSigner(address));
