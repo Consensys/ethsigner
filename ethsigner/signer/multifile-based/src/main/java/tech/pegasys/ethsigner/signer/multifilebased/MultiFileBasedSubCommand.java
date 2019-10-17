@@ -12,17 +12,15 @@
  */
 package tech.pegasys.ethsigner.signer.multifilebased;
 
-import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
-
-import java.nio.file.Path;
-
 import com.google.common.base.MoreObjects;
+import java.nio.file.Path;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
+import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 /** Multi file-based authentication related sub-command */
 @Command(
@@ -49,11 +47,11 @@ public class MultiFileBasedSubCommand extends SignerSubCommand {
   // TODO should we parameterize how often the directory watcher checks for file events??
 
   @Override
-  public TransactionSignerFactory createSignerFactory()
+  public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
     final KeyPasswordLoader keyPasswordLoader = new KeyPasswordLoader(directoryPath);
-    final MultiKeyFileTransactionSignerFactory factory =
-        new MultiKeyFileTransactionSignerFactory(keyPasswordLoader);
+    final MultiKeyFileTransactionSignerProvider factory =
+        new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
 
     final DirectoryWatcher directoryWatcher = new DirectoryWatcher(directoryPath);
     directoryWatcher.onFileCreatedEvent(factory::handleFileCreated);

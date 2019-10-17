@@ -33,15 +33,15 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class MultiKeyFileTransactionSignerFactoryTest {
+class MultiKeyFileTransactionSignerProviderTest {
 
   private KeyPasswordLoader keyPasswordLoader;
-  private MultiKeyFileTransactionSignerFactory signerFactory;
+  private MultiKeyFileTransactionSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
     keyPasswordLoader = mock(KeyPasswordLoader.class);
-    signerFactory = new MultiKeyFileTransactionSignerFactory(keyPasswordLoader);
+    signerFactory = new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
   }
 
   @Test
@@ -53,7 +53,7 @@ class MultiKeyFileTransactionSignerFactoryTest {
             loadKeyPasswordFile(ADDRESS_3));
     when(keyPasswordLoader.loadAvailableKeys()).thenReturn(keyPasswordFiles);
 
-    signerFactory = new MultiKeyFileTransactionSignerFactory(keyPasswordLoader);
+    signerFactory = new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
 
     assertThat(signerFactory.availableAddresses()).hasSize(keyPasswordFiles.size());
   }
@@ -64,7 +64,7 @@ class MultiKeyFileTransactionSignerFactoryTest {
 
     assertThrows(
         TransactionSignerInitializationException.class,
-        () -> new MultiKeyFileTransactionSignerFactory(keyPasswordLoader));
+        () -> new MultiKeyFileTransactionSignerProvider(keyPasswordLoader));
   }
 
   @Test

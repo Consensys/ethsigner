@@ -12,30 +12,28 @@
  */
 package tech.pegasys.ethsigner.signer.multifilebased;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
-
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
-public class MultiKeyFileTransactionSignerFactory implements TransactionSignerFactory {
+public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final KeyPasswordLoader keyPasswordLoader;
   private final Map<String, TransactionSigner> signers = new ConcurrentHashMap<>();
 
-  MultiKeyFileTransactionSignerFactory(final KeyPasswordLoader keyPasswordLoader) {
+  MultiKeyFileTransactionSignerProvider(final KeyPasswordLoader keyPasswordLoader) {
     this.keyPasswordLoader = keyPasswordLoader;
     try {
       keyPasswordLoader.loadAvailableKeys().forEach(this::addSigner);
@@ -53,7 +51,7 @@ public class MultiKeyFileTransactionSignerFactory implements TransactionSignerFa
   }
 
   @Override
-  public Collection<String> availableAddresses() {
+  public Set<String> availableAddresses() {
     return signers.keySet();
   }
 
