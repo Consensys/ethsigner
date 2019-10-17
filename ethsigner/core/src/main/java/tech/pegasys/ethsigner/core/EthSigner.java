@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -30,11 +30,11 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final TransactionSignerFactory transactionSignerFactory;
+  private final TransactionSignerProvider transactionSignerProvider;
 
-  public EthSigner(final Config config, final TransactionSignerFactory transactionSignerFactory) {
+  public EthSigner(final Config config, final TransactionSignerProvider transactionSignerProvider) {
     this.config = config;
-    this.transactionSignerFactory = transactionSignerFactory;
+    this.transactionSignerProvider = transactionSignerProvider;
   }
 
   public void run() {
@@ -68,7 +68,7 @@ public final class EthSigner {
     final Runner runner =
         new Runner(
             config.getChainId().id(),
-            transactionSignerFactory,
+            transactionSignerProvider,
             clientOptions,
             serverOptions,
             downstreamHttpRequestTimeout,

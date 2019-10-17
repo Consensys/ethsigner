@@ -23,28 +23,28 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SingleTransactionSignerFactoryTest {
+class SingleTransactionSignerProviderTest {
 
   private TransactionSigner transactionSigner;
-  private SingleTransactionSignerFactory signerFactory;
+  private SingleTransactionSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
     transactionSigner = mock(TransactionSigner.class);
-    signerFactory = new SingleTransactionSignerFactory(transactionSigner);
+    signerFactory = new SingleTransactionSignerProvider(transactionSigner);
   }
 
   @Test
   void whenSignerIsNullFactoryCreationFails() {
     Assertions.assertThrows(
-        IllegalArgumentException.class, () -> new SingleTransactionSignerFactory(null));
+        IllegalArgumentException.class, () -> new SingleTransactionSignerProvider(null));
   }
 
   @Test
   void whenSignerAddressIsNullFactoryAvailableAddressesShouldReturnEmptySet() {
     when(transactionSigner.getAddress()).thenReturn(null);
 
-    Collection<String> addresses = signerFactory.availableAddresses();
+    final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).isEmpty();
   }
 
@@ -52,7 +52,7 @@ class SingleTransactionSignerFactoryTest {
   void whenSignerAddressIsNullFactoryGetSignerShouldReturnEmpty() {
     when(transactionSigner.getAddress()).thenReturn(null);
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isEmpty();
   }
 
@@ -60,7 +60,7 @@ class SingleTransactionSignerFactoryTest {
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isNotEmpty();
   }
 
@@ -81,7 +81,7 @@ class SingleTransactionSignerFactoryTest {
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
+    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
     assertThat(signer).isEmpty();
   }
 
@@ -89,7 +89,7 @@ class SingleTransactionSignerFactoryTest {
   void whenGetAvailableAddressesShouldReturnSignerAddress() {
     when(transactionSigner.getAddress()).thenReturn("0x0");
 
-    Collection<String> addresses = signerFactory.availableAddresses();
+    final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).containsExactly("0x0");
   }
 }

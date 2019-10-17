@@ -12,16 +12,15 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-public class SingleTransactionSignerFactory implements TransactionSignerFactory {
+public class SingleTransactionSignerProvider implements TransactionSignerProvider {
 
-  private TransactionSigner signer;
+  private final TransactionSigner signer;
 
-  public SingleTransactionSignerFactory(final TransactionSigner signer) {
+  public SingleTransactionSignerProvider(final TransactionSigner signer) {
     if (signer == null) {
       throw new IllegalArgumentException(
           "SingleTransactionSignerFactory requires a non-null TransactionSigner");
@@ -39,7 +38,7 @@ public class SingleTransactionSignerFactory implements TransactionSignerFactory 
   }
 
   @Override
-  public Collection<String> availableAddresses() {
+  public Set<String> availableAddresses() {
     if (signer.getAddress() != null) {
       return Set.of(signer.getAddress());
     } else {
