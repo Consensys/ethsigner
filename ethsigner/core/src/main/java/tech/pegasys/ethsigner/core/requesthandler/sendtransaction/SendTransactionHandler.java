@@ -24,7 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.util.Optional;
 
@@ -39,7 +39,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private final long chainId;
   private final HttpClient ethNodeClient;
-  private final TransactionSignerFactory transactionSignerFactory;
+  private final TransactionSignerProvider transactionSignerProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
@@ -48,12 +48,12 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   public SendTransactionHandler(
       final long chainId,
       final HttpClient ethNodeClient,
-      final TransactionSignerFactory transactionSignerFactory,
+      final TransactionSignerProvider transactionSignerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;
     this.ethNodeClient = ethNodeClient;
-    this.transactionSignerFactory = transactionSignerFactory;
+    this.transactionSignerProvider = transactionSignerProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
@@ -75,7 +75,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     final Optional<TransactionSigner> transactionSigner =
-        transactionSignerFactory.getSigner(transaction.sender());
+        transactionSignerProvider.getSigner(transaction.sender());
 
     if (transactionSigner.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());

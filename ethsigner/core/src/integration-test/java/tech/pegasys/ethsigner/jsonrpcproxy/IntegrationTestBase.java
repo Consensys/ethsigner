@@ -26,9 +26,9 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
@@ -97,8 +97,8 @@ public class IntegrationTestBase {
   protected static void setupEthSigner(final long chainId) throws IOException {
     clientAndServer = startClientAndServer();
 
-    final TransactionSignerFactory transactionSignerFactory =
-        new SingleTransactionSignerFactory(transactionSigner());
+    final TransactionSignerProvider transactionSignerProvider =
+        new SingleTransactionSignerProvider(transactionSigner());
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -122,7 +122,7 @@ public class IntegrationTestBase {
     runner =
         new Runner(
             chainId,
-            transactionSignerFactory,
+            transactionSignerProvider,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
@@ -137,7 +137,7 @@ public class IntegrationTestBase {
     serverSocket.close();
 
     unlockedAccount =
-        transactionSignerFactory.availableAddresses().stream().findAny().orElseThrow();
+        transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
   }
 
   protected static void resetEthSigner() throws IOException {

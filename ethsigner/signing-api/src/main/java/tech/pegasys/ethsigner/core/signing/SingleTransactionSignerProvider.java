@@ -17,11 +17,11 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-public class SingleTransactionSignerFactory implements TransactionSignerFactory {
+public class SingleTransactionSignerProvider implements TransactionSignerProvider {
 
   private TransactionSigner signer;
 
-  public SingleTransactionSignerFactory(final TransactionSigner signer) {
+  public SingleTransactionSignerProvider(final TransactionSigner signer) {
     if (signer == null) {
       throw new IllegalArgumentException(
           "SingleTransactionSignerFactory requires a non-null TransactionSigner");

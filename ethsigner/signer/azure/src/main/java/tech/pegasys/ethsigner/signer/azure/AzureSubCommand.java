@@ -14,9 +14,9 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerFactory;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -86,9 +86,9 @@ public class AzureSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public TransactionSignerFactory createSignerFactory()
+  public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerFactory(createSigner());
+    return new SingleTransactionSignerProvider(createSigner());
   }
 
   @Override

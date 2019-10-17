@@ -23,21 +23,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SingleTransactionSignerFactoryTest {
+class SingleTransactionSignerProviderTest {
 
   private TransactionSigner transactionSigner;
-  private SingleTransactionSignerFactory signerFactory;
+  private SingleTransactionSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
     transactionSigner = mock(TransactionSigner.class);
-    signerFactory = new SingleTransactionSignerFactory(transactionSigner);
+    signerFactory = new SingleTransactionSignerProvider(transactionSigner);
   }
 
   @Test
   void whenSignerIsNullFactoryCreationFails() {
     Assertions.assertThrows(
-        IllegalArgumentException.class, () -> new SingleTransactionSignerFactory(null));
+        IllegalArgumentException.class, () -> new SingleTransactionSignerProvider(null));
   }
 
   @Test
