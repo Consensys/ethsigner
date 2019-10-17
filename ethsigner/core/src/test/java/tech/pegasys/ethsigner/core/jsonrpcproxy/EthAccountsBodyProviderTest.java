@@ -17,11 +17,12 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
-import java.util.Set;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
+
+import java.util.Set;
 
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
@@ -32,8 +33,7 @@ public class EthAccountsBodyProviderTest {
   public void valueFromBodyProviderInsertedToResult() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider =
-        new EthAccountsBodyProvider(() -> Set.of(address));
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -52,8 +52,7 @@ public class EthAccountsBodyProviderTest {
   public void ifParamsContainsANonEmptyArrayErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider =
-        new EthAccountsBodyProvider(() -> Set.of(address));
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -68,8 +67,7 @@ public class EthAccountsBodyProviderTest {
   public void isParamIsAnObjectErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider =
-        new EthAccountsBodyProvider(() -> Set.of(address));
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -84,8 +82,7 @@ public class EthAccountsBodyProviderTest {
   public void missingParametersIsOk() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider =
-        new EthAccountsBodyProvider(() -> Set.of(address));
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));

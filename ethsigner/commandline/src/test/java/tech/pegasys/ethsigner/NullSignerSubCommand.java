@@ -12,13 +12,12 @@
  */
 package tech.pegasys.ethsigner;
 
-import java.util.Set;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
