@@ -114,7 +114,7 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider.availableAddresses())));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
 
     return requestMapper;
   }
