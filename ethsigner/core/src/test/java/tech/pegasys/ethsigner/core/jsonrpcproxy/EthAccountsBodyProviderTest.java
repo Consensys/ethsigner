@@ -22,10 +22,10 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.google.common.collect.Sets;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
@@ -120,10 +120,7 @@ public class EthAccountsBodyProviderTest {
 
   @Test
   public void accountsReturnedAreDynamicallyFetchedFromProvider() {
-    final Set<String> addresses = new HashSet<>();
-    addresses.add("a");
-    addresses.add("b");
-    addresses.add("c");
+    final Set<String> addresses = Sets.newHashSet("a", "b", "c");
 
     final Supplier<Set<String>> supplier = () -> addresses;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(supplier);
@@ -134,12 +131,26 @@ public class EthAccountsBodyProviderTest {
 
     JsonRpcBody body = bodyProvider.getBody(request);
     JsonObject jsonObj = new JsonObject(body.body());
-    assertThat(jsonObj.getJsonArray("result")).hasSize(3);
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
 
     addresses.remove("a");
 
     body = bodyProvider.getBody(request);
     jsonObj = new JsonObject(body.body());
-    assertThat(jsonObj.getJsonArray("result")).hasSize(2);
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("b", "c");
+  }
+
+  @Test
+  public void accountsReturnedAreSortedAlphabetically() {
+    final Supplier<Set<String>> supplier = () -> Sets.newHashSet("c", "b", "a");
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(supplier);
+
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
+    request.setId(new JsonRpcRequestId(1));
+    request.setParams(emptyList());
+
+    JsonRpcBody body = bodyProvider.getBody(request);
+    JsonObject jsonObj = new JsonObject(body.body());
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
   }
 }
