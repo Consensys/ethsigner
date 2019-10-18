@@ -48,7 +48,7 @@ class MultiFileBasedSubCommandTest {
 
   @Test
   void parseCommandSuccessfullyUsingShortcutSetDirectory() {
-    commandLine.parse("--d", "/keys/directory/path");
+    commandLine.parse("-d", "/keys/directory/path");
 
     final ParseResult parseResult = commandLine.getParseResult();
     assertThat(parseResult.errors()).isEmpty();
