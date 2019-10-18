@@ -39,7 +39,7 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    return keyPasswordLoader.loadKeyAndPassword(address).map(this::createSigner);
+    return keyPasswordLoader.loadKeyAndPasswordForAddress(address).map(this::createSigner);
   }
 
   @Override

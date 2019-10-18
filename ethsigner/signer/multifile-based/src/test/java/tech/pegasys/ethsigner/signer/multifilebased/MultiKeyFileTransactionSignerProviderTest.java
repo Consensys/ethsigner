@@ -43,14 +43,14 @@ class MultiKeyFileTransactionSignerProviderTest {
   @Test
   void getSignerForAvailableKeyPasswordReturnsSigner() {
     final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(ADDRESS_1);
-    when(keyPasswordLoader.loadKeyAndPassword(ADDRESS_1)).thenReturn(Optional.of(keyPasswordFile));
+    when(keyPasswordLoader.loadKeyAndPasswordForAddress(ADDRESS_1)).thenReturn(Optional.of(keyPasswordFile));
 
     assertThat(signerFactory.getSigner(ADDRESS_1)).isNotEmpty();
   }
 
   @Test
   void getSignerForUnavailableKeyPasswordReturnsEmpty() {
-    when(keyPasswordLoader.loadKeyAndPassword(any())).thenReturn(Optional.empty());
+    when(keyPasswordLoader.loadKeyAndPasswordForAddress(any())).thenReturn(Optional.empty());
 
     assertThat(signerFactory.getSigner(ADDRESS_1)).isEmpty();
   }
@@ -59,7 +59,7 @@ class MultiKeyFileTransactionSignerProviderTest {
   void getSignerForPasswordNotMatchingKeyReturnsEmpty() {
     final String address = "627306090abab3a6e1400e9345bc60c78a8bef57";
     final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile("key_with_invalid_password");
-    when(keyPasswordLoader.loadKeyAndPassword(address)).thenReturn(Optional.of(keyPasswordFile));
+    when(keyPasswordLoader.loadKeyAndPasswordForAddress(address)).thenReturn(Optional.of(keyPasswordFile));
 
     assertThat(signerFactory.getSigner(address)).isEmpty();
   }
