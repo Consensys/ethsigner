@@ -12,26 +12,29 @@
  */
 package tech.pegasys.ethsigner.signer.multifilebased;
 
-import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final int VALID_ADDRESS_LENGTH = 40;
 
   private final KeyPasswordLoader keyPasswordLoader;
-  private final Map<String, TransactionSigner> signers = new ConcurrentHashMap<>();
+  private final Map<String, TransactionSigner> signers = new HashMap<>();
 
   MultiKeyFileTransactionSignerProvider(final KeyPasswordLoader keyPasswordLoader) {
     this.keyPasswordLoader = keyPasswordLoader;
@@ -44,10 +47,13 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    if (!signers.containsKey(address)) {
-      keyPasswordLoader.loadKeyPassword(Path.of(address + ".key")).ifPresent(this::addSigner);
+    final String normalizedAddress = address.toLowerCase();
+    if (!signers.containsKey(normalizedAddress)) {
+      keyPasswordLoader
+          .loadKeyPassword(Path.of(normalizedAddress + ".key"))
+          .ifPresent(this::addSigner);
     }
-    return Optional.ofNullable(signers.getOrDefault(normalizeKey(address), null));
+    return Optional.ofNullable(signers.getOrDefault(normalizedAddress, null));
   }
 
   @Override
@@ -55,15 +61,11 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
     return signers.keySet();
   }
 
-  @VisibleForTesting
-  void addTransactionSigner(TransactionSigner signer) {
-    final String key = signer.getAddress();
-    this.signers.put(normalizeKey(key), signer);
-  }
-
-  void handleFileCreated(Path createdFile) {
+  void handleFileCreated(final Path createdFile) {
     if (isKeyOrPasswordFile(createdFile)) {
-      keyPasswordLoader.loadKeyPassword(createdFile).ifPresent(this::addSigner);
+      synchronized (this) {
+        keyPasswordLoader.loadKeyPassword(createdFile).ifPresent(this::addSigner);
+      }
     }
   }
 
@@ -80,29 +82,39 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
     }
   }
 
-  void handleFileDeleted(Path deletedFile) {
-    if (isKeyOrPasswordFile(deletedFile)) {
-      final String address = deletedFile.getFileName().toString().substring(0, 40);
-      final TransactionSigner removedSigner = signers.remove(normalizeKey(address));
+  @VisibleForTesting
+  void addTransactionSigner(final TransactionSigner signer) {
+    final String key = signer.getAddress();
+    this.signers.put(normalizeAddress(key), signer);
+  }
 
-      if (removedSigner != null) {
-        LOG.debug("Unloaded signer for address {}", address);
+  void handleFileDeleted(final Path deletedFile) {
+    if (isKeyOrPasswordFile(deletedFile)) {
+      synchronized (this) {
+        final String address = getAddressFromFilename(deletedFile);
+        final TransactionSigner removedSigner = signers.remove(normalizeAddress(address));
+
+        if (removedSigner != null) {
+          LOG.debug("Unloaded signer for address {}", address);
+        }
       }
     }
   }
 
   private boolean isKeyOrPasswordFile(final Path file) {
-    return file.toFile().getName().endsWith(".key")
-        || file.toFile().getName().endsWith(".password");
+    final String filename = file.toFile().getName();
+    return (filename.endsWith(".key") || filename.endsWith(".password"));
   }
 
-  private String normalizeKey(final String key) {
-    String normalized = key;
+  private String getAddressFromFilename(final Path deletedFile) {
+    return deletedFile.getFileName().toString().substring(0, VALID_ADDRESS_LENGTH).toLowerCase();
+  }
 
-    if (key.startsWith("0x")) {
-      normalized = normalized.substring(2);
+  private String normalizeAddress(final String address) {
+    if (address.startsWith("0x")) {
+      return address.substring(2).toLowerCase();
+    } else {
+      return address.toLowerCase();
     }
-
-    return normalized.toLowerCase();
   }
 }

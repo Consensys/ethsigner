@@ -23,8 +23,8 @@ import java.nio.file.Path;
 */
 class KeyPasswordFileFixture {
 
-  public static String ADDRESS_1 = "627306090abaB3A6e1400e9345bC60c78a8BEf57";
-  public static String ADDRESS_2 = "f17f52151EbEF6C7334FAD080c5704D77216b732";
+  public static String ADDRESS_1 = "627306090abab3a6e1400e9345bc60c78a8bef57";
+  public static String ADDRESS_2 = "f17f52151ebef6c7334fad080c5704d77216b732";
   public static String ADDRESS_3 = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   private static final Path keyDirectory = Path.of("src/test/resources/keys");

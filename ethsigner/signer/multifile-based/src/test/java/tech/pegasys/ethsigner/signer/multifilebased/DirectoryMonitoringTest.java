@@ -20,6 +20,9 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
@@ -29,44 +32,56 @@ class DirectoryMonitoringTest {
 
   private static final int TIMEOUT_IN_MILLIS = 15000;
 
-  @Test
-  void onFileCreatedTriggersForANewFile(@TempDir Path directory) throws IOException {
-    final DirectoryWatcher watcher = new DirectoryWatcher(directory);
-    final Path file = directory.resolve("foo");
+  private Path file;
+  private DirectoryWatcher watcher;
+  private Consumer<Path> fileCreatedCallback;
+  private Consumer<Path> fileDeletedCallback;
+  private ArgumentCaptor<Path> callbackArgCaptor;
 
-    final Consumer<Path> callback = mock(Consumer.class);
-    final ArgumentCaptor<Path> callbackArgCaptor = ArgumentCaptor.forClass(Path.class);
+  @BeforeEach
+  void beforeEach(@TempDir Path directory) {
+    file = directory.resolve("foo");
 
-    watcher.onFileCreatedEvent(callback);
+    watcher = new DirectoryWatcher(directory);
     watcher.run();
+
+    fileCreatedCallback = mock(Consumer.class);
+    fileDeletedCallback = mock(Consumer.class);
+    callbackArgCaptor = ArgumentCaptor.forClass(Path.class);
+  }
+
+  @AfterEach
+  void afterEach() {
+    watcher.shutdown();
+  }
+
+  @Test
+  void creatingFileTriggerOnFileCreatedCallback() throws IOException {
+    watcher.onFileCreatedEvent(fileCreatedCallback);
 
     assertThat(file.toFile().createNewFile()).isTrue();
 
-    verify(callback, timeout(TIMEOUT_IN_MILLIS).only()).accept(callbackArgCaptor.capture());
+    verify(fileCreatedCallback, timeout(TIMEOUT_IN_MILLIS).only())
+        .accept(callbackArgCaptor.capture());
     assertThat(callbackArgCaptor.getValue()).isEqualTo(file);
   }
 
   @Test
-  void onFileDeletedTriggersForADeletedFile(@TempDir Path directory) throws IOException {
-    final DirectoryWatcher watcher = new DirectoryWatcher(directory);
-    final Path file = directory.resolve("foo");
-    assertThat(file.toFile().createNewFile()).isTrue();
-
-    final Consumer<Path> callback = mock(Consumer.class);
-    final ArgumentCaptor<Path> callbackArgCaptor = ArgumentCaptor.forClass(Path.class);
-
-    watcher.onFileDeletedEvent(callback);
-    watcher.run();
-
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException e) {
-      //do nothing
-    }
+  void deletingFileTriggerOnFileDeletedCallback() throws IOException {
+    createFileAndWaitForCreatedEvent();
+    watcher.onFileDeletedEvent(fileDeletedCallback);
 
     assertThat(file.toFile().delete()).isTrue();
-    verify(callback, timeout(TIMEOUT_IN_MILLIS).only()).accept(callbackArgCaptor.capture());
+
+    verify(fileDeletedCallback, timeout(TIMEOUT_IN_MILLIS).only())
+        .accept(callbackArgCaptor.capture());
     assertThat(callbackArgCaptor.getValue()).isEqualTo(file);
   }
 
+  private void createFileAndWaitForCreatedEvent() throws IOException {
+    watcher.onFileCreatedEvent(fileCreatedCallback);
+    assertThat(file.toFile().createNewFile()).isTrue();
+    verify(fileCreatedCallback, timeout(TIMEOUT_IN_MILLIS).only())
+        .accept(callbackArgCaptor.capture());
+  }
 }

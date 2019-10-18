@@ -22,7 +22,6 @@ import java.nio.file.WatchService;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -34,17 +33,16 @@ class DirectoryWatcher {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final ExecutorService executorService =
-      Executors.newSingleThreadExecutor(
-          new ThreadFactoryBuilder().setNameFormat("directory-monitoring").build());
   private final Path directory;
+  private final ExecutorService executorService = buildExecutorService();
   private final WatchService watchService;
 
-  private Optional<Consumer<Path>> fileCreatedEventListener = Optional.empty();
-  private Optional<Consumer<Path>> fileDeletedEventListener = Optional.empty();
+  private Optional<Consumer<Path>> fileCreatedEventCallback = Optional.empty();
+  private Optional<Consumer<Path>> fileDeletedEventCallback = Optional.empty();
 
   DirectoryWatcher(final Path directory) {
     this.directory = directory;
+
     try {
       this.watchService = FileSystems.getDefault().newWatchService();
       directory.register(
@@ -54,44 +52,41 @@ class DirectoryWatcher {
     }
   }
 
-  void onFileCreatedEvent(Consumer<Path> callback) {
-    this.fileCreatedEventListener = Optional.ofNullable(callback);
+  private static ExecutorService buildExecutorService() {
+    return Executors.newSingleThreadExecutor(
+        new ThreadFactoryBuilder().setNameFormat("directory-monitoring").build());
   }
 
-  void onFileDeletedEvent(Consumer<Path> callback) {
-    this.fileDeletedEventListener = Optional.ofNullable(callback);
+  void onFileCreatedEvent(final Consumer<Path> callback) {
+    this.fileCreatedEventCallback = Optional.ofNullable(callback);
+  }
+
+  void onFileDeletedEvent(final Consumer<Path> callback) {
+    this.fileDeletedEventCallback = Optional.ofNullable(callback);
   }
 
   void run() {
     LOG.info("Starting directory watcher ({})", directory);
-
-    executorService.execute(
-        () -> {
-          try {
-            WatchKey key;
-            while ((key = watchService.take()) != null) {
-              for (WatchEvent<?> event : key.pollEvents()) {
-                //TODO change to trace
-                LOG.info("Event kind: {}, File affected: {}", event.kind(), event.context());
-
-                try {
-                  processWatchEvent(event);
-                } catch (Exception e) {
-                  LOG.warn("Error processing file watch event", e);
-                  // do nothing if we miss a watch event
-                }
-              }
-              key.reset();
-            }
-          } catch (InterruptedException e) {
-            LOG.error("Directory watcher thread has been interrupted", e);
-            throw new RuntimeException(e);
-          }
-        });
-
-    LOG.info("Started directory watcher ({})", directory);
-
+    executorService.execute(watchForFileEvents());
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+  }
+
+  private Runnable watchForFileEvents() {
+    return () -> {
+      try {
+        WatchKey key;
+        while ((key = watchService.take()) != null) {
+          for (WatchEvent<?> event : key.pollEvents()) {
+            LOG.trace("Event kind: {}, File affected: {}", event.kind(), event.context());
+            processWatchEvent(event);
+          }
+          key.reset();
+        }
+      } catch (InterruptedException e) {
+        LOG.error("Directory watcher thread has been interrupted", e);
+        throw new RuntimeException(e);
+      }
+    };
   }
 
   private void processWatchEvent(final WatchEvent<?> event) {
@@ -100,20 +95,29 @@ class DirectoryWatcher {
       switch (event.kind().name()) {
         case "ENTRY_CREATE":
           {
-            fileCreatedEventListener.ifPresent(l -> l.accept(directory.resolve(file)));
+            tryCallbackExecution(fileCreatedEventCallback, file);
             break;
           }
         case "ENTRY_DELETE":
           {
-            fileDeletedEventListener.ifPresent(l -> l.accept(directory.resolve(file)));
+            tryCallbackExecution(fileDeletedEventCallback, file);
             break;
           }
       }
     }
   }
 
-  private void shutdown() {
+  private void tryCallbackExecution(final Optional<Consumer<Path>> callback, final Path file) {
+    try {
+      callback.ifPresent(l -> l.accept(directory.resolve(file)));
+    } catch (Exception e) {
+      LOG.warn("Error executing callback", e);
+      // do nothing if we miss an event. We don't any errors to stop our watcher thread.
+    }
+  }
+
+  void shutdown() {
     LOG.info("Shutting down directory watcher");
-    executorService.shutdown();
+    executorService.shutdownNow();
   }
 }
