@@ -42,7 +42,7 @@ class KeyPasswordLoaderTest {
   void loadKeyPasswordWithMatchingPasswordReturnsFile() {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPasswordForAddress(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
     assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
@@ -53,7 +53,7 @@ class KeyPasswordLoaderTest {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
     Files.delete(keyPasswordFile.getPassword());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPasswordForAddress(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
@@ -63,7 +63,7 @@ class KeyPasswordLoaderTest {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
     Files.delete(keyPasswordFile.getKey());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPasswordForAddress(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
@@ -74,7 +74,7 @@ class KeyPasswordLoaderTest {
     Files.delete(keyPasswordFile.getKey());
     Files.delete(keyPasswordFile.getPassword());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPasswordForAddress(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }

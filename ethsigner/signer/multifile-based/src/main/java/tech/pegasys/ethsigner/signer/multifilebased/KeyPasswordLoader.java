@@ -41,8 +41,9 @@ class KeyPasswordLoader {
     this.keysDirectory = keysDirectory;
   }
 
-  Optional<KeyPasswordFile> loadKeyAndPassword(final String keyFilename) {
-    final Path keyPath = keysDirectory.resolve(keyFilename.toLowerCase() + KEY_FILE_EXTENSION);
+  Optional<KeyPasswordFile> loadKeyAndPasswordForAddress(final String address) {
+    final String filename = normalizeAddress(address);
+    final Path keyPath = keysDirectory.resolve(filename + KEY_FILE_EXTENSION);
     if (keyPath.toFile().exists() && isFilenameValid(keyPath)) {
       return tryFindingMatchingPassword(keyPath).map(path -> new KeyPasswordFile(keyPath, path));
     } else {
@@ -74,6 +75,14 @@ class KeyPasswordLoader {
       return Optional.of(file.toPath());
     } else {
       return Optional.empty();
+    }
+  }
+
+  private String normalizeAddress(final String address) {
+    if (address.startsWith("0x")) {
+      return address.replace("0x", "").toLowerCase();
+    } else {
+      return address.toLowerCase();
     }
   }
 
