@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.signer.multifilebased;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_1;
@@ -21,12 +21,8 @@ import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixtur
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_3;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.loadKeyPasswordFile;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,7 +41,34 @@ class MultiKeyFileTransactionSignerProviderTest {
   }
 
   @Test
-  void loadAvailableKeysOnCreation() throws Exception {
+  void getSignerForAvailableKeyPasswordReturnsSigner() {
+    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(ADDRESS_1);
+    when(keyPasswordLoader.loadKeyAndPassword(ADDRESS_1)).thenReturn(Optional.of(keyPasswordFile));
+
+    assertThat(signerFactory.getSigner(ADDRESS_1)).isNotEmpty();
+  }
+
+  @Test
+  void getSignerForUnavailableKeyPasswordReturnsEmpty() {
+    when(keyPasswordLoader.loadKeyAndPassword(any())).thenReturn(Optional.empty());
+
+    assertThat(signerFactory.getSigner(ADDRESS_1)).isEmpty();
+  }
+
+  @Test
+  void getSignerForPasswordNotMatchingKeyReturnsEmpty() {
+    final String address = "627306090abab3a6e1400e9345bc60c78a8bef57";
+    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile("key_with_invalid_password");
+    when(keyPasswordLoader.loadKeyAndPassword(address)).thenReturn(Optional.of(keyPasswordFile));
+
+    assertThat(signerFactory.getSigner(address)).isEmpty();
+  }
+
+  @Test
+  void getAvailableAddressesReturnAllValidAddressesFromLoader() throws IOException {
+    final Set<String> expectedAddressesWithHexPrefix =
+        Set.of("0x" + ADDRESS_1, "0x" + ADDRESS_2, "0x" + ADDRESS_3);
+
     final Set<KeyPasswordFile> keyPasswordFiles =
         Set.of(
             loadKeyPasswordFile(ADDRESS_1),
@@ -53,126 +76,27 @@ class MultiKeyFileTransactionSignerProviderTest {
             loadKeyPasswordFile(ADDRESS_3));
     when(keyPasswordLoader.loadAvailableKeys()).thenReturn(keyPasswordFiles);
 
-    signerFactory = new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
-
-    assertThat(signerFactory.availableAddresses()).hasSize(keyPasswordFiles.size());
+    assertThat(signerFactory.availableAddresses()).containsAll(expectedAddressesWithHexPrefix);
   }
 
   @Test
-  void ioExceptionOnLoadAvailableKeysDuringStartupThrowsTxSignerInitException() throws Exception {
-    when(keyPasswordLoader.loadAvailableKeys()).thenThrow(new IOException());
+  void getAvailableAddressesReturnOnlyMatchingKeyPasswordAddressesFromLoader() throws IOException {
+    final Set<String> expectedAddressesWithHexPrefix = Set.of("0x" + ADDRESS_1, "0x" + ADDRESS_3);
 
-    assertThrows(
-        TransactionSignerInitializationException.class,
-        () -> new MultiKeyFileTransactionSignerProvider(keyPasswordLoader));
+    final Set<KeyPasswordFile> keyPasswordFiles =
+        Set.of(
+            loadKeyPasswordFile(ADDRESS_1),
+            loadKeyPasswordFile("key_with_invalid_password"),
+            loadKeyPasswordFile(ADDRESS_3));
+    when(keyPasswordLoader.loadAvailableKeys()).thenReturn(keyPasswordFiles);
+
+    assertThat(signerFactory.availableAddresses()).containsAll(expectedAddressesWithHexPrefix);
   }
 
   @Test
-  void handleCreatedKeyFileWithMatchingPasswordLoadsSigner() {
-    final String address = ADDRESS_1;
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    when(keyPasswordLoader.loadKeyPassword(keyPasswordFile.getKey()))
-        .thenReturn(Optional.of(keyPasswordFile));
+  void getAvailableAddressesReturnEmptyListWhenLoaderHasNoValidKeys() throws IOException {
+    when(keyPasswordLoader.loadAvailableKeys()).thenReturn(Collections.emptyList());
 
-    signerFactory.handleFileCreated(keyPasswordFile.getKey());
-
-    assertThat(signerFactory.getSigner(address)).isNotEmpty();
-  }
-
-  @Test
-  void handleCreatedPasswordFileWithMatchingKeyLoadsSigner() {
-    final String address = ADDRESS_1;
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    when(keyPasswordLoader.loadKeyPassword(keyPasswordFile.getKey()))
-        .thenReturn(Optional.of(keyPasswordFile));
-
-    signerFactory.handleFileCreated(keyPasswordFile.getKey());
-
-    assertThat(signerFactory.getSigner(address)).isNotEmpty();
-  }
-
-  @Test
-  void handleCreatedKeyFileWithInvalidPasswordDoesNothing() {
-    final String address = "key_with_invalid_password";
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    when(keyPasswordLoader.loadKeyPassword(keyPasswordFile.getKey()))
-        .thenReturn(Optional.of(keyPasswordFile));
-
-    signerFactory.handleFileCreated(keyPasswordFile.getKey());
-
-    assertThat(signerFactory.getSigner(address)).isEmpty();
-  }
-
-  @Test
-  void handleDeletedKeyFileWithLoadedSignerUnloadsSigner() {
-    final String address = ADDRESS_1;
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    signerFactory.addTransactionSigner(createTransactionSigner(address));
-
-    signerFactory.handleFileDeleted(keyPasswordFile.getKey());
-
-    assertThat(signerFactory.getSigner(address)).isEmpty();
-  }
-
-  @Test
-  void handleDeletedPasswordFileWithLoadedSignerUnloadsSigner() {
-    final String address = ADDRESS_1;
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    signerFactory.addTransactionSigner(createTransactionSigner(address));
-
-    signerFactory.handleFileDeleted(keyPasswordFile.getPassword());
-
-    assertThat(signerFactory.getSigner(address)).isEmpty();
-  }
-
-  @Test
-  void getSignerForAvailableKeyPasswordLazyLoadsSigner() {
-    final String address = ADDRESS_1;
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(address);
-    when(keyPasswordLoader.loadKeyPassword(Path.of(address + ".key")))
-        .thenReturn(Optional.of(keyPasswordFile));
-
-    assertThat(signerFactory.getSigner(address)).isNotEmpty();
-  }
-
-  @Test
-  void getAvailableAddressesReturnAllLoadedSigners() {
-    Collection<String> availableKeys = Set.of("foo", "bar");
-
-    signerFactory.addTransactionSigner(createTransactionSigner("foo"));
-    signerFactory.addTransactionSigner(createTransactionSigner("bar"));
-
-    assertThat(signerFactory.availableAddresses()).containsAll(availableKeys);
-  }
-
-  @Test
-  void getSignerReturnsSignerWhenOneExistsForAddress() {
-    signerFactory.addTransactionSigner(createTransactionSigner("foo"));
-
-    Optional<TransactionSigner> signer = signerFactory.getSigner("foo");
-
-    assertThat(signer).isNotEmpty();
-    assertThat(signer.get().getAddress()).isEqualTo("foo");
-  }
-
-  @Test
-  void getSignerReturnsEmptyWhenNoMatchingSignerFound() {
-    Optional<TransactionSigner> signer = signerFactory.getSigner("bar");
-
-    assertThat(signer).isEmpty();
-  }
-
-  @Test
-  void getSignerIsCaseInsensitive() {
-    signerFactory.addTransactionSigner(createTransactionSigner("foo"));
-
-    assertThat(signerFactory.getSigner("foo")).isNotEmpty();
-    assertThat(signerFactory.getSigner("FOO")).isNotEmpty();
-  }
-
-  private TransactionSigner createTransactionSigner(final String address) {
-    TransactionSigner transactionSigner = mock(TransactionSigner.class);
-    when(transactionSigner.getAddress()).thenReturn(address);
-    return transactionSigner;
+    assertThat(signerFactory.availableAddresses()).isEmpty();
   }
 }

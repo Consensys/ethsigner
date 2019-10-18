@@ -41,7 +41,7 @@ public class MultiFileBasedSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"-d", "--directory"},
-      description = "The path to a directory containing the password files and keys",
+      description = "The path to a directory containing the keys password files",
       required = true,
       arity = "1")
   private Path directoryPath;
@@ -50,15 +50,7 @@ public class MultiFileBasedSubCommand extends SignerSubCommand {
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
     final KeyPasswordLoader keyPasswordLoader = new KeyPasswordLoader(directoryPath);
-    final MultiKeyFileTransactionSignerProvider factory =
-        new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
-
-    final DirectoryWatcher directoryWatcher = new DirectoryWatcher(directoryPath);
-    directoryWatcher.onFileCreatedEvent(factory::handleFileCreated);
-    directoryWatcher.onFileDeletedEvent(factory::handleFileDeleted);
-    directoryWatcher.run();
-
-    return factory;
+    return new MultiKeyFileTransactionSignerProvider(keyPasswordLoader);
   }
 
   @Override

@@ -18,103 +18,54 @@ import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final int VALID_ADDRESS_LENGTH = 40;
 
   private final KeyPasswordLoader keyPasswordLoader;
-  private final Map<String, TransactionSigner> signers = new HashMap<>();
 
   MultiKeyFileTransactionSignerProvider(final KeyPasswordLoader keyPasswordLoader) {
     this.keyPasswordLoader = keyPasswordLoader;
-    try {
-      keyPasswordLoader.loadAvailableKeys().forEach(this::addSigner);
-    } catch (IOException e) {
-      throw new TransactionSignerInitializationException("Error loading keys/passwords", e);
-    }
   }
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    final String normalizedAddress = address.toLowerCase();
-    if (!signers.containsKey(normalizedAddress)) {
-      keyPasswordLoader
-          .loadKeyPassword(Path.of(normalizedAddress + ".key"))
-          .ifPresent(this::addSigner);
-    }
-    return Optional.ofNullable(signers.getOrDefault(normalizedAddress, null));
+    return keyPasswordLoader.loadKeyAndPassword(address).map(this::createSigner);
   }
 
   @Override
   public Set<String> availableAddresses() {
-    return signers.keySet();
-  }
-
-  void handleFileCreated(final Path createdFile) {
-    if (isKeyOrPasswordFile(createdFile)) {
-      synchronized (this) {
-        keyPasswordLoader.loadKeyPassword(createdFile).ifPresent(this::addSigner);
-      }
+    try {
+      return keyPasswordLoader.loadAvailableKeys().stream()
+          .map(this::createSigner)
+          .filter(Objects::nonNull)
+          .map(TransactionSigner::getAddress)
+          .collect(Collectors.toSet());
+    } catch (IOException e) {
+      LOG.error("Error loading available signers", e);
+      return Collections.emptySet();
     }
   }
 
-  private void addSigner(final KeyPasswordFile keyPasswordFile) {
+  private TransactionSigner createSigner(final KeyPasswordFile keyPasswordFile) {
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               keyPasswordFile.getKey(), keyPasswordFile.getPassword());
-      addTransactionSigner(signer);
-
       LOG.debug("Loaded signer for address {}", keyPasswordFile.getAddress());
+      return signer;
     } catch (TransactionSignerInitializationException e) {
-      // do nothing if we fail to load a single credential
-    }
-  }
-
-  @VisibleForTesting
-  void addTransactionSigner(final TransactionSigner signer) {
-    final String key = signer.getAddress();
-    this.signers.put(normalizeAddress(key), signer);
-  }
-
-  void handleFileDeleted(final Path deletedFile) {
-    if (isKeyOrPasswordFile(deletedFile)) {
-      synchronized (this) {
-        final String address = getAddressFromFilename(deletedFile);
-        final TransactionSigner removedSigner = signers.remove(normalizeAddress(address));
-
-        if (removedSigner != null) {
-          LOG.debug("Unloaded signer for address {}", address);
-        }
-      }
-    }
-  }
-
-  private boolean isKeyOrPasswordFile(final Path file) {
-    final String filename = file.toFile().getName();
-    return (filename.endsWith(".key") || filename.endsWith(".password"));
-  }
-
-  private String getAddressFromFilename(final Path deletedFile) {
-    return deletedFile.getFileName().toString().substring(0, VALID_ADDRESS_LENGTH).toLowerCase();
-  }
-
-  private String normalizeAddress(final String address) {
-    if (address.startsWith("0x")) {
-      return address.substring(2).toLowerCase();
-    } else {
-      return address.toLowerCase();
+      LOG.warn("Error loading signer for address {}", keyPasswordFile.getAddress(), e);
+      return null;
     }
   }
 }

@@ -39,25 +39,23 @@ class KeyPasswordLoaderTest {
   }
 
   @Test
+  void loadKeyPasswordWithMatchingPasswordReturnsFile() {
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
+
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
+
+    assertThat(loadedKeyPassFile).isNotEmpty();
+    assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
+  }
+
+  @Test
   void loadKeyPasswordWithMissingPasswordReturnsEmpty() throws IOException {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
     Files.delete(keyPasswordFile.getPassword());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyPassword(keyPasswordFile.getKey());
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
-  }
-
-  @Test
-  void loadKeyPasswordWithMatchingPasswordReturnsFile() {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
-
-    final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyPassword(keyPasswordFile.getKey());
-
-    assertThat(loadedKeyPassFile).isNotEmpty();
-    assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
   }
 
   @Test
@@ -65,8 +63,7 @@ class KeyPasswordLoaderTest {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
     Files.delete(keyPasswordFile.getKey());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyPassword(keyPasswordFile.getKey());
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
@@ -77,8 +74,7 @@ class KeyPasswordLoaderTest {
     Files.delete(keyPasswordFile.getKey());
     Files.delete(keyPasswordFile.getPassword());
 
-    final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyPassword(keyPasswordFile.getKey());
+    final Optional<KeyPasswordFile> loadedKeyPassFile = loader.loadKeyAndPassword(ADDRESS_1);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
@@ -96,8 +92,8 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysIgnoresKeyWithoutMatchingPassword() throws IOException {
-    final KeyPasswordFile kpFile1 = copyKeyPasswordToKeysDirectory(ADDRESS_1);
-    Files.delete(kpFile1.getPassword());
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
+    Files.delete(kpFile.getPassword());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
@@ -106,8 +102,18 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysIgnoresPasswordWithoutMatchingKey() throws IOException {
-    final KeyPasswordFile kpFile1 = copyKeyPasswordToKeysDirectory(ADDRESS_1);
-    Files.delete(kpFile1.getKey());
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
+    Files.delete(kpFile.getKey());
+
+    final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
+
+    assertThat(keyPasswordFiles).isEmpty();
+  }
+
+  @Test
+  void loadAvailableKeysIgnoresKeyFileWithNonLowercaseName() throws IOException {
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
+    renameFile(kpFile.getKey(), ADDRESS_1.toUpperCase());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
@@ -127,5 +133,9 @@ class KeyPasswordLoaderTest {
     }
 
     return new KeyPasswordFile(newKeyFile, newPasswordFile);
+  }
+
+  private void renameFile(final Path file, final String newName) throws IOException {
+    Files.move(file, file.getParent().resolve(newName));
   }
 }
