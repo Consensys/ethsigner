@@ -19,8 +19,10 @@ import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
@@ -45,8 +47,9 @@ public class EthAccountsBodyProvider implements BodyProvider {
       return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
     }
 
-    final JsonRpcSuccessResponse response =
-        new JsonRpcSuccessResponse(request.getId(), addressesSupplier.get());
+    final List<String> addresses =
+        addressesSupplier.get().stream().sorted().collect(Collectors.toList());
+    final JsonRpcSuccessResponse response = new JsonRpcSuccessResponse(request.getId(), addresses);
     return new JsonRpcBody(Json.encodeToBuffer(response));
   }
 
