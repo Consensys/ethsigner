@@ -41,7 +41,7 @@ public class MultiFileBasedSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"-d", "--directory"},
-      description = "The path to a directory containing the keys password files",
+      description = "The path to a directory containing the keys and password files",
       required = true,
       arity = "1")
   private Path directoryPath;
