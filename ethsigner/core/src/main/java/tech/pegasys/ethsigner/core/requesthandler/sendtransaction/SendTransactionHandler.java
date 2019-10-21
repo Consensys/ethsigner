@@ -43,7 +43,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
-  private static final int MAX_RETRIES_NONCE_RETRIES = 5;
+  private static final int MAX_NONCE_RETRIES = 5;
 
   public SendTransactionHandler(
       final long chainId,
@@ -112,7 +112,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
           transaction,
           transactionSerialiser,
           vertxTransmitterFactory,
-          new NonceTooLowRetryMechanism(MAX_RETRIES_NONCE_RETRIES),
+          new NonceTooLowRetryMechanism(MAX_NONCE_RETRIES),
           routingContext);
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");

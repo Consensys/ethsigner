@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import java.nio.file.Path;
+
 public class SignerConfigurationBuilder {
 
   /** ChainId defined in the Pantheon dev mode genesis. */
@@ -24,6 +26,7 @@ public class SignerConfigurationBuilder {
   private int hashicorpVaultPort;
   private String ipAddress;
   private String keyVaultName;
+  private Path keysDirectory;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -50,9 +53,15 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withKeysDirectory(final Path keysDirectory) {
+    this.keysDirectory = keysDirectory;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress, keyVaultName);
+        new TransactionSignerParamsSupplier(
+            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }
