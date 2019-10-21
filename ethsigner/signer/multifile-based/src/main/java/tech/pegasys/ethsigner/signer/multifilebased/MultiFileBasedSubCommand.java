@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.nio.file.Path;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -56,6 +57,11 @@ public class MultiFileBasedSubCommand extends SignerSubCommand {
   @Override
   public String getCommandName() {
     return COMMAND_NAME;
+  }
+
+  @VisibleForTesting
+  Path getDirectoryPath() {
+    return directoryPath;
   }
 
   @Override

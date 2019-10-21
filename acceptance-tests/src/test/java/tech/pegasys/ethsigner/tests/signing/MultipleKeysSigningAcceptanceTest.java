@@ -90,6 +90,7 @@ class MultipleKeysSigningAcceptanceTest {
   @Test
   void transactionSucceedsWithValidSenderKeyAndPassword() throws IOException {
     copySenderKeysToKeysDirectory(richBenefactor().address());
+    assertThat(ethSigner().accounts().list()).containsExactly(richBenefactor().address());
 
     final BigInteger transferAmountWei =
         Convert.toWei("1.75", Convert.Unit.ETHER).toBigIntegerExact();
@@ -107,6 +108,7 @@ class MultipleKeysSigningAcceptanceTest {
   @Test
   void transactionFailsAfterDeletingSenderKeyAndPassword() throws IOException {
     copySenderKeysToKeysDirectory(richBenefactor().address());
+    assertThat(ethSigner().accounts().list()).containsExactly(richBenefactor().address());
 
     final BigInteger transferAmountWei =
         Convert.toWei("1.75", Convert.Unit.ETHER).toBigIntegerExact();
@@ -121,6 +123,7 @@ class MultipleKeysSigningAcceptanceTest {
     assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
 
     deleteSenderKeyFromKeysDirectory(richBenefactor().address());
+    assertThat(ethSigner().accounts().list()).isEmpty();
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().transactions().submitExceptional(transaction);

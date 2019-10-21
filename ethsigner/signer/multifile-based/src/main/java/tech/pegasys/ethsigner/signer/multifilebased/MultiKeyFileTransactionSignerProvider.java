@@ -64,7 +64,7 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
       LOG.debug("Loaded signer for address {}", keyPasswordFile.getAddress());
       return signer;
     } catch (TransactionSignerInitializationException e) {
-      LOG.warn("Error loading signer for address {}", keyPasswordFile.getAddress(), e);
+      LOG.warn("Unable to load signer for address {}", keyPasswordFile.getAddress(), e);
       return null;
     }
   }

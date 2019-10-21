@@ -29,15 +29,23 @@ class KeyPasswordFile {
     if (!keyAndPasswordNameMatch(key, password)) {
       throw new IllegalArgumentException("Key and Password names must match");
     } else {
-      this.address = key.toFile().getName().replace(".key", "");
+      this.address = getAddressFromFile(key);
     }
   }
 
   private boolean keyAndPasswordNameMatch(final Path key, final Path password) {
-    return key.toFile()
-        .getName()
-        .replace(".key", "")
-        .equals(password.toFile().getName().replace(".password", ""));
+    return getAddressFromFile(key).equals(getAddressFromFile(password));
+  }
+
+  private String getAddressFromFile(final Path file) {
+    final String filename = file.getFileName().toString();
+    if (filename.endsWith(".key")) {
+      return filename.replace(".key", "");
+    } else if (filename.endsWith(".password")) {
+      return filename.replace(".password", "");
+    } else {
+      throw new IllegalStateException("Invalid key/password filename");
+    }
   }
 
   String getAddress() {

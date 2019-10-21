@@ -124,6 +124,17 @@ class KeyPasswordLoaderTest {
     assertThat(keyPasswordFiles).isEmpty();
   }
 
+  @Test
+  void loadKeyPasswordWithHexPrefixReturnsFile() {
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(ADDRESS_1);
+
+    final Optional<KeyPasswordFile> loadedKeyPassFile =
+        loader.loadKeyAndPasswordForAddress("0x" + ADDRESS_1);
+
+    assertThat(loadedKeyPassFile).isNotEmpty();
+    assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
+  }
+
   private KeyPasswordFile copyKeyPasswordToKeysDirectory(final String address) {
     final KeyPasswordFile kpFile = loadKeyPasswordFile(address);
     final Path newKeyFile = keysDirectory.resolve(kpFile.getKey().getFileName());

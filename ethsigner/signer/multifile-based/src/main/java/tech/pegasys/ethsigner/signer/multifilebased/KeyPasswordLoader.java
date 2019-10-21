@@ -54,8 +54,8 @@ class KeyPasswordLoader {
   Collection<KeyPasswordFile> loadAvailableKeys() throws IOException {
     final Collection<KeyPasswordFile> keysAndPasswords = new HashSet<>();
 
-    try (DirectoryStream<Path> stream = Files.newDirectoryStream(keysDirectory)) {
-      for (Path keyFile : stream) {
+    try (final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(keysDirectory)) {
+      for (final Path keyFile : directoryStream) {
         if (KEY_FILE_MATCHER.matches(keyFile) && isFilenameValid(keyFile)) {
           tryFindingMatchingPassword(keyFile)
               .ifPresent(

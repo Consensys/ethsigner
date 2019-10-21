@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.signer.multifilebased;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.file.Path;
+
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,24 +39,28 @@ class MultiFileBasedSubCommandTest {
 
   @Test
   void parseCommandSuccessfullySetDirectory() {
+    final Path expectedPath = Path.of("/keys/directory/path");
+
     commandLine.parse("--directory", "/keys/directory/path");
 
     final ParseResult parseResult = commandLine.getParseResult();
     assertThat(parseResult.errors()).isEmpty();
 
-    final String cmdString = multiFileSubCommand.toString();
-    assertThat(cmdString).contains("directoryPath=/keys/directory/path");
+    final Path path = multiFileSubCommand.getDirectoryPath();
+    assertThat(path).isEqualTo(expectedPath);
   }
 
   @Test
   void parseCommandSuccessfullyUsingShortcutSetDirectory() {
+    final Path expectedPath = Path.of("/keys/directory/path");
+
     commandLine.parse("-d", "/keys/directory/path");
 
     final ParseResult parseResult = commandLine.getParseResult();
     assertThat(parseResult.errors()).isEmpty();
 
-    final String cmdString = multiFileSubCommand.toString();
-    assertThat(cmdString).contains("directoryPath=/keys/directory/path");
+    final Path path = multiFileSubCommand.getDirectoryPath();
+    assertThat(path).isEqualTo(expectedPath);
   }
 
   @Test
