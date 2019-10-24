@@ -44,7 +44,7 @@ class KeyPasswordLoader {
   Optional<KeyPasswordFile> loadKeyAndPasswordForAddress(final String address) {
     final List<KeyPasswordFile> matchingKeys =
         loadAvailableKeys().stream()
-            .filter(kp -> kp.getName().contains(normalizeAddress(address)))
+            .filter(kp -> kp.getName().toLowerCase().contains(normalizeAddress(address)))
             .collect(Collectors.toList());
 
     if (matchingKeys.size() > 1) {

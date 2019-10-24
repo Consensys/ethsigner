@@ -99,7 +99,18 @@ class KeyPasswordLoaderTest {
   }
 
   @Test
-  void loadAvailableKeysReturnsAllValidKeyPasswordFilesInKeysDirectory() throws IOException {
+  void loadKeyPasswordWorkWithNonLowercaseFilename() throws IOException {
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
+    renameFile(kpFile.getKey(), KEY_PASSWORD_2.toUpperCase() + ".key");
+
+    final Optional<KeyPasswordFile> loadedKeyPassFile =
+        loader.loadKeyAndPasswordForAddress(ADDRESS_2);
+
+    assertThat(loadedKeyPassFile).isNotEmpty();
+  }
+
+  @Test
+  void loadAvailableKeysReturnsAllValidKeyPasswordFilesInKeysDirectory() {
     final KeyPasswordFile kpFile1 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
     final KeyPasswordFile kpFile2 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
 
@@ -127,6 +138,18 @@ class KeyPasswordLoaderTest {
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
     assertThat(keyPasswordFiles).isEmpty();
+  }
+
+  @Test
+  void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    renameFile(kpFile.getKey(), KEY_PASSWORD_1.toUpperCase() + ".key");
+    renameFile(kpFile.getPassword(), KEY_PASSWORD_1.toUpperCase() + ".password");
+
+    final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
+
+    assertThat(keyPasswordFiles).hasSize(1);
+    assertThat(keyPasswordFiles).containsOnly(kpFile);
   }
 
   @Test
@@ -172,6 +195,8 @@ class KeyPasswordLoaderTest {
   }
 
   private void renameFile(final Path file, final String newName) throws IOException {
-    Files.move(file, file.getParent().resolve(newName));
+    final Path newFile = file.getParent().resolve(newName);
+    Files.move(file, newFile);
+    assertThat(newFile.toFile().exists()).isTrue();
   }
 }
