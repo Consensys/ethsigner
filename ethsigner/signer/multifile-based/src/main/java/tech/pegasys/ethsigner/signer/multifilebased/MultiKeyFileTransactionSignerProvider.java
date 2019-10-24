@@ -17,8 +17,6 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -44,16 +42,11 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
 
   @Override
   public Set<String> availableAddresses() {
-    try {
-      return keyPasswordLoader.loadAvailableKeys().stream()
-          .map(this::createSigner)
-          .filter(Objects::nonNull)
-          .map(TransactionSigner::getAddress)
-          .collect(Collectors.toSet());
-    } catch (IOException e) {
-      LOG.error("Error loading available signers", e);
-      return Collections.emptySet();
-    }
+    return keyPasswordLoader.loadAvailableKeys().stream()
+        .map(this::createSigner)
+        .filter(Objects::nonNull)
+        .map(TransactionSigner::getAddress)
+        .collect(Collectors.toSet());
   }
 
   private TransactionSigner createSigner(final KeyPasswordFile keyPasswordFile) {
@@ -61,10 +54,10 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               keyPasswordFile.getKey(), keyPasswordFile.getPassword());
-      LOG.debug("Loaded signer for address {}", keyPasswordFile.getAddress());
+      LOG.debug("Loaded signer with key/password {}", keyPasswordFile.getName());
       return signer;
     } catch (TransactionSignerInitializationException e) {
-      LOG.warn("Unable to load signer for address {}", keyPasswordFile.getAddress(), e);
+      LOG.warn("Unable to load signer with key/password {}", keyPasswordFile.getName(), e);
       return null;
     }
   }
