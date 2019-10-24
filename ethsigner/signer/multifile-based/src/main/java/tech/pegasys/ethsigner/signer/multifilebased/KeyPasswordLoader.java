@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,9 +42,10 @@ class KeyPasswordLoader {
   }
 
   Optional<KeyPasswordFile> loadKeyAndPasswordForAddress(final String address) {
-    final List<KeyPasswordFile> matchingKeys = loadAvailableKeys().stream()
-        .filter(kp -> kp.getName().contains(normalizeAddress(address)))
-        .collect(Collectors.toList());
+    final List<KeyPasswordFile> matchingKeys =
+        loadAvailableKeys().stream()
+            .filter(kp -> kp.getName().contains(normalizeAddress(address)))
+            .collect(Collectors.toList());
 
     if (matchingKeys.size() > 1) {
       LOG.error("Found multiple key/password matches for address {}", address);
@@ -67,7 +69,7 @@ class KeyPasswordLoader {
         }
       }
       return keysAndPasswords;
-    } catch(IOException e) {
+    } catch (IOException e) {
       LOG.warn("Error searching for key/password files", e);
       return Collections.emptySet();
     }

@@ -32,8 +32,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class KeyPasswordLoaderTest {
 
-  @TempDir
-  Path keysDirectory;
+  @TempDir Path keysDirectory;
   KeyPasswordLoader loader;
 
   @BeforeEach
