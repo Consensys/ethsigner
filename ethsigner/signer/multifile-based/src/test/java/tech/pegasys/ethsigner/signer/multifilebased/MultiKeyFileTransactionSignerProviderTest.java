@@ -19,6 +19,9 @@ import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_1;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_2;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_3;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.KEY_PASSWORD_1;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.KEY_PASSWORD_2;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.KEY_PASSWORD_3;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.loadKeyPasswordFile;
 
 import java.io.IOException;
@@ -42,7 +45,7 @@ class MultiKeyFileTransactionSignerProviderTest {
 
   @Test
   void getSignerForAvailableKeyPasswordReturnsSigner() {
-    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(ADDRESS_1);
+    final KeyPasswordFile keyPasswordFile = loadKeyPasswordFile(KEY_PASSWORD_1);
     when(keyPasswordLoader.loadKeyAndPasswordForAddress(ADDRESS_1))
         .thenReturn(Optional.of(keyPasswordFile));
 
@@ -73,9 +76,9 @@ class MultiKeyFileTransactionSignerProviderTest {
 
     final Set<KeyPasswordFile> keyPasswordFiles =
         Set.of(
-            loadKeyPasswordFile(ADDRESS_1),
-            loadKeyPasswordFile(ADDRESS_2),
-            loadKeyPasswordFile(ADDRESS_3));
+            loadKeyPasswordFile(KEY_PASSWORD_1),
+            loadKeyPasswordFile(KEY_PASSWORD_2),
+            loadKeyPasswordFile(KEY_PASSWORD_3));
     when(keyPasswordLoader.loadAvailableKeys()).thenReturn(keyPasswordFiles);
 
     assertThat(signerFactory.availableAddresses()).containsAll(expectedAddressesWithHexPrefix);
@@ -87,9 +90,9 @@ class MultiKeyFileTransactionSignerProviderTest {
 
     final Set<KeyPasswordFile> keyPasswordFiles =
         Set.of(
-            loadKeyPasswordFile(ADDRESS_1),
+            loadKeyPasswordFile(KEY_PASSWORD_1),
             loadKeyPasswordFile("key_with_invalid_password"),
-            loadKeyPasswordFile(ADDRESS_3));
+            loadKeyPasswordFile(KEY_PASSWORD_3));
     when(keyPasswordLoader.loadAvailableKeys()).thenReturn(keyPasswordFiles);
 
     assertThat(signerFactory.availableAddresses()).containsAll(expectedAddressesWithHexPrefix);
