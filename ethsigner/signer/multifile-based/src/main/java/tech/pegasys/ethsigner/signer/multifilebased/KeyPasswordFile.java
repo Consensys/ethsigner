@@ -18,7 +18,7 @@ import com.google.common.base.Objects;
 
 class KeyPasswordFile {
 
-  private final String address;
+  private final String name;
   private final Path key;
   private final Path password;
 
@@ -29,27 +29,25 @@ class KeyPasswordFile {
     if (!keyAndPasswordNameMatch(key, password)) {
       throw new IllegalArgumentException("Key and Password names must match");
     } else {
-      this.address = getAddressFromFile(key);
+      this.name = getFilenameWithoutExtension(key);
     }
   }
 
   private boolean keyAndPasswordNameMatch(final Path key, final Path password) {
-    return getAddressFromFile(key).equals(getAddressFromFile(password));
+    return getFilenameWithoutExtension(key).equals(getFilenameWithoutExtension(password));
   }
 
-  private String getAddressFromFile(final Path file) {
+  private String getFilenameWithoutExtension(final Path file) {
     final String filename = file.getFileName().toString();
-    if (filename.endsWith(".key")) {
-      return filename.replace(".key", "");
-    } else if (filename.endsWith(".password")) {
-      return filename.replace(".password", "");
+    if (filename.endsWith(".key") || filename.endsWith(".password")) {
+      return filename.replaceAll("\\.key|\\.password", "");
     } else {
-      throw new IllegalStateException("Invalid key/password filename");
+      throw new IllegalArgumentException("Invalid key/password filename extension");
     }
   }
 
-  String getAddress() {
-    return address;
+  String getName() {
+    return name;
   }
 
   Path getKey() {
@@ -69,13 +67,13 @@ class KeyPasswordFile {
       return false;
     }
     final KeyPasswordFile that = (KeyPasswordFile) o;
-    return Objects.equal(address, that.address)
+    return Objects.equal(name, that.name)
         && Objects.equal(key, that.key)
         && Objects.equal(password, that.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(address, key, password);
+    return Objects.hashCode(name, key, password);
   }
 }
