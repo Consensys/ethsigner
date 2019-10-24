@@ -130,17 +130,6 @@ class KeyPasswordLoaderTest {
   }
 
   @Test
-  void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
-    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    renameFile(kpFile.getKey(), KEY_PASSWORD_1.toUpperCase() + ".key");
-
-    final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
-
-    assertThat(keyPasswordFiles).hasSize(1);
-    assertThat(keyPasswordFiles).containsOnly(kpFile);
-  }
-
-  @Test
   void loadKeyPasswordWithHexPrefixReturnsFile() {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
 
