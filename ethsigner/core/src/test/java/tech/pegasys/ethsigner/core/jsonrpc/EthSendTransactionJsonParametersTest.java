@@ -17,11 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigInteger;
 import java.util.Optional;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
-public class EthSendTransactionJsonParametersTest {
+class EthSendTransactionJsonParametersTest {
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -30,29 +29,12 @@ public class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  public void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
-    final JsonObject parameters = new JsonObject();
-    parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
-    parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
-    parameters.put("nonce", "0x1");
-    parameters.put("gas", "0x76c0");
-    parameters.put("gasPrice", "0x9184e72a000");
-    parameters.put("value", "0x9184e72a");
-    parameters.put(
-        "data",
-        "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+  void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
+    final JsonObject parameters = validEthTransactionParameters();
 
-    final JsonArray inputParameters = new JsonArray();
-    inputParameters.add(parameters);
-
-    final JsonObject input = new JsonObject();
-    input.put("jsonrpc", 2.0);
-    input.put("method", "mine");
-    input.put("params", inputParameters);
-
-    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -63,26 +45,12 @@ public class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  public void transactionNotStoredInJsonArrayCanBeDecoded() throws Throwable {
-    final JsonObject parameters = new JsonObject();
-    parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
-    parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
-    parameters.put("nonce", "0x1");
-    parameters.put("gas", "0x76c0");
-    parameters.put("gasPrice", "0x9184e72a000");
-    parameters.put("value", "0x9184e72a");
-    parameters.put(
-        "data",
-        "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+  void transactionNotStoredInJsonArrayCanBeDecoded() throws Throwable {
+    final JsonObject parameters = validEthTransactionParameters();
 
-    final JsonObject input = new JsonObject();
-    input.put("jsonrpc", 2.0);
-    input.put("method", "mine");
-    input.put("params", parameters);
-
-    final JsonRpcRequest request = input.mapTo(JsonRpcRequest.class);
-    final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -90,5 +58,53 @@ public class EthSendTransactionJsonParametersTest {
     assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
     assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
     assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
+  }
+
+  @Test
+  void transactionWithInvalidFromCanBeDecoded() {
+    final JsonObject parameters = validEthTransactionParameters();
+    parameters.put("from", "invalidFromAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
+  }
+
+  @Test
+  void transactionWithInvalidToCanBeDecoded() {
+    final JsonObject parameters = validEthTransactionParameters();
+    parameters.put("to", "invalidToAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.receiver()).contains("invalidToAddress");
+  }
+
+  private JsonObject validEthTransactionParameters() {
+    final JsonObject parameters = new JsonObject();
+    parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
+    parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
+    parameters.put("nonce", "0x1");
+    parameters.put("gas", "0x76c0");
+    parameters.put("gasPrice", "0x9184e72a000");
+    parameters.put("value", "0x0");
+    parameters.put(
+        "data",
+        "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+
+    return parameters;
+  }
+
+  private <T> JsonRpcRequest wrapParametersInRequest(final T parameters) {
+    final JsonObject input = new JsonObject();
+    input.put("jsonrpc", 2.0);
+    input.put("method", "mine");
+    input.put("params", parameters);
+
+    return input.mapTo(JsonRpcRequest.class);
   }
 }

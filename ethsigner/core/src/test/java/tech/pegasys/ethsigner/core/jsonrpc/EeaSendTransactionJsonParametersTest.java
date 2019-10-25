@@ -19,12 +19,135 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigInteger;
 import java.util.Optional;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.web3j.utils.Base64String;
 
-public class EeaSendTransactionJsonParametersTest {
+class EeaSendTransactionJsonParametersTest {
+
+  @Test
+  void transactionStoredInJsonArrayCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
+    assertThat(txnParams.gasPrice())
+        .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
+    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
+    assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
+    assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
+    assertThat(txnParams.privateFrom())
+        .isEqualTo(Base64String.wrap(parameters.getString("privateFrom")));
+    assertThat(txnParams.privateFor().get())
+        .containsExactly(Base64String.wrap(parameters.getJsonArray("privateFor").getString(0)));
+    assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
+  }
+
+  @Test
+  void transactionNotStoredInJsonArrayCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
+    assertThat(txnParams.gasPrice())
+        .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
+    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
+    assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
+    assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
+    assertThat(txnParams.privateFrom())
+        .isEqualTo(Base64String.wrap(parameters.getString("privateFrom")));
+    assertThat(txnParams.privateFor().get())
+        .containsExactly(Base64String.wrap(parameters.getJsonArray("privateFor").getString(0)));
+    assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
+  }
+
+  @Test
+  void transactionWithInvalidPrivateFromThrowsIllegalArgumentException() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("privateFrom", "invalidThirtyTwoByteData=");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+  }
+
+  @Test
+  void transactionWithoutPrivateFromCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.remove("privateFrom");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.privateFrom()).isNull();
+  }
+
+  @Test
+  void transactionWithInvalidPrivateForThrowsIllegalArgumentException() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("privateFor", singletonList("invalidThirtyTwoByteData="));
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+  }
+
+  @Test
+  void transactionWithoutRestrictionCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.remove("restriction");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.restriction()).isNull();
+  }
+
+  @Test
+  void transactionWithInvalidRestrictionCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("restriction", "invalidRestriction");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.restriction()).isEqualTo("invalidRestriction");
+  }
+
+  @Test
+  void transactionWithInvalidFromCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("from", "invalidFromAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
+  }
+
+  @Test
+  void transactionWithInvalidToCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("to", "invalidToAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.receiver()).contains("invalidToAddress");
+  }
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -48,73 +171,6 @@ public class EeaSendTransactionJsonParametersTest {
     parameters.put("restriction", "restricted");
 
     return parameters;
-  }
-
-  @Test
-  public void transactionStoredInJsonArrayCanBeDecoded() {
-    final JsonObject parameters = validEeaTransactionParameters();
-
-    final JsonArray inputParameters = new JsonArray();
-    inputParameters.add(parameters);
-
-    final JsonRpcRequest request = wrapParametersInRequest(inputParameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
-
-    assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
-    assertThat(txnParams.gasPrice())
-        .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
-    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
-    assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
-    assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
-    assertThat(txnParams.privateFrom())
-        .isEqualTo(Base64String.wrap(parameters.getString("privateFrom")));
-    assertThat(txnParams.privateFor().get())
-        .containsExactly(Base64String.wrap(parameters.getJsonArray("privateFor").getString(0)));
-    assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
-  }
-
-  @Test
-  public void transactionNotStoredInJsonArrayCanBeDecoded() {
-    final JsonObject parameters = validEeaTransactionParameters();
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
-
-    assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
-    assertThat(txnParams.gasPrice())
-        .isEqualTo(getStringAsOptionalBigInteger(parameters, "gasPrice"));
-    assertThat(txnParams.nonce()).isEqualTo(getStringAsOptionalBigInteger(parameters, "nonce"));
-    assertThat(txnParams.receiver()).isEqualTo(Optional.of(parameters.getString("to")));
-    assertThat(txnParams.value()).isEqualTo(getStringAsOptionalBigInteger(parameters, "value"));
-    assertThat(txnParams.privateFrom())
-        .isEqualTo(Base64String.wrap(parameters.getString("privateFrom")));
-    assertThat(txnParams.privateFor().get())
-        .containsExactly(Base64String.wrap(parameters.getJsonArray("privateFor").getString(0)));
-    assertThat(txnParams.restriction()).isEqualTo(parameters.getString("restriction"));
-  }
-
-  @Test
-  public void transactionWithInvalidPrivateFromThrowsIllegalArgumentException() {
-    final JsonObject parameters = validEeaTransactionParameters();
-    parameters.put("privateFrom", "invalidThirtyTwoByteData=");
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
-  }
-
-  @Test
-  public void transactionWithInvalidPrivateForThrowsIllegalArgumentException() {
-    final JsonObject parameters = validEeaTransactionParameters();
-    parameters.put("privateFor", singletonList("invalidThirtyTwoByteData="));
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
   }
 
   private <T> JsonRpcRequest wrapParametersInRequest(final T parameters) {
