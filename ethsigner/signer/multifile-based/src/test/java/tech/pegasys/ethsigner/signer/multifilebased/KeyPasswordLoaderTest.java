@@ -21,6 +21,8 @@ import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixtur
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_LOWERCASE_DUP_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.SUFFIX_KP;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.SUFFIX_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.loadKeyPasswordFile;
 
 import java.io.IOException;
@@ -36,7 +38,7 @@ import org.junit.jupiter.api.io.TempDir;
 class KeyPasswordLoaderTest {
 
   @TempDir Path keysDirectory;
-  KeyPasswordLoader loader;
+  private KeyPasswordLoader loader;
 
   @BeforeEach
   void beforeEach() {
@@ -166,13 +168,21 @@ class KeyPasswordLoaderTest {
 
   @Test
   void multipleMatchesForSameAddressReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile1 =
-        copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_A_KP);
-    final KeyPasswordFile keyPasswordFile2 =
-        copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_B_KP);
+    copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_A_KP);
+    copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_B_KP);
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(PREFIX_LOWERCASE_DUP_KP_ADDRESS);
+
+    assertThat(loadedKeyPassFile).isEmpty();
+  }
+
+  @Test
+  void loadKeyPasswordNotEndingWithAddressReturnsEmpty() {
+    copyKeyPasswordToKeysDirectory(SUFFIX_KP);
+
+    final Optional<KeyPasswordFile> loadedKeyPassFile =
+        loader.loadKeyAndPasswordForAddress(SUFFIX_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }

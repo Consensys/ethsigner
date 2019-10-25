@@ -44,7 +44,7 @@ class KeyPasswordLoader {
   Optional<KeyPasswordFile> loadKeyAndPasswordForAddress(final String address) {
     final List<KeyPasswordFile> matchingKeys =
         loadAvailableKeys().stream()
-            .filter(kp -> kp.getName().toLowerCase().contains(normalizeAddress(address)))
+            .filter(kp -> kp.getFilename().toLowerCase().endsWith(normalizeAddress(address)))
             .collect(Collectors.toList());
 
     if (matchingKeys.size() > 1) {
@@ -60,23 +60,18 @@ class KeyPasswordLoader {
   Collection<KeyPasswordFile> loadAvailableKeys() {
     final Collection<KeyPasswordFile> keysAndPasswords = new HashSet<>();
 
-    try (final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(keysDirectory)) {
+    try (final DirectoryStream<Path> directoryStream =
+        Files.newDirectoryStream(keysDirectory, "**" + KEY_FILE_EXTENSION)) {
       for (final Path file : directoryStream) {
-        if (isKeyFile(file)) {
-          tryFindingMatchingPassword(file)
-              .ifPresent(
-                  passwordFile -> keysAndPasswords.add(new KeyPasswordFile(file, passwordFile)));
-        }
+        tryFindingMatchingPassword(file)
+            .ifPresent(
+                passwordFile -> keysAndPasswords.add(new KeyPasswordFile(file, passwordFile)));
       }
       return keysAndPasswords;
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOG.warn("Error searching for key/password files", e);
       return Collections.emptySet();
     }
-  }
-
-  private boolean isKeyFile(final Path file) {
-    return file.getFileName().toString().endsWith(KEY_FILE_EXTENSION);
   }
 
   private Optional<Path> tryFindingMatchingPassword(final Path keyFile) {

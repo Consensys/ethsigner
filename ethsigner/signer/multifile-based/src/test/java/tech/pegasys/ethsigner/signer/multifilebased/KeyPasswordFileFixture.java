@@ -36,6 +36,9 @@ class KeyPasswordFileFixture {
   public static String PREFIX_LOWERCASE_DUP_A_KP = "foo_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   public static String PREFIX_LOWERCASE_DUP_B_KP = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
+  public static String SUFFIX_KP_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
+  public static String SUFFIX_KP = "627306090abab3a6e1400e9345bc60c78a8bef57_foo";
+
   private static final Path keysDirectory = Path.of("src/test/resources/keys");
 
   static KeyPasswordFile loadKeyPasswordFile(final String filename) {

@@ -28,14 +28,14 @@ class KeyPasswordFileTest {
   void matchingKeyAndPasswordWithoutPrefixShouldHaveExpectedName() {
     final KeyPasswordFile kpFile = loadKeyPasswordFile(NO_PREFIX_LOWERCASE_KP);
 
-    assertThat(kpFile.getName()).matches(NO_PREFIX_LOWERCASE_KP);
+    assertThat(kpFile.getFilename()).matches(NO_PREFIX_LOWERCASE_KP);
   }
 
   @Test
   void matchingKeyAndPasswordWithPrefixShouldHaveExpectedName() {
     final KeyPasswordFile kpFile = loadKeyPasswordFile(PREFIX_MIXEDCASE_KP);
 
-    assertThat(kpFile.getName()).matches(PREFIX_MIXEDCASE_KP);
+    assertThat(kpFile.getFilename()).matches(PREFIX_MIXEDCASE_KP);
   }
 
   @Test
