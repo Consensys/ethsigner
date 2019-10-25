@@ -152,7 +152,7 @@ class KeyPasswordLoaderTest {
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
     assertThat(keyPasswordFiles).hasSize(1);
-    assertThat(keyPasswordFiles).containsOnly(originalKpFile);
+    assertThat(keyPasswordFiles).containsOnly(expectedKeyPassword);
   }
 
   @Test
