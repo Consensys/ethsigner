@@ -32,8 +32,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class KeyPasswordLoaderTest {
 
-  @TempDir
-  Path keysDirectory;
+  @TempDir Path keysDirectory;
   KeyPasswordLoader loader;
 
   @BeforeEach
@@ -144,10 +143,10 @@ class KeyPasswordLoaderTest {
   @Test
   void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
     final KeyPasswordFile originalKpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    final Path renamedKey = renameFile(originalKpFile.getKey(),
-        KEY_PASSWORD_1.toUpperCase() + ".key");
-    final Path renamedPassword = renameFile(originalKpFile.getPassword(),
-        KEY_PASSWORD_1.toUpperCase() + ".password");
+    final Path renamedKey =
+        renameFile(originalKpFile.getKey(), KEY_PASSWORD_1.toUpperCase() + ".key");
+    final Path renamedPassword =
+        renameFile(originalKpFile.getPassword(), KEY_PASSWORD_1.toUpperCase() + ".password");
     final KeyPasswordFile expectedKeyPassword = new KeyPasswordFile(renamedKey, renamedPassword);
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
