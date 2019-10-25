@@ -14,10 +14,10 @@ package tech.pegasys.ethsigner.signer.multifilebased;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_1;
-import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.ADDRESS_2;
-import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.KEY_PASSWORD_1;
-import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.KEY_PASSWORD_2;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.NO_PREFIX_LOWERCASE_KP;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.NO_PREFIX_LOWERCASE_KP_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.loadKeyPasswordFile;
 
 import java.io.IOException;
@@ -42,10 +42,10 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadKeyPasswordWithMatchingPasswordReturnsFile() {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
     assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
@@ -53,12 +53,12 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadKeyPasswordWithPrefixReturnsFile() {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
     final String keyFilename = keyPasswordFile.getKey().getFileName().toString();
-    assertThat(keyFilename.startsWith(ADDRESS_2)).isFalse();
+    assertThat(keyFilename.startsWith(PREFIX_MIXEDCASE_KP_ADDRESS)).isFalse();
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_2);
+        loader.loadKeyAndPasswordForAddress(PREFIX_MIXEDCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
     assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
@@ -66,53 +66,54 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadKeyPasswordWithMissingPasswordReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     Files.delete(keyPasswordFile.getPassword());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
 
   @Test
   void loadKeyPasswordWithMissingKeyReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     Files.delete(keyPasswordFile.getKey());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
 
   @Test
   void loadKeyPasswordWithMissingKeyAndPasswordReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     Files.delete(keyPasswordFile.getKey());
     Files.delete(keyPasswordFile.getPassword());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
 
   @Test
   void loadKeyPasswordWorkWithNonLowercaseFilename() throws IOException {
-    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
-    renameFile(kpFile.getKey(), KEY_PASSWORD_2.toUpperCase() + ".key");
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
+    renameFile(kpFile.getKey(), PREFIX_MIXEDCASE_KP.toUpperCase() + ".key");
+    renameFile(kpFile.getPassword(), PREFIX_MIXEDCASE_KP.toUpperCase() + ".password");
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_2);
+        loader.loadKeyAndPasswordForAddress(PREFIX_MIXEDCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
   }
 
   @Test
   void loadAvailableKeysReturnsAllValidKeyPasswordFilesInKeysDirectory() {
-    final KeyPasswordFile kpFile1 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    final KeyPasswordFile kpFile2 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
+    final KeyPasswordFile kpFile1 = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
+    final KeyPasswordFile kpFile2 = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
@@ -122,7 +123,7 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysIgnoresKeyWithoutMatchingPassword() throws IOException {
-    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     Files.delete(kpFile.getPassword());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
@@ -132,7 +133,7 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysIgnoresPasswordWithoutMatchingKey() throws IOException {
-    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     Files.delete(kpFile.getKey());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
@@ -142,11 +143,12 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
-    final KeyPasswordFile originalKpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile originalKpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
     final Path renamedKey =
-        renameFile(originalKpFile.getKey(), KEY_PASSWORD_1.toUpperCase() + ".key");
+        renameFile(originalKpFile.getKey(), NO_PREFIX_LOWERCASE_KP.toUpperCase() + ".key");
     final Path renamedPassword =
-        renameFile(originalKpFile.getPassword(), KEY_PASSWORD_1.toUpperCase() + ".password");
+        renameFile(
+            originalKpFile.getPassword(), NO_PREFIX_LOWERCASE_KP.toUpperCase() + ".password");
     final KeyPasswordFile expectedKeyPassword = new KeyPasswordFile(renamedKey, renamedPassword);
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
@@ -157,10 +159,10 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadKeyPasswordWithHexPrefixReturnsFile() {
-    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress("0x" + ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress("0x" + NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
     assertThat(loadedKeyPassFile.get()).isEqualTo(keyPasswordFile);
@@ -168,16 +170,18 @@ class KeyPasswordLoaderTest {
 
   @Test
   void multipleMatchesForSameAddressReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile1 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    renameFile(keyPasswordFile1.getKey(), "foo_" + ADDRESS_1 + ".key");
-    renameFile(keyPasswordFile1.getPassword(), "foo_" + ADDRESS_1 + ".password");
+    final KeyPasswordFile keyPasswordFile1 = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
+    renameFile(keyPasswordFile1.getKey(), "foo_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".key");
+    renameFile(
+        keyPasswordFile1.getPassword(), "foo_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".password");
 
-    final KeyPasswordFile keyPasswordFile2 = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    renameFile(keyPasswordFile2.getKey(), "bar_" + ADDRESS_1 + ".key");
-    renameFile(keyPasswordFile2.getPassword(), "bar_" + ADDRESS_1 + ".password");
+    final KeyPasswordFile keyPasswordFile2 = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
+    renameFile(keyPasswordFile2.getKey(), "bar_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".key");
+    renameFile(
+        keyPasswordFile2.getPassword(), "bar_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".password");
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(ADDRESS_1);
+        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }

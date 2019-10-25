@@ -25,15 +25,15 @@ import java.nio.file.Path;
 */
 class KeyPasswordFileFixture {
 
-  public static String ADDRESS_1 = "627306090abab3a6e1400e9345bc60c78a8bef57";
-  public static String KEY_PASSWORD_1 = "627306090abab3a6e1400e9345bc60c78a8bef57";
+  public static String NO_PREFIX_LOWERCASE_KP_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
+  public static String NO_PREFIX_LOWERCASE_KP = "627306090abab3a6e1400e9345bc60c78a8bef57";
 
-  public static String ADDRESS_2 = "f17f52151ebef6c7334fad080c5704d77216b732";
-  public static String KEY_PASSWORD_2 =
+  public static String PREFIX_MIXEDCASE_KP_ADDRESS = "f17f52151ebef6c7334fad080c5704d77216b732";
+  public static String PREFIX_MIXEDCASE_KP =
       "UTC--2019-10-23T04-00-04.860366000Z--f17f52151ebef6c7334fad080c5704d77216b732";
 
-  public static String ADDRESS_3 = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  public static String KEY_PASSWORD_3 = "1571803966_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_LOWERCASE_KP_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_LOWERCASE_KP = "1571803966_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   private static final Path keysDirectory = Path.of("src/test/resources/keys");
 
