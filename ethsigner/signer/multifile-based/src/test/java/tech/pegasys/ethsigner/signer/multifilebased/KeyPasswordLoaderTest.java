@@ -16,6 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.NO_PREFIX_LOWERCASE_KP;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.NO_PREFIX_LOWERCASE_KP_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_LOWERCASE_DUP_A_KP;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_LOWERCASE_DUP_B_KP;
+import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_LOWERCASE_DUP_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.PREFIX_MIXEDCASE_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multifilebased.KeyPasswordFileFixture.loadKeyPasswordFile;
@@ -99,15 +102,14 @@ class KeyPasswordLoaderTest {
   }
 
   @Test
-  void loadKeyPasswordWorkWithNonLowercaseFilename() throws IOException {
+  void loadKeyPasswordWorkWithNonLowercaseFilename() {
     final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
-    renameFile(kpFile.getKey(), PREFIX_MIXEDCASE_KP.toUpperCase() + ".key");
-    renameFile(kpFile.getPassword(), PREFIX_MIXEDCASE_KP.toUpperCase() + ".password");
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(PREFIX_MIXEDCASE_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isNotEmpty();
+    assertThat(loadedKeyPassFile.get()).isEqualTo(kpFile);
   }
 
   @Test
@@ -142,19 +144,13 @@ class KeyPasswordLoaderTest {
   }
 
   @Test
-  void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
-    final KeyPasswordFile originalKpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    final Path renamedKey =
-        renameFile(originalKpFile.getKey(), NO_PREFIX_LOWERCASE_KP.toUpperCase() + ".key");
-    final Path renamedPassword =
-        renameFile(
-            originalKpFile.getPassword(), NO_PREFIX_LOWERCASE_KP.toUpperCase() + ".password");
-    final KeyPasswordFile expectedKeyPassword = new KeyPasswordFile(renamedKey, renamedPassword);
+  void loadAvailableKeysKeysWorkWithNonLowercaseFilename() {
+    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
     assertThat(keyPasswordFiles).hasSize(1);
-    assertThat(keyPasswordFiles).containsOnly(expectedKeyPassword);
+    assertThat(keyPasswordFiles).containsOnly(kpFile);
   }
 
   @Test
@@ -170,18 +166,13 @@ class KeyPasswordLoaderTest {
 
   @Test
   void multipleMatchesForSameAddressReturnsEmpty() throws IOException {
-    final KeyPasswordFile keyPasswordFile1 = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    renameFile(keyPasswordFile1.getKey(), "foo_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".key");
-    renameFile(
-        keyPasswordFile1.getPassword(), "foo_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".password");
-
-    final KeyPasswordFile keyPasswordFile2 = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    renameFile(keyPasswordFile2.getKey(), "bar_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".key");
-    renameFile(
-        keyPasswordFile2.getPassword(), "bar_" + NO_PREFIX_LOWERCASE_KP_ADDRESS + ".password");
+    final KeyPasswordFile keyPasswordFile1 =
+        copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_A_KP);
+    final KeyPasswordFile keyPasswordFile2 =
+        copyKeyPasswordToKeysDirectory(PREFIX_LOWERCASE_DUP_B_KP);
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
-        loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
+        loader.loadKeyAndPasswordForAddress(PREFIX_LOWERCASE_DUP_KP_ADDRESS);
 
     assertThat(loadedKeyPassFile).isEmpty();
   }
@@ -199,12 +190,5 @@ class KeyPasswordLoaderTest {
     }
 
     return new KeyPasswordFile(newKeyFile, newPasswordFile);
-  }
-
-  private Path renameFile(final Path file, final String newName) throws IOException {
-    final Path newFile = file.getParent().resolve(newName);
-    Files.move(file, newFile);
-    assertThat(newFile.toFile().exists()).isTrue();
-    return newFile;
   }
 }

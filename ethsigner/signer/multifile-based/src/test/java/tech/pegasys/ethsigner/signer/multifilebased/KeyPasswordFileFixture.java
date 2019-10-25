@@ -32,8 +32,9 @@ class KeyPasswordFileFixture {
   public static String PREFIX_MIXEDCASE_KP =
       "UTC--2019-10-23T04-00-04.860366000Z--f17f52151ebef6c7334fad080c5704d77216b732";
 
-  public static String PREFIX_LOWERCASE_KP_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  public static String PREFIX_LOWERCASE_KP = "1571803966_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_LOWERCASE_DUP_KP_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_LOWERCASE_DUP_A_KP = "foo_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_LOWERCASE_DUP_B_KP = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   private static final Path keysDirectory = Path.of("src/test/resources/keys");
 
