@@ -32,7 +32,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class KeyPasswordLoaderTest {
 
-  @TempDir Path keysDirectory;
+  @TempDir
+  Path keysDirectory;
   KeyPasswordLoader loader;
 
   @BeforeEach
@@ -143,14 +144,17 @@ class KeyPasswordLoaderTest {
 
   @Test
   void loadAvailableKeysKeysWorkWithNonLowercaseFilename() throws IOException {
-    final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
-    renameFile(kpFile.getKey(), KEY_PASSWORD_1.toUpperCase() + ".key");
-    renameFile(kpFile.getPassword(), KEY_PASSWORD_1.toUpperCase() + ".password");
+    final KeyPasswordFile originalKpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_1);
+    final Path renamedKey = renameFile(originalKpFile.getKey(),
+        KEY_PASSWORD_1.toUpperCase() + ".key");
+    final Path renamedPassword = renameFile(originalKpFile.getPassword(),
+        KEY_PASSWORD_1.toUpperCase() + ".password");
+    final KeyPasswordFile expectedKeyPassword = new KeyPasswordFile(renamedKey, renamedPassword);
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
     assertThat(keyPasswordFiles).hasSize(1);
-    assertThat(keyPasswordFiles).containsOnly(kpFile);
+    assertThat(keyPasswordFiles).containsOnly(originalKpFile);
   }
 
   @Test
@@ -195,9 +199,10 @@ class KeyPasswordLoaderTest {
     return new KeyPasswordFile(newKeyFile, newPasswordFile);
   }
 
-  private void renameFile(final Path file, final String newName) throws IOException {
+  private Path renameFile(final Path file, final String newName) throws IOException {
     final Path newFile = file.getParent().resolve(newName);
     Files.move(file, newFile);
     assertThat(newFile.toFile().exists()).isTrue();
+    return newFile;
   }
 }
