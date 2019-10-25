@@ -34,6 +34,7 @@ class KeyPasswordLoader {
 
   private static final String KEY_FILE_EXTENSION = ".key";
   private static final String PASSWORD_FILE_EXTENSION = ".password";
+  private static final String GLOB_KEY_MATCHER = "**" + KEY_FILE_EXTENSION;
 
   private final Path keysDirectory;
 
@@ -61,7 +62,7 @@ class KeyPasswordLoader {
     final Collection<KeyPasswordFile> keysAndPasswords = new HashSet<>();
 
     try (final DirectoryStream<Path> directoryStream =
-        Files.newDirectoryStream(keysDirectory, "**" + KEY_FILE_EXTENSION)) {
+        Files.newDirectoryStream(keysDirectory, GLOB_KEY_MATCHER)) {
       for (final Path file : directoryStream) {
         tryFindingMatchingPassword(file)
             .ifPresent(
