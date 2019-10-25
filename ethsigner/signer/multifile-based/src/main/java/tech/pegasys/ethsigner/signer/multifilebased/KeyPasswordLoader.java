@@ -62,6 +62,7 @@ class KeyPasswordLoader {
 
     try (final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(keysDirectory)) {
       for (final Path file : directoryStream) {
+        LOG.info("loadAvailableKeys (FILE): {}", file.toAbsolutePath().getFileName().toString());
         if (isKeyFile(file)) {
           tryFindingMatchingPassword(file)
               .ifPresent(
@@ -82,7 +83,11 @@ class KeyPasswordLoader {
   private Optional<Path> tryFindingMatchingPassword(final Path keyFile) {
     final String passwordFilePath =
         keyFile.toAbsolutePath().toString().replace(KEY_FILE_EXTENSION, PASSWORD_FILE_EXTENSION);
+    LOG.info("tryFindingMatchingPassword (KEY): {}", keyFile.getFileName().toString());
     final File file = Paths.get(passwordFilePath).toFile();
+    LOG.info(
+        "tryFindingMatchingPassword (PASSWORD): {}",
+        Paths.get(passwordFilePath).getFileName().toString());
     if (file.exists()) {
       return Optional.of(file.toPath());
     } else {

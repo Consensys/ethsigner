@@ -102,6 +102,7 @@ class KeyPasswordLoaderTest {
   void loadKeyPasswordWorkWithNonLowercaseFilename() throws IOException {
     final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(KEY_PASSWORD_2);
     renameFile(kpFile.getKey(), KEY_PASSWORD_2.toUpperCase() + ".key");
+    renameFile(kpFile.getPassword(), KEY_PASSWORD_2.toUpperCase() + ".password");
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(ADDRESS_2);
