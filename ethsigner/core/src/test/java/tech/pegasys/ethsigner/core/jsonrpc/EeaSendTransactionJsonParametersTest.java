@@ -96,17 +96,6 @@ public class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  public void transactionWithNonZeroValueFails() {
-    final JsonObject parameters = validEeaTransactionParameters();
-    parameters.put("value", "0x9184e72a");
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
-  }
-
-  @Test
   public void transactionWithInvalidPrivateFromThrowsIllegalArgumentException() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("privateFrom", "invalidThirtyTwoByteData=");

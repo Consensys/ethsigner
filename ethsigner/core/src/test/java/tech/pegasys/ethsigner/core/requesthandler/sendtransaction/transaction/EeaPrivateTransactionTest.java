@@ -40,11 +40,7 @@ public class EeaPrivateTransactionTest {
 
   @BeforeEach
   public void setup() {
-    params =
-        new EeaSendTransactionJsonParameters(
-            "0x7577919ae5df4941180eac211965f275cdce314d",
-            "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=",
-            "restricted");
+    params = new EeaSendTransactionJsonParameters("0x7577919ae5df4941180eac211965f275cdce314d");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
@@ -53,6 +49,8 @@ public class EeaPrivateTransactionTest {
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
+    params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
+    params.restriction("restricted");
 
     privateTransaction =
         EeaPrivateTransaction.from(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
