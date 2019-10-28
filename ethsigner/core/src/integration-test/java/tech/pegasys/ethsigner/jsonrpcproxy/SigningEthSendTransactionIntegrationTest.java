@@ -88,6 +88,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
+  // TODO change this test to confirm it get send through to eth client as is
   @Test
   public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
@@ -105,7 +106,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.withSender("")), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransaction.withSender("")), response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
@@ -133,12 +134,14 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
         request.ethSigner(sendTransaction.missingSender()), response.ethSigner(INVALID_PARAMS));
   }
 
+  // TODO does this test make sense? looks like signTransactionWhenMissingReceiverAddress
   @Test
   public void signTransactionWhenReceiverAddressIsEmpty() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withReceiver("")), response.ethSigner(INVALID_PARAMS));
   }
 
+  // TODO change this test to confirm it get send through to eth client as is
   @Test
   public void invalidParamsResponseWhenReceiverAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
