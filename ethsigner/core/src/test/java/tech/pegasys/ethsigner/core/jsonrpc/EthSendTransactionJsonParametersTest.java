@@ -33,8 +33,8 @@ class EthSendTransactionJsonParametersTest {
     final JsonObject parameters = validEthTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -49,8 +49,8 @@ class EthSendTransactionJsonParametersTest {
     final JsonObject parameters = validEthTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -66,8 +66,8 @@ class EthSendTransactionJsonParametersTest {
     parameters.put("from", "invalidFromAddress");
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
   }
@@ -78,8 +78,8 @@ class EthSendTransactionJsonParametersTest {
     parameters.put("to", "invalidToAddress");
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+    final EthSendTransactionJsonParameters txnParams =
+        EthSendTransactionJsonParameters.from(request);
 
     assertThat(txnParams.receiver()).contains("invalidToAddress");
   }

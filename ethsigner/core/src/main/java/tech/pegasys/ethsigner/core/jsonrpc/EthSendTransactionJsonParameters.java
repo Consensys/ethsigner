@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -35,6 +36,7 @@ public class EthSendTransactionJsonParameters {
 
   @JsonCreator
   public EthSendTransactionJsonParameters(@JsonProperty("from") final String sender) {
+    validateNotEmpty(sender);
     this.sender = sender;
   }
 

@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -31,6 +32,8 @@ import org.web3j.utils.Base64String;
 public class EeaSendTransactionJsonParameters {
 
   private final String sender;
+  private final Base64String privateFrom;
+  private final String restriction;
 
   private BigInteger gas;
   private BigInteger gasPrice;
@@ -40,11 +43,15 @@ public class EeaSendTransactionJsonParameters {
   private String data;
   private Base64String privacyGroupId;
   private List<Base64String> privateFor;
-  private Base64String privateFrom;
-  private String restriction;
 
   @JsonCreator
-  public EeaSendTransactionJsonParameters(@JsonProperty("from") final String sender) {
+  public EeaSendTransactionJsonParameters(
+      @JsonProperty("from") final String sender,
+      @JsonProperty("privateFrom") final String privateFrom,
+      @JsonProperty("restriction") final String restriction) {
+    validateNotEmpty(sender);
+    this.privateFrom = Base64String.wrap(privateFrom);
+    this.restriction = restriction;
     this.sender = sender;
   }
 
@@ -85,19 +92,9 @@ public class EeaSendTransactionJsonParameters {
         Arrays.stream(privateFor).map(Base64String::wrap).collect(Collectors.toList());
   }
 
-  @JsonSetter("privateFrom")
-  public void privateFrom(final String privateFrom) {
-    this.privateFrom = Base64String.wrap(privateFrom);
-  }
-
   @JsonSetter("privacyGroupId")
   public void privacyGroupId(final String privacyGroupId) {
     this.privacyGroupId = Base64String.wrap(privacyGroupId);
-  }
-
-  @JsonSetter("restriction")
-  public void restriction(final String restriction) {
-    this.restriction = restriction;
   }
 
   public Optional<String> data() {

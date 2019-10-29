@@ -90,18 +90,6 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithoutPrivateFromCanBeDecoded() {
-    final JsonObject parameters = validEeaTransactionParameters();
-    parameters.remove("privateFrom");
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
-
-    assertThat(txnParams.privateFrom()).isNull();
-  }
-
-  @Test
   void transactionWithInvalidPrivateForThrowsIllegalArgumentException() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("privateFor", singletonList("invalidThirtyTwoByteData="));
@@ -110,18 +98,6 @@ class EeaSendTransactionJsonParametersTest {
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
-  }
-
-  @Test
-  void transactionWithoutRestrictionCanBeDecoded() {
-    final JsonObject parameters = validEeaTransactionParameters();
-    parameters.remove("restriction");
-
-    final JsonRpcRequest request = wrapParametersInRequest(parameters);
-    final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
-
-    assertThat(txnParams.restriction()).isNull();
   }
 
   @Test

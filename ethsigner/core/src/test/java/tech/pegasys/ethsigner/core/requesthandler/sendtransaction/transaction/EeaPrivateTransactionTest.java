@@ -33,14 +33,18 @@ import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
 import org.web3j.utils.Restriction;
 
-public class EeaPrivateTransactionTest {
+class EeaPrivateTransactionTest {
 
   private PrivateTransaction privateTransaction;
   private EeaSendTransactionJsonParameters params;
 
   @BeforeEach
-  public void setup() {
-    params = new EeaSendTransactionJsonParameters("0x7577919ae5df4941180eac211965f275cdce314d");
+  void setup() {
+    params =
+        new EeaSendTransactionJsonParameters(
+            "0x7577919ae5df4941180eac211965f275cdce314d",
+            "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=",
+            "restricted");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
@@ -49,15 +53,13 @@ public class EeaPrivateTransactionTest {
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
-    params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
-    params.restriction("restricted");
 
     privateTransaction =
         EeaPrivateTransaction.from(params, () -> BigInteger.ZERO, new JsonRpcRequestId(1));
   }
 
   @Test
-  public void rlpEncodesTransaction() {
+  void rlpEncodesTransaction() {
     final SignatureData signatureData =
         new SignatureData(new byte[] {1}, new byte[] {2}, new byte[] {3});
     final byte[] rlpEncodedBytes = privateTransaction.rlpEncode(signatureData);
@@ -90,7 +92,7 @@ public class EeaPrivateTransactionTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void createsJsonEeaRequest() {
+  void createsJsonEeaRequest() {
     final JsonRpcRequestId id = new JsonRpcRequestId(2);
     final String transactionString =
         "0xf90114a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456704a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0fe72a92aede764ce41d06b163d28700b58e5ee8bb1af91d9d54979ea3bdb3e7ea046ae10c94c322fa44ddceb86677c2cd6cc17dfbd766924f41d10a244c512996dac5a6c617045736c3971444c50792f6538382b2f36797643554556497648383379304e3441367748754b58493dedac4756386d30565a41636359474141594d42755951744b456a3058747058656177324150636f426d744132773d8a72657374726963746564";
