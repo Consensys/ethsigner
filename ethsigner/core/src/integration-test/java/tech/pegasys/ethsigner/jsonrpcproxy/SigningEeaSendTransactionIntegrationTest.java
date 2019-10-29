@@ -111,7 +111,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWithMEmptyReceiverAddress() {
+  public void signTransactionWithEmptyReceiverAddress() {
     final String sendTransactionRequest = sendTransaction.withReceiver("");
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
