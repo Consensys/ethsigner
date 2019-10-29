@@ -258,7 +258,9 @@ public class IntegrationTestBase {
   private static TransactionSigner transactionSigner() throws IOException {
     final File keyFile = createKeyFile();
     final File passwordFile = createFile("password");
-    return FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
+    final TransactionSigner fileBasedTransactionSigner =
+        FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
+    return fileBasedTransactionSigner;
   }
 
   @SuppressWarnings("UnstableApiUsage")

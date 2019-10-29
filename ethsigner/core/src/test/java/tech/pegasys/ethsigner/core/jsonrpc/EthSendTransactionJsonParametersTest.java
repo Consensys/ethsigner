@@ -20,7 +20,7 @@ import java.util.Optional;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
-class EthSendTransactionJsonParametersTest {
+public class EthSendTransactionJsonParametersTest {
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -29,7 +29,7 @@ class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
+  public void transactionStoredInJsonArrayCanBeDecoded() throws Throwable {
     final JsonObject parameters = validEthTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
@@ -45,7 +45,7 @@ class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionNotStoredInJsonArrayCanBeDecoded() throws Throwable {
+  public void transactionNotStoredInJsonArrayCanBeDecoded() throws Throwable {
     final JsonObject parameters = validEthTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
@@ -61,7 +61,7 @@ class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidFromCanBeDecoded() {
+  public void transactionWithInvalidFromCanBeDecoded() {
     final JsonObject parameters = validEthTransactionParameters();
     parameters.put("from", "invalidFromAddress");
 
@@ -73,7 +73,7 @@ class EthSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidToCanBeDecoded() {
+  public void transactionWithInvalidToCanBeDecoded() {
     final JsonObject parameters = validEthTransactionParameters();
     parameters.put("to", "invalidToAddress");
 
@@ -91,7 +91,7 @@ class EthSendTransactionJsonParametersTest {
     parameters.put("nonce", "0x1");
     parameters.put("gas", "0x76c0");
     parameters.put("gasPrice", "0x9184e72a000");
-    parameters.put("value", "0x0");
+    parameters.put("value", "0x9184e72a");
     parameters.put(
         "data",
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");

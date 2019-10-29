@@ -23,10 +23,10 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.web3j.utils.Base64String;
 
-class EeaSendTransactionJsonParametersTest {
+public class EeaSendTransactionJsonParametersTest {
 
   @Test
-  void transactionStoredInJsonArrayCanBeDecoded() {
+  public void transactionStoredInJsonArrayCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
@@ -47,7 +47,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionNotStoredInJsonArrayCanBeDecoded() {
+  public void transactionNotStoredInJsonArrayCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
@@ -68,7 +68,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithNonZeroValueFails() {
+  public void transactionWithNonZeroValueFails() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("value", "0x9184e72a");
 
@@ -79,7 +79,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidPrivateFromThrowsIllegalArgumentException() {
+  public void transactionWithInvalidPrivateFromThrowsIllegalArgumentException() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("privateFrom", "invalidThirtyTwoByteData=");
 
@@ -90,7 +90,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidPrivateForThrowsIllegalArgumentException() {
+  public void transactionWithInvalidPrivateForThrowsIllegalArgumentException() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("privateFor", singletonList("invalidThirtyTwoByteData="));
 
@@ -101,7 +101,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidRestrictionCanBeDecoded() {
+  public void transactionWithInvalidRestrictionCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("restriction", "invalidRestriction");
 
@@ -113,7 +113,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidFromCanBeDecoded() {
+  public void transactionWithInvalidFromCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("from", "invalidFromAddress");
 
@@ -125,7 +125,7 @@ class EeaSendTransactionJsonParametersTest {
   }
 
   @Test
-  void transactionWithInvalidToCanBeDecoded() {
+  public void transactionWithInvalidToCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
     parameters.put("to", "invalidToAddress");
 
