@@ -48,7 +48,7 @@ public class SendRawTransaction {
   }
 
   @SuppressWarnings("unchecked")
-  public String request(final Request<?, EthSendTransaction> request) {
+  public String request(final Request<?, EthSendTransaction> request, final long chainId) {
     final List<Transaction> params = (List<Transaction>) request.getParams();
     final Transaction transaction = params.get(0);
     final RawTransaction rawTransaction =
@@ -60,9 +60,13 @@ public class SendRawTransaction {
             convert(transaction.getValue()),
             transaction.getData());
     final byte[] signedTransaction =
-        TransactionEncoder.signMessage(rawTransaction, DEFAULT_CHAIN_ID, credentials);
+        TransactionEncoder.signMessage(rawTransaction, chainId, credentials);
     final String value = "0x" + BaseEncoding.base16().encode(signedTransaction).toLowerCase();
     return request(value);
+  }
+
+  public String request(final Request<?, EthSendTransaction> request) {
+    return request(request, DEFAULT_CHAIN_ID);
   }
 
   private BigInteger convert(final String value) {
