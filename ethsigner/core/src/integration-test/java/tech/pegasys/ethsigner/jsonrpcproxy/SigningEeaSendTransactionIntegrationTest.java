@@ -21,11 +21,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.crypto.CipherException;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
@@ -260,7 +257,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWhenContractWithLongChainId() throws IOException, CipherException {
+  public void signSendTransactionWhenContractWithLongChainId() throws Exception {
     setupEthSigner(4123123123L);
 
     final String sendTransactionRequest = sendTransaction.smartContract();

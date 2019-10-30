@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,7 +25,6 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class EeaSendTransaction {
   private static final String RESTRICTED = "restricted";
-  private static final int DEFAULT_ID = 77;
   private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
   private static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
   private static final List<String> PRIVATE_FOR =

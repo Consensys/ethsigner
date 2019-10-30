@@ -12,7 +12,17 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static org.web3j.utils.Numeric.decodeQuantity;
+import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_CHAIN_ID;
+
+import java.math.BigInteger;
+import java.util.List;
+
+import com.google.common.io.BaseEncoding;
 import io.vertx.core.json.Json;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
@@ -21,9 +31,11 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 public class SendRawTransaction {
 
   private final Web3j jsonRpc;
+  private final Credentials credentials;
 
-  public SendRawTransaction(final Web3j jsonRpc) {
+  public SendRawTransaction(final Web3j jsonRpc, final Credentials credentials) {
     this.jsonRpc = jsonRpc;
+    this.credentials = credentials;
   }
 
   public String request() {
@@ -33,6 +45,28 @@ public class SendRawTransaction {
     sendRawTransactionRequest.setId(77);
 
     return Json.encode(sendRawTransactionRequest);
+  }
+
+  @SuppressWarnings("unchecked")
+  public String request(final Request<?, EthSendTransaction> request) {
+    final List<Transaction> params = (List<Transaction>) request.getParams();
+    final Transaction transaction = params.get(0);
+    final RawTransaction rawTransaction =
+        RawTransaction.createTransaction(
+            convert(transaction.getNonce()),
+            convert(transaction.getGasPrice()),
+            convert(transaction.getGas()),
+            transaction.getTo(),
+            convert(transaction.getValue()),
+            transaction.getData());
+    final byte[] signedTransaction =
+        TransactionEncoder.signMessage(rawTransaction, DEFAULT_CHAIN_ID, credentials);
+    final String value = "0x" + BaseEncoding.base16().encode(signedTransaction).toLowerCase();
+    return request(value);
+  }
+
+  private BigInteger convert(final String value) {
+    return value == null ? null : decodeQuantity(value);
   }
 
   public String request(final String value) {
