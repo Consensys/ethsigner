@@ -16,6 +16,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Transaction {
+  public static final String DEFAULT_VALUE = "0x0";
+  public static final String DEFAULT_GAS = "0x15F90";
+  public static final String DEFAULT_GAS_PRICE = "0x0";
+  public static final String DEFAULT_DATA = "";
+
   private final String from;
   private final String to;
   private final String gasPrice;

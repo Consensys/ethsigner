@@ -19,20 +19,22 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction.DEFAULT_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_VALUE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
-
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
-
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
 
@@ -164,9 +166,8 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void signTransactionWhenMissingValue() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingValue();
-    // TODO add default value constant
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withValue("0x0"));
+        sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
@@ -189,9 +190,8 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void signTransactionWhenMissingGas() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGas();
-    // TODO make default gas a constant
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGas("0x15F90"));
+        sendRawTransaction.request(sendTransaction.withGas(DEFAULT_GAS));
 
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
@@ -215,9 +215,8 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void signTransactionWhenMissingGasPrice() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGasPrice();
-    // TODO create constant for default gasPrice
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGasPrice("0x0"));
+        sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
@@ -240,9 +239,8 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   @Test
   public void signSendTransactionWhenMissingData() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingData();
-    // TODO this seems hacky
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withData(""));
+        sendRawTransaction.request(sendTransaction.withData(DEFAULT_DATA));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
