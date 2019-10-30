@@ -19,19 +19,20 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
-import static tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction.DEFAULT_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_DATA;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS_PRICE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_VALUE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
-import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
