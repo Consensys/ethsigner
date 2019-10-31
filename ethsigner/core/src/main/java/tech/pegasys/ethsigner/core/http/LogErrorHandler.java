@@ -26,7 +26,7 @@ public class LogErrorHandler implements Handler<RoutingContext> {
   public void handle(final RoutingContext failureContext) {
 
     if (failureContext.failed()) {
-      LOG.error(
+      LOG.debug(
           String.format("Failed request: %s", failureContext.request().absoluteURI()),
           failureContext.failure());
       // Let the next matching route or error handler deal with the error, we only handle logging
