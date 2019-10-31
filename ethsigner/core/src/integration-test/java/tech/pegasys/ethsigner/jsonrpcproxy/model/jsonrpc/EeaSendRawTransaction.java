@@ -12,18 +12,33 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static java.util.stream.Collectors.toList;
+import static org.web3j.utils.Numeric.decodeQuantity;
+import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_CHAIN_ID;
+
+import java.math.BigInteger;
+import java.util.List;
+
+import com.google.common.io.BaseEncoding;
 import io.vertx.core.json.Json;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
+import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
+import org.web3j.utils.Base64String;
+import org.web3j.utils.Restriction;
 
 public class EeaSendRawTransaction {
 
   private final Eea eeaJsonRpc;
+  private Credentials credentials;
 
-  public EeaSendRawTransaction(final Eea eeaJsonRpc) {
+  public EeaSendRawTransaction(final Eea eeaJsonRpc, final Credentials credentials) {
     this.eeaJsonRpc = eeaJsonRpc;
+    this.credentials = credentials;
   }
 
   public String request() {
@@ -33,6 +48,40 @@ public class EeaSendRawTransaction {
     sendRawTransactionRequest.setId(77);
 
     return Json.encode(sendRawTransactionRequest);
+  }
+
+  @SuppressWarnings("unchecked")
+  // TODO lot of dupe with request in SendRawTransaction
+  public String request(final Request<?, EthSendTransaction> request, final long chainId) {
+    final List<PrivateTransaction> params = (List<PrivateTransaction>) request.getParams();
+    final PrivateTransaction transaction = params.get(0);
+    final RawPrivateTransaction rawTransaction =
+        RawPrivateTransaction.createTransaction(
+            valueToBigDecimal(transaction.getNonce()),
+            valueToBigDecimal(transaction.getGasPrice()),
+            valueToBigDecimal(transaction.getGas()),
+            transaction.getTo(),
+            transaction.getData(),
+            valueToBase64String(transaction.getPrivateFrom()),
+            transaction.getPrivateFor().stream().map(this::valueToBase64String).collect(toList()),
+            Restriction.fromString(transaction.getRestriction()));
+    final byte[] signedTransaction =
+        PrivateTransactionEncoder.signMessage(rawTransaction, chainId, credentials);
+    final String value = "0x" + BaseEncoding.base16().encode(signedTransaction).toLowerCase();
+    return request(value);
+  }
+
+  public String request(final Request<?, EthSendTransaction> request) {
+    return request(request, DEFAULT_CHAIN_ID);
+  }
+
+  // TODO this is in common with SendRawTransaction
+  private BigInteger valueToBigDecimal(final String value) {
+    return value == null ? null : decodeQuantity(value);
+  }
+
+  private Base64String valueToBase64String(final String value) {
+    return value == null ? null : Base64String.wrap(value);
   }
 
   public String request(final String value) {
