@@ -53,11 +53,11 @@ public class SendRawTransaction {
     final Transaction transaction = params.get(0);
     final RawTransaction rawTransaction =
         RawTransaction.createTransaction(
-            convert(transaction.getNonce()),
-            convert(transaction.getGasPrice()),
-            convert(transaction.getGas()),
+            valueToBigDecimal(transaction.getNonce()),
+            valueToBigDecimal(transaction.getGasPrice()),
+            valueToBigDecimal(transaction.getGas()),
             transaction.getTo(),
-            convert(transaction.getValue()),
+            valueToBigDecimal(transaction.getValue()),
             transaction.getData());
     final byte[] signedTransaction =
         TransactionEncoder.signMessage(rawTransaction, chainId, credentials);
@@ -69,7 +69,7 @@ public class SendRawTransaction {
     return request(request, DEFAULT_CHAIN_ID);
   }
 
-  private BigInteger convert(final String value) {
+  private BigInteger valueToBigDecimal(final String value) {
     return value == null ? null : decodeQuantity(value);
   }
 

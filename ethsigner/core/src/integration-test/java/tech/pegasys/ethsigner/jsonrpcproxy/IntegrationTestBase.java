@@ -81,8 +81,6 @@ public class IntegrationTestBase {
 
   private static Runner runner;
   protected static ClientAndServer clientAndServer;
-
-  // TODO add a getter?
   protected static Credentials credentials;
 
   private JsonRpc2_0Web3j jsonRpc;
@@ -101,8 +99,6 @@ public class IntegrationTestBase {
   }
 
   protected static void setupEthSigner(final long chainId) throws Exception {
-    //    Configurator.setAllLevels("", Level.DEBUG);
-
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();

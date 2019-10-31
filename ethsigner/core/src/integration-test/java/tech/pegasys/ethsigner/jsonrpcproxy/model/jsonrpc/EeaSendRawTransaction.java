@@ -34,7 +34,7 @@ import org.web3j.utils.Restriction;
 public class EeaSendRawTransaction {
 
   private final Eea eeaJsonRpc;
-  private Credentials credentials;
+  private final Credentials credentials;
 
   public EeaSendRawTransaction(final Eea eeaJsonRpc, final Credentials credentials) {
     this.eeaJsonRpc = eeaJsonRpc;
@@ -51,7 +51,6 @@ public class EeaSendRawTransaction {
   }
 
   @SuppressWarnings("unchecked")
-  // TODO lot of dupe with request in SendRawTransaction
   public String request(final Request<?, EthSendTransaction> request, final long chainId) {
     final List<PrivateTransaction> params = (List<PrivateTransaction>) request.getParams();
     final PrivateTransaction transaction = params.get(0);
@@ -75,7 +74,6 @@ public class EeaSendRawTransaction {
     return request(request, DEFAULT_CHAIN_ID);
   }
 
-  // TODO this is in common with SendRawTransaction
   private BigInteger valueToBigDecimal(final String value) {
     return value == null ? null : decodeQuantity(value);
   }
