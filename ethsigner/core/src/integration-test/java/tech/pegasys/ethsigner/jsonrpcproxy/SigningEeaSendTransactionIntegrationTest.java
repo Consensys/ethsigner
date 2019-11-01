@@ -80,6 +80,13 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
+  public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
+  }
+
+  @Test
   public void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("")), response.ethSigner(INVALID_PARAMS));
