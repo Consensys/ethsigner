@@ -15,25 +15,26 @@ package tech.pegasys.ethsigner.signer.multifilebased;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class KeyPasswordLoader {
 
-  private static final int VALID_ADDRESS_LENGTH = 40;
+  private static final Logger LOG = LogManager.getLogger();
+
   private static final String KEY_FILE_EXTENSION = ".key";
   private static final String PASSWORD_FILE_EXTENSION = ".password";
-  private final PathMatcher KEY_FILE_MATCHER =
-      FileSystems.getDefault().getPathMatcher("glob:**" + KEY_FILE_EXTENSION);
+  private static final String GLOB_KEY_MATCHER = "**" + KEY_FILE_EXTENSION;
 
   private final Path keysDirectory;
 
@@ -42,28 +43,35 @@ class KeyPasswordLoader {
   }
 
   Optional<KeyPasswordFile> loadKeyAndPasswordForAddress(final String address) {
-    final String filename = normalizeAddress(address);
-    final Path keyPath = keysDirectory.resolve(filename + KEY_FILE_EXTENSION);
-    if (keyPath.toFile().exists() && isFilenameValid(keyPath)) {
-      return tryFindingMatchingPassword(keyPath).map(path -> new KeyPasswordFile(keyPath, path));
-    } else {
+    final List<KeyPasswordFile> matchingKeys =
+        loadAvailableKeys().stream()
+            .filter(kp -> kp.getFilename().toLowerCase().endsWith(normalizeAddress(address)))
+            .collect(Collectors.toList());
+
+    if (matchingKeys.size() > 1) {
+      LOG.error("Found multiple key/password matches for address {}", address);
       return Optional.empty();
+    } else if (matchingKeys.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(matchingKeys.get(0));
     }
   }
 
-  Collection<KeyPasswordFile> loadAvailableKeys() throws IOException {
+  Collection<KeyPasswordFile> loadAvailableKeys() {
     final Collection<KeyPasswordFile> keysAndPasswords = new HashSet<>();
 
-    try (final DirectoryStream<Path> directoryStream = Files.newDirectoryStream(keysDirectory)) {
-      for (final Path keyFile : directoryStream) {
-        if (KEY_FILE_MATCHER.matches(keyFile) && isFilenameValid(keyFile)) {
-          tryFindingMatchingPassword(keyFile)
-              .ifPresent(
-                  passwordFile -> keysAndPasswords.add(new KeyPasswordFile(keyFile, passwordFile)));
-        }
+    try (final DirectoryStream<Path> directoryStream =
+        Files.newDirectoryStream(keysDirectory, GLOB_KEY_MATCHER)) {
+      for (final Path file : directoryStream) {
+        tryFindingMatchingPassword(file)
+            .ifPresent(
+                passwordFile -> keysAndPasswords.add(new KeyPasswordFile(file, passwordFile)));
       }
-
       return keysAndPasswords;
+    } catch (final IOException e) {
+      LOG.warn("Error searching for key/password files", e);
+      return Collections.emptySet();
     }
   }
 
@@ -84,26 +92,5 @@ class KeyPasswordLoader {
     } else {
       return address.toLowerCase();
     }
-  }
-
-  private boolean isFilenameValid(final Path file) {
-    final String filename = file.getFileName().toString();
-    if (illegalExtension(filename) || illegalLength(filename) || notLowercase(filename)) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  private boolean illegalExtension(final String filename) {
-    return !(filename.endsWith(KEY_FILE_EXTENSION) || filename.endsWith(PASSWORD_FILE_EXTENSION));
-  }
-
-  private boolean illegalLength(final String filename) {
-    return Iterables.get(Splitter.on('.').split(filename), 0).length() != VALID_ADDRESS_LENGTH;
-  }
-
-  private boolean notLowercase(final String filename) {
-    return !filename.equals(filename.toLowerCase());
   }
 }
