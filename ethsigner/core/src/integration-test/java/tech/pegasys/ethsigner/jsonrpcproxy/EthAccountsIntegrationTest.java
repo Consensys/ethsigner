@@ -21,14 +21,14 @@ import java.util.Map;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.json.Json;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthAccounts;
 
-public class EthAccountsIntegrationTest extends IntegrationTestBase {
+class EthAccountsIntegrationTest extends IntegrationTestBase {
 
   @Test
-  public void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {
+  void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {
 
     final Request<?, EthAccounts> requestBody = jsonRpc().ethAccounts();
     final Map<String, String> expectedHeaders =
