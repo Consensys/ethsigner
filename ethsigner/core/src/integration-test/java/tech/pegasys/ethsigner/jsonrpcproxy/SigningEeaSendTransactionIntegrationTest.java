@@ -66,7 +66,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingNonceResultsInEthNodeRespondingSuccessfully() {
+  void missingNonceResultsInEthNodeRespondingSuccessfully() {
     final String ethNodeResponseBody = "VALID_RESPONSE";
     final String requestBody = sendRawTransaction.request(sendTransaction.withNonce("0x1"));
 
@@ -338,7 +338,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void signSendTransaction() {
+  void signSendTransaction() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.request();
     final String sendRawTransactionRequest = sendRawTransaction.request(sendTransaction.request());
     final String sendRawTransactionResponse =
@@ -354,7 +354,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
+  void missingNonceResultsInNewNonceBeingCreatedAndResent() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(sendTransaction.withNonce("0x0"));
     final String rawTransactionWithNextNonce =
@@ -399,7 +399,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
+  void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
     setupEthNodeResponse(".*eea_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 6);
 
     sendRequestThenVerifyResponse(
@@ -407,7 +407,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
+  void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
     setupEthNodeResponse(".*eea_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 3);
     timeoutRequest(".*eea_sendRawTransaction.*");
 
