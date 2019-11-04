@@ -19,45 +19,17 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.math.BigInteger;
 import java.util.Optional;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.web3j.utils.Base64String;
 
 public class EeaSendTransactionJsonParametersTest {
 
-  private Optional<BigInteger> getStringAsOptionalBigInteger(
-      final JsonObject object, final String key) {
-    final String value = object.getString(key);
-    return Optional.of(new BigInteger(value.substring(2), 16));
-  }
-
-  private JsonObject validEeaTransactionParameters() {
-    final JsonObject parameters = new JsonObject();
-    parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
-    parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
-    parameters.put("nonce", "0x1");
-    parameters.put("gas", "0x76c0");
-    parameters.put("gasPrice", "0x9184e72a000");
-    parameters.put("value", "0x0");
-    parameters.put(
-        "data",
-        "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-    parameters.put("privateFrom", "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
-    parameters.put("privateFor", singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="));
-    parameters.put("restriction", "restricted");
-
-    return parameters;
-  }
-
   @Test
   public void transactionStoredInJsonArrayCanBeDecoded() {
     final JsonObject parameters = validEeaTransactionParameters();
 
-    final JsonArray inputParameters = new JsonArray();
-    inputParameters.add(parameters);
-
-    final JsonRpcRequest request = wrapParametersInRequest(inputParameters);
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
         EeaSendTransactionJsonParameters.from(request);
 
@@ -126,6 +98,66 @@ public class EeaSendTransactionJsonParametersTest {
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+  }
+
+  @Test
+  public void transactionWithInvalidRestrictionCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("restriction", "invalidRestriction");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.restriction()).isEqualTo("invalidRestriction");
+  }
+
+  @Test
+  public void transactionWithInvalidFromCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("from", "invalidFromAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
+  }
+
+  @Test
+  public void transactionWithInvalidToCanBeDecoded() {
+    final JsonObject parameters = validEeaTransactionParameters();
+    parameters.put("to", "invalidToAddress");
+
+    final JsonRpcRequest request = wrapParametersInRequest(parameters);
+    final EeaSendTransactionJsonParameters txnParams =
+        EeaSendTransactionJsonParameters.from(request);
+
+    assertThat(txnParams.receiver()).contains("invalidToAddress");
+  }
+
+  private Optional<BigInteger> getStringAsOptionalBigInteger(
+      final JsonObject object, final String key) {
+    final String value = object.getString(key);
+    return Optional.of(new BigInteger(value.substring(2), 16));
+  }
+
+  private JsonObject validEeaTransactionParameters() {
+    final JsonObject parameters = new JsonObject();
+    parameters.put("from", "0xb60e8dd61c5d32be8058bb8eb970870f07233155");
+    parameters.put("to", "0xd46e8dd67c5d32be8058bb8eb970870f07244567");
+    parameters.put("nonce", "0x1");
+    parameters.put("gas", "0x76c0");
+    parameters.put("gasPrice", "0x9184e72a000");
+    parameters.put("value", "0x0");
+    parameters.put(
+        "data",
+        "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
+    parameters.put("privateFrom", "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
+    parameters.put("privateFor", singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="));
+    parameters.put("restriction", "restricted");
+
+    return parameters;
   }
 
   private <T> JsonRpcRequest wrapParametersInRequest(final T parameters) {
