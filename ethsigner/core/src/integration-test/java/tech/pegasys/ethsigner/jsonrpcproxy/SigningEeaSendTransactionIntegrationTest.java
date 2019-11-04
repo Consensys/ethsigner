@@ -140,8 +140,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.withReceiver("");
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(
-            "0xf8e8a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c08080a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a04fad7672bda5c3b7fa5c3cae6443f810ee880e9682ca5d67e1718ed72385c7fea00249e9d794a42c6d772dca2adee6c5b6daf37989d353460330ad90817f42bddea06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
+        sendRawTransaction.request(sendTransaction.missingReceiver());
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -159,8 +158,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.withReceiver("");
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(
-            "0xf8e8a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c08080a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a04fad7672bda5c3b7fa5c3cae6443f810ee880e9682ca5d67e1718ed72385c7fea00249e9d794a42c6d772dca2adee6c5b6daf37989d353460330ad90817f42bddea06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
+        sendRawTransaction.request(sendTransaction.missingReceiver());
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -179,7 +177,7 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
         sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D");
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
-            "0xf8fca0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c0947577919ae5df4941180eac211965f275cdce314d80a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567535a0ef2ec6ed6efff22f4682be538d18d88953673459b9607013797aa7c7e07af381a00e3dc55d0619660fbcc76bcec5c4e481d4c34cad514a81ab179612db80217b86a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
+            sendTransaction.withReceiver("0x7577919ae5df4941180eac211965f275CDCE314D"));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
