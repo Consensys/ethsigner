@@ -52,9 +52,15 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
   integrationTestImplementation project(':ethsigner:signer:file-based')
+  integrationTestImplementation 'org.junit.jupiter:junit-jupiter-api'
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
-  integrationTestImplementation 'org.mock-server:mockserver-netty'
+  integrationTestImplementation('org.mock-server:mockserver-netty') {
+    // mock-server includes a dependency on junit 4 for a junit rule which we aren't using
+    exclude group: 'junit', module: 'junit'
+  }
   integrationTestImplementation 'org.mockito:mockito-core'
   integrationTestImplementation 'org.mockito:mockito-junit-jupiter'
+
+  integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

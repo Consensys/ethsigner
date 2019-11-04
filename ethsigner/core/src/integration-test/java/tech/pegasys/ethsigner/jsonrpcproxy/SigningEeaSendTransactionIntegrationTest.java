@@ -23,18 +23,17 @@ import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.web3j.crypto.CipherException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
+class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     sendTransaction = new EeaSendTransaction();
     sendRawTransaction = new EeaSendRawTransaction(eeaJsonRpc());
     final TransactionCountResponder getTransactionResponse =
@@ -43,7 +42,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void proxyMalformedJsonResponseFromNode() {
+  void proxyMalformedJsonResponseFromNode() {
     final String rawTransaction = sendRawTransaction.request();
     setUpEthNodeResponse(request.ethNode(rawTransaction), response.ethNode(MALFORMED_JSON));
 
@@ -52,48 +51,48 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenNonceIsNaN() {
+  void invalidParamsResponseWhenNonceIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withNonce("I'm an invalid nonce format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsTooShort() {
+  void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x577919ae5df4941180eac211965f275CDCE314D")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsTooLong() {
+  void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x1577919ae5df4941180eac211965f275CDCE314D")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+  void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
+  void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsWhenSenderAddressIsEmpty() {
+  void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("")), response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
+  void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
     final String sendTransactionRequest =
         sendTransaction.withSender("0x7577919ae5df4941180eac211965f275CDCE314D");
     final String sendRawTransactionRequest =
@@ -112,13 +111,13 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingSenderAddress() {
+  void invalidParamsResponseWhenMissingSenderAddress() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingSender()), response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenReceiverAddressIsEmpty() {
+  void signTransactionWhenReceiverAddressIsEmpty() {
     final String sendTransactionRequest = sendTransaction.withReceiver("");
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -136,7 +135,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWhenEmptyReceiverAddress() {
+  void signTransactionWhenEmptyReceiverAddress() {
     final String sendTransactionRequest = sendTransaction.withReceiver("");
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -154,7 +153,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
+  void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
     final String sendTransactionRequest =
         sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D");
     final String sendRawTransactionRequest =
@@ -173,7 +172,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWhenMissingReceiverAddress() {
+  void signTransactionWhenMissingReceiverAddress() {
     final String sendTransactionRequest = sendTransaction.missingReceiver();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -191,7 +190,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWhenMissingValue() {
+  void signTransactionWhenMissingValue() {
     final String sendTransactionRequest = sendTransaction.missingValue();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -209,14 +208,14 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenValueIsNaN() {
+  void invalidParamsResponseWhenValueIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withValue("I'm an invalid value format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenMissingGas() {
+  void signTransactionWhenMissingGas() {
     final String sendTransactionRequest = sendTransaction.missingGas();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -234,14 +233,14 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenGasIsNaN() {
+  void invalidParamsResponseWhenGasIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withGas("I'm an invalid gas format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenMissingGasPrice() {
+  void signTransactionWhenMissingGasPrice() {
     final String sendTransactionRequest = sendTransaction.missingGasPrice();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -259,14 +258,14 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenGasPriceIsNaN() {
+  void invalidParamsResponseWhenGasPriceIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withGasPrice("I'm an invalid gas price format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signSendTransactionWhenMissingData() {
+  void signSendTransactionWhenMissingData() {
     final String sendTransactionRequest = sendTransaction.missingData();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -284,7 +283,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWhenContract() {
+  void signSendTransactionWhenContract() {
     final String sendTransactionRequest = sendTransaction.smartContract();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -302,7 +301,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWhenContractWithLongChainId() throws IOException, CipherException {
+  void signSendTransactionWhenContractWithLongChainId() throws IOException {
     setupEthSigner(4123123123L);
 
     final String sendTransactionRequest = sendTransaction.smartContract();
@@ -324,7 +323,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransaction() {
+  void signSendTransaction() {
     final String sendTransactionRequest = sendTransaction.request();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
@@ -342,7 +341,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void missingNonceInPrivateTransactionIsPopulated() {
+  void missingNonceInPrivateTransactionIsPopulated() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(
             "0xf8dc018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a039231358760e94952178f2963c32a977cbca58e9ebfbbd6263f8ca32b280516ea01d12666bea8dc7d4fb747c6dea691a7b90098c921e7f4adac8afd6178cbeb5a7a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
@@ -358,7 +357,7 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void transactionWithMissingNonceReturnsErrorsOtherThanLowNonceToCaller() {
+  void transactionWithMissingNonceReturnsErrorsOtherThanLowNonceToCaller() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(
             "0xf8dc018609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456780a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a039231358760e94952178f2963c32a977cbca58e9ebfbbd6263f8ca32b280516ea01d12666bea8dc7d4fb747c6dea691a7b90098c921e7f4adac8afd6178cbeb5a7a06656a912c97da832cfcbf7bcf3effacaf09411522f1fcdf2d0de00eb01ee2972e1a0195f26d1564071c60600060c06e610b4a123d17b695de6b0d803dca019ad036c8a72657374726963746564");
@@ -371,20 +370,20 @@ public class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingPrivateFrom() {
+  void invalidParamsResponseWhenMissingPrivateFrom() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingPrivateFrom()),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingPrivateFor() {
+  void invalidParamsResponseWhenMissingPrivateFor() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingPrivateFor()), response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingRestriction() {
+  void invalidParamsResponseWhenMissingRestriction() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingRestriction()),
         response.ethSigner(INVALID_PARAMS));
