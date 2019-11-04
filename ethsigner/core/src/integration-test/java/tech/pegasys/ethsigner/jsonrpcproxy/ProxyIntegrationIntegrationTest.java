@@ -17,14 +17,14 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
-public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
+class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
 
   @Test
-  public void requestWithHeadersIsProxied() {
+  void requestWithHeadersIsProxied() {
     final String netVersionRequest = Json.encode(jsonRpc().netVersion());
     final Response<String> netVersion = new NetVersion();
     netVersion.setResult("4");
@@ -42,7 +42,7 @@ public class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void requestReturningErrorIsProxied() {
+  void requestReturningErrorIsProxied() {
     final String ethProtocolVersionRequest = Json.encode(jsonRpc().ethProtocolVersion());
 
     setUpEthNodeResponse(
