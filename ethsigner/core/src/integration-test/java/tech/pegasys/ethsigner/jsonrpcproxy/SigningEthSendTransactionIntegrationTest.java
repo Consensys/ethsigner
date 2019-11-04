@@ -91,7 +91,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
@@ -133,16 +133,58 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  void signTransactionWhenReceiverAddressIsEmpty() {
+  void signTransactionWhenEmptyReceiverAddress() {
+    final String sendTransactionRequest = sendTransaction.withReceiver("");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.withReceiver("")), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
-  void invalidParamsResponseWhenReceiverAddressMissingHexPrefix() {
+  void signTransactionWhenEmpty0xReceiverAddress() {
+    final String sendTransactionRequest = sendTransaction.withReceiver("0x");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
+    final String sendTransactionRequest =
+        sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf8b1a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c0947577919ae5df4941180eac211965f275cdce314d849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675359f2b273b5646863e0f4da2120e4b59851984025f41f0980db9d1d3750c7df23da070cb99530e6c60bb74f56f6d24dde829e9e78681c582ae3630ef0eec54a64d27");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
