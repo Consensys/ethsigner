@@ -18,12 +18,12 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersionReque
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FailedConnectionTest extends IntegrationTestBase {
+class FailedConnectionTest extends IntegrationTestBase {
 
   @Test
-  public void failsToConnectToDownStreamRaisesTimeout() {
+  void failsToConnectToDownStreamRaisesTimeout() {
     clientAndServer.stop();
     final EthProtocolVersionRequest request = new EthProtocolVersionRequest(jsonRpc());
 

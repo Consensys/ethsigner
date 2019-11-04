@@ -29,18 +29,19 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
+class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
+
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
 
-  @Before
-  public void setUp() {
+  @BeforeEach
+  void setUp() {
     sendTransaction = new SendTransaction();
     sendRawTransaction = new SendRawTransaction(jsonRpc(), credentials);
     final TransactionCountResponder getTransactionResponse =
@@ -49,7 +50,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void proxyMalformedJsonResponseFromNode() {
+  void proxyMalformedJsonResponseFromNode() {
     final String rawTransaction = sendRawTransaction.request();
     setUpEthNodeResponse(request.ethNode(rawTransaction), response.ethNode(MALFORMED_JSON));
 
@@ -58,14 +59,14 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenNonceIsNaN() {
+  void invalidParamsResponseWhenNonceIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withNonce("I'm an invalid nonce format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void missingNonceResultsInEthNodeRespondingSuccessfully() {
+  void missingNonceResultsInEthNodeRespondingSuccessfully() {
     final String ethNodeResponseBody = "VALID_RESPONSE";
     final String requestBody = sendRawTransaction.request(sendTransaction.withNonce("0x1"));
 
@@ -76,41 +77,41 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsTooShort() {
+  void invalidParamsResponseWhenSenderAddressIsTooShort() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x577919ae5df4941180eac211965f275CDCE314D")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsTooLong() {
+  void invalidParamsResponseWhenSenderAddressIsTooLong() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0x1577919ae5df4941180eac211965f275CDCE314D")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+  void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("7577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
+  void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("0xb60e8dd61c5d32be8058bb8eb970870f07233XXX")),
         response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
   }
 
   @Test
-  public void invalidParamsWhenSenderAddressIsEmpty() {
+  void invalidParamsWhenSenderAddressIsEmpty() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withSender("")), response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
+  void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.withSender("0x7577919ae5df4941180eac211965f275CDCE314D");
     final String sendRawTransactionRequest =
@@ -129,26 +130,69 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenMissingSenderAddress() {
+  void invalidParamsResponseWhenMissingSenderAddress() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingSender()), response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenReceiverAddressIsEmpty() {
+  void signTransactionWhenEmptyReceiverAddress() {
+    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withReceiver("");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.withReceiver("")), response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
-  public void invalidParamsResponseWhenReceiverAddressMissingHexPrefix() {
+  void signTransactionWhenEmpty0xReceiverAddress() {
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.withReceiver("0x");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf89ea0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c080849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a09667b2df27d9bed3df507cbe4a0df47038934c350e442349546bedff0ebbe005a077d738b7c379683114694e98ddff0930a03ba1693fbb8ae597afc689757d9c6d");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
     sendRequestThenVerifyResponse(
-        request.ethSigner(sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D")),
-        response.ethSigner(INVALID_PARAMS));
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
   }
 
   @Test
-  public void signTransactionWhenMissingReceiverAddress() {
+  void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.withReceiver("7577919ae5df4941180eac211965f275CDCE314D");
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            "0xf8b1a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c0947577919ae5df4941180eac211965f275cdce314d849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675359f2b273b5646863e0f4da2120e4b59851984025f41f0980db9d1d3750c7df23da070cb99530e6c60bb74f56f6d24dde829e9e78681c582ae3630ef0eec54a64d27");
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  void signTransactionWhenMissingReceiverAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingReceiver();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.missingReceiver());
@@ -165,7 +209,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signTransactionWhenMissingValue() {
+  void signTransactionWhenMissingValue() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingValue();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
@@ -182,14 +226,14 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenValueIsNaN() {
+  void invalidParamsResponseWhenValueIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withValue("I'm an invalid value format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenMissingGas() {
+  void signTransactionWhenMissingGas() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGas();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withGas(DEFAULT_GAS));
@@ -207,14 +251,14 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenGasIsNaN() {
+  void invalidParamsResponseWhenGasIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withGas("I'm an invalid gas format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signTransactionWhenMissingGasPrice() {
+  void signTransactionWhenMissingGasPrice() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGasPrice();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
@@ -231,14 +275,14 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void invalidParamsResponseWhenGasPriceIsNaN() {
+  void invalidParamsResponseWhenGasPriceIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withGasPrice("I'm an invalid gas price format!")),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  public void signSendTransactionWhenMissingData() {
+  void signSendTransactionWhenMissingData() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingData();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withData(DEFAULT_DATA));
@@ -255,7 +299,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWhenContract() {
+  void signSendTransactionWhenContract() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.smartContract());
@@ -272,7 +316,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void signSendTransactionWhenContractWithLongChainId() throws Exception {
+  void signSendTransactionWhenContractWithLongChainId() throws Exception {
     setupEthSigner(4123123123L);
 
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
@@ -309,7 +353,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void missingNonceResultsInNewNonceBeingCreatedAndResent() {
+  void missingNonceResultsInNewNonceBeingCreatedAndResent() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(sendTransaction.withNonce("0x0"));
     final String rawTransactionWithNextNonce =
@@ -328,7 +372,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void transactionWithMissingNonceReturnsErrorsOtherThanLowNonceToCaller() {
+  void transactionWithMissingNonceReturnsErrorsOtherThanLowNonceToCaller() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(sendTransaction.withNonce("0x1"));
     setUpEthNodeResponse(
@@ -339,7 +383,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
+  void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
     setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 6);
 
     sendRequestThenVerifyResponse(
@@ -347,7 +391,7 @@ public class SigningEthSendTransactionIntegrationTest extends IntegrationTestBas
   }
 
   @Test
-  public void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
+  void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
     setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 3);
     timeoutRequest(".*eth_sendRawTransaction.*");
 
