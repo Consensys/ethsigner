@@ -12,6 +12,16 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
+
+import io.vertx.core.json.JsonObject;
+
 public class TransactionBuilder {
   private String from;
   private String nonce;
@@ -26,18 +36,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeFrom() {
-    this.from = null;
-    return this;
-  }
-
   public TransactionBuilder withNonce(final String nonce) {
     this.nonce = nonce;
-    return this;
-  }
-
-  public TransactionBuilder removeNonce() {
-    this.nonce = null;
     return this;
   }
 
@@ -46,18 +46,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeGasPrice() {
-    this.gasPrice = null;
-    return this;
-  }
-
   public TransactionBuilder withGas(final String gas) {
     this.gas = gas;
-    return this;
-  }
-
-  public TransactionBuilder removeGas() {
-    this.gas = null;
     return this;
   }
 
@@ -66,18 +56,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeTo() {
-    this.to = null;
-    return this;
-  }
-
   public TransactionBuilder withValue(final String value) {
     this.value = value;
-    return this;
-  }
-
-  public TransactionBuilder removeValue() {
-    this.value = null;
     return this;
   }
 
@@ -86,12 +66,15 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeData() {
-    this.data = null;
-    return this;
-  }
-
-  public Transaction build() {
-    return new Transaction(from, nonce, gasPrice, gas, to, value, data);
+  public JsonObject build() {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put(FIELD_FROM, from);
+    jsonObject.put(FIELD_NONCE, nonce);
+    jsonObject.put(FIELD_GAS_PRICE, gasPrice);
+    jsonObject.put(FIELD_GAS, gas);
+    jsonObject.put(FIELD_TO, to);
+    jsonObject.put(FIELD_VALUE, value);
+    jsonObject.put(FIELD_DATA, data);
+    return jsonObject;
   }
 }
