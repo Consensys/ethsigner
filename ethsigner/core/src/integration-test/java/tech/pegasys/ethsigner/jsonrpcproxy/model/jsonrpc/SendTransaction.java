@@ -12,219 +12,113 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
-import java.math.BigInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_VALUE;
 
-import io.vertx.core.json.Json;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class SendTransaction {
 
-  private static final int DEFAULT_ID = 77;
   private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
 
-  private final Web3j jsonRpc;
-
-  public SendTransaction(final Web3j jsonRpc) {
-    this.jsonRpc = jsonRpc;
+  public Request<?, EthSendTransaction> withGas(final String gas) {
+    return createRequest(defaultTransaction().withGas(gas));
   }
 
-  public String withGas(final String gas) {
-    return replaceParameter("gas", gas, request());
+  public Request<?, EthSendTransaction> withGasPrice(final String gasPrice) {
+    return createRequest(defaultTransaction().withGasPrice(gasPrice));
   }
 
-  public String withGasPrice(final String gasPrice) {
-    return replaceParameter("gasPrice", gasPrice, request());
+  public Request<?, EthSendTransaction> withValue(final String value) {
+    return createRequest(defaultTransaction().withValue(value));
   }
 
-  public String withValue(final String value) {
-    return replaceParameter("value", value, request());
+  public Request<?, EthSendTransaction> withNonce(final String nonce) {
+    return createRequest(defaultTransaction().withNonce(nonce));
   }
 
-  public String withNonce(final String nonce) {
-    return replaceParameter("nonce", nonce, request());
+  public Request<?, EthSendTransaction> withSender(final String sender) {
+    return createRequest(defaultTransaction().withFrom(sender));
   }
 
-  public String withSender(final String receiver) {
-    return replaceParameter("from", receiver, request());
+  public Request<?, EthSendTransaction> withReceiver(final String receiver) {
+    return createRequest(defaultTransaction().withTo(receiver));
   }
 
-  public String withReceiver(final String sender) {
-    return replaceParameter("to", sender, request());
+  public Request<?, EthSendTransaction> withData(final String data) {
+    return createRequest(defaultTransaction().withData(data));
   }
 
-  public String missingSender() {
-    final Transaction transaction =
-        new Transaction(
-            null,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingSender() {
+    return createRequest(defaultTransaction().removeFrom());
   }
 
-  public String missingNonce() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            null,
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingNonce() {
+    return createRequest(defaultTransaction().removeNonce());
   }
 
-  public String missingReceiver() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            null,
-            new BigInteger("2441406250"),
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingReceiver() {
+    return createRequest(defaultTransaction().removeTo());
   }
 
-  public String missingValue() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            null,
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingValue() {
+    return createRequest(defaultTransaction().removeValue());
   }
 
-  public String missingGas() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            null,
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingGas() {
+    return createRequest(defaultTransaction().removeGas());
   }
 
-  public String missingGasPrice() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            null,
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingGasPrice() {
+    return createRequest(defaultTransaction().removeGasPrice());
   }
 
-  public String missingData() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
-            null);
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
+  public Request<?, EthSendTransaction> missingData() {
+    return createRequest(defaultTransaction().removeData());
   }
 
   /**
    * Due to the underlying server mocking, When only a single request is used, the contents does not
    * actually matter, only their equivalence does.
    */
-  public String request() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger(
-                "101454411220705080123888225389655371100299455501706857686025051036223022797554"),
-            new BigInteger("10000000000000"),
-            new BigInteger("30400"),
-            "0xd46e8dd67c5d32be8058bb8eb970870f07244567",
-            new BigInteger("2441406250"),
+  public Request<?, EthSendTransaction> request() {
+    return createRequest(defaultTransaction());
+  }
+
+  public Request<?, EthSendTransaction> smartContract() {
+    final TransactionBuilder transaction =
+        new TransactionBuilder()
+            .withFrom(UNLOCKED_ACCOUNT)
+            .withGas("0x76c0")
+            .withGasPrice("0x9184e72a000")
+            .withValue(DEFAULT_VALUE)
+            .withNonce("0x1")
+            .withData(
+                "0x608060405234801561001057600080fd5b50604051602080610114833981016040525160005560e1806100336000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632a1afcd98114605757806360fe47b114607b5780636d4ce63c146092575b600080fd5b348015606257600080fd5b50606960a4565b60408051918252519081900360200190f35b348015608657600080fd5b50609060043560aa565b005b348015609d57600080fd5b50606960af565b60005481565b600055565b600054905600a165627a7a72305820ade758a90b7d6841e99ca64c339eda0498d86ec9a97d5dcdeb3f12e3500079130029000000000000000000000000000000000000000000000000000000000000000a");
+    return createRequest(transaction);
+  }
+
+  private TransactionBuilder defaultTransaction() {
+    return new TransactionBuilder()
+        .withFrom(UNLOCKED_ACCOUNT)
+        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
+        .withGasPrice("0x9184e72a000")
+        .withGas("0x76c0")
+        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
+        .withValue("0x9184e72a")
+        .withData(
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
   }
 
-  public String smartContract() {
-    final Transaction transaction =
-        new Transaction(
-            UNLOCKED_ACCOUNT,
-            new BigInteger("1"),
-            null,
-            null,
-            null,
-            null,
-            "0x608060405234801561001057600080fd5b50604051602080610114833981016040525160005560e1806100336000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632a1afcd98114605757806360fe47b114607b5780636d4ce63c146092575b600080fd5b348015606257600080fd5b50606960a4565b60408051918252519081900360200190f35b348015608657600080fd5b50609060043560aa565b005b348015609d57600080fd5b50606960af565b60005481565b600055565b600054905600a165627a7a72305820ade758a90b7d6841e99ca64c339eda0498d86ec9a97d5dcdeb3f12e3500079130029000000000000000000000000000000000000000000000000000000000000000a");
-
-    final Request<?, ? extends Response<?>> sendTransactionRequest =
-        jsonRpc.ethSendTransaction(transaction);
-    sendTransactionRequest.setId(DEFAULT_ID);
-    return Json.encode(sendTransactionRequest);
-  }
-
-  private String replaceParameter(
-      final String key, final String replacementValue, final String body) {
-    final Pattern nonceWithValue = Pattern.compile(String.format("%s\\\":\\\"(\\w*)\\\"", key));
-    final Matcher matches = nonceWithValue.matcher(body);
-    return matches.replaceFirst(String.format("%s\":\"%s\"", key, replacementValue));
+  private Request<?, EthSendTransaction> createRequest(
+      final TransactionBuilder transactionBuilder) {
+    final Transaction transaction = transactionBuilder.build();
+    final Request<Object, EthSendTransaction> eea_sendTransaction =
+        new Request<>(
+            "eth_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);
+    eea_sendTransaction.setId(DEFAULT_ID);
+    return eea_sendTransaction;
   }
 }
