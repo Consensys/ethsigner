@@ -59,6 +59,14 @@ public class EeaSendTransaction {
     return createRequest(defaultTransaction().withData(data).build());
   }
 
+  public Request<?, EthSendTransaction> withPrivateFor(final List<String> privateFor) {
+    return createRequest(defaultTransaction().withPrivateFor(privateFor).build());
+  }
+
+  public Request<?, EthSendTransaction> withRestriction(final String restriction) {
+    return createRequest(defaultTransaction().withRestriction(restriction).build());
+  }
+
   public Request<?, EthSendTransaction> missingSender() {
     return createRequest(transactionWithoutField("from"));
   }

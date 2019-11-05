@@ -327,7 +327,8 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   void signTransactionWhenGasPriceIsNull() {
-    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withGasPrice(null);
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.withGasPrice(null);
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
     final String sendRawTransactionResponse =
