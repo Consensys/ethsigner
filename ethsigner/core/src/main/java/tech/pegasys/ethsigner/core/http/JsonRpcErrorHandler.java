@@ -47,12 +47,12 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
     final int statusCode =
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
     LOG.debug(
-        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}, Failure: {}",
+        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
         context.request()::method,
         context.request()::absoluteURI,
         () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
         () -> Json.encode(errorResponse),
-        () -> Json.encode(context.failure()));
+        () -> context.failure());
     httpResponseFactory.create(context.request(), statusCode, errorResponse);
   }
 
