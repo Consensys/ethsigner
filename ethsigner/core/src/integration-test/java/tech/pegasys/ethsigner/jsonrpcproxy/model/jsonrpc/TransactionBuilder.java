@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import io.vertx.core.json.JsonObject;
+
 public class TransactionBuilder {
   private String from;
   private String nonce;
@@ -26,18 +28,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeFrom() {
-    this.from = null;
-    return this;
-  }
-
   public TransactionBuilder withNonce(final String nonce) {
     this.nonce = nonce;
-    return this;
-  }
-
-  public TransactionBuilder removeNonce() {
-    this.nonce = null;
     return this;
   }
 
@@ -46,18 +38,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeGasPrice() {
-    this.gasPrice = null;
-    return this;
-  }
-
   public TransactionBuilder withGas(final String gas) {
     this.gas = gas;
-    return this;
-  }
-
-  public TransactionBuilder removeGas() {
-    this.gas = null;
     return this;
   }
 
@@ -66,18 +48,8 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeTo() {
-    this.to = null;
-    return this;
-  }
-
   public TransactionBuilder withValue(final String value) {
     this.value = value;
-    return this;
-  }
-
-  public TransactionBuilder removeValue() {
-    this.value = null;
     return this;
   }
 
@@ -86,12 +58,15 @@ public class TransactionBuilder {
     return this;
   }
 
-  public TransactionBuilder removeData() {
-    this.data = null;
-    return this;
-  }
-
-  public Transaction build() {
-    return new Transaction(from, nonce, gasPrice, gas, to, value, data);
+  public JsonObject build() {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put("from", from);
+    jsonObject.put("nonce", nonce);
+    jsonObject.put("gasPrice", gasPrice);
+    jsonObject.put("gas", gas);
+    jsonObject.put("to", to);
+    jsonObject.put("value", value);
+    jsonObject.put("data", data);
+    return jsonObject;
   }
 }

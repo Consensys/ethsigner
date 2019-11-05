@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import java.util.List;
 
+import io.vertx.core.json.JsonObject;
+
 public class PrivateTransactionBuilder {
   private String from;
   private String nonce;
@@ -31,18 +33,8 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
-  public PrivateTransactionBuilder removeFrom() {
-    this.from = null;
-    return this;
-  }
-
   public PrivateTransactionBuilder withNonce(final String nonce) {
     this.nonce = nonce;
-    return this;
-  }
-
-  public PrivateTransactionBuilder removeNonce() {
-    this.nonce = null;
     return this;
   }
 
@@ -51,28 +43,13 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
-  public PrivateTransactionBuilder removeGasPrice() {
-    this.gasPrice = null;
-    return this;
-  }
-
   public PrivateTransactionBuilder withGas(final String gas) {
     this.gas = gas;
     return this;
   }
 
-  public PrivateTransactionBuilder removeGas() {
-    this.gas = null;
-    return this;
-  }
-
   public PrivateTransactionBuilder withTo(final String to) {
     this.to = to;
-    return this;
-  }
-
-  public PrivateTransactionBuilder removeTo() {
-    this.to = null;
     return this;
   }
 
@@ -126,8 +103,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
-  public PrivateTransaction build() {
-    return new PrivateTransaction(
-        from, nonce, gasPrice, gas, to, value, data, privateFrom, privateFor, restriction);
+  public JsonObject build() {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put("from", from);
+    jsonObject.put("nonce", nonce);
+    jsonObject.put("gasPrice", gasPrice);
+    jsonObject.put("gas", gas);
+    jsonObject.put("to", to);
+    jsonObject.put("value", value);
+    jsonObject.put("data", data);
+    jsonObject.put("privateFrom", privateFrom);
+    jsonObject.put("privateFor", privateFor);
+    jsonObject.put("restriction", restriction);
+    return jsonObject;
   }
 }

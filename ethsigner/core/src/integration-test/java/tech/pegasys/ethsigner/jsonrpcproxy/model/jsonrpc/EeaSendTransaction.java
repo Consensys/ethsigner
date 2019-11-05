@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID
 
 import java.util.List;
 
+import io.vertx.core.json.JsonObject;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
@@ -31,71 +32,71 @@ public class EeaSendTransaction {
       "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675";
 
   public Request<Object, EthSendTransaction> withGas(final String gas) {
-    return createRequest(defaultTransaction().withGas(gas));
+    return createRequest(defaultTransaction().withGas(gas).build());
   }
 
   public Request<Object, EthSendTransaction> withGasPrice(final String gasPrice) {
-    return createRequest(defaultTransaction().withGasPrice(gasPrice));
+    return createRequest(defaultTransaction().withGasPrice(gasPrice).build());
   }
 
   public Request<Object, EthSendTransaction> withValue(final String value) {
-    return createRequest(defaultTransaction().withValue(value));
+    return createRequest(defaultTransaction().withValue(value).build());
   }
 
   public Request<Object, EthSendTransaction> withNonce(final String nonce) {
-    return createRequest(defaultTransaction().withNonce(nonce));
+    return createRequest(defaultTransaction().withNonce(nonce).build());
   }
 
   public Request<Object, EthSendTransaction> withSender(final String sender) {
-    return createRequest(defaultTransaction().withFrom(sender));
+    return createRequest(defaultTransaction().withFrom(sender).build());
   }
 
   public Request<Object, EthSendTransaction> withReceiver(final String sender) {
-    return createRequest(defaultTransaction().withTo(sender));
+    return createRequest(defaultTransaction().withTo(sender).build());
   }
 
   public Request<?, EthSendTransaction> withData(final String data) {
-    return createRequest(defaultTransaction().withData(data));
+    return createRequest(defaultTransaction().withData(data).build());
   }
 
   public Request<?, EthSendTransaction> missingSender() {
-    return createRequest(defaultTransaction().removeFrom());
+    return createRequest(transactionWithoutField("from"));
   }
 
   public Request<?, EthSendTransaction> missingNonce() {
-    return createRequest(defaultTransaction().removeNonce());
+    return createRequest(transactionWithoutField("nonce"));
   }
 
   public Request<?, EthSendTransaction> missingReceiver() {
-    return createRequest(defaultTransaction().removeTo());
+    return createRequest(transactionWithoutField("to"));
   }
 
   public Request<?, EthSendTransaction> missingValue() {
-    return createRequest(defaultTransaction().removeValue());
+    return createRequest(transactionWithoutField("value"));
   }
 
   public Request<?, EthSendTransaction> missingGas() {
-    return createRequest(defaultTransaction().removeGas());
+    return createRequest(transactionWithoutField("gas"));
   }
 
   public Request<?, EthSendTransaction> missingGasPrice() {
-    return createRequest(defaultTransaction().removeGasPrice());
+    return createRequest(transactionWithoutField("gasPrice"));
   }
 
   public Request<?, EthSendTransaction> missingData() {
-    return createRequest(defaultTransaction().removeData());
+    return createRequest(transactionWithoutField("data"));
   }
 
   public Request<Object, EthSendTransaction> missingPrivateFrom() {
-    return createRequest(defaultTransaction().removePrivateFrom());
+    return createRequest(transactionWithoutField("privateFrom"));
   }
 
   public Request<Object, EthSendTransaction> missingPrivateFor() {
-    return createRequest(defaultTransaction().removePrivateFor());
+    return createRequest(transactionWithoutField("privateFor"));
   }
 
   public Request<Object, EthSendTransaction> missingRestriction() {
-    return createRequest(defaultTransaction().removeRestriction());
+    return createRequest(transactionWithoutField("restriction"));
   }
 
   /**
@@ -103,7 +104,7 @@ public class EeaSendTransaction {
    * actually matter, only their equivalence does.
    */
   public Request<Object, EthSendTransaction> request() {
-    return createRequest(defaultTransaction());
+    return createRequest(defaultTransaction().build());
   }
 
   public Request<?, EthSendTransaction> smartContract() {
@@ -118,7 +119,7 @@ public class EeaSendTransaction {
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
             .withRestriction(RESTRICTED);
-    return createRequest(transaction);
+    return createRequest(transaction.build());
   }
 
   private PrivateTransactionBuilder defaultTransaction() {
@@ -135,9 +136,13 @@ public class EeaSendTransaction {
         .withRestriction(RESTRICTED);
   }
 
-  private Request<Object, EthSendTransaction> createRequest(
-      final PrivateTransactionBuilder transactionBuilder) {
-    final PrivateTransaction transaction = transactionBuilder.build();
+  private JsonObject transactionWithoutField(final String field) {
+    final JsonObject transaction = defaultTransaction().build();
+    transaction.remove(field);
+    return transaction;
+  }
+
+  private Request<Object, EthSendTransaction> createRequest(final JsonObject transaction) {
     final Request<Object, EthSendTransaction> eea_sendTransaction =
         new Request<>(
             "eea_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);

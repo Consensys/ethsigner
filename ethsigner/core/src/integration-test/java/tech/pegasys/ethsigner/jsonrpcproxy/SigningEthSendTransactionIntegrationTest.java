@@ -19,10 +19,10 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_DATA;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_GAS_PRICE;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.DEFAULT_VALUE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_VALUE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
@@ -335,7 +335,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  public void signSendTransaction() {
+  void signSendTransaction() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.request();
     final String sendRawTransactionRequest = sendRawTransaction.request(sendTransaction.request());
     final String sendRawTransactionResponse =

@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.google.common.io.BaseEncoding;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -49,16 +50,16 @@ public class SendRawTransaction {
 
   @SuppressWarnings("unchecked")
   public String request(final Request<?, EthSendTransaction> request, final long chainId) {
-    final List<Transaction> params = (List<Transaction>) request.getParams();
-    final Transaction transaction = params.get(0);
+    final List<JsonObject> params = (List<JsonObject>) request.getParams();
+    final JsonObject transaction = params.get(0);
     final RawTransaction rawTransaction =
         RawTransaction.createTransaction(
-            valueToBigDecimal(transaction.getNonce()),
-            valueToBigDecimal(transaction.getGasPrice()),
-            valueToBigDecimal(transaction.getGas()),
-            transaction.getTo(),
-            valueToBigDecimal(transaction.getValue()),
-            transaction.getData());
+            valueToBigDecimal(transaction.getString("nonce")),
+            valueToBigDecimal(transaction.getString("gasPrice")),
+            valueToBigDecimal(transaction.getString("gas")),
+            transaction.getString("to"),
+            valueToBigDecimal(transaction.getString("value")),
+            transaction.getString("data"));
     final byte[] signedTransaction =
         TransactionEncoder.signMessage(rawTransaction, chainId, credentials);
     final String value = "0x" + BaseEncoding.base16().encode(signedTransaction).toLowerCase();
