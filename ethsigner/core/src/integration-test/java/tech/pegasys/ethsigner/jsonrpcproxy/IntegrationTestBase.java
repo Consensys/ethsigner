@@ -60,6 +60,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 import org.mockserver.model.RegexBody;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
@@ -71,12 +74,14 @@ public class IntegrationTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String LOCALHOST = "127.0.0.1";
-  private static final long DEFAULT_CHAIN_ID = 9;
+  public static final long DEFAULT_CHAIN_ID = 9;
+  public static final int DEFAULT_ID = 77;
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   private static Runner runner;
   static ClientAndServer clientAndServer;
+  static Credentials credentials;
 
   private JsonRpc2_0Web3j jsonRpc;
   private JsonRpc2_0Eea eeaJsonRpc;
@@ -89,15 +94,19 @@ public class IntegrationTestBase {
   private static final Duration downstreamTimeout = Duration.ofSeconds(1);
 
   @BeforeAll
-  public static void setupEthSigner() throws IOException {
+  public static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);
   }
 
-  static void setupEthSigner(final long chainId) throws IOException {
+  static void setupEthSigner(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
+    final File keyFile = createKeyFile();
+    final File passwordFile = createFile("password");
+    credentials = WalletUtils.loadCredentials("password", keyFile);
+
     final TransactionSignerProvider transactionSignerProvider =
-        new SingleTransactionSignerProvider(transactionSigner());
+        new SingleTransactionSignerProvider(transactionSigner(keyFile, passwordFile));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -139,7 +148,7 @@ public class IntegrationTestBase {
         transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
   }
 
-  static void resetEthSigner() throws IOException {
+  static void resetEthSigner() throws IOException, CipherException {
     setupEthSigner();
   }
 
@@ -241,12 +250,8 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner() throws IOException {
-    final File keyFile = createKeyFile();
-    final File passwordFile = createFile("password");
-    final TransactionSigner fileBasedTransactionSigner =
-        FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
-    return fileBasedTransactionSigner;
+  private static TransactionSigner transactionSigner(final File keyFile, final File passwordFile) {
+    return FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
   }
 
   @SuppressWarnings("UnstableApiUsage")

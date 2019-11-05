@@ -16,6 +16,9 @@ import static java.util.Collections.emptyMap;
 
 import java.util.Map;
 
+import io.vertx.core.json.Json;
+import org.web3j.protocol.core.Request;
+
 public class EthRequestFactory {
 
   private static final Map<String, String> NO_HEADERS = emptyMap();
@@ -26,6 +29,10 @@ public class EthRequestFactory {
 
   public EthSignerRequest ethSigner(final String body) {
     return new EthSignerRequest(NO_HEADERS, body);
+  }
+
+  public EthSignerRequest ethSigner(final Request<?, ?> request) {
+    return new EthSignerRequest(NO_HEADERS, Json.encode(request));
   }
 
   public EthNodeRequest ethNode(final String body) {
