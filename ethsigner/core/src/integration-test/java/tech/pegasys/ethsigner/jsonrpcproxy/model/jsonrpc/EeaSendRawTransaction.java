@@ -54,6 +54,9 @@ public class EeaSendRawTransaction {
   @SuppressWarnings("unchecked")
   public String request(final Request<?, EthSendTransaction> request, final long chainId) {
     final List<JsonObject> params = (List<JsonObject>) request.getParams();
+    if (params.size() != 1) {
+      throw new IllegalStateException("eeaSendTransaction request must have only 1 parameter");
+    }
     final JsonObject transaction = params.get(0);
     final RawPrivateTransaction rawTransaction =
         RawPrivateTransaction.createTransaction(

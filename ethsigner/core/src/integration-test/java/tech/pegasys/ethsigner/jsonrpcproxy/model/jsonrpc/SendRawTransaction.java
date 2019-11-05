@@ -51,6 +51,9 @@ public class SendRawTransaction {
   @SuppressWarnings("unchecked")
   public String request(final Request<?, EthSendTransaction> request, final long chainId) {
     final List<JsonObject> params = (List<JsonObject>) request.getParams();
+    if (params.size() != 1) {
+      throw new IllegalStateException("sendTransaction request must have only 1 parameter");
+    }
     final JsonObject transaction = params.get(0);
     final RawTransaction rawTransaction =
         RawTransaction.createTransaction(
