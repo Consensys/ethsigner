@@ -13,255 +13,131 @@
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import io.vertx.core.json.Json;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class EeaSendTransaction {
   private static final String RESTRICTED = "restricted";
-  private static final int DEFAULT_ID = 77;
   private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
   private static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
   private static final List<String> PRIVATE_FOR =
       singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=");
-  private static final String DEFAULT_NONCE =
-      "0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2";
-  private static final String DEFAULT_GAS_PRICE = "0x9184e72a000";
-  private static final String DEFAULT_GAS = "0x76c0";
-  private static final String DEFAULT_RECEIVER = "0xd46e8dd67c5d32be8058bb8eb970870f07244567";
-  private static final String DEFAULT_VALUE = "0x0";
-  private static final String DEFAULT_DATA =
+  private static final String VALUE = "0x0";
+  private static final String DATA =
       "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675";
 
-  public String withGas(final String gas) {
-    return replaceParameter("gas", gas, request());
+  public Request<Object, EthSendTransaction> withGas(final String gas) {
+    return createRequest(defaultTransaction().withGas(gas));
   }
 
-  public String withGasPrice(final String gasPrice) {
-    return replaceParameter("gasPrice", gasPrice, request());
+  public Request<Object, EthSendTransaction> withGasPrice(final String gasPrice) {
+    return createRequest(defaultTransaction().withGasPrice(gasPrice));
   }
 
-  public String withValue(final String value) {
-    return replaceParameter("value", value, request());
+  public Request<Object, EthSendTransaction> withValue(final String value) {
+    return createRequest(defaultTransaction().withValue(value));
   }
 
-  public String withNonce(final String nonce) {
-    return replaceParameter("nonce", nonce, request());
+  public Request<Object, EthSendTransaction> withNonce(final String nonce) {
+    return createRequest(defaultTransaction().withNonce(nonce));
   }
 
-  public String withSender(final String receiver) {
-    return replaceParameter("from", receiver, request());
+  public Request<Object, EthSendTransaction> withSender(final String sender) {
+    return createRequest(defaultTransaction().withFrom(sender));
   }
 
-  public String withReceiver(final String sender) {
-    return replaceParameter("to", sender, request());
+  public Request<Object, EthSendTransaction> withReceiver(final String sender) {
+    return createRequest(defaultTransaction().withTo(sender));
   }
 
-  public String missingSender() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> withData(final String data) {
+    return createRequest(defaultTransaction().withData(data));
   }
 
-  public String missingNonce() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingSender() {
+    return createRequest(defaultTransaction().removeFrom());
   }
 
-  public String missingReceiver() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingNonce() {
+    return createRequest(defaultTransaction().removeNonce());
   }
 
-  public String missingValue() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingReceiver() {
+    return createRequest(defaultTransaction().removeTo());
   }
 
-  public String missingGas() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingValue() {
+    return createRequest(defaultTransaction().removeValue());
   }
 
-  public String missingGasPrice() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingGas() {
+    return createRequest(defaultTransaction().removeGas());
   }
 
-  public String missingData() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingGasPrice() {
+    return createRequest(defaultTransaction().removeGasPrice());
   }
 
-  public String missingPrivateFrom() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<?, EthSendTransaction> missingData() {
+    return createRequest(defaultTransaction().removeData());
   }
 
-  public String missingPrivateFor() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<Object, EthSendTransaction> missingPrivateFrom() {
+    return createRequest(defaultTransaction().removePrivateFrom());
   }
 
-  public String missingRestriction() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<Object, EthSendTransaction> missingPrivateFor() {
+    return createRequest(defaultTransaction().removePrivateFor());
+  }
+
+  public Request<Object, EthSendTransaction> missingRestriction() {
+    return createRequest(defaultTransaction().removeRestriction());
   }
 
   /**
    * Due to the underlying server mocking, When only a single request is used, the contents does not
    * actually matter, only their equivalence does.
    */
-  public String request() {
-    final PrivateTransaction transaction =
-        new PrivateTransactionBuilder()
-            .withFrom(UNLOCKED_ACCOUNT)
-            .withNonce(DEFAULT_NONCE)
-            .withGasPrice(DEFAULT_GAS_PRICE)
-            .withGas(DEFAULT_GAS)
-            .withTo(DEFAULT_RECEIVER)
-            .withValue(DEFAULT_VALUE)
-            .withData(DEFAULT_DATA)
-            .withPrivateFrom(PRIVATE_FROM)
-            .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+  public Request<Object, EthSendTransaction> request() {
+    return createRequest(defaultTransaction());
   }
 
-  public String smartContract() {
-    final PrivateTransaction transaction =
+  public Request<?, EthSendTransaction> smartContract() {
+    final PrivateTransactionBuilder transaction =
         new PrivateTransactionBuilder()
             .withFrom(UNLOCKED_ACCOUNT)
+            .withGas("0x76c0")
+            .withGasPrice("0x9184e72a000")
+            .withValue(VALUE)
             .withNonce("0x1")
-            .withData(DEFAULT_DATA)
+            .withData(DATA)
             .withPrivateFrom(PRIVATE_FROM)
             .withPrivateFor(PRIVATE_FOR)
-            .withRestriction(RESTRICTED)
-            .build();
-    return Json.encode(eeaSendTransaction(transaction));
+            .withRestriction(RESTRICTED);
+    return createRequest(transaction);
   }
 
-  private String replaceParameter(
-      final String key, final String replacementValue, final String body) {
-    final Pattern nonceWithValue = Pattern.compile(String.format("%s\\\":\\\"(\\w*)\\\"", key));
-    final Matcher matches = nonceWithValue.matcher(body);
-    return matches.replaceFirst(String.format("%s\":\"%s\"", key, replacementValue));
+  private PrivateTransactionBuilder defaultTransaction() {
+    return new PrivateTransactionBuilder()
+        .withFrom(UNLOCKED_ACCOUNT)
+        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
+        .withGasPrice("0x9184e72a000")
+        .withGas("0x76c0")
+        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
+        .withValue(VALUE)
+        .withData(DATA)
+        .withPrivateFrom(PRIVATE_FROM)
+        .withPrivateFor(PRIVATE_FOR)
+        .withRestriction(RESTRICTED);
   }
 
-  private Request<Object, EthSendTransaction> eeaSendTransaction(final Object transaction) {
+  private Request<Object, EthSendTransaction> createRequest(
+      final PrivateTransactionBuilder transactionBuilder) {
+    final PrivateTransaction transaction = transactionBuilder.build();
     final Request<Object, EthSendTransaction> eea_sendTransaction =
         new Request<>(
             "eea_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);

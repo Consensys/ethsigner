@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.web3j.utils.Numeric.decodeQuantity;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -49,7 +49,7 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("from") final String sender,
       @JsonProperty("privateFrom") final String privateFrom,
       @JsonProperty("restriction") final String restriction) {
-    validatePrefix(sender);
+    validateNotEmpty(sender);
     this.privateFrom = Base64String.wrap(privateFrom);
     this.restriction = restriction;
     this.sender = sender;
@@ -72,7 +72,6 @@ public class EeaSendTransactionJsonParameters {
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
-    validatePrefix(receiver);
     this.receiver = receiver;
   }
 

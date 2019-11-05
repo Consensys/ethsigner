@@ -17,17 +17,9 @@ import java.util.List;
 import io.vertx.core.json.JsonObject;
 
 public class RpcUtil {
-  private static final String ENCODING_PREFIX = "0x";
   public static final String JSON_RPC_VERSION = "2.0";
 
-  public static void validatePrefix(final String value) {
-    if (!value.startsWith(ENCODING_PREFIX)) {
-      throw new IllegalArgumentException(
-          String.format("Prefix of '0x' is expected in value: %s", value));
-    }
-  }
-
-  public static <T> T fromRpcRequestToJsonParam(final Class<T> type, final JsonRpcRequest request) {
+  static <T> T fromRpcRequestToJsonParam(final Class<T> type, final JsonRpcRequest request) {
 
     final Object object;
     final Object params = request.getParams();
@@ -48,5 +40,11 @@ public class RpcUtil {
     final JsonObject receivedParams = JsonObject.mapFrom(object);
 
     return receivedParams.mapTo(type);
+  }
+
+  static void validateNotEmpty(final String value) {
+    if (value.isEmpty()) {
+      throw new IllegalArgumentException("Value cannot be empty");
+    }
   }
 }

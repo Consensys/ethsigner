@@ -31,8 +31,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removeFrom() {
+    this.from = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withNonce(final String nonce) {
     this.nonce = nonce;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removeNonce() {
+    this.nonce = null;
     return this;
   }
 
@@ -41,8 +51,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removeGasPrice() {
+    this.gasPrice = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withGas(final String gas) {
     this.gas = gas;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removeGas() {
+    this.gas = null;
     return this;
   }
 
@@ -51,8 +71,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removeTo() {
+    this.to = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withValue(final String value) {
     this.value = value;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removeValue() {
+    this.value = null;
     return this;
   }
 
@@ -61,8 +91,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removeData() {
+    this.data = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withPrivateFrom(final String privateFrom) {
     this.privateFrom = privateFrom;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removePrivateFrom() {
+    this.privateFrom = null;
     return this;
   }
 
@@ -71,8 +111,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removePrivateFor() {
+    this.privateFor = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withRestriction(final String restriction) {
     this.restriction = restriction;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removeRestriction() {
+    this.restriction = null;
     return this;
   }
 
