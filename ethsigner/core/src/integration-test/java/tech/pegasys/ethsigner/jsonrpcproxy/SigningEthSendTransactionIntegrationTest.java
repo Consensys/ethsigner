@@ -207,8 +207,43 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
+  void signTransactionWhenReceiverAddressIsNull() {
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.withReceiver(null);
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(sendTransaction.missingReceiver());
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
   void signTransactionWhenMissingValue() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingValue();
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  void signTransactionWhenValueIsNull() {
+    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withValue(null);
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
     final String sendRawTransactionResponse =
@@ -249,6 +284,24 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
+  void signTransactionWhenGasIsNull() {
+    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withGas(null);
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(sendTransaction.withGas(DEFAULT_GAS));
+
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d7777777");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
   void invalidParamsResponseWhenGasIsNaN() {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withGas("I'm an invalid gas format!")),
@@ -257,6 +310,23 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   void signTransactionWhenMissingGasPrice() {
+    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGasPrice();
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  void signTransactionWhenGasPriceIsNull() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGasPrice();
     final String sendRawTransactionRequest =
         sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
@@ -366,6 +436,25 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()),
+        response.ethSigner(successResponseFromWeb3Provider));
+  }
+
+  @Test
+  void nullNonceResultsInNewNonceBeingCreatedAndResent() {
+    final String rawTransactionWithInitialNonce =
+        sendRawTransaction.request(sendTransaction.withNonce("0x0"));
+    final String rawTransactionWithNextNonce =
+        sendRawTransaction.request(sendTransaction.withNonce("0x1"));
+    setUpEthNodeResponse(
+        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
+
+    final String successResponseFromWeb3Provider = "VALID_RESULT";
+    setUpEthNodeResponse(
+        request.ethNode(rawTransactionWithNextNonce),
+        response.ethNode(successResponseFromWeb3Provider));
+
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransaction.withNonce(null)),
         response.ethSigner(successResponseFromWeb3Provider));
   }
 
