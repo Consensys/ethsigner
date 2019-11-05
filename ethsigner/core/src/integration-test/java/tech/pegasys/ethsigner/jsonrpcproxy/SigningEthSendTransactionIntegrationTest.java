@@ -19,10 +19,10 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_DATA;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_GAS;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_GAS_PRICE;
-import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.DEFAULT_VALUE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA_DEFAULT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_DEFAULT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE_DEFAULT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
@@ -228,7 +228,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signTransactionWhenMissingValue() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingValue();
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
+        sendRawTransaction.request(sendTransaction.withValue(FIELD_VALUE_DEFAULT));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
@@ -245,7 +245,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signTransactionWhenValueIsNull() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withValue(null);
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withValue(DEFAULT_VALUE));
+        sendRawTransaction.request(sendTransaction.withValue(FIELD_VALUE_DEFAULT));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1666666");
@@ -269,7 +269,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signTransactionWhenMissingGas() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGas();
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGas(DEFAULT_GAS));
+        sendRawTransaction.request(sendTransaction.withGas(FIELD_GAS_DEFAULT));
 
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
@@ -287,7 +287,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signTransactionWhenGasIsNull() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.withGas(null);
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGas(DEFAULT_GAS));
+        sendRawTransaction.request(sendTransaction.withGas(FIELD_GAS_DEFAULT));
 
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
@@ -312,7 +312,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signTransactionWhenMissingGasPrice() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingGasPrice();
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
+        sendRawTransaction.request(sendTransaction.withGasPrice(FIELD_GAS_PRICE_DEFAULT));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
@@ -330,7 +330,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.withGasPrice(null);
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withGasPrice(DEFAULT_GAS_PRICE));
+        sendRawTransaction.request(sendTransaction.withGasPrice(FIELD_GAS_PRICE_DEFAULT));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
@@ -354,7 +354,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
   void signSendTransactionWhenMissingData() {
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.missingData();
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.withData(DEFAULT_DATA));
+        sendRawTransaction.request(sendTransaction.withData(FIELD_DATA_DEFAULT));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");

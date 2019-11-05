@@ -12,6 +12,14 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
+
 import io.vertx.core.json.JsonObject;
 
 public class TransactionBuilder {
@@ -60,13 +68,13 @@ public class TransactionBuilder {
 
   public JsonObject build() {
     final JsonObject jsonObject = new JsonObject();
-    jsonObject.put("from", from);
-    jsonObject.put("nonce", nonce);
-    jsonObject.put("gasPrice", gasPrice);
-    jsonObject.put("gas", gas);
-    jsonObject.put("to", to);
-    jsonObject.put("value", value);
-    jsonObject.put("data", data);
+    jsonObject.put(FIELD_FROM, from);
+    jsonObject.put(FIELD_NONCE, nonce);
+    jsonObject.put(FIELD_GAS_PRICE, gasPrice);
+    jsonObject.put(FIELD_GAS, gas);
+    jsonObject.put(FIELD_TO, to);
+    jsonObject.put(FIELD_VALUE, value);
+    jsonObject.put(FIELD_DATA, data);
     return jsonObject;
   }
 }

@@ -12,6 +12,17 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_PRIVATE_FOR;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_PRIVATE_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_RESTRICTION;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
+
 import java.util.List;
 
 import io.vertx.core.json.JsonObject;
@@ -105,16 +116,16 @@ public class PrivateTransactionBuilder {
 
   public JsonObject build() {
     final JsonObject jsonObject = new JsonObject();
-    jsonObject.put("from", from);
-    jsonObject.put("nonce", nonce);
-    jsonObject.put("gasPrice", gasPrice);
-    jsonObject.put("gas", gas);
-    jsonObject.put("to", to);
-    jsonObject.put("value", value);
-    jsonObject.put("data", data);
-    jsonObject.put("privateFrom", privateFrom);
-    jsonObject.put("privateFor", privateFor);
-    jsonObject.put("restriction", restriction);
+    jsonObject.put(FIELD_FROM, from);
+    jsonObject.put(FIELD_NONCE, nonce);
+    jsonObject.put(FIELD_GAS_PRICE, gasPrice);
+    jsonObject.put(FIELD_GAS, gas);
+    jsonObject.put(FIELD_TO, to);
+    jsonObject.put(FIELD_VALUE, value);
+    jsonObject.put(FIELD_DATA, data);
+    jsonObject.put(FIELD_PRIVATE_FROM, privateFrom);
+    jsonObject.put(FIELD_PRIVATE_FOR, privateFor);
+    jsonObject.put(FIELD_RESTRICTION, restriction);
     return jsonObject;
   }
 }
