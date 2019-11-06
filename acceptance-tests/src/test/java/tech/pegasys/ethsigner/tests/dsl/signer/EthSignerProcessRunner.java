@@ -217,7 +217,7 @@ public class EthSignerProcessRunner {
       portsProperties.load(fis);
       LOG.info("EthSigner ports: {}", portsProperties);
     } catch (final IOException e) {
-      throw new RuntimeException("Error reading Pantheon ports file", e);
+      throw new RuntimeException("Error reading Web3Provider ports file", e);
     }
   }
 
