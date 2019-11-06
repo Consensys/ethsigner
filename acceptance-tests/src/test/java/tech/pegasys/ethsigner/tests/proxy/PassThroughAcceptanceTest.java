@@ -44,7 +44,8 @@ public class PassThroughAcceptanceTest extends AcceptanceTestBase {
 
     ethSignerTransactionCount = ethSigner().transactions().count(richBenefactor().address());
 
-    assertThat(web3ProviderTransactionCount.add(BigInteger.ONE)).isEqualTo(ethSignerTransactionCount);
+    assertThat(web3ProviderTransactionCount.add(BigInteger.ONE))
+        .isEqualTo(ethSignerTransactionCount);
   }
 
   @Test

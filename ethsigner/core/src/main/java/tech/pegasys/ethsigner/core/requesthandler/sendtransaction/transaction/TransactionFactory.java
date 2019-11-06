@@ -79,8 +79,7 @@ public class TransactionFactory {
 
     if (params.privacyGroupId().isPresent()) {
       final NonceProvider nonceProvider =
-          new BesuPrivateNonceProvider(
-              pantheon, params.sender(), params.privacyGroupId().get());
+          new BesuPrivateNonceProvider(pantheon, params.sender(), params.privacyGroupId().get());
       return BesuPrivateTransaction.from(params, nonceProvider, request.getId());
     }
 
