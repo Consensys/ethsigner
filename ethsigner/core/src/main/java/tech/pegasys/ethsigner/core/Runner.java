@@ -177,7 +177,7 @@ public class Runner {
     try (final FileOutputStream fileOutputStream = new FileOutputStream(portsFile)) {
       properties.store(
           fileOutputStream,
-          "This file contains the ports used by the running instance of Pantheon. This file will be deleted after the node is shutdown.");
+          "This file contains the ports used by the running instance of Web3Provider. This file will be deleted after the node is shutdown.");
     } catch (final Exception e) {
       LOG.warn("Error writing ports file", e);
     }

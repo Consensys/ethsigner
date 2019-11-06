@@ -24,7 +24,7 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.pantheon.Pantheon;
 import org.web3j.utils.Base64String;
 
-public class PantheonPrivateNonceProvider implements NonceProvider {
+public class BesuPrivateNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -32,7 +32,7 @@ public class PantheonPrivateNonceProvider implements NonceProvider {
   private final String accountAddress;
   private final Base64String privacyGroupId;
 
-  PantheonPrivateNonceProvider(
+  BesuPrivateNonceProvider(
       final Pantheon pantheon, final String accountAddress, final Base64String privacyGroupId) {
     this.pantheon = pantheon;
     this.accountAddress = accountAddress;
