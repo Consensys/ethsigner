@@ -23,11 +23,12 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class Eea {
 
-  private final org.web3j.protocol.eea.Eea eea;
+  private final org.web3j.protocol.besu.Besu besu;
   private final RawJsonRpcRequestFactory requestFactory;
 
-  public Eea(final org.web3j.protocol.eea.Eea eea, final RawJsonRpcRequestFactory requestFactory) {
-    this.eea = eea;
+  public Eea(
+      final org.web3j.protocol.besu.Besu besu, final RawJsonRpcRequestFactory requestFactory) {
+    this.besu = besu;
     this.requestFactory = requestFactory;
   }
 
@@ -46,6 +47,6 @@ public class Eea {
 
   public Optional<PrivateTransactionReceipt> getTransactionReceipt(final String hash)
       throws IOException {
-    return eea.eeaGetTransactionReceipt(hash).send().getTransactionReceipt();
+    return besu.privGetTransactionReceipt(hash).send().getTransactionReceipt();
   }
 }
