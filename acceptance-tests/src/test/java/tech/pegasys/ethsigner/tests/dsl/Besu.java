@@ -21,12 +21,12 @@ import java.util.Optional;
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
-public class Eea {
+public class Besu {
 
   private final org.web3j.protocol.besu.Besu besu;
   private final RawJsonRpcRequestFactory requestFactory;
 
-  public Eea(
+  public Besu(
       final org.web3j.protocol.besu.Besu besu, final RawJsonRpcRequestFactory requestFactory) {
     this.besu = besu;
     this.requestFactory = requestFactory;

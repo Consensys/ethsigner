@@ -19,20 +19,20 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class PrivateContracts extends Contracts<PrivateTransaction> {
 
-  private final Eea eea;
+  private final Besu besu;
 
-  public PrivateContracts(final Eea eea) {
-    this.eea = eea;
+  public PrivateContracts(final Besu besu) {
+    this.besu = besu;
   }
 
   @Override
   public String sendTransaction(final PrivateTransaction smartContract) throws IOException {
-    return eea.sendTransaction(smartContract);
+    return besu.sendTransaction(smartContract);
   }
 
   @Override
   public Optional<? extends TransactionReceipt> getTransactionReceipt(final String hash)
       throws IOException {
-    return eea.getTransactionReceipt(hash);
+    return besu.getTransactionReceipt(hash);
   }
 }
