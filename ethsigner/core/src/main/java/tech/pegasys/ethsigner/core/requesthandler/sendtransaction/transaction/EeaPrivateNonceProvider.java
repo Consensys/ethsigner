@@ -55,7 +55,7 @@ public class EeaPrivateNonceProvider implements NonceProvider {
 
     final Request<?, EthGetTransactionCount> request =
         new Request<>(
-            "eea_getTransactionCount",
+            "priv_getEeaTransactionCount",
             Lists.newArrayList(accountAddress, privateFrom, privateFor),
             web3jService,
             EthGetTransactionCount.class);

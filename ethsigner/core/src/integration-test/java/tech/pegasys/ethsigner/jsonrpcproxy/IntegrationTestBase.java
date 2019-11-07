@@ -59,6 +59,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
+import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
@@ -232,7 +233,7 @@ public class IntegrationTestBase {
   void verifyEthNodeReceived(final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
-            .withBody(proxyBodyRequest)
+            .withBody(JsonBody.json(proxyBodyRequest))
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
