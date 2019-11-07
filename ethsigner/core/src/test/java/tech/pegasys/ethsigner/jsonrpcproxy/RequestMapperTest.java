@@ -29,7 +29,7 @@ public class RequestMapperTest {
   @Mock private JsonRpcRequestHandler handler2;
 
   @Test
-  public void returnsHandleForAssociatedRpcMethod() {
+  public void returnsHandlerForAssociatedRpcMethod() {
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("foo", handler1);
     requestMapper.addHandler("bar", handler2);

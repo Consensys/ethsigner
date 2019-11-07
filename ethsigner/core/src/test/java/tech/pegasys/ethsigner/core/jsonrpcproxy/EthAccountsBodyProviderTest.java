@@ -66,7 +66,7 @@ public class EthAccountsBodyProviderTest {
   }
 
   @Test
-  public void isParamIsAnObjectErrorIsReturned() {
+  public void ifParamIsAnObjectErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
     final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));

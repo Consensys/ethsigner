@@ -37,7 +37,7 @@ dependencies {
   runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
 
   implementation 'org.web3j:crypto'
-  implementation 'org.web3j:pantheon'
+  implementation 'org.web3j:besu'
 
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web'

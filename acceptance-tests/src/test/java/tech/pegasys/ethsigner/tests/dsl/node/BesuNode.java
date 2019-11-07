@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Besu;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
@@ -53,8 +54,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
@@ -111,12 +112,13 @@ public class BesuNode implements Node {
     this.jsonRpc =
         new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
-    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
+    final JsonRpc2_0Besu besuJsonRpc = new JsonRpc2_0Besu(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);
-    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
+    final Besu besu = new Besu(besuJsonRpc);
+    final Eea eea = new Eea(requestFactory);
     this.accounts = new Accounts(eth);
     this.publicContracts = new PublicContracts(eth);
-    this.privateContracts = new PrivateContracts(eea);
+    this.privateContracts = new PrivateContracts(besu, eea);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }

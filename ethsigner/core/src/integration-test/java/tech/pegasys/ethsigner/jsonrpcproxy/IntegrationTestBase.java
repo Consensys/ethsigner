@@ -69,11 +69,11 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.protocol.pantheon.Pantheon;
 
 public class IntegrationTestBase {
 
@@ -132,7 +132,7 @@ public class IntegrationTestBase {
                 + ":"
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Pantheon pantheon = Pantheon.build(web3jService);
+    final Besu besu = Besu.build(web3jService);
 
     runner =
         new Runner(
@@ -141,7 +141,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(pantheon, web3j, web3jService),
+            new TransactionFactory(besu, web3j, web3jService),
             null);
     runner.start();
 
