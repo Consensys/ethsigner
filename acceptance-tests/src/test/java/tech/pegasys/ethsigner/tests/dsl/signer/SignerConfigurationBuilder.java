@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 public class SignerConfigurationBuilder {
 
-  /** ChainId defined in the Pantheon dev mode genesis. */
+  /** ChainId defined in the dev mode genesis. */
   private static final String CHAIN_ID = "2018";
 
   private static final String LOCALHOST = "127.0.0.1";

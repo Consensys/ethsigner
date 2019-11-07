@@ -20,9 +20,9 @@ import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Restriction;
 
-public class PantheonPrivateTransaction extends PrivateTransaction {
+public class BesuPrivateTransaction extends PrivateTransaction {
 
-  public static PantheonPrivateTransaction from(
+  public static BesuPrivateTransaction from(
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
@@ -32,12 +32,12 @@ public class PantheonPrivateTransaction extends PrivateTransaction {
     }
 
     final Base64String privacyId = transactionJsonParameters.privacyGroupId().get();
-    return new PantheonPrivateTransaction(transactionJsonParameters, nonceProvider, id, privacyId);
+    return new BesuPrivateTransaction(transactionJsonParameters, nonceProvider, id, privacyId);
   }
 
   private final Base64String privacyGroupId;
 
-  private PantheonPrivateTransaction(
+  private BesuPrivateTransaction(
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id,

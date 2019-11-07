@@ -258,7 +258,7 @@ public class IntegrationTestBase {
             GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
             EeaSendTransaction.UNLOCKED_ACCOUNT,
             EeaSendTransaction.PRIVATE_FROM,
-            EeaSendTransaction.PRIVATE_FOR.get(0));
+            EeaSendTransaction.PRIVATE_FOR);
     assertThat(body).contains(expectedBody);
   }
 

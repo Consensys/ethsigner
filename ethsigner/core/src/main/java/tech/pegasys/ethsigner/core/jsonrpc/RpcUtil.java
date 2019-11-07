@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
+import static org.web3j.utils.Numeric.decodeQuantity;
+
+import java.math.BigInteger;
 import java.util.List;
 
 import io.vertx.core.json.JsonObject;
@@ -46,5 +49,9 @@ public class RpcUtil {
     if (value.isEmpty()) {
       throw new IllegalArgumentException("Value cannot be empty");
     }
+  }
+
+  static BigInteger decodeBigInteger(final String value) {
+    return value == null ? null : decodeQuantity(value);
   }
 }
