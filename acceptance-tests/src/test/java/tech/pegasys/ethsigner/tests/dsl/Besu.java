@@ -15,26 +15,18 @@ package tech.pegasys.ethsigner.tests.dsl;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 
-public class PrivateContracts extends Contracts<PrivateTransaction> {
+public class Besu {
 
-  private final Besu besu;
-  private final Eea eea;
+  private final org.web3j.protocol.besu.Besu besu;
 
-  public PrivateContracts(final Besu besu, final Eea eea) {
+  public Besu(final org.web3j.protocol.besu.Besu besu) {
     this.besu = besu;
-    this.eea = eea;
   }
 
-  @Override
-  public String sendTransaction(final PrivateTransaction smartContract) throws IOException {
-    return eea.sendTransaction(smartContract);
-  }
-
-  @Override
-  public Optional<? extends TransactionReceipt> getTransactionReceipt(final String hash)
+  public Optional<PrivateTransactionReceipt> getTransactionReceipt(final String hash)
       throws IOException {
-    return besu.getTransactionReceipt(hash);
+    return besu.privGetTransactionReceipt(hash).send().getTransactionReceipt();
   }
 }

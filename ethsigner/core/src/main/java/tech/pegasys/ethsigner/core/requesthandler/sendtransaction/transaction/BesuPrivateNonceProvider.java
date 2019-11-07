@@ -19,22 +19,22 @@ import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.pantheon.Pantheon;
 import org.web3j.utils.Base64String;
 
 public class BesuPrivateNonceProvider implements NonceProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Pantheon pantheon;
+  private final Besu besu;
   private final String accountAddress;
   private final Base64String privacyGroupId;
 
   BesuPrivateNonceProvider(
-      final Pantheon pantheon, final String accountAddress, final Base64String privacyGroupId) {
-    this.pantheon = pantheon;
+      final Besu besu, final String accountAddress, final Base64String privacyGroupId) {
+    this.besu = besu;
     this.accountAddress = accountAddress;
     this.privacyGroupId = privacyGroupId;
   }
@@ -47,7 +47,7 @@ public class BesuPrivateNonceProvider implements NonceProvider {
   private BigInteger getNonceFromClient() {
 
     final Request<?, EthGetTransactionCount> request =
-        pantheon.privGetTransactionCount(accountAddress, privacyGroupId);
+        besu.privGetTransactionCount(accountAddress, privacyGroupId);
     try {
       LOG.debug(
           "Retrieving Transaction count from eea provider for {} with privacy group id {}",
