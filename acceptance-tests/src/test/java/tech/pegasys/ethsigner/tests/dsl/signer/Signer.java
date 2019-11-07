@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Besu;
+import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
 import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
@@ -75,14 +76,15 @@ public class Signer {
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
-    final JsonRpc2_0Besu eeaJsonRpc = new JsonRpc2_0Besu(web3jHttpService);
+    final JsonRpc2_0Besu besuJsonRpc = new JsonRpc2_0Besu(web3jHttpService);
 
     final Eth eth = new Eth(jsonRpc);
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
     this.transactions = new Transactions(eth);
-    final Besu besu = new Besu(eeaJsonRpc, requestFactory);
+    final Besu besu = new Besu(besuJsonRpc);
+    final Eea eea = new Eea(requestFactory);
     this.publicContracts = new PublicContracts(eth);
-    this.privateContracts = new PrivateContracts(besu);
+    this.privateContracts = new PrivateContracts(besu, eea);
     this.accounts = new Accounts(eth);
     this.rawJsonRpcRequests = new RawJsonRpcRequests(web3jHttpService, requestFactory);
     this.rawHttpRequests = new HttpRequest(httpJsonRpcUrl);

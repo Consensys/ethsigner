@@ -12,37 +12,17 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.Optional;
 
 import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class Besu {
 
   private final org.web3j.protocol.besu.Besu besu;
-  private final RawJsonRpcRequestFactory requestFactory;
 
-  public Besu(
-      final org.web3j.protocol.besu.Besu besu, final RawJsonRpcRequestFactory requestFactory) {
+  public Besu(final org.web3j.protocol.besu.Besu besu) {
     this.besu = besu;
-    this.requestFactory = requestFactory;
-  }
-
-  public String sendTransaction(final PrivateTransaction transaction) throws IOException {
-    final EthSendTransaction response =
-        requestFactory
-            .createRequest(
-                "eea_sendTransaction", singletonList(transaction), EthSendTransaction.class)
-            .send();
-
-    assertThat(response.getTransactionHash()).isNotEmpty();
-    assertThat(response.getError()).isNull();
-
-    return response.getTransactionHash();
   }
 
   public Optional<PrivateTransactionReceipt> getTransactionReceipt(final String hash)
