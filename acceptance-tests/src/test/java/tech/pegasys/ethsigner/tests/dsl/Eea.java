@@ -18,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.eea.response.PrivateTransactionReceipt;
 
 public class Eea {
 
