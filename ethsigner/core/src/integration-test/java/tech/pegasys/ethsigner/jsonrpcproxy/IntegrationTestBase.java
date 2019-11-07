@@ -16,6 +16,7 @@ import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.matchers.Times.exactly;
@@ -29,6 +30,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
@@ -44,6 +46,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +62,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
@@ -78,6 +83,8 @@ public class IntegrationTestBase {
   public static final int DEFAULT_ID = 77;
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
+  private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
+      "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]],\"id";
 
   private static Runner runner;
   static ClientAndServer clientAndServer;
@@ -232,8 +239,27 @@ public class IntegrationTestBase {
   void verifyEthNodeReceived(final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
-            .withBody(proxyBodyRequest)
+            .withBody(JsonBody.json(proxyBodyRequest))
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
+  }
+
+  void verifyEthNodeReceivedGetEeaTransactionCountRequestOnce() {
+    final String expectedMethod = "priv_getEeaTransactionCount";
+    final HttpRequest[] httpRequests = clientAndServer.retrieveRecordedRequests(null);
+    final List<String> bodyList =
+        Arrays.stream(httpRequests)
+            .map(r -> r.getBody().toString())
+            .filter(s -> s.contains(expectedMethod))
+            .collect(toList());
+    assertThat(bodyList.size()).isEqualTo(1);
+    final String body = bodyList.get(0);
+    final String expectedBody =
+        String.format(
+            GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
+            EeaSendTransaction.UNLOCKED_ACCOUNT,
+            EeaSendTransaction.PRIVATE_FROM,
+            EeaSendTransaction.PRIVATE_FOR.get(0));
+    assertThat(body).contains(expectedBody);
   }
 
   void verifyEthNodeReceived(

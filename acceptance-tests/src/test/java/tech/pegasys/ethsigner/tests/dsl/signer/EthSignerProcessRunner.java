@@ -84,7 +84,7 @@ public class EthSignerProcessRunner {
     if (useDynamicPortAllocation) {
       try {
         this.dataPath = Files.createTempDirectory("acceptance-test");
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException(
             "Failed to create the temporary directory to store the ethsigner.ports file");
       }

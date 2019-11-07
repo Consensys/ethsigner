@@ -22,9 +22,9 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 public class EeaSendTransaction {
   private static final String RESTRICTED = "restricted";
-  private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
-  private static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
-  private static final List<String> PRIVATE_FOR =
+  public static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
+  public static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
+  public static final List<String> PRIVATE_FOR =
       singletonList("GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=");
   private static final String VALUE = "0x0";
   private static final String DATA =

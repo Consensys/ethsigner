@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.math.BigInteger.ONE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
@@ -30,11 +29,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockserver.model.HttpRequest;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
@@ -448,10 +444,6 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(ethNodeResponseBody));
 
-    final HttpRequest[] httpRequests = clientAndServer.retrieveRecordedRequests(null);
-    assertThat(
-            Arrays.asList(httpRequests).stream()
-                .anyMatch(r -> r.getBody().toString().contains("priv_getEeaTransactionCount")))
-        .isTrue();
+    verifyEthNodeReceivedGetEeaTransactionCountRequestOnce();
   }
 }
