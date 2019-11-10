@@ -37,6 +37,9 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
 
+  private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
+      "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}";
+
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
 
@@ -505,5 +508,21 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
     sendRequestThenVerifyResponse(
         request.ethSigner(sendTransaction.withRestriction("invalid")),
         response.ethSigner(INVALID_PARAMS));
+  }
+
+  @Test
+  void missingNonceResultsInRequestToPrivGetEeaTransactionCount() {
+    final String ethNodeResponseBody = "VALID_RESPONSE";
+    final String requestBody = sendRawTransaction.request(sendTransaction.withNonce("0x1"));
+    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
+    sendRequestThenVerifyResponse(
+        request.ethSigner(sendTransaction.missingNonce()), response.ethSigner(ethNodeResponseBody));
+    final String expectedBody =
+        String.format(
+            GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
+            EeaSendTransaction.UNLOCKED_ACCOUNT,
+            EeaSendTransaction.PRIVATE_FROM,
+            EeaSendTransaction.PRIVATE_FOR);
+    verifyEthNodeReceived(expectedBody);
   }
 }

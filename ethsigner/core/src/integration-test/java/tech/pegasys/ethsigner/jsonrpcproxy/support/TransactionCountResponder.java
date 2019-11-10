@@ -40,7 +40,7 @@ public class TransactionCountResponder implements ExpectationResponseCallback {
   }
 
   private static final String ETH_REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
-  private static final String EEA_REQUEST_REGEX_PATTERN = ".*eea_getTransactionCount.*";
+  private static final String EEA_REQUEST_REGEX_PATTERN = ".*priv_getEeaTransactionCount.*";
 
   private BigInteger nonce = BigInteger.ZERO;
   private final Function<BigInteger, BigInteger> nonceMutator;
