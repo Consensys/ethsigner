@@ -26,8 +26,9 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
@@ -53,30 +54,35 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
+import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.protocol.pantheon.Pantheon;
 
 public class IntegrationTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String LOCALHOST = "127.0.0.1";
-  private static final long DEFAULT_CHAIN_ID = 9;
+  public static final long DEFAULT_CHAIN_ID = 9;
+  public static final int DEFAULT_ID = 77;
 
-  protected static final String MALFORMED_JSON = "{Bad Json: {{{}";
+  static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
   private static Runner runner;
-  protected static ClientAndServer clientAndServer;
+  static ClientAndServer clientAndServer;
+  static Credentials credentials;
 
   private JsonRpc2_0Web3j jsonRpc;
   private JsonRpc2_0Eea eeaJsonRpc;
@@ -84,20 +90,24 @@ public class IntegrationTestBase {
   protected final EthRequestFactory request = new EthRequestFactory();
   protected final EthResponseFactory response = new EthResponseFactory();
 
-  protected static String unlockedAccount;
+  static String unlockedAccount;
 
-  protected static Duration downstreamTimeout = Duration.ofSeconds(1);
+  private static final Duration downstreamTimeout = Duration.ofSeconds(1);
 
-  @BeforeClass
-  public static void setupEthSigner() throws IOException {
+  @BeforeAll
+  public static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);
   }
 
-  protected static void setupEthSigner(final long chainId) throws IOException {
+  static void setupEthSigner(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
-    final TransactionSerialiser serialiser =
-        new TransactionSerialiser(transactionSigner(), chainId);
+    final File keyFile = createKeyFile();
+    final File passwordFile = createFile("password");
+    credentials = WalletUtils.loadCredentials("password", keyFile);
+
+    final TransactionSignerProvider transactionSignerProvider =
+        new SingleTransactionSignerProvider(transactionSigner(keyFile, passwordFile));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -116,15 +126,16 @@ public class IntegrationTestBase {
                 + ":"
                 + httpClientOptions.getDefaultPort());
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Pantheon pantheon = Pantheon.build(web3jService);
+    final Besu besu = Besu.build(web3jService);
 
     runner =
         new Runner(
-            serialiser,
+            chainId,
+            transactionSignerProvider,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(pantheon, web3j, web3jService),
+            new TransactionFactory(besu, web3j, web3jService),
             null);
     runner.start();
 
@@ -134,22 +145,23 @@ public class IntegrationTestBase {
         clientAndServer.getLocalPort());
     serverSocket.close();
 
-    unlockedAccount = serialiser.getAddress();
+    unlockedAccount =
+        transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
   }
 
-  protected static void resetEthSigner() throws IOException {
+  static void resetEthSigner() throws IOException, CipherException {
     setupEthSigner();
   }
 
-  protected Web3j jsonRpc() {
+  Web3j jsonRpc() {
     return jsonRpc;
   }
 
-  protected Eea eeaJsonRpc() {
+  Eea eeaJsonRpc() {
     return eeaJsonRpc;
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     jsonRpc = new JsonRpc2_0Web3j(null, 2000, defaultExecutorService());
     eeaJsonRpc = new JsonRpc2_0Eea(null);
@@ -158,13 +170,13 @@ public class IntegrationTestBase {
     }
   }
 
-  @AfterClass
+  @AfterAll
   public static void teardown() {
     clientAndServer.stop();
     runner.stop();
   }
 
-  public void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
+  void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
     final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(json(request.getBody())), exactly(1))
@@ -175,7 +187,7 @@ public class IntegrationTestBase {
                 .withStatusCode(response.getStatusCode()));
   }
 
-  public void setupEthNodeResponse(
+  void setupEthNodeResponse(
       final String bodyRegex, final EthNodeResponse response, final int count) {
     final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
@@ -187,7 +199,7 @@ public class IntegrationTestBase {
                 .withStatusCode(response.getStatusCode()));
   }
 
-  public void timeoutRequest(final String bodyRegex) {
+  void timeoutRequest(final String bodyRegex) {
     final int ENSURE_TIMEOUT = 5;
     clientAndServer
         .when(request().withBody(new RegexBody(bodyRegex)))
@@ -196,7 +208,7 @@ public class IntegrationTestBase {
                 .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
-  public void timeoutRequest(final EthNodeRequest request) {
+  void timeoutRequest(final EthNodeRequest request) {
     final int ENSURE_TIMEOUT = 5;
     clientAndServer
         .when(request().withBody(json(request.getBody())), exactly(1))
@@ -205,20 +217,7 @@ public class IntegrationTestBase {
                 .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
-  public void setUpEthNodeResponse(
-      final EthNodeRequest request, final EthNodeResponse response, final Delay delay) {
-    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
-    clientAndServer
-        .when(request().withBody(json(request.getBody())), exactly(1))
-        .respond(
-            response()
-                .withBody(response.getBody())
-                .withHeaders(headers)
-                .withStatusCode(response.getStatusCode())
-                .withDelay(delay));
-  }
-
-  public void sendRequestThenVerifyResponse(
+  void sendRequestThenVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse) {
     given()
         .when()
@@ -231,14 +230,14 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  public void verifyEthNodeReceived(final String proxyBodyRequest) {
+  void verifyEthNodeReceived(final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
-            .withBody(proxyBodyRequest)
+            .withBody(JsonBody.json(proxyBodyRequest))
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
-  public void verifyEthNodeReceived(
+  void verifyEthNodeReceived(
       final Map<String, String> proxyHeaders, final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
@@ -252,12 +251,8 @@ public class IntegrationTestBase {
         .collect(toList());
   }
 
-  private static TransactionSigner transactionSigner() throws IOException {
-    final File keyFile = createKeyFile();
-    final File passwordFile = createFile("password");
-    final TransactionSigner fileBasedTransactionSigner =
-        FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
-    return fileBasedTransactionSigner;
+  private static TransactionSigner transactionSigner(final File keyFile, final File passwordFile) {
+    return FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
   }
 
   @SuppressWarnings("UnstableApiUsage")

@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.dsl.Besu;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
@@ -53,26 +54,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.core.ConditionTimeoutException;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
-public class PantheonNode implements Node {
+public class BesuNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final String PANTHEON_IMAGE = "pegasyseng/pantheon:latest";
+  private static final String BESU_IMAGE = "hyperledger/besu:latest";
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
 
-  /** Pantheon's dev.json has the hard fork at block 0 */
+  /** Besu's dev.json has the hard fork at block 0 */
   private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
 
   private static final int DEFAULT_HTTP_RPC_PORT = 8545;
   private static final int DEFAULT_WS_RPC_PORT = 8546;
 
   private final DockerClient docker;
-  private final String pantheonContainerId;
+  private final String besuContainerId;
   private final long pollingInterval;
   private final String hostname;
 
@@ -83,71 +84,72 @@ public class PantheonNode implements Node {
   private PublicContracts publicContracts;
   private PrivateContracts privateContracts;
 
-  public PantheonNode(final DockerClient docker, final NodeConfiguration config) {
+  public BesuNode(final DockerClient docker, final NodeConfiguration config) {
     this.docker = docker;
-    pullPantheonImage();
-    this.pantheonContainerId = createPantheonContainer(config);
+    pullBesuImage();
+    this.besuContainerId = createBesuContainer(config);
     this.pollingInterval = config.getPollingInterval().toMillis();
     this.hostname = config.getHostname();
   }
 
   @Override
   public void start() {
-    LOG.info("Starting Pantheon Docker container: {}", pantheonContainerId);
-    docker.startContainerCmd(pantheonContainerId).exec();
+    LOG.info("Starting Besu Docker container: {}", besuContainerId);
+    docker.startContainerCmd(besuContainerId).exec();
 
     LOG.info("Querying for the Docker dynamically allocated RPC port numbers");
     final InspectContainerResponse containerResponse =
-        docker.inspectContainerCmd(pantheonContainerId).exec();
+        docker.inspectContainerCmd(besuContainerId).exec();
     final Ports ports = containerResponse.getNetworkSettings().getPorts();
     final int httpRpcPort = httpRpcPort(ports);
     final int wsRpcPort = wsRpcPort(ports);
     LOG.info("Http RPC port: {}, Web Socket RPC port: {}", httpRpcPort, wsRpcPort);
 
     final String httpRpcUrl = url(httpRpcPort);
-    LOG.info("Pantheon Web3j service targeting: {} ", httpRpcUrl);
+    LOG.info("Besu Web3j service targeting: {} ", httpRpcUrl);
 
     final HttpService web3jHttpService = new HttpService(httpRpcUrl);
     this.jsonRpc =
         new JsonRpc2_0Web3j(web3jHttpService, pollingInterval, Async.defaultExecutorService());
     final RawJsonRpcRequestFactory requestFactory = new RawJsonRpcRequestFactory(web3jHttpService);
-    final JsonRpc2_0Eea eeaJsonRpc = new JsonRpc2_0Eea(web3jHttpService);
+    final JsonRpc2_0Besu besuJsonRpc = new JsonRpc2_0Besu(web3jHttpService);
     final Eth eth = new Eth(jsonRpc);
-    final Eea eea = new Eea(eeaJsonRpc, requestFactory);
+    final Besu besu = new Besu(besuJsonRpc);
+    final Eea eea = new Eea(requestFactory);
     this.accounts = new Accounts(eth);
     this.publicContracts = new PublicContracts(eth);
-    this.privateContracts = new PrivateContracts(eea);
+    this.privateContracts = new PrivateContracts(besu, eea);
     this.transactions = new Transactions(eth);
     this.ports = new NodePorts(httpRpcPort, wsRpcPort);
   }
 
   @Override
   public void shutdown() {
-    if (hasPantheonContainer()) {
-      stopPantheonContainer();
-      removePantheonContainer();
+    if (hasBesuContainer()) {
+      stopBesuContainer();
+      removeBesuContainer();
     }
   }
 
   @Override
   public void awaitStartupCompletion() {
     try {
-      LOG.info("Waiting for Pantheon to become responsive...");
+      LOG.info("Waiting for Besu to become responsive...");
       waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
-      LOG.info("Pantheon is now responsive");
+      LOG.info("Besu is now responsive");
       waitFor(
           () ->
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
     } catch (final ConditionTimeoutException e) {
-      showLogFromPantheonContainer();
-      throw new RuntimeException("Failed to start the Pantheon node", e);
+      showLogFromBesuContainer();
+      throw new RuntimeException("Failed to start the Besu node", e);
     }
   }
 
-  private void showLogFromPantheonContainer() {
+  private void showLogFromBesuContainer() {
     docker
-        .logContainerCmd(pantheonContainerId)
+        .logContainerCmd(besuContainerId)
         .withStdOut(true)
         .withStdErr(true)
         .withFollowStream(true)
@@ -190,48 +192,48 @@ public class PantheonNode implements Node {
     return String.format(HTTP_URL_FORMAT, hostname, port);
   }
 
-  private boolean hasPantheonContainer() {
-    return docker != null && pantheonContainerId != null;
+  private boolean hasBesuContainer() {
+    return docker != null && besuContainerId != null;
   }
 
-  private void stopPantheonContainer() {
+  private void stopBesuContainer() {
     try {
-      LOG.info("Stopping the Pantheon Docker container...");
-      docker.stopContainerCmd(pantheonContainerId).exec();
+      LOG.info("Stopping the Besu Docker container...");
+      docker.stopContainerCmd(besuContainerId).exec();
       final WaitContainerResultCallback waiter = new WaitContainerResultCallback();
-      docker.waitContainerCmd(pantheonContainerId).exec((waiter));
+      docker.waitContainerCmd(besuContainerId).exec((waiter));
       waiter.awaitCompletion();
-      LOG.info("Stopped the Pantheon Docker container");
+      LOG.info("Stopped the Besu Docker container");
     } catch (final NotModifiedException e) {
-      LOG.error("Pantheon Docker container has already stopped");
+      LOG.error("Besu Docker container has already stopped");
     } catch (final InterruptedException e) {
-      LOG.error("Interrupted when waiting for Pantheon Docker container to stop");
+      LOG.error("Interrupted when waiting for Besu Docker container to stop");
     }
   }
 
-  private void removePantheonContainer() {
-    LOG.info("Removing the Pantheon Docker container...");
-    docker.removeContainerCmd(pantheonContainerId).withForce(true).exec();
-    LOG.info("Removed the Pantheon Docker container");
+  private void removeBesuContainer() {
+    LOG.info("Removing the Besu Docker container...");
+    docker.removeContainerCmd(besuContainerId).withForce(true).exec();
+    LOG.info("Removed the Besu Docker container");
   }
 
-  private void pullPantheonImage() {
+  private void pullBesuImage() {
     final PullImageResultCallback callback = new PullImageResultCallback();
-    docker.pullImageCmd(PANTHEON_IMAGE).exec(callback);
+    docker.pullImageCmd(BESU_IMAGE).exec(callback);
 
     try {
-      LOG.info("Pulling the Pantheon Docker image...");
+      LOG.info("Pulling the Besu Docker image...");
       callback.awaitCompletion();
-      LOG.info("Pulled the Pantheon Docker image: " + PANTHEON_IMAGE);
+      LOG.info("Pulled the Besu Docker image: " + BESU_IMAGE);
     } catch (final InterruptedException e) {
       LOG.error(e);
     }
   }
 
-  private String createPantheonContainer(final NodeConfiguration config) {
+  private String createBesuContainer(final NodeConfiguration config) {
     final String genesisFilePath = genesisFilePath(config.getGenesisFilePath());
     LOG.info("Path to Genesis file: {}", genesisFilePath);
-    final Volume genesisVolume = new Volume("/etc/pantheon/genesis.json");
+    final Volume genesisVolume = new Volume("/etc/besu/genesis.json");
     final Bind genesisBinding = new Bind(genesisFilePath, genesisVolume);
     final Bind privacyBinding = privacyVolumeBinding("enclave_key.pub");
     final List<Bind> bindings = Lists.newArrayList(genesisBinding, privacyBinding);
@@ -261,32 +263,31 @@ public class PantheonNode implements Node {
           .ifPresent(
               cors -> commandLineItems.addAll(Lists.newArrayList("--rpc-http-cors-origins", cors)));
 
-      LOG.debug("pantheon command line {}", config);
+      LOG.debug("besu command line {}", config);
 
       final HostConfig hostConfig =
           HostConfig.newHostConfig()
               .withPortBindings(httpRpcPortBinding(), wsRpcPortBinding())
               .withBinds(bindings);
-      final CreateContainerCmd createPantheon =
+      final CreateContainerCmd createBesu =
           docker
-              .createContainerCmd(PANTHEON_IMAGE)
+              .createContainerCmd(BESU_IMAGE)
               .withHostConfig(hostConfig)
               .withVolumes(genesisVolume)
               .withCmd(commandLineItems);
 
-      LOG.info("Creating the Pantheon Docker container...");
-      final CreateContainerResponse pantheon = createPantheon.exec();
-      LOG.info("Created Pantheon Docker container, id: " + pantheon.getId());
-      return pantheon.getId();
+      LOG.info("Creating the Besu Docker container...");
+      final CreateContainerResponse besu = createBesu.exec();
+      LOG.info("Created Besu Docker container, id: " + besu.getId());
+      return besu.getId();
     } catch (final NotFoundException e) {
       throw new RuntimeException(
-          "Before you run the acceptance tests, execute 'docker pull pegasyseng/pantheon:latest'",
-          e);
+          "Before you run the acceptance tests, execute 'docker pull hyperledger/besu:latest'", e);
     }
   }
 
   private String genesisFilePath(final String filename) {
-    final URL resource = PantheonNode.class.getResource(filename);
+    final URL resource = BesuNode.class.getResource(filename);
     return resourceFileName(resource);
   }
 
@@ -307,7 +308,7 @@ public class PantheonNode implements Node {
 
   private Bind privacyVolumeBinding(final String privacyPublicKey) {
     final String privacyPublicKeyFile = privacyPublicKeyFilePath(privacyPublicKey);
-    final Volume privacyPublicKeyVolume = new Volume("/etc/pantheon/privacy_public_key");
+    final Volume privacyPublicKeyVolume = new Volume("/etc/besu/privacy_public_key");
     return new Bind(privacyPublicKeyFile, privacyPublicKeyVolume);
   }
 

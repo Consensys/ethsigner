@@ -13,8 +13,9 @@
 package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.web3j.utils.Numeric.decodeQuantity;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.decodeBigInteger;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class EeaSendTransactionJsonParameters {
       @JsonProperty("from") final String sender,
       @JsonProperty("privateFrom") final String privateFrom,
       @JsonProperty("restriction") final String restriction) {
-    validatePrefix(sender);
+    validateNotEmpty(sender);
     this.privateFrom = Base64String.wrap(privateFrom);
     this.restriction = restriction;
     this.sender = sender;
@@ -57,29 +58,28 @@ public class EeaSendTransactionJsonParameters {
 
   @JsonSetter("gas")
   public void gas(final String gas) {
-    this.gas = decodeQuantity(gas);
+    this.gas = decodeBigInteger(gas);
   }
 
   @JsonSetter("gasPrice")
   public void gasPrice(final String gasPrice) {
-    this.gasPrice = decodeQuantity(gasPrice);
+    this.gasPrice = decodeBigInteger(gasPrice);
   }
 
   @JsonSetter("nonce")
   public void nonce(final String nonce) {
-    this.nonce = decodeQuantity(nonce);
+    this.nonce = decodeBigInteger(nonce);
   }
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
-    validatePrefix(receiver);
     this.receiver = receiver;
   }
 
   @JsonSetter("value")
   public void value(final String value) {
     validateValue(value);
-    this.value = decodeQuantity(value);
+    this.value = decodeBigInteger(value);
   }
 
   @JsonSetter("data")
@@ -147,7 +147,7 @@ public class EeaSendTransactionJsonParameters {
   }
 
   private void validateValue(final String value) {
-    if (!decodeQuantity(value).equals(BigInteger.ZERO)) {
+    if (value != null && !decodeQuantity(value).equals(BigInteger.ZERO)) {
       throw new IllegalArgumentException(
           "Non-zero value, private transactions cannot transfer ether");
     }

@@ -21,31 +21,30 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.pantheon.Pantheon;
 
 public class TransactionFactory {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Pantheon pantheon;
+  private final Besu besu;
   private final Web3j web3j;
 
   // TODO(tmm): Remove this once eea_GetTransaction is available from eea namespace in web3j
   private final Web3jService web3jService;
 
-  public TransactionFactory(
-      final Pantheon pantheon, final Web3j web3j, final Web3jService web3jService) {
-    this.pantheon = pantheon;
+  public TransactionFactory(final Besu besu, final Web3j web3j, final Web3jService web3jService) {
+    this.besu = besu;
     this.web3j = web3j;
     this.web3jService = web3jService;
   }
 
   public static TransactionFactory createFrom(final Web3jService web3jService) {
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService);
-    final Pantheon pantheon = Pantheon.build(web3jService);
+    final Besu besu = Besu.build(web3jService);
 
-    return new TransactionFactory(pantheon, web3j, web3jService);
+    return new TransactionFactory(besu, web3j, web3jService);
   }
 
   public Transaction createTransaction(final JsonRpcRequest request) {
@@ -79,9 +78,8 @@ public class TransactionFactory {
 
     if (params.privacyGroupId().isPresent()) {
       final NonceProvider nonceProvider =
-          new PantheonPrivateNonceProvider(
-              pantheon, params.sender(), params.privacyGroupId().get());
-      return PantheonPrivateTransaction.from(params, nonceProvider, request.getId());
+          new BesuPrivateNonceProvider(besu, params.sender(), params.privacyGroupId().get());
+      return BesuPrivateTransaction.from(params, nonceProvider, request.getId());
     }
 
     final NonceProvider nonceProvider =

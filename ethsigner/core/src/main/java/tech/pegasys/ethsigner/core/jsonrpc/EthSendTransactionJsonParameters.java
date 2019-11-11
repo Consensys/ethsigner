@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
-import static org.web3j.utils.Numeric.decodeQuantity;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.decodeBigInteger;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validatePrefix;
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -36,34 +36,33 @@ public class EthSendTransactionJsonParameters {
 
   @JsonCreator
   public EthSendTransactionJsonParameters(@JsonProperty("from") final String sender) {
-    validatePrefix(sender);
+    validateNotEmpty(sender);
     this.sender = sender;
   }
 
   @JsonSetter("gas")
   public void gas(final String gas) {
-    this.gas = decodeQuantity(gas);
+    this.gas = decodeBigInteger(gas);
   }
 
   @JsonSetter("gasPrice")
   public void gasPrice(final String gasPrice) {
-    this.gasPrice = decodeQuantity(gasPrice);
+    this.gasPrice = decodeBigInteger(gasPrice);
   }
 
   @JsonSetter("nonce")
   public void nonce(final String nonce) {
-    this.nonce = decodeQuantity(nonce);
+    this.nonce = decodeBigInteger(nonce);
   }
 
   @JsonSetter("to")
   public void receiver(final String receiver) {
-    validatePrefix(receiver);
     this.receiver = receiver;
   }
 
   @JsonSetter("value")
   public void value(final String value) {
-    this.value = decodeQuantity(value);
+    this.value = decodeBigInteger(value);
   }
 
   @JsonSetter("data")

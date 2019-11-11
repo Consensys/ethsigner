@@ -32,7 +32,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureKeyVaultTransactionSignerFactoryTest {
+public class AzureKeyVaultTransactionSignerProviderTest {
 
   @Test
   public void generatedTransactionSignerHasExpectedAddress() {
