@@ -16,6 +16,12 @@ executors:
     resource_class: large
     working_directory: ~/project
 
+  executor_machine:
+    machine:
+      image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      docker_layer_caching: true
+    working_directory: ~/project
+
 commands:
   prepare:
     description: "Prepare"
@@ -32,7 +38,6 @@ commands:
             - deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
             - deps-{{ checksum "build.gradle" }}
             - deps-
-
 
   capture_test_results:
     description: "Capture test results"
@@ -84,10 +89,7 @@ jobs:
             - ./
 
   acceptanceTests:
-    machine:
-      image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      docker_layer_caching: true
-    working_directory: ~/project
+    executor: executor_machine
     steps:
       - prepare
       - run:
@@ -105,10 +107,7 @@ jobs:
       - capture_test_results
 
   azureTests:
-    machine:
-      image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
-      docker_layer_caching: true
-    working_directory: ~/project
+    executor: executor_machine
     steps:
       - prepare
       - run:
@@ -140,6 +139,11 @@ jobs:
           name: build image
           command: |
             ./gradlew --no-daemon distDocker
+      - run:
+          name: test image
+          command: |
+            mkdir -p docker/reports
+            ./gradlew --no-daemon testDocker
 
   publish:
     executor: executor_med

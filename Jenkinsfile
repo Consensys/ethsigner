@@ -80,22 +80,9 @@ try {
                         // build image
                         sh './gradlew distDocker'
 
-                        // test image labels
-                        shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
-                        version = sh(returnStdout: true, script: "grep -oE \"version=(.*)\" ${version_property_file} | cut -d= -f2").trim()
-                        sh "docker image inspect \
-    --format='{{index .Config.Labels \"org.label-schema.vcs-ref\"}}' \
-    ${image} \
-    | grep ${shortCommit}"
-                        sh "docker image inspect \
-    --format='{{index .Config.Labels \"org.label-schema.version\"}}' \
-    ${image} \
-    | grep ${version}"
-
                         // test image
                         try {
-                            sh "mkdir -p ${reports_folder}"
-                            sh "cd ${docker_folder} && bash test.sh ${image}"
+                            sh './gradlew testDocker'
                         } finally {
                             junit "${reports_folder}/*.xml"
                             sh "rm -rf ${reports_folder}"
