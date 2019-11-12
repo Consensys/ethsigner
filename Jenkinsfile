@@ -25,7 +25,7 @@ if (env.BRANCH_NAME == "master") {
 def registry = 'https://registry.hub.docker.com'
 def userAccount = 'dockerhub-pegasysengci'
 def imageRepos = 'pegasyseng'
-def imageTag = 'develop'
+
 
 def abortPreviousBuilds() {
     Run previousBuild = currentBuild.rawBuild.getPreviousBuildInProgress()
@@ -68,9 +68,10 @@ try {
                         sh './gradlew --no-daemon --parallel acceptanceTest'
                     }
                     stage('Docker') {
+                        def gradleProperties = readProperties file: 'gradle.properties'
+                        def imageTag = gradleProperties.version
                         def image = imageRepos + '/ethsigner:' + imageTag
                         def docker_folder = 'docker'
-                        def version_property_file = 'gradle.properties'
                         def reports_folder = docker_folder + '/reports'
                         def dockerfile = docker_folder + '/Dockerfile'
 
