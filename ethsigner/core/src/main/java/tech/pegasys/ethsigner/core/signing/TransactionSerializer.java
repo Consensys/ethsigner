@@ -18,17 +18,17 @@ import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
-public class TransactionSerialiser {
+public class TransactionSerializer {
 
   private final TransactionSigner signer;
   private final long chainId;
 
-  public TransactionSerialiser(final TransactionSigner signer, final long chainId) {
+  public TransactionSerializer(final TransactionSigner signer, final long chainId) {
     this.signer = signer;
     this.chainId = chainId;
   }
 
-  public String serialise(final Transaction transaction) {
+  public String serialize(final Transaction transaction) {
     final byte[] bytesToSign = transaction.rlpEncode(chainId);
 
     final Signature signature = signer.sign(bytesToSign);
@@ -42,8 +42,8 @@ public class TransactionSerialiser {
     final SignatureData eip155Signature =
         TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
 
-    final byte[] serialisedBytes = transaction.rlpEncode(eip155Signature);
-    return Numeric.toHexString(serialisedBytes);
+    final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
+    return Numeric.toHexString(serializedBytes);
   }
 
   public String getAddress() {

@@ -42,7 +42,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"-p", "--password-file"},
-      description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
+      description = "The path to a file containing the password used to decrypt the keyfile.",
       required = true,
       arity = "1")
   private Path passwordFilePath;
