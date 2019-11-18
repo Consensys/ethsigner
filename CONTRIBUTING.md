@@ -184,10 +184,6 @@ All code submissions must be accompanied by appropriate automated tests.
 The goal is to provide confidence in the code’s robustness, while avoiding redundant tests.
 
 >**Important**
-> 
-> The [`libsodium`](https://download.libsodium.org/doc/installation) library must be installed to 
-run `./gradlew integrationTest`.
-> 
 > Docker must be running to run `./gradlew acceptanceTest`
 
 ### Pull Requests
