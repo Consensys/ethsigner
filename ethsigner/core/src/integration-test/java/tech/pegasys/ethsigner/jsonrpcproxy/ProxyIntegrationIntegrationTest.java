@@ -12,9 +12,10 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.jupiter.api.Test;
@@ -24,9 +25,9 @@ import org.web3j.protocol.core.methods.response.NetVersion;
 class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
   private static final String LOGIN_BODY = "{\"username\":\"username1\",\"password\":\"pegasys\"}";
   private static final String LOGIN_RESPONSE = "{\"token\":\"eyJ0\"}";
-  private static final Map<String, String> REQUEST_HEADERS = ImmutableMap.of("Accept", "*/*");
+  private static final Map<String, String> REQUEST_HEADERS = singletonMap("Accept", "*/*");
   private static final Map<String, String> RESPONSE_HEADERS =
-      ImmutableMap.of("Content-Type", "Application/Json");
+      singletonMap("Content-Type", "Application/Json");
 
   @Test
   void requestWithHeadersIsProxied() {
