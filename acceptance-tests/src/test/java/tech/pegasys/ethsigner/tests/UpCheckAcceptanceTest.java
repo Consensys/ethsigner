@@ -62,15 +62,6 @@ public class UpCheckAcceptanceTest {
   }
 
   @Test
-  public void getRequestWithWrongPathMustTimeout() {
-    final SocketTimeoutException reply =
-        ethSigner().httpRequests().getExceptingTimeout(UP_CHECK_PATH + "Noise");
-
-    assertThat(reply).isNotNull();
-    verifyOkHttpResponse(reply);
-  }
-
-  @Test
   public void getRequestMustRespond() {
     final HttpResponse reply = ethSigner().httpRequests().get(UP_CHECK_PATH);
 
@@ -78,36 +69,4 @@ public class UpCheckAcceptanceTest {
     assertThat(reply.body()).isEqualTo(UP_CHECK_MESSAGE);
   }
 
-  @Test
-  public void postRequestMustTimeout() {
-    final SocketTimeoutException reply =
-        ethSigner().httpRequests().postExceptingTimeout(UP_CHECK_PATH);
-
-    assertThat(reply).isNotNull();
-    verifyOkHttpResponse(reply);
-  }
-
-  @Test
-  public void putRequestMustTimeout() {
-    final SocketTimeoutException reply =
-        ethSigner().httpRequests().putExceptingTimeout(UP_CHECK_PATH);
-
-    assertThat(reply).isNotNull();
-    verifyOkHttpResponse(reply);
-  }
-
-  @Test
-  public void deleteRequestMustTimeout() {
-    final SocketTimeoutException reply =
-        ethSigner().httpRequests().deleteExceptingTimeout(UP_CHECK_PATH);
-
-    assertThat(reply).isNotNull();
-    verifyOkHttpResponse(reply);
-  }
-
-  private void verifyOkHttpResponse(final SocketTimeoutException reply) {
-    // OkHttp appears to have a race condition whereby the thrown exception can have either
-    // of 2 possible messages - it is non-deterministic.
-    assertThat(reply.getMessage()).isIn(TIMEOUT_MESSAGE, READ_TIMED_OUT_MESSAGE);
-  }
 }
