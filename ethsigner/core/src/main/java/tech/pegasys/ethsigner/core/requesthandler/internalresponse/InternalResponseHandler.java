@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -23,7 +22,6 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,9 +34,9 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
   private final BodyProvider responseBodyProvider;
   private JsonDecoder jsonDecoder;
 
-
   public InternalResponseHandler(
-      final HttpResponseFactory responder, final BodyProvider responseBodyProvider,
+      final HttpResponseFactory responder,
+      final BodyProvider responseBodyProvider,
       final JsonDecoder jsonDecoder) {
     this.responder = responder;
     this.responseBodyProvider = responseBodyProvider;

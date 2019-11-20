@@ -38,8 +38,8 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private final HttpResponseFactory httpResponseFactory;
   private final JsonDecoder jsonDecoder;
 
-  public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory,
-      JsonDecoder jsonDecoder) {
+  public JsonRpcErrorHandler(
+      final HttpResponseFactory httpResponseFactory, JsonDecoder jsonDecoder) {
     this.httpResponseFactory = httpResponseFactory;
     this.jsonDecoder = jsonDecoder;
   }

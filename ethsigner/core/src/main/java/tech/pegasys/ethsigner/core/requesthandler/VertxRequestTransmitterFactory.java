@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter.ResponseBodyHandler;
 
 @FunctionalInterface
 public interface VertxRequestTransmitterFactory {
