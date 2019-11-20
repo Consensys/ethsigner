@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tech.pegasys.ethsigner.signer.multiplatform.TomlConfigFileParser;
 
 public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
 
@@ -37,6 +38,8 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
+    // TODO load as TOML
+//    TomlConfigFileParser.loadConfigurationFromFile()
     return keyPasswordLoader.loadKeyAndPasswordForAddress(address).map(this::createSigner);
   }
 
