@@ -17,12 +17,16 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
 class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
+  private static final String LOGIN_BODY = "{\"username\":\"username1\",\"password\":\"pegasys\"}";
+  private static final String LOGIN_RESPONSE = "{\"token\":\"eyJ0\"}";
+  private static final Map<String, String> REQUEST_HEADERS = ImmutableMap.of("Accept", "*/*");
+  private static final Map<String, String> RESPONSE_HEADERS =
+      ImmutableMap.of("Content-Type", "Application/Json");
 
   @Test
   void requestWithHeadersIsProxied() {
@@ -30,16 +34,15 @@ class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
     final Response<String> netVersion = new NetVersion();
     netVersion.setResult("4");
     final String netVersionResponse = Json.encode(netVersion);
-    final Map<String, String> requestHeaders = ImmutableMap.of("Accept", "*/*");
-    final Map<String, String> responseHeaders = ImmutableMap.of("Content-Type", "Application/Json");
+
     setUpEthNodeResponse(
-        request.ethNode(netVersionRequest), response.ethNode(responseHeaders, netVersionResponse));
+        request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
 
-    sendRequest(
-        request.ethSigner(requestHeaders, netVersionRequest),
-        response.ethSigner(responseHeaders, netVersionResponse));
+    sendPostRequest(
+        request.ethSigner(REQUEST_HEADERS, netVersionRequest),
+        response.ethSigner(RESPONSE_HEADERS, netVersionResponse));
 
-    verifyEthNodeReceived(requestHeaders, netVersionRequest);
+    verifyEthNodeReceived(REQUEST_HEADERS, netVersionRequest);
   }
 
   @Test
@@ -50,7 +53,7 @@ class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
         request.ethNode(ethProtocolVersionRequest),
         response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
 
-    sendRequest(
+    sendPostRequest(
         request.ethSigner(ethProtocolVersionRequest),
         response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND));
 
@@ -58,18 +61,60 @@ class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  void requestToNonRootPathIsProxied() {
-    final String loginBody =
-        Json.encode(new JsonObject().put("username", "username1").put("password", "pegasys1"));
-
+  void postRequestToNonRootPathIsProxied() {
     setUpEthNodeResponse(
-        request.ethNode(loginBody), response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
+        request.ethNode(LOGIN_BODY),
+        response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
 
-    sendRequest(
-        request.ethSigner(loginBody),
-        response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND),
+    sendPostRequest(
+        request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
+        response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(loginBody, "/login");
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+  }
+
+  @Test
+  void getRequestToNonRootPathIsProxied() {
+    setUpEthNodeResponse(
+        request.ethNode(LOGIN_BODY),
+        response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
+
+    // Whilst a get request doesn't normally have a body, it can and we want to ensure the request
+    // is proxied as is
+    sendGetRequest(
+        request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
+        response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
+        "/login");
+
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+  }
+
+  @Test
+  void putRequestToNonRootPathIsProxied() {
+    setUpEthNodeResponse(
+        request.ethNode(LOGIN_BODY),
+        response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
+
+    sendPutRequest(
+        request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
+        response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
+        "/login");
+
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+  }
+
+  @Test
+  void deleteRequestToNonRootPathIsProxied() {
+    setUpEthNodeResponse(
+        request.ethNode(LOGIN_BODY),
+        response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
+
+    sendDeleteRequest(
+        request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
+        response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
+        "/login");
+
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
   }
 }
