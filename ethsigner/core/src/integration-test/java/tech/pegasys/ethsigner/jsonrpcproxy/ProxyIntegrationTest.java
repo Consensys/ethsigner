@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
-class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
+class ProxyIntegrationTest extends IntegrationTestBase {
   private static final String LOGIN_BODY = "{\"username\":\"username1\",\"password\":\"pegasys\"}";
   private static final String LOGIN_RESPONSE = "{\"token\":\"eyJ0\"}";
   private static final Map<String, String> REQUEST_HEADERS = singletonMap("Accept", "*/*");
