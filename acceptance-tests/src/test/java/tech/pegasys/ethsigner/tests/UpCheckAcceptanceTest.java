@@ -22,8 +22,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
-import java.net.SocketTimeoutException;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,8 +31,6 @@ public class UpCheckAcceptanceTest {
 
   private static final String UP_CHECK_PATH = "/upcheck";
   private static final String UP_CHECK_MESSAGE = "I'm up!";
-  private static final String TIMEOUT_MESSAGE = "timeout";
-  private static final String READ_TIMED_OUT_MESSAGE = "Read timed out";
 
   private static Signer ethSigner;
 
@@ -68,5 +64,4 @@ public class UpCheckAcceptanceTest {
     assertThat(reply.status()).isEqualTo(HttpResponseStatus.OK);
     assertThat(reply.body()).isEqualTo(UP_CHECK_MESSAGE);
   }
-
 }
