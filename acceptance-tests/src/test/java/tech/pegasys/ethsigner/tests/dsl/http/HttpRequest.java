@@ -20,7 +20,6 @@ import java.time.Duration;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 
 public class HttpRequest {
 
@@ -41,30 +40,6 @@ public class HttpRequest {
       fail("Unexpected IOException ", e);
       return null;
     }
-  }
-
-  public SocketTimeoutException getExceptingTimeout(final String path) {
-    return execute(url(path).get());
-  }
-
-  public SocketTimeoutException postExceptingTimeout(final String path) {
-    return execute(url(path).post(emptyBody()));
-  }
-
-  public SocketTimeoutException putExceptingTimeout(final String path) {
-    return execute(url(path).put(emptyBody()));
-  }
-
-  public SocketTimeoutException deleteExceptingTimeout(final String path) {
-    return execute(url(path).delete());
-  }
-
-  private RequestBody emptyBody() {
-    return RequestBody.create(null, "");
-  }
-
-  private Request.Builder url(final String path) {
-    return new Request.Builder().url(contextRoot + path);
   }
 
   private SocketTimeoutException execute(final Request.Builder request) {
