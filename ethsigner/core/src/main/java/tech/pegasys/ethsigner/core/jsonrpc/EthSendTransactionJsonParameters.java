@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.decodeBigInteger;
-import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.fromRpcRequestToJsonParam;
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.validateNotEmpty;
 
 import java.math.BigInteger;
@@ -96,9 +95,5 @@ public class EthSendTransactionJsonParameters {
 
   public String sender() {
     return sender;
-  }
-
-  public static EthSendTransactionJsonParameters from(final JsonRpcRequest request) {
-    return fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
   }
 }

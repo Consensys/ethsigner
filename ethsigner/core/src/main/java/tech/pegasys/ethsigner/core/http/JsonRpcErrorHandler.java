@@ -62,7 +62,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {
     try {
-      return Optional.of(Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class));
+      return Optional.of(jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class));
     } catch (final DecodeException e) {
       LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
       return Optional.empty();

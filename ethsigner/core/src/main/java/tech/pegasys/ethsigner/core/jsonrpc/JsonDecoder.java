@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ public class JsonDecoder {
   public <T> T decodeValue(Buffer buf, Class<T> clazz) throws DecodeException {
     try {
       return mapper.readValue((InputStream) new ByteBufInputStream(buf.getByteBuf()), clazz);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new DecodeException("Failed to decode:" + e.getMessage(), e);
     }
   }

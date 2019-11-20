@@ -34,8 +34,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Properties;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
@@ -61,6 +59,7 @@ public class Runner {
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
@@ -72,12 +71,14 @@ public class Runner {
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final TransactionFactory transactionFactory,
+      final JsonDecoder jsonDecoder,
       final Path dataPath) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
+    this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = Vertx.vertx();
     this.httpServerService = new HttpServerService(router(), serverOptions);
@@ -91,7 +92,7 @@ public class Runner {
     vertx.close();
   }
 
-  private RequestMapper createRequestMapper(final JsonDecoder jsonDecoder) {
+  private RequestMapper createRequestMapper() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
@@ -125,13 +126,7 @@ public class Runner {
   private Router router() {
     final Router router = Router.router(vertx);
 
-    final ObjectMapper jsonObjectMapper = new ObjectMapper();
-    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
-    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-
-    final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
-
-    final RequestMapper requestMapper = createRequestMapper(jsonDecoder);
+    final RequestMapper requestMapper = createRequestMapper();
 
     // Handler for JSON-RPC requests
     router
@@ -140,7 +135,7 @@ public class Runner {
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper));
+        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router

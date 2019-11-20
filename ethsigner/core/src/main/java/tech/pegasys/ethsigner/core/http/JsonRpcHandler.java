@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
@@ -20,7 +21,6 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,11 +31,15 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
+  private final JsonDecoder jsonDecoder;
 
   public JsonRpcHandler(
-      final HttpResponseFactory responseFactory, final RequestMapper requestHandlerMapper) {
+      final HttpResponseFactory responseFactory,
+      final RequestMapper requestHandlerMapper,
+      JsonDecoder jsonDecoder) {
     this.responseFactory = responseFactory;
     this.requestHandlerMapper = requestHandlerMapper;
+    this.jsonDecoder = jsonDecoder;
   }
 
   @Override
@@ -61,9 +65,8 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
   private void process(final RoutingContext context) {
     try {
       LOG.trace("Request body = {}", context.getBodyAsString());
-
-      final JsonObject requestJson = context.getBodyAsJson();
-      final JsonRpcRequest request = requestJson.mapTo(JsonRpcRequest.class);
+      final JsonRpcRequest request =
+          jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class);
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context, request);

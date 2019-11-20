@@ -16,14 +16,27 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import tech.pegasys.ethsigner.core.EthSigner;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+
 import java.math.BigInteger;
 import java.util.Optional;
 
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.utils.Base64String;
 
 public class EeaSendTransactionJsonParametersTest {
+
+  private TransactionFactory factory;
+
+  @BeforeEach
+  public void setup() {
+    // NOTE: the factory has been configured as per its use in the application.
+    factory = TransactionFactory.createFrom(null, EthSigner.createJsonDecoder());
+  }
 
   @Test
   public void transactionStoredInJsonArrayCanBeDecoded() {
@@ -31,7 +44,7 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -52,7 +65,7 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -74,8 +87,10 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
 
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+    assertThatExceptionOfType(DecodeException.class)
+        .isThrownBy(
+            () ->
+                factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request));
   }
 
   @Test
@@ -85,8 +100,10 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
 
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+    assertThatExceptionOfType(DecodeException.class)
+        .isThrownBy(
+            () ->
+                factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request));
   }
 
   @Test
@@ -96,8 +113,10 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
 
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> EeaSendTransactionJsonParameters.from(request));
+    assertThatExceptionOfType(DecodeException.class)
+        .isThrownBy(
+            () ->
+                factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request));
   }
 
   @Test
@@ -107,7 +126,7 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.restriction()).isEqualTo("invalidRestriction");
   }
@@ -119,7 +138,7 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
   }
@@ -131,7 +150,7 @@ public class EeaSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EeaSendTransactionJsonParameters txnParams =
-        EeaSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.receiver()).contains("invalidToAddress");
   }
