@@ -89,32 +89,6 @@ public class Runner {
     vertx.close();
   }
 
-  private RequestMapper createRequestMapper(
-      final HttpClient downStreamConnection,
-      final VertxRequestTransmitterFactory transmitterFactory) {
-    final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory);
-
-    final SendTransactionHandler sendTransactionHandler =
-        new SendTransactionHandler(
-            chainId,
-            downStreamConnection,
-            transactionSignerProvider,
-            transactionFactory,
-            transmitterFactory);
-
-    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
-    requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
-    requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
-    requestMapper.addHandler(
-        "eth_accounts",
-        new InternalResponseHandler(
-            responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
-
-    return requestMapper;
-  }
-
   private Router router() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
     final VertxRequestTransmitterFactory transmitterFactory =
@@ -146,6 +120,32 @@ public class Runner {
         new PassThroughHandler(downStreamConnection, transmitterFactory);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
+  }
+
+  private RequestMapper createRequestMapper(
+      final HttpClient downStreamConnection,
+      final VertxRequestTransmitterFactory transmitterFactory) {
+    final PassThroughHandler defaultHandler =
+        new PassThroughHandler(downStreamConnection, transmitterFactory);
+
+    final SendTransactionHandler sendTransactionHandler =
+        new SendTransactionHandler(
+            chainId,
+            downStreamConnection,
+            transactionSignerProvider,
+            transactionFactory,
+            transmitterFactory);
+
+    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
+    requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
+    requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
+    requestMapper.addHandler(
+        "eth_accounts",
+        new InternalResponseHandler(
+            responseFactory,
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
+
+    return requestMapper;
   }
 
   private void httpServerServiceDeployment(final AsyncResult<String> result) {
