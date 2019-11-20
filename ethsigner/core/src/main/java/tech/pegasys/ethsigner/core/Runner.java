@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -19,6 +21,7 @@ import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
 import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
@@ -88,8 +91,7 @@ public class Runner {
     vertx.close();
   }
 
-  private RequestMapper createRequestMapper() {
-
+  private RequestMapper createRequestMapper(final JsonDecoder jsonDecoder) {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
@@ -114,14 +116,22 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
+            jsonDecoder));
 
     return requestMapper;
   }
 
   private Router router() {
     final Router router = Router.router(vertx);
-    final RequestMapper requestMapper = createRequestMapper();
+
+    final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+
+    final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
+
+    final RequestMapper requestMapper = createRequestMapper(jsonDecoder);
 
     // Handler for JSON-RPC requests
     router
@@ -129,7 +139,7 @@ public class Runner {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
         .handler(new JsonRpcHandler(responseFactory, requestMapper));
 
     // Handler for UpCheck endpoint

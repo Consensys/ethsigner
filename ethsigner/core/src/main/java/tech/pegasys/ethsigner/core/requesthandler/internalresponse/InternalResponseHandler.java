@@ -12,7 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
@@ -32,11 +34,15 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private final HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
+  private JsonDecoder jsonDecoder;
+
 
   public InternalResponseHandler(
-      final HttpResponseFactory responder, final BodyProvider responseBodyProvider) {
+      final HttpResponseFactory responder, final BodyProvider responseBodyProvider,
+      final JsonDecoder jsonDecoder) {
     this.responder = responder;
     this.responseBodyProvider = responseBodyProvider;
+    this.jsonDecoder = jsonDecoder;
   }
 
   @Override
@@ -48,7 +54,7 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
       context.fail(new JsonRpcException(providedBody.error()));
     } else {
       final JsonRpcSuccessResponse result =
-          Json.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
+          jsonDecoder.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
       responder.create(context.request(), HttpResponseStatus.OK.code(), result);
     }
   }

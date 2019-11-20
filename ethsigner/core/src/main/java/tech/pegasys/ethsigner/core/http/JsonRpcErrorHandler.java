@@ -17,6 +17,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -35,9 +36,12 @@ import org.apache.logging.log4j.Logger;
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private static final Logger LOG = LogManager.getLogger();
   private final HttpResponseFactory httpResponseFactory;
+  private final JsonDecoder jsonDecoder;
 
-  public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory) {
+  public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory,
+      JsonDecoder jsonDecoder) {
     this.httpResponseFactory = httpResponseFactory;
+    this.jsonDecoder = jsonDecoder;
   }
 
   @Override

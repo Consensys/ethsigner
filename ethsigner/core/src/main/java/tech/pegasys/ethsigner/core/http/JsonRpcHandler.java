@@ -31,12 +31,6 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  static {
-    // Force Jackson to fail when @JsonCreator values are missing
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
-    Json.mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-  }
-
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
 

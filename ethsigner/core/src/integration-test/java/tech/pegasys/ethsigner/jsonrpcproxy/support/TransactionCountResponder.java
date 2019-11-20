@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy.support;
 import static org.mockserver.model.HttpResponse.response;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
@@ -31,6 +32,8 @@ import org.mockserver.model.HttpResponse;
 import org.mockserver.model.RegexBody;
 
 public class TransactionCountResponder implements ExpectationResponseCallback {
+
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
   private static final Logger LOG = LogManager.getLogger();
 
