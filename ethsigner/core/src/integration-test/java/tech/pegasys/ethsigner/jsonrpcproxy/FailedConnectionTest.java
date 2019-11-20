@@ -32,7 +32,7 @@ class FailedConnectionTest extends IntegrationTestBase {
             new JsonRpcErrorResponse(
                 request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
 
-    sendRequestThenVerifyResponse(
+    sendRequest(
         this.request.ethSigner(request.getEncodedRequestBody()),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
   }

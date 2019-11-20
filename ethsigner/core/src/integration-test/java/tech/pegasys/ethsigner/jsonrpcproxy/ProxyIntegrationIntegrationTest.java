@@ -17,6 +17,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
@@ -34,7 +35,7 @@ class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
     setUpEthNodeResponse(
         request.ethNode(netVersionRequest), response.ethNode(responseHeaders, netVersionResponse));
 
-    sendRequestThenVerifyResponse(
+    sendRequest(
         request.ethSigner(requestHeaders, netVersionRequest),
         response.ethSigner(responseHeaders, netVersionResponse));
 
@@ -49,10 +50,26 @@ class ProxyIntegrationIntegrationTest extends IntegrationTestBase {
         request.ethNode(ethProtocolVersionRequest),
         response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
 
-    sendRequestThenVerifyResponse(
+    sendRequest(
         request.ethSigner(ethProtocolVersionRequest),
         response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND));
 
     verifyEthNodeReceived(ethProtocolVersionRequest);
+  }
+
+  @Test
+  void requestToNonRootPathIsProxied() {
+    final String loginBody =
+        Json.encode(new JsonObject().put("username", "username1").put("password", "pegasys1"));
+
+    setUpEthNodeResponse(
+        request.ethNode(loginBody), response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
+
+    sendRequest(
+        request.ethSigner(loginBody),
+        response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND),
+        "/login");
+
+    verifyEthNodeReceived(loginBody, "/login");
   }
 }

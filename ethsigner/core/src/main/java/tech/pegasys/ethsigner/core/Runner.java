@@ -88,16 +88,12 @@ public class Runner {
     vertx.close();
   }
 
-  private RequestMapper createRequestMapper() {
-
-    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
-
-    final RequestMapper requestMapper =
-        new RequestMapper(
-            new PassThroughHandler(
-                downStreamConnection,
-                responseBodyHandler ->
-                    new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
+  private RequestMapper createRequestMapper(final HttpClient downStreamConnection) {
+    final PassThroughHandler defaultHandler =
+        new PassThroughHandler(
+            downStreamConnection,
+            responseBodyHandler ->
+                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
@@ -107,9 +103,10 @@ public class Runner {
             transactionFactory,
             responseBodyHandler ->
                 new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
+
+    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
-
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
@@ -120,8 +117,9 @@ public class Runner {
   }
 
   private Router router() {
+    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
+    final RequestMapper requestMapper = createRequestMapper(downStreamConnection);
     final Router router = Router.router(vertx);
-    final RequestMapper requestMapper = createRequestMapper();
 
     // Handler for JSON-RPC requests
     router
@@ -141,8 +139,12 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    // Default route handler does nothing: no response
-    router.route().handler(context -> {});
+    final PassThroughHandler passThroughHandler =
+        new PassThroughHandler(
+            downStreamConnection,
+            responseBodyHandler ->
+                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
+    router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
 
