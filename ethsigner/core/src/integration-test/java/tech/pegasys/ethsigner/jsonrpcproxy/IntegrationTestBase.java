@@ -24,7 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import java.net.ServerSocket;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
