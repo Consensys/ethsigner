@@ -15,22 +15,35 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import com.google.common.base.Objects;
 import java.nio.file.Path;
 
-class MetadataFile {
+class FileBasedSigningMetadataFile {
 
   private final Path file;
+  private final Path keyFilename;
+  private final Path passwordFilename;
   private final String type;
-  private final String filename;
 
-  MetadataFile(final Path file) {
-    this.file = file;
+
+  FileBasedSigningMetadataFile(final Path file, final Path keyFilename, final Path passwordFilename) {
     this.type = "file-based"; // TODO make an enum
-    this.filename = file.getFileName().toString();
+    this.file = file;
+    this.keyFilename = keyFilename;
+    this.passwordFilename = passwordFilename;
   }
 
-  String getFilename() {
-    return filename;
-  }
   String getType() { return type; }
+  String getFilename() { return getFilenameWithoutExtension(file); }
+
+  Path getKeyFilename() { return keyFilename; }
+  Path getPasswordFilename() { return passwordFilename; }
+
+  private String getFilenameWithoutExtension(final Path file) {
+    final String filename = file.getFileName().toString();
+    if (filename.endsWith(".config")) {
+      return filename.replaceAll("\\.config", "");
+    } else {
+      throw new IllegalArgumentException("Invalid config filename extension");
+    }
+  }
 
   @Override
   public boolean equals(final Object o) {
@@ -40,13 +53,14 @@ class MetadataFile {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final MetadataFile that = (MetadataFile) o;
-    return Objects.equal(filename, that.filename)
+    final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
+    return Objects.equal(keyFilename, that.keyFilename)
+        && Objects.equal(passwordFilename, that.passwordFilename)
         && Objects.equal(type, that.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(filename, type);
+    return Objects.hashCode(keyFilename, passwordFilename, type);
   }
 }

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tech.pegasys.ethsigner.signer.multiplatform.TomlConfigFileParser;
 
 public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
 

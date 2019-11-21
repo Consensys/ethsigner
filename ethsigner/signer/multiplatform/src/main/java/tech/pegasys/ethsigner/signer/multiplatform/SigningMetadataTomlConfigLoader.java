@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.toml.TomlParseResult;
 
 class SigningMetadataTomlConfigLoader {
 
@@ -38,8 +40,8 @@ class SigningMetadataTomlConfigLoader {
     this.tomlConfigsDirectory = metadataTomlFilesDirectory;
   }
 
-  Optional<MetadataFile> loadSigningMetadataTomlForAddress(final String address) {
-    final List<MetadataFile> matchingMetadata =
+  Optional<FileBasedSigningMetadataFile> loadSigningMetadataTomlForAddress(final String address) {
+    final List<FileBasedSigningMetadataFile> matchingMetadata =
         loadAvailableSigningMetadataTomlConfigs().stream()
             .filter(toml -> toml.getFilename().toLowerCase().endsWith(normalizeAddress(address)))
             .collect(Collectors.toList());
@@ -54,18 +56,30 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  Collection<MetadataFile> loadAvailableSigningMetadataTomlConfigs() {
-    final Collection<MetadataFile> metadataConfigs = new HashSet<>();
+  Collection<FileBasedSigningMetadataFile> loadAvailableSigningMetadataTomlConfigs() {
+    final Collection<FileBasedSigningMetadataFile> metadataConfigs = new HashSet<>();
 
     try (final DirectoryStream<Path> directoryStream =
         Files.newDirectoryStream(tomlConfigsDirectory, GLOB_CONFIG_MATCHER)) {
       for (final Path file : directoryStream) {
-        metadataConfigs.add(new MetadataFile(file));
+        metadataConfigs.add(getMetadataInfo(file));
       }
       return metadataConfigs;
     } catch (final IOException e) {
       LOG.warn("Error searching for signing metadata TOML files", e);
       return Collections.emptySet();
+    }
+  }
+
+  FileBasedSigningMetadataFile getMetadataInfo(Path file) {
+    try {
+      TomlParseResult result = TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
+      String keyFilename = result.getTable("signing").getString("key-file");
+      String passwordFilename = result.getTable("signing").getString("password-file");
+      return new FileBasedSigningMetadataFile(file, new File(keyFilename).toPath(), new File(passwordFilename).toPath());
+    } catch (Exception e) {
+      LOG.error("could not load TOML file");
+      return null;
     }
   }
 

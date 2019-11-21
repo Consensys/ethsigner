@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
@@ -22,12 +24,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-class MetadataFileTest {
+class FileBasedSigningMetadataFileTest {
 
   @Test
   void matchingMetadataFileWithoutPrefixShouldHaveExpectedName() {
-    final MetadataFile metadataFile = load(NO_PREFIX_LOWERCASE_ADDRESS);
+    final FileBasedSigningMetadataFile fileBasedSigningMetadataFile = load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
 
-    assertThat(metadataFile.getFilename()).matches(NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION);
+    assertThat(fileBasedSigningMetadataFile.getFilename()).matches(NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION);
+    assertThat(fileBasedSigningMetadataFile.getKeyFilename().toAbsolutePath().toString()).matches(KEY_FILE);
+    assertThat(fileBasedSigningMetadataFile.getPasswordFilename().toAbsolutePath().toString()).matches(PASSWORD_FILE);
   }
 }
