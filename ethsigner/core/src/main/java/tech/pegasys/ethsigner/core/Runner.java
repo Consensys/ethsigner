@@ -21,6 +21,7 @@ import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
@@ -93,8 +94,13 @@ public class Runner {
   }
 
   private Router router() {
+    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
+    final VertxRequestTransmitterFactory transmitterFactory =
+        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
+    final RequestMapper requestMapper =
+        createRequestMapper(downStreamConnection, transmitterFactory);
+
     final Router router = Router.router(vertx);
-    final RequestMapper requestMapper = createRequestMapper();
 
     // Handler for JSON-RPC requests
     router
@@ -102,8 +108,8 @@ public class Runner {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper));
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
+        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -114,21 +120,17 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    // Default route handler does nothing: no response
-    router.route().handler(context -> {});
+    final PassThroughHandler passThroughHandler =
+        new PassThroughHandler(downStreamConnection, transmitterFactory);
+    router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
 
-  private RequestMapper createRequestMapper() {
-
-    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
-
-    final RequestMapper requestMapper =
-        new RequestMapper(
-            new PassThroughHandler(
-                downStreamConnection,
-                responseBodyHandler ->
-                    new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler)));
+  private RequestMapper createRequestMapper(
+      final HttpClient downStreamConnection,
+      final VertxRequestTransmitterFactory transmitterFactory) {
+    final PassThroughHandler defaultHandler =
+        new PassThroughHandler(downStreamConnection, transmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
@@ -136,20 +138,20 @@ public class Runner {
             downStreamConnection,
             transactionSignerProvider,
             transactionFactory,
-            responseBodyHandler ->
-                new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler));
+            transmitterFactory);
+
+    final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
-
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
+            jsonDecoder));
 
     return requestMapper;
   }
-
 
   private void httpServerServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {
