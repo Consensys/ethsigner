@@ -12,12 +12,15 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.nio.file.Path;
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
@@ -51,8 +54,11 @@ public final class EthSigner {
       return;
     }
 
+    final JsonDecoder jsonDecoder = createJsonDecoder();
+
     final HttpService web3jService = createWeb3jHttpService();
-    final TransactionFactory transactionFactory = TransactionFactory.createFrom(web3jService);
+    final TransactionFactory transactionFactory =
+        TransactionFactory.createFrom(web3jService, jsonDecoder);
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
@@ -73,9 +79,19 @@ public final class EthSigner {
             serverOptions,
             downstreamHttpRequestTimeout,
             transactionFactory,
+            jsonDecoder,
             dataPath);
 
     runner.start();
+  }
+
+  public static JsonDecoder createJsonDecoder() {
+    // Force TransactionDeserialisation to fail
+    final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+
+    return new JsonDecoder(jsonObjectMapper);
   }
 
   private HttpService createWeb3jHttpService() {

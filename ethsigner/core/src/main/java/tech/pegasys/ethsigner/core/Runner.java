@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
 import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
@@ -59,6 +60,7 @@ public class Runner {
   private final Duration httpRequestTimeout;
   private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
@@ -70,12 +72,14 @@ public class Runner {
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final TransactionFactory transactionFactory,
+      final JsonDecoder jsonDecoder,
       final Path dataPath) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.transactionFactory = transactionFactory;
+    this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = Vertx.vertx();
     this.httpServerService = new HttpServerService(router(), serverOptions);
@@ -104,8 +108,8 @@ public class Runner {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper));
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
+        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -143,7 +147,8 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
+            jsonDecoder));
 
     return requestMapper;
   }
