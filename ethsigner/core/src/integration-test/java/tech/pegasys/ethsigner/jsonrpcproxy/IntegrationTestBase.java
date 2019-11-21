@@ -142,7 +142,7 @@ public class IntegrationTestBase {
             httpServerOptions,
             downstreamTimeout,
             new TransactionFactory(besu, web3j, web3jService),
-            null);
+            dataPath);
     runner.start();
 
     final int ethSignerPort = httpJsonRpcPort();
