@@ -39,7 +39,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
     setUpEthNodeResponse(
         request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
 
-    sendPostRequest(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(REQUEST_HEADERS, netVersionRequest),
         response.ethSigner(RESPONSE_HEADERS, netVersionResponse));
 
@@ -54,7 +54,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethNode(ethProtocolVersionRequest),
         response.ethNode("Not Found", HttpResponseStatus.NOT_FOUND));
 
-    sendPostRequest(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(ethProtocolVersionRequest),
         response.ethSigner("Not Found", HttpResponseStatus.NOT_FOUND));
 
@@ -67,7 +67,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethNode(LOGIN_BODY),
         response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
 
-    sendPostRequest(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
@@ -83,7 +83,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
 
     // Whilst a get request doesn't normally have a body, it can and we want to ensure the request
     // is proxied as is
-    sendGetRequest(
+    sendGetRequestAndVerifyResponse(
         request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
@@ -97,7 +97,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethNode(LOGIN_BODY),
         response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
 
-    sendPutRequest(
+    sendPutRequestAndVerifyResponse(
         request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
@@ -111,7 +111,7 @@ class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethNode(LOGIN_BODY),
         response.ethNode(RESPONSE_HEADERS, LOGIN_RESPONSE, HttpResponseStatus.OK));
 
-    sendDeleteRequest(
+    sendDeleteRequestAndVerifyResponse(
         request.ethSigner(REQUEST_HEADERS, LOGIN_BODY),
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
