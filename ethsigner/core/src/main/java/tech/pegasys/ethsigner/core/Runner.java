@@ -92,7 +92,35 @@ public class Runner {
     vertx.close();
   }
 
+  private Router router() {
+    final Router router = Router.router(vertx);
+    final RequestMapper requestMapper = createRequestMapper();
+
+    // Handler for JSON-RPC requests
+    router
+        .route(HttpMethod.POST, "/")
+        .produces(JSON)
+        .handler(BodyHandler.create())
+        .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
+        .handler(new JsonRpcHandler(responseFactory, requestMapper));
+
+    // Handler for UpCheck endpoint
+    router
+        .route(HttpMethod.GET, "/upcheck")
+        .produces(TEXT)
+        .handler(BodyHandler.create())
+        .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new LogErrorHandler())
+        .handler(new UpcheckHandler());
+
+    // Default route handler does nothing: no response
+    router.route().handler(context -> {});
+    return router;
+  }
+
   private RequestMapper createRequestMapper() {
+
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
 
     final RequestMapper requestMapper =
@@ -117,39 +145,11 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
-            jsonDecoder));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
 
     return requestMapper;
   }
 
-  private Router router() {
-    final Router router = Router.router(vertx);
-
-    final RequestMapper requestMapper = createRequestMapper();
-
-    // Handler for JSON-RPC requests
-    router
-        .route(HttpMethod.POST, "/")
-        .produces(JSON)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
-
-    // Handler for UpCheck endpoint
-    router
-        .route(HttpMethod.GET, "/upcheck")
-        .produces(TEXT)
-        .handler(BodyHandler.create())
-        .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new LogErrorHandler())
-        .handler(new UpcheckHandler());
-
-    // Default route handler does nothing: no response
-    router.route().handler(context -> {});
-    return router;
-  }
 
   private void httpServerServiceDeployment(final AsyncResult<String> result) {
     if (result.succeeded()) {

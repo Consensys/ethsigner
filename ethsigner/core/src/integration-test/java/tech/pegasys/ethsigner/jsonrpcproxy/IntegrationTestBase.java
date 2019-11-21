@@ -228,13 +228,56 @@ public class IntegrationTestBase {
                 .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
-  void sendRequestThenVerifyResponse(
-      final EthSignerRequest request, final EthSignerResponse expectResponse) {
+  void sendPostRequest(final EthSignerRequest request, final EthSignerResponse expectResponse) {
+    sendPostRequest(request, expectResponse, "/");
+  }
+
+  void sendPostRequest(
+      final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
     given()
         .when()
         .body(request.getBody())
         .headers(request.getHeaders())
-        .post()
+        .post(path)
+        .then()
+        .statusCode(expectResponse.getStatusCode())
+        .body(equalTo(expectResponse.getBody()))
+        .headers(expectResponse.getHeaders());
+  }
+
+  void sendPutRequest(
+      final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
+    given()
+        .when()
+        .body(request.getBody())
+        .headers(request.getHeaders())
+        .put(path)
+        .then()
+        .statusCode(expectResponse.getStatusCode())
+        .body(equalTo(expectResponse.getBody()))
+        .headers(expectResponse.getHeaders());
+  }
+
+  void sendGetRequest(
+      final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
+    given()
+        .when()
+        .body(request.getBody())
+        .headers(request.getHeaders())
+        .get(path)
+        .then()
+        .statusCode(expectResponse.getStatusCode())
+        .body(equalTo(expectResponse.getBody()))
+        .headers(expectResponse.getHeaders());
+  }
+
+  void sendDeleteRequest(
+      final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
+    given()
+        .when()
+        .body(request.getBody())
+        .headers(request.getHeaders())
+        .delete(path)
         .then()
         .statusCode(expectResponse.getStatusCode())
         .body(equalTo(expectResponse.getBody()))
@@ -248,12 +291,20 @@ public class IntegrationTestBase {
             .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
   }
 
-  void verifyEthNodeReceived(
-      final Map<String, String> proxyHeaders, final String proxyBodyRequest) {
+  void verifyEthNodeReceived(final Map<String, String> headers, final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
             .withBody(proxyBodyRequest)
-            .withHeaders(convertHeadersToMockServerHeaders(proxyHeaders)));
+            .withHeaders(convertHeadersToMockServerHeaders(headers)));
+  }
+
+  void verifyEthNodeReceived(
+      final Map<String, String> headers, final String proxyBodyRequest, final String path) {
+    clientAndServer.verify(
+        request()
+            .withPath(path)
+            .withBody(JsonBody.json(proxyBodyRequest))
+            .withHeaders(convertHeadersToMockServerHeaders(headers)));
   }
 
   private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
