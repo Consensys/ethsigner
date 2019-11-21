@@ -12,29 +12,39 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-import com.google.common.base.Objects;
 import java.nio.file.Path;
+
+import com.google.common.base.Objects;
 
 class FileBasedSigningMetadataFile {
 
   private final Path file;
-  private final Path keyFilename;
-  private final Path passwordFilename;
+  private final Path key;
+  private final Path password;
   private final String type;
 
-
-  FileBasedSigningMetadataFile(final Path file, final Path keyFilename, final Path passwordFilename) {
-    this.type = "file-based"; // TODO make an enum
+  FileBasedSigningMetadataFile(final Path file, final Path key, final Path password) {
+    this.type = "file-based-signer"; // TODO make an enum
     this.file = file;
-    this.keyFilename = keyFilename;
-    this.passwordFilename = passwordFilename;
+    this.key = key;
+    this.password = password;
   }
 
-  String getType() { return type; }
-  String getFilename() { return getFilenameWithoutExtension(file); }
+  String getType() {
+    return type;
+  }
 
-  Path getKeyFilename() { return keyFilename; }
-  Path getPasswordFilename() { return passwordFilename; }
+  String getFilename() {
+    return getFilenameWithoutExtension(file);
+  }
+
+  Path getKey() {
+    return key;
+  }
+
+  Path getPassword() {
+    return password;
+  }
 
   private String getFilenameWithoutExtension(final Path file) {
     final String filename = file.getFileName().toString();
@@ -54,13 +64,13 @@ class FileBasedSigningMetadataFile {
       return false;
     }
     final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
-    return Objects.equal(keyFilename, that.keyFilename)
-        && Objects.equal(passwordFilename, that.passwordFilename)
+    return Objects.equal(key, that.key)
+        && Objects.equal(password, that.password)
         && Objects.equal(type, that.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(keyFilename, passwordFilename, type);
+    return Objects.hashCode(key, password, type);
   }
 }

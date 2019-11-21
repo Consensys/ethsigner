@@ -13,40 +13,36 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SigningMetadataTomlConfigLoaderTest {
+class MultiPlatformTransactionSignerProviderTest {
 
-  private SigningMetadataTomlConfigLoader loader;
-
-  private static final Path metadataTomlConfigsDirectory =
-      Path.of("src/test/resources/metadata-toml-configs");
+  private SigningMetadataTomlConfigLoader keyPasswordLoader;
+  private MultiPlatformTransactionSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
-    loader = new SigningMetadataTomlConfigLoader(metadataTomlConfigsDirectory);
+    keyPasswordLoader = mock(SigningMetadataTomlConfigLoader.class);
+    signerFactory = new MultiPlatformTransactionSignerProvider(keyPasswordLoader);
   }
 
   @Test
-  void loadMetadataFilePopulatesKeyAndPasswordFilePaths() {
-    final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
+  void getSignerForAvailableMetadataReturnsSigner() {
+    final FileBasedSigningMetadataFile keyPasswordFile =
         load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
+    when(keyPasswordLoader.loadSigningMetadataTomlForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
+        .thenReturn(Optional.of(keyPasswordFile));
 
-    final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadSigningMetadataTomlForAddress(NO_PREFIX_LOWERCASE_ADDRESS);
-
-    assertThat(loadedMetadataFile).isNotEmpty();
-    assertThat(loadedMetadataFile.get().getKey()).isEqualTo(fileBasedSigningMetadataFile.getKey());
-    assertThat(loadedMetadataFile.get().getPassword())
-        .isEqualTo(fileBasedSigningMetadataFile.getPassword());
+    assertThat(signerFactory.getSigner(NO_PREFIX_LOWERCASE_ADDRESS)).isNotEmpty();
   }
 }

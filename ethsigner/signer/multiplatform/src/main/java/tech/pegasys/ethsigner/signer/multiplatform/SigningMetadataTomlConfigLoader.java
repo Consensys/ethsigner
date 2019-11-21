@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.toml.TomlParseResult;
@@ -73,10 +74,12 @@ class SigningMetadataTomlConfigLoader {
 
   FileBasedSigningMetadataFile getMetadataInfo(Path file) {
     try {
-      TomlParseResult result = TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
+      TomlParseResult result =
+          TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
       String keyFilename = result.getTable("signing").getString("key-file");
       String passwordFilename = result.getTable("signing").getString("password-file");
-      return new FileBasedSigningMetadataFile(file, new File(keyFilename).toPath(), new File(passwordFilename).toPath());
+      return new FileBasedSigningMetadataFile(
+          file, new File(keyFilename).toPath(), new File(passwordFilename).toPath());
     } catch (Exception e) {
       LOG.error("could not load TOML file");
       return null;
