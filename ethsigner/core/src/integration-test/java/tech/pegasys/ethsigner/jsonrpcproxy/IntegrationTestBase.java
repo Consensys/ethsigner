@@ -156,7 +156,9 @@ public class IntegrationTestBase {
             dataPath);
     runner.start();
 
-    final int ethSignerPort = httpJsonRpcPort();
+    final Path portsFile = dataPath.resolve(PORTS_FILENAME);
+    waitForNonEmptyFileToExist(portsFile);
+    final int ethSignerPort = httpJsonRpcPort(portsFile);
     RestAssured.port = ethSignerPort;
 
     LOG.info(
@@ -344,13 +346,8 @@ public class IntegrationTestBase {
     return file;
   }
 
-  private static int httpJsonRpcPort() {
-    final File portsFile = new File(dataPath.toFile(), PORTS_FILENAME);
-    LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
-    awaitPortsFile(dataPath);
-    LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
-
-    try (final FileInputStream fis = new FileInputStream(portsFile)) {
+  private static int httpJsonRpcPort(final Path portsFile) {
+    try (final FileInputStream fis = new FileInputStream(portsFile.toString())) {
       final Properties portProperties = new Properties();
       portProperties.load(fis);
       final String value = portProperties.getProperty(HTTP_JSON_RPC_KEY);
@@ -360,8 +357,8 @@ public class IntegrationTestBase {
     }
   }
 
-  private static void awaitPortsFile(final Path dataDir) {
-    final File file = new File(dataDir.toFile(), PORTS_FILENAME);
+  private static void waitForNonEmptyFileToExist(final Path path) {
+    final File file = path.toFile();
     Awaitility.waitAtMost(30, TimeUnit.SECONDS)
         .until(
             () -> {
