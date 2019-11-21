@@ -78,7 +78,7 @@ jobs:
           name: Integration Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon --parallel integrationTest --info -XX:+PrintFlagsFinal
+            ./gradlew --no-daemon --parallel integrationTest --info
       - capture_test_results
       - save_cache:
           name: Caching gradle dependencies
