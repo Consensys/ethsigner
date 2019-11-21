@@ -30,6 +30,7 @@ import org.apache.tuweni.toml.TomlParseResult;
 
 class SigningMetadataTomlConfigLoader {
 
+  public static final String FILE_BASED_SIGNER = "file-based-signer";
   private static final Logger LOG = LogManager.getLogger();
 
   private static final String CONFIG_FILE_EXTENSION = ".config";
@@ -63,7 +64,7 @@ class SigningMetadataTomlConfigLoader {
     try (final DirectoryStream<Path> directoryStream =
         Files.newDirectoryStream(tomlConfigsDirectory, GLOB_CONFIG_MATCHER)) {
       for (final Path file : directoryStream) {
-        metadataConfigs.add(getMetadataInfo(file));
+        getMetadataInfo(file).ifPresent(metadataFile -> metadataConfigs.add(metadataFile));
       }
       return metadataConfigs;
     } catch (final IOException e) {
@@ -72,14 +73,20 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  FileBasedSigningMetadataFile getMetadataInfo(Path file) {
+  Optional<FileBasedSigningMetadataFile> getMetadataInfo(Path file) {
     try {
       TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
-      String keyFilename = result.getTable("signing").getString("key-file");
-      String passwordFilename = result.getTable("signing").getString("password-file");
-      return new FileBasedSigningMetadataFile(
-          file, new File(keyFilename).toPath(), new File(passwordFilename).toPath());
+      String type = result.getTable("signing").getString("type");
+      if (FILE_BASED_SIGNER.equals(type)) {
+        String keyFilename = result.getTable("signing").getString("key-file");
+        String passwordFilename = result.getTable("signing").getString("password-file");
+        return Optional.of(new FileBasedSigningMetadataFile(
+            file, new File(keyFilename).toPath(), new File(passwordFilename).toPath()));
+      } else {
+        LOG.error("unknown signing type in metadata %s", type);
+        return Optional.empty();
+      }
     } catch (Exception e) {
       LOG.error("could not load TOML file");
       return null;

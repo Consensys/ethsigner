@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
@@ -48,5 +49,13 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(loadedMetadataFile.get().getKey()).isEqualTo(fileBasedSigningMetadataFile.getKey());
     assertThat(loadedMetadataFile.get().getPassword())
         .isEqualTo(fileBasedSigningMetadataFile.getPassword());
+  }
+
+  @Test
+  void loadMetadataFileWithUnknownTypeSignerFails() {
+    final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
+        loader.loadSigningMetadataTomlForAddress(PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER);
+
+    assertThat(loadedMetadataFile).isEmpty();
   }
 }
