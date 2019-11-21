@@ -22,12 +22,14 @@ class FileBasedSigningMetadataFile {
   private final Path key;
   private final Path password;
   private final String type;
+  private final String filename;
 
   FileBasedSigningMetadataFile(final Path file, final Path key, final Path password) {
     this.type = "file-based-signer"; // TODO make an enum
     this.file = file;
     this.key = key;
     this.password = password;
+    this.filename = getFilenameWithoutExtension(file);
   }
 
   String getType() {
@@ -35,7 +37,7 @@ class FileBasedSigningMetadataFile {
   }
 
   String getFilename() {
-    return getFilenameWithoutExtension(file);
+    return filename;
   }
 
   Path getKey() {
@@ -64,13 +66,14 @@ class FileBasedSigningMetadataFile {
       return false;
     }
     final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
-    return Objects.equal(key, that.key)
+    return Objects.equal(file, that.file)
+        && Objects.equal(key, that.key)
         && Objects.equal(password, that.password)
         && Objects.equal(type, that.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(key, password, type);
+    return Objects.hashCode(file, key, password, type);
   }
 }

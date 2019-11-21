@@ -51,7 +51,7 @@ class KeyPasswordFileTest {
 
   @Test
   void keyWithInvalidExtensionThrowsIllegalArgumentException() {
-    final Path keyFile = Path.of("invalid_extensionn.txt");
+    final Path keyFile = Path.of("invalid_extension.txt");
     final Path passwordFile = Path.of("valid_extension.password");
 
     final IllegalArgumentException thrown =
@@ -62,7 +62,7 @@ class KeyPasswordFileTest {
 
   @Test
   void passwordWithInvalidExtensionThrowsIllegalArgumentException() {
-    final Path keyFile = Path.of("valid_extensionn.key");
+    final Path keyFile = Path.of("valid_extension.key");
     final Path passwordFile = Path.of("invalid_extension.txt");
 
     final IllegalArgumentException thrown =
