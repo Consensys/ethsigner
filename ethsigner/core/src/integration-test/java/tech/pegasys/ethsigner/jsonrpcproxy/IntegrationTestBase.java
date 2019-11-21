@@ -217,11 +217,12 @@ public class IntegrationTestBase {
                 .withDelay(TimeUnit.MILLISECONDS, downstreamTimeout.toMillis() + ENSURE_TIMEOUT));
   }
 
-  void sendPostRequest(final EthSignerRequest request, final EthSignerResponse expectResponse) {
-    sendPostRequest(request, expectResponse, "/");
+  void sendPostRequestAndVerifyResponse(
+      final EthSignerRequest request, final EthSignerResponse expectResponse) {
+    sendPostRequestAndVerifyResponse(request, expectResponse, "/");
   }
 
-  void sendPostRequest(
+  void sendPostRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
     given()
         .when()
@@ -234,7 +235,7 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  void sendPutRequest(
+  void sendPutRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
     given()
         .when()
@@ -247,7 +248,7 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  void sendGetRequest(
+  void sendGetRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
     given()
         .when()
@@ -260,7 +261,7 @@ public class IntegrationTestBase {
         .headers(expectResponse.getHeaders());
   }
 
-  void sendDeleteRequest(
+  void sendDeleteRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
     given()
         .when()
