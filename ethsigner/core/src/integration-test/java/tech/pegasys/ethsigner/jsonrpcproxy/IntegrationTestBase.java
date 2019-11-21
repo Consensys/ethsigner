@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import java.net.ServerSocket;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
@@ -38,15 +39,17 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
@@ -54,9 +57,11 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 import org.mockserver.model.JsonBody;
@@ -74,6 +79,8 @@ import org.web3j.protocol.http.HttpService;
 public class IntegrationTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String PORTS_FILENAME = "ethsigner.ports";
+  private static final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
   private static final String LOCALHOST = "127.0.0.1";
   public static final long DEFAULT_CHAIN_ID = 9;
   public static final int DEFAULT_ID = 77;
@@ -94,6 +101,8 @@ public class IntegrationTestBase {
 
   private static final Duration downstreamTimeout = Duration.ofSeconds(1);
 
+  @TempDir static Path dataPath;
+
   @BeforeAll
   public static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);
@@ -113,10 +122,8 @@ public class IntegrationTestBase {
     httpClientOptions.setDefaultHost(LOCALHOST);
     httpClientOptions.setDefaultPort(clientAndServer.getLocalPort());
 
-    final ServerSocket serverSocket = new ServerSocket(0);
-    RestAssured.port = serverSocket.getLocalPort();
     final HttpServerOptions httpServerOptions = new HttpServerOptions();
-    httpServerOptions.setPort(serverSocket.getLocalPort());
+    httpServerOptions.setPort(0);
     httpServerOptions.setHost("localhost");
 
     final HttpService web3jService =
@@ -139,11 +146,13 @@ public class IntegrationTestBase {
             null);
     runner.start();
 
+    final int ethSignerPort = httpJsonRpcPort();
+    RestAssured.port = ethSignerPort;
+
     LOG.info(
         "Started ethSigner on port {}, eth stub node on port {}",
-        serverSocket.getLocalPort(),
+        ethSignerPort,
         clientAndServer.getLocalPort());
-    serverSocket.close();
 
     unlockedAccount =
         transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
@@ -323,5 +332,35 @@ public class IntegrationTestBase {
     final File file = path.toFile();
     file.deleteOnExit();
     return file;
+  }
+
+  private static int httpJsonRpcPort() {
+    final File portsFile = new File(dataPath.toFile(), PORTS_FILENAME);
+    LOG.info("Awaiting presence of ethsigner.ports file: {}", portsFile.getAbsolutePath());
+    awaitPortsFile(dataPath);
+    LOG.info("Found ethsigner.ports file: {}", portsFile.getAbsolutePath());
+
+    try (final FileInputStream fis = new FileInputStream(portsFile)) {
+      final Properties portProperties = new Properties();
+      portProperties.load(fis);
+      final String value = portProperties.getProperty(HTTP_JSON_RPC_KEY);
+      return Integer.parseInt(value);
+    } catch (final IOException e) {
+      throw new RuntimeException("Error reading Web3Provider ports file", e);
+    }
+  }
+
+  private static void awaitPortsFile(final Path dataDir) {
+    final File file = new File(dataDir.toFile(), PORTS_FILENAME);
+    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+        .until(
+            () -> {
+              if (file.exists()) {
+                try (final Stream<String> s = Files.lines(file.toPath())) {
+                  return s.count() > 0;
+                }
+              }
+              return false;
+            });
   }
 }
