@@ -25,6 +25,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -50,6 +51,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
 import io.vertx.core.http.HttpClientOptions;
@@ -134,6 +137,13 @@ public class IntegrationTestBase {
     final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
     final Besu besu = Besu.build(web3jService);
 
+    // Force TransactionDeserialisation to fail
+    final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+
+    final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
+
     runner =
         new Runner(
             chainId,
@@ -141,7 +151,8 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(besu, web3j, web3jService),
+            new TransactionFactory(besu, web3j, jsonDecoder, web3jService),
+            jsonDecoder,
             dataPath);
     runner.start();
 
