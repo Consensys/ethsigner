@@ -22,13 +22,13 @@ import io.vertx.core.json.DecodeException;
 
 public class JsonDecoder {
 
-  final ObjectMapper mapper;
+  private final ObjectMapper mapper;
 
-  public JsonDecoder(ObjectMapper mapper) {
+  public JsonDecoder(final ObjectMapper mapper) {
     this.mapper = mapper;
   }
 
-  public <T> T decodeValue(Buffer buf, Class<T> clazz) throws DecodeException {
+  public <T> T decodeValue(final Buffer buf, final Class<T> clazz) throws DecodeException {
     try {
       return mapper.readValue((InputStream) new ByteBufInputStream(buf.getByteBuf()), clazz);
     } catch (IOException e) {
