@@ -22,7 +22,8 @@ public class MetadataFileFixture {
   public static final String CONFIG_FILE_EXTENSION = ".config";
   public static String NO_PREFIX_LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
   public static String PREFIX_ADDRESS = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
+  public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER =
+      "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
   public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
   public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";
 
