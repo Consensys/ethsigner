@@ -25,7 +25,7 @@ class FileBasedSigningMetadataFile {
   private final String filename;
 
   FileBasedSigningMetadataFile(final Path file, final Path key, final Path password) {
-    this.type = "file-based-signer"; // TODO make an enum
+    this.type = "file-based-signer";
     this.file = file;
     this.key = key;
     this.password = password;

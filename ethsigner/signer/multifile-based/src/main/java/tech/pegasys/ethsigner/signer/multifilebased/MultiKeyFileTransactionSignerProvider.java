@@ -37,8 +37,6 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    // TODO load as TOML
-    //    TomlConfigFileParser.loadConfigurationFromFile()
     return keyPasswordLoader.loadKeyAndPasswordForAddress(address).map(this::createSigner);
   }
 
