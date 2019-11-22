@@ -33,7 +33,7 @@ class SigningMetadataTomlConfigLoader {
   public static final String FILE_BASED_SIGNER = "file-based-signer";
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final String CONFIG_FILE_EXTENSION = ".config";
+  private static final String CONFIG_FILE_EXTENSION = ".toml";
   private static final String GLOB_CONFIG_MATCHER = "**" + CONFIG_FILE_EXTENSION;
 
   private final Path tomlConfigsDirectory;

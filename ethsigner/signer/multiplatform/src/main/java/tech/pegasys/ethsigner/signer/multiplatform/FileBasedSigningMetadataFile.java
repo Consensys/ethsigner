@@ -50,10 +50,10 @@ class FileBasedSigningMetadataFile {
 
   private String getFilenameWithoutExtension(final Path file) {
     final String filename = file.getFileName().toString();
-    if (filename.endsWith(".config")) {
-      return filename.replaceAll("\\.config", "");
+    if (filename.endsWith(".toml")) {
+      return filename.replaceAll("\\.toml", "");
     } else {
-      throw new IllegalArgumentException("Invalid config filename extension");
+      throw new IllegalArgumentException("Invalid TOML config filename extension");
     }
   }
 

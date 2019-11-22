@@ -19,7 +19,7 @@ import java.nio.file.Path;
 
 public class MetadataFileFixture {
 
-  public static final String CONFIG_FILE_EXTENSION = ".config";
+  public static final String CONFIG_FILE_EXTENSION = ".toml";
   public static String NO_PREFIX_LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
   public static String PREFIX_ADDRESS = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER =
