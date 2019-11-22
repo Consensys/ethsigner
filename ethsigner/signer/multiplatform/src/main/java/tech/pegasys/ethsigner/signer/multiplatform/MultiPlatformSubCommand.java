@@ -12,18 +12,23 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
-import java.nio.file.Path;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Spec;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
-/** Multi platform authentication related sub-command. Metadata config TOML files containing signing information from one of several providers. */
+import java.nio.file.Path;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Spec;
+
+/**
+ * Multi platform authentication related sub-command. Metadata config TOML files containing signing
+ * information from one of several providers.
+ */
 @Command(
     name = MultiPlatformSubCommand.COMMAND_NAME,
     description =
@@ -47,7 +52,8 @@ public class MultiPlatformSubCommand extends SignerSubCommand {
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader = new SigningMetadataTomlConfigLoader(directoryPath);
+    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
+        new SigningMetadataTomlConfigLoader(directoryPath);
     return new MultiPlatformTransactionSignerProvider(signingMetadataTomlConfigLoader);
   }
 
