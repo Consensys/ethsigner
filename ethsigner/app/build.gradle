@@ -32,6 +32,7 @@ dependencies {
   implementation project(':ethsigner:signer:hashicorp')
   implementation project(':ethsigner:signer:file-based')
   implementation project(':ethsigner:signer:multifile-based')
+  implementation project(':ethsigner:signer:multiplatform')
   implementation project(':ethsigner:signer:azure')
   implementation project(':ethsigner:commandline')
 
