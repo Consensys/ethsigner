@@ -61,6 +61,7 @@ dependencies {
   }
   integrationTestImplementation 'org.mockito:mockito-core'
   integrationTestImplementation 'org.mockito:mockito-junit-jupiter'
+  integrationTestImplementation 'org.awaitility:awaitility'
 
   integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

@@ -37,7 +37,7 @@ class EthAccountsIntegrationTest extends IntegrationTestBase {
     final JsonRpcSuccessResponse responseBody =
         new JsonRpcSuccessResponse(requestBody.getId(), singletonList(unlockedAccount));
 
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(Json.encode(requestBody)),
         response.ethSigner(expectedHeaders, Json.encode(responseBody)));
   }

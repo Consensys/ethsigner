@@ -29,6 +29,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import java.util.Optional;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.DecodeException;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,7 +69,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException | DecodeException e) {
       LOG.debug("JSON Deserialization failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;

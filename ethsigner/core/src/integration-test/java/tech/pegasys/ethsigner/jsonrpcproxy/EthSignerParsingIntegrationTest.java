@@ -22,7 +22,7 @@ class EthSignerParsingIntegrationTest extends IntegrationTestBase {
 
   @Test
   void parseErrorResponseWhenJsonRequestIsMalformed() {
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(MALFORMED_JSON), response.ethSigner(NO_ID, PARSE_ERROR));
   }
 }

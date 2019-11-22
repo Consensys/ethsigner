@@ -33,7 +33,7 @@ class TimeoutTest extends IntegrationTestBase {
             new JsonRpcErrorResponse(
                 request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
 
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         this.request.ethSigner(request.getEncodedRequestBody()),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
   }
