@@ -64,11 +64,6 @@ public class TomlConfigFileParser {
       if (!tomlConfigFile.canRead()) {
         throw new Exception(String.format("Read access denied for file at: %s", filename));
       }
-      if (!tomlConfigFile.canWrite()) {
-        LOG.warn(
-            "Write access denied for file at: %s. Configuration modification operations will not be permitted.",
-            filename);
-      }
       return tomlConfigFile;
     } else {
       throw new FileNotFoundException(
