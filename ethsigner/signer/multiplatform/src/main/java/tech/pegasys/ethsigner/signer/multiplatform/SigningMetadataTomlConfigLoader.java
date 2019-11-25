@@ -90,7 +90,7 @@ class SigningMetadataTomlConfigLoader {
       }
     } catch (Exception e) {
       LOG.error("Could not load TOML file");
-      return null;
+      return Optional.empty();
     }
   }
 
