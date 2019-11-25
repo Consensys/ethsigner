@@ -23,10 +23,10 @@ class FileBasedSigningMetadataFile {
   private final Path password;
   private final String filename;
 
-  FileBasedSigningMetadataFile(final Path file, final Path key, final Path password) {
+  FileBasedSigningMetadataFile(final Path file, final Path keyPath, final Path passwordPath) {
     this.file = file;
-    this.key = key;
-    this.password = password;
+    this.key = keyPath;
+    this.password = passwordPath;
     this.filename = getFilenameWithoutExtension(file);
   }
 

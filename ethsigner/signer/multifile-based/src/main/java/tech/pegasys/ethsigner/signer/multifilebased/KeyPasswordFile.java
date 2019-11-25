@@ -22,14 +22,14 @@ class KeyPasswordFile {
   private final Path key;
   private final Path password;
 
-  KeyPasswordFile(final Path key, final Path password) {
-    this.key = key;
-    this.password = password;
+  KeyPasswordFile(final Path keyPath, final Path passwordPath) {
+    this.key = keyPath;
+    this.password = passwordPath;
 
-    if (!keyAndPasswordNameMatch(key, password)) {
+    if (!keyAndPasswordNameMatch(keyPath, passwordPath)) {
       throw new IllegalArgumentException("Key and Password names must match");
     } else {
-      this.filename = getFilenameWithoutExtension(key);
+      this.filename = getFilenameWithoutExtension(keyPath);
     }
   }
 

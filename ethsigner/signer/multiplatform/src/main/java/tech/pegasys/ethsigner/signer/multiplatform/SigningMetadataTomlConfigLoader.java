@@ -85,11 +85,11 @@ class SigningMetadataTomlConfigLoader {
             new FileBasedSigningMetadataFile(
                 file, new File(keyFilename).toPath(), new File(passwordFilename).toPath()));
       } else {
-        LOG.error("unknown signing type in metadata %s", type);
+        LOG.error("Unknown signing type in metadata %s", type);
         return Optional.empty();
       }
     } catch (Exception e) {
-      LOG.error("could not load TOML file");
+      LOG.error("Could not load TOML file");
       return null;
     }
   }
