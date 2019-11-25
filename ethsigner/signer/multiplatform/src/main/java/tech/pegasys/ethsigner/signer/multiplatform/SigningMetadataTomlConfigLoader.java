@@ -38,8 +38,8 @@ class SigningMetadataTomlConfigLoader {
 
   private final Path tomlConfigsDirectory;
 
-  SigningMetadataTomlConfigLoader(final Path metadataTomlFilesDirectory) {
-    this.tomlConfigsDirectory = metadataTomlFilesDirectory;
+  SigningMetadataTomlConfigLoader(final Path rootDirectory) {
+    this.tomlConfigsDirectory = rootDirectory;
   }
 
   Optional<FileBasedSigningMetadataFile> loadMetadataForAddress(final String address) {
@@ -73,14 +73,14 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  Optional<FileBasedSigningMetadataFile> getMetadataInfo(Path file) {
+  Optional<FileBasedSigningMetadataFile> getMetadataInfo(final Path file) {
     try {
-      TomlParseResult result =
+      final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
-      String type = result.getTable("signing").getString("type");
+      final String type = result.getTable("signing").getString("type");
       if (FILE_BASED_SIGNER.equals(type)) {
-        String keyFilename = result.getTable("signing").getString("key-file");
-        String passwordFilename = result.getTable("signing").getString("password-file");
+        final String keyFilename = result.getTable("signing").getString("key-file");
+        final String passwordFilename = result.getTable("signing").getString("password-file");
         return Optional.of(
             new FileBasedSigningMetadataFile(
                 file, new File(keyFilename).toPath(), new File(passwordFilename).toPath()));

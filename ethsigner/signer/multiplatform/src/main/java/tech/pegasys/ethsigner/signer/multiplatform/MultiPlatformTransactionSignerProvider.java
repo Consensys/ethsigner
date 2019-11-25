@@ -38,9 +38,7 @@ public class MultiPlatformTransactionSignerProvider implements TransactionSigner
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    return signingMetadataTomlConfigLoader
-        .loadMetadataForAddress(address)
-        .map(this::createSigner);
+    return signingMetadataTomlConfigLoader.loadMetadataForAddress(address).map(this::createSigner);
   }
 
   @Override
