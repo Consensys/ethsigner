@@ -42,7 +42,7 @@ class SigningMetadataTomlConfigLoader {
     this.tomlConfigsDirectory = metadataTomlFilesDirectory;
   }
 
-  Optional<FileBasedSigningMetadataFile> loadSigningMetadataTomlForAddress(final String address) {
+  Optional<FileBasedSigningMetadataFile> loadMetadataForAddress(final String address) {
     final List<FileBasedSigningMetadataFile> matchingMetadata =
         loadAvailableSigningMetadataTomlConfigs().stream()
             .filter(toml -> toml.getFilename().toLowerCase().endsWith(normalizeAddress(address)))

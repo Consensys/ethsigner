@@ -40,7 +40,7 @@ class MultiPlatformTransactionSignerProviderTest {
   void getSignerForAvailableMetadataReturnsSigner() {
     final FileBasedSigningMetadataFile keyPasswordFile =
         load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
-    when(keyPasswordLoader.loadSigningMetadataTomlForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
+    when(keyPasswordLoader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
         .thenReturn(Optional.of(keyPasswordFile));
 
     assertThat(signerFactory.getSigner(NO_PREFIX_LOWERCASE_ADDRESS)).isNotEmpty();

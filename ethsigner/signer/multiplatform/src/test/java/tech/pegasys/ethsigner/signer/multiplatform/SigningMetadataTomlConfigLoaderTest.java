@@ -43,7 +43,7 @@ class SigningMetadataTomlConfigLoaderTest {
         load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
 
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadSigningMetadataTomlForAddress(NO_PREFIX_LOWERCASE_ADDRESS);
+        loader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS);
 
     assertThat(loadedMetadataFile).isNotEmpty();
     assertThat(loadedMetadataFile.get().getKey()).isEqualTo(fileBasedSigningMetadataFile.getKey());
@@ -54,7 +54,7 @@ class SigningMetadataTomlConfigLoaderTest {
   @Test
   void loadMetadataFileWithUnknownTypeSignerFails() {
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadSigningMetadataTomlForAddress(PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER);
+        loader.loadMetadataForAddress(PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER);
 
     assertThat(loadedMetadataFile).isEmpty();
   }
