@@ -31,8 +31,9 @@ public class MetadataFileFixture {
   public static String PREFIX_MIXEDCASE_KP =
       "UTC--2019-10-23T04-00-04.860366000Z--f17f52151ebef6c7334fad080c5704d77216b732";
 
-  public static String SUFFIX_KP_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef60";
-  public static String SUFFIX_KP = "627306090abab3a6e1400e9345bc60c78a8bef60_foo";
+  public static String SUFFIX_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef60";
+  public static String PREFIX_LOWERCASE_DUPLICATE_ADDRESS =
+      "fe3b557e8fb62b89f4916b721be55ceb828dbd61";
 
   public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
   public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";

@@ -20,8 +20,9 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MI
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_MIXEDCASE_KP;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_KP_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
@@ -97,6 +98,22 @@ class SigningMetadataTomlConfigLoaderTest {
   }
 
   @Test
+  void loadMetadataFileWithHexPrefixReturnsFile() {
+    final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
+        load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
+
+    final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
+        loader.loadMetadataForAddress("0x" + NO_PREFIX_LOWERCASE_ADDRESS);
+
+    assertThat(loadedMetadataFile).isNotEmpty();
+    assertThat(loadedMetadataFile.get().getKeyPath())
+        .isEqualTo(fileBasedSigningMetadataFile.getKeyPath());
+    assertThat(loadedMetadataFile.get().getPasswordPath())
+        .isEqualTo(fileBasedSigningMetadataFile.getPasswordPath());
+
+  }
+
+  @Test
   void loadMetadataFileWithMissingKeyAndPasswordPathIsEmpty() {
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
         loader.loadMetadataForAddress(MISSING_KEY_AND_PASSWORD_PATH_ADDRESS);
@@ -105,9 +122,17 @@ class SigningMetadataTomlConfigLoaderTest {
   }
 
   @Test
+  void multipleMatchesForSameAddressReturnsEmpty() {
+    final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
+        loader.loadMetadataForAddress(PREFIX_LOWERCASE_DUPLICATE_ADDRESS);
+
+    assertThat(loadedMetadataFile).isEmpty();
+  }
+
+  @Test
   void loadKeyPasswordNotEndingWithAddressReturnsEmpty() {
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadMetadataForAddress(SUFFIX_KP_ADDRESS);
+        loader.loadMetadataForAddress(SUFFIX_ADDRESS);
 
     assertThat(loadedMetadataFile).isEmpty();
   }
