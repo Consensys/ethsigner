@@ -14,18 +14,24 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE_2;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_AND_PASSWORD_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_PASSWORD_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE_2;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_MIXEDCASE_KP;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_1;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_2;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -135,5 +141,24 @@ class SigningMetadataTomlConfigLoaderTest {
         loader.loadMetadataForAddress(SUFFIX_ADDRESS);
 
     assertThat(loadedMetadataFile).isEmpty();
+  }
+
+  @Test
+  void loadAvailableConfigsReturnsAllValidMetadataFilesInDirectory() {
+    final FileBasedSigningMetadataFile metadataFile1 =
+        load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
+    final FileBasedSigningMetadataFile metadataFile2 =
+        load(PREFIX_MIXEDCASE_KP, KEY_FILE, PASSWORD_FILE);
+    final FileBasedSigningMetadataFile metadataFile3 =
+        load(PREFIX_ADDRESS, KEY_FILE_2, PASSWORD_FILE_2);
+    final FileBasedSigningMetadataFile metadataFile4 =
+        load(PREFIX_LOWERCASE_DUPLICATE_FILENAME_2, KEY_FILE_2, PASSWORD_FILE_2);
+    final FileBasedSigningMetadataFile metadataFile5 =
+        load(PREFIX_LOWERCASE_DUPLICATE_FILENAME_1, KEY_FILE, PASSWORD_FILE);
+
+    final Collection<FileBasedSigningMetadataFile> metadataFiles = loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles).hasSize(5);
+    assertThat(metadataFiles).containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
   }
 }

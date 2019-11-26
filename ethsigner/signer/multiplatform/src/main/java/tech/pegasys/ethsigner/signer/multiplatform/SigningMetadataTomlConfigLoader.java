@@ -80,18 +80,20 @@ class SigningMetadataTomlConfigLoader {
       final String type = result.getTable("signing").getString("type");
       if (FILE_BASED_SIGNER.equals(type)) {
         final String keyFilename = result.getTable("signing").getString("key-file");
+        final Path keyPath = new File(keyFilename).toPath();
         final String passwordFilename = result.getTable("signing").getString("password-file");
+        final Path passwordPath = new File(passwordFilename).toPath();
         return Optional.of(
             new FileBasedSigningMetadataFile(
                 file.getFileName().toString(),
-                new File(keyFilename).toPath(),
-                new File(passwordFilename).toPath()));
+                keyPath,
+                passwordPath));
       } else {
-        LOG.error("Unknown signing type in metadata %s", type);
+        LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
       }
     } catch (Exception e) {
-      LOG.error("Could not load TOML file");
+      LOG.error("Could not load TOML file", e);
       return Optional.empty();
     }
   }

@@ -23,7 +23,7 @@ public class MetadataFileFixture {
   public static String NO_PREFIX_LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
   public static String PREFIX_ADDRESS = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER =
-      "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
+      "unknown_type_signer_bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
   public static String MISSING_KEY_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd76";
   public static String MISSING_PASSWORD_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd77";
   public static String MISSING_KEY_AND_PASSWORD_PATH_ADDRESS =
@@ -33,10 +33,16 @@ public class MetadataFileFixture {
 
   public static String SUFFIX_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef60";
   public static String PREFIX_LOWERCASE_DUPLICATE_ADDRESS =
-      "fe3b557e8fb62b89f4916b721be55ceb828dbd61";
+      "627306090abab3a6e1400e9345bc60c78a8bef61";
+  public static String PREFIX_LOWERCASE_DUPLICATE_FILENAME_1 =
+      "duplicate_foo_627306090abab3a6e1400e9345bc60c78a8bef61";
+  public static String PREFIX_LOWERCASE_DUPLICATE_FILENAME_2 =
+      "duplicate_bar_627306090abab3a6e1400e9345bc60c78a8bef61";
 
   public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
   public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";
+  public static String KEY_FILE_2 = "src/test/resources/metadata-toml-configs/k2.key";
+  public static String PASSWORD_FILE_2 = "src/test/resources/metadata-toml-configs/p2.password";
 
   private static final Path metadataTomlConfigsDirectory =
       Path.of("src/test/resources/metadata-toml-configs");
