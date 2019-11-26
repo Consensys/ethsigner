@@ -21,6 +21,7 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_MIXEDCASE_KP;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_KP_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
@@ -99,6 +100,14 @@ class SigningMetadataTomlConfigLoaderTest {
   void loadMetadataFileWithMissingKeyAndPasswordPathIsEmpty() {
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
         loader.loadMetadataForAddress(MISSING_KEY_AND_PASSWORD_PATH_ADDRESS);
+
+    assertThat(loadedMetadataFile).isEmpty();
+  }
+
+  @Test
+  void loadKeyPasswordNotEndingWithAddressReturnsEmpty() {
+    final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
+        loader.loadMetadataForAddress(SUFFIX_KP_ADDRESS);
 
     assertThat(loadedMetadataFile).isEmpty();
   }
