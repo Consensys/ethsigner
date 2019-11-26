@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -48,23 +47,10 @@ public class TomlConfigFileParser {
 
   public static TomlParseResult loadConfigurationFromFile(final String configFilePath)
       throws IOException {
-    return loadConfiguration(configTomlAsString(tomlConfigFile(configFilePath)));
+    return loadConfiguration(configTomlAsString(new File(configFilePath)));
   }
 
   private static String configTomlAsString(final File file) throws IOException {
     return Resources.toString(file.toURI().toURL(), UTF_8);
-  }
-
-  private static File tomlConfigFile(final String filename) throws IOException {
-    final File tomlConfigFile = new File(filename);
-    if (tomlConfigFile.exists()) {
-      if (!tomlConfigFile.canRead()) {
-        throw new IOException(String.format("Read access denied for file at: %s", filename));
-      }
-      return tomlConfigFile;
-    } else {
-      throw new FileNotFoundException(
-          String.format("Configuration file does not exist: %s", filename));
-    }
   }
 }
