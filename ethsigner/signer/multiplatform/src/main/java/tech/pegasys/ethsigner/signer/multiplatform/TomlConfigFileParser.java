@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 import com.google.common.io.Resources;
@@ -30,39 +31,39 @@ public class TomlConfigFileParser {
   protected static final Logger LOG = LogManager.getLogger();
 
   private static TomlParseResult checkConfigurationValidity(
-      final TomlParseResult result, final String toml) throws Exception {
+      final TomlParseResult result, final String toml) throws RuntimeException {
     if (result == null || result.isEmpty()) {
-      throw new Exception("Empty TOML result: " + toml);
+      throw new RuntimeException("Empty TOML result: " + toml);
     }
     return result;
   }
 
-  public static TomlParseResult loadConfiguration(final String toml) throws Exception {
+  public static TomlParseResult loadConfiguration(final String toml) throws RuntimeException {
     final TomlParseResult result = Toml.parse(toml);
 
     if (result.hasErrors()) {
       final String errors =
           result.errors().stream().map(TomlParseError::toString).collect(Collectors.joining("\n"));
-      throw new Exception("Invalid TOML configuration: \n" + errors);
+      throw new RuntimeException("Invalid TOML configuration: \n" + errors);
     }
 
     return checkConfigurationValidity(result, toml);
   }
 
   public static TomlParseResult loadConfigurationFromFile(final String configFilePath)
-      throws Exception {
+      throws IOException {
     return loadConfiguration(configTomlAsString(tomlConfigFile(configFilePath)));
   }
 
-  private static String configTomlAsString(final File file) throws Exception {
+  private static String configTomlAsString(final File file) throws IOException {
     return Resources.toString(file.toURI().toURL(), UTF_8);
   }
 
-  private static File tomlConfigFile(final String filename) throws Exception {
+  private static File tomlConfigFile(final String filename) throws IOException {
     final File tomlConfigFile = new File(filename);
     if (tomlConfigFile.exists()) {
       if (!tomlConfigFile.canRead()) {
-        throw new Exception(String.format("Read access denied for file at: %s", filename));
+        throw new IOException(String.format("Read access denied for file at: %s", filename));
       }
       return tomlConfigFile;
     } else {
