@@ -24,10 +24,10 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PA
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_ADDRESS;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_MIXEDCASE_KP;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_1;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_2;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_MIXEDCASE_KP;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.SUFFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
@@ -116,7 +116,6 @@ class SigningMetadataTomlConfigLoaderTest {
         .isEqualTo(fileBasedSigningMetadataFile.getKeyPath());
     assertThat(loadedMetadataFile.get().getPasswordPath())
         .isEqualTo(fileBasedSigningMetadataFile.getPasswordPath());
-
   }
 
   @Test
@@ -156,9 +155,13 @@ class SigningMetadataTomlConfigLoaderTest {
     final FileBasedSigningMetadataFile metadataFile5 =
         load(PREFIX_LOWERCASE_DUPLICATE_FILENAME_1, KEY_FILE, PASSWORD_FILE);
 
-    final Collection<FileBasedSigningMetadataFile> metadataFiles = loader.loadAvailableSigningMetadataTomlConfigs();
+    // duplicate files are loaded at this stage since addresses aren't checked until signers are
+    // created
+    final Collection<FileBasedSigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
 
     assertThat(metadataFiles).hasSize(5);
-    assertThat(metadataFiles).containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
+    assertThat(metadataFiles)
+        .containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
   }
 }

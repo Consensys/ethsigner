@@ -84,10 +84,7 @@ class SigningMetadataTomlConfigLoader {
         final String passwordFilename = result.getTable("signing").getString("password-file");
         final Path passwordPath = new File(passwordFilename).toPath();
         return Optional.of(
-            new FileBasedSigningMetadataFile(
-                file.getFileName().toString(),
-                keyPath,
-                passwordPath));
+            new FileBasedSigningMetadataFile(file.getFileName().toString(), keyPath, passwordPath));
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
