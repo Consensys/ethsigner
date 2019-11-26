@@ -18,27 +18,27 @@ import com.google.common.base.Objects;
 
 class FileBasedSigningMetadataFile {
 
-  private final Path key;
-  private final Path password;
+  private final Path keyPath;
+  private final Path passwordPath;
   private final String filename;
 
   public FileBasedSigningMetadataFile(
       final String filename, final Path keyPath, final Path passwordPath) {
     this.filename = getFilenameWithoutExtension(filename);
-    this.key = keyPath;
-    this.password = passwordPath;
+    this.keyPath = keyPath;
+    this.passwordPath = passwordPath;
   }
 
   String getFilename() {
     return filename;
   }
 
-  Path getKey() {
-    return key;
+  Path getKeyPath() {
+    return keyPath;
   }
 
-  Path getPassword() {
-    return password;
+  Path getPasswordPath() {
+    return passwordPath;
   }
 
   private String getFilenameWithoutExtension(final String filename) {
@@ -59,12 +59,12 @@ class FileBasedSigningMetadataFile {
     }
     final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
     return Objects.equal(filename, that.filename)
-        && Objects.equal(key, that.key)
-        && Objects.equal(password, that.password);
+        && Objects.equal(keyPath, that.keyPath)
+        && Objects.equal(passwordPath, that.passwordPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(filename, key, password);
+    return Objects.hashCode(filename, keyPath, passwordPath);
   }
 }

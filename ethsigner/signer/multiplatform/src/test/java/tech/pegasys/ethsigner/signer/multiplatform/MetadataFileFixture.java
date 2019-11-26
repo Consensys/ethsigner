@@ -24,6 +24,13 @@ public class MetadataFileFixture {
   public static String PREFIX_ADDRESS = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER =
       "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
+  public static String MISSING_KEY_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd76";
+  public static String MISSING_PASSWORD_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd77";
+  public static String MISSING_KEY_AND_PASSWORD_PATH_ADDRESS =
+      "fe3b557e8fb62b89f4916b721be55ceb828dbd78";
+  public static String PREFIX_MIXEDCASE_KP =
+      "UTC--2019-10-23T04-00-04.860366000Z--f17f52151ebef6c7334fad080c5704d77216b732";
+
   public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
   public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";
 

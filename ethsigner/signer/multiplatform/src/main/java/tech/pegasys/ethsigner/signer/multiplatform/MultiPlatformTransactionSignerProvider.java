@@ -54,12 +54,12 @@ public class MultiPlatformTransactionSignerProvider implements TransactionSigner
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
-              signingMetadataFile.getKey(), signingMetadataFile.getPassword());
-      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKey().getFileName());
+              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
+      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
       return signer;
     } catch (TransactionSignerInitializationException e) {
       LOG.warn(
-          "Unable to load signer with key '{}'", signingMetadataFile.getKey().getFileName(), e);
+          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }
