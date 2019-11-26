@@ -57,7 +57,9 @@ class FileBasedSigningMetadataFileTest {
     final IllegalArgumentException thrown =
         assertThrows(
             IllegalArgumentException.class,
-            () -> new FileBasedSigningMetadataFile(metadataFile, keyFile, passwordFile));
+            () ->
+                new FileBasedSigningMetadataFile(
+                    metadataFile.getFileName().toString(), keyFile, passwordFile));
     assertThat(thrown.getMessage()).isEqualTo("Invalid TOML config filename extension");
   }
 }

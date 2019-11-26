@@ -22,7 +22,8 @@ class FileBasedSigningMetadataFile {
   private final Path password;
   private final String filename;
 
-  FileBasedSigningMetadataFile(final String filename, final Path keyPath, final Path passwordPath) {
+  public FileBasedSigningMetadataFile(
+      final String filename, final Path keyPath, final Path passwordPath) {
     this.filename = getFilenameWithoutExtension(filename);
     this.key = keyPath;
     this.password = passwordPath;

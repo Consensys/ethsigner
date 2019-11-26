@@ -40,6 +40,8 @@ public class MetadataFileFixture {
     }
 
     return new FileBasedSigningMetadataFile(
-        metadataPath, new File(keyFilename).toPath(), new File(passwordFilename).toPath());
+        metadataPath.getFileName().toString(),
+        new File(keyFilename).toPath(),
+        new File(passwordFilename).toPath());
   }
 }
