@@ -18,16 +18,14 @@ import com.google.common.base.Objects;
 
 class FileBasedSigningMetadataFile {
 
-  private final Path file;
   private final Path key;
   private final Path password;
   private final String filename;
 
-  FileBasedSigningMetadataFile(final Path file, final Path keyPath, final Path passwordPath) {
-    this.file = file;
+  FileBasedSigningMetadataFile(final String filename, final Path keyPath, final Path passwordPath) {
+    this.filename = getFilenameWithoutExtension(filename);
     this.key = keyPath;
     this.password = passwordPath;
-    this.filename = getFilenameWithoutExtension(file);
   }
 
   String getFilename() {
@@ -42,8 +40,7 @@ class FileBasedSigningMetadataFile {
     return password;
   }
 
-  private String getFilenameWithoutExtension(final Path file) {
-    final String filename = file.getFileName().toString();
+  private String getFilenameWithoutExtension(final String filename) {
     if (filename.endsWith(".toml")) {
       return filename.replaceAll("\\.toml", "");
     } else {
@@ -60,13 +57,13 @@ class FileBasedSigningMetadataFile {
       return false;
     }
     final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
-    return Objects.equal(file, that.file)
+    return Objects.equal(filename, that.filename)
         && Objects.equal(key, that.key)
         && Objects.equal(password, that.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(file, key, password);
+    return Objects.hashCode(filename, key, password);
   }
 }
