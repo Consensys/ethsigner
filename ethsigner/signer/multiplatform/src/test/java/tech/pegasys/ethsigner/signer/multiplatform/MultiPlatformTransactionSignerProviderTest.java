@@ -22,19 +22,14 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.lo
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class MultiPlatformTransactionSignerProviderTest {
 
-  private SigningMetadataTomlConfigLoader keyPasswordLoader;
-  private MultiPlatformTransactionSignerProvider signerFactory;
-
-  @BeforeEach
-  void beforeEach() {
-    keyPasswordLoader = mock(SigningMetadataTomlConfigLoader.class);
-    signerFactory = new MultiPlatformTransactionSignerProvider(keyPasswordLoader);
-  }
+  private SigningMetadataTomlConfigLoader keyPasswordLoader =
+      mock(SigningMetadataTomlConfigLoader.class);;
+  private MultiPlatformTransactionSignerProvider signerFactory =
+      new MultiPlatformTransactionSignerProvider(keyPasswordLoader);
 
   @Test
   void getSignerForAvailableMetadataReturnsSigner() {

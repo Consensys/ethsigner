@@ -34,20 +34,15 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SigningMetadataTomlConfigLoaderTest {
 
-  private SigningMetadataTomlConfigLoader loader;
+  private SigningMetadataTomlConfigLoader loader =
+      new SigningMetadataTomlConfigLoader(metadataTomlConfigsDirectory);
 
   private static final Path metadataTomlConfigsDirectory =
       Path.of("src/test/resources/metadata-toml-configs");
-
-  @BeforeEach
-  void beforeEach() {
-    loader = new SigningMetadataTomlConfigLoader(metadataTomlConfigsDirectory);
-  }
 
   @Test
   void loadMetadataFilePopulatesKeyAndPasswordFilePaths() {
