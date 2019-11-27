@@ -19,12 +19,12 @@ import com.google.common.base.Objects;
 class KeyPasswordFile {
 
   private final String filename;
-  private final Path key;
-  private final Path password;
+  private final Path keyPath;
+  private final Path passwordPath;
 
   KeyPasswordFile(final Path keyPath, final Path passwordPath) {
-    this.key = keyPath;
-    this.password = passwordPath;
+    this.keyPath = keyPath;
+    this.passwordPath = passwordPath;
 
     if (!keyAndPasswordNameMatch(keyPath, passwordPath)) {
       throw new IllegalArgumentException("Key and Password names must match");
@@ -50,12 +50,12 @@ class KeyPasswordFile {
     return filename;
   }
 
-  Path getKey() {
-    return key;
+  Path getKeyPath() {
+    return keyPath;
   }
 
-  Path getPassword() {
-    return password;
+  Path getPasswordPath() {
+    return passwordPath;
   }
 
   @Override
@@ -68,12 +68,12 @@ class KeyPasswordFile {
     }
     final KeyPasswordFile that = (KeyPasswordFile) o;
     return Objects.equal(filename, that.filename)
-        && Objects.equal(key, that.key)
-        && Objects.equal(password, that.password);
+        && Objects.equal(keyPath, that.keyPath)
+        && Objects.equal(passwordPath, that.passwordPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(filename, key, password);
+    return Objects.hashCode(filename, keyPath, passwordPath);
   }
 }

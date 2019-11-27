@@ -41,7 +41,7 @@ class MultiPlatformSubCommandTest {
   void parseCommandSuccessfullySetDirectory() {
     final Path expectedPath = Path.of("/keys/directory/path");
 
-    commandLine.parse("--directory", "/keys/directory/path");
+    commandLine.parse("--directory", expectedPath.toString());
 
     final ParseResult parseResult = commandLine.getParseResult();
     assertThat(parseResult.errors()).isEmpty();

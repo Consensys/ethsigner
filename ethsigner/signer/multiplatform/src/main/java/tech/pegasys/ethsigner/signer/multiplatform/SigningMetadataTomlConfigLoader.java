@@ -73,7 +73,7 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  Optional<FileBasedSigningMetadataFile> getMetadataInfo(final Path file) {
+  private Optional<FileBasedSigningMetadataFile> getMetadataInfo(final Path file) {
     try {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
@@ -89,7 +89,7 @@ class SigningMetadataTomlConfigLoader {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       LOG.error("Could not load TOML file", e);
       return Optional.empty();
     }

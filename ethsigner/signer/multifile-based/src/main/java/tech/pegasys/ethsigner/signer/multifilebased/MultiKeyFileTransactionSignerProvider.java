@@ -53,11 +53,12 @@ public class MultiKeyFileTransactionSignerProvider implements TransactionSignerP
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
-              keyPasswordFile.getKey(), keyPasswordFile.getPassword());
-      LOG.debug("Loaded signer with key '{}'", keyPasswordFile.getKey().getFileName());
+              keyPasswordFile.getKeyPath(), keyPasswordFile.getPasswordPath());
+      LOG.debug("Loaded signer with key '{}'", keyPasswordFile.getKeyPath().getFileName());
       return signer;
-    } catch (TransactionSignerInitializationException e) {
-      LOG.warn("Unable to load signer with key '{}'", keyPasswordFile.getKey().getFileName(), e);
+    } catch (final TransactionSignerInitializationException e) {
+      LOG.warn(
+          "Unable to load signer with key '{}'", keyPasswordFile.getKeyPath().getFileName(), e);
       return null;
     }
   }

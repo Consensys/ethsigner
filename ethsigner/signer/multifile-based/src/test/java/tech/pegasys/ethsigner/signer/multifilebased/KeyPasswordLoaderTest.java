@@ -59,7 +59,7 @@ class KeyPasswordLoaderTest {
   @Test
   void loadKeyPasswordWithPrefixReturnsFile() {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(PREFIX_MIXEDCASE_KP);
-    final String keyFilename = keyPasswordFile.getKey().getFileName().toString();
+    final String keyFilename = keyPasswordFile.getKeyPath().getFileName().toString();
     assertThat(keyFilename.startsWith(PREFIX_MIXEDCASE_KP_ADDRESS)).isFalse();
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
@@ -72,7 +72,7 @@ class KeyPasswordLoaderTest {
   @Test
   void loadKeyPasswordWithMissingPasswordReturnsEmpty() throws IOException {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    Files.delete(keyPasswordFile.getPassword());
+    Files.delete(keyPasswordFile.getPasswordPath());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
@@ -83,7 +83,7 @@ class KeyPasswordLoaderTest {
   @Test
   void loadKeyPasswordWithMissingKeyReturnsEmpty() throws IOException {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    Files.delete(keyPasswordFile.getKey());
+    Files.delete(keyPasswordFile.getKeyPath());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
@@ -94,8 +94,8 @@ class KeyPasswordLoaderTest {
   @Test
   void loadKeyPasswordWithMissingKeyAndPasswordReturnsEmpty() throws IOException {
     final KeyPasswordFile keyPasswordFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    Files.delete(keyPasswordFile.getKey());
-    Files.delete(keyPasswordFile.getPassword());
+    Files.delete(keyPasswordFile.getKeyPath());
+    Files.delete(keyPasswordFile.getPasswordPath());
 
     final Optional<KeyPasswordFile> loadedKeyPassFile =
         loader.loadKeyAndPasswordForAddress(NO_PREFIX_LOWERCASE_KP_ADDRESS);
@@ -128,7 +128,7 @@ class KeyPasswordLoaderTest {
   @Test
   void loadAvailableKeysIgnoresKeyWithoutMatchingPassword() throws IOException {
     final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    Files.delete(kpFile.getPassword());
+    Files.delete(kpFile.getPasswordPath());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
@@ -138,7 +138,7 @@ class KeyPasswordLoaderTest {
   @Test
   void loadAvailableKeysIgnoresPasswordWithoutMatchingKey() throws IOException {
     final KeyPasswordFile kpFile = copyKeyPasswordToKeysDirectory(NO_PREFIX_LOWERCASE_KP);
-    Files.delete(kpFile.getKey());
+    Files.delete(kpFile.getKeyPath());
 
     final Collection<KeyPasswordFile> keyPasswordFiles = loader.loadAvailableKeys();
 
@@ -189,12 +189,12 @@ class KeyPasswordLoaderTest {
 
   private KeyPasswordFile copyKeyPasswordToKeysDirectory(final String filename) {
     final KeyPasswordFile kpFile = loadKeyPasswordFile(filename);
-    final Path newKeyFile = keysDirectory.resolve(kpFile.getKey().getFileName());
-    final Path newPasswordFile = keysDirectory.resolve(kpFile.getPassword().getFileName());
+    final Path newKeyFile = keysDirectory.resolve(kpFile.getKeyPath().getFileName());
+    final Path newPasswordFile = keysDirectory.resolve(kpFile.getPasswordPath().getFileName());
 
     try {
-      Files.copy(kpFile.getKey(), newKeyFile);
-      Files.copy(kpFile.getPassword(), newPasswordFile);
+      Files.copy(kpFile.getKeyPath(), newKeyFile);
+      Files.copy(kpFile.getPasswordPath(), newPasswordFile);
     } catch (IOException e) {
       fail("Error copying key/password files", e);
     }

@@ -57,7 +57,7 @@ public class MultiPlatformTransactionSignerProvider implements TransactionSigner
               signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
       LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
       return signer;
-    } catch (TransactionSignerInitializationException e) {
+    } catch (final TransactionSignerInitializationException e) {
       LOG.warn(
           "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
       return null;
