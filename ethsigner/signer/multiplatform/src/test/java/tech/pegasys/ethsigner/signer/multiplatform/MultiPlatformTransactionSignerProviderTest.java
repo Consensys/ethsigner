@@ -20,24 +20,33 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 class MultiPlatformTransactionSignerProviderTest {
 
-  private SigningMetadataTomlConfigLoader keyPasswordLoader =
-      mock(SigningMetadataTomlConfigLoader.class);;
+  private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);;
   private MultiPlatformTransactionSignerProvider signerFactory =
-      new MultiPlatformTransactionSignerProvider(keyPasswordLoader);
+      new MultiPlatformTransactionSignerProvider(loader);
+  private final FileBasedSigningMetadataFile metadataFile =
+      load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
 
   @Test
   void getSignerForAvailableMetadataReturnsSigner() {
-    final FileBasedSigningMetadataFile keyPasswordFile =
-        load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
-    when(keyPasswordLoader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
-        .thenReturn(Optional.of(keyPasswordFile));
+    when(loader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
+        .thenReturn(Optional.of(metadataFile));
 
     assertThat(signerFactory.getSigner(NO_PREFIX_LOWERCASE_ADDRESS)).isNotEmpty();
+  }
+
+  @Test
+  void getAddresses() {
+    Collection<FileBasedSigningMetadataFile> files = Collections.singleton(metadataFile);
+    when(loader.loadAvailableSigningMetadataTomlConfigs()).thenReturn(files);
+    assertThat(signerFactory.availableAddresses())
+        .containsExactly("0x" + NO_PREFIX_LOWERCASE_ADDRESS);
   }
 }

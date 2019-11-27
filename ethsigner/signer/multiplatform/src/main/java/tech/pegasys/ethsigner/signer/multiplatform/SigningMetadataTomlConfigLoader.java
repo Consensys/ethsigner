@@ -30,7 +30,6 @@ import org.apache.tuweni.toml.TomlParseResult;
 
 class SigningMetadataTomlConfigLoader {
 
-  public static final String FILE_BASED_SIGNER = "file-based-signer";
   private static final Logger LOG = LogManager.getLogger();
 
   private static final String CONFIG_FILE_EXTENSION = ".toml";
@@ -78,13 +77,8 @@ class SigningMetadataTomlConfigLoader {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
       final String type = result.getTable("signing").getString("type");
-      if (FILE_BASED_SIGNER.equals(type)) {
-        final String keyFilename = result.getTable("signing").getString("key-file");
-        final Path keyPath = new File(keyFilename).toPath();
-        final String passwordFilename = result.getTable("signing").getString("password-file");
-        final Path passwordPath = new File(passwordFilename).toPath();
-        return Optional.of(
-            new FileBasedSigningMetadataFile(file.getFileName().toString(), keyPath, passwordPath));
+      if (SignerType.FILE_BASED_SIGNER.getType().equals(type)) {
+        return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
@@ -93,6 +87,15 @@ class SigningMetadataTomlConfigLoader {
       LOG.error("Could not load TOML file", e);
       return Optional.empty();
     }
+  }
+
+  private Optional<FileBasedSigningMetadataFile> getFileBasedSigningMetadataFromToml(
+      String filename, TomlParseResult result) {
+    final String keyFilename = result.getTable("signing").getString("key-file");
+    final Path keyPath = new File(keyFilename).toPath();
+    final String passwordFilename = result.getTable("signing").getString("password-file");
+    final Path passwordPath = new File(passwordFilename).toPath();
+    return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
   }
 
   private String normalizeAddress(final String address) {
