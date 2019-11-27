@@ -64,7 +64,7 @@ class SigningMetadataTomlConfigLoader {
     try (final DirectoryStream<Path> directoryStream =
         Files.newDirectoryStream(tomlConfigsDirectory, GLOB_CONFIG_MATCHER)) {
       for (final Path file : directoryStream) {
-        getMetadataInfo(file).ifPresent(metadataFile -> metadataConfigs.add(metadataFile));
+        getMetadataInfo(file).ifPresent(metadataConfigs::add);
       }
       return metadataConfigs;
     } catch (final IOException e) {
