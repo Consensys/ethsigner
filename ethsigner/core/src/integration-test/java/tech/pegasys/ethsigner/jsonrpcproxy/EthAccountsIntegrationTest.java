@@ -17,15 +17,23 @@ import static java.util.Collections.singletonMap;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
+import java.io.IOException;
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.json.Json;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthAccounts;
 
 class EthAccountsIntegrationTest extends IntegrationTestBase {
+
+  @BeforeAll
+  private static void setupEthSigner() throws IOException, CipherException {
+    setupEthSigner(DEFAULT_CHAIN_ID);
+  }
 
   @Test
   void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {

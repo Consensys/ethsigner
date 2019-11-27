@@ -29,8 +29,12 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
@@ -42,6 +46,11 @@ class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
+
+  @BeforeAll
+  private static void setupEthSigner() throws IOException, CipherException {
+    setupEthSigner(DEFAULT_CHAIN_ID);
+  }
 
   @BeforeEach
   void setUp() {

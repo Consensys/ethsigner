@@ -29,8 +29,12 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
@@ -39,6 +43,11 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
+
+  @BeforeAll
+  private static void setupEthSigner() throws IOException, CipherException {
+    setupEthSigner(DEFAULT_CHAIN_ID);
+  }
 
   @BeforeEach
   void setUp() {
@@ -382,29 +391,6 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
         request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
-  }
-
-  @Test
-  void signSendTransactionWhenContractWithLongChainId() throws Exception {
-    cleanUpInstance();
-    setupEthSigner(4123123123L);
-
-    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
-    final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.smartContract(), 4123123123L);
-    final String sendRawTransactionResponse =
-        sendRawTransaction.response(
-            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
-    setUpEthNodeResponse(
-        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
-
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
-
-    verifyEthNodeReceived(sendRawTransactionRequest);
-
-    cleanUpInstance();
-    resetEthSigner();
   }
 
   @Test
