@@ -191,10 +191,17 @@ public class IntegrationTestBase {
     }
   }
 
-  @AfterAll
-  public static void teardown() {
+  static void cleanUpInstance() {
     clientAndServer.stop();
     runner.stop();
+    clientAndServer = null;
+    runner = null;
+    System.gc();
+  }
+
+  @AfterAll
+  public static void teardown() {
+    cleanUpInstance();
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {

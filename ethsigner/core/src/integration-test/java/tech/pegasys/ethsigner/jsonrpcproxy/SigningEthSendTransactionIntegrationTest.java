@@ -386,6 +386,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
   @Test
   void signSendTransactionWhenContractWithLongChainId() throws Exception {
+    cleanUpInstance();
     setupEthSigner(4123123123L);
 
     final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
@@ -402,6 +403,7 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
 
     verifyEthNodeReceived(sendRawTransactionRequest);
 
+    cleanUpInstance();
     resetEthSigner();
   }
 
