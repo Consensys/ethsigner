@@ -16,20 +16,11 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersionRequest;
 
-import java.io.IOException;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.web3j.crypto.CipherException;
 
-class FailedConnectionTest extends IntegrationTestBase {
-
-  @BeforeAll
-  private static void setupEthSigner() throws IOException, CipherException {
-    setupEthSigner(DEFAULT_CHAIN_ID);
-  }
+class FailedConnectionTest extends DefaultTestBase {
 
   @Test
   void failsToConnectToDownStreamRaisesTimeout() {

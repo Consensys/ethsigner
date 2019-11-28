@@ -12,17 +12,14 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.PARSE_ERROR;
+import java.io.IOException;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.web3j.crypto.CipherException;
 
-class EthSignerParsingIntegrationTest extends DefaultTestBase {
-
-  private static final Object NO_ID = null;
-
-  @Test
-  void parseErrorResponseWhenJsonRequestIsMalformed() {
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(MALFORMED_JSON), response.ethSigner(NO_ID, PARSE_ERROR));
+public class DefaultTestBase extends IntegrationTestBase {
+  @BeforeAll
+  private static void setupEthSigner() throws IOException, CipherException {
+    setupEthSigner(DEFAULT_CHAIN_ID);
   }
 }

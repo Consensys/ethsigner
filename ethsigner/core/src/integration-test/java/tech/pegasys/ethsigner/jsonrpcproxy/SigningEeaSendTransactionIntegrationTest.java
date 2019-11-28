@@ -29,28 +29,19 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
-import java.io.IOException;
-
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
+class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
   private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
       "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}";
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
-
-  @BeforeAll
-  private static void setupEthSigner() throws IOException, CipherException {
-    setupEthSigner(DEFAULT_CHAIN_ID);
-  }
 
   @BeforeEach
   void setUp() {

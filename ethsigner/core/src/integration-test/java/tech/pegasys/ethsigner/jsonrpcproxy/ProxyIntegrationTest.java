@@ -14,28 +14,20 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonMap;
 
-import java.io.IOException;
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
-class ProxyIntegrationTest extends IntegrationTestBase {
+class ProxyIntegrationTest extends DefaultTestBase {
   private static final String LOGIN_BODY = "{\"username\":\"username1\",\"password\":\"pegasys\"}";
   private static final String LOGIN_RESPONSE = "{\"token\":\"eyJ0\"}";
   private static final Map<String, String> REQUEST_HEADERS = singletonMap("Accept", "*/*");
   private static final Map<String, String> RESPONSE_HEADERS =
       singletonMap("Content-Type", "Application/Json");
-
-  @BeforeAll
-  private static void setupEthSigner() throws IOException, CipherException {
-    setupEthSigner(DEFAULT_CHAIN_ID);
-  }
 
   @Test
   void requestWithHeadersIsProxied() {
