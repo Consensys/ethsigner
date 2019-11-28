@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
@@ -32,7 +33,7 @@ class MultiPlatformTransactionSignerProviderTest {
   private MultiPlatformTransactionSignerProvider signerFactory =
       new MultiPlatformTransactionSignerProvider(loader);
   private final FileBasedSigningMetadataFile metadataFile =
-      load(NO_PREFIX_LOWERCASE_ADDRESS, KEY_FILE, PASSWORD_FILE);
+      load(NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
   @Test
   void getSignerForAvailableMetadataReturnsSigner() {

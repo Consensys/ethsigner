@@ -45,7 +45,7 @@ class FileBasedSigningMetadataFile {
     if (filename.endsWith(".toml")) {
       return filename.replaceAll("\\.toml", "");
     } else {
-      throw new IllegalArgumentException("Invalid TOML config filename extension");
+      throw new IllegalArgumentException("Invalid TOML config filename extension: " + filename);
     }
   }
 

@@ -15,50 +15,98 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+
+import com.google.common.io.Resources;
 
 public class MetadataFileFixture {
 
   public static final String CONFIG_FILE_EXTENSION = ".toml";
   public static String NO_PREFIX_LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
-  public static String PREFIX_ADDRESS = "bar_fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  public static String PREFIX_ADDRESS_UNKNOWN_TYPE_SIGNER =
-      "unknown_type_signer_bar_fe3b557e8fb62b89f4916b721be55ceb828dbd75";
+  public static String PREFIX_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  public static String PREFIX_FILENAME_WITHOUT_EXTENSION = "bar_" + PREFIX_ADDRESS;
+  public static String PREFIX_FILENAME = PREFIX_FILENAME_WITHOUT_EXTENSION + CONFIG_FILE_EXTENSION;
+  public static String UNKNOWN_TYPE_SIGNER_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd75";
+  public static String UNKNOWN_TYPE_SIGNER_FILENAME =
+      "unknown_type_signer_" + UNKNOWN_TYPE_SIGNER_ADDRESS + CONFIG_FILE_EXTENSION;
   public static String MISSING_KEY_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd76";
   public static String MISSING_PASSWORD_PATH_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd77";
   public static String MISSING_KEY_AND_PASSWORD_PATH_ADDRESS =
       "fe3b557e8fb62b89f4916b721be55ceb828dbd78";
-  public static String PREFIX_MIXEDCASE_KP =
-      "UTC--2019-10-23T04-00-04.860366000Z--f17f52151ebef6c7334fad080c5704d77216b732";
+  public static String MISSING_KEY_PATH_FILENAME =
+      "missing_key_file_" + MISSING_KEY_PATH_ADDRESS + CONFIG_FILE_EXTENSION;
+  public static String MISSING_PASSWORD_PATH_FILENAME =
+      "missing_password_file_" + MISSING_PASSWORD_PATH_ADDRESS + CONFIG_FILE_EXTENSION;
+  public static String MISSING_KEY_AND_PASSWORD_PATH_FILENAME =
+      "missing_key_and_password_file_"
+          + MISSING_KEY_AND_PASSWORD_PATH_ADDRESS
+          + CONFIG_FILE_EXTENSION;
+
+  public static String PREFIX_MIXEDCASE_ADDRESS = "f17f52151ebef6c7334fad080c5704d77216b732";
+  public static String PREFIX_MIXEDCASE_FILENAME =
+      "UTC--2019-10-23T04-00-04.860366000Z--" + PREFIX_MIXEDCASE_ADDRESS + CONFIG_FILE_EXTENSION;
 
   public static String SUFFIX_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef60";
   public static String PREFIX_LOWERCASE_DUPLICATE_ADDRESS =
       "627306090abab3a6e1400e9345bc60c78a8bef61";
   public static String PREFIX_LOWERCASE_DUPLICATE_FILENAME_1 =
-      "duplicate_foo_627306090abab3a6e1400e9345bc60c78a8bef61";
+      "duplicate_foo_" + PREFIX_LOWERCASE_DUPLICATE_ADDRESS + CONFIG_FILE_EXTENSION;
   public static String PREFIX_LOWERCASE_DUPLICATE_FILENAME_2 =
-      "duplicate_bar_627306090abab3a6e1400e9345bc60c78a8bef61";
+      "duplicate_bar_" + PREFIX_LOWERCASE_DUPLICATE_ADDRESS + CONFIG_FILE_EXTENSION;
 
   public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
   public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";
   public static String KEY_FILE_2 = "src/test/resources/metadata-toml-configs/k2.key";
   public static String PASSWORD_FILE_2 = "src/test/resources/metadata-toml-configs/p2.password";
 
-  private static final Path metadataTomlConfigsDirectory =
-      Path.of("src/test/resources/metadata-toml-configs");
+  private static final URL metadataTomlConfigPathUrl =
+      Resources.getResource("metadata-toml-configs");
 
   static FileBasedSigningMetadataFile load(
       final String metadataFilename, final String keyFilename, final String passwordFilename) {
-    final Path metadataPath =
-        metadataTomlConfigsDirectory.resolve(metadataFilename + CONFIG_FILE_EXTENSION);
-    if (!metadataPath.toFile().exists()) {
-      fail("Missing metadata TOML file " + metadataPath.getFileName().toString());
+    try {
+      final Path metadataTomlConfigsDirectory = Path.of(metadataTomlConfigPathUrl.toURI());
+      final Path metadataPath = metadataTomlConfigsDirectory.resolve(metadataFilename);
+      if (!metadataPath.toFile().exists()) {
+        fail("Missing metadata TOML file " + metadataPath.getFileName().toString());
+        return null;
+      }
+
+      return new FileBasedSigningMetadataFile(
+          metadataPath.getFileName().toString(),
+          new File(keyFilename).toPath(),
+          new File(passwordFilename).toPath());
+
+    } catch (URISyntaxException e) {
+      fail("URI Syntax Exception" + metadataFilename);
       return null;
     }
+  }
 
-    return new FileBasedSigningMetadataFile(
-        metadataPath.getFileName().toString(),
-        new File(keyFilename).toPath(),
-        new File(passwordFilename).toPath());
+  static FileBasedSigningMetadataFile copyMetadataFileToDirectory(
+      final Path configsDirectory,
+      final String metadataFilename,
+      final String keyFilename,
+      final String passwordFilename) {
+
+    final FileBasedSigningMetadataFile metadataFile =
+        load(metadataFilename, keyFilename, passwordFilename);
+    final Path newMetadataFile = configsDirectory.resolve(metadataFilename);
+    final Path newKeyFile = configsDirectory.resolve(metadataFile.getKeyPath().getFileName());
+    final Path newPasswordFile =
+        configsDirectory.resolve(metadataFile.getPasswordPath().getFileName());
+
+    try {
+      Files.copy(
+          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(metadataFilename),
+          newMetadataFile);
+    } catch (Exception e) {
+      fail("Error copying metadata files", e);
+    }
+
+    return metadataFile;
   }
 }
