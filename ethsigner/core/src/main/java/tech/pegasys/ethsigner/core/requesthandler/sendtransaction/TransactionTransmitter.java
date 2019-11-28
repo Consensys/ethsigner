@@ -78,7 +78,7 @@ public class TransactionTransmitter {
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return;
     } catch (final RuntimeException e) {
-      LOG.info("Unable to get nonce from web3j provider.");
+      LOG.warn("Unable to get nonce from web3j provider.", e);
       final Throwable cause = e.getCause();
       if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
         routingContext.fail(
