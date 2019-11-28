@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
@@ -33,21 +33,19 @@ class MultiPlatformTransactionSignerProviderTest {
   private MultiPlatformTransactionSignerProvider signerFactory =
       new MultiPlatformTransactionSignerProvider(loader);
   private final FileBasedSigningMetadataFile metadataFile =
-      load(NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
+      load(LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
   @Test
   void getSignerForAvailableMetadataReturnsSigner() {
-    when(loader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS))
-        .thenReturn(Optional.of(metadataFile));
+    when(loader.loadMetadataForAddress(LOWERCASE_ADDRESS)).thenReturn(Optional.of(metadataFile));
 
-    assertThat(signerFactory.getSigner(NO_PREFIX_LOWERCASE_ADDRESS)).isNotEmpty();
+    assertThat(signerFactory.getSigner(LOWERCASE_ADDRESS)).isNotEmpty();
   }
 
   @Test
   void getAddresses() {
     Collection<FileBasedSigningMetadataFile> files = Collections.singleton(metadataFile);
     when(loader.loadAvailableSigningMetadataTomlConfigs()).thenReturn(files);
-    assertThat(signerFactory.availableAddresses())
-        .containsExactly("0x" + NO_PREFIX_LOWERCASE_ADDRESS);
+    assertThat(signerFactory.availableAddresses()).containsExactly("0x" + LOWERCASE_ADDRESS);
   }
 }

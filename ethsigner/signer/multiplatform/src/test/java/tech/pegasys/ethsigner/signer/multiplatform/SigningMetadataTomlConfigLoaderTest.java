@@ -16,16 +16,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE_2;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_AND_PASSWORD_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_AND_PASSWORD_PATH_FILENAME;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_KEY_PATH_FILENAME;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_PASSWORD_PATH_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.MISSING_PASSWORD_PATH_FILENAME;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE_2;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_FILENAME;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_1;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_LOWERCASE_DUPLICATE_FILENAME_2;
@@ -60,13 +60,10 @@ class SigningMetadataTomlConfigLoaderTest {
 
     final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
         copyMetadataFileToDirectory(
-            configsDirectory,
-            NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION,
-            KEY_FILE,
-            PASSWORD_FILE);
+            configsDirectory, LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadMetadataForAddress(NO_PREFIX_LOWERCASE_ADDRESS);
+        loader.loadMetadataForAddress(LOWERCASE_ADDRESS);
 
     assertThat(loadedMetadataFile).isNotEmpty();
     assertThat(loadedMetadataFile.get().getKeyPath())
@@ -125,13 +122,10 @@ class SigningMetadataTomlConfigLoaderTest {
   void loadMetadataFileWithHexPrefixReturnsFile() {
     final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
         copyMetadataFileToDirectory(
-            configsDirectory,
-            NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION,
-            KEY_FILE,
-            PASSWORD_FILE);
+            configsDirectory, LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
     final Optional<FileBasedSigningMetadataFile> loadedMetadataFile =
-        loader.loadMetadataForAddress("0x" + NO_PREFIX_LOWERCASE_ADDRESS);
+        loader.loadMetadataForAddress("0x" + LOWERCASE_ADDRESS);
 
     assertThat(loadedMetadataFile).isNotEmpty();
     assertThat(loadedMetadataFile.get().getKeyPath())
@@ -174,15 +168,16 @@ class SigningMetadataTomlConfigLoaderTest {
   void loadAvailableConfigsReturnsAllValidMetadataFilesInDirectory() {
     final FileBasedSigningMetadataFile metadataFile1 =
         copyMetadataFileToDirectory(
-            configsDirectory,
-            NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION,
-            KEY_FILE,
-            PASSWORD_FILE);
+            configsDirectory, LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
     final FileBasedSigningMetadataFile metadataFile2 =
         copyMetadataFileToDirectory(
             configsDirectory, PREFIX_MIXEDCASE_FILENAME, KEY_FILE, PASSWORD_FILE);
     final FileBasedSigningMetadataFile metadataFile3 =
-        copyMetadataFileToDirectory(configsDirectory, PREFIX_FILENAME, KEY_FILE_2, PASSWORD_FILE_2);
+        copyMetadataFileToDirectory(
+            configsDirectory,
+            "bar_" + PREFIX_ADDRESS + CONFIG_FILE_EXTENSION,
+            KEY_FILE_2,
+            PASSWORD_FILE_2);
     final FileBasedSigningMetadataFile metadataFile4 =
         copyMetadataFileToDirectory(
             configsDirectory, PREFIX_LOWERCASE_DUPLICATE_FILENAME_2, KEY_FILE_2, PASSWORD_FILE_2);

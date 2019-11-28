@@ -16,10 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_FILENAME;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_FILENAME_WITHOUT_EXTENSION;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
 import java.nio.file.Path;
@@ -31,9 +30,9 @@ class FileBasedSigningMetadataFileTest {
   @Test
   void matchingMetadataFileWithoutPrefixShouldHaveExpectedName() {
     final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
-        load(NO_PREFIX_LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
+        load(LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
-    assertThat(fileBasedSigningMetadataFile.getFilename()).matches(NO_PREFIX_LOWERCASE_ADDRESS);
+    assertThat(fileBasedSigningMetadataFile.getFilename()).matches(LOWERCASE_ADDRESS);
     assertThat(fileBasedSigningMetadataFile.getKeyPath().toFile().toString()).matches(KEY_FILE);
     assertThat(fileBasedSigningMetadataFile.getPasswordPath().toFile().toString())
         .matches(PASSWORD_FILE);
@@ -41,11 +40,11 @@ class FileBasedSigningMetadataFileTest {
 
   @Test
   void matchingMetadataFileWithPrefixShouldHaveExpectedName() {
+    final String prefix = "bar_";
     final FileBasedSigningMetadataFile fileBasedSigningMetadataFile =
-        load(PREFIX_FILENAME, KEY_FILE, PASSWORD_FILE);
+        load(prefix + PREFIX_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
 
-    assertThat(fileBasedSigningMetadataFile.getFilename())
-        .matches(PREFIX_FILENAME_WITHOUT_EXTENSION);
+    assertThat(fileBasedSigningMetadataFile.getFilename()).matches(prefix + PREFIX_ADDRESS);
     assertThat(fileBasedSigningMetadataFile.getKeyPath().toFile().toString()).matches(KEY_FILE);
     assertThat(fileBasedSigningMetadataFile.getPasswordPath().toFile().toString())
         .matches(PASSWORD_FILE);

@@ -25,10 +25,8 @@ import com.google.common.io.Resources;
 public class MetadataFileFixture {
 
   public static final String CONFIG_FILE_EXTENSION = ".toml";
-  public static String NO_PREFIX_LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
+  public static String LOWERCASE_ADDRESS = "627306090abab3a6e1400e9345bc60c78a8bef57";
   public static String PREFIX_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  public static String PREFIX_FILENAME_WITHOUT_EXTENSION = "bar_" + PREFIX_ADDRESS;
-  public static String PREFIX_FILENAME = PREFIX_FILENAME_WITHOUT_EXTENSION + CONFIG_FILE_EXTENSION;
   public static String UNKNOWN_TYPE_SIGNER_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd75";
   public static String UNKNOWN_TYPE_SIGNER_FILENAME =
       "unknown_type_signer_" + UNKNOWN_TYPE_SIGNER_ADDRESS + CONFIG_FILE_EXTENSION;
