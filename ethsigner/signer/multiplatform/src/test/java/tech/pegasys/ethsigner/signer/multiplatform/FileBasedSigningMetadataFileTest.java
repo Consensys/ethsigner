@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.NO_PREFIX_LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
@@ -54,12 +54,12 @@ class FileBasedSigningMetadataFileTest {
     final Path keyFile = Path.of("valid_extension.key");
     final Path passwordFile = Path.of("valid_extension.password");
 
-    final IllegalArgumentException thrown =
-        assertThrows(
-            IllegalArgumentException.class,
-            () ->
-                new FileBasedSigningMetadataFile(
-                    metadataFile.getFileName().toString(), keyFile, passwordFile));
-    assertThat(thrown.getMessage()).isEqualTo("Invalid TOML config filename extension");
+    assertThatThrownBy(
+            () -> {
+              new FileBasedSigningMetadataFile(
+                  metadataFile.getFileName().toString(), keyFile, passwordFile);
+            })
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Invalid TOML config filename extension");
   }
 }
