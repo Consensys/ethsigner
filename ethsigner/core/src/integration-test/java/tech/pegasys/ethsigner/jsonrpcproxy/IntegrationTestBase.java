@@ -187,7 +187,6 @@ public class IntegrationTestBase {
     runner.stop();
     clientAndServer = null;
     runner = null;
-    System.gc();
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
