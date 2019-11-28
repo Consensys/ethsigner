@@ -25,24 +25,19 @@ import org.apache.tuweni.toml.TomlParseResult;
 
 public class TomlConfigFileParser {
 
-  private static TomlParseResult checkConfigurationValidity(
-      final TomlParseResult result, final String toml) throws RuntimeException {
+  private static TomlParseResult loadConfiguration(final String toml) throws RuntimeException {
+    final TomlParseResult result = Toml.parse(toml);
+
     if (result == null || result.isEmpty()) {
       throw new RuntimeException("Empty TOML result: " + toml);
     }
-    return result;
-  }
-
-  private static TomlParseResult loadConfiguration(final String toml) throws RuntimeException {
-    final TomlParseResult result = Toml.parse(toml);
 
     if (result.hasErrors()) {
       final String errors =
           result.errors().stream().map(TomlParseError::toString).collect(Collectors.joining("\n"));
       throw new RuntimeException("Invalid TOML configuration: \n" + errors);
     }
-
-    return checkConfigurationValidity(result, toml);
+    return result;
   }
 
   public static TomlParseResult loadConfigurationFromFile(final String configFilePath)
