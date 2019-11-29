@@ -55,10 +55,10 @@ public class MetadataFileFixture {
   public static String PREFIX_LOWERCASE_DUPLICATE_FILENAME_2 =
       "duplicate_bar_" + PREFIX_LOWERCASE_DUPLICATE_ADDRESS + CONFIG_FILE_EXTENSION;
 
-  public static String KEY_FILE = "src/test/resources/metadata-toml-configs/k.key";
-  public static String PASSWORD_FILE = "src/test/resources/metadata-toml-configs/p.password";
-  public static String KEY_FILE_2 = "src/test/resources/metadata-toml-configs/k2.key";
-  public static String PASSWORD_FILE_2 = "src/test/resources/metadata-toml-configs/p2.password";
+  public static String KEY_FILE = "/path/to/k.key";
+  public static String PASSWORD_FILE = "/path/to/p.password";
+  public static String KEY_FILE_2 = "/path/to/k2.key";
+  public static String PASSWORD_FILE_2 = "/path/to/p2.password";
 
   private static final URL metadataTomlConfigPathUrl =
       Resources.getResource("metadata-toml-configs");

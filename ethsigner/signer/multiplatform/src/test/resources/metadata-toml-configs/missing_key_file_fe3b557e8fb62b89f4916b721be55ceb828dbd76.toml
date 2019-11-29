@@ -4,4 +4,4 @@ description = "Example of File based configuration"
 
 [signing]
 type = "file-based-signer"
-password-file = "src/test/resources/metadata-toml-configs/p2.password"
+password-file = "/path/to/p2.password"

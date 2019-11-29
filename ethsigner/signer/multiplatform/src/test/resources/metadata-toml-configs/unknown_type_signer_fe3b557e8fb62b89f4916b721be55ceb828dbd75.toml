@@ -4,5 +4,5 @@ description = "Example of File based configuration"
 
 [signing]
 type = "unknown-type-signer"
-key-file = "src/test/resources/metadata-toml-configs/k2.key"
-password-file = "src/test/resources/metadata-toml-configs/p2.password"
+key-file = "/path/to/k2.key"
+password-file = "/path/to/p2.password"
