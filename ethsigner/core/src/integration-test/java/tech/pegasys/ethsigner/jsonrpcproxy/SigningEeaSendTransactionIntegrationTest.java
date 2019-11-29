@@ -35,7 +35,7 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-class SigningEeaSendTransactionIntegrationTest extends IntegrationTestBase {
+class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
   private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
       "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}";

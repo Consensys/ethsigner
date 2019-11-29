@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthAccounts;
 
-class EthAccountsIntegrationTest extends IntegrationTestBase {
+class EthAccountsIntegrationTest extends DefaultTestBase {
 
   @Test
   void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {

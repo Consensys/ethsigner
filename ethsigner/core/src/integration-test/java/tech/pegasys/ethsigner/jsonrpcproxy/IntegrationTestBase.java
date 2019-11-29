@@ -61,7 +61,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockserver.integration.ClientAndServer;
@@ -104,11 +103,6 @@ public class IntegrationTestBase {
   private static final Duration downstreamTimeout = Duration.ofSeconds(1);
 
   @TempDir static Path dataPath;
-
-  @BeforeAll
-  public static void setupEthSigner() throws IOException, CipherException {
-    setupEthSigner(DEFAULT_CHAIN_ID);
-  }
 
   static void setupEthSigner(final long chainId) throws IOException, CipherException {
     clientAndServer = startClientAndServer();
@@ -170,10 +164,6 @@ public class IntegrationTestBase {
         transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
   }
 
-  static void resetEthSigner() throws IOException, CipherException {
-    setupEthSigner();
-  }
-
   Web3j jsonRpc() {
     return jsonRpc;
   }
@@ -195,6 +185,8 @@ public class IntegrationTestBase {
   public static void teardown() {
     clientAndServer.stop();
     runner.stop();
+    clientAndServer = null;
+    runner = null;
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {

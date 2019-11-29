@@ -35,7 +35,7 @@ import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
-class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
+class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
@@ -382,27 +382,6 @@ class SigningEthSendTransactionIntegrationTest extends IntegrationTestBase {
         request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
 
     verifyEthNodeReceived(sendRawTransactionRequest);
-  }
-
-  @Test
-  void signSendTransactionWhenContractWithLongChainId() throws Exception {
-    setupEthSigner(4123123123L);
-
-    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
-    final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.smartContract(), 4123123123L);
-    final String sendRawTransactionResponse =
-        sendRawTransaction.response(
-            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");
-    setUpEthNodeResponse(
-        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
-
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
-
-    verifyEthNodeReceived(sendRawTransactionRequest);
-
-    resetEthSigner();
   }
 
   @Test

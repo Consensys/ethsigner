@@ -343,6 +343,8 @@ subprojects {
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
 
+    jvmArgs = ['-Xms512m', '-Xmx1g']
+
     useJUnitPlatform()
   }
 
