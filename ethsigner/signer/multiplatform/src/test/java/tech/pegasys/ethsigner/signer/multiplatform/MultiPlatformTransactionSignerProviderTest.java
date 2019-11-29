@@ -13,27 +13,61 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PASSWORD_FILE;
-import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
+import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.google.common.io.Resources;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class MultiPlatformTransactionSignerProviderTest {
+
+  @TempDir Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);;
   private MultiPlatformTransactionSignerProvider signerFactory =
       new MultiPlatformTransactionSignerProvider(loader);
-  private final FileBasedSigningMetadataFile metadataFile =
-      load(LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION, KEY_FILE, PASSWORD_FILE);
+  private FileBasedSigningMetadataFile metadataFile;
+  private Path newKeyFile;
+  private Path newPasswordFile;
+  private String KEY_FILENAME = "k.key";
+  private String PASSWORD_FILENAME = "p.password";
+
+  @BeforeEach
+  void beforeEach() {
+    newKeyFile = configsDirectory.resolve(KEY_FILENAME);
+    newPasswordFile = configsDirectory.resolve(PASSWORD_FILENAME);
+    metadataFile =
+        copyMetadataFileToDirectory(
+            configsDirectory,
+            LOWERCASE_ADDRESS + CONFIG_FILE_EXTENSION,
+            newKeyFile.toAbsolutePath().toString(),
+            newPasswordFile.toAbsolutePath().toString());
+
+    // make sure the password files are where they are expected to be
+    try {
+      Files.copy(
+          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(KEY_FILENAME),
+          newKeyFile);
+      Files.copy(
+          Path.of(Resources.getResource("metadata-toml-configs").toURI())
+              .resolve(PASSWORD_FILENAME),
+          newPasswordFile);
+    } catch (Exception e) {
+      fail("Error copying metadata files", e);
+    }
+  }
 
   @Test
   void getSignerForAvailableMetadataReturnsSigner() {
