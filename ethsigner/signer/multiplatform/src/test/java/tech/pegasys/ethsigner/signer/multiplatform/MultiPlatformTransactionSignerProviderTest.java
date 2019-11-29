@@ -39,13 +39,13 @@ class MultiPlatformTransactionSignerProviderTest {
   private MultiPlatformTransactionSignerProvider signerFactory =
       new MultiPlatformTransactionSignerProvider(loader);
   private FileBasedSigningMetadataFile metadataFile;
-  private Path newKeyFile;
-  private Path newPasswordFile;
 
   @BeforeEach
   void beforeEach() {
-    String KEY_FILENAME = "k.key";
-    String PASSWORD_FILENAME = "p.password";
+    final Path newKeyFile;
+    final Path newPasswordFile;
+    final String KEY_FILENAME = "k.key";
+    final String PASSWORD_FILENAME = "p.password";
     newKeyFile = configsDirectory.resolve(KEY_FILENAME);
     newPasswordFile = configsDirectory.resolve(PASSWORD_FILENAME);
     metadataFile =
