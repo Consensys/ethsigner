@@ -77,7 +77,7 @@ class SigningMetadataTomlConfigLoader {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
       final String type = result.getTable("signing").getString("type");
-      if (SignerType.FILE_BASED_SIGNER.getType().equals(type)) {
+      if (SignerType.fromString(type).equals(SignerType.FILE_BASED_SIGNER)) {
         return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
