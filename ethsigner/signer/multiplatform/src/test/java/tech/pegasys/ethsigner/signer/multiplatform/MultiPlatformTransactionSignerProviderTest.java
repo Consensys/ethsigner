@@ -42,12 +42,11 @@ class MultiPlatformTransactionSignerProviderTest {
 
   @BeforeEach
   void beforeEach() {
-    final Path newKeyFile;
-    final Path newPasswordFile;
     final String KEY_FILENAME = "k.key";
     final String PASSWORD_FILENAME = "p.password";
-    newKeyFile = configsDirectory.resolve(KEY_FILENAME);
-    newPasswordFile = configsDirectory.resolve(PASSWORD_FILENAME);
+    final Path newKeyFile = configsDirectory.resolve(KEY_FILENAME);
+    final Path newPasswordFile = configsDirectory.resolve(PASSWORD_FILENAME);
+
     metadataFile =
         copyMetadataFileToDirectory(
             configsDirectory,
