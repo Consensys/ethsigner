@@ -93,9 +93,6 @@ public class MetadataFileFixture {
     final FileBasedSigningMetadataFile metadataFile =
         load(metadataFilename, keyFilename, passwordFilename);
     final Path newMetadataFile = configsDirectory.resolve(metadataFilename);
-    final Path newKeyFile = configsDirectory.resolve(metadataFile.getKeyPath().getFileName());
-    final Path newPasswordFile =
-        configsDirectory.resolve(metadataFile.getPasswordPath().getFileName());
 
     try {
       Files.copy(
