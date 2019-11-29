@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multifilebased;
+package tech.pegasys.ethsigner.signer.multiplatform;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -25,40 +25,41 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MultiKeyFileTransactionSignerProvider implements TransactionSignerProvider {
+public class MultiPlatformTransactionSignerProvider implements TransactionSignerProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final KeyPasswordLoader keyPasswordLoader;
+  private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
 
-  MultiKeyFileTransactionSignerProvider(final KeyPasswordLoader keyPasswordLoader) {
-    this.keyPasswordLoader = keyPasswordLoader;
+  MultiPlatformTransactionSignerProvider(
+      final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
+    this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
   }
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    return keyPasswordLoader.loadKeyAndPasswordForAddress(address).map(this::createSigner);
+    return signingMetadataTomlConfigLoader.loadMetadataForAddress(address).map(this::createSigner);
   }
 
   @Override
   public Set<String> availableAddresses() {
-    return keyPasswordLoader.loadAvailableKeys().stream()
+    return signingMetadataTomlConfigLoader.loadAvailableSigningMetadataTomlConfigs().stream()
         .map(this::createSigner)
         .filter(Objects::nonNull)
         .map(TransactionSigner::getAddress)
         .collect(Collectors.toSet());
   }
 
-  private TransactionSigner createSigner(final KeyPasswordFile keyPasswordFile) {
+  private TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile) {
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
-              keyPasswordFile.getKeyPath(), keyPasswordFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", keyPasswordFile.getKeyPath().getFileName());
+              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
+      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
       LOG.warn(
-          "Unable to load signer with key '{}'", keyPasswordFile.getKeyPath().getFileName(), e);
+          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }

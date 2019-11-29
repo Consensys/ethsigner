@@ -10,40 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multifilebased;
+package tech.pegasys.ethsigner.signer.multiplatform;
 
 import java.nio.file.Path;
 
 import com.google.common.base.Objects;
 
-class KeyPasswordFile {
+class FileBasedSigningMetadataFile {
 
-  private final String filename;
   private final Path keyPath;
   private final Path passwordPath;
+  private final String filename;
 
-  KeyPasswordFile(final Path keyPath, final Path passwordPath) {
+  public FileBasedSigningMetadataFile(
+      final String filename, final Path keyPath, final Path passwordPath) {
+    this.filename = getFilenameWithoutExtension(filename);
     this.keyPath = keyPath;
     this.passwordPath = passwordPath;
-
-    if (!keyAndPasswordNameMatch(keyPath, passwordPath)) {
-      throw new IllegalArgumentException("Key and Password names must match");
-    } else {
-      this.filename = getFilenameWithoutExtension(keyPath);
-    }
-  }
-
-  private boolean keyAndPasswordNameMatch(final Path key, final Path password) {
-    return getFilenameWithoutExtension(key).equals(getFilenameWithoutExtension(password));
-  }
-
-  private String getFilenameWithoutExtension(final Path file) {
-    final String filename = file.getFileName().toString();
-    if (filename.endsWith(".key") || filename.endsWith(".password")) {
-      return filename.replaceAll("\\.key|\\.password", "");
-    } else {
-      throw new IllegalArgumentException("Invalid key/password filename extension");
-    }
   }
 
   String getFilename() {
@@ -58,6 +41,14 @@ class KeyPasswordFile {
     return passwordPath;
   }
 
+  private String getFilenameWithoutExtension(final String filename) {
+    if (filename.endsWith(".toml")) {
+      return filename.replaceAll("\\.toml", "");
+    } else {
+      throw new IllegalArgumentException("Invalid TOML config filename extension: " + filename);
+    }
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) {
@@ -66,7 +57,7 @@ class KeyPasswordFile {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final KeyPasswordFile that = (KeyPasswordFile) o;
+    final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
     return Objects.equal(filename, that.filename)
         && Objects.equal(keyPath, that.keyPath)
         && Objects.equal(passwordPath, that.passwordPath);
