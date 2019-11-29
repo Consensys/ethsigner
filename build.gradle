@@ -629,6 +629,7 @@ bintray {
   }
 
   publish = true
+  override = version.endsWith('SNAPSHOT')
 
   pkg = bintrayPackage
 }
