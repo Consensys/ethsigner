@@ -10,15 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.signer.multiplatform;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner:app'
-include 'ethsigner:core'
-include 'ethsigner:signing-api'
-include 'ethsigner:signer:hashicorp'
-include 'ethsigner:signer:file-based'
-include 'ethsigner:signer:multifile-based'
-include 'ethsigner:signer:azure'
-include 'ethsigner:signer:multiplatform'
-include 'ethsigner:commandline'
+public enum SignerType {
+  FILE_BASED_SIGNER("file-based-signer"),
+  UNKNOWN_TYPE_SIGNER("unknown");
+
+  private final String type;
+
+  SignerType(String type) {
+    this.type = type;
+  }
+
+  private String getType() {
+    return type;
+  }
+
+  public static SignerType fromString(String typeString) {
+    if (FILE_BASED_SIGNER.getType().equals(typeString)) {
+      return FILE_BASED_SIGNER;
+    } else {
+      return UNKNOWN_TYPE_SIGNER;
+    }
+  }
+};
