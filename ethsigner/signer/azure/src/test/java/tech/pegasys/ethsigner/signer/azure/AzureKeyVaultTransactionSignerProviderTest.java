@@ -39,21 +39,26 @@ public class AzureKeyVaultTransactionSignerProviderTest {
     final ECKeyPair web3jKeyPair = ECKeyPair.create(BigInteger.valueOf(5));
     final String expectedAddress = Credentials.create(web3jKeyPair).getAddress();
 
-    final String keyName = "keyName";
-    final String keyVersion = "keyVersion";
+    final AzureConfig config =
+        new AzureConfig("arbitraryKeyVault", "keyName", "keyVersion", "clientId", "clientSecret");
+
     final KeyVaultClient mockClient = mock(KeyVaultClient.class);
     final KeyBundle mockKeyBundle = mock(KeyBundle.class);
     final JsonWebKey mockWebKey = mock(JsonWebKey.class);
+    final AzureKeyVaultAuthenticator mockAuthenticator = mock(AzureKeyVaultAuthenticator.class);
     when(mockWebKey.x())
         .thenReturn(Arrays.copyOfRange(web3jKeyPair.getPublicKey().toByteArray(), 0, 32));
     when(mockWebKey.y())
         .thenReturn(Arrays.copyOfRange(web3jKeyPair.getPublicKey().toByteArray(), 32, 64));
     when(mockClient.getKey(any())).thenReturn(mockKeyBundle);
     when(mockKeyBundle.key()).thenReturn(mockWebKey);
+    when(mockAuthenticator.getAuthenticatedClient(config.getClientId(), config.getClientSecret()))
+        .thenReturn(mockClient);
 
     AzureKeyVaultTransactionSignerFactory factory =
-        new AzureKeyVaultTransactionSignerFactory("arbitraryKeyVault", mockClient);
-    TransactionSigner signer = factory.createSigner(keyName, keyVersion);
+        new AzureKeyVaultTransactionSignerFactory(mockAuthenticator);
+
+    TransactionSigner signer = factory.createSigner(config);
     assertThat(signer.getAddress()).isEqualTo(expectedAddress);
   }
 }

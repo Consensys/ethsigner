@@ -44,8 +44,8 @@ public class AzureKeyVaultAuthenticatorTest {
   private static final String validKeyVersion = "7c01fe58d68148bba5824ce418241092";
 
   private final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-  private final KeyVaultClientCustom client =
-      authenticator.getAuthenticatedClient(clientId, clientSecret);
+  final AzureKeyVaultTransactionSignerFactory factory =
+      new AzureKeyVaultTransactionSignerFactory(authenticator);
 
   @BeforeAll
   public static void setup() {
@@ -56,6 +56,9 @@ public class AzureKeyVaultAuthenticatorTest {
 
   @Test
   public void ensureCanAuthenticateAndFindKeys() {
+    final KeyVaultClientCustom client =
+        authenticator.getAuthenticatedClient(clientId, clientSecret);
+
     assertThat(client.apiVersion()).isEqualTo("7.0");
 
     final PagedList<KeyItem> keys = client.listKeys("https://ethsignertestkey.vault.azure.net");
@@ -91,10 +94,8 @@ public class AzureKeyVaultAuthenticatorTest {
   public void ensureCanFindKeysAndSign() {
     final String EXPECTED_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-    final AzureKeyVaultTransactionSignerFactory factory =
-        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", client);
-
-    final TransactionSigner signer = factory.createSigner("TestKey", validKeyVersion);
+    final AzureConfigBuilder configBuilder = createValidConfigBuilder();
+    final TransactionSigner signer = factory.createSigner(configBuilder.build());
     assertThat(signer.getAddress()).isEqualTo(EXPECTED_ADDRESS);
 
     byte[] data = {1, 2, 3};
@@ -113,52 +114,48 @@ public class AzureKeyVaultAuthenticatorTest {
 
   @Test
   public void accessingNonExistentKeyVaultThrowsExceptionWithMessage() {
-    final String vaultName = "invalidKeyVault";
-    final AzureKeyVaultTransactionSignerFactory nonExistentKeyVaultFactory =
-        new AzureKeyVaultTransactionSignerFactory(vaultName, client);
+    final AzureConfigBuilder configBuilder = createValidConfigBuilder();
+
+    final String invalidVaultName = "invalidKeyVault";
+    configBuilder.withKeyvaultName(invalidVaultName);
 
     final String expectedMessage =
         String.format(
             AzureKeyVaultTransactionSignerFactory.INVALID_VAULT_PARAMETERS_ERROR_PATTERN,
-            AzureKeyVaultTransactionSignerFactory.constructAzureKeyVaultUrl(vaultName));
+            AzureKeyVaultTransactionSignerFactory.constructAzureKeyVaultUrl(invalidVaultName));
 
-    assertThatThrownBy(() -> nonExistentKeyVaultFactory.createSigner("TestKey", validKeyVersion))
+    assertThatThrownBy(() -> factory.createSigner(configBuilder.build()))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(expectedMessage);
   }
 
   @Test
   public void accessingIncorrectKeyNameOrValueThrowsExceptionWithMessage() {
-    final AzureKeyVaultTransactionSignerFactory validFactory =
-        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", client);
+    final AzureConfigBuilder configBuilder = createValidConfigBuilder();
 
-    assertThatThrownBy(() -> validFactory.createSigner("TestKey", "invalid_version"))
+    configBuilder.withKeyVersion("invalid_version");
+    assertThatThrownBy(() -> factory.createSigner(configBuilder.build()))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
 
-    assertThatThrownBy(() -> validFactory.createSigner("invalid_keyname", validKeyVersion))
+    configBuilder.withKeyVersion(validKeyVersion).withKeyName("invalid_keyname");
+    assertThatThrownBy(() -> factory.createSigner(configBuilder.build()))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.INVALID_KEY_PARAMETERS_ERROR);
   }
 
   @Test
   public void invalidClientCredentialsResultInException() {
-    final KeyVaultClientCustom clientWithInvalidId =
-        authenticator.getAuthenticatedClient("Invalid_id", clientSecret);
-    final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientId =
-        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidId);
+    final AzureConfigBuilder configBuilder = createValidConfigBuilder();
+    configBuilder.withClientId("Invalid_id");
 
-    assertThatThrownBy(() -> factoryWithInvalidClientId.createSigner("TestKey", validKeyVersion))
+    assertThatThrownBy(() -> factory.createSigner(configBuilder.build()))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
 
-    final KeyVaultClientCustom clientWithInvalidSecret =
-        authenticator.getAuthenticatedClient(clientId, "invalid_secret");
-    final AzureKeyVaultTransactionSignerFactory factoryWithInvalidClientSecret =
-        new AzureKeyVaultTransactionSignerFactory("ethsignertestkey", clientWithInvalidSecret);
+    configBuilder.withClientId(clientId).withClientSecret("invalid_secret");
 
-    assertThatThrownBy(
-            () -> factoryWithInvalidClientSecret.createSigner("TestKey", validKeyVersion))
+    assertThatThrownBy(() -> factory.createSigner(configBuilder.build()))
         .isInstanceOf(TransactionSignerInitializationException.class)
         .hasMessage(AzureKeyVaultTransactionSignerFactory.UNKNOWN_VAULT_ACCESS_ERROR);
   }
@@ -167,5 +164,52 @@ public class AzureKeyVaultAuthenticatorTest {
   public void nullClientAndOrSecretAreHandledCleanly() {
     assertThatThrownBy(() -> authenticator.getAuthenticatedClient(null, null))
         .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  private static class AzureConfigBuilder {
+
+    private String keyvaultName;
+    private String keyName;
+    private String keyVersion;
+    private String clientId;
+    private String clientSecret;
+
+    public AzureConfigBuilder withKeyvaultName(String keyvaultName) {
+      this.keyvaultName = keyvaultName;
+      return this;
+    }
+
+    public AzureConfigBuilder withKeyName(String keyName) {
+      this.keyName = keyName;
+      return this;
+    }
+
+    public AzureConfigBuilder withKeyVersion(String keyVersion) {
+      this.keyVersion = keyVersion;
+      return this;
+    }
+
+    public AzureConfigBuilder withClientId(String clientId) {
+      this.clientId = clientId;
+      return this;
+    }
+
+    public AzureConfigBuilder withClientSecret(String clientSecret) {
+      this.clientSecret = clientSecret;
+      return this;
+    }
+
+    public AzureConfig build() {
+      return new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
+    }
+  }
+
+  private AzureConfigBuilder createValidConfigBuilder() {
+    return new AzureConfigBuilder()
+        .withClientId(clientId)
+        .withClientSecret(clientSecret)
+        .withKeyVersion(validKeyVersion)
+        .withKeyName("TestKey")
+        .withKeyvaultName("ethsignertestkey");
   }
 }
