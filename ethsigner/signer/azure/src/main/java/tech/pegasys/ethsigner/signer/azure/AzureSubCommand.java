@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.base.Charsets;
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -77,12 +76,10 @@ public class AzureSubCommand extends SignerSubCommand {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
 
-    final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-    final KeyVaultClientCustom client =
-        authenticator.getAuthenticatedClient(clientId, clientSecret);
-    final AzureKeyVaultTransactionSignerFactory factory =
-        new AzureKeyVaultTransactionSignerFactory(keyvaultName, client);
-    return factory.createSigner(keyName, keyVersion);
+    final AzureConfig config =
+        new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
+
+    return Helpers.createSigner(config);
   }
 
   @Override
