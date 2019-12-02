@@ -13,11 +13,11 @@
 package tech.pegasys.ethsigner.signer.azure;
 
 public class AzureConfig {
-  private String keyvaultName;
-  private String keyName;
-  private String keyVersion;
-  private String clientId;
-  private String clientSecret;
+  private final String keyvaultName;
+  private final String keyName;
+  private final String keyVersion;
+  private final String clientId;
+  private final String clientSecret;
 
   public AzureConfig(
       String keyvaultName,

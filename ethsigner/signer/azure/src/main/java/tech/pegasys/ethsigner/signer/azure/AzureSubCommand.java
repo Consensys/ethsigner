@@ -79,7 +79,10 @@ public class AzureSubCommand extends SignerSubCommand {
     final AzureConfig config =
         new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
 
-    return Helpers.createSigner(config);
+    final AzureKeyVaultTransactionSignerFactory factory =
+        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+
+    return factory.createSigner(config);
   }
 
   @Override
