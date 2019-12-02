@@ -12,26 +12,27 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-public enum SignerType {
-  FILE_BASED_SIGNER("file-based-signer"),
-  AZURE_BASED_SIGNER("azure-based-signer"),
-  UNKNOWN_TYPE_SIGNER("unknown");
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
-  private final String type;
+public abstract class SigningMetadataFile {
 
-  SignerType(String type) {
-    this.type = type;
+  protected String baseFilename;
+
+  public SigningMetadataFile(final String filename) {
+    this.baseFilename = getFilenameWithoutExtension(filename);
   }
 
-  private String getType() {
-    return type;
+  public String getBaseFilename() {
+    return baseFilename;
   }
 
-  public static SignerType fromString(String typeString) {
-    if (FILE_BASED_SIGNER.getType().equals(typeString)) {
-      return FILE_BASED_SIGNER;
+  private String getFilenameWithoutExtension(final String filename) {
+    if (filename.endsWith(".toml")) {
+      return filename.replaceAll("\\.toml", "");
     } else {
-      return UNKNOWN_TYPE_SIGNER;
+      throw new IllegalArgumentException("Invalid TOML config filename extension: " + filename);
     }
   }
-};
+
+  public abstract TransactionSigner createSigner(final MultiSignerFactory factory);
+}

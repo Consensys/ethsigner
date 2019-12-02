@@ -12,10 +12,10 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -30,37 +30,32 @@ public class MultiPlatformTransactionSignerProvider implements TransactionSigner
   private static final Logger LOG = LogManager.getLogger();
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
+  private final MultiSignerFactory signerFactory;
 
   MultiPlatformTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
+
+    final AzureKeyVaultAuthenticator azureAuthenticator = new AzureKeyVaultAuthenticator();
+    final AzureKeyVaultTransactionSignerFactory azureFactory =
+        new AzureKeyVaultTransactionSignerFactory(azureAuthenticator);
+
+    signerFactory = new MultiSignerFactory(azureFactory);
   }
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    return signingMetadataTomlConfigLoader.loadMetadataForAddress(address).map(this::createSigner);
+    return signingMetadataTomlConfigLoader
+        .loadMetadataForAddress(address)
+        .map(metaDataFile -> metaDataFile.createSigner(signerFactory));
   }
 
   @Override
   public Set<String> availableAddresses() {
     return signingMetadataTomlConfigLoader.loadAvailableSigningMetadataTomlConfigs().stream()
-        .map(this::createSigner)
+        .map(metaDataFile -> metaDataFile.createSigner(signerFactory))
         .filter(Objects::nonNull)
         .map(TransactionSigner::getAddress)
         .collect(Collectors.toSet());
-  }
-
-  private TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile) {
-    try {
-      final TransactionSigner signer =
-          FileBasedSignerFactory.createSigner(
-              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
-      return signer;
-    } catch (final TransactionSignerInitializationException e) {
-      LOG.warn(
-          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
-      return null;
-    }
   }
 }

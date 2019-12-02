@@ -12,26 +12,24 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-public enum SignerType {
-  FILE_BASED_SIGNER("file-based-signer"),
-  AZURE_BASED_SIGNER("azure-based-signer"),
-  UNKNOWN_TYPE_SIGNER("unknown");
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig;
 
-  private final String type;
+class AzureSigningMetadataFile extends SigningMetadataFile {
 
-  SignerType(String type) {
-    this.type = type;
+  private final AzureConfig config;
+
+  public AzureSigningMetadataFile(final String filename, final AzureConfig config) {
+    super(filename);
+    this.config = config;
   }
 
-  private String getType() {
-    return type;
+  public AzureConfig getConfig() {
+    return config;
   }
 
-  public static SignerType fromString(String typeString) {
-    if (FILE_BASED_SIGNER.getType().equals(typeString)) {
-      return FILE_BASED_SIGNER;
-    } else {
-      return UNKNOWN_TYPE_SIGNER;
-    }
+  @Override
+  public TransactionSigner createSigner(final MultiSignerFactory factory) {
+    return factory.createSigner(this);
   }
-};
+}

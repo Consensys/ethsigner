@@ -12,41 +12,30 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+
 import java.nio.file.Path;
 
 import com.google.common.base.Objects;
 
-class FileBasedSigningMetadataFile {
+class FileBasedSigningMetadataFile extends SigningMetadataFile {
 
   private final Path keyPath;
   private final Path passwordPath;
-  private final String filename;
 
   public FileBasedSigningMetadataFile(
       final String filename, final Path keyPath, final Path passwordPath) {
-    this.filename = getFilenameWithoutExtension(filename);
+    super(filename);
     this.keyPath = keyPath;
     this.passwordPath = passwordPath;
   }
 
-  String getFilename() {
-    return filename;
-  }
-
-  Path getKeyPath() {
+  public Path getKeyPath() {
     return keyPath;
   }
 
-  Path getPasswordPath() {
+  public Path getPasswordPath() {
     return passwordPath;
-  }
-
-  private String getFilenameWithoutExtension(final String filename) {
-    if (filename.endsWith(".toml")) {
-      return filename.replaceAll("\\.toml", "");
-    } else {
-      throw new IllegalArgumentException("Invalid TOML config filename extension: " + filename);
-    }
   }
 
   @Override
@@ -58,13 +47,18 @@ class FileBasedSigningMetadataFile {
       return false;
     }
     final FileBasedSigningMetadataFile that = (FileBasedSigningMetadataFile) o;
-    return Objects.equal(filename, that.filename)
+    return Objects.equal(baseFilename, that.baseFilename)
         && Objects.equal(keyPath, that.keyPath)
         && Objects.equal(passwordPath, that.passwordPath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(filename, keyPath, passwordPath);
+    return Objects.hashCode(baseFilename, keyPath, passwordPath);
+  }
+
+  @Override
+  public TransactionSigner createSigner(final MultiSignerFactory factory) {
+    return factory.createSigner(this);
   }
 }

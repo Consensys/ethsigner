@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
+import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.toml.TomlParseResult;
+import org.apache.tuweni.toml.TomlTable;
 
 class SigningMetadataTomlConfigLoader {
 
@@ -41,10 +44,11 @@ class SigningMetadataTomlConfigLoader {
     this.tomlConfigsDirectory = rootDirectory;
   }
 
-  Optional<FileBasedSigningMetadataFile> loadMetadataForAddress(final String address) {
-    final List<FileBasedSigningMetadataFile> matchingMetadata =
+  Optional<SigningMetadataFile> loadMetadataForAddress(final String address) {
+    final List<SigningMetadataFile> matchingMetadata =
         loadAvailableSigningMetadataTomlConfigs().stream()
-            .filter(toml -> toml.getFilename().toLowerCase().endsWith(normalizeAddress(address)))
+            .filter(
+                toml -> toml.getBaseFilename().toLowerCase().endsWith(normalizeAddress(address)))
             .collect(Collectors.toList());
 
     if (matchingMetadata.size() > 1) {
@@ -57,8 +61,8 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  Collection<FileBasedSigningMetadataFile> loadAvailableSigningMetadataTomlConfigs() {
-    final Collection<FileBasedSigningMetadataFile> metadataConfigs = new HashSet<>();
+  Collection<SigningMetadataFile> loadAvailableSigningMetadataTomlConfigs() {
+    final Collection<SigningMetadataFile> metadataConfigs = new HashSet<>();
 
     try (final DirectoryStream<Path> directoryStream =
         Files.newDirectoryStream(tomlConfigsDirectory, GLOB_CONFIG_MATCHER)) {
@@ -72,13 +76,15 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  private Optional<FileBasedSigningMetadataFile> getMetadataInfo(final Path file) {
+  private Optional<SigningMetadataFile> getMetadataInfo(final Path file) {
     try {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
       final String type = result.getTable("signing").getString("type");
       if (SignerType.fromString(type).equals(SignerType.FILE_BASED_SIGNER)) {
         return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
+      } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
+        return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
@@ -89,13 +95,27 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  private Optional<FileBasedSigningMetadataFile> getFileBasedSigningMetadataFromToml(
-      String filename, TomlParseResult result) {
+  private Optional<SigningMetadataFile> getFileBasedSigningMetadataFromToml(
+      final String filename, final TomlParseResult result) {
     final String keyFilename = result.getTable("signing").getString("key-file");
     final Path keyPath = new File(keyFilename).toPath();
     final String passwordFilename = result.getTable("signing").getString("password-file");
     final Path passwordPath = new File(passwordFilename).toPath();
     return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
+  }
+
+  public Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
+      final String filename, final TomlParseResult result) {
+    final TomlTable signingTable = result.getTable("signing");
+    return Optional.of(
+        new AzureSigningMetadataFile(
+            filename,
+            new AzureConfig(
+                signingTable.getString("key-vault-name"),
+                signingTable.getString("key-name"),
+                signingTable.getString("key-version"),
+                signingTable.getString("clientId"),
+                signingTable.getString("client-secret-path"))));
   }
 
   private String normalizeAddress(final String address) {

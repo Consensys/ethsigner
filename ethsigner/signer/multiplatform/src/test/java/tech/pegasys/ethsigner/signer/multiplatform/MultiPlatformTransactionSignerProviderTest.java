@@ -77,7 +77,7 @@ class MultiPlatformTransactionSignerProviderTest {
 
   @Test
   void getAddresses() {
-    Collection<FileBasedSigningMetadataFile> files = Collections.singleton(metadataFile);
+    Collection<SigningMetadataFile> files = Collections.singleton(metadataFile);
     when(loader.loadAvailableSigningMetadataTomlConfigs()).thenReturn(files);
     assertThat(signerFactory.availableAddresses()).containsExactly("0x" + LOWERCASE_ADDRESS);
   }
