@@ -10,15 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multiplatform;
+package tech.pegasys.ethsigner.signer.multiplatform.metadata;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.multiplatform.MultiSignerFactory;
 
 import java.nio.file.Path;
 
 import com.google.common.base.Objects;
 
-class FileBasedSigningMetadataFile extends SigningMetadataFile {
+public class FileBasedSigningMetadataFile extends SigningMetadataFile {
 
   private final Path keyPath;
   private final Path passwordPath;

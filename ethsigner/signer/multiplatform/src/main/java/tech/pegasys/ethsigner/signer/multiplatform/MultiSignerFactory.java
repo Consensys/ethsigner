@@ -12,43 +12,13 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+public interface MultiSignerFactory {
 
-public class MultiSignerFactory {
+  TransactionSigner createSigner(final AzureSigningMetadataFile metaData);
 
-  private static final Logger LOG = LogManager.getLogger();
-
-  final AzureKeyVaultTransactionSignerFactory azureFactory;
-
-  public MultiSignerFactory(AzureKeyVaultTransactionSignerFactory azureFactory) {
-    this.azureFactory = azureFactory;
-  }
-
-  public TransactionSigner createSigner(final AzureSigningMetadataFile metaData) {
-    final TransactionSigner signer = azureFactory.createSigner(metaData.getConfig());
-
-    // assert signer.getAddress() == metaData.getFilename();
-
-    return signer;
-  }
-
-  public TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile) {
-    try {
-      final TransactionSigner signer =
-          FileBasedSignerFactory.createSigner(
-              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
-      return signer;
-    } catch (final TransactionSignerInitializationException e) {
-      LOG.warn(
-          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
-      return null;
-    }
-  }
+  TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile);
 }

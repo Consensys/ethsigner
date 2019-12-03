@@ -20,6 +20,9 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CO
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;

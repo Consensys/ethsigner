@@ -13,6 +13,9 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 import java.io.File;
 import java.io.IOException;

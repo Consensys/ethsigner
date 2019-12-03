@@ -10,29 +10,27 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multiplatform;
+package tech.pegasys.ethsigner.signer.multiplatform.metadata;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+import tech.pegasys.ethsigner.signer.multiplatform.MultiSignerFactory;
 
-public abstract class SigningMetadataFile {
+public class AzureSigningMetadataFile extends SigningMetadataFile {
 
-  protected String baseFilename;
+  private final AzureConfig config;
 
-  public SigningMetadataFile(final String filename) {
-    this.baseFilename = getFilenameWithoutExtension(filename);
+  public AzureSigningMetadataFile(final String filename, final AzureConfig config) {
+    super(filename);
+    this.config = config;
   }
 
-  public String getBaseFilename() {
-    return baseFilename;
+  public AzureConfig getConfig() {
+    return config;
   }
 
-  private String getFilenameWithoutExtension(final String filename) {
-    if (filename.endsWith(".toml")) {
-      return filename.replaceAll("\\.toml", "");
-    } else {
-      throw new IllegalArgumentException("Invalid TOML config filename extension: " + filename);
-    }
+  @Override
+  public TransactionSigner createSigner(final MultiSignerFactory factory) {
+    return factory.createSigner(this);
   }
-
-  public abstract TransactionSigner createSigner(final MultiSignerFactory factory);
 }

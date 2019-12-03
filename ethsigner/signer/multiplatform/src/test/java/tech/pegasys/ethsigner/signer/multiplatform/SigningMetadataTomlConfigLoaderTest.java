@@ -37,6 +37,10 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UN
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UNKNOWN_TYPE_SIGNER_FILENAME;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;

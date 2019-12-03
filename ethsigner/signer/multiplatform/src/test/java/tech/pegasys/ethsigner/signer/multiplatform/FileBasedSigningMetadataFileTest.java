@@ -21,6 +21,8 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PA
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.PREFIX_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.load;
 
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
