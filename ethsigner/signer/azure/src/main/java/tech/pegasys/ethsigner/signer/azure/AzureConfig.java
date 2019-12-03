@@ -20,11 +20,11 @@ public class AzureConfig {
   private final String clientSecret;
 
   public AzureConfig(
-      final String keyvaultName,
-      final String keyName,
-      final String keyVersion,
-      final String clientId,
-      final String clientSecret) {
+      String keyvaultName,
+      String keyName,
+      String keyVersion,
+      String clientId,
+      String clientSecret) {
     this.keyvaultName = keyvaultName;
     this.keyName = keyName;
     this.keyVersion = keyVersion;
