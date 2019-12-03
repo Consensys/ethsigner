@@ -115,7 +115,7 @@ class SigningMetadataTomlConfigLoader {
                 signingTable.getString("key-name"),
                 signingTable.getString("key-version"),
                 signingTable.getString("clientId"),
-                signingTable.getString("client-secret-path"))));
+                signingTable.getString("client-secret"))));
   }
 
   private String normalizeAddress(final String address) {
