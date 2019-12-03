@@ -37,12 +37,12 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UN
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UNKNOWN_TYPE_SIGNER_FILENAME;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
-import com.google.common.io.Resources;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.google.common.io.Resources;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -204,7 +204,6 @@ class SigningMetadataTomlConfigLoaderTest {
         .containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
   }
 
-
   @Test
   void azureConfigIsLoadedIfAzureMetaDataFileInDirectory() {
     final String metaDataFilename = "azureconfig.toml";
@@ -231,7 +230,4 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(metaData.getConfig().getKeyName()).isEqualTo("TestKey");
     assertThat(metaData.getConfig().getKeyVersion()).isEqualTo("7c01fe58d68148bba5824ce418241092");
   }
-
-
-
 }

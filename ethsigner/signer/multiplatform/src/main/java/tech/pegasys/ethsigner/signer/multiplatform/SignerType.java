@@ -28,8 +28,8 @@ public enum SignerType {
   }
 
   public static SignerType fromString(String typeString) {
-    for(final SignerType signerType: SignerType.values()) {
-      if(signerType.getType().equals(typeString)) {
+    for (final SignerType signerType : SignerType.values()) {
+      if (signerType.getType().equals(typeString)) {
         return signerType;
       }
     }

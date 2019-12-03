@@ -114,7 +114,7 @@ class SigningMetadataTomlConfigLoader {
                 signingTable.getString("key-vault-name"),
                 signingTable.getString("key-name"),
                 signingTable.getString("key-version"),
-                signingTable.getString("clientId"),
+                signingTable.getString("client-id"),
                 signingTable.getString("client-secret"))));
   }
 
