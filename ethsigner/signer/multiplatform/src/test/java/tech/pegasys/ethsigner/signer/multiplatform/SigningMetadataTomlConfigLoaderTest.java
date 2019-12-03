@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CONFIG_FILE_EXTENSION;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.KEY_FILE_2;
@@ -36,6 +37,8 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UN
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.UNKNOWN_TYPE_SIGNER_FILENAME;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import com.google.common.io.Resources;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
@@ -200,4 +203,35 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(metadataFiles)
         .containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
   }
+
+
+  @Test
+  void azureConfigIsLoadedIfAzureMetaDataFileInDirectory() {
+    final String metaDataFilename = "azureconfig.toml";
+    final Path newMetadataFile = configsDirectory.resolve(metaDataFilename);
+
+    try {
+      Files.copy(
+          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(metaDataFilename),
+          newMetadataFile);
+    } catch (Exception e) {
+      fail("Error copying metadata files", e);
+    }
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isOne();
+    assertThat(metadataFiles.toArray()[0]).isInstanceOf(AzureSigningMetadataFile.class);
+    final AzureSigningMetadataFile metaData = (AzureSigningMetadataFile) metadataFiles.toArray()[0];
+
+    assertThat(metaData.getConfig().getClientId()).isEqualTo("theClientId");
+    assertThat(metaData.getConfig().getClientSecret()).isEqualTo("theClientSecret");
+    assertThat(metaData.getConfig().getKeyvaultName()).isEqualTo("ethsignertestkey");
+    assertThat(metaData.getConfig().getKeyName()).isEqualTo("TestKey");
+    assertThat(metaData.getConfig().getKeyVersion()).isEqualTo("7c01fe58d68148bba5824ce418241092");
+  }
+
+
+
 }

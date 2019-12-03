@@ -28,10 +28,11 @@ public enum SignerType {
   }
 
   public static SignerType fromString(String typeString) {
-    if (FILE_BASED_SIGNER.getType().equals(typeString)) {
-      return FILE_BASED_SIGNER;
-    } else {
-      return UNKNOWN_TYPE_SIGNER;
+    for(final SignerType signerType: SignerType.values()) {
+      if(signerType.getType().equals(typeString)) {
+        return signerType;
+      }
     }
+    return UNKNOWN_TYPE_SIGNER;
   }
-};
+}
