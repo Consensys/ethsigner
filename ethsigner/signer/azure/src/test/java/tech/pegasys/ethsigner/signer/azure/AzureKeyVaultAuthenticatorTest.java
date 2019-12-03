@@ -206,10 +206,10 @@ public class AzureKeyVaultAuthenticatorTest {
 
   private AzureConfigBuilder createValidConfigBuilder() {
     return new AzureConfigBuilder()
-        .withClientId(clientId)
-        .withClientSecret(clientSecret)
-        .withKeyVersion(validKeyVersion)
+        .withKeyvaultName("ethsignertestkey")
         .withKeyName("TestKey")
-        .withKeyvaultName("ethsignertestkey");
+        .withKeyVersion(validKeyVersion)
+        .withClientId(clientId)
+        .withClientSecret(clientSecret);
   }
 }

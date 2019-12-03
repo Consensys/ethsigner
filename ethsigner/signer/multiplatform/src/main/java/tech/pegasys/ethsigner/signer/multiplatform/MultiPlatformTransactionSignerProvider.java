@@ -35,7 +35,7 @@ public class MultiPlatformTransactionSignerProvider
   private static final Logger LOG = LogManager.getLogger();
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
-  final AzureKeyVaultTransactionSignerFactory azureFactory;
+  private final AzureKeyVaultTransactionSignerFactory azureFactory;
 
   MultiPlatformTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
@@ -62,16 +62,24 @@ public class MultiPlatformTransactionSignerProvider
   }
 
   @Override
-  public TransactionSigner createSigner(final AzureSigningMetadataFile metaData) {
-    final TransactionSigner signer = azureFactory.createSigner(metaData.getConfig());
+  public TransactionSigner createSigner(final AzureSigningMetadataFile metaDataFile) {
+    final TransactionSigner signer;
+    try {
+      signer = azureFactory.createSigner(metaDataFile.getConfig());
+    } catch (final TransactionSignerInitializationException e) {
+      LOG.error("Failed to construct azure siger from {}", metaDataFile.getBaseFilename());
+      return null;
+    }
+
     final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metaData.getBaseFilename())) {
+    if (!signerAddress.equals(metaDataFile.getBaseFilename())) {
       LOG.error(
           "Azure Signer's Ethereum Address ({}) does not align with metadata filename ({})",
           signerAddress,
-          metaData.getBaseFilename());
+          metaDataFile.getBaseFilename());
       throw new IllegalArgumentException("Mismatch between signer and filename.");
     }
+    LOG.info("Loaded signer for address {}", signerAddress);
     return signer;
   }
 
