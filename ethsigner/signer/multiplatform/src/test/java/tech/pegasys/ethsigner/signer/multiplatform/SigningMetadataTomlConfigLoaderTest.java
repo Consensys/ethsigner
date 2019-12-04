@@ -208,18 +208,21 @@ class SigningMetadataTomlConfigLoaderTest {
         .containsOnly(metadataFile1, metadataFile2, metadataFile3, metadataFile4, metadataFile5);
   }
 
-  @Test
-  void azureConfigIsLoadedIfAzureMetadataFileInDirectory() {
-    final String metadataFilename = "azureconfig.toml";
-    final Path newMetadataFile = configsDirectory.resolve(metadataFilename);
+  private void copyFileIntoConfigDirectory(final String filename) {
+    final Path newMetadataFile = configsDirectory.resolve(filename);
 
     try {
       Files.copy(
-          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(metadataFilename),
+          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(filename),
           newMetadataFile);
     } catch (Exception e) {
       fail("Error copying metadata files", e);
     }
+  }
+
+  @Test
+  void azureConfigIsLoadedIfAzureMetadataFileInDirectory() {
+    copyFileIntoConfigDirectory("azureconfig.toml");
 
     final Collection<SigningMetadataFile> metadataFiles =
         loader.loadAvailableSigningMetadataTomlConfigs();
@@ -235,5 +238,19 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(metadataFile.getConfig().getKeyName()).isEqualTo("TestKey");
     assertThat(metadataFile.getConfig().getKeyVersion())
         .isEqualTo("7c01fe58d68148bba5824ce418241092");
+  }
+
+  @Test
+  void azureConfigWithIllegalValueTypeFailsToLoad() {
+    copyFileIntoConfigDirectory("azureconfig_illegalValueType.toml");
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isZero();
+  }
+
+  @Test
+  void azureConfigWithMissingFieldFailsToLoad() {
+    copyFileIntoConfigDirectory("azureconfig_missingField.toml");
   }
 }

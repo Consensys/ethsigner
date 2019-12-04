@@ -97,5 +97,4 @@ public class AzureSignerMultiplatformSigning {
 
     assertThat(ethSigner.accounts().list()).isEmpty();
   }
-
 }

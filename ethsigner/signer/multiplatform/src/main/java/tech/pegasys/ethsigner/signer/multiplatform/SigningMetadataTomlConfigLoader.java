@@ -55,7 +55,7 @@ class SigningMetadataTomlConfigLoader {
             .collect(Collectors.toList());
 
     if (matchingMetadata.size() > 1) {
-      LOG.error("Found multiple signing metadata TOML file matches for address {}", address);
+      LOG.error("Found multiple signing metadata TOML file matches for address " + address);
       return Optional.empty();
     } else if (matchingMetadata.isEmpty()) {
       return Optional.empty();
@@ -83,7 +83,15 @@ class SigningMetadataTomlConfigLoader {
     try {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
-      final String type = result.getTable("signing").getString("type");
+
+      final Optional<ThrowingTomlTable> signingTable =
+          getSigningTableFrom(file.getFileName().toString(), result);
+      if (signingTable.isEmpty()) {
+        return Optional.empty();
+      }
+
+      final String type = signingTable.get().getString("type");
+
       if (SignerType.fromString(type).equals(SignerType.FILE_BASED_SIGNER)) {
         return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
@@ -93,7 +101,7 @@ class SigningMetadataTomlConfigLoader {
         return Optional.empty();
       }
     } catch (final Exception e) {
-      LOG.error("Could not load TOML file", e);
+      LOG.error("Could not load TOML file " + file, e);
       return Optional.empty();
     }
   }
