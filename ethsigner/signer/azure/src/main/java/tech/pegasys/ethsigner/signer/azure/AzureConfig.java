@@ -32,7 +32,7 @@ public class AzureConfig {
     this.clientSecret = clientSecret;
   }
 
-  public String getKeyvaultName() {
+  public String getKeyVaultName() {
     return keyVaultName;
   }
 

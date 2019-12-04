@@ -41,6 +41,7 @@ public class MultiPlatformTransactionSignerProvider
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
 
+    // TODO(tmm): The factory should be injected
     final AzureKeyVaultAuthenticator azureAuthenticator = new AzureKeyVaultAuthenticator();
     azureFactory = new AzureKeyVaultTransactionSignerFactory(azureAuthenticator);
   }

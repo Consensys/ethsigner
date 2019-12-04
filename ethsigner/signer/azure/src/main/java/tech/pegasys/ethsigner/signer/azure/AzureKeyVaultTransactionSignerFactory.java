@@ -51,7 +51,7 @@ public class AzureKeyVaultTransactionSignerFactory {
     checkNotNull(config, "Config must be specified");
     final KeyVaultClientCustom client =
         vaultAuthenticator.getAuthenticatedClient(config.getClientId(), config.getClientSecret());
-    final String baseUrl = constructAzureKeyVaultUrl(config.getKeyvaultName());
+    final String baseUrl = constructAzureKeyVaultUrl(config.getKeyVaultName());
 
     final JsonWebKey key;
     final KeyIdentifier keyIdentifier;
