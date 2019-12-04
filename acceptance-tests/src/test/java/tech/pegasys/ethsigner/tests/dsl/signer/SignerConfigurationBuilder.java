@@ -27,6 +27,7 @@ public class SignerConfigurationBuilder {
   private String ipAddress;
   private String keyVaultName;
   private Path keysDirectory;
+  private Path metaDataLibraryPath;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -58,10 +59,15 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withMetaDataLibrary(final Path metaDataLibraryPath) {
+    this.metaDataLibraryPath = metaDataLibraryPath;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(
-            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory);
+            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory, metaDataLibraryPath);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }

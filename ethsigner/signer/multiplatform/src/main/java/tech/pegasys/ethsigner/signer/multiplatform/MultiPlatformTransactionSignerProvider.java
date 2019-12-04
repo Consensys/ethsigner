@@ -68,7 +68,7 @@ public class MultiPlatformTransactionSignerProvider
     try {
       signer = azureFactory.createSigner(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
-      LOG.error("Failed to construct Azure signer from {}", metadataFile.getBaseFilename());
+      LOG.error("Failed to construct Azure signer from " + metadataFile.getBaseFilename());
       return null;
     }
 
@@ -78,7 +78,7 @@ public class MultiPlatformTransactionSignerProvider
           "Azure signer's Ethereum Address ({}) does not align with metadata filename ({})",
           signerAddress,
           metadataFile.getBaseFilename());
-      throw new IllegalArgumentException("Mismatch between signer and filename.");
+      return null;
     }
     LOG.info("Loaded signer for address {}", signerAddress);
     return signer;
