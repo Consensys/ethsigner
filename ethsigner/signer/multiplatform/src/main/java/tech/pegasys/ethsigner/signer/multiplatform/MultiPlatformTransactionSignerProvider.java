@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
@@ -38,12 +37,10 @@ public class MultiPlatformTransactionSignerProvider
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
 
   MultiPlatformTransactionSignerProvider(
-      final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
+      final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
+      final AzureKeyVaultTransactionSignerFactory azureFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
-
-    // TODO(tmm): The factory should be injected
-    final AzureKeyVaultAuthenticator azureAuthenticator = new AzureKeyVaultAuthenticator();
-    azureFactory = new AzureKeyVaultTransactionSignerFactory(azureAuthenticator);
+    this.azureFactory = azureFactory;
   }
 
   @Override
@@ -68,17 +65,17 @@ public class MultiPlatformTransactionSignerProvider
     try {
       signer = azureFactory.createSigner(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
-      LOG.error("Failed to construct Azure signer from {}", metadataFile.getBaseFilename());
+      LOG.error("Failed to construct Azure signer from " + metadataFile.getBaseFilename());
       return null;
     }
 
     final String signerAddress = signer.getAddress();
     if (!signerAddress.equals(metadataFile.getBaseFilename())) {
       LOG.error(
-          "Azure signer's Ethereum Address ({}) does not align with metadata filename ({})",
-          signerAddress,
-          metadataFile.getBaseFilename());
-      throw new IllegalArgumentException("Mismatch between signer and filename.");
+          String.format(
+              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              signerAddress, metadataFile.getBaseFilename()));
+      return null;
     }
     LOG.info("Loaded signer for address {}", signerAddress);
     return signer;
