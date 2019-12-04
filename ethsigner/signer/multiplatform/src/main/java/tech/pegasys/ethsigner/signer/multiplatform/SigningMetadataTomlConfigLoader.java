@@ -100,43 +100,63 @@ class SigningMetadataTomlConfigLoader {
 
   private Optional<SigningMetadataFile> getFileBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
-    final String keyFilename = result.getTable("signing").getString("key-file");
-    final Path keyPath = new File(keyFilename).toPath();
-    final String passwordFilename = result.getTable("signing").getString("password-file");
-    final Path passwordPath = new File(passwordFilename).toPath();
-    return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
-  }
-
-  public Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
-      final String filename, final TomlParseResult result) {
-    final TomlTable signingTable = result.getTable("signing");
-    if (signingTable == null) {
-      final String errorMsg =
-          String.format(
-              "%s is a badly formed EthSigner metadata file - \"signing\" heading is missing.",
-              filename);
-      LOG.error(errorMsg);
+    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
-    final ThrowingTomlTable table = new ThrowingTomlTable(signingTable);
-
-    final AzureConfigBuilder builder;
     try {
-      builder = new AzureConfigBuilder();
-      builder.withKeyVaultName(table.getString("key-vault-name"));
-      builder.withKeyName(table.getString("key-name"));
-      builder.withKeyVersion(table.getString("key-version"));
-      builder.withClientId(table.getString("client-id"));
-      builder.withClientSecret(table.getString("client-secret"));
+      final ThrowingTomlTable table = signingTable.get();
+
+      final String keyFilename = table.getString("key-file");
+      final Path keyPath = new File(keyFilename).toPath();
+      final String passwordFilename = table.getString("password-file");
+      final Path passwordPath = new File(passwordFilename).toPath();
+      return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
     } catch (final IllegalArgumentException e) {
       final String errorMsg =
           String.format("%s failed to decoded due to %s", filename, e.getMessage());
       LOG.error(errorMsg);
       return Optional.empty();
     }
+  }
 
-    return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
+  public Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
+      final String filename, final TomlParseResult result) {
+
+    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    if (signingTable.isEmpty()) {
+      return Optional.empty();
+    }
+
+    final AzureConfigBuilder builder;
+    try {
+      final ThrowingTomlTable table = signingTable.get();
+      builder = new AzureConfigBuilder();
+      builder.withKeyVaultName(table.getString("key-vault-name"));
+      builder.withKeyName(table.getString("key-name"));
+      builder.withKeyVersion(table.getString("key-version"));
+      builder.withClientId(table.getString("client-id"));
+      builder.withClientSecret(table.getString("client-secret"));
+      return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
+    } catch (final IllegalArgumentException e) {
+      final String errorMsg =
+          String.format("%s failed to decoded due to %s", filename, e.getMessage());
+      LOG.error(errorMsg);
+      return Optional.empty();
+    }
+  }
+
+  private Optional<ThrowingTomlTable> getSigningTableFrom(
+      final String filename, final TomlParseResult result) {
+    final TomlTable signingTable = result.getTable("signing");
+    if (signingTable == null) {
+      LOG.error(
+          filename
+              + " is a badly formed EthSigner metadata file - \"signing\" heading is missing.");
+      return Optional.empty();
+    }
+    return Optional.of(new ThrowingTomlTable(signingTable));
   }
 
   private String normalizeAddress(final String address) {
