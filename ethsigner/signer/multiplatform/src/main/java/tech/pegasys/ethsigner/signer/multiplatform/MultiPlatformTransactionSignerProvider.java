@@ -49,34 +49,34 @@ public class MultiPlatformTransactionSignerProvider
   public Optional<TransactionSigner> getSigner(final String address) {
     return signingMetadataTomlConfigLoader
         .loadMetadataForAddress(address)
-        .map(metaDataFile -> metaDataFile.createSigner(this));
+        .map(metadataFile -> metadataFile.createSigner(this));
   }
 
   @Override
   public Set<String> availableAddresses() {
     return signingMetadataTomlConfigLoader.loadAvailableSigningMetadataTomlConfigs().stream()
-        .map(metaDataFile -> metaDataFile.createSigner(this))
+        .map(metadataFile -> metadataFile.createSigner(this))
         .filter(Objects::nonNull)
         .map(TransactionSigner::getAddress)
         .collect(Collectors.toSet());
   }
 
   @Override
-  public TransactionSigner createSigner(final AzureSigningMetadataFile metaDataFile) {
+  public TransactionSigner createSigner(final AzureSigningMetadataFile metadataFile) {
     final TransactionSigner signer;
     try {
-      signer = azureFactory.createSigner(metaDataFile.getConfig());
+      signer = azureFactory.createSigner(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
-      LOG.error("Failed to construct azure siger from {}", metaDataFile.getBaseFilename());
+      LOG.error("Failed to construct Azure signer from {}", metadataFile.getBaseFilename());
       return null;
     }
 
     final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metaDataFile.getBaseFilename())) {
+    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
       LOG.error(
-          "Azure Signer's Ethereum Address ({}) does not align with metadata filename ({})",
+          "Azure signer's Ethereum Address ({}) does not align with metadata filename ({})",
           signerAddress,
-          metaDataFile.getBaseFilename());
+          metadataFile.getBaseFilename());
       throw new IllegalArgumentException("Mismatch between signer and filename.");
     }
     LOG.info("Loaded signer for address {}", signerAddress);
@@ -84,16 +84,15 @@ public class MultiPlatformTransactionSignerProvider
   }
 
   @Override
-  public TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile) {
+  public TransactionSigner createSigner(final FileBasedSigningMetadataFile metadataFile) {
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
-              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
+              metadataFile.getKeyPath(), metadataFile.getPasswordPath());
+      LOG.debug("Loaded signer with key '{}'", metadataFile.getKeyPath().getFileName());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
-      LOG.warn(
-          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
+      LOG.warn("Unable to load signer with key '{}'", metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }

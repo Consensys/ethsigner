@@ -210,12 +210,12 @@ class SigningMetadataTomlConfigLoaderTest {
 
   @Test
   void azureConfigIsLoadedIfAzureMetaDataFileInDirectory() {
-    final String metaDataFilename = "azureconfig.toml";
-    final Path newMetadataFile = configsDirectory.resolve(metaDataFilename);
+    final String metadataFilename = "azureconfig.toml";
+    final Path newMetadataFile = configsDirectory.resolve(metadataFilename);
 
     try {
       Files.copy(
-          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(metaDataFilename),
+          Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(metadataFilename),
           newMetadataFile);
     } catch (Exception e) {
       fail("Error copying metadata files", e);
@@ -226,12 +226,14 @@ class SigningMetadataTomlConfigLoaderTest {
 
     assertThat(metadataFiles.size()).isOne();
     assertThat(metadataFiles.toArray()[0]).isInstanceOf(AzureSigningMetadataFile.class);
-    final AzureSigningMetadataFile metaData = (AzureSigningMetadataFile) metadataFiles.toArray()[0];
+    final AzureSigningMetadataFile metadataFile =
+        (AzureSigningMetadataFile) metadataFiles.toArray()[0];
 
-    assertThat(metaData.getConfig().getClientId()).isEqualTo("theClientId");
-    assertThat(metaData.getConfig().getClientSecret()).isEqualTo("theClientSecret");
-    assertThat(metaData.getConfig().getKeyvaultName()).isEqualTo("ethsignertestkey");
-    assertThat(metaData.getConfig().getKeyName()).isEqualTo("TestKey");
-    assertThat(metaData.getConfig().getKeyVersion()).isEqualTo("7c01fe58d68148bba5824ce418241092");
+    assertThat(metadataFile.getConfig().getClientId()).isEqualTo("theClientId");
+    assertThat(metadataFile.getConfig().getClientSecret()).isEqualTo("theClientSecret");
+    assertThat(metadataFile.getConfig().getKeyvaultName()).isEqualTo("ethsignertestkey");
+    assertThat(metadataFile.getConfig().getKeyName()).isEqualTo("TestKey");
+    assertThat(metadataFile.getConfig().getKeyVersion())
+        .isEqualTo("7c01fe58d68148bba5824ce418241092");
   }
 }

@@ -27,7 +27,7 @@ public enum SignerType {
     return type;
   }
 
-  public static SignerType fromString(String typeString) {
+  public static SignerType fromString(final String typeString) {
     for (final SignerType signerType : SignerType.values()) {
       if (signerType.getType().equals(typeString)) {
         return signerType;

@@ -117,7 +117,7 @@ public class AzureKeyVaultAuthenticatorTest {
     final AzureConfigBuilder configBuilder = createValidConfigBuilder();
 
     final String invalidVaultName = "invalidKeyVault";
-    configBuilder.withKeyvaultName(invalidVaultName);
+    configBuilder.withKeyVaultName(invalidVaultName);
 
     final String expectedMessage =
         String.format(
@@ -168,28 +168,28 @@ public class AzureKeyVaultAuthenticatorTest {
 
   private static class AzureConfigBuilder {
 
-    private String keyvaultName;
+    private String keyVaultName;
     private String keyName;
     private String keyVersion;
     private String clientId;
     private String clientSecret;
 
-    public AzureConfigBuilder withKeyvaultName(String keyvaultName) {
-      this.keyvaultName = keyvaultName;
+    public AzureConfigBuilder withKeyVaultName(final String keyVaultName) {
+      this.keyVaultName = keyVaultName;
       return this;
     }
 
-    public AzureConfigBuilder withKeyName(String keyName) {
+    public AzureConfigBuilder withKeyName(final String keyName) {
       this.keyName = keyName;
       return this;
     }
 
-    public AzureConfigBuilder withKeyVersion(String keyVersion) {
+    public AzureConfigBuilder withKeyVersion(final String keyVersion) {
       this.keyVersion = keyVersion;
       return this;
     }
 
-    public AzureConfigBuilder withClientId(String clientId) {
+    public AzureConfigBuilder withClientId(final String clientId) {
       this.clientId = clientId;
       return this;
     }
@@ -200,13 +200,13 @@ public class AzureKeyVaultAuthenticatorTest {
     }
 
     public AzureConfig build() {
-      return new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
+      return new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
     }
   }
 
   private AzureConfigBuilder createValidConfigBuilder() {
     return new AzureConfigBuilder()
-        .withKeyvaultName("ethsignertestkey")
+        .withKeyVaultName("ethsignertestkey")
         .withKeyName("TestKey")
         .withKeyVersion(validKeyVersion)
         .withClientId(clientId)

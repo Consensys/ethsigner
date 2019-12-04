@@ -55,7 +55,7 @@ public class AzureKeyVaultTransactionSigner implements TransactionSigner {
 
     if (signature.length != 64) {
       throw new RuntimeException(
-          "Invalid signature from the keyvault signing service, must be 64 bytes long");
+          "Invalid signature from the key vault signing service, must be 64 bytes long");
     }
 
     // reference: blog by Tomislav Markovski

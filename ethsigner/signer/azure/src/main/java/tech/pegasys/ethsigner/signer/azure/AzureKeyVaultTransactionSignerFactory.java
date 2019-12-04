@@ -54,10 +54,10 @@ public class AzureKeyVaultTransactionSignerFactory {
     final String baseUrl = constructAzureKeyVaultUrl(config.getKeyvaultName());
 
     final JsonWebKey key;
-    final KeyIdentifier kid;
+    final KeyIdentifier keyIdentifier;
     try {
-      kid = new KeyIdentifier(baseUrl, config.getKeyName(), config.getKeyVersion());
-      key = client.getKey(kid.toString()).key();
+      keyIdentifier = new KeyIdentifier(baseUrl, config.getKeyName(), config.getKeyVersion());
+      key = client.getKey(keyIdentifier.toString()).key();
     } catch (final KeyVaultErrorException ex) {
       if (ex.response().raw().code() == 401) {
         LOG.debug(INACCESSIBLE_KEY_ERROR);
@@ -82,7 +82,7 @@ public class AzureKeyVaultTransactionSignerFactory {
 
     final byte[] rawPublicKey = Bytes.concat(key.x(), key.y());
     final BigInteger publicKey = new BigInteger(1, rawPublicKey);
-    return new AzureKeyVaultTransactionSigner(client, kid.toString(), publicKey);
+    return new AzureKeyVaultTransactionSigner(client, keyIdentifier.toString(), publicKey);
   }
 
   public static String constructAzureKeyVaultUrl(final String keyVaultName) {

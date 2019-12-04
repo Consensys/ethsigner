@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMeta
 
 public interface MultiSignerFactory {
 
-  TransactionSigner createSigner(final AzureSigningMetadataFile metaData);
+  TransactionSigner createSigner(final AzureSigningMetadataFile metadataFile);
 
-  TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile);
+  TransactionSigner createSigner(final FileBasedSigningMetadataFile metadataFile);
 }

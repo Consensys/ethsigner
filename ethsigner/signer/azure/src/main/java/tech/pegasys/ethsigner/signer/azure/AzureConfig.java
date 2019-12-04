@@ -13,19 +13,19 @@
 package tech.pegasys.ethsigner.signer.azure;
 
 public class AzureConfig {
-  private final String keyvaultName;
+  private final String keyVaultName;
   private final String keyName;
   private final String keyVersion;
   private final String clientId;
   private final String clientSecret;
 
   public AzureConfig(
-      String keyvaultName,
-      String keyName,
-      String keyVersion,
-      String clientId,
-      String clientSecret) {
-    this.keyvaultName = keyvaultName;
+      final String keyVaultName,
+      final String keyName,
+      final String keyVersion,
+      final String clientId,
+      final String clientSecret) {
+    this.keyVaultName = keyVaultName;
     this.keyName = keyName;
     this.keyVersion = keyVersion;
     this.clientId = clientId;
@@ -33,7 +33,7 @@ public class AzureConfig {
   }
 
   public String getKeyvaultName() {
-    return keyvaultName;
+    return keyVaultName;
   }
 
   public String getKeyName() {
