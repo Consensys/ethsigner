@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.toml.TomlInvalidTypeException;
 import org.apache.tuweni.toml.TomlParseResult;
 import org.apache.tuweni.toml.TomlTable;
 
@@ -80,6 +81,8 @@ class SigningMetadataTomlConfigLoader {
   }
 
   private Optional<SigningMetadataFile> getMetadataInfo(final Path file) {
+    final String filename = file.getFileName().toString();
+
     try {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
@@ -91,15 +94,18 @@ class SigningMetadataTomlConfigLoader {
       }
 
       final String type = signingTable.get().getString("type");
-
       if (SignerType.fromString(type).equals(SignerType.FILE_BASED_SIGNER)) {
-        return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
+        return getFileBasedSigningMetadataFromToml(filename, result);
       } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
         return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
       }
+    } catch (final IllegalArgumentException | TomlInvalidTypeException e) {
+      final String errorMsg = String.format("%s failed to decode: %s", filename, e.getMessage());
+      LOG.error(errorMsg);
+      return Optional.empty();
     } catch (final Exception e) {
       LOG.error("Could not load TOML file " + file, e);
       return Optional.empty();
@@ -112,24 +118,16 @@ class SigningMetadataTomlConfigLoader {
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
+    final ThrowingTomlTable table = signingTable.get();
 
-    try {
-      final ThrowingTomlTable table = signingTable.get();
-
-      final String keyFilename = table.getString("key-file");
-      final Path keyPath = new File(keyFilename).toPath();
-      final String passwordFilename = table.getString("password-file");
-      final Path passwordPath = new File(passwordFilename).toPath();
-      return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
-    } catch (final IllegalArgumentException e) {
-      final String errorMsg =
-          String.format("%s failed to decoded due to %s", filename, e.getMessage());
-      LOG.error(errorMsg);
-      return Optional.empty();
-    }
+    final String keyFilename = table.getString("key-file");
+    final Path keyPath = new File(keyFilename).toPath();
+    final String passwordFilename = table.getString("password-file");
+    final Path passwordPath = new File(passwordFilename).toPath();
+    return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
   }
 
-  public Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
+  private Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
 
     final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
@@ -138,21 +136,14 @@ class SigningMetadataTomlConfigLoader {
     }
 
     final AzureConfigBuilder builder;
-    try {
-      final ThrowingTomlTable table = signingTable.get();
-      builder = new AzureConfigBuilder();
-      builder.withKeyVaultName(table.getString("key-vault-name"));
-      builder.withKeyName(table.getString("key-name"));
-      builder.withKeyVersion(table.getString("key-version"));
-      builder.withClientId(table.getString("client-id"));
-      builder.withClientSecret(table.getString("client-secret"));
-      return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
-    } catch (final IllegalArgumentException e) {
-      final String errorMsg =
-          String.format("%s failed to decoded due to %s", filename, e.getMessage());
-      LOG.error(errorMsg);
-      return Optional.empty();
-    }
+    final ThrowingTomlTable table = signingTable.get();
+    builder = new AzureConfigBuilder();
+    builder.withKeyVaultName(table.getString("key-vault-name"));
+    builder.withKeyName(table.getString("key-name"));
+    builder.withKeyVersion(table.getString("key-version"));
+    builder.withClientId(table.getString("client-id"));
+    builder.withClientSecret(table.getString("client-secret"));
+    return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
   }
 
   private Optional<ThrowingTomlTable> getSigningTableFrom(
