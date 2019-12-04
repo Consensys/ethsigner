@@ -90,7 +90,7 @@ public class MultiPlatformTransactionSignerProvider
       LOG.debug("Loaded signer with key '{}'", metadataFile.getKeyPath().getFileName());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
-      LOG.warn("Unable to load signer with key '{}'", metadataFile.getKeyPath().getFileName(), e);
+      LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }
