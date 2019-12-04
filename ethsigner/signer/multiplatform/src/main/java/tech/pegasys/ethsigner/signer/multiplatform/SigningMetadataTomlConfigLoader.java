@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
@@ -110,15 +110,33 @@ class SigningMetadataTomlConfigLoader {
   public Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
     final TomlTable signingTable = result.getTable("signing");
-    return Optional.of(
-        new AzureSigningMetadataFile(
-            filename,
-            new AzureConfig(
-                signingTable.getString("key-vault-name"),
-                signingTable.getString("key-name"),
-                signingTable.getString("key-version"),
-                signingTable.getString("client-id"),
-                signingTable.getString("client-secret"))));
+    if (signingTable == null) {
+      final String errorMsg =
+          String.format(
+              "%s is a badly formed EthSigner metadata file - \"signing\" heading is missing.",
+              filename);
+      LOG.error(errorMsg);
+      return Optional.empty();
+    }
+
+    final ThrowingTomlTable table = new ThrowingTomlTable(signingTable);
+
+    final AzureConfigBuilder builder;
+    try {
+      builder = new AzureConfigBuilder();
+      builder.withKeyVaultName(table.getString("key-vault-name"));
+      builder.withKeyName(table.getString("key-name"));
+      builder.withKeyVersion(table.getString("key-version"));
+      builder.withClientId(table.getString("client-id"));
+      builder.withClientSecret(table.getString("client-secret"));
+    } catch (final IllegalArgumentException e) {
+      final String errorMsg =
+          String.format("%s failed to decoded due to %s", filename, e.getMessage());
+      LOG.error(errorMsg);
+      return Optional.empty();
+    }
+
+    return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
   }
 
   private String normalizeAddress(final String address) {

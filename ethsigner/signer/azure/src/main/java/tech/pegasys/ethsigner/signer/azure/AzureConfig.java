@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class AzureConfig {
   private final String keyVaultName;
   private final String keyName;
@@ -50,5 +52,49 @@ public class AzureConfig {
 
   public String getClientSecret() {
     return clientSecret;
+  }
+
+  public static class AzureConfigBuilder {
+
+    private String keyVaultName;
+    private String keyName;
+    private String keyVersion;
+    private String clientId;
+    private String clientSecret;
+
+    public AzureConfigBuilder withKeyVaultName(final String keyVaultName) {
+      this.keyVaultName = keyVaultName;
+      return this;
+    }
+
+    public AzureConfigBuilder withKeyName(final String keyName) {
+      this.keyName = keyName;
+      return this;
+    }
+
+    public AzureConfigBuilder withKeyVersion(final String keyVersion) {
+      this.keyVersion = keyVersion;
+      return this;
+    }
+
+    public AzureConfigBuilder withClientId(final String clientId) {
+      this.clientId = clientId;
+      return this;
+    }
+
+    public AzureConfigBuilder withClientSecret(String clientSecret) {
+      this.clientSecret = clientSecret;
+      return this;
+    }
+
+    public AzureConfig build() {
+      checkNotNull(keyVaultName, "Key Vault Name was not set.");
+      checkNotNull(keyName, "Key Name was not set.");
+      checkNotNull(keyVersion, "Key Version was not set.");
+      checkNotNull(clientId, "Client Id was not set.");
+      checkNotNull(clientSecret, "Client Secret was not set.");
+
+      return new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
+    }
   }
 }

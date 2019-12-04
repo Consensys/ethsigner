@@ -19,6 +19,7 @@ import static org.web3j.crypto.Keys.getAddress;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 
 import java.math.BigInteger;
 
@@ -164,44 +165,6 @@ public class AzureKeyVaultAuthenticatorTest {
   public void nullClientAndOrSecretAreHandledCleanly() {
     assertThatThrownBy(() -> authenticator.getAuthenticatedClient(null, null))
         .isInstanceOf(IllegalArgumentException.class);
-  }
-
-  private static class AzureConfigBuilder {
-
-    private String keyVaultName;
-    private String keyName;
-    private String keyVersion;
-    private String clientId;
-    private String clientSecret;
-
-    public AzureConfigBuilder withKeyVaultName(final String keyVaultName) {
-      this.keyVaultName = keyVaultName;
-      return this;
-    }
-
-    public AzureConfigBuilder withKeyName(final String keyName) {
-      this.keyName = keyName;
-      return this;
-    }
-
-    public AzureConfigBuilder withKeyVersion(final String keyVersion) {
-      this.keyVersion = keyVersion;
-      return this;
-    }
-
-    public AzureConfigBuilder withClientId(final String clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public AzureConfigBuilder withClientSecret(String clientSecret) {
-      this.clientSecret = clientSecret;
-      return this;
-    }
-
-    public AzureConfig build() {
-      return new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
-    }
   }
 
   private AzureConfigBuilder createValidConfigBuilder() {
