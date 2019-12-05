@@ -33,19 +33,19 @@ public class TransactionSignerParamsSupplier {
   private final String ipAddress;
   private final String azureKeyVault;
   private final Path keysDirectory;
-  private final Path multiplatformSignerDirectory;
+  private final Path multiPlatformSignerDirectory;
 
   public TransactionSignerParamsSupplier(
       final int hashicorpVaultPort,
       final String ipAddress,
       final String azureKeyVault,
       final Path keysDirectory,
-      final Path multiplatformSignerDirectory) {
+      final Path multiPlatformSignerDirectory) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
     this.azureKeyVault = azureKeyVault;
     this.keysDirectory = keysDirectory;
-    this.multiplatformSignerDirectory = multiplatformSignerDirectory;
+    this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
   }
 
   public Collection<String> get() {
@@ -74,10 +74,10 @@ public class TransactionSignerParamsSupplier {
       params.add("multifile-based-signer");
       params.add("--directory");
       params.add(keysDirectory.toAbsolutePath().toString());
-    } else if (multiplatformSignerDirectory != null) {
+    } else if (multiPlatformSignerDirectory != null) {
       params.add("multiplatform-signer");
       params.add("--directory");
-      params.add(multiplatformSignerDirectory.toAbsolutePath().toString());
+      params.add(multiPlatformSignerDirectory.toAbsolutePath().toString());
     } else {
       params.add("file-based-signer");
       params.add("--password-file");

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.tests.multiplatformsigner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -22,37 +21,19 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import com.google.common.io.Resources;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class AzureSignerMultiplatformSigning {
+public class MultiplatformAcceptanceTestBase {
 
-  private static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
-  private static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-
-  private final String AZURE_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  private final String FILE_ETHEREUM_ADDRESS = "0xa01f618424b0113a9cebdc6cb66ca5b48e9120c5";
-  private Signer ethSigner;
+  protected Signer ethSigner;
 
   @TempDir Path tomlDirectory;
-
-  @BeforeAll
-  public static void preChecks() {
-    Assumptions.assumeTrue(
-        clientId != null && clientSecret != null,
-        "Ensure Azure client id and client secret env variables are set");
-  }
 
   @AfterEach
   public void cleanUp() {
@@ -62,9 +43,9 @@ public class AzureSignerMultiplatformSigning {
     }
   }
 
-  public void setup() {
+  void setup() {
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withMultiplatformSignerDirectory(tomlDirectory).build();
+        new SignerConfigurationBuilder().withMultiPlatformSignerDirectory(tomlDirectory).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
@@ -72,7 +53,8 @@ public class AzureSignerMultiplatformSigning {
     ethSigner.awaitStartupCompletion();
   }
 
-  private void createAzureTomlFileAt(final String tomlFilename) {
+  void createAzureTomlFileAt(
+      final String tomlFilename, final String clientId, final String clientSecret) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
@@ -91,7 +73,7 @@ public class AzureSignerMultiplatformSigning {
     }
   }
 
-  private void createFileBasedTomlFileAt(
+  void createFileBasedTomlFileAt(
       final String tomlFilename, final String keyPath, final String passwordPath) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
@@ -106,56 +88,5 @@ public class AzureSignerMultiplatformSigning {
     } catch (final IOException e) {
       fail("Unable to create Azure TOML file.");
     }
-  }
-
-  @Test
-  void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
-
-    createAzureTomlFileAt(AZURE_ETHEREUM_ADDRESS + ".toml");
-    createFileBasedTomlFileAt(
-        "a01f618424b0113a9cebdc6cb66ca5b48e9120c5.toml",
-        new File(
-                Resources.getResource(
-                        "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
-                    .toURI())
-            .getAbsolutePath(),
-        new File(
-                Resources.getResource(
-                        "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
-                    .toURI())
-            .getAbsolutePath());
-
-    setup();
-
-    assertThat(ethSigner.accounts().list())
-        .containsOnly(AZURE_ETHEREUM_ADDRESS, FILE_ETHEREUM_ADDRESS);
-  }
-
-  @Test
-  void incorrectlyNamedAzureFileIsNotLoaded() {
-    createAzureTomlFileAt("ffffffffffffffffffffffffffffffffffffffff.toml");
-
-    setup();
-
-    assertThat(ethSigner.accounts().list()).isEmpty();
-  }
-
-  @Test
-  void incorrectlyNamedFileBasedSignerIsNotLoaded() throws URISyntaxException {
-    createFileBasedTomlFileAt(
-        "ffffffffffffffffffffffffffffffffffffffff.toml",
-        new File(
-                Resources.getResource(
-                        "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
-                    .toURI())
-            .getAbsolutePath(),
-        new File(
-                Resources.getResource(
-                        "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
-                    .toURI())
-            .getAbsolutePath());
-    setup();
-
-    assertThat(ethSigner.accounts().list()).isEmpty();
   }
 }

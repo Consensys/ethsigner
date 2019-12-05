@@ -59,7 +59,7 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withMultiplatformSignerDirectory(
+  public SignerConfigurationBuilder withMultiPlatformSignerDirectory(
       final Path multiPlatformSignerDirectory) {
     this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
     return this;
