@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;

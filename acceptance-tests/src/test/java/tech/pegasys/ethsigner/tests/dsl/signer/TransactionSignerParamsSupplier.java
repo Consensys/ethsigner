@@ -57,7 +57,7 @@ public class TransactionSignerParamsSupplier {
       params.add(String.valueOf(hashicorpVaultPort));
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
-      params.add("--keyvault-name");
+      params.add("--key-vault-name");
       params.add(azureKeyVault);
       params.add("--key-name");
       params.add("TestKey");

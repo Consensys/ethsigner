@@ -12,6 +12,11 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
+import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -26,7 +31,9 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.toml.TomlInvalidTypeException;
 import org.apache.tuweni.toml.TomlParseResult;
+import org.apache.tuweni.toml.TomlTable;
 
 class SigningMetadataTomlConfigLoader {
 
@@ -41,14 +48,15 @@ class SigningMetadataTomlConfigLoader {
     this.tomlConfigsDirectory = rootDirectory;
   }
 
-  Optional<FileBasedSigningMetadataFile> loadMetadataForAddress(final String address) {
-    final List<FileBasedSigningMetadataFile> matchingMetadata =
+  Optional<SigningMetadataFile> loadMetadataForAddress(final String address) {
+    final List<SigningMetadataFile> matchingMetadata =
         loadAvailableSigningMetadataTomlConfigs().stream()
-            .filter(toml -> toml.getFilename().toLowerCase().endsWith(normalizeAddress(address)))
+            .filter(
+                toml -> toml.getBaseFilename().toLowerCase().endsWith(normalizeAddress(address)))
             .collect(Collectors.toList());
 
     if (matchingMetadata.size() > 1) {
-      LOG.error("Found multiple signing metadata TOML file matches for address {}", address);
+      LOG.error("Found multiple signing metadata TOML file matches for address " + address);
       return Optional.empty();
     } else if (matchingMetadata.isEmpty()) {
       return Optional.empty();
@@ -57,8 +65,8 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  Collection<FileBasedSigningMetadataFile> loadAvailableSigningMetadataTomlConfigs() {
-    final Collection<FileBasedSigningMetadataFile> metadataConfigs = new HashSet<>();
+  Collection<SigningMetadataFile> loadAvailableSigningMetadataTomlConfigs() {
+    final Collection<SigningMetadataFile> metadataConfigs = new HashSet<>();
 
     try (final DirectoryStream<Path> directoryStream =
         Files.newDirectoryStream(tomlConfigsDirectory, GLOB_CONFIG_MATCHER)) {
@@ -72,30 +80,82 @@ class SigningMetadataTomlConfigLoader {
     }
   }
 
-  private Optional<FileBasedSigningMetadataFile> getMetadataInfo(final Path file) {
+  private Optional<SigningMetadataFile> getMetadataInfo(final Path file) {
+    final String filename = file.getFileName().toString();
+
     try {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
-      final String type = result.getTable("signing").getString("type");
+
+      final Optional<ThrowingTomlTable> signingTable =
+          getSigningTableFrom(file.getFileName().toString(), result);
+      if (signingTable.isEmpty()) {
+        return Optional.empty();
+      }
+
+      final String type = signingTable.get().getString("type");
       if (SignerType.fromString(type).equals(SignerType.FILE_BASED_SIGNER)) {
-        return getFileBasedSigningMetadataFromToml(file.getFileName().toString(), result);
+        return getFileBasedSigningMetadataFromToml(filename, result);
+      } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
+        return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
       }
+    } catch (final IllegalArgumentException | TomlInvalidTypeException e) {
+      final String errorMsg = String.format("%s failed to decode: %s", filename, e.getMessage());
+      LOG.error(errorMsg);
+      return Optional.empty();
     } catch (final Exception e) {
-      LOG.error("Could not load TOML file", e);
+      LOG.error("Could not load TOML file " + file, e);
       return Optional.empty();
     }
   }
 
-  private Optional<FileBasedSigningMetadataFile> getFileBasedSigningMetadataFromToml(
-      String filename, TomlParseResult result) {
-    final String keyFilename = result.getTable("signing").getString("key-file");
+  private Optional<SigningMetadataFile> getFileBasedSigningMetadataFromToml(
+      final String filename, final TomlParseResult result) {
+    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    if (signingTable.isEmpty()) {
+      return Optional.empty();
+    }
+    final ThrowingTomlTable table = signingTable.get();
+
+    final String keyFilename = table.getString("key-file");
     final Path keyPath = new File(keyFilename).toPath();
-    final String passwordFilename = result.getTable("signing").getString("password-file");
+    final String passwordFilename = table.getString("password-file");
     final Path passwordPath = new File(passwordFilename).toPath();
     return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
+  }
+
+  private Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
+      final String filename, final TomlParseResult result) {
+
+    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    if (signingTable.isEmpty()) {
+      return Optional.empty();
+    }
+
+    final AzureConfigBuilder builder;
+    final ThrowingTomlTable table = signingTable.get();
+    builder = new AzureConfigBuilder();
+    builder.withKeyVaultName(table.getString("key-vault-name"));
+    builder.withKeyName(table.getString("key-name"));
+    builder.withKeyVersion(table.getString("key-version"));
+    builder.withClientId(table.getString("client-id"));
+    builder.withClientSecret(table.getString("client-secret"));
+    return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
+  }
+
+  private Optional<ThrowingTomlTable> getSigningTableFrom(
+      final String filename, final TomlParseResult result) {
+    final TomlTable signingTable = result.getTable("signing");
+    if (signingTable == null) {
+      LOG.error(
+          filename
+              + " is a badly formed EthSigner metadata file - \"signing\" heading is missing.");
+      return Optional.empty();
+    }
+    return Optional.of(new ThrowingTomlTable(signingTable));
   }
 
   private String normalizeAddress(final String address) {

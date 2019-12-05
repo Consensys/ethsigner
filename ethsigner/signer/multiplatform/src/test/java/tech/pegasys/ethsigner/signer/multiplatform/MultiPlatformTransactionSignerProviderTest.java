@@ -20,6 +20,11 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.CO
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -35,9 +40,11 @@ class MultiPlatformTransactionSignerProviderTest {
 
   @TempDir Path configsDirectory;
 
-  private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);;
+  private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);
+  final AzureKeyVaultTransactionSignerFactory azureFactory =
+      new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
   private MultiPlatformTransactionSignerProvider signerFactory =
-      new MultiPlatformTransactionSignerProvider(loader);
+      new MultiPlatformTransactionSignerProvider(loader, azureFactory);
   private FileBasedSigningMetadataFile metadataFile;
 
   @BeforeEach
@@ -77,7 +84,7 @@ class MultiPlatformTransactionSignerProviderTest {
 
   @Test
   void getAddresses() {
-    Collection<FileBasedSigningMetadataFile> files = Collections.singleton(metadataFile);
+    Collection<SigningMetadataFile> files = Collections.singleton(metadataFile);
     when(loader.loadAvailableSigningMetadataTomlConfigs()).thenReturn(files);
     assertThat(signerFactory.availableAddresses()).containsExactly("0x" + LOWERCASE_ADDRESS);
   }

@@ -12,27 +12,20 @@
  */
 package tech.pegasys.ethsigner.signer.multiplatform;
 
-public enum SignerType {
-  FILE_BASED_SIGNER("file-based-signer"),
-  AZURE_BASED_SIGNER("azure-based-signer"),
-  UNKNOWN_TYPE_SIGNER("unknown");
+import java.util.Optional;
 
-  private final String type;
+import org.apache.tuweni.toml.TomlTable;
 
-  SignerType(String type) {
-    this.type = type;
+public class ThrowingTomlTable {
+
+  private final TomlTable table;
+
+  public ThrowingTomlTable(final TomlTable table) {
+    this.table = table;
   }
 
-  private String getType() {
-    return type;
-  }
-
-  public static SignerType fromString(final String typeString) {
-    for (final SignerType signerType : SignerType.values()) {
-      if (signerType.getType().equals(typeString)) {
-        return signerType;
-      }
-    }
-    return UNKNOWN_TYPE_SIGNER;
+  public String getString(final String key) {
+    return Optional.ofNullable(table.getString(key))
+        .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
   }
 }

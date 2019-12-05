@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 
 import java.nio.file.Path;
 
@@ -54,7 +56,12 @@ public class MultiPlatformSubCommand extends SignerSubCommand {
       throws TransactionSignerInitializationException {
     final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
         new SigningMetadataTomlConfigLoader(directoryPath);
-    return new MultiPlatformTransactionSignerProvider(signingMetadataTomlConfigLoader);
+
+    final AzureKeyVaultTransactionSignerFactory azureFactory =
+        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+
+    return new MultiPlatformTransactionSignerProvider(
+        signingMetadataTomlConfigLoader, azureFactory);
   }
 
   @Override

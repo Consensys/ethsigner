@@ -19,6 +19,7 @@ import static org.web3j.crypto.Keys.getAddress;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.Signature;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 
 import java.math.BigInteger;
 
@@ -117,7 +118,7 @@ public class AzureKeyVaultAuthenticatorTest {
     final AzureConfigBuilder configBuilder = createValidConfigBuilder();
 
     final String invalidVaultName = "invalidKeyVault";
-    configBuilder.withKeyvaultName(invalidVaultName);
+    configBuilder.withKeyVaultName(invalidVaultName);
 
     final String expectedMessage =
         String.format(
@@ -166,50 +167,12 @@ public class AzureKeyVaultAuthenticatorTest {
         .isInstanceOf(IllegalArgumentException.class);
   }
 
-  private static class AzureConfigBuilder {
-
-    private String keyvaultName;
-    private String keyName;
-    private String keyVersion;
-    private String clientId;
-    private String clientSecret;
-
-    public AzureConfigBuilder withKeyvaultName(String keyvaultName) {
-      this.keyvaultName = keyvaultName;
-      return this;
-    }
-
-    public AzureConfigBuilder withKeyName(String keyName) {
-      this.keyName = keyName;
-      return this;
-    }
-
-    public AzureConfigBuilder withKeyVersion(String keyVersion) {
-      this.keyVersion = keyVersion;
-      return this;
-    }
-
-    public AzureConfigBuilder withClientId(String clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public AzureConfigBuilder withClientSecret(String clientSecret) {
-      this.clientSecret = clientSecret;
-      return this;
-    }
-
-    public AzureConfig build() {
-      return new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
-    }
-  }
-
   private AzureConfigBuilder createValidConfigBuilder() {
     return new AzureConfigBuilder()
-        .withClientId(clientId)
-        .withClientSecret(clientSecret)
-        .withKeyVersion(validKeyVersion)
+        .withKeyVaultName("ethsignertestkey")
         .withKeyName("TestKey")
-        .withKeyvaultName("ethsignertestkey");
+        .withKeyVersion(validKeyVersion)
+        .withClientId(clientId)
+        .withClientSecret(clientSecret);
   }
 }

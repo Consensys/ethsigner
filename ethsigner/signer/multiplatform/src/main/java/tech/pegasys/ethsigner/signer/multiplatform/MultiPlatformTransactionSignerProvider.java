@@ -15,7 +15,10 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -25,41 +28,69 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class MultiPlatformTransactionSignerProvider implements TransactionSignerProvider {
+public class MultiPlatformTransactionSignerProvider
+    implements TransactionSignerProvider, MultiSignerFactory {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
+  private final AzureKeyVaultTransactionSignerFactory azureFactory;
 
   MultiPlatformTransactionSignerProvider(
-      final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader) {
+      final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
+      final AzureKeyVaultTransactionSignerFactory azureFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
+    this.azureFactory = azureFactory;
   }
 
   @Override
   public Optional<TransactionSigner> getSigner(final String address) {
-    return signingMetadataTomlConfigLoader.loadMetadataForAddress(address).map(this::createSigner);
+    return signingMetadataTomlConfigLoader
+        .loadMetadataForAddress(address)
+        .map(metadataFile -> metadataFile.createSigner(this));
   }
 
   @Override
   public Set<String> availableAddresses() {
     return signingMetadataTomlConfigLoader.loadAvailableSigningMetadataTomlConfigs().stream()
-        .map(this::createSigner)
+        .map(metadataFile -> metadataFile.createSigner(this))
         .filter(Objects::nonNull)
         .map(TransactionSigner::getAddress)
         .collect(Collectors.toSet());
   }
 
-  private TransactionSigner createSigner(final FileBasedSigningMetadataFile signingMetadataFile) {
+  @Override
+  public TransactionSigner createSigner(final AzureSigningMetadataFile metadataFile) {
+    final TransactionSigner signer;
+    try {
+      signer = azureFactory.createSigner(metadataFile.getConfig());
+    } catch (final TransactionSignerInitializationException e) {
+      LOG.error("Failed to construct Azure signer from " + metadataFile.getBaseFilename());
+      return null;
+    }
+
+    final String signerAddress = signer.getAddress();
+    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
+      LOG.error(
+          String.format(
+              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              signerAddress, metadataFile.getBaseFilename()));
+      return null;
+    }
+    LOG.info("Loaded signer for address {}", signerAddress);
+    return signer;
+  }
+
+  @Override
+  public TransactionSigner createSigner(final FileBasedSigningMetadataFile metadataFile) {
     try {
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
-              signingMetadataFile.getKeyPath(), signingMetadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", signingMetadataFile.getKeyPath().getFileName());
+              metadataFile.getKeyPath(), metadataFile.getPasswordPath());
+      LOG.debug("Loaded signer with key '{}'", metadataFile.getKeyPath().getFileName());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
-      LOG.warn(
-          "Unable to load signer with key '{}'", signingMetadataFile.getKeyPath().getFileName(), e);
+      LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }

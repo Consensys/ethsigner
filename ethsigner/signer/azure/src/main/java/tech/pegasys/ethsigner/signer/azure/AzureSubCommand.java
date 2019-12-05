@@ -34,11 +34,11 @@ import picocli.CommandLine.Option;
 public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
-      names = {"--keyvault-name"},
+      names = {"--keyvault-name, --key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
       required = true,
       arity = "1")
-  private String keyvaultName;
+  private String keyVaultName;
 
   @Option(
       names = {"--key-name"},
@@ -54,7 +54,7 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"--client-id"},
-      description = "The ID used to authenticate with Azure keyvault",
+      description = "The ID used to authenticate with Azure key vault",
       required = true)
   private String clientId;
 
@@ -77,7 +77,7 @@ public class AzureSubCommand extends SignerSubCommand {
     }
 
     final AzureConfig config =
-        new AzureConfig(keyvaultName, keyName, keyVersion, clientId, clientSecret);
+        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
 
     final AzureKeyVaultTransactionSignerFactory factory =
         new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());

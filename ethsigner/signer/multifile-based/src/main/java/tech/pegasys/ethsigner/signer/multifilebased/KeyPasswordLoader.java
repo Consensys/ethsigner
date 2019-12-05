@@ -49,7 +49,7 @@ class KeyPasswordLoader {
             .collect(Collectors.toList());
 
     if (matchingKeys.size() > 1) {
-      LOG.error("Found multiple key/password matches for address {}", address);
+      LOG.error("Found multiple key/password matches for address " + address);
       return Optional.empty();
     } else if (matchingKeys.isEmpty()) {
       return Optional.empty();
