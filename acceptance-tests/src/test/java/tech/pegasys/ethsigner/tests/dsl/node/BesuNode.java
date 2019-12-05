@@ -301,7 +301,7 @@ public class BesuNode implements Node {
     try {
       return URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8.name());
     } catch (final UnsupportedEncodingException ex) {
-      LOG.error("Unsupported encoding used to decode " + resource.toString() + " filepath.", ex);
+      LOG.error("Unsupported encoding used to decode {}, filepath.", resource);
       throw new RuntimeException("Illegal string decoding");
     }
   }
