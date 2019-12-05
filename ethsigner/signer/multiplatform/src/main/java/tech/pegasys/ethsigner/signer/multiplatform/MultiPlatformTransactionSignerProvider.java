@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 public class MultiPlatformTransactionSignerProvider
     implements TransactionSignerProvider, MultiSignerFactory {
@@ -69,15 +70,11 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
-      LOG.error(
-          String.format(
-              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
-              signerAddress, metadataFile.getBaseFilename()));
+    if(!validateFilenameMatchesSigningAddress(signer, metadataFile)) {
       return null;
     }
-    LOG.info("Loaded signer for address {}", signerAddress);
+
+    LOG.info("Loaded signer for address {}", signer.getAddress());
     return signer;
   }
 
@@ -87,11 +84,28 @@ public class MultiPlatformTransactionSignerProvider
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", metadataFile.getKeyPath().getFileName());
+      if(!validateFilenameMatchesSigningAddress(signer, metadataFile)) {
+        return null;
+      }
+
+      LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
+  }
+
+  private boolean validateFilenameMatchesSigningAddress(final TransactionSigner signer,
+      final SigningMetadataFile metadataFile) {
+    final String signerAddress = signer.getAddress();
+    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
+      LOG.error(
+          String.format(
+              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              signerAddress, metadataFile.getBaseFilename()));
+      return false;
+    }
+    return true;
   }
 }
