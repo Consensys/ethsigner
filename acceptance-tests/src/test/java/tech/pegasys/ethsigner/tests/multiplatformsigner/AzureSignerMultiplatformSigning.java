@@ -81,7 +81,6 @@ public class AzureSignerMultiplatformSigning {
     final Path azureConfigFile = tomlDirectory.resolve(AZURE_ETHEREUM_ADDRESS + ".toml");
     createAzureTomlFileAt(azureConfigFile);
 
-    // Note: setup must be called _after_ the metadata file has been created.
     setup();
 
     assertThat(ethSigner.accounts().list()).containsOnly(AZURE_ETHEREUM_ADDRESS);
@@ -92,7 +91,6 @@ public class AzureSignerMultiplatformSigning {
     final Path azureConfigFile = tomlDirectory.resolve("invalidAddress.toml");
     createAzureTomlFileAt(azureConfigFile);
 
-    // Note: setup must be called _after_ the metadata file has been created.
     setup();
 
     assertThat(ethSigner.accounts().list()).isEmpty();
