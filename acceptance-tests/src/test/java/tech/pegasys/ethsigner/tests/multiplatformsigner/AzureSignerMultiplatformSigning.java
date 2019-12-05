@@ -52,7 +52,7 @@ public class AzureSignerMultiplatformSigning {
 
   public void setup() {
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withMetaDataLibrary(tomlDirectory).build();
+        new SignerConfigurationBuilder().withMetadataLibrary(tomlDirectory).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
@@ -72,12 +72,12 @@ public class AzureSignerMultiplatformSigning {
       writer.append("client-secret = \"" + clientSecret + "\"\n");
       writer.close();
     } catch (final IOException e) {
-      fail("Unable to create azure toml file.");
+      fail("Unable to create Azure TOML file.");
     }
   }
 
   @Test
-  public void azureSignerIsCreatedAndReportsAddress() {
+  public void azureSignerIsCreatedAndContainsExpectedAddresses() {
     final Path azureConfigFile = tomlDirectory.resolve(AZURE_ETHEREUM_ADDRESS + ".toml");
     createAzureTomlFileAt(azureConfigFile);
 
