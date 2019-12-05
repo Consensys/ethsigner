@@ -16,9 +16,7 @@ import java.nio.file.Path;
 
 public class SignerConfigurationBuilder {
 
-  /**
-   * ChainId defined in the dev mode genesis.
-   */
+  /** ChainId defined in the dev mode genesis. */
   private static final String CHAIN_ID = "2018";
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -70,7 +68,10 @@ public class SignerConfigurationBuilder {
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(
-            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory,
+            hashicorpVaultPort,
+            ipAddress,
+            keyVaultName,
+            keysDirectory,
             multiPlatformSignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);

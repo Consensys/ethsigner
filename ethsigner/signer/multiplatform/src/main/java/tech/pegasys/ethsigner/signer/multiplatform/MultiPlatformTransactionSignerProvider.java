@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +28,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 public class MultiPlatformTransactionSignerProvider
     implements TransactionSignerProvider, MultiSignerFactory {
@@ -70,7 +70,7 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    if(!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
       return null;
     }
 
@@ -85,7 +85,7 @@ public class MultiPlatformTransactionSignerProvider
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
       final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if(!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
+      if (!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
         return null;
       }
 
@@ -97,8 +97,8 @@ public class MultiPlatformTransactionSignerProvider
     }
   }
 
-  private boolean validateFilenameMatchesSigningAddress(final String signerAddress,
-      final SigningMetadataFile metadataFile) {
+  private boolean validateFilenameMatchesSigningAddress(
+      final String signerAddress, final SigningMetadataFile metadataFile) {
 
     if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
       LOG.error(
