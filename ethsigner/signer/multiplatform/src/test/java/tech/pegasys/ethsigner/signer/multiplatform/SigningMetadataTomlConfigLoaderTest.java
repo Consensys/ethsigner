@@ -252,5 +252,10 @@ class SigningMetadataTomlConfigLoaderTest {
   @Test
   void azureConfigWithMissingFieldFailsToLoad() {
     copyFileIntoConfigDirectory("azureconfig_missingField.toml");
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isZero();
   }
 }

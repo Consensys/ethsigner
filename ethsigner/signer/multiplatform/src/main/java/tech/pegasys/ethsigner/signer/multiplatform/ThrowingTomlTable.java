@@ -26,6 +26,6 @@ public class ThrowingTomlTable {
 
   public String getString(final String key) {
     return Optional.ofNullable(table.getString(key))
-        .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in toml input."));
+        .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
   }
 }
