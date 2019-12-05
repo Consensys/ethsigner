@@ -16,7 +16,9 @@ import java.nio.file.Path;
 
 public class SignerConfigurationBuilder {
 
-  /** ChainId defined in the dev mode genesis. */
+  /**
+   * ChainId defined in the dev mode genesis.
+   */
   private static final String CHAIN_ID = "2018";
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -27,7 +29,7 @@ public class SignerConfigurationBuilder {
   private String ipAddress;
   private String keyVaultName;
   private Path keysDirectory;
-  private Path metadataLibraryPath;
+  private Path multiPlatformSignerDirectory;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -59,15 +61,17 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withMetadataLibrary(final Path metadataLibraryPath) {
-    this.metadataLibraryPath = metadataLibraryPath;
+  public SignerConfigurationBuilder withMultiplatformSignerDirectory(
+      final Path multiPlatformSignerDirectory) {
+    this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
     return this;
   }
 
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(
-            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory, metadataLibraryPath);
+            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory,
+            multiPlatformSignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }

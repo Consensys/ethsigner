@@ -70,7 +70,7 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    if(!validateFilenameMatchesSigningAddress(signer, metadataFile)) {
+    if(!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
       return null;
     }
 
@@ -84,7 +84,8 @@ public class MultiPlatformTransactionSignerProvider
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
-      if(!validateFilenameMatchesSigningAddress(signer, metadataFile)) {
+      final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
+      if(!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
         return null;
       }
 
@@ -96,13 +97,13 @@ public class MultiPlatformTransactionSignerProvider
     }
   }
 
-  private boolean validateFilenameMatchesSigningAddress(final TransactionSigner signer,
+  private boolean validateFilenameMatchesSigningAddress(final String signerAddress,
       final SigningMetadataFile metadataFile) {
-    final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
+
+    if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
       LOG.error(
           String.format(
-              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              "Signer's Ethereum Address (%s) does not align with metadata filename (%s)",
               signerAddress, metadataFile.getBaseFilename()));
       return false;
     }
