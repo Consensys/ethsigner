@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import java.nio.file.Path;
+
 public class SignerConfigurationBuilder {
 
   /** ChainId defined in the dev mode genesis. */
@@ -24,6 +26,7 @@ public class SignerConfigurationBuilder {
   private int hashicorpVaultPort;
   private String ipAddress;
   private String keyVaultName;
+  private Path multiPlatformSignerDirectory;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -50,7 +53,6 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-
   public SignerConfigurationBuilder withMultiPlatformSignerDirectory(
       final Path multiPlatformSignerDirectory) {
     this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
@@ -60,10 +62,7 @@ public class SignerConfigurationBuilder {
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(
-            hashicorpVaultPort,
-            ipAddress,
-            keyVaultName,
-            multiPlatformSignerDirectory);
+            hashicorpVaultPort, ipAddress, keyVaultName, multiPlatformSignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }

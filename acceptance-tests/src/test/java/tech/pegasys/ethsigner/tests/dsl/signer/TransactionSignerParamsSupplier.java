@@ -42,6 +42,7 @@ public class TransactionSignerParamsSupplier {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
     this.azureKeyVault = azureKeyVault;
+    this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
   }
 
   public Collection<String> get() {
