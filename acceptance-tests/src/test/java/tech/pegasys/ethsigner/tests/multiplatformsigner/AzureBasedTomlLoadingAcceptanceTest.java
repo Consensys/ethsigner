@@ -14,17 +14,15 @@ package tech.pegasys.ethsigner.tests.multiplatformsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URISyntaxException;
-
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class AzureBasedTomlLoadingAcceptanceTest extends MultiplatformAcceptanceTestBase {
+public class AzureBasedTomlLoadingAcceptanceTest extends MultiPlatformAcceptanceTestBase {
 
-  public static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
-  public static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  public static final String AZURE_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
+  static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
+  static final String AZURE_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   @BeforeAll
   static void preChecks() {
@@ -34,7 +32,7 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiplatformAcceptance
   }
 
   @Test
-  void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
+  void azureSignersAreCreatedAndExpectedAddressIsReported() {
     createAzureTomlFileAt(AZURE_ETHEREUM_ADDRESS + ".toml", clientId, clientSecret);
 
     setup();

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class MultiplatformSigningAcceptanceTest extends MultiplatformAcceptanceTestBase {
+class MultiPlatformSigningAcceptanceTest extends MultiPlatformAcceptanceTestBase {
 
   @BeforeAll
   static void preChecks() {

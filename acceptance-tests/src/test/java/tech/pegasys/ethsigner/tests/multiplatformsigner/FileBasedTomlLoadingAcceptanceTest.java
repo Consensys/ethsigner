@@ -20,9 +20,9 @@ import java.net.URISyntaxException;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
 
-class FileBasedTomlLoadingAcceptanceTest extends MultiplatformAcceptanceTestBase {
+class FileBasedTomlLoadingAcceptanceTest extends MultiPlatformAcceptanceTestBase {
 
-  public static final String FILE_ETHEREUM_ADDRESS = "0xa01f618424b0113a9cebdc6cb66ca5b48e9120c5";
+  static final String FILE_ETHEREUM_ADDRESS = "0xa01f618424b0113a9cebdc6cb66ca5b48e9120c5";
 
   @Test
   void validFileBasedTomlFileProducesSignerWhicReportsMatchingAddress() throws URISyntaxException {

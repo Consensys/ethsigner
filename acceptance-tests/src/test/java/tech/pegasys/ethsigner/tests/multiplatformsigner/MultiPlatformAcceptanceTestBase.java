@@ -29,7 +29,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MultiplatformAcceptanceTestBase {
+public class MultiPlatformAcceptanceTestBase {
 
   protected Signer ethSigner;
 
