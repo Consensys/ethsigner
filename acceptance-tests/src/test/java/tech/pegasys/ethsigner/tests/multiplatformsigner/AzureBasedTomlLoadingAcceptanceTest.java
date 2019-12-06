@@ -42,7 +42,7 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiPlatformAcceptance
 
   @Test
   void incorrectlyNamedAzureFileIsNotLoaded() {
-    createAzureTomlFileAt("ffffffffffffffffffffffffffffffffffff‰ffff.toml", clientId, clientSecret);
+    createAzureTomlFileAt("ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret);
 
     setup();
 
