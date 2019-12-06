@@ -32,19 +32,16 @@ public class TransactionSignerParamsSupplier {
   private final int hashicorpVaultPort;
   private final String ipAddress;
   private final String azureKeyVault;
-  private final Path keysDirectory;
   private final Path multiPlatformSignerDirectory;
 
   public TransactionSignerParamsSupplier(
       final int hashicorpVaultPort,
       final String ipAddress,
       final String azureKeyVault,
-      final Path keysDirectory,
       final Path multiPlatformSignerDirectory) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
     this.azureKeyVault = azureKeyVault;
-    this.keysDirectory = keysDirectory;
     this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
   }
 
@@ -70,10 +67,6 @@ public class TransactionSignerParamsSupplier {
       params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
-    } else if (keysDirectory != null) {
-      params.add("multifile-based-signer");
-      params.add("--directory");
-      params.add(keysDirectory.toAbsolutePath().toString());
     } else if (multiPlatformSignerDirectory != null) {
       params.add("multiplatform-signer");
       params.add("--directory");
