@@ -17,8 +17,10 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 import java.util.Objects;
@@ -36,12 +38,14 @@ public class MultiPlatformTransactionSignerProvider
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
+  private final HashicorpSignerFactory hashicorpFactory;
 
   MultiPlatformTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
+    this.hashicorpFactory = new HashicorpSignerFactory();
   }
 
   @Override
@@ -75,6 +79,28 @@ public class MultiPlatformTransactionSignerProvider
     }
 
     LOG.info("Loaded signer for address {}", signer.getAddress());
+    return signer;
+  }
+
+  @Override
+  public TransactionSigner createSigner(HashicorpSigningMetadataFile metadataFile) {
+    final TransactionSigner signer;
+    try {
+      signer = hashicorpFactory.createSigner(metadataFile.getConfig());
+    } catch (final TransactionSignerInitializationException e) {
+      LOG.error("Failed to construct Hashicorp signer from " + metadataFile.getBaseFilename());
+      return null;
+    }
+
+    final String signerAddress = signer.getAddress();
+    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
+      LOG.error(
+          String.format(
+              "Hashicorp signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              signerAddress, metadataFile.getBaseFilename()));
+      return null;
+    }
+    LOG.info("Loaded signer for address {}", signerAddress);
     return signer;
   }
 

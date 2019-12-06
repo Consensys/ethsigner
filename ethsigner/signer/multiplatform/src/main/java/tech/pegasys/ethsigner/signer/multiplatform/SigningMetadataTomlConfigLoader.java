@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner.signer.multiplatform;
 
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 import java.io.File;
@@ -98,6 +100,8 @@ class SigningMetadataTomlConfigLoader {
         return getFileBasedSigningMetadataFromToml(filename, result);
       } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
         return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
+      } else if (SignerType.fromString(type).equals(SignerType.HASHICORP)) {
+        return getHashicorpMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
@@ -144,6 +148,27 @@ class SigningMetadataTomlConfigLoader {
     builder.withClientId(table.getString("client-id"));
     builder.withClientSecret(table.getString("client-secret"));
     return Optional.of(new AzureSigningMetadataFile(filename, builder.build()));
+  }
+
+  private Optional<SigningMetadataFile> getHashicorpMetadataFromToml(
+      final String filename, final TomlParseResult result) {
+
+    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    if (signingTable.isEmpty()) {
+      return Optional.empty();
+    }
+
+    final HashicorpConfig.HashicorpConfigBuilder builder =
+        new HashicorpConfig.HashicorpConfigBuilder();
+    ThrowingTomlTable table = signingTable.get();
+
+    builder.withSigningKeyPath(table.getString("signing-key-path"));
+    builder.withHost(table.getString("host"));
+    builder.withPort(table.getLong("port").intValue());
+    builder.withAuthFilePath(new File(table.getString("auth-file")).toPath());
+    builder.withTimeout(table.getLong("timeout"));
+
+    return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }
 
   private Optional<ThrowingTomlTable> getSigningTableFrom(

@@ -15,10 +15,13 @@ package tech.pegasys.ethsigner.signer.multiplatform;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.HashicorpSigningMetadataFile;
 
 public interface MultiSignerFactory {
 
-  TransactionSigner createSigner(AzureSigningMetadataFile metadataFile);
+  TransactionSigner createSigner(final AzureSigningMetadataFile metadataFile);
 
-  TransactionSigner createSigner(FileBasedSigningMetadataFile metadataFile);
+  TransactionSigner createSigner(final FileBasedSigningMetadataFile metadataFile);
+
+  TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile);
 }

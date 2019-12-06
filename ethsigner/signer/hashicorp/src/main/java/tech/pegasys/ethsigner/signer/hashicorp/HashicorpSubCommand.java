@@ -77,8 +77,10 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    return HashicorpSignerFactory.createSigner(
-        signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+    HashicorpConfig config =
+        new HashicorpConfig(signingKeyPath, serverHost, serverPort, authFilePath, timeout);
+    HashicorpSignerFactory factory = new HashicorpSignerFactory();
+    return factory.createSigner(config);
   }
 
   @Override
