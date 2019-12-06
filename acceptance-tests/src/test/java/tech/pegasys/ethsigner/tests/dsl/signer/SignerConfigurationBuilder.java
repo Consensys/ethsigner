@@ -50,9 +50,20 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+
+  public SignerConfigurationBuilder withMultiPlatformSignerDirectory(
+      final Path multiPlatformSignerDirectory) {
+    this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(hashicorpVaultPort, ipAddress, keyVaultName);
+        new TransactionSignerParamsSupplier(
+            hashicorpVaultPort,
+            ipAddress,
+            keyVaultName,
+            multiPlatformSignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }
