@@ -83,7 +83,7 @@ public class MultiPlatformTransactionSignerProvider
   }
 
   @Override
-  public TransactionSigner createSigner(HashicorpSigningMetadataFile metadataFile) {
+  public TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile) {
     final TransactionSigner signer;
     try {
       signer = hashicorpFactory.createSigner(metadataFile.getConfig());
@@ -92,16 +92,12 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
-      LOG.error(
-          String.format(
-              "Hashicorp signer's Ethereum Address (%s) does not align with metadata filename (%s)",
-              signerAddress, metadataFile.getBaseFilename()));
-      return null;
+    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+        return null;
     }
-    LOG.info("Loaded signer for address {}", signerAddress);
-    return signer;
+
+      LOG.info("Loaded signer for address {}", signer.getAddress());
+      return signer;
   }
 
   @Override

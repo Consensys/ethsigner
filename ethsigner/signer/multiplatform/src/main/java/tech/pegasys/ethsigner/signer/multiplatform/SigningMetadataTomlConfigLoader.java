@@ -100,7 +100,7 @@ class SigningMetadataTomlConfigLoader {
         return getFileBasedSigningMetadataFromToml(filename, result);
       } else if (SignerType.fromString(type).equals(SignerType.AZURE_BASED_SIGNER)) {
         return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
-      } else if (SignerType.fromString(type).equals(SignerType.HASHICORP)) {
+      } else if (SignerType.fromString(type).equals(SignerType.HASHICORP_BASED_SIGNER)) {
         return getHashicorpMetadataFromToml(file.getFileName().toString(), result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);

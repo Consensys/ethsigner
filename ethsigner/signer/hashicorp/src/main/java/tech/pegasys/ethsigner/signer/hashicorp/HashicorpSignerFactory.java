@@ -45,7 +45,7 @@ public class HashicorpSignerFactory {
   private static final String TIMEOUT_MESSGAE =
       "Timeout while retrieving private key from Hashicorp Vault.";
 
-  public TransactionSigner createSigner(HashicorpConfig hashicorpConfig) {
+  public TransactionSigner createSigner(final HashicorpConfig hashicorpConfig) {
     final String response =
         requestSecretFromVault(
             hashicorpConfig.getSigningKeyPath(),
@@ -53,21 +53,6 @@ public class HashicorpSignerFactory {
             hashicorpConfig.getHost(),
             hashicorpConfig.getAuthFilePath(),
             hashicorpConfig.getTimeout());
-    final Credentials credentials = extractCredentialsFromJson(response);
-    if (credentials.getAddress() != null) {
-      LOG.debug("Successfully retrieved the credentials from the Hashicorp vault.");
-    }
-    return new CredentialTransactionSigner(credentials);
-  }
-
-  public static TransactionSigner createSigner(
-      final String signingKeyPath,
-      final int serverPort,
-      final String serverHost,
-      final Path authFilePath,
-      final long timeout) {
-    final String response =
-        requestSecretFromVault(signingKeyPath, serverPort, serverHost, authFilePath, timeout);
     final Credentials credentials = extractCredentialsFromJson(response);
     if (credentials.getAddress() != null) {
       LOG.debug("Successfully retrieved the credentials from the Hashicorp vault.");
