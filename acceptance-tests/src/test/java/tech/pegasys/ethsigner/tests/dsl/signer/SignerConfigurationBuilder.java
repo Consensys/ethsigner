@@ -27,6 +27,7 @@ public class SignerConfigurationBuilder {
   private String ipAddress;
   private String keyVaultName;
   private Path keysDirectory;
+  private Path multiPlatformSignerDirectory;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -58,10 +59,20 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withMultiPlatformSignerDirectory(
+      final Path multiPlatformSignerDirectory) {
+    this.multiPlatformSignerDirectory = multiPlatformSignerDirectory;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(
-            hashicorpVaultPort, ipAddress, keyVaultName, keysDirectory);
+            hashicorpVaultPort,
+            ipAddress,
+            keyVaultName,
+            keysDirectory,
+            multiPlatformSignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }

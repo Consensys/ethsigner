@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -69,15 +70,11 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    final String signerAddress = signer.getAddress();
-    if (!signerAddress.equals(metadataFile.getBaseFilename())) {
-      LOG.error(
-          String.format(
-              "Azure signer's Ethereum Address (%s) does not align with metadata filename (%s)",
-              signerAddress, metadataFile.getBaseFilename()));
+    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
       return null;
     }
-    LOG.info("Loaded signer for address {}", signerAddress);
+
+    LOG.info("Loaded signer for address {}", signer.getAddress());
     return signer;
   }
 
@@ -87,11 +84,29 @@ public class MultiPlatformTransactionSignerProvider
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
-      LOG.debug("Loaded signer with key '{}'", metadataFile.getKeyPath().getFileName());
+      final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
+      if (!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
+        return null;
+      }
+
+      LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
+  }
+
+  private boolean validateFilenameMatchesSigningAddress(
+      final String signerAddress, final SigningMetadataFile metadataFile) {
+
+    if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
+      LOG.error(
+          String.format(
+              "Signer's Ethereum Address (%s) does not align with metadata filename (%s)",
+              signerAddress, metadataFile.getBaseFilename()));
+      return false;
+    }
+    return true;
   }
 }
