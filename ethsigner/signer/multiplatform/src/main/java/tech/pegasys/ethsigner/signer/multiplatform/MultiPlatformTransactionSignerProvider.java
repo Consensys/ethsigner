@@ -74,12 +74,12 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
-      return null;
+    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+        LOG.info("Loaded signer for address {}", signer.getAddress());
+        return signer;
     }
 
-    LOG.info("Loaded signer for address {}", signer.getAddress());
-    return signer;
+      return null;
   }
 
   @Override
@@ -92,12 +92,12 @@ public class MultiPlatformTransactionSignerProvider
       return null;
     }
 
-    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
-        return null;
+    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+        LOG.info("Loaded signer for address {}", signer.getAddress());
+        return signer;
     }
 
-      LOG.info("Loaded signer for address {}", signer.getAddress());
-      return signer;
+      return null;
   }
 
   @Override
@@ -107,19 +107,20 @@ public class MultiPlatformTransactionSignerProvider
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
       final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if (!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
-        return null;
+      if (!filenameMatchesSigningAddress(signerAddress, metadataFile)) {
+          LOG.info("Loaded signer for address {}", signer.getAddress());
+          return signer;
       }
 
-      LOG.info("Loaded signer for address {}", signer.getAddress());
-      return signer;
+      return null;
+
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }
 
-  private boolean validateFilenameMatchesSigningAddress(
+  private boolean filenameMatchesSigningAddress(
       final String signerAddress, final SigningMetadataFile metadataFile) {
 
     if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
