@@ -75,11 +75,11 @@ public class MultiPlatformTransactionSignerProvider
     }
 
     if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
-        LOG.info("Loaded signer for address {}", signer.getAddress());
-        return signer;
+      LOG.info("Loaded signer for address {}", signer.getAddress());
+      return signer;
     }
 
-      return null;
+    return null;
   }
 
   @Override
@@ -93,11 +93,11 @@ public class MultiPlatformTransactionSignerProvider
     }
 
     if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
-        LOG.info("Loaded signer for address {}", signer.getAddress());
-        return signer;
+      LOG.info("Loaded signer for address {}", signer.getAddress());
+      return signer;
     }
 
-      return null;
+    return null;
   }
 
   @Override
@@ -108,8 +108,8 @@ public class MultiPlatformTransactionSignerProvider
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
       final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
       if (!filenameMatchesSigningAddress(signerAddress, metadataFile)) {
-          LOG.info("Loaded signer for address {}", signer.getAddress());
-          return signer;
+        LOG.info("Loaded signer for address {}", signer.getAddress());
+        return signer;
       }
 
       return null;
