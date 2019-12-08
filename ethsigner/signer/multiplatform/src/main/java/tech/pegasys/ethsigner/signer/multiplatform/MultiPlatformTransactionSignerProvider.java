@@ -107,7 +107,7 @@ public class MultiPlatformTransactionSignerProvider
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
       final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if (!filenameMatchesSigningAddress(signerAddress, metadataFile)) {
+      if (filenameMatchesSigningAddress(signerAddress, metadataFile)) {
         LOG.info("Loaded signer for address {}", signer.getAddress());
         return signer;
       }
