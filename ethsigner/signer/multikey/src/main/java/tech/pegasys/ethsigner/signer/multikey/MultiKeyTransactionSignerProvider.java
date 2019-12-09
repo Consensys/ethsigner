@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multikey;
+package tech.pegasys.ethsigner.signer.multiplatform;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -39,9 +39,11 @@ public class MultiKeyTransactionSignerProvider
 
   MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
-      final AzureKeyVaultTransactionSignerFactory azureFactory) {
+      final AzureKeyVaultTransactionSignerFactory azureFactory,
+      final HashicorpSignerFactory hashicorpFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
+    this.hashicorpFactory = hashicorpFactory;
   }
 
   @Override
@@ -70,12 +72,30 @@ public class MultiKeyTransactionSignerProvider
       return null;
     }
 
-    if (!validateFilenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+      LOG.info("Loaded signer for address {}", signer.getAddress());
+      return signer;
+    }
+
+    return null;
+  }
+
+  @Override
+  public TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile) {
+    final TransactionSigner signer;
+    try {
+      signer = hashicorpFactory.createSigner(metadataFile.getConfig());
+    } catch (final TransactionSignerInitializationException e) {
+      LOG.error("Failed to construct Hashicorp signer from " + metadataFile.getBaseFilename());
       return null;
     }
 
-    LOG.info("Loaded signer for address {}", signer.getAddress());
-    return signer;
+    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+      LOG.info("Loaded signer for address {}", signer.getAddress());
+      return signer;
+    }
+
+    return null;
   }
 
   @Override
@@ -85,19 +105,20 @@ public class MultiKeyTransactionSignerProvider
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
       final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if (!validateFilenameMatchesSigningAddress(signerAddress, metadataFile)) {
-        return null;
+      if (filenameMatchesSigningAddress(signerAddress, metadataFile)) {
+        LOG.info("Loaded signer for address {}", signer.getAddress());
+        return signer;
       }
 
-      LOG.info("Loaded signer for address {}", signer.getAddress());
-      return signer;
+      return null;
+
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Unable to load signer with key " + metadataFile.getKeyPath().getFileName(), e);
       return null;
     }
   }
 
-  private boolean validateFilenameMatchesSigningAddress(
+  private boolean filenameMatchesSigningAddress(
       final String signerAddress, final SigningMetadataFile metadataFile) {
 
     if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {

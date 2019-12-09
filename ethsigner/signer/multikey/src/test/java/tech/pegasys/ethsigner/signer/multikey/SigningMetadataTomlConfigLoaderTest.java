@@ -258,4 +258,43 @@ class SigningMetadataTomlConfigLoaderTest {
 
     assertThat(metadataFiles.size()).isZero();
   }
+
+  @Test
+  void hashicorpConfigIsLoadedIfHashicorpMetadataFileInDirectory() {
+    copyFileIntoConfigDirectory("hashicorpconfig.toml");
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isOne();
+    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
+    final HashicorpSigningMetadataFile metadataFile =
+        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
+
+    assertThat(metadataFile.getConfig().getSigningKeyPath()).isEqualTo("/path/to/key");
+    assertThat(metadataFile.getConfig().getHost()).isEqualTo("Host");
+    assertThat(metadataFile.getConfig().getPort()).isEqualTo(9999);
+    assertThat(metadataFile.getConfig().getAuthFilePath().toString())
+        .isEqualTo("/path/to/auth-file");
+    assertThat(metadataFile.getConfig().getTimeout()).isEqualTo(50);
+  }
+
+  @Test
+  void hashicorpConfigWithIllegalValueTypeFailsToLoad() {
+    copyFileIntoConfigDirectory("hashicorpconfig_illegalValueType.toml");
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isZero();
+  }
+
+  @Test
+  void hashicorpConfigWithMissingFieldFailsToLoad() {
+    copyFileIntoConfigDirectory("hashicorpconfig_missingField.toml");
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isZero();
+  }
 }

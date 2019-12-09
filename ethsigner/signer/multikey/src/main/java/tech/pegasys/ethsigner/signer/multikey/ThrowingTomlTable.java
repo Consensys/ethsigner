@@ -28,4 +28,9 @@ public class ThrowingTomlTable {
     return Optional.ofNullable(table.getString(key))
         .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
   }
+
+  public Long getLong(final String key) {
+    return Optional.ofNullable(table.getLong(key))
+        .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
+  }
 }
