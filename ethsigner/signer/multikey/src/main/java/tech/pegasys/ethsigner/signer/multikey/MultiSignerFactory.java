@@ -10,14 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package tech.pegasys.ethsigner.signer.multikey;
 
-rootProject.name='ethsigner'
-include 'acceptance-tests'
-include 'ethsigner:app'
-include 'ethsigner:core'
-include 'ethsigner:signing-api'
-include 'ethsigner:signer:hashicorp'
-include 'ethsigner:signer:file-based'
-include 'ethsigner:signer:azure'
-include 'ethsigner:signer:multikey'
-include 'ethsigner:commandline'
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
+import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
+
+public interface MultiSignerFactory {
+
+  TransactionSigner createSigner(AzureSigningMetadataFile metadataFile);
+
+  TransactionSigner createSigner(FileBasedSigningMetadataFile metadataFile);
+}
