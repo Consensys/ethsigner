@@ -1,0 +1,11 @@
+[metadata]
+createdAt = 2019-07-01T12:22:30Z
+description = "Example of invalid Hashicorp based configuration"
+
+[signing]
+type = "hashicorp-based-signer"
+signing-key-path = "/path/to/key"
+host = "Host"
+#port = 9999
+#auth-file = "/path/to/auth-file"
+#timeout = 50
