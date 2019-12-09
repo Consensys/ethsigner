@@ -7,6 +7,7 @@
 ### Features Added
 - Multi-key signing: Ethsigner is initialised with a directory containing a number of TOML metadata files, each of which describe a key which may be used for signing. Upon reception of a Transaction, Ethsigner loads the corresponding metadata file, and signs the Transaction with the key defined therein.
 - Relaxed definition of 'optional' when parsing eth_SendTransaction (empty string, null an "0x" are deemed a missing optional parameter).
+- All endpoints (not just "/") are proxied to the downstream web3j provider (eg. "/login")
 - CI moved from Jenkins to CircleCI
 - Updated to Web3j 4.5.5
 - Updated to JUnit 5
