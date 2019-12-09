@@ -42,10 +42,11 @@ public class MultiPlatformTransactionSignerProvider
 
   MultiPlatformTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
-      final AzureKeyVaultTransactionSignerFactory azureFactory) {
+      final AzureKeyVaultTransactionSignerFactory azureFactory,
+      HashicorpSignerFactory hashicorpFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
-    this.hashicorpFactory = new HashicorpSignerFactory();
+    this.hashicorpFactory = hashicorpFactory;
   }
 
   @Override

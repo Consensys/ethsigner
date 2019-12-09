@@ -22,6 +22,7 @@ import static tech.pegasys.ethsigner.signer.multiplatform.MetadataFileFixture.co
 
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multiplatform.metadata.SigningMetadataFile;
 
@@ -43,8 +44,9 @@ class MultiPlatformTransactionSignerProviderTest {
   private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);
   final AzureKeyVaultTransactionSignerFactory azureFactory =
       new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-  private MultiPlatformTransactionSignerProvider signerFactory =
-      new MultiPlatformTransactionSignerProvider(loader, azureFactory);
+  private final HashicorpSignerFactory hashicorpFactory = new HashicorpSignerFactory();
+  private final MultiPlatformTransactionSignerProvider signerFactory =
+      new MultiPlatformTransactionSignerProvider(loader, azureFactory, hashicorpFactory);
   private FileBasedSigningMetadataFile metadataFile;
 
   @BeforeEach
