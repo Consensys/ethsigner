@@ -10,11 +10,11 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multiplatform.metadata;
+package tech.pegasys.ethsigner.signer.multikey.metadata;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
-import tech.pegasys.ethsigner.signer.multiplatform.MultiSignerFactory;
+import tech.pegasys.ethsigner.signer.multikey.MultiSignerFactory;
 
 public class HashicorpSigningMetadataFile extends SigningMetadataFile {
 
