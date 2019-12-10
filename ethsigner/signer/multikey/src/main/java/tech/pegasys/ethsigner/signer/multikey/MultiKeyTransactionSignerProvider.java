@@ -75,7 +75,7 @@ public class MultiKeyTransactionSignerProvider
       return null;
     }
 
-    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (filenameMatchesSigningAddress(signer, metadataFile)) {
       LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     }
@@ -93,7 +93,7 @@ public class MultiKeyTransactionSignerProvider
       return null;
     }
 
-    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (filenameMatchesSigningAddress(signer, metadataFile)) {
       LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     }
@@ -107,8 +107,7 @@ public class MultiKeyTransactionSignerProvider
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
-      final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if (filenameMatchesSigningAddress(signerAddress, metadataFile)) {
+      if (filenameMatchesSigningAddress(signer, metadataFile)) {
         LOG.info("Loaded signer for address {}", signer.getAddress());
         return signer;
       }
@@ -122,8 +121,9 @@ public class MultiKeyTransactionSignerProvider
   }
 
   private boolean filenameMatchesSigningAddress(
-      final String signerAddress, final SigningMetadataFile metadataFile) {
+      final TransactionSigner signer, final SigningMetadataFile metadataFile) {
 
+    final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
     if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
       LOG.error(
           String.format(
