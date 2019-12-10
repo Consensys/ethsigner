@@ -14,24 +14,28 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
 public class MultiKeyAcceptanceTestBase {
 
   protected Signer ethSigner;
+  static HashicorpVaultDocker hashicorpVaultDocker;
 
   @TempDir Path tomlDirectory;
 
@@ -51,6 +55,18 @@ public class MultiKeyAcceptanceTestBase {
     ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+  }
+
+  static void setUpHashicorpVault() {
+    final DockerClient docker = new DockerClientFactory().create();
+    hashicorpVaultDocker = new HashicorpVaultDocker(docker);
+    hashicorpVaultDocker.start();
+    hashicorpVaultDocker.awaitStartupCompletion();
+    hashicorpVaultDocker.createTestData();
+  }
+
+  static void tearDownHashicorpVault() {
+    hashicorpVaultDocker.shutdown();
   }
 
   void createAzureTomlFileAt(
@@ -87,6 +103,32 @@ public class MultiKeyAcceptanceTestBase {
       writer.close();
     } catch (final IOException e) {
       fail("Unable to create Azure TOML file.");
+    }
+  }
+
+  void createHashicorpTomlFileAt(
+      final String tomlFilename,
+      final String keyPath,
+      final String authFile,
+      final HashicorpVaultDocker hashicorpVaultDocker) {
+    {
+      try {
+        final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
+
+        final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
+        writer.write("[signing]\n");
+        writer
+            .append("type = \"hashicorp-based-signer\"\n")
+            .append("signing-key-path = \"" + keyPath + "\"\n")
+            .append("host = \"" + hashicorpVaultDocker.getIpAddress() + "\"\n")
+            .append("port = " + hashicorpVaultDocker.port() + "\n")
+            .append("auth-file  = \"" + authFile + "\"\n")
+            .append("timeout = 500\n");
+
+        writer.close();
+      } catch (final IOException e) {
+        fail("Unable to create Hashicorp TOML file.");
+      }
     }
   }
 }

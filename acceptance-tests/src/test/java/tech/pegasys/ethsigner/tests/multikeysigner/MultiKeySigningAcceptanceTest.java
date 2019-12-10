@@ -15,11 +15,16 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
+import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
+
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.signing.ValueTransferWithHashicorpAcceptanceTest;
 
 import java.io.File;
 import java.net.URISyntaxException;
 
 import com.google.common.io.Resources;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,6 +37,11 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
         AzureBasedTomlLoadingAcceptanceTest.clientId != null
             && AzureBasedTomlLoadingAcceptanceTest.clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
+
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
+
+    setUpHashicorpVault();
   }
 
   @Test
@@ -54,9 +64,20 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
                     .toURI())
             .getAbsolutePath());
 
+    createHashicorpTomlFileAt(
+        HASHICORP_ETHEREUM_ADDRESS + ".toml",
+        HashicorpHelpers.keyPath,
+        HashicorpHelpers.vaultAuthFile,
+        hashicorpVaultDocker);
+
     setup();
 
     assertThat(ethSigner.accounts().list())
-        .containsOnly(AZURE_ETHEREUM_ADDRESS, FILE_ETHEREUM_ADDRESS);
+        .containsOnly(AZURE_ETHEREUM_ADDRESS, FILE_ETHEREUM_ADDRESS, HASHICORP_ETHEREUM_ADDRESS);
+  }
+
+  @AfterAll
+  void tearDown() {
+    tearDownHashicorpVault();
   }
 }

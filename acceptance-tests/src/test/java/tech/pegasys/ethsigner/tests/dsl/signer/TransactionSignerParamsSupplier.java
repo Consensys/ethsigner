@@ -13,9 +13,9 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers.createVaultAuthFile;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
 import java.io.IOException;
@@ -105,11 +105,7 @@ public class TransactionSignerParamsSupplier {
     return createTmpFile("ethsigner_keyfile", data);
   }
 
-  private File createVaultAuthFile() {
-    return createTmpFile("vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
-  }
-
-  private File createTmpFile(final String tempNamePrefix, final byte[] data) {
+  public static File createTmpFile(final String tempNamePrefix, final byte[] data) {
     final Path path;
     try {
       path = Files.createTempFile(tempNamePrefix, null);
