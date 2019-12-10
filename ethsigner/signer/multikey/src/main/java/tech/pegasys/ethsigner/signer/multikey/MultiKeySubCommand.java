@@ -43,11 +43,9 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "multikey-signer";
 
-  public MultiKeySubCommand() {
-  }
+  public MultiKeySubCommand() {}
 
-  @Spec
-  private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
+  @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
   @Option(
       names = {"-d", "--directory"},
