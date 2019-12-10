@@ -35,15 +35,19 @@ import picocli.CommandLine.Spec;
 @Command(
     name = MultiKeySubCommand.COMMAND_NAME,
     description =
-        "This command allows metadata file that matches the sender address to specify signing credentials from one of several types",
+        "This command allows Ethsigner to access multiple keys, and use the appropriate key "
+            + "when signing a transaction (based on its \"from\" field). Each key's 'access' "
+            + "parameters are defined in a toml file contained within the specified directory.",
     mixinStandardHelpOptions = true)
 public class MultiKeySubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "multikey-signer";
 
-  public MultiKeySubCommand() {}
+  public MultiKeySubCommand() {
+  }
 
-  @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
+  @Spec
+  private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
 
   @Option(
       names = {"-d", "--directory"},
