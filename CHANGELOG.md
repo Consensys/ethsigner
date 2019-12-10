@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.0
+
+### Known Issues
+
+### Features Added
+- Multi-key signing: Ethsigner is initialised with a directory containing a number of TOML metadata files, each of which describe a key which may be used for signing. Upon reception of a Transaction, Ethsigner loads the corresponding metadata file, and signs the Transaction with the key defined therein.
+- Relaxed definition of 'optional' when parsing eth_SendTransaction (empty string, null an "0x" are deemed a missing optional parameter).
+- All endpoints (not just "/") are proxied to the downstream web3j provider (eg. "/login")
+- CI moved from Jenkins to CircleCI
+- Updated to Web3j 4.5.5
+- Updated to JUnit 5
+
+
+### Bugs Fixed
+- When a private transaction is submitted without a nonce, a nonce is generated and inserted. However, if the supplied nonce is too low, the transaction is not resubmitted with a new nonce. Rather an error is returned to the caller (resolved in Besu 1.2.5).
+- Removed intermittent "out of memory" failure during integration testing.
+- Resolved an issue whereby a missing optional field in eth_SendTransaction would fail
 
 ## 0.3.0
 
