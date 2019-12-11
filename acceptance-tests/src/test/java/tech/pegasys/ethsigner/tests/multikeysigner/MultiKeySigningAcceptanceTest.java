@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAc
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
-import tech.pegasys.ethsigner.tests.signing.ValueTransferWithHashicorpAcceptanceTest;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -38,7 +37,8 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
         "Ensure Azure client id and client secret env variables are set");
 
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
+        .addShutdownHook(
+            new Thread(() -> HashicorpHelpers.tearDownHashicorpVault(hashicorpVaultDocker)));
   }
 
   @Test
