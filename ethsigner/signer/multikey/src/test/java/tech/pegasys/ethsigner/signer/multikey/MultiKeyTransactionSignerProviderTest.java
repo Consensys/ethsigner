@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.CONFIG_
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.copyMetadataFileToDirectory;
 
-import java.net.URISyntaxException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
@@ -28,6 +27,7 @@ import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -41,8 +41,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class MultiKeyTransactionSignerProviderTest {
 
-  @TempDir
-  Path configsDirectory;
+  @TempDir Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);
   final AzureKeyVaultTransactionSignerFactory azureFactory =
@@ -97,12 +96,15 @@ class MultiKeyTransactionSignerProviderTest {
   @Test
   void signerIsLoadedSuccessfullyWhenAddressHasCaseMismatchToFilename() throws URISyntaxException {
     final FileBasedSigningMetadataFile capitalisedMetadata =
-        new FileBasedSigningMetadataFile(LOWERCASE_ADDRESS.toUpperCase() + ".toml",
+        new FileBasedSigningMetadataFile(
+            LOWERCASE_ADDRESS.toUpperCase() + ".toml",
             Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(KEY_FILENAME),
-            Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(PASSWORD_FILENAME));
+            Path.of(Resources.getResource("metadata-toml-configs").toURI())
+                .resolve(PASSWORD_FILENAME));
 
     final TransactionSigner signer = signerFactory.createSigner(capitalisedMetadata);
     assertThat(signer).isNotNull();
-    assertThat(capitalisedMetadata.getBaseFilename()).isNotEqualTo(signer.getAddress().substring(2));
+    assertThat(capitalisedMetadata.getBaseFilename())
+        .isNotEqualTo(signer.getAddress().substring(2));
   }
 }
