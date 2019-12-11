@@ -24,7 +24,6 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 import com.google.common.io.Resources;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,8 +39,6 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     Runtime.getRuntime()
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
-
-    setUpHashicorpVault();
   }
 
   @Test
@@ -74,10 +71,5 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     assertThat(ethSigner.accounts().list())
         .containsOnly(AZURE_ETHEREUM_ADDRESS, FILE_ETHEREUM_ADDRESS, HASHICORP_ETHEREUM_ADDRESS);
-  }
-
-  @AfterAll
-  static void tearDown() {
-    tearDownHashicorpVault();
   }
 }
