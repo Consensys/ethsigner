@@ -20,6 +20,8 @@ import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.CONFIG_
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.LOWERCASE_ADDRESS;
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import java.net.URISyntaxException;
+import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
@@ -39,7 +41,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class MultiKeyTransactionSignerProviderTest {
 
-  @TempDir Path configsDirectory;
+  @TempDir
+  Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);
   final AzureKeyVaultTransactionSignerFactory azureFactory =
@@ -48,11 +51,11 @@ class MultiKeyTransactionSignerProviderTest {
   private MultiKeyTransactionSignerProvider signerFactory =
       new MultiKeyTransactionSignerProvider(loader, azureFactory, hashicorpFactory);
   private FileBasedSigningMetadataFile metadataFile;
+  private final String KEY_FILENAME = "k.key";
+  private final String PASSWORD_FILENAME = "p.password";
 
   @BeforeEach
   void beforeEach() {
-    final String KEY_FILENAME = "k.key";
-    final String PASSWORD_FILENAME = "p.password";
     final Path newKeyFile = configsDirectory.resolve(KEY_FILENAME);
     final Path newPasswordFile = configsDirectory.resolve(PASSWORD_FILENAME);
 
@@ -86,8 +89,20 @@ class MultiKeyTransactionSignerProviderTest {
 
   @Test
   void getAddresses() {
-    Collection<SigningMetadataFile> files = Collections.singleton(metadataFile);
+    final Collection<SigningMetadataFile> files = Collections.singleton(metadataFile);
     when(loader.loadAvailableSigningMetadataTomlConfigs()).thenReturn(files);
     assertThat(signerFactory.availableAddresses()).containsExactly("0x" + LOWERCASE_ADDRESS);
+  }
+
+  @Test
+  void signerIsLoadedSuccessfullyWhenAddressHasCaseMismatchToFilename() throws URISyntaxException {
+    final FileBasedSigningMetadataFile capitalisedMetadata =
+        new FileBasedSigningMetadataFile(LOWERCASE_ADDRESS.toUpperCase() + ".toml",
+            Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(KEY_FILENAME),
+            Path.of(Resources.getResource("metadata-toml-configs").toURI()).resolve(PASSWORD_FILENAME));
+
+    final TransactionSigner signer = signerFactory.createSigner(capitalisedMetadata);
+    assertThat(signer).isNotNull();
+    assertThat(capitalisedMetadata.getBaseFilename()).isNotEqualTo(signer.getAddress().substring(2));
   }
 }
