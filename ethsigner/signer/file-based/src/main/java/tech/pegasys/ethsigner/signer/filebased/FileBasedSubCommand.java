@@ -29,8 +29,7 @@ import picocli.CommandLine.Spec;
 /** File-based authentication related sub-command */
 @Command(
     name = FileBasedSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures transactions are signed by a key stored in an encrypted file.",
+    description = "Sign transactions with a key stored in an encrypted V3 Keystore file.",
     mixinStandardHelpOptions = true)
 public class FileBasedSubCommand extends SignerSubCommand {
 
