@@ -35,7 +35,9 @@ import picocli.CommandLine.Spec;
 @Command(
     name = MultiKeySubCommand.COMMAND_NAME,
     description =
-        "This command allows metadata file that matches the sender address to specify signing credentials from one of several types",
+        "Access multiple keys (of any supported type). Each key's "
+            + "parameters are defined in a separate TOML file contained within a given "
+            + "directory.",
     mixinStandardHelpOptions = true)
 public class MultiKeySubCommand extends SignerSubCommand {
 
