@@ -83,7 +83,9 @@ class MultiKeyTransactionSignerProviderTest {
   void getSignerForAvailableMetadataReturnsSigner() {
     when(loader.loadMetadataForAddress(LOWERCASE_ADDRESS)).thenReturn(Optional.of(metadataFile));
 
-    assertThat(signerFactory.getSigner(LOWERCASE_ADDRESS)).isNotEmpty();
+    final Optional<TransactionSigner> signer = signerFactory.getSigner(LOWERCASE_ADDRESS);
+    assertThat(signer).isNotEmpty();
+    assertThat(signer.get().getAddress()).isEqualTo("0x" + LOWERCASE_ADDRESS);
   }
 
   @Test
@@ -106,5 +108,6 @@ class MultiKeyTransactionSignerProviderTest {
     assertThat(signer).isNotNull();
     assertThat(capitalisedMetadata.getBaseFilename())
         .isNotEqualTo(signer.getAddress().substring(2));
+    assertThat(signer.getAddress()).isEqualTo("0x" + LOWERCASE_ADDRESS);
   }
 }
