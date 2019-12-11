@@ -35,11 +35,9 @@ import picocli.CommandLine.Spec;
 @Command(
     name = MultiKeySubCommand.COMMAND_NAME,
     description =
-        "This command allows Ethsigner to access multiple keys, and use the appropriate key "
-            + "when signing a transaction (based on its \"from\" field). Each key's 'access' "
-            + "parameters are defined in a toml file contained within the specified directory. "
-            + "Keys stored in a local file, Azure or Hashicorp Vault may be accessed with an "
-            + "appropriately structured TOML file."
+        "Access multiple keys (of any supported type). Each key's "
+            + "parameters are defined in a separate TOML file contained within a given "
+            + "directory.",
     mixinStandardHelpOptions = true)
 public class MultiKeySubCommand extends SignerSubCommand {
 
