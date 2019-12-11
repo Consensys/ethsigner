@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -55,18 +53,6 @@ public class MultiKeyAcceptanceTestBase {
     ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
-  }
-
-  static void setUpHashicorpVault() {
-    final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = new HashicorpVaultDocker(docker);
-    hashicorpVaultDocker.start();
-    hashicorpVaultDocker.awaitStartupCompletion();
-    hashicorpVaultDocker.createTestData();
-  }
-
-  static void tearDownHashicorpVault() {
-    hashicorpVaultDocker.shutdown();
   }
 
   void createAzureTomlFileAt(

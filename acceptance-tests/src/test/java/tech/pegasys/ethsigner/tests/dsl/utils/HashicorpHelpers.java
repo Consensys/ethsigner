@@ -14,10 +14,14 @@ package tech.pegasys.ethsigner.tests.dsl.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import tech.pegasys.ethsigner.tests.dsl.node.Node;
+import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.TransactionSignerParamsSupplier;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
+
+import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpHelpers {
 
@@ -28,5 +32,32 @@ public class HashicorpHelpers {
   public static File createVaultAuthFile() {
     return TransactionSignerParamsSupplier.createTmpFile(
         "vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
+  }
+
+  public static HashicorpVaultDocker setUpHashicorpVault(final DockerClient docker) {
+    HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
+    hashicorpVaultDocker.start();
+    hashicorpVaultDocker.awaitStartupCompletion();
+    hashicorpVaultDocker.createTestData();
+    return hashicorpVaultDocker;
+  }
+
+  public static void tearDownBase(
+      final Node ethNode, final Signer ethSigner, final HashicorpVaultDocker hashicorpVaultDocker) {
+    if (ethNode != null) {
+      ethNode.shutdown();
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+
+    tearDownHashicorpVault(hashicorpVaultDocker);
+  }
+
+  public static void tearDownHashicorpVault(final HashicorpVaultDocker hashicorpVaultDocker) {
+    if (hashicorpVaultDocker != null) {
+      hashicorpVaultDocker.shutdown();
+    }
   }
 }

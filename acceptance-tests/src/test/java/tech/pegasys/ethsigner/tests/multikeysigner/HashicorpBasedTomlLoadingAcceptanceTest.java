@@ -14,29 +14,30 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
-import tech.pegasys.ethsigner.tests.signing.ValueTransferWithHashicorpAcceptanceTest;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
+  static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   static final String HASHICORP_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   @BeforeAll
   static void setUpBase() {
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
+        .addShutdownHook(
+            new Thread(() -> HashicorpHelpers.tearDownHashicorpVault(hashicorpVaultDocker)));
 
-    setUpHashicorpVault();
+    hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(new DockerClientFactory().create());
   }
 
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported() {
     createHashicorpTomlFileAt(
-        HASHICORP_ETHEREUM_ADDRESS + ".toml",
+        FILENAME + ".toml",
         HashicorpHelpers.keyPath,
         HashicorpHelpers.vaultAuthFile,
         hashicorpVaultDocker);
@@ -53,10 +54,5 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
         hashicorpVaultDocker);
     setup();
     assertThat(ethSigner.accounts().list()).isEmpty();
-  }
-
-  @AfterAll
-  static void tearDown() {
-    tearDownHashicorpVault();
   }
 }
