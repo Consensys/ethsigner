@@ -123,8 +123,9 @@ public class MultiKeyTransactionSignerProvider
   private boolean filenameMatchesSigningAddress(
       final TransactionSigner signer, final SigningMetadataFile metadataFile) {
 
-    final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-    if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
+    // strip leading 0x from the address.
+    final String signerAddress = signer.getAddress().substring(2).toLowerCase();
+    if (!metadataFile.getBaseFilename().toLowerCase().endsWith(signerAddress)) {
       LOG.error(
           String.format(
               "Signer's Ethereum Address (%s) does not align with metadata filename (%s)",
