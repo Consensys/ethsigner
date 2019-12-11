@@ -77,7 +77,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   }
 
   @AfterAll
-  void tearDown() {
+  static void tearDown() {
     tearDownHashicorpVault();
   }
 }
