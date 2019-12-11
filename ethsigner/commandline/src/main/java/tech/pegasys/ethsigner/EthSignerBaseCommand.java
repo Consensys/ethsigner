@@ -28,7 +28,9 @@ import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
-    description = "This command runs the EthSigner.",
+    description =
+        "This command runs the EthSigner.\n"
+            + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
     mixinStandardHelpOptions = true,
