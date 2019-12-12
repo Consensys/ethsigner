@@ -90,11 +90,6 @@ public class Signer {
     this.rawHttpRequests = new HttpRequest(httpJsonRpcUrl);
   }
 
-  public void shutdown() {
-    LOG.info("Shutting down EthSigner");
-    runner.shutdown();
-  }
-
   public Transactions transactions() {
     return this.transactions;
   }

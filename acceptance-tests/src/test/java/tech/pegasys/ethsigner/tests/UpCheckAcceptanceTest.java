@@ -23,7 +23,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -40,21 +39,12 @@ public class UpCheckAcceptanceTest {
 
   @BeforeAll
   public static void setUpBase() {
-    Runtime.getRuntime().addShutdownHook(new Thread(UpCheckAcceptanceTest::tearDownBase));
-
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
-  }
-
-  @AfterAll
-  static void tearDownBase() {
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
   }
 
   @Test

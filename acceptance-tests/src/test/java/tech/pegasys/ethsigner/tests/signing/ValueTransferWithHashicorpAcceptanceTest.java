@@ -79,14 +79,12 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   public static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
+      ethNode = null;
     }
 
     if (hashicorpVaultDocker != null) {
       hashicorpVaultDocker.shutdown();
+      hashicorpVaultDocker = null;
     }
   }
 

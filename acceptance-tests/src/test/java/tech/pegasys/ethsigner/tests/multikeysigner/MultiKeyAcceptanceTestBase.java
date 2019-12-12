@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
 public class MultiKeyAcceptanceTestBase {
@@ -34,14 +33,6 @@ public class MultiKeyAcceptanceTestBase {
   protected Signer ethSigner;
 
   @TempDir Path tomlDirectory;
-
-  @AfterEach
-  public void cleanUp() {
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-      ethSigner = null;
-    }
-  }
 
   void setup() {
     final SignerConfiguration signerConfig =

@@ -30,7 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -50,15 +49,6 @@ public class ConnectionTimeoutAcceptanceTest {
     ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
-
-    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
-  }
-
-  @AfterEach
-  public void tearDown() {
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
   }
 
   private Account richBenefactor() {

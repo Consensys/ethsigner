@@ -69,10 +69,6 @@ public class ReadTimeoutAcceptanceTest {
 
   @AfterEach
   public void tearDown() {
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
-
     close(unresponsiveSocketA);
     close(unresponsiveSocketB);
   }

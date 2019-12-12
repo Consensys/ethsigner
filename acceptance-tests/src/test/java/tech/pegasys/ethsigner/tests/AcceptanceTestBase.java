@@ -87,9 +87,5 @@ public class AcceptanceTestBase {
     if (ethNode != null) {
       ethNode.shutdown();
     }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
   }
 }

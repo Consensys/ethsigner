@@ -88,10 +88,6 @@ public class DataPathFeatureFlagAcceptanceTest {
     if (ethNode != null) {
       ethNode.shutdown();
     }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
   }
 
   @Test

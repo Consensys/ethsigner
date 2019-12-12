@@ -61,10 +61,7 @@ public class CorsAcceptanceTest {
   public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
+      ethNode = null;
     }
   }
 
