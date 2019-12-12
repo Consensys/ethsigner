@@ -13,10 +13,8 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers.createVaultAuthFile;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -24,37 +22,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.google.common.io.Resources;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 public class TransactionSignerParamsSupplier {
 
-  private final int hashicorpVaultPort;
-  private final String ipAddress;
+  private final HashicorpVaultDocker hashicorpVault;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
   public TransactionSignerParamsSupplier(
-      final int hashicorpVaultPort,
-      final String ipAddress,
+      final HashicorpVaultDocker hashicorpVault,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {
-    this.hashicorpVaultPort = hashicorpVaultPort;
-    this.ipAddress = ipAddress;
+    this.hashicorpVault = hashicorpVault;
     this.azureKeyVault = azureKeyVault;
     this.multiKeySignerDirectory = multiKeySignerDirectory;
   }
 
   public Collection<String> get() {
     final ArrayList<String> params = new ArrayList<>();
-    if (hashicorpVaultPort != 0) {
+    if (hashicorpVault != null) {
       params.add("hashicorp-signer");
       params.add("--auth-file");
-      params.add(createVaultAuthFile().getAbsolutePath());
+      params.add(createVaultAuthFile(hashicorpVault.getVaultToken()).getAbsolutePath());
       params.add("--host");
-      params.add(ipAddress);
+      params.add(hashicorpVault.getIpAddress());
       params.add("--port");
-      params.add(String.valueOf(hashicorpVaultPort));
+      params.add(String.valueOf(hashicorpVault.getPort()));
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
       params.add("--key-vault-name");
@@ -103,6 +98,11 @@ public class TransactionSignerParamsSupplier {
     }
 
     return createTmpFile("ethsigner_keyfile", data);
+  }
+
+  private static File createVaultAuthFile(final String vaultToken) {
+    return TransactionSignerParamsSupplier.createTmpFile(
+        "vault_authfile", vaultToken.getBytes(UTF_8));
   }
 
   public static File createTmpFile(final String tempNamePrefix, final byte[] data) {

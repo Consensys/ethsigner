@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers.tearDownHashicorpVault;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -44,13 +45,25 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
 
+  public static void tearDownBase(
+      final Node ethNode, final Signer ethSigner, final HashicorpVaultDocker hashicorpVaultDocker) {
+    if (ethNode != null) {
+      ethNode.shutdown();
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+
+    tearDownHashicorpVault(hashicorpVaultDocker);
+  }
+
   @BeforeAll
   public static void setUpBase() {
 
     Runtime.getRuntime()
         .addShutdownHook(
-            new Thread(
-                () -> HashicorpHelpers.tearDownBase(ethNode, ethSigner, hashicorpVaultDocker)));
+            new Thread(() -> tearDownBase(ethNode, ethSigner, hashicorpVaultDocker)));
 
     final DockerClient docker = new DockerClientFactory().create();
     hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(docker);
@@ -62,7 +75,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final String ip = hashicorpVaultDocker.getIpAddress();
-    final int port = hashicorpVaultDocker.port();
+    final int port = hashicorpVaultDocker.getPort();
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder()
             .withHashicorpVaultPort(port)

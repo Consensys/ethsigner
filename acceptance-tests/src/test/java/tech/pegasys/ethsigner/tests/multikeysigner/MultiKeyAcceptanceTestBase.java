@@ -107,7 +107,7 @@ public class MultiKeyAcceptanceTestBase {
             .append("type = \"hashicorp-based-signer\"\n")
             .append("signing-key-path = \"" + keyPath + "\"\n")
             .append("host = \"" + hashicorpVaultDocker.getIpAddress() + "\"\n")
-            .append("port = " + hashicorpVaultDocker.port() + "\n")
+            .append("port = " + hashicorpVaultDocker.getPort() + "\n")
             .append("auth-file  = \"" + authFile + "\"\n")
             .append("timeout = 500\n");
 

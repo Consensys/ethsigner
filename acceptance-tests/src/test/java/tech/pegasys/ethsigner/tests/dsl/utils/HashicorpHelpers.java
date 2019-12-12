@@ -27,32 +27,12 @@ public class HashicorpHelpers {
 
   public static String keyPath = "/secret/data/ethsignerSigningKey";
 
-  public static final String vaultAuthFile = createVaultAuthFile().getPath();
-
-  public static File createVaultAuthFile() {
-    return TransactionSignerParamsSupplier.createTmpFile(
-        "vault_authfile", HashicorpVaultDocker.vaultToken.getBytes(UTF_8));
-  }
-
   public static HashicorpVaultDocker setUpHashicorpVault(final DockerClient docker) {
     HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();
     hashicorpVaultDocker.createTestData();
     return hashicorpVaultDocker;
-  }
-
-  public static void tearDownBase(
-      final Node ethNode, final Signer ethSigner, final HashicorpVaultDocker hashicorpVaultDocker) {
-    if (ethNode != null) {
-      ethNode.shutdown();
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
-
-    tearDownHashicorpVault(hashicorpVaultDocker);
   }
 
   public static void tearDownHashicorpVault(final HashicorpVaultDocker hashicorpVaultDocker) {

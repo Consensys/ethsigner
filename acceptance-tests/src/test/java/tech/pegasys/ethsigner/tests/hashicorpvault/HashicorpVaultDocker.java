@@ -46,7 +46,6 @@ public class HashicorpVaultDocker {
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_VAULT_IMAGE = "vault:latest";
   private static final int DEFAULT_HTTP_PORT = 8200;
-  public static final String vaultToken = "token";
   private static final String[] CREATE_ETHSIGNER_SIGNING_KEY_SECRET = {
     "vault",
     "kv",
@@ -64,11 +63,13 @@ public class HashicorpVaultDocker {
 
   private int port;
   private String ipAddress;
+  private String vaultToken;
 
   public HashicorpVaultDocker(final DockerClient docker) {
     this.docker = docker;
+    this.vaultToken = "token";
     pullVaultImage();
-    this.vaultContainerId = createVaultContainer();
+    this.vaultContainerId = createVaultContainer(vaultToken);
   }
 
   public void start() {
@@ -158,12 +159,16 @@ public class HashicorpVaultDocker {
     LOG.info("Hashicorp Vault is now responsive");
   }
 
-  public int port() {
+  public int getPort() {
     return port;
   }
 
   public String getIpAddress() {
     return ipAddress;
+  }
+
+  public String getVaultToken() {
+    return vaultToken;
   }
 
   private boolean hasVaultContainer() {
@@ -204,14 +209,14 @@ public class HashicorpVaultDocker {
     }
   }
 
-  private String createVaultContainer() {
+  private String createVaultContainer(final String vaultToken) {
     final HostConfig hostConfig =
         HostConfig.newHostConfig()
             .withPortBindings(httpPortBinding())
             .withCapAdd(Capability.IPC_LOCK);
 
     final List<String> enviromentVars = new ArrayList<>();
-    enviromentVars.add("VAULT_DEV_ROOT_TOKEN_ID=token");
+    enviromentVars.add("VAULT_DEV_ROOT_TOKEN_ID=" + vaultToken);
     enviromentVars.add("VAULT_ADDR=http://127.0.0.1:8200");
     enviromentVars.add("VAULT_TOKEN=token");
 

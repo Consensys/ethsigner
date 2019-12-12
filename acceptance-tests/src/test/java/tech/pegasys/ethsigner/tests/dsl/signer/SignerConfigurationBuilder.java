@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import java.nio.file.Path;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 public class SignerConfigurationBuilder {
 
@@ -23,10 +25,9 @@ public class SignerConfigurationBuilder {
 
   private int httpRpcPort;
   private int webSocketPort;
-  private int hashicorpVaultPort;
-  private String ipAddress;
   private String keyVaultName;
   private Path multiKeySignerDirectory;
+  private HashicorpVaultDocker hashicorpVault;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -38,13 +39,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withHashicorpVaultPort(final int port) {
-    hashicorpVaultPort = port;
-    return this;
-  }
-
-  public SignerConfigurationBuilder withHashicorpIpAddress(final String address) {
-    ipAddress = address;
+  public SignerConfigurationBuilder withHashicorpSigner(final HashicorpVaultDocker hashicorpVault) {
+    this.hashicorpVault = hashicorpVault;
     return this;
   }
 
@@ -61,8 +57,7 @@ public class SignerConfigurationBuilder {
 
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(
-            hashicorpVaultPort, ipAddress, keyVaultName, multiKeySignerDirectory);
+        new TransactionSignerParamsSupplier(hashicorpVault, keyVaultName, multiKeySignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
   }
