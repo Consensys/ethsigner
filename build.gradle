@@ -338,7 +338,30 @@ subprojects {
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
 
-    jvmArgs = ['-Xms512m', '-Xmx1g']
+    jvmArgs = [
+      '-Xms512m', 
+      '-Xmx1g', 
+      '--add-opens',
+      'java.base/sun.security.provider=ALL-UNNAMED',
+      // Mockito and jackson-databind do some strange reflection during tests.
+      // This suppresses an illegal access warning.
+      '--add-opens',
+      'java.base/java.util=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.util.regex=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.lang=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.lang.invoke=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.lang.reflect=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.net=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/sun.net.spi=ALL-UNNAMED',
+      '--add-opens',
+      'java.base/java.io=ALL-UNNAMED'
+    ]
 
     useJUnitPlatform()
   }
