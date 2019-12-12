@@ -12,33 +12,54 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
+  @TempDir static Path tempDir;
+  private static String authFilename;
+  private static HashicorpVaultDocker hashicorpVaultDocker;
+
   @BeforeAll
+  static void preSetup() throws IOException {
+    preChecks();
+
+    hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(new DockerClientFactory().create());
+
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(() -> HashicorpHelpers.tearDownHashicorpVault(hashicorpVaultDocker)));
+
+    final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
+    Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
+    authFilename = authFilePath.toAbsolutePath().toString();
+  }
+
   static void preChecks() {
     Assumptions.assumeTrue(
         AzureBasedTomlLoadingAcceptanceTest.clientId != null
             && AzureBasedTomlLoadingAcceptanceTest.clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
-
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(() -> HashicorpHelpers.tearDownHashicorpVault(hashicorpVaultDocker)));
   }
 
   @Test
@@ -63,8 +84,8 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     createHashicorpTomlFileAt(
         HASHICORP_ETHEREUM_ADDRESS + ".toml",
-        HashicorpHelpers.keyPath,
-        HashicorpHelpers.vaultAuthFile,
+        HashicorpVaultDocker.absKeyPath,
+        authFilename,
         hashicorpVaultDocker);
 
     setup();

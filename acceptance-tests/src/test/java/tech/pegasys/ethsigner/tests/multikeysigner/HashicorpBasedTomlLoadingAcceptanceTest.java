@@ -12,35 +12,48 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker.absKeyPath;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  static final String HASHICORP_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
+
+  private static HashicorpVaultDocker hashicorpVaultDocker;
+
+  @TempDir static Path tempDir;
+  private static String authFilename;
 
   @BeforeAll
-  static void setUpBase() {
+  static void setUpBase() throws IOException {
+    hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(new DockerClientFactory().create());
+
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(() -> HashicorpHelpers.tearDownHashicorpVault(hashicorpVaultDocker)));
 
-    hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(new DockerClientFactory().create());
+    final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
+    Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
+    authFilename = authFilePath.toAbsolutePath().toString();
   }
 
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported() {
-    createHashicorpTomlFileAt(
-        FILENAME + ".toml",
-        HashicorpHelpers.keyPath,
-        HashicorpHelpers.vaultAuthFile,
-        hashicorpVaultDocker);
+    createHashicorpTomlFileAt(FILENAME + ".toml", absKeyPath, authFilename, hashicorpVaultDocker);
     setup();
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }
@@ -49,8 +62,8 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   void incorrectlyNamedHashicorpConfigFileIsNotLoaded() {
     createHashicorpTomlFileAt(
         "ffffffffffffffffffffffffffffffffffffffff.toml",
-        HashicorpHelpers.keyPath,
-        HashicorpHelpers.vaultAuthFile,
+        absKeyPath,
+        authFilename,
         hashicorpVaultDocker);
     setup();
     assertThat(ethSigner.accounts().list()).isEmpty();

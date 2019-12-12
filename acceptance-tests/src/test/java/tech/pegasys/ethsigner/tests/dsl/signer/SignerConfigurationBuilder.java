@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import java.nio.file.Path;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+
+import java.nio.file.Path;
 
 public class SignerConfigurationBuilder {
 

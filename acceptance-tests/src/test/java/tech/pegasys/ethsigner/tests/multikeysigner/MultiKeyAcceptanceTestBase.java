@@ -27,22 +27,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
 public class MultiKeyAcceptanceTestBase {
 
   protected Signer ethSigner;
-  static HashicorpVaultDocker hashicorpVaultDocker;
 
   @TempDir Path tomlDirectory;
 
   @AfterEach
-  public void cleanUp() {
+  public void cleanUp() throws IOException {
     if (ethSigner != null) {
       ethSigner.shutdown();
       ethSigner = null;
     }
+    MoreFiles.deleteDirectoryContents(tomlDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
   void setup() {
@@ -104,7 +106,7 @@ public class MultiKeyAcceptanceTestBase {
         final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
         writer.write("[signing]\n");
         writer
-            .append("type = \"hashicorp-based-signer\"\n")
+            .append("type = \"hashicorp-signer\"\n")
             .append("signing-key-path = \"" + keyPath + "\"\n")
             .append("host = \"" + hashicorpVaultDocker.getIpAddress() + "\"\n")
             .append("port = " + hashicorpVaultDocker.getPort() + "\n")

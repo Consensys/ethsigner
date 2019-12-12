@@ -62,8 +62,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   public static void setUpBase() {
 
     Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(() -> tearDownBase(ethNode, ethSigner, hashicorpVaultDocker)));
+        .addShutdownHook(new Thread(() -> tearDownBase(ethNode, ethSigner, hashicorpVaultDocker)));
 
     final DockerClient docker = new DockerClientFactory().create();
     hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(docker);
@@ -74,13 +73,8 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    final String ip = hashicorpVaultDocker.getIpAddress();
-    final int port = hashicorpVaultDocker.getPort();
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder()
-            .withHashicorpVaultPort(port)
-            .withHashicorpIpAddress(ip)
-            .build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVaultDocker).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();

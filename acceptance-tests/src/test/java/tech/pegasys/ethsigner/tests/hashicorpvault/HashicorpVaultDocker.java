@@ -43,6 +43,10 @@ import org.apache.logging.log4j.Logger;
 
 public class HashicorpVaultDocker {
 
+  private static final String keyName = "ethsignerSigningKey";
+
+  // Note: keyPath is _not_ the same as the string passed to the vault cmd when creating said key.
+  public static String absKeyPath = "/secret/data/" + keyName;
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_VAULT_IMAGE = "vault:latest";
   private static final int DEFAULT_HTTP_PORT = 8200;
@@ -50,7 +54,7 @@ public class HashicorpVaultDocker {
     "vault",
     "kv",
     "put",
-    "secret/ethsignerSigningKey",
+    "secret/" + keyName,
     "value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
   };
   private static final String[] COMMAND_TO_CHECK_VAULT_IS_UP = {"vault", "status"};

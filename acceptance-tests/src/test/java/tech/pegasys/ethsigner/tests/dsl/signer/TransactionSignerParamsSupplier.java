@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.common.io.Resources;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -22,8 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+
+import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
 
@@ -105,7 +107,7 @@ public class TransactionSignerParamsSupplier {
         "vault_authfile", vaultToken.getBytes(UTF_8));
   }
 
-  public static File createTmpFile(final String tempNamePrefix, final byte[] data) {
+  private static File createTmpFile(final String tempNamePrefix, final byte[] data) {
     final Path path;
     try {
       path = Files.createTempFile(tempNamePrefix, null);

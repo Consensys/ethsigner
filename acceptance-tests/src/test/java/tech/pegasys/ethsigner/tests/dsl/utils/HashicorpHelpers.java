@@ -12,20 +12,11 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.utils;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
-import tech.pegasys.ethsigner.tests.dsl.signer.TransactionSignerParamsSupplier;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
-
-import java.io.File;
 
 import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpHelpers {
-
-  public static String keyPath = "/secret/data/ethsignerSigningKey";
 
   public static HashicorpVaultDocker setUpHashicorpVault(final DockerClient docker) {
     HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
