@@ -339,8 +339,8 @@ subprojects {
     outputs.upToDateWhen { false }
 
     jvmArgs = [
-      '-Xms512m', 
-      '-Xmx1g', 
+      '-Xms512m',
+      '-Xmx1g',
       '--add-opens',
       'java.base/sun.security.provider=ALL-UNNAMED',
       // Mockito and jackson-databind do some strange reflection during tests.
