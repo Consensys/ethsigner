@@ -63,7 +63,7 @@ public class MultiKeyAcceptanceTestBase {
       final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
-          .append("type = \"azure-based-signer\"\n")
+          .append("type = \"azure-signer\"\n")
           .append("key-vault-name = \"ethsignertestkey\"\n")
           .append("key-name = \"TestKey\"\n")
           .append("key-version = \"7c01fe58d68148bba5824ce418241092\"\n")
