@@ -26,6 +26,7 @@ import java.nio.file.Path;
 
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,17 +38,14 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   private static HashicorpVaultDocker hashicorpVaultDocker;
+  private static final HashicorpNode hashicorpNode = new HashicorpNode();
 
   @TempDir static Path tempDir;
   private static String authFilename;
 
   @BeforeAll
   static void setUpBase() throws IOException {
-    hashicorpVaultDocker = HashicorpNode.setUpHashicorpVault(new DockerClientFactory().create());
-
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(() -> HashicorpNode.tearDownHashicorpVault(hashicorpVaultDocker)));
+    hashicorpVaultDocker = hashicorpNode.start(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
@@ -77,5 +75,10 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   @AfterEach
   public void cleanTempDir() throws IOException {
     MoreFiles.deleteDirectoryContents(tempDir, RecursiveDeleteOption.ALLOW_INSECURE);
+  }
+
+  @AfterAll
+  public void tearDown() {
+    hashicorpNode.shutdown(hashicorpVaultDocker);
   }
 }

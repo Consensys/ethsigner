@@ -18,7 +18,7 @@ import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpNode {
 
-  public static HashicorpVaultDocker setUpHashicorpVault(final DockerClient docker) {
+  public HashicorpVaultDocker start(final DockerClient docker) {
     HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();
@@ -26,7 +26,7 @@ public class HashicorpNode {
     return hashicorpVaultDocker;
   }
 
-  public static void tearDownHashicorpVault(final HashicorpVaultDocker hashicorpVaultDocker) {
+  public void shutdown(final HashicorpVaultDocker hashicorpVaultDocker) {
     if (hashicorpVaultDocker != null) {
       hashicorpVaultDocker.shutdown();
     }

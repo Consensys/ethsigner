@@ -40,12 +40,13 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   @TempDir static Path tempDir;
   private static String authFilename;
   private static HashicorpVaultDocker hashicorpVaultDocker;
+  private static final HashicorpNode hashicorpNode = new HashicorpNode();
 
   @BeforeAll
   static void preSetup() throws IOException {
     preChecks();
 
-    hashicorpVaultDocker = HashicorpNode.setUpHashicorpVault(new DockerClientFactory().create());
+    hashicorpVaultDocker = hashicorpNode.start(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
@@ -96,6 +97,6 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @AfterAll
   static void tearDown() {
-    HashicorpNode.tearDownHashicorpVault(hashicorpVaultDocker);
+    hashicorpNode.shutdown(hashicorpVaultDocker);
   }
 }

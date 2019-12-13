@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode.tearDownHashicorpVault;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -44,6 +43,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Node ethNode;
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
+  private static final HashicorpNode hashicorpNode = new HashicorpNode();
 
   @BeforeAll
   public static void setUpBase() {
@@ -52,7 +52,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = HashicorpNode.setUpHashicorpVault(docker);
+    hashicorpVaultDocker = hashicorpNode.start(docker);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -77,7 +77,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
       ethSigner.shutdown();
     }
 
-    tearDownHashicorpVault(hashicorpVaultDocker);
+    hashicorpNode.shutdown(hashicorpVaultDocker);
   }
 
   private Account richBenefactor() {
