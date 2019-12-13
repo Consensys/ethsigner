@@ -213,7 +213,7 @@ public class HashicorpVaultDocker {
     }
   }
 
-  private String createVaultContainer(final String vaultToken) {
+  private String createVaultContainer() {
     final HostConfig hostConfig =
         HostConfig.newHostConfig()
             .withPortBindings(httpPortBinding())

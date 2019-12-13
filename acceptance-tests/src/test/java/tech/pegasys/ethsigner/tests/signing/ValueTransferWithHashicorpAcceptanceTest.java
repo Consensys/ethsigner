@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers.tearDownHashicorpVault;
 
+import org.junit.jupiter.api.AfterAll;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
@@ -45,24 +46,11 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
 
-  public static void tearDownBase(
-      final Node ethNode, final Signer ethSigner, final HashicorpVaultDocker hashicorpVaultDocker) {
-    if (ethNode != null) {
-      ethNode.shutdown();
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
-
-    tearDownHashicorpVault(hashicorpVaultDocker);
-  }
-
   @BeforeAll
   public static void setUpBase() {
 
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(() -> tearDownBase(ethNode, ethSigner, hashicorpVaultDocker)));
+        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
     hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(docker);
@@ -79,6 +67,18 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+  }
+
+  static void tearDownBase() {
+    if (ethNode != null) {
+      ethNode.shutdown();
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+    }
+
+    tearDownHashicorpVault(hashicorpVaultDocker);
   }
 
   private Account richBenefactor() {
