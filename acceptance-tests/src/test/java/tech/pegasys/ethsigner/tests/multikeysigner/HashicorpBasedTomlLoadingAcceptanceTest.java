@@ -73,12 +73,12 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   }
 
   @AfterEach
-  public void cleanTempDir() throws IOException {
+  void cleanTempDir() throws IOException {
     MoreFiles.deleteDirectoryContents(tempDir, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
   @AfterAll
-  public void tearDown() {
+  static void tearDown() {
     hashicorpNode.shutdown(hashicorpVaultDocker);
   }
 }
