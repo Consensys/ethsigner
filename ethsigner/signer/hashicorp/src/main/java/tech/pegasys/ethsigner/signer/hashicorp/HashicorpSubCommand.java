@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -26,12 +28,11 @@ import picocli.CommandLine.Option;
 /** Hashicorp vault related sub-command */
 @Command(
     name = HashicorpSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures transactions are signed by a key retrieved from a Hashicorp Vault.",
+    description = "Sign transactions with a key stored in a Hashicorp Vault.",
     mixinStandardHelpOptions = true)
 public class HashicorpSubCommand extends SignerSubCommand {
 
-  public static final String COMMAND_NAME = "hashicorp-signer";
+  static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
   private static final String DEFAULT_PORT_STRING = "8200";
@@ -74,10 +75,17 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+    final HashicorpConfig config =
+        new HashicorpConfig(signingKeyPath, serverHost, serverPort, authFilePath, timeout);
+    final HashicorpSignerFactory factory = new HashicorpSignerFactory();
+    return factory.createSigner(config);
+  }
+
   @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    return HashicorpSignerFactory.createSigner(
-        signingKeyPath, serverPort, serverHost, authFilePath, timeout);
+  public TransactionSignerProvider createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new SingleTransactionSignerProvider(createSigner());
   }
 
   @Override

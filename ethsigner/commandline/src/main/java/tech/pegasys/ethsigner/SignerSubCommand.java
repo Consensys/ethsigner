@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.EthSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +26,8 @@ public abstract class SignerSubCommand implements Runnable {
 
   @CommandLine.ParentCommand private EthSignerBaseCommand config;
 
-  public abstract TransactionSigner createSigner() throws TransactionSignerInitializationException;
+  public abstract TransactionSignerProvider createSignerFactory()
+      throws TransactionSignerInitializationException;
 
   public abstract String getCommandName();
 
@@ -39,9 +40,7 @@ public abstract class SignerSubCommand implements Runnable {
     LOG.debug("Configuration = {}", this);
     LOG.info("Version = {}", ApplicationInfo.version());
 
-    final TransactionSigner transactionSigner = createSigner();
-
-    final EthSigner signer = new EthSigner(config, transactionSigner);
+    final EthSigner signer = new EthSigner(config, createSignerFactory());
     signer.run();
   }
 }

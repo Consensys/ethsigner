@@ -23,7 +23,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -43,7 +43,7 @@ public class TransactionTransmitter {
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpClient ethNodeClient;
-  private final TransactionSerialiser transactionSerialiser;
+  private final TransactionSerializer transactionSerializer;
   private final Transaction transaction;
   private final VertxRequestTransmitter transmitter;
   private final RoutingContext routingContext;
@@ -51,13 +51,13 @@ public class TransactionTransmitter {
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
       final Transaction transaction,
-      final TransactionSerialiser transactionSerialiser,
+      final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RoutingContext routingContext) {
     this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
     this.transaction = transaction;
-    this.transactionSerialiser = transactionSerialiser;
+    this.transactionSerializer = transactionSerializer;
     this.routingContext = routingContext;
   }
 
@@ -72,13 +72,13 @@ public class TransactionTransmitter {
         transaction.updateNonce();
       }
 
-      signedTransactionHexString = transactionSerialiser.serialise(transaction);
+      signedTransactionHexString = transactionSerializer.serialize(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", transaction, e);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return;
     } catch (final RuntimeException e) {
-      LOG.info("Unable to get nonce from web3j provider.");
+      LOG.warn("Unable to get nonce from web3j provider.", e);
       final Throwable cause = e.getCause();
       if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
         routingContext.fail(
@@ -88,7 +88,7 @@ public class TransactionTransmitter {
       }
       return;
     } catch (final Throwable thrown) {
-      LOG.debug("Failed to encode/serialise transaction: {}", transaction, thrown);
+      LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       return;
     }
@@ -98,7 +98,7 @@ public class TransactionTransmitter {
     try {
       sendTransaction(Json.encodeToBuffer(rawTransaction));
     } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialisation failed for: {}", rawTransaction, e);
+      LOG.debug("JSON Serialization failed for: {}", rawTransaction, e);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }

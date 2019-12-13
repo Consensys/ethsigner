@@ -113,14 +113,9 @@ allprojects {
   targetCompatibility = 11
 
   repositories {
-    if ("$System.env.JENKINS_URL" == 'https://jenkins.pegasys.tech/') {
-      maven { url "https://nexus.int.pegasys.tech/repository/consensys-pegasys/" }
-      maven { url "https://nexus.int.pegasys.tech/repository/jcenter/" }
-    } else {
-      jcenter()
-      mavenCentral()
-      maven { url  "https://consensys.bintray.com/pegasys-repo" }
-    }
+    jcenter()
+    mavenCentral()
+    maven { url  "https://consensys.bintray.com/pegasys-repo" }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
@@ -342,6 +337,10 @@ subprojects {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+
+    jvmArgs = ['-Xms512m', '-Xmx1g']
+
+    useJUnitPlatform()
   }
 
   if (file('src/jmh').directory) {
@@ -460,7 +459,8 @@ tasks.register("dockerDistUntar") {
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def image = project.hasProperty('release.releaseVersion') ? "pegasyseng/ethsigner:" + project.property('release.releaseVersion') : "pegasyseng/ethsigner:develop"
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def dockerBuildDir = "build/docker-ethsigner/"
   workingDir "${dockerBuildDir}"
 
@@ -473,6 +473,42 @@ task distDocker(type: Exec) {
 
   executable "sh"
   args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+}
+
+task testDocker(type: Exec) {
+  dependsOn distDocker
+  def dockerReportsDir = "docker/reports/"
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  workingDir "docker"
+
+  doFirst {
+    new File(dockerReportsDir).mkdir()
+  }
+
+  executable "sh"
+  args "-c", "bash test.sh ${image}"
+}
+
+task dockerUpload(type: Exec) {
+  dependsOn distDocker
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  def cmd = "docker push '${image}'"
+  def additionalTags = []
+
+  if (project.hasProperty('branch') && project.property('branch') == 'master') {
+    additionalTags.add('develop')
+  }
+
+  if (! version ==~ /.*-SNAPSHOT/) {
+    additionalTags.add('latest')
+    additionalTags.add(version.split(/\./)[0..1].join('.'))
+  }
+
+  additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
+  executable "sh"
+  args "-c", cmd
 }
 
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
@@ -588,6 +624,7 @@ bintray {
   }
 
   publish = true
+  override = version.endsWith('SNAPSHOT')
 
   pkg = bintrayPackage
 }

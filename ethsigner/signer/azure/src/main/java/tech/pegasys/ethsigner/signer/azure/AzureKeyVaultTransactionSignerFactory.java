@@ -40,24 +40,24 @@ public class AzureKeyVaultTransactionSignerFactory {
   private static final Logger LOG = LogManager.getLogger();
 
   private static final String AZURE_URL_PATTERN = "https://%s.vault.azure.net";
-
-  private final KeyVaultClientCustom client;
-  private final String baseUrl;
+  private final AzureKeyVaultAuthenticator vaultAuthenticator;
 
   public AzureKeyVaultTransactionSignerFactory(
-      final String keyVaultName, final KeyVaultClientCustom client) {
-    this.client = client;
-    this.baseUrl = constructAzureKeyVaultUrl(keyVaultName);
+      final AzureKeyVaultAuthenticator vaultAuthenticator) {
+    this.vaultAuthenticator = vaultAuthenticator;
   }
 
-  public TransactionSigner createSigner(final String keyName, final String keyVersion) {
-    checkNotNull(keyName, "keyName must be specified");
+  public TransactionSigner createSigner(final AzureConfig config) {
+    checkNotNull(config, "Config must be specified");
+    final KeyVaultClientCustom client =
+        vaultAuthenticator.getAuthenticatedClient(config.getClientId(), config.getClientSecret());
+    final String baseUrl = constructAzureKeyVaultUrl(config.getKeyVaultName());
 
     final JsonWebKey key;
-    final KeyIdentifier kid;
+    final KeyIdentifier keyIdentifier;
     try {
-      kid = new KeyIdentifier(baseUrl, keyName, keyVersion);
-      key = client.getKey(kid.toString()).key();
+      keyIdentifier = new KeyIdentifier(baseUrl, config.getKeyName(), config.getKeyVersion());
+      key = client.getKey(keyIdentifier.toString()).key();
     } catch (final KeyVaultErrorException ex) {
       if (ex.response().raw().code() == 401) {
         LOG.debug(INACCESSIBLE_KEY_ERROR);
@@ -82,7 +82,7 @@ public class AzureKeyVaultTransactionSignerFactory {
 
     final byte[] rawPublicKey = Bytes.concat(key.x(), key.y());
     final BigInteger publicKey = new BigInteger(1, rawPublicKey);
-    return new AzureKeyVaultTransactionSigner(client, kid.toString(), publicKey);
+    return new AzureKeyVaultTransactionSigner(client, keyIdentifier.toString(), publicKey);
   }
 
   public static String constructAzureKeyVaultUrl(final String keyVaultName) {

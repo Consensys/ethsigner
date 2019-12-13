@@ -14,30 +14,30 @@ package tech.pegasys.ethsigner.signer.azure;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.base.Charsets;
-import com.microsoft.azure.keyvault.KeyVaultClientCustom;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures that transactions are signed by a key retrieved from Azure KMS.",
+    description = "Sign transactions using the Azure signing service.",
     mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
-      names = {"--keyvault-name"},
+      names = {"--keyvault-name, --key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
       required = true,
       arity = "1")
-  private String keyvaultName;
+  private String keyVaultName;
 
   @Option(
       names = {"--key-name"},
@@ -53,7 +53,7 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"--client-id"},
-      description = "The ID used to authenticate with Azure keyvault",
+      description = "The ID used to authenticate with Azure key vault",
       required = true)
   private String clientId;
 
@@ -67,8 +67,7 @@ public class AzureSubCommand extends SignerSubCommand {
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
   public static final String COMMAND_NAME = "azure-signer";
 
-  @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final String clientSecret;
     try {
       clientSecret = readSecretFromFile(clientSecretPath);
@@ -76,12 +75,19 @@ public class AzureSubCommand extends SignerSubCommand {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
 
-    final AzureKeyVaultAuthenticator authenticator = new AzureKeyVaultAuthenticator();
-    final KeyVaultClientCustom client =
-        authenticator.getAuthenticatedClient(clientId, clientSecret);
+    final AzureConfig config =
+        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
+
     final AzureKeyVaultTransactionSignerFactory factory =
-        new AzureKeyVaultTransactionSignerFactory(keyvaultName, client);
-    return factory.createSigner(keyName, keyVersion);
+        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+
+    return factory.createSigner(config);
+  }
+
+  @Override
+  public TransactionSignerProvider createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new SingleTransactionSignerProvider(createSigner());
   }
 
   @Override

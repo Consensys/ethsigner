@@ -16,18 +16,14 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.eea.response.PrivateTransactionReceipt;
 
 public class Eea {
 
-  private final org.web3j.protocol.eea.Eea eea;
   private final RawJsonRpcRequestFactory requestFactory;
 
-  public Eea(final org.web3j.protocol.eea.Eea eea, final RawJsonRpcRequestFactory requestFactory) {
-    this.eea = eea;
+  public Eea(final RawJsonRpcRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
   }
 
@@ -42,10 +38,5 @@ public class Eea {
     assertThat(response.getError()).isNull();
 
     return response.getTransactionHash();
-  }
-
-  public Optional<PrivateTransactionReceipt> getTransactionReceipt(final String hash)
-      throws IOException {
-    return eea.eeaGetTransactionReceipt(hash).send().getTransactionReceipt();
   }
 }

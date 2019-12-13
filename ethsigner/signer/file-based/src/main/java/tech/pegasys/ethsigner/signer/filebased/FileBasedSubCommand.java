@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.signer.filebased;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.nio.file.Path;
 
@@ -27,8 +29,7 @@ import picocli.CommandLine.Spec;
 /** File-based authentication related sub-command */
 @Command(
     name = FileBasedSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures transactions are signed by a key stored in an encrypted file.",
+    description = "Sign transactions with a key stored in an encrypted V3 Keystore file.",
     mixinStandardHelpOptions = true)
 public class FileBasedSubCommand extends SignerSubCommand {
 
@@ -40,7 +41,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"-p", "--password-file"},
-      description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
+      description = "The path to a file containing the password used to decrypt the keyfile.",
       required = true,
       arity = "1")
   private Path passwordFilePath;
@@ -53,9 +54,14 @@ public class FileBasedSubCommand extends SignerSubCommand {
       arity = "1")
   private Path keyFilePath;
 
-  @Override
-  public TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
+  }
+
+  @Override
+  public TransactionSignerProvider createSignerFactory()
+      throws TransactionSignerInitializationException {
+    return new SingleTransactionSignerProvider(createSigner());
   }
 
   @Override

@@ -12,7 +12,20 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_PRIVATE_FOR;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_PRIVATE_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.FIELD_RESTRICTION;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
+
 import java.util.List;
+
+import io.vertx.core.json.JsonObject;
 
 public class PrivateTransactionBuilder {
   private String from;
@@ -56,8 +69,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removeValue() {
+    this.value = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withData(final String data) {
     this.data = data;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removeData() {
+    this.data = null;
     return this;
   }
 
@@ -66,8 +89,18 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
+  public PrivateTransactionBuilder removePrivateFrom() {
+    this.privateFrom = null;
+    return this;
+  }
+
   public PrivateTransactionBuilder withPrivateFor(final List<String> privateFor) {
     this.privateFor = privateFor;
+    return this;
+  }
+
+  public PrivateTransactionBuilder removePrivateFor() {
+    this.privateFor = null;
     return this;
   }
 
@@ -76,8 +109,23 @@ public class PrivateTransactionBuilder {
     return this;
   }
 
-  public PrivateTransaction build() {
-    return new PrivateTransaction(
-        from, nonce, gasPrice, gas, to, value, data, privateFrom, privateFor, restriction);
+  public PrivateTransactionBuilder removeRestriction() {
+    this.restriction = null;
+    return this;
+  }
+
+  public JsonObject build() {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put(FIELD_FROM, from);
+    jsonObject.put(FIELD_NONCE, nonce);
+    jsonObject.put(FIELD_GAS_PRICE, gasPrice);
+    jsonObject.put(FIELD_GAS, gas);
+    jsonObject.put(FIELD_TO, to);
+    jsonObject.put(FIELD_VALUE, value);
+    jsonObject.put(FIELD_DATA, data);
+    jsonObject.put(FIELD_PRIVATE_FROM, privateFrom);
+    jsonObject.put(FIELD_PRIVATE_FOR, privateFor);
+    jsonObject.put(FIELD_RESTRICTION, restriction);
+    return jsonObject;
   }
 }

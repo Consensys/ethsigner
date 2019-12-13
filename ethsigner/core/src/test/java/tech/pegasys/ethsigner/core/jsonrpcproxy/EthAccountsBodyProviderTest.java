@@ -22,6 +22,10 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 
+import java.util.Set;
+import java.util.function.Supplier;
+
+import com.google.common.collect.Sets;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +35,7 @@ public class EthAccountsBodyProviderTest {
   public void valueFromBodyProviderInsertedToResult() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -50,7 +54,7 @@ public class EthAccountsBodyProviderTest {
   public void ifParamsContainsANonEmptyArrayErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -62,10 +66,10 @@ public class EthAccountsBodyProviderTest {
   }
 
   @Test
-  public void isParamIsAnObjectErrorIsReturned() {
+  public void ifParamIsAnObjectErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -80,7 +84,7 @@ public class EthAccountsBodyProviderTest {
   public void missingParametersIsOk() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(address);
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -92,5 +96,61 @@ public class EthAccountsBodyProviderTest {
     assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
     assertThat(jsonObj.getInteger("id")).isEqualTo(id);
     assertThat(jsonObj.getJsonArray("result")).containsExactly(address);
+  }
+
+  @Test
+  public void multipleValueFromBodyProviderInsertedToResult() {
+    final Set<String> addresses = Set.of("a", "b", "c");
+    final int id = 1;
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(() -> addresses);
+
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
+    request.setId(new JsonRpcRequestId(id));
+    request.setParams(emptyList());
+
+    final JsonRpcBody body = bodyProvider.getBody(request);
+    final JsonObject jsonObj = new JsonObject(body.body());
+
+    assertThat(body.hasError()).isFalse();
+    assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
+    assertThat(jsonObj.getInteger("id")).isEqualTo(id);
+    assertThat(jsonObj.getJsonArray("result")).hasSize(3);
+    assertThat(jsonObj.getJsonArray("result")).containsAll(addresses);
+  }
+
+  @Test
+  public void accountsReturnedAreDynamicallyFetchedFromProvider() {
+    final Set<String> addresses = Sets.newHashSet("a", "b", "c");
+
+    final Supplier<Set<String>> supplier = () -> addresses;
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(supplier);
+
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
+    request.setId(new JsonRpcRequestId(1));
+    request.setParams(emptyList());
+
+    JsonRpcBody body = bodyProvider.getBody(request);
+    JsonObject jsonObj = new JsonObject(body.body());
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
+
+    addresses.remove("a");
+
+    body = bodyProvider.getBody(request);
+    jsonObj = new JsonObject(body.body());
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("b", "c");
+  }
+
+  @Test
+  public void accountsReturnedAreSortedAlphabetically() {
+    final Supplier<Set<String>> supplier = () -> Sets.newHashSet("c", "b", "a");
+    final EthAccountsBodyProvider bodyProvider = new EthAccountsBodyProvider(supplier);
+
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
+    request.setId(new JsonRpcRequestId(1));
+    request.setParams(emptyList());
+
+    JsonRpcBody body = bodyProvider.getBody(request);
+    JsonObject jsonObj = new JsonObject(body.body());
+    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
   }
 }

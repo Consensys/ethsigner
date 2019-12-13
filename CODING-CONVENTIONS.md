@@ -37,17 +37,15 @@ Simple does not mean the fewest lines of code. Simple code is:
 ## 2.2 Idiomatic Java 
 
 EthSigner embraces typical Java idioms including using an Object Oriented approach to design. This includes:   
-* Providing alternate behaviours via polymorphism instead of having conditional logic scattered through the codebase. For example, `ProtocolSpec` provides a standard interface to blockchain operations and multiple implementations define the different behaviours for each Ethereum milestone. 
-* Encapsulating behaviour and data together in classes. For example, `BytesValue` encapsulates byte data and methods operating on the byte data. `BytesValue.isZero()` is an instance method instead of accepting a `BytesValue` parameter.
-
-  `ProtocolSpec` is an exception and does not hold the blockchain data on which it operates. This is because that blockchain data is widely shared and not specifically owned by `ProtocolSpec`.
+* Providing alternate behaviours via polymorphism instead of having conditional logic scattered through the codebase. For example, `TransactionSigner` provides a standard interface to signing operations. 
+* Encapsulating behaviour and data together in classes. 
 * Embracing modern Java features like Optional, Streams and lambdas when they make code simpler and clearer. 
 
    - Do use Streams and map with lambdas to convert values in a list to a different form.
    - Don't pass lambdas into executors because it makes it harder to identify the threading interactions. The lambda makes the code shorter but not clearer. Instead use a separate class or extract a method. 
 * For good examples, refer to the APIs the JDK itself exposes. 
 
->**Note** If you're not sure what idiomatic Java looks like, start by following the typical patterns and naming used in EthSigner, or otherwise, other Pegasys codebases.
+>**Note** If you're not sure what idiomatic Java looks like, start by following the typical patterns and naming used in this or other PegaSys codebases.
 
 ## 2.3 You Ain't Gonna Need It (YAGNI)
 
@@ -110,7 +108,7 @@ So the code can cope with constant refactoring and evolving design, write code t
 
 * Use Optional rather than returning null when not having a value is a normal case
 
-* Consider exception and error handling as part of the overall design.   EthSigner avoids checked exceptions
+* Consider exception and error handling as part of the overall design.  EthSigner avoids checked exceptions
 
 * Give threads meaningful names. For example:
  `Executors.newFixedThreadPool(1, new ThreadFactoryBuilder().setNameFormat(“Ibft”).build())`

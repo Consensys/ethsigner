@@ -32,12 +32,17 @@ public class TransactionSignerParamsSupplier {
   private final int hashicorpVaultPort;
   private final String ipAddress;
   private final String azureKeyVault;
+  private final Path multiKeySignerDirectory;
 
   public TransactionSignerParamsSupplier(
-      final int hashicorpVaultPort, final String ipAddress, final String azureKeyVault) {
+      final int hashicorpVaultPort,
+      final String ipAddress,
+      final String azureKeyVault,
+      final Path multiKeySignerDirectory) {
     this.hashicorpVaultPort = hashicorpVaultPort;
     this.ipAddress = ipAddress;
     this.azureKeyVault = azureKeyVault;
+    this.multiKeySignerDirectory = multiKeySignerDirectory;
   }
 
   public Collection<String> get() {
@@ -52,7 +57,7 @@ public class TransactionSignerParamsSupplier {
       params.add(String.valueOf(hashicorpVaultPort));
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
-      params.add("--keyvault-name");
+      params.add("--key-vault-name");
       params.add(azureKeyVault);
       params.add("--key-name");
       params.add("TestKey");
@@ -62,6 +67,10 @@ public class TransactionSignerParamsSupplier {
       params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
+    } else if (multiKeySignerDirectory != null) {
+      params.add("multikey-signer");
+      params.add("--directory");
+      params.add(multiKeySignerDirectory.toAbsolutePath().toString());
     } else {
       params.add("file-based-signer");
       params.add("--password-file");

@@ -19,8 +19,8 @@ import org.web3j.protocol.core.methods.response.EthProtocolVersion;
 
 public class EthProtocolVersionRequest {
 
-  final Request<?, EthProtocolVersion> jsonRpcRequest;
-  final String ethProtocolVersionRequest;
+  private final Request<?, EthProtocolVersion> jsonRpcRequest;
+  private final String ethProtocolVersionRequest;
 
   public EthProtocolVersionRequest(final Web3j web3j) {
     jsonRpcRequest = web3j.ethProtocolVersion();

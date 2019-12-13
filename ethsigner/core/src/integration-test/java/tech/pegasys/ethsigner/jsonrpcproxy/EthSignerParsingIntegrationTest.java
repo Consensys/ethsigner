@@ -14,15 +14,15 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.PARSE_ERROR;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class EthSignerParsingIntegrationTest extends IntegrationTestBase {
+class EthSignerParsingIntegrationTest extends DefaultTestBase {
 
   private static final Object NO_ID = null;
 
   @Test
-  public void parseErrorResponseWhenJsonRequestIsMalformed() {
-    sendRequestThenVerifyResponse(
+  void parseErrorResponseWhenJsonRequestIsMalformed() {
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(MALFORMED_JSON), response.ethSigner(NO_ID, PARSE_ERROR));
   }
 }

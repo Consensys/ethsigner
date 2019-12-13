@@ -18,10 +18,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.PantheonNode;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -74,7 +74,7 @@ public class DataPathFeatureFlagAcceptanceTest {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 
-    ethNode = new PantheonNode(docker, nodeConfig);
+    ethNode = new BesuNode(docker, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 

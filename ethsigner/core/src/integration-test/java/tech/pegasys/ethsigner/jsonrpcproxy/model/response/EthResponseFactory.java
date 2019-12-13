@@ -49,12 +49,17 @@ public class EthResponseFactory {
     return new EthSignerResponse(NO_HEADERS, body, HttpResponseStatus.OK);
   }
 
-  public EthSignerResponse ethSigner(final String body, final HttpResponseStatus code) {
-    return new EthSignerResponse(NO_HEADERS, body, code);
+  public EthSignerResponse ethSigner(final String body, final HttpResponseStatus statusCode) {
+    return new EthSignerResponse(NO_HEADERS, body, statusCode);
   }
 
   public EthNodeResponse ethNode(final Map<String, String> headers, final String body) {
     return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
+  }
+
+  public EthNodeResponse ethNode(
+      final Map<String, String> headers, final String body, final HttpResponseStatus statusCode) {
+    return new EthNodeResponse(headers, body, statusCode);
   }
 
   public EthNodeResponse ethNode(final String body) {

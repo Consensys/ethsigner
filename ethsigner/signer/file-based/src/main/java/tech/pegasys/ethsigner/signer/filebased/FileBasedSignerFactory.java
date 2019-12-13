@@ -29,11 +29,11 @@ import org.web3j.crypto.WalletUtils;
 public class FileBasedSignerFactory {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String READ_PWD_FILE_MESSAGE = "Error when reading the password from file.";
+  private static final String READ_PWD_FILE_MESSAGE = "Error when reading the password from file. ";
   private static final String READ_AUTH_FILE_MESSAGE =
-      "Error when reading key file for the file based signer.";
+      "Error when reading key file for the file based signer. ";
   private static final String DECRYPTING_KEY_FILE_MESSAGE =
-      "Error when decrypting key for the file based signer.";
+      "Error when decrypting key for the file based signer. ";
 
   public static TransactionSigner createSigner(
       final Path keyFilePath, final Path passwordFilePath) {

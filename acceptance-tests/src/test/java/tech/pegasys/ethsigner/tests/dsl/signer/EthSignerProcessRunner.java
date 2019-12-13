@@ -84,7 +84,7 @@ public class EthSignerProcessRunner {
     if (useDynamicPortAllocation) {
       try {
         this.dataPath = Files.createTempDirectory("acceptance-test");
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException(
             "Failed to create the temporary directory to store the ethsigner.ports file");
       }
@@ -217,7 +217,7 @@ public class EthSignerProcessRunner {
       portsProperties.load(fis);
       LOG.info("EthSigner ports: {}", portsProperties);
     } catch (final IOException e) {
-      throw new RuntimeException("Error reading Pantheon ports file", e);
+      throw new RuntimeException("Error reading Web3Provider ports file", e);
     }
   }
 

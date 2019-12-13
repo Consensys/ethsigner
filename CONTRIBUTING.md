@@ -50,14 +50,14 @@ please [include as many details as possible](#how-do-i-submit-a-good-bug-report)
 open a new issue and include a link to the original issue in the body of your new one.
 
 #### Before Submitting A Bug Report
-* **Confirm the problem** is reproducible in the latest version of the software
+* **Confirm the problem** is reproducible in the latest version of the software.
 * **Check [EthSigner documentation]**. You might be able to find the cause of the problem and fix things yourself. 
-* **Perform a [cursory search of project issues](https://pegasys1.atlassian.net/browse/PAN-2502?jql=project%20%3D%20PAN)** 
+* **Perform a cursory search of project issues in [Jira]** 
 to see if the problem has already been reported. If it has **and the issue is still open**, add a comment 
 to the existing issue instead of opening a new one.
 
 #### How Do I Submit A (Good) Bug Report?
-Bugs are tracked as [Jira issues](https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10000).  
+Bugs are tracked as issues in [Jira].  
 
 Explain the problem and include additional details to help maintainers reproduce the problem:
 
@@ -90,7 +90,7 @@ Include details about your configuration and environment:
 * **Are you running in a virtual machine?** If so, which VM software are you using and which operating 
 systems and versions are used for the host and the guest?
 * **Are you running in a docker container?** If so, what version of docker?
-* **Are you running in a a Cloud?** If so, which one, and what type/size of VM is it?
+* **Are you running in a Cloud?** If so, which one, and what type/size of VM is it?
 * **What version of Java are you running?** You can get the exact version by looking at the EthSigner 
 logfile during startup.
 
@@ -111,13 +111,13 @@ When you are creating an enhancement suggestion, please
 #### Before Submitting An Enhancement Suggestion
 
 * **Check the [EthSigner documentation].** You might be able to find the cause of the problem and fix things yourself. 
-* **Perform a [cursory search of project issues](https://pegasys1.atlassian.net/browse/PAN-2502?jql=project%20%3D%20PAN)** 
+* **Perform a cursory search of project issues in [Jira]** 
 to see if the problem has already been reported. If it has **and the issue is still open**, add a comment 
 to the existing issue instead of opening a new one.
 
 #### How Do I Submit A (Good) Enhancement Suggestion?
 
-Enhancement suggestions are tracked as [Jira issues](https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10000).
+Enhancement suggestions are tracked as issues in [Jira].
 Provide the following information:
 
 * **Use a clear and descriptive title** for the issue to identify the suggestion.
@@ -133,7 +133,7 @@ Provide the following information:
 * **Specify the name and version of the OS you're using.**
 
 ## Your First Contribution
-Start by looking through the 'good first issue' and 'help wanted' labeled issues on the [Jira dashboard](https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10000):
+Start by looking through the 'good first issue' and 'help wanted' labeled issues on the [Jira] dashboard:
 * [Good First Issue][search-label-good-first-issue] - issues which should only require a few lines of code or documentation, 
 and a test or two.
 * [Help wanted issues][search-label-help-wanted] - issues which are a bit more involved than `good first issue` issues.
@@ -162,7 +162,7 @@ another part of the software. Running the `./gradlew clean check test` command l
 to be confident that your changes will pass CI tests once pushed as a Pull Request.
 1. **Push your changes** to your remote fork (usually labeled as `origin`).
 1. **Create a pull-request** (PR) on the EthSigner repository. If the PR addresses an existing Jira issue, 
-include the issue number in the PR title in square brackets (for example, `[PAN-2374]`). 
+include the issue number in the PR title in square brackets (for example, `[ES-2374]`). 
 1. **Add labels** to identify the type of your PR. _For example, if your PR is not ready to validate,
 add the "work-in-progress" label. If it fixes a bug, add the "bug" label._
 1. If the PR address an existing Jira issue, comment in the Jira issue with the PR number. 
@@ -183,9 +183,8 @@ Questions on architectural best practices will be guided by the principles set f
 All code submissions must be accompanied by appropriate automated tests.
 The goal is to provide confidence in the code’s robustness, while avoiding redundant tests.
 
->**Important** 
-> The [`libsodium`](https://download.libsodium.org/doc/installation) library must be installed to 
-run `./gradlew integrationTest`. 
+>**Important**
+> Docker must be running to run `./gradlew acceptanceTest`
 
 ### Pull Requests
 
@@ -245,6 +244,7 @@ These are not strictly enforced during the build, but should be adhered to and c
 
 [private@pegasys.tech]: mailto:private@pegasys.tech
 [Gitter]: https://gitter.im/PegaSysEng/EthSigner
+[Jira]: https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10121
 [EthSigner documentation]: https://docs.ethsigner.pegasys.tech/
 [CLA.md]: /CLA.md
 [Code Reviews]: /community/code-reviews.md

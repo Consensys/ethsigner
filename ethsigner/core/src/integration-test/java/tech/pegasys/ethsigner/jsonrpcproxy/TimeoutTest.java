@@ -18,12 +18,12 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EthProtocolVersionReque
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class TimeoutTest extends IntegrationTestBase {
+class TimeoutTest extends DefaultTestBase {
 
   @Test
-  public void downstreamConnectsButDoesNotRespondReturnsGatewayTimeout() {
+  void downstreamConnectsButDoesNotRespondReturnsGatewayTimeout() {
     final EthProtocolVersionRequest request = new EthProtocolVersionRequest(jsonRpc());
 
     timeoutRequest(this.request.ethNode(request.getEncodedRequestBody()));
@@ -33,7 +33,7 @@ public class TimeoutTest extends IntegrationTestBase {
             new JsonRpcErrorResponse(
                 request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
 
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         this.request.ethSigner(request.getEncodedRequestBody()),
         response.ethSigner(expectedResponse, HttpResponseStatus.GATEWAY_TIMEOUT));
   }
