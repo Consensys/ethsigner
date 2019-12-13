@@ -64,10 +64,10 @@ public class HashicorpVaultDocker {
 
   private final DockerClient docker;
   private final String vaultContainerId;
+  private final String vaultToken;
 
   private int port;
   private String ipAddress;
-  private String vaultToken;
 
   public HashicorpVaultDocker(final DockerClient docker) {
     this.docker = docker;

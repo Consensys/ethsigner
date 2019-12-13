@@ -14,9 +14,12 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
@@ -32,20 +35,24 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   }
 
   @Test
-  void azureSignersAreCreatedAndExpectedAddressIsReported() {
+  void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        "arbitrary_prefix" + AZURE_ETHEREUM_ADDRESS + ".toml", clientId, clientSecret);
+        "arbitrary_prefix" + AZURE_ETHEREUM_ADDRESS + ".toml",
+        clientId,
+        clientSecret,
+        tomlDirectory);
 
-    setup();
+    setup(tomlDirectory);
 
     assertThat(ethSigner.accounts().list()).containsOnly("0x" + AZURE_ETHEREUM_ADDRESS);
   }
 
   @Test
-  void incorrectlyNamedAzureFileIsNotLoaded() {
-    createAzureTomlFileAt("ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret);
+  void incorrectlyNamedAzureFileIsNotLoaded(@TempDir Path tomlDirectory) {
+    createAzureTomlFileAt(
+        "ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret, tomlDirectory);
 
-    setup();
+    setup(tomlDirectory);
 
     assertThat(ethSigner.accounts().list()).isEmpty();
   }

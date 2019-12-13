@@ -27,27 +27,21 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-import com.google.common.io.MoreFiles;
-import com.google.common.io.RecursiveDeleteOption;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.io.TempDir;
 
 public class MultiKeyAcceptanceTestBase {
 
   protected Signer ethSigner;
 
-  @TempDir Path tomlDirectory;
-
   @AfterEach
-  public void cleanUp() throws IOException {
+  public void cleanUp() {
     if (ethSigner != null) {
       ethSigner.shutdown();
       ethSigner = null;
     }
-    MoreFiles.deleteDirectoryContents(tomlDirectory, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
-  void setup() {
+  void setup(final Path tomlDirectory) {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withMultiKeySignerDirectory(tomlDirectory).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
@@ -58,7 +52,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createAzureTomlFileAt(
-      final String tomlFilename, final String clientId, final String clientSecret) {
+      final String tomlFilename,
+      final String clientId,
+      final String clientSecret,
+      final Path tomlDirectory) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
@@ -78,7 +75,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createFileBasedTomlFileAt(
-      final String tomlFilename, final String keyPath, final String passwordPath) {
+      final String tomlFilename,
+      final String keyPath,
+      final String passwordPath,
+      final Path tomlDirectory) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
@@ -98,7 +98,8 @@ public class MultiKeyAcceptanceTestBase {
       final String tomlFilename,
       final String keyPath,
       final String authFile,
-      final HashicorpVaultDocker hashicorpVaultDocker) {
+      final HashicorpVaultDocker hashicorpVaultDocker,
+      final Path tomlDirectory) {
     {
       try {
         final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);

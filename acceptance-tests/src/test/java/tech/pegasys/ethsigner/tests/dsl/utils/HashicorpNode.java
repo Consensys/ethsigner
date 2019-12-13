@@ -16,7 +16,7 @@ import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import com.github.dockerjava.api.DockerClient;
 
-public class HashicorpHelpers {
+public class HashicorpNode {
 
   public static HashicorpVaultDocker setUpHashicorpVault(final DockerClient docker) {
     HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);

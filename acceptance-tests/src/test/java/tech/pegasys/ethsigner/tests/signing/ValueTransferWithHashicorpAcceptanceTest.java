@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers.tearDownHashicorpVault;
+import static tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode.tearDownHashicorpVault;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -26,7 +26,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.math.BigInteger;
@@ -52,7 +52,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = HashicorpHelpers.setUpHashicorpVault(docker);
+    hashicorpVaultDocker = HashicorpNode.setUpHashicorpVault(docker);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
