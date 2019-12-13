@@ -73,7 +73,7 @@ public class HashicorpVaultDocker {
     this.docker = docker;
     this.vaultToken = "token";
     pullVaultImage();
-    this.vaultContainerId = createVaultContainer(vaultToken);
+    this.vaultContainerId = createVaultContainer();
   }
 
   public void start() {
