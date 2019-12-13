@@ -59,7 +59,7 @@ public final class EthSigner {
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
-            .setDefaultHost(config.getDownstreamHttpHost().getHostAddress());
+            .setDefaultHost(config.getDownstreamHttpHost().getHostName());
     final HttpServerOptions serverOptions =
         new HttpServerOptions()
             .setPort(config.getHttpListenPort())
