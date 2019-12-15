@@ -34,8 +34,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
-  static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
+  private static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  private static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   private static HashicorpVaultDocker hashicorpVaultDocker;
   private static final HashicorpNode hashicorpNode = new HashicorpNode();

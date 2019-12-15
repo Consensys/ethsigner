@@ -19,7 +19,7 @@ import com.github.dockerjava.api.DockerClient;
 public class HashicorpNode {
 
   public HashicorpVaultDocker start(final DockerClient docker) {
-    HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
+    final HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();
     hashicorpVaultDocker.createTestData();
