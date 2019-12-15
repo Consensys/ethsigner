@@ -43,15 +43,18 @@ import org.apache.logging.log4j.Logger;
 
 public class HashicorpVaultDocker {
 
+  private static final String keyName = "ethsignerSigningKey";
+
+  // Note: keyPath is _not_ the same as the string passed to the vault cmd when creating said key.
+  public static String absKeyPath = "/secret/data/" + keyName;
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_VAULT_IMAGE = "vault:latest";
   private static final int DEFAULT_HTTP_PORT = 8200;
-  public static final String vaultToken = "token";
   private static final String[] CREATE_ETHSIGNER_SIGNING_KEY_SECRET = {
     "vault",
     "kv",
     "put",
-    "secret/ethsignerSigningKey",
+    "secret/" + keyName,
     "value=8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
   };
   private static final String[] COMMAND_TO_CHECK_VAULT_IS_UP = {"vault", "status"};
@@ -61,12 +64,14 @@ public class HashicorpVaultDocker {
 
   private final DockerClient docker;
   private final String vaultContainerId;
+  private final String vaultToken;
 
   private int port;
   private String ipAddress;
 
   public HashicorpVaultDocker(final DockerClient docker) {
     this.docker = docker;
+    this.vaultToken = "token";
     pullVaultImage();
     this.vaultContainerId = createVaultContainer();
   }
@@ -158,12 +163,16 @@ public class HashicorpVaultDocker {
     LOG.info("Hashicorp Vault is now responsive");
   }
 
-  public int port() {
+  public int getPort() {
     return port;
   }
 
   public String getIpAddress() {
     return ipAddress;
+  }
+
+  public String getVaultToken() {
+    return vaultToken;
   }
 
   private boolean hasVaultContainer() {
@@ -211,7 +220,7 @@ public class HashicorpVaultDocker {
             .withCapAdd(Capability.IPC_LOCK);
 
     final List<String> enviromentVars = new ArrayList<>();
-    enviromentVars.add("VAULT_DEV_ROOT_TOKEN_ID=token");
+    enviromentVars.add("VAULT_DEV_ROOT_TOKEN_ID=" + vaultToken);
     enviromentVars.add("VAULT_ADDR=http://127.0.0.1:8200");
     enviromentVars.add("VAULT_TOKEN=token");
 

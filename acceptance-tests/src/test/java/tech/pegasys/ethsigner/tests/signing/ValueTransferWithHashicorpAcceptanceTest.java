@@ -25,12 +25,12 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -43,6 +43,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   private static Node ethNode;
   private static Signer ethSigner;
   private static HashicorpVaultDocker hashicorpVaultDocker;
+  private static final HashicorpNode hashicorpNode = new HashicorpNode();
 
   @BeforeAll
   public static void setUpBase() {
@@ -51,10 +52,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = new HashicorpVaultDocker(docker);
-    hashicorpVaultDocker.start();
-    hashicorpVaultDocker.awaitStartupCompletion();
-    hashicorpVaultDocker.createTestData();
+    hashicorpVaultDocker = hashicorpNode.start(docker);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -62,21 +60,15 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    final String ip = hashicorpVaultDocker.getIpAddress();
-    final int port = hashicorpVaultDocker.port();
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder()
-            .withHashicorpVaultPort(port)
-            .withHashicorpIpAddress(ip)
-            .build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVaultDocker).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
 
-  @AfterAll
-  public static void tearDownBase() {
+  static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
     }
@@ -85,9 +77,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
       ethSigner.shutdown();
     }
 
-    if (hashicorpVaultDocker != null) {
-      hashicorpVaultDocker.shutdown();
-    }
+    hashicorpNode.shutdown(hashicorpVaultDocker);
   }
 
   private Account richBenefactor() {
