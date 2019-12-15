@@ -102,12 +102,11 @@ public class TransactionSignerParamsSupplier {
     return createTmpFile("ethsigner_keyfile", data);
   }
 
-  private static File createVaultAuthFile(final String vaultToken) {
-    return TransactionSignerParamsSupplier.createTmpFile(
-        "vault_authfile", vaultToken.getBytes(UTF_8));
+  private File createVaultAuthFile(final String vaultToken) {
+    return createTmpFile("vault_authfile", vaultToken.getBytes(UTF_8));
   }
 
-  private static File createTmpFile(final String tempNamePrefix, final byte[] data) {
+  private File createTmpFile(final String tempNamePrefix, final byte[] data) {
     final Path path;
     try {
       path = Files.createTempFile(tempNamePrefix, null);

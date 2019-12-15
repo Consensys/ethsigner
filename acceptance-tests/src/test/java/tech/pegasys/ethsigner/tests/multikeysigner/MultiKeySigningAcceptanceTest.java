@@ -19,7 +19,7 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAc
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.File;
@@ -40,13 +40,13 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   @TempDir static Path tempDir;
   private static String authFilename;
   private static HashicorpVaultDocker hashicorpVaultDocker;
-  private static final HashicorpNode hashicorpNode = new HashicorpNode();
+  private static final HashicorpVault HASHICORP_VAULT = new HashicorpVault();
 
   @BeforeAll
   static void preSetup() throws IOException {
     preChecks();
 
-    hashicorpVaultDocker = hashicorpNode.start(new DockerClientFactory().create());
+    hashicorpVaultDocker = HASHICORP_VAULT.start(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
@@ -97,6 +97,6 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @AfterAll
   static void tearDown() {
-    hashicorpNode.shutdown(hashicorpVaultDocker);
+    HASHICORP_VAULT.shutdown(hashicorpVaultDocker);
   }
 }
