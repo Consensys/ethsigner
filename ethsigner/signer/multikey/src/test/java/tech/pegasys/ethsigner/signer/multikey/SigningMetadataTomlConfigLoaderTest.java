@@ -54,8 +54,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class SigningMetadataTomlConfigLoaderTest {
 
-  @TempDir
-  Path configsDirectory;
+  @TempDir Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader;
 
@@ -328,10 +327,8 @@ class SigningMetadataTomlConfigLoaderTest {
     final FileBasedSigningMetadataFile metadataFile =
         (FileBasedSigningMetadataFile) metadataFiles.toArray()[0];
 
-    assertThat(metadataFile.getKeyPath())
-        .isEqualTo(configsDirectory.resolve("./path/to/k.key"));
+    assertThat(metadataFile.getKeyPath()).isEqualTo(configsDirectory.resolve("./path/to/k.key"));
     assertThat(metadataFile.getPasswordPath())
         .isEqualTo(configsDirectory.resolve("./path/to/p.password"));
   }
-
 }
