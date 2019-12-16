@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 
-import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 
@@ -24,13 +23,13 @@ public interface Config {
 
   Level getLogLevel();
 
-  InetAddress getDownstreamHttpHost();
+  String getDownstreamHttpHost();
 
   Integer getDownstreamHttpPort();
 
   Duration getDownstreamHttpRequestTimeout();
 
-  InetAddress getHttpListenHost();
+  String getHttpListenHost();
 
   Integer getHttpListenPort();
 
