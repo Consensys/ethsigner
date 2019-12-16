@@ -39,17 +39,17 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @TempDir static Path tempDir;
   private static String authFilename;
-  private static HashicorpVaultDocker hashicorpVaultDocker;
-  private static final HashicorpVault HASHICORP_VAULT = new HashicorpVault();
+
+  private static HashicorpVault hashicorpVault;
 
   @BeforeAll
   static void preSetup() throws IOException {
     preChecks();
 
-    hashicorpVaultDocker = HASHICORP_VAULT.start(new DockerClientFactory().create());
+    hashicorpVault = HashicorpVault.start(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
-    Files.write(authFilePath, hashicorpVaultDocker.getVaultToken().getBytes(UTF_8));
+    Files.write(authFilePath, hashicorpVault.getVaultToken().getBytes(UTF_8));
     authFilename = authFilePath.toAbsolutePath().toString();
   }
 
@@ -64,12 +64,11 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
 
     createAzureTomlFileAt(
-        AZURE_ETHEREUM_ADDRESS + ".toml",
+        tempDir.resolve(AZURE_ETHEREUM_ADDRESS + ".toml").toAbsolutePath(),
         AzureBasedTomlLoadingAcceptanceTest.clientId,
-        AzureBasedTomlLoadingAcceptanceTest.clientSecret,
-        tempDir);
+        AzureBasedTomlLoadingAcceptanceTest.clientSecret);
     createFileBasedTomlFileAt(
-        "a01f618424b0113a9cebdc6cb66ca5b48e9120c5.toml",
+        tempDir.resolve("a01f618424b0113a9cebdc6cb66ca5b48e9120c5.toml").toAbsolutePath(),
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -79,15 +78,13 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
-            .getAbsolutePath(),
-        tempDir);
+            .getAbsolutePath());
 
     createHashicorpTomlFileAt(
-        HASHICORP_ETHEREUM_ADDRESS + ".toml",
+        tempDir.resolve(HASHICORP_ETHEREUM_ADDRESS + ".toml").toAbsolutePath(),
         HashicorpVaultDocker.absKeyPath,
         authFilename,
-        hashicorpVaultDocker,
-        tempDir);
+        hashicorpVault);
 
     setup(tempDir);
 
@@ -97,6 +94,8 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @AfterAll
   static void tearDown() {
-    HASHICORP_VAULT.shutdown(hashicorpVaultDocker);
+    if(hashicorpVault != null) {
+      hashicorpVault.shutdown();
+    }
   }
 }

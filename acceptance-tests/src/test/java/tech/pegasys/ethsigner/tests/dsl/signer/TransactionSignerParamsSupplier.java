@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +29,12 @@ import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
 
-  private final HashicorpVaultDocker hashicorpVault;
+  private final HashicorpVault hashicorpVault;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
   public TransactionSignerParamsSupplier(
-      final HashicorpVaultDocker hashicorpVault,
+      final HashicorpVault hashicorpVault,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {
     this.hashicorpVault = hashicorpVault;

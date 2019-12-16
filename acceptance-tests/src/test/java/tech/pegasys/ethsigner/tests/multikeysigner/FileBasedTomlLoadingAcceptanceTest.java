@@ -30,7 +30,9 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void validFileBasedTomlFileProducesSignerWhicReportsMatchingAddress(@TempDir Path tomlDirectory)
       throws URISyntaxException {
     createFileBasedTomlFileAt(
-        "arbitrary_prefix" + FILE_ETHEREUM_ADDRESS + ".toml",
+        tomlDirectory
+            .resolve("arbitrary_prefix" + FILE_ETHEREUM_ADDRESS + ".toml")
+            .toAbsolutePath(),
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -40,8 +42,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
-            .getAbsolutePath(),
-        tomlDirectory);
+            .getAbsolutePath());
 
     setup(tomlDirectory);
 
@@ -52,7 +53,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void incorrectlyNamedFileBasedSignerIsNotLoaded(@TempDir Path tomlDirectory)
       throws URISyntaxException {
     createFileBasedTomlFileAt(
-        "ffffffffffffffffffffffffffffffffffffffff.toml",
+        tomlDirectory.resolve("ffffffffffffffffffffffffffffffffffffffff.toml").toAbsolutePath(),
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -62,8 +63,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
-            .getAbsolutePath(),
-        tomlDirectory);
+            .getAbsolutePath());
 
     setup(tomlDirectory);
 

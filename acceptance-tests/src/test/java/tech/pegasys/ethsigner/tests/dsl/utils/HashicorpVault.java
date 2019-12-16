@@ -18,17 +18,35 @@ import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpVault {
 
-  public HashicorpVaultDocker start(final DockerClient docker) {
+  private final HashicorpVaultDocker dockerContainer;
+
+  public HashicorpVault(final HashicorpVaultDocker dockerContainer) {
+    this.dockerContainer = dockerContainer;
+  }
+
+  public static HashicorpVault start(final DockerClient docker) {
     final HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();
     hashicorpVaultDocker.createTestData();
-    return hashicorpVaultDocker;
+    return new HashicorpVault(hashicorpVaultDocker);
   }
 
-  public void shutdown(final HashicorpVaultDocker hashicorpVaultDocker) {
-    if (hashicorpVaultDocker != null) {
-      hashicorpVaultDocker.shutdown();
+  public void shutdown() {
+    if (dockerContainer != null) {
+      dockerContainer.shutdown();
     }
+  }
+
+  public int getPort() {
+    return dockerContainer.getPort();
+  }
+
+  public String getIpAddress() {
+    return dockerContainer.getIpAddress();
+  }
+
+  public String getVaultToken() {
+    return dockerContainer.getVaultToken();
   }
 }

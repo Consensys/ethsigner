@@ -26,7 +26,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.math.BigInteger;
 
@@ -42,8 +41,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
 
   private static Node ethNode;
   private static Signer ethSigner;
-  private static HashicorpVaultDocker hashicorpVaultDocker;
-  private static final HashicorpVault HASHICORP_VAULT = new HashicorpVault();
+  private static HashicorpVault hashicorpVault;;
 
   @BeforeAll
   public static void setUpBase() {
@@ -52,7 +50,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = HASHICORP_VAULT.start(docker);
+    hashicorpVault = HashicorpVault.start(docker);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -61,7 +59,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVaultDocker).build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVault).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
@@ -77,7 +75,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
       ethSigner.shutdown();
     }
 
-    HASHICORP_VAULT.shutdown(hashicorpVaultDocker);
+    hashicorpVault.shutdown();
   }
 
   private Account richBenefactor() {
