@@ -25,7 +25,8 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
 
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  static final String AZURE_ETHEREUM_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String AZURE_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   @BeforeAll
   static void preChecks() {
@@ -38,7 +39,7 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
         tomlDirectory
-            .resolve("arbitrary_prefix" + AZURE_ETHEREUM_ADDRESS + ".toml")
+            .resolve("arbitrary_prefix" + FILENAME + ".toml")
             .toAbsolutePath(),
         clientId,
         clientSecret);

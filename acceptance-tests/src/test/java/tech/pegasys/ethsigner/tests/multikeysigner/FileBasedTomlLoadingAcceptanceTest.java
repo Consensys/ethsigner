@@ -31,7 +31,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
       throws URISyntaxException {
     createFileBasedTomlFileAt(
         tomlDirectory
-            .resolve("arbitrary_prefix" + FILE_ETHEREUM_ADDRESS + ".toml")
+            .resolve("arbitrary_prefix" + FILENAME + ".toml")
             .toAbsolutePath(),
         new File(
                 Resources.getResource(
@@ -46,7 +46,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly("0x" + FILE_ETHEREUM_ADDRESS);
+    assertThat(ethSigner.accounts().list()).containsOnly(FILE_ETHEREUM_ADDRESS);
   }
 
   @Test
