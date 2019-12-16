@@ -79,10 +79,10 @@ public class CommandlineParserTest {
     assertThat(result).isTrue();
 
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
-    assertThat(config.getDownstreamHttpHost()).isEqualTo(InetAddress.getByName("8.8.8.8"));
+    assertThat(config.getDownstreamHttpHost()).isEqualTo("8.8.8.8");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
-    assertThat(config.getHttpListenHost()).isEqualTo(InetAddress.getByName("localhost"));
+    assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
   }
 
@@ -139,7 +139,9 @@ public class CommandlineParserTest {
   @Test
   public void missingDownStreamHostDefaultsToLoopback() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "downstream-http-host", config::getDownstreamHttpHost, InetAddress.getLoopbackAddress());
+        "downstream-http-host",
+        config::getDownstreamHttpHost,
+        InetAddress.getLoopbackAddress().getHostAddress());
   }
 
   @Test
@@ -159,7 +161,9 @@ public class CommandlineParserTest {
   @Test
   public void missingListenHostDefaultsToLoopback() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-listen-host", config::getHttpListenHost, InetAddress.getLoopbackAddress());
+        "http-listen-host",
+        config::getHttpListenHost,
+        InetAddress.getLoopbackAddress().getHostAddress());
   }
 
   @Test
@@ -202,22 +206,6 @@ public class CommandlineParserTest {
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
-  }
-
-  @Test
-  public void domainNamesDecodeIntoAnInetAddress() {
-    final String input =
-        "--downstream-http-host=google.com "
-            + "--downstream-http-port=5000 "
-            + "--downstream-http-request-timeout=10000 "
-            + "--http-listen-port=5001 "
-            + "--http-listen-host=localhost "
-            + "--chain-id=6 "
-            + "--logging=INFO";
-    final String[] inputArgs = input.split(" ");
-
-    parser.parseCommandLine(inputArgs);
-    assertThat(config.getDownstreamHttpHost().getHostName()).isEqualTo("google.com");
   }
 
   @Test
