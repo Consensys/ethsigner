@@ -94,7 +94,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @AfterAll
   static void tearDown() {
-    if(hashicorpVault != null) {
+    if (hashicorpVault != null) {
       hashicorpVault.shutdown();
     }
   }
