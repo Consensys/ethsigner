@@ -33,7 +33,7 @@ import picocli.CommandLine.Option;
 public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
-      names = {"--keyvault-name, --key-vault-name"},
+      names = {"--keyvault-name", "--key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
       required = true,
       arity = "1")
