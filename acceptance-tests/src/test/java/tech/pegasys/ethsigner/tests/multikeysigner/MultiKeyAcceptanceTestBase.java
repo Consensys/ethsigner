@@ -52,10 +52,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createAzureTomlFileAt(
-      final Path absTomlPath, final String clientId, final String clientSecret) {
+      final Path tomlPath, final String clientId, final String clientSecret) {
     try {
 
-      final FileWriter writer = new FileWriter(absTomlPath.toFile(), StandardCharsets.UTF_8);
+      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
           .append("type = \"azure-signer\"\n")
@@ -71,9 +71,9 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createFileBasedTomlFileAt(
-      final Path absTomlPath, final String keyPath, final String passwordPath) {
+      final Path tomlPath, final String keyPath, final String passwordPath) {
     try {
-      final FileWriter writer = new FileWriter(absTomlPath.toFile(), StandardCharsets.UTF_8);
+      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
           .append("type = \"file-based-signer\"\n")
@@ -86,14 +86,14 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createHashicorpTomlFileAt(
-      final Path absTomlPath,
+      final Path tomlPath,
       final String keyPath,
       final String authFile,
       final HashicorpVault hashicorpVault) {
     {
       try {
 
-        final FileWriter writer = new FileWriter(absTomlPath.toFile(), StandardCharsets.UTF_8);
+        final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
         writer.write("[signing]\n");
         writer
             .append("type = \"hashicorp-signer\"\n")

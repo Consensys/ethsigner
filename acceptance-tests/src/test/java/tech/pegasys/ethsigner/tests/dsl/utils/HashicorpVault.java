@@ -20,11 +20,11 @@ public class HashicorpVault {
 
   private final HashicorpVaultDocker dockerContainer;
 
-  public HashicorpVault(final HashicorpVaultDocker dockerContainer) {
+  private HashicorpVault(final HashicorpVaultDocker dockerContainer) {
     this.dockerContainer = dockerContainer;
   }
 
-  public static HashicorpVault start(final DockerClient docker) {
+  public static HashicorpVault createVault(final DockerClient docker) {
     final HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();

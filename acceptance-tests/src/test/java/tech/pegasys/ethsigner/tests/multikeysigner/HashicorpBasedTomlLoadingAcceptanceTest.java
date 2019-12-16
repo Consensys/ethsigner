@@ -43,7 +43,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @BeforeAll
   static void setUpBase() throws IOException {
-    hashicorpVault = HashicorpVault.start(new DockerClientFactory().create());
+    hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpVault.getVaultToken().getBytes(UTF_8));
