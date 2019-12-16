@@ -62,11 +62,11 @@ public final class EthSigner {
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
-            .setDefaultHost(config.getDownstreamHttpHost().getHostAddress());
+            .setDefaultHost(config.getDownstreamHttpHost());
     final HttpServerOptions serverOptions =
         new HttpServerOptions()
             .setPort(config.getHttpListenPort())
-            .setHost(config.getHttpListenHost().getHostAddress())
+            .setHost(config.getHttpListenHost())
             .setReuseAddress(true)
             .setReusePort(true);
     final Path dataPath = config.getDataPath();
@@ -96,10 +96,7 @@ public final class EthSigner {
 
   private HttpService createWeb3jHttpService() {
     final String downstreamUrl =
-        "http://"
-            + config.getDownstreamHttpHost().getHostName()
-            + ":"
-            + config.getDownstreamHttpPort();
+        "http://" + config.getDownstreamHttpHost() + ":" + config.getDownstreamHttpPort();
     LOG.info("Downstream URL = {}", downstreamUrl);
 
     final OkHttpClient.Builder builder = new OkHttpClient.Builder();
