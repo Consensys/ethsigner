@@ -54,7 +54,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class SigningMetadataTomlConfigLoaderTest {
 
-  @TempDir Path configsDirectory;
+  @TempDir
+  Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader;
 
@@ -298,4 +299,39 @@ class SigningMetadataTomlConfigLoaderTest {
 
     assertThat(metadataFiles.size()).isZero();
   }
+
+  @Test
+  void relativeHashicorpAuthFileIsRelativeToLibraryRoot() {
+    copyFileIntoConfigDirectory("hashicorpconfig_relativePath.toml");
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isOne();
+    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
+    final HashicorpSigningMetadataFile metadataFile =
+        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
+
+    assertThat(metadataFile.getConfig().getAuthFilePath())
+        .isEqualTo(configsDirectory.resolve("./path/to/auth-file"));
+  }
+
+  @Test
+  void relativeKeyAndPasswordFilesAreResolveRelativeToLibraryRoot() {
+    copyFileIntoConfigDirectory("key_password_relative_path.toml");
+
+    final Collection<SigningMetadataFile> metadataFiles =
+        loader.loadAvailableSigningMetadataTomlConfigs();
+
+    assertThat(metadataFiles.size()).isOne();
+    assertThat(metadataFiles.toArray()[0]).isInstanceOf(FileBasedSigningMetadataFile.class);
+    final FileBasedSigningMetadataFile metadataFile =
+        (FileBasedSigningMetadataFile) metadataFiles.toArray()[0];
+
+    assertThat(metadataFile.getKeyPath())
+        .isEqualTo(configsDirectory.resolve("./path/to/k.key"));
+    assertThat(metadataFile.getPasswordPath())
+        .isEqualTo(configsDirectory.resolve("./path/to/p.password"));
+  }
+
 }
