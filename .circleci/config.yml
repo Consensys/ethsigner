@@ -210,3 +210,8 @@ workflows:
             - acceptanceTests
             - azureTests
             - buildDocker
+notify:
+  branches:
+    only:
+      - master
+      - /^release-.*/
