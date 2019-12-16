@@ -59,7 +59,7 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires primitives to not be final.
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
