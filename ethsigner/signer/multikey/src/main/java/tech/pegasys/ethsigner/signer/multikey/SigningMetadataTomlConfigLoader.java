@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataF
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -125,9 +124,9 @@ class SigningMetadataTomlConfigLoader {
     final ThrowingTomlTable table = signingTable.get();
 
     final String keyFilename = table.getString("key-file");
-    final Path keyPath = new File(keyFilename).toPath();
+    final Path keyPath = makeRelativePathAbsolute(keyFilename);
     final String passwordFilename = table.getString("password-file");
-    final Path passwordPath = new File(passwordFilename).toPath();
+    final Path passwordPath = makeRelativePathAbsolute(passwordFilename);
     return Optional.of(new FileBasedSigningMetadataFile(filename, keyPath, passwordPath));
   }
 
@@ -162,11 +161,12 @@ class SigningMetadataTomlConfigLoader {
         new HashicorpConfig.HashicorpConfigBuilder();
     ThrowingTomlTable table = signingTable.get();
 
-    builder.withSigningKeyPath(table.getString("signing-key-path"));
-    builder.withHost(table.getString("host"));
-    builder.withPort(table.getLong("port").intValue());
-    builder.withAuthFilePath(new File(table.getString("auth-file")).toPath());
-    builder.withTimeout(table.getLong("timeout"));
+    builder
+        .withSigningKeyPath(table.getString("signing-key-path"))
+        .withHost(table.getString("host"))
+        .withPort(table.getLong("port").intValue())
+        .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
+        .withTimeout(table.getLong("timeout"));
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }
@@ -189,5 +189,15 @@ class SigningMetadataTomlConfigLoader {
     } else {
       return address.toLowerCase();
     }
+  }
+
+  private Path makeRelativePathAbsolute(final String input) {
+    final Path parsedInput = Path.of(input);
+
+    if (parsedInput.isAbsolute()) {
+      return parsedInput;
+    }
+
+    return tomlConfigsDirectory.resolve(input);
   }
 }
