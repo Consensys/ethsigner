@@ -28,13 +28,12 @@ import picocli.CommandLine.Option;
 
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures that transactions are signed by a key retrieved from Azure KMS.",
+    description = "Sign transactions using the Azure signing service.",
     mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
-      names = {"--keyvault-name, --key-vault-name"},
+      names = {"--keyvault-name", "--key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
       required = true,
       arity = "1")

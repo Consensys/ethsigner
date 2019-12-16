@@ -20,6 +20,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,13 +28,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.io.TempDir;
 
 public class MultiKeyAcceptanceTestBase {
 
   protected Signer ethSigner;
-
-  @TempDir Path tomlDirectory;
 
   @AfterEach
   public void cleanUp() {
@@ -43,7 +41,7 @@ public class MultiKeyAcceptanceTestBase {
     }
   }
 
-  void setup() {
+  void setup(final Path tomlDirectory) {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withMultiKeySignerDirectory(tomlDirectory).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
@@ -54,14 +52,17 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createAzureTomlFileAt(
-      final String tomlFilename, final String clientId, final String clientSecret) {
+      final String tomlFilename,
+      final String clientId,
+      final String clientSecret,
+      final Path tomlDirectory) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
       final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
-          .append("type = \"azure-based-signer\"\n")
+          .append("type = \"azure-signer\"\n")
           .append("key-vault-name = \"ethsignertestkey\"\n")
           .append("key-name = \"TestKey\"\n")
           .append("key-version = \"7c01fe58d68148bba5824ce418241092\"\n")
@@ -74,7 +75,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createFileBasedTomlFileAt(
-      final String tomlFilename, final String keyPath, final String passwordPath) {
+      final String tomlFilename,
+      final String keyPath,
+      final String passwordPath,
+      final Path tomlDirectory) {
     try {
       final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
@@ -87,6 +91,33 @@ public class MultiKeyAcceptanceTestBase {
       writer.close();
     } catch (final IOException e) {
       fail("Unable to create Azure TOML file.");
+    }
+  }
+
+  void createHashicorpTomlFileAt(
+      final String tomlFilename,
+      final String keyPath,
+      final String authFile,
+      final HashicorpVaultDocker hashicorpVaultDocker,
+      final Path tomlDirectory) {
+    {
+      try {
+        final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
+
+        final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
+        writer.write("[signing]\n");
+        writer
+            .append("type = \"hashicorp-signer\"\n")
+            .append("signing-key-path = \"" + keyPath + "\"\n")
+            .append("host = \"" + hashicorpVaultDocker.getIpAddress() + "\"\n")
+            .append("port = " + hashicorpVaultDocker.getPort() + "\n")
+            .append("auth-file  = \"" + authFile + "\"\n")
+            .append("timeout = 500\n");
+
+        writer.close();
+      } catch (final IOException e) {
+        fail("Unable to create Hashicorp TOML file.");
+      }
     }
   }
 }

@@ -75,7 +75,7 @@ public class MultiKeyTransactionSignerProvider
       return null;
     }
 
-    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (filenameMatchesSigningAddress(signer, metadataFile)) {
       LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     }
@@ -93,7 +93,7 @@ public class MultiKeyTransactionSignerProvider
       return null;
     }
 
-    if (filenameMatchesSigningAddress(signer.getAddress(), metadataFile)) {
+    if (filenameMatchesSigningAddress(signer, metadataFile)) {
       LOG.info("Loaded signer for address {}", signer.getAddress());
       return signer;
     }
@@ -107,8 +107,7 @@ public class MultiKeyTransactionSignerProvider
       final TransactionSigner signer =
           FileBasedSignerFactory.createSigner(
               metadataFile.getKeyPath(), metadataFile.getPasswordPath());
-      final String signerAddress = signer.getAddress().substring(2); // strip leading 0x
-      if (filenameMatchesSigningAddress(signerAddress, metadataFile)) {
+      if (filenameMatchesSigningAddress(signer, metadataFile)) {
         LOG.info("Loaded signer for address {}", signer.getAddress());
         return signer;
       }
@@ -122,9 +121,11 @@ public class MultiKeyTransactionSignerProvider
   }
 
   private boolean filenameMatchesSigningAddress(
-      final String signerAddress, final SigningMetadataFile metadataFile) {
+      final TransactionSigner signer, final SigningMetadataFile metadataFile) {
 
-    if (!metadataFile.getBaseFilename().endsWith(signerAddress)) {
+    // strip leading 0x from the address.
+    final String signerAddress = signer.getAddress().substring(2).toLowerCase();
+    if (!metadataFile.getBaseFilename().toLowerCase().endsWith(signerAddress)) {
       LOG.error(
           String.format(
               "Signer's Ethereum Address (%s) does not align with metadata filename (%s)",

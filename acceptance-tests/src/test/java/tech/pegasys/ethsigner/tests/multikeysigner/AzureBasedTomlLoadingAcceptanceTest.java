@@ -14,15 +14,18 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  static final String AZURE_ETHEREUM_ADDRESS = "0xfe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String AZURE_ETHEREUM_ADDRESS = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   @BeforeAll
   static void preChecks() {
@@ -32,19 +35,24 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   }
 
   @Test
-  void azureSignersAreCreatedAndExpectedAddressIsReported() {
-    createAzureTomlFileAt(AZURE_ETHEREUM_ADDRESS + ".toml", clientId, clientSecret);
+  void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
+    createAzureTomlFileAt(
+        "arbitrary_prefix" + AZURE_ETHEREUM_ADDRESS + ".toml",
+        clientId,
+        clientSecret,
+        tomlDirectory);
 
-    setup();
+    setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly(AZURE_ETHEREUM_ADDRESS);
+    assertThat(ethSigner.accounts().list()).containsOnly("0x" + AZURE_ETHEREUM_ADDRESS);
   }
 
   @Test
-  void incorrectlyNamedAzureFileIsNotLoaded() {
-    createAzureTomlFileAt("ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret);
+  void incorrectlyNamedAzureFileIsNotLoaded(@TempDir Path tomlDirectory) {
+    createAzureTomlFileAt(
+        "ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret, tomlDirectory);
 
-    setup();
+    setup(tomlDirectory);
 
     assertThat(ethSigner.accounts().list()).isEmpty();
   }

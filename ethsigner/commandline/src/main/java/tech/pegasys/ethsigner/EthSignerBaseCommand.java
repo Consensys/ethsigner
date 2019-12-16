@@ -28,7 +28,9 @@ import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
-    description = "This command runs the EthSigner.",
+    description =
+        "This command runs the EthSigner.\n"
+            + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
     mixinStandardHelpOptions = true,
@@ -49,13 +51,15 @@ public class EthSignerBaseCommand implements Config {
           "Logging verbosity levels: OFF, FATAL, WARN, INFO, DEBUG, TRACE, ALL (default: INFO)")
   private final Level logLevel = Level.INFO;
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-host",
       description =
           "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
+  private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
@@ -76,7 +80,7 @@ public class EthSignerBaseCommand implements Config {
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final InetAddress httpListenHost = InetAddress.getLoopbackAddress();
+  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
 
   @Option(
       names = {"--http-listen-port"},
@@ -104,7 +108,7 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public InetAddress getDownstreamHttpHost() {
+  public String getDownstreamHttpHost() {
     return downstreamHttpHost;
   }
 
@@ -114,7 +118,7 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public InetAddress getHttpListenHost() {
+  public String getHttpListenHost() {
     return httpListenHost;
   }
 

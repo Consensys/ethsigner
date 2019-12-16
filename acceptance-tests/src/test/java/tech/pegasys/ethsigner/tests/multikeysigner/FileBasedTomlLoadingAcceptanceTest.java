@@ -16,18 +16,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
-  static final String FILE_ETHEREUM_ADDRESS = "0xa01f618424b0113a9cebdc6cb66ca5b48e9120c5";
+  static final String FILE_ETHEREUM_ADDRESS = "a01f618424b0113a9cebdc6cb66ca5b48e9120c5";
 
   @Test
-  void validFileBasedTomlFileProducesSignerWhicReportsMatchingAddress() throws URISyntaxException {
+  void validFileBasedTomlFileProducesSignerWhicReportsMatchingAddress(@TempDir Path tomlDirectory)
+      throws URISyntaxException {
     createFileBasedTomlFileAt(
-        "a01f618424b0113a9cebdc6cb66ca5b48e9120c5.toml",
+        "arbitrary_prefix" + FILE_ETHEREUM_ADDRESS + ".toml",
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -37,15 +40,17 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
-            .getAbsolutePath());
+            .getAbsolutePath(),
+        tomlDirectory);
 
-    setup();
+    setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly(FILE_ETHEREUM_ADDRESS);
+    assertThat(ethSigner.accounts().list()).containsOnly("0x" + FILE_ETHEREUM_ADDRESS);
   }
 
   @Test
-  void incorrectlyNamedFileBasedSignerIsNotLoaded() throws URISyntaxException {
+  void incorrectlyNamedFileBasedSignerIsNotLoaded(@TempDir Path tomlDirectory)
+      throws URISyntaxException {
     createFileBasedTomlFileAt(
         "ffffffffffffffffffffffffffffffffffffffff.toml",
         new File(
@@ -57,8 +62,10 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
-            .getAbsolutePath());
-    setup();
+            .getAbsolutePath(),
+        tomlDirectory);
+
+    setup(tomlDirectory);
 
     assertThat(ethSigner.accounts().list()).isEmpty();
   }
