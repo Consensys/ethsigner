@@ -24,13 +24,14 @@ import org.junit.jupiter.api.io.TempDir;
 
 class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
-  static final String FILE_ETHEREUM_ADDRESS = "a01f618424b0113a9cebdc6cb66ca5b48e9120c5";
+  static final String FILENAME = "a01f618424b0113a9cebdc6cb66ca5b48e9120c5";
+  static final String FILE_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   @Test
   void validFileBasedTomlFileProducesSignerWhicReportsMatchingAddress(@TempDir Path tomlDirectory)
       throws URISyntaxException {
     createFileBasedTomlFileAt(
-        "arbitrary_prefix" + FILE_ETHEREUM_ADDRESS + ".toml",
+        "arbitrary_prefix" + FILENAME + ".toml",
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -45,7 +46,7 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly("0x" + FILE_ETHEREUM_ADDRESS);
+    assertThat(ethSigner.accounts().list()).containsOnly(FILE_ETHEREUM_ADDRESS);
   }
 
   @Test
