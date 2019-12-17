@@ -38,15 +38,13 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   @Test
   void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        tomlDirectory
-            .resolve("arbitrary_prefix" + FILENAME + ".toml")
-            .toAbsolutePath(),
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml").toAbsolutePath(),
         clientId,
         clientSecret);
 
     setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly("0x" + AZURE_ETHEREUM_ADDRESS);
+    assertThat(ethSigner.accounts().list()).containsOnly(AZURE_ETHEREUM_ADDRESS);
   }
 
   @Test

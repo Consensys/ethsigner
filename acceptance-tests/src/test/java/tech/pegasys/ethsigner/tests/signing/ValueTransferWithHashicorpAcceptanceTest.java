@@ -69,13 +69,18 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
 
-    hashicorpVault.shutdown();
+    if (hashicorpVault != null) {
+      hashicorpVault.shutdown();
+      hashicorpVault = null;
+    }
   }
 
   private Account richBenefactor() {
