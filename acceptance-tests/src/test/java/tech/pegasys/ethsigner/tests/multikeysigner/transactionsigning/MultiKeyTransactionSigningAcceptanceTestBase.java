@@ -90,10 +90,12 @@ public class MultiKeyTransactionSigningAcceptanceTestBase extends MultiKeyAccept
   public static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
   }
 }
