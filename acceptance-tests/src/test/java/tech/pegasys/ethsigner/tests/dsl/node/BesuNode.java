@@ -137,7 +137,7 @@ public class BesuNode implements Node {
       LOG.info("Waiting for Besu to become responsive...");
       waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
       LOG.info("Besu is now responsive");
-      waitFor(
+      waitFor(60,
           () ->
               assertThat(jsonRpc.ethBlockNumber().send().getBlockNumber())
                   .isGreaterThan(SPURIOUS_DRAGON_HARD_FORK_BLOCK));
