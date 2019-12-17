@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker.absKeyPath;
 
-import org.junit.jupiter.api.AfterEach;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
@@ -27,7 +26,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.web3j.protocol.core.methods.request.Transaction;
