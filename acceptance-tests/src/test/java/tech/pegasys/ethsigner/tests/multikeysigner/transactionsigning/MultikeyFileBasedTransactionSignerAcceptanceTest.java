@@ -30,20 +30,15 @@ import org.web3j.utils.Convert.Unit;
 
 public class MultikeyFileBasedTransactionSignerAcceptanceTest extends
     MultikeyTransactionSigningAcceptanceTestBase {
-  static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
-  static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-  @BeforeAll
-  public void checkAzureCredentials() {
-    Assumptions.assumeTrue(
-        clientId != null && clientSecret != null,
-        "Ensure Azure client id and client secret env variables are set");
-  }
+  final String FILENAME = richBenefactor().address();
 
   @Test
-  public void azureMultikeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
-    createAzureTomlFileAt(
+  public void fileBasedMultikeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
+
+
+
+    createFileBasedTomlFileAt(
         "arbitrary_prefix" + FILENAME + ".toml", clientId, clientSecret, tomlDirectory);
 
     setUpBase(tomlDirectory);
