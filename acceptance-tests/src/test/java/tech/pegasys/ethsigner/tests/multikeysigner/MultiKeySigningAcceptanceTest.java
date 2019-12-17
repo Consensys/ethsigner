@@ -64,11 +64,11 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
 
     createAzureTomlFileAt(
-        tempDir.resolve(AzureBasedTomlLoadingAcceptanceTest.FILENAME + ".toml").toAbsolutePath(),
+        tempDir.resolve(AzureBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         AzureBasedTomlLoadingAcceptanceTest.clientId,
         AzureBasedTomlLoadingAcceptanceTest.clientSecret);
     createFileBasedTomlFileAt(
-        tempDir.resolve(FileBasedTomlLoadingAcceptanceTest.FILENAME + ".toml").toAbsolutePath(),
+        tempDir.resolve(FileBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         new File(
                 Resources.getResource(
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
@@ -81,9 +81,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
             .getAbsolutePath());
 
     createHashicorpTomlFileAt(
-        tempDir
-            .resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml")
-            .toAbsolutePath(),
+        tempDir.resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         HashicorpVaultDocker.absKeyPath,
         authFilename,
         hashicorpVault);

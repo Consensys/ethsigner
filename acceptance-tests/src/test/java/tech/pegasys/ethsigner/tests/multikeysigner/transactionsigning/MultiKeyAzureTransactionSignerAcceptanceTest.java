@@ -10,9 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.multikeysigner;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import java.nio.file.Path;
 
@@ -21,39 +19,27 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
+public class MultiKeyAzureTransactionSignerAcceptanceTest
+    extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
-  static final String AZURE_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   @BeforeAll
-  static void preChecks() {
+  public static void checkAzureCredentials() {
     Assumptions.assumeTrue(
         clientId != null && clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
   }
 
   @Test
-  void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
+  public void azureLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
         tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"), clientId, clientSecret);
 
     setup(tomlDirectory);
 
-    assertThat(ethSigner.accounts().list()).containsOnly(AZURE_ETHEREUM_ADDRESS);
-  }
-
-  @Test
-  void incorrectlyNamedAzureFileIsNotLoaded(@TempDir Path tomlDirectory) {
-    createAzureTomlFileAt(
-        tomlDirectory.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
-        clientId,
-        clientSecret);
-
-    setup(tomlDirectory);
-
-    assertThat(ethSigner.accounts().list()).isEmpty();
+    performTransaction();
   }
 }

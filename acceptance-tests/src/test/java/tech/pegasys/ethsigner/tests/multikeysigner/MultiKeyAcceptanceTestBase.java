@@ -51,7 +51,7 @@ public class MultiKeyAcceptanceTestBase {
     ethSigner.awaitStartupCompletion();
   }
 
-  void createAzureTomlFileAt(
+  public void createAzureTomlFileAt(
       final Path tomlPath, final String clientId, final String clientSecret) {
     try {
 
@@ -70,7 +70,7 @@ public class MultiKeyAcceptanceTestBase {
     }
   }
 
-  void createFileBasedTomlFileAt(
+  public void createFileBasedTomlFileAt(
       final Path tomlPath, final String keyPath, final String passwordPath) {
     try {
       final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
@@ -85,7 +85,7 @@ public class MultiKeyAcceptanceTestBase {
     }
   }
 
-  void createHashicorpTomlFileAt(
+  public void createHashicorpTomlFileAt(
       final Path tomlPath,
       final String keyPath,
       final String authFile,

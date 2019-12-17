@@ -53,10 +53,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported() {
     createHashicorpTomlFileAt(
-        tempDir.resolve(FILENAME + ".toml").toAbsolutePath(),
-        absKeyPath,
-        authFilename,
-        hashicorpVault);
+        tempDir.resolve(FILENAME + ".toml"), absKeyPath, authFilename, hashicorpVault);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }
@@ -64,7 +61,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   @Test
   void incorrectlyNamedHashicorpConfigFileIsNotLoaded() {
     createHashicorpTomlFileAt(
-        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml").toAbsolutePath(),
+        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
         absKeyPath,
         authFilename,
         hashicorpVault);

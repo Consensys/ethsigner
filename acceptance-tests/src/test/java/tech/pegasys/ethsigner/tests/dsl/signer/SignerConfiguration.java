@@ -17,7 +17,7 @@ import java.time.Duration;
 public class SignerConfiguration {
 
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
-  private static final Duration TIMEOUT = Duration.ofSeconds(1);
+  private static final Duration TIMEOUT = Duration.ofSeconds(2);
   public static final int UNASSIGNED_PORT = 0;
 
   private final String chainId;

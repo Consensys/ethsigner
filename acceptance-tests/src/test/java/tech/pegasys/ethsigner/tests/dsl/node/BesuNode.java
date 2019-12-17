@@ -135,7 +135,7 @@ public class BesuNode implements Node {
   public void awaitStartupCompletion() {
     try {
       LOG.info("Waiting for Besu to become responsive...");
-      waitFor(() -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
+      waitFor(60, () -> assertThat(jsonRpc.ethBlockNumber().send().hasError()).isFalse());
       LOG.info("Besu is now responsive");
       waitFor(
           () ->
