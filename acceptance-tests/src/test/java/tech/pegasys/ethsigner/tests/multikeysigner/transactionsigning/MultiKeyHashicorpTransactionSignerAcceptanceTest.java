@@ -13,36 +13,29 @@
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
-import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker.absKeyPath;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Convert.Unit;
 
-public class MultikeyHashicorpTransactionSignerAcceptanceTest
-    extends MultikeyTransactionSigningAcceptanceTestBase {
+public class MultiKeyHashicorpTransactionSignerAcceptanceTest
+    extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   private HashicorpVault hashicorpVault;
 
   @Test
-  public void azureLoadedFromMultikeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory)
-      throws IOException {
+  public void hashicorpLoadedFromMultiKeyCanSignValueTransferTransaction(
+      @TempDir Path tomlDirectory) throws IOException {
 
     hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
 
@@ -53,25 +46,8 @@ public class MultikeyHashicorpTransactionSignerAcceptanceTest
     createHashicorpTomlFileAt(
         tomlDirectory.resolve(FILENAME + ".toml"), absKeyPath, authFilename, hashicorpVault);
 
-    setUpBase(tomlDirectory);
-    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
-
-    final BigInteger startBalance = ethNode.accounts().balance(RECIPIENT);
-    final Transaction transaction =
-        Transaction.createEtherTransaction(
-            richBenefactor().address(),
-            null,
-            GAS_PRICE,
-            INTRINSIC_GAS,
-            RECIPIENT,
-            transferAmountWei);
-
-    final String hash = ethSigner.transactions().submit(transaction);
-    ethNode.transactions().awaitBlockContaining(hash);
-
-    final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
-    final BigInteger actualEndBalance = ethNode.accounts().balance(RECIPIENT);
-    assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
+    setup(tomlDirectory);
+    performTransaction();
   }
 
   @AfterEach

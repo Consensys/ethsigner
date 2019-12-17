@@ -12,23 +12,15 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
-import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-
-import java.math.BigInteger;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Convert.Unit;
 
-public class MultikeyAzureTransactionSignerAcceptanceTest
-    extends MultikeyTransactionSigningAcceptanceTestBase {
+public class MultiKeyAzureTransactionSignerAcceptanceTest
+    extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
@@ -42,28 +34,12 @@ public class MultikeyAzureTransactionSignerAcceptanceTest
   }
 
   @Test
-  public void azureLoadedFromMultikeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
+  public void azureLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
         tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"), clientId, clientSecret);
 
-    setUpBase(tomlDirectory);
-    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
+    setup(tomlDirectory);
 
-    final BigInteger startBalance = ethNode.accounts().balance(RECIPIENT);
-    final Transaction transaction =
-        Transaction.createEtherTransaction(
-            richBenefactor().address(),
-            null,
-            GAS_PRICE,
-            INTRINSIC_GAS,
-            RECIPIENT,
-            transferAmountWei);
-
-    final String hash = ethSigner.transactions().submit(transaction);
-    ethNode.transactions().awaitBlockContaining(hash);
-
-    final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
-    final BigInteger actualEndBalance = ethNode.accounts().balance(RECIPIENT);
-    assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
+    performTransaction();
   }
 }
