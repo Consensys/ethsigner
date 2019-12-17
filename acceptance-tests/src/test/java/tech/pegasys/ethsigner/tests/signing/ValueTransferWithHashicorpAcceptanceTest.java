@@ -25,8 +25,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpNode;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.math.BigInteger;
 
@@ -42,8 +41,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
 
   private static Node ethNode;
   private static Signer ethSigner;
-  private static HashicorpVaultDocker hashicorpVaultDocker;
-  private static final HashicorpNode hashicorpNode = new HashicorpNode();
+  private static HashicorpVault hashicorpVault;;
 
   @BeforeAll
   public static void setUpBase() {
@@ -52,7 +50,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpVaultDocker = hashicorpNode.start(docker);
+    hashicorpVault = HashicorpVault.createVault(docker);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -61,7 +59,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVaultDocker).build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpVault).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
@@ -71,13 +69,18 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   static void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
 
-    hashicorpNode.shutdown(hashicorpVaultDocker);
+    if (hashicorpVault != null) {
+      hashicorpVault.shutdown();
+      hashicorpVault = null;
+    }
   }
 
   private Account richBenefactor() {

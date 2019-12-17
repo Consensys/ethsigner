@@ -38,7 +38,9 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   @Test
   void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        "arbitrary_prefix" + FILENAME + ".toml", clientId, clientSecret, tomlDirectory);
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml").toAbsolutePath(),
+        clientId,
+        clientSecret);
 
     setup(tomlDirectory);
 
@@ -48,7 +50,9 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   @Test
   void incorrectlyNamedAzureFileIsNotLoaded(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        "ffffffffffffffffffffffffffffffffffffffff.toml", clientId, clientSecret, tomlDirectory);
+        tomlDirectory.resolve("ffffffffffffffffffffffffffffffffffffffff.toml").toAbsolutePath(),
+        clientId,
+        clientSecret);
 
     setup(tomlDirectory);
 

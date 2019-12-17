@@ -20,7 +20,7 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,14 +52,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createAzureTomlFileAt(
-      final String tomlFilename,
-      final String clientId,
-      final String clientSecret,
-      final Path tomlDirectory) {
+      final Path tomlPath, final String clientId, final String clientSecret) {
     try {
-      final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
-      final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
+      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
           .append("type = \"azure-signer\"\n")
@@ -75,14 +71,9 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createFileBasedTomlFileAt(
-      final String tomlFilename,
-      final String keyPath,
-      final String passwordPath,
-      final Path tomlDirectory) {
+      final Path tomlPath, final String keyPath, final String passwordPath) {
     try {
-      final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
-
-      final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
+      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
       writer.write("[signing]\n");
       writer
           .append("type = \"file-based-signer\"\n")
@@ -95,22 +86,20 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   void createHashicorpTomlFileAt(
-      final String tomlFilename,
+      final Path tomlPath,
       final String keyPath,
       final String authFile,
-      final HashicorpVaultDocker hashicorpVaultDocker,
-      final Path tomlDirectory) {
+      final HashicorpVault hashicorpVault) {
     {
       try {
-        final Path tomlFilePath = tomlDirectory.resolve(tomlFilename);
 
-        final FileWriter writer = new FileWriter(tomlFilePath.toFile(), StandardCharsets.UTF_8);
+        final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
         writer.write("[signing]\n");
         writer
             .append("type = \"hashicorp-signer\"\n")
             .append("signing-key-path = \"" + keyPath + "\"\n")
-            .append("host = \"" + hashicorpVaultDocker.getIpAddress() + "\"\n")
-            .append("port = " + hashicorpVaultDocker.getPort() + "\n")
+            .append("host = \"" + hashicorpVault.getIpAddress() + "\"\n")
+            .append("port = " + hashicorpVault.getPort() + "\n")
             .append("auth-file  = \"" + authFile + "\"\n")
             .append("timeout = 500\n");
 
