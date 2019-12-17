@@ -12,78 +12,33 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package tech.pegasys.ethsigner.tests.multikeysigner;
+package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import com.github.dockerjava.api.DockerClient;
 import java.math.BigInteger;
 import java.nio.file.Path;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
-import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
-import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
-import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
-import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
-public class MultikeyTransactionSignerAcceptanceTest extends MultiKeyAcceptanceTestBase {
-
-  private static Node ethNode;
-  private static Signer ethSigner;
-  private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+public class MultikeyHashicorpTransactionSignerAcceptanceTest extends
+    MultikeyTransactionSigningAcceptanceTestBase {
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-
-  protected Account richBenefactor() {
-    return ethSigner.accounts().richBenefactor();
-  }
-
-  private static void setUpBase(final Path tomlDirectory) {
+  @BeforeAll
+  public void checkAzureCredentials() {
     Assumptions.assumeTrue(
         clientId != null && clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
-
-    Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
-
-    final DockerClient docker = new DockerClientFactory().create();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
-    ethNode = new BesuNode(docker, nodeConfig);
-    ethNode.start();
-    ethNode.awaitStartupCompletion();
-
-    final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withMultiKeySignerDirectory(tomlDirectory).build();
-
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
-    ethSigner.start();
-    ethSigner.awaitStartupCompletion();
-  }
-
-  @AfterAll
-  public static void tearDownBase() {
-    if (ethNode != null) {
-      ethNode.shutdown();
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-    }
   }
 
   @Test
@@ -111,5 +66,4 @@ public class MultikeyTransactionSignerAcceptanceTest extends MultiKeyAcceptanceT
     final BigInteger actualEndBalance = ethNode.accounts().balance(RECIPIENT);
     assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
   }
-
 }
