@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,8 +9,6 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
@@ -20,6 +18,7 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import java.math.BigInteger;
 import java.nio.file.Path;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,14 +27,15 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class MultikeyAzureTransactionSignerAcceptanceTest extends
-    MultikeyTransactionSigningAcceptanceTestBase {
+public class MultikeyAzureTransactionSignerAcceptanceTest
+    extends MultikeyTransactionSigningAcceptanceTestBase {
+
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
   @BeforeAll
-  public void checkAzureCredentials() {
+  public static void checkAzureCredentials() {
     Assumptions.assumeTrue(
         clientId != null && clientSecret != null,
         "Ensure Azure client id and client secret env variables are set");
@@ -44,7 +44,7 @@ public class MultikeyAzureTransactionSignerAcceptanceTest extends
   @Test
   public void azureLoadedFromMultikeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        "arbitrary_prefix" + FILENAME + ".toml", clientId, clientSecret, tomlDirectory);
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"), clientId, clientSecret);
 
     setUpBase(tomlDirectory);
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
