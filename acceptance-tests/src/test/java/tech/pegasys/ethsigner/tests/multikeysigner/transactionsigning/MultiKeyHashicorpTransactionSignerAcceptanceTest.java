@@ -22,7 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,13 +32,16 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-  private HashicorpVault hashicorpVault;
+  private static HashicorpVault hashicorpVault;
+
+  @BeforeAll
+  static void preSetup() {
+    hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
+  }
 
   @Test
-  public void hashicorpLoadedFromMultiKeyCanSignValueTransferTransaction(
-      @TempDir Path tomlDirectory) throws IOException {
-
-    hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
+  void hashicorpLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory)
+      throws IOException {
 
     final Path authFilePath = tomlDirectory.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpVault.getVaultToken().getBytes(UTF_8));
@@ -50,8 +54,8 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
     performTransaction();
   }
 
-  @AfterEach
-  public void tearDown() {
+  @AfterAll
+  static void tearDown() {
     if (hashicorpVault != null) {
       hashicorpVault.shutdown();
       hashicorpVault = null;
