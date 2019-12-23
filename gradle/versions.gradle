@@ -26,7 +26,7 @@ dependencyManagement {
 
     dependency 'commons-cli:commons-cli:1.4'
 
-    dependency 'info.picocli:picocli:3.9.2'
+    dependency 'info.picocli:picocli:4.1.4'
 
     dependency 'io.vertx:vertx-codegen:3.6.3'
     dependency 'io.vertx:vertx-core:3.6.3'
