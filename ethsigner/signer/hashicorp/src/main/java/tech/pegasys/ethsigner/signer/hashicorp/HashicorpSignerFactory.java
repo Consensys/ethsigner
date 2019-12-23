@@ -40,9 +40,9 @@ public class HashicorpSignerFactory {
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
   private static final String AUTH_FILE_MESSAGE =
       "Unable to read file containing the authentication information for Hashicorp Vault: ";
-  private static final String RETRIEVE_PRIVATE_KEY_MESSGAE =
+  private static final String RETRIEVE_PRIVATE_KEY_MESSAGE =
       "Unable to retrieve private key from Hashicorp Vault.";
-  private static final String TIMEOUT_MESSGAE =
+  private static final String TIMEOUT_MESSAGE =
       "Timeout while retrieving private key from Hashicorp Vault.";
 
   public TransactionSigner createSigner(final HashicorpConfig hashicorpConfig) {
@@ -128,11 +128,11 @@ public class HashicorpSignerFactory {
     try {
       response = future.get(timeout, TimeUnit.SECONDS);
     } catch (final InterruptedException | ExecutionException e) {
-      final String message = RETRIEVE_PRIVATE_KEY_MESSGAE;
+      final String message = RETRIEVE_PRIVATE_KEY_MESSAGE;
       LOG.error(message, e);
       throw new TransactionSignerInitializationException(message, e);
     } catch (final TimeoutException e) {
-      final String message = TIMEOUT_MESSGAE;
+      final String message = TIMEOUT_MESSAGE;
       LOG.error(message, e);
       throw new TransactionSignerInitializationException(message, e);
     }
