@@ -28,11 +28,11 @@ dependencyManagement {
 
     dependency 'info.picocli:picocli:4.1.4'
 
-    dependency 'io.vertx:vertx-codegen:3.6.3'
-    dependency 'io.vertx:vertx-core:3.6.3'
-    dependency 'io.vertx:vertx-unit:3.6.3'
-    dependency 'io.vertx:vertx-web:3.6.3'
-    dependency 'io.vertx:vertx-web-client:3.6.3'
+    dependency 'io.vertx:vertx-codegen:3.8.2'
+    dependency 'io.vertx:vertx-core:3.8.2'
+    dependency 'io.vertx:vertx-unit:3.8.2'
+    dependency 'io.vertx:vertx-web:3.8.2'
+    dependency 'io.vertx:vertx-web-client:3.8.2'
 
     dependency 'io.rest-assured:rest-assured:3.0.7'
 
@@ -61,5 +61,6 @@ dependencyManagement {
     dependency 'org.web3j:besu:4.5.5'
 
     dependency 'org.apache.tuweni:tuweni-toml:0.9.0'
+    dependency 'org.apache.tuweni:tuweni-net:0.9.0'
   }
 }
