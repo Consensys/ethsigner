@@ -27,11 +27,11 @@ public class CmdlineHelpers {
         + "--tls-known-clients-file=./client_whitelist ";
   }
 
-  public static String removeFieldFrom(final String input, final String fieldname) {
-    return input.replaceAll("--" + fieldname + "=.*?(\\s|$)", "");
+  public static String removeFieldFrom(final String input, final String fieldName) {
+    return input.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
   }
 
-  public static String modifyField(final String input, final String fieldname, final String value) {
-    return input.replaceFirst("--" + fieldname + "=[^\\s]*", "--" + fieldname + "=" + value);
+  public static String modifyField(final String input, final String fieldName, final String value) {
+    return input.replaceFirst("--" + fieldName + "=[^\\s]*", "--" + fieldName + "=" + value);
   }
 }
