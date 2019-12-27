@@ -73,10 +73,10 @@ class CommandlineParserTest {
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
     assertThat(config.getTlsOptions()).isNotEmpty();
     assertThat(config.getTlsOptions().get().getKeyStoreFile())
-        .isEqualTo(new File("./keystore.cert"));
+        .isEqualTo(new File("./keystore.pfx"));
     assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
-    assertThat(config.getTlsOptions().get().getWhitelistFingerprints())
+    assertThat(config.getTlsOptions().get().getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./client_whitelist")));
   }
 
@@ -210,7 +210,7 @@ class CommandlineParserTest {
   }
 
   @Test
-  void creatingSignerThrowsDisplaysFailureToCreateSignerText() {
+  void creatingSignerDisplaysFailureToCreateSignerText() {
     subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
     parser = new CommandlineParser(config, outPrintStream);
@@ -234,8 +234,8 @@ class CommandlineParserTest {
   @Test
   void missingTlsClientWhitelistIsValid() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "tls-client-whitelist-file",
-        () -> config.getTlsOptions().get().getWhitelistFingerprints(),
+        "tls-known-clients-file",
+        () -> config.getTlsOptions().get().getKnownClientsFile(),
         Optional.empty());
   }
 
@@ -245,7 +245,7 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingTlsPasswordFileShowsErroWhenKeyStoreIsSet() {
+  void missingTlsPasswordFileShowsErrorWhenKeyStoreIsSet() {
     missingParameterShowsError(validBaseCommandOptions(), "tls-keystore-password-file");
   }
 
@@ -256,11 +256,11 @@ class CommandlineParserTest {
   }
 
   @Test
-  void ethsignerStartsValidlyIfNoTlsOptionsAreSet() {
+  void ethSignerStartsValidlyIfNoTlsOptionsAreSet() {
     String cmdLine = validBaseCommandOptions();
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-file");
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-password-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-client-whitelist-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 

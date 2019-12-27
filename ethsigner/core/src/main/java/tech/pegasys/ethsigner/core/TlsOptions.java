@@ -21,5 +21,5 @@ public interface TlsOptions {
 
   File getKeyStorePasswordFile();
 
-  Optional<File> getWhitelistFingerprints();
+  Optional<File> getKnownClientsFile();
 }

@@ -22,9 +22,9 @@ public class CmdlineHelpers {
         + "--http-listen-host=localhost "
         + "--chain-id=6 "
         + "--logging=INFO "
-        + "--tls-keystore-file=./keystore.cert "
+        + "--tls-keystore-file=./keystore.pfx "
         + "--tls-keystore-password-file=./keystore.passwd "
-        + "--tls-client-whitelist-file=./client_whitelist ";
+        + "--tls-known-clients-file=./client_whitelist ";
   }
 
   public static String removeFieldFrom(final String input, final String fieldname) {

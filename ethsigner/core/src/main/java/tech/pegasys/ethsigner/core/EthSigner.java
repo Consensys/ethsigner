@@ -106,11 +106,10 @@ public final class EthSigner {
       final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
 
-      if (tlsConfig.getWhitelistFingerprints().isPresent()) {
+      if (tlsConfig.getKnownClientsFile().isPresent()) {
         // result.setClientAuth(ClientAuth.REQUIRED);
         result.setTrustOptions(
-            VertxTrustOptions.whitelistClients(
-                tlsConfig.getWhitelistFingerprints().get().toPath()));
+            VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
       }
     } catch (final NoSuchFileException e) {
       throw new InitialisationException(

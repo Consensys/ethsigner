@@ -53,22 +53,22 @@ public class EthSignerBaseCommand implements Config {
     @Option(
         names = "--tls-keystore-file",
         description =
-            "Path to PKCS#12 format trust store for the JSON-RPC HTTP service client trust.",
+            "Path to a PKCS#12 formatted key store; used to enable TLS on inbound connections.",
         arity = "1",
         required = true)
     private File keystoreFile;
 
     @Option(
         names = "--tls-keystore-password-file",
-        description = "Path to a file containing the password required to use the truststore file.",
+        description = "Path to a file containing the password used to decrypt the keystore.",
         arity = "1",
         required = true)
     private File keystorePasswordFile;
 
     @Option(
-        names = "--tls-client-whitelist-file",
+        names = "--tls-known-clients-file",
         description =
-            "Path to a file containing the fingerprints of authorised clients. "
+            "Path to a file containing the fingerprints of authorized clients. "
                 + "Any client may connect if not specified.",
         arity = "1")
     private final File clientWhitelistFile = null;
@@ -84,7 +84,7 @@ public class EthSignerBaseCommand implements Config {
     }
 
     @Override
-    public Optional<File> getWhitelistFingerprints() {
+    public Optional<File> getKnownClientsFile() {
       return Optional.ofNullable(clientWhitelistFile);
     }
   }
