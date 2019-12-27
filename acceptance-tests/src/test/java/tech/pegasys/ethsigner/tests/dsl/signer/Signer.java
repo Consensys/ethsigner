@@ -13,8 +13,15 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.not;
+import static org.junit.jupiter.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.net.PfxOptions;
+import java.io.File;
+import java.util.Optional;
+import okhttp3.OkHttpClient;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Besu;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
@@ -38,11 +45,11 @@ import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
+import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
 public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final String HTTP_URL_FORMAT = "http://%s:%s";
 
   private final EthSignerProcessRunner runner;
   private final Duration pollingInverval;
@@ -55,14 +62,38 @@ public class Signer {
   private Web3j jsonRpc;
   private RawJsonRpcRequests rawJsonRpcRequests;
   private HttpRequest rawHttpRequests;
+  private final SignerConfiguration signerConfig;
+  private final String urlFormatting;
+  private final Optional<File> expectedTlsCertificate;
 
   public Signer(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
+    this(signerConfig, nodeConfig, nodePorts, Optional.empty());
+  }
+
+  public Signer(
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final NodePorts nodePorts,
+      final File expectedTlsCertificate) {
+    this(signerConfig, nodeConfig, nodePorts, Optional.ofNullable(expectedTlsCertificate));
+  }
+
+
+  public Signer(
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
+      final NodePorts nodePorts,
+      final Optional<File> expectedTlsCertificate) {
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
     this.pollingInverval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
+    this.signerConfig = signerConfig;
+    urlFormatting = signerConfig.serverTlsOptions().isPresent() ?
+        "https://%s:%s" : "http://%s:%s";
+    this.expectedTlsCertificate = expectedTlsCertificate;
   }
 
   public void start() {
@@ -71,8 +102,11 @@ public class Signer {
 
     final String httpJsonRpcUrl = url(runner.httpJsonRpcPort());
 
-    LOG.info("EthSigner Web3j service targeting: : {} ", httpJsonRpcUrl);
-    final HttpService web3jHttpService = new HttpService(httpJsonRpcUrl);
+    LOG.info("Http requests being submitted to : {} ", httpJsonRpcUrl);
+
+    final OkHttpClient httpClient = OkHttpClientHelpers.createOkHttpClient(expectedTlsCertificate);
+
+    final HttpService web3jHttpService = new HttpService(httpJsonRpcUrl, httpClient);
     this.jsonRpc =
         new JsonRpc2_0Web3j(
             web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
@@ -87,7 +121,8 @@ public class Signer {
     this.privateContracts = new PrivateContracts(besu, eea);
     this.accounts = new Accounts(eth);
     this.rawJsonRpcRequests = new RawJsonRpcRequests(web3jHttpService, requestFactory);
-    this.rawHttpRequests = new HttpRequest(httpJsonRpcUrl);
+    this.rawHttpRequests =
+        new HttpRequest(httpJsonRpcUrl, OkHttpClientHelpers.createOkHttpClient(expectedTlsCertificate));
   }
 
   public void shutdown() {
@@ -128,6 +163,10 @@ public class Signer {
   }
 
   private String url(final int port) {
-    return String.format(HTTP_URL_FORMAT, hostname, port);
+    return String.format(urlFormatting, hostname, port);
+  }
+
+  public String getUrlEndpoint() {
+    return url(runner.httpJsonRpcPort());
   }
 }

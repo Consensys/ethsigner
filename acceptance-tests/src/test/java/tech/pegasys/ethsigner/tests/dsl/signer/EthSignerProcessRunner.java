@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
@@ -138,6 +139,17 @@ public class EthSignerProcessRunner {
     if (useDynamicPortAllocation) {
       params.add("--data-path");
       params.add(dataPath.toAbsolutePath().toString());
+    }
+    if (signerConfig.serverTlsOptions().isPresent()) {
+      final TlsOptions serverTlsOptions = signerConfig.serverTlsOptions().get();
+      params.add("--tls-keystore-file");
+      params.add(serverTlsOptions.getKeyStoreFile().toString());
+      params.add("--tls-keystore-password-file");
+      params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
+      if (serverTlsOptions.getKnownClientsFile().isPresent()) {
+        params.add("--tls-client-whitelist-file");
+        params.add(serverTlsOptions.getKnownClientsFile().get().toString());
+      }
     }
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 

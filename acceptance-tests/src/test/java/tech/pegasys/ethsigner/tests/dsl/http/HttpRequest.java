@@ -16,19 +16,23 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 
+import java.util.Optional;
+import javax.net.ssl.SSLContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import tech.pegasys.ethsigner.core.TlsOptions;
 
 public class HttpRequest {
 
   private final OkHttpClient client;
   private final String contextRoot;
 
-  public HttpRequest(final String contextRoot) {
+  public HttpRequest(final String contextRoot, final OkHttpClient client) {
     this.contextRoot = contextRoot;
-    this.client = new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(2)).build();
+    this.client = client;
   }
 
   public HttpResponse get(final String path) {
@@ -37,8 +41,7 @@ public class HttpRequest {
           client.newCall(new Request.Builder().url(contextRoot + path).get().build()).execute();
       return new HttpResponse(reply.code(), reply.body().string());
     } catch (final IOException e) {
-      fail("Unexpected IOException ", e);
-      return null;
+      throw new RuntimeException("Get request has failed", e);
     }
   }
 
