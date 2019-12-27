@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import io.vertx.core.http.ClientAuth;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
