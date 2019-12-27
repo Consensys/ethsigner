@@ -13,15 +13,8 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.not;
-import static org.junit.jupiter.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.net.PfxOptions;
-import java.io.File;
-import java.util.Optional;
-import okhttp3.OkHttpClient;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Besu;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
@@ -34,10 +27,14 @@ import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
+import java.io.File;
 import java.time.Duration;
+import java.util.Optional;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -45,7 +42,6 @@ import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
-import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
 public class Signer {
 
@@ -81,7 +77,6 @@ public class Signer {
     this(signerConfig, nodeConfig, nodePorts, Optional.ofNullable(expectedTlsCertificate));
   }
 
-
   public Signer(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
@@ -91,8 +86,7 @@ public class Signer {
     this.pollingInverval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     this.signerConfig = signerConfig;
-    urlFormatting = signerConfig.serverTlsOptions().isPresent() ?
-        "https://%s:%s" : "http://%s:%s";
+    urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";
     this.expectedTlsCertificate = expectedTlsCertificate;
   }
 
@@ -122,7 +116,8 @@ public class Signer {
     this.accounts = new Accounts(eth);
     this.rawJsonRpcRequests = new RawJsonRpcRequests(web3jHttpService, requestFactory);
     this.rawHttpRequests =
-        new HttpRequest(httpJsonRpcUrl, OkHttpClientHelpers.createOkHttpClient(expectedTlsCertificate));
+        new HttpRequest(
+            httpJsonRpcUrl, OkHttpClientHelpers.createOkHttpClient(expectedTlsCertificate));
   }
 
   public void shutdown() {

@@ -16,14 +16,9 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
 
-import java.util.Optional;
-import javax.net.ssl.SSLContext;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import tech.pegasys.ethsigner.core.TlsOptions;
 
 public class HttpRequest {
 

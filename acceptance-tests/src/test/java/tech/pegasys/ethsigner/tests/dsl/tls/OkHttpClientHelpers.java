@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,8 +9,6 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
@@ -29,6 +27,7 @@ import java.time.Duration;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+
 import okhttp3.OkHttpClient;
 
 public class OkHttpClientHelpers {
@@ -50,7 +49,7 @@ public class OkHttpClientHelpers {
             new MatchingCertTrustManager(myCAPublicKey);
 
         final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, new TrustManager[]{insecureTrustManager}, new SecureRandom());
+        sslContext.init(null, new TrustManager[] {insecureTrustManager}, new SecureRandom());
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), insecureTrustManager);
       } catch (final NoSuchAlgorithmException e) {
         fail("Unable to construct a TLS client during test setup, missing encryption algorithm.");
@@ -65,5 +64,4 @@ public class OkHttpClientHelpers {
 
     return clientBuilder.build();
   }
-
 }

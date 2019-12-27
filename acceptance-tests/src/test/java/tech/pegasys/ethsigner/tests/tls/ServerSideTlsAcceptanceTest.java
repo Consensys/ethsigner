@@ -16,29 +16,28 @@ import static java.nio.file.Files.writeString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
-import java.net.URISyntaxException;
-import javax.net.ssl.SSLHandshakeException;
-import org.junit.jupiter.api.BeforeEach;
 import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
-import tech.pegasys.ethsigner.tests.dsl.http.HttpResponse;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
+import javax.net.ssl.SSLHandshakeException;
 
 import com.google.common.io.Resources;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
 public class ServerSideTlsAcceptanceTest {
 
@@ -75,12 +74,10 @@ public class ServerSideTlsAcceptanceTest {
   //
   private static Signer ethSigner;
 
-  @TempDir
-  Path dataPath;
+  @TempDir Path dataPath;
 
   @BeforeEach
-  public void setup()
-      throws IOException, URISyntaxException {
+  public void setup() throws IOException, URISyntaxException {
     final URL sslCertificate = Resources.getResource("domain.pfx");
     final Path certPath = Path.of(sslCertificate.getPath());
 
@@ -112,8 +109,7 @@ public class ServerSideTlsAcceptanceTest {
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-    ethSigner =
-        new Signer(signerConfig, nodeConfig, new NodePorts(1, 2), expectedServerTlsCert);
+    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2), expectedServerTlsCert);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
@@ -127,12 +123,12 @@ public class ServerSideTlsAcceptanceTest {
   void nonTlsClientsCannotConnectToTlsEnabledEthSigner() {
     // The ethSigner object (and in-built requester are already TLS enabled, so need to make a new
     // http client which does not have TLS enabled
-    final HttpRequest rawRequests = new HttpRequest(ethSigner.getUrlEndpoint(),
-        OkHttpClientHelpers.createOkHttpClient(Optional.empty()));
+    final HttpRequest rawRequests =
+        new HttpRequest(
+            ethSigner.getUrlEndpoint(), OkHttpClientHelpers.createOkHttpClient(Optional.empty()));
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
     assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
-
   }
 }
