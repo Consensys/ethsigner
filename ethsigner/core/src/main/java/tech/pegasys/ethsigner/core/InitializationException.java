@@ -12,23 +12,23 @@
  */
 package tech.pegasys.ethsigner.core;
 
-public class InitialisationException extends RuntimeException {
+public class InitializationException extends RuntimeException {
 
-  public InitialisationException() {}
+  public InitializationException() {}
 
-  public InitialisationException(final String message) {
+  public InitializationException(final String message) {
     super(message);
   }
 
-  public InitialisationException(final String message, final Throwable cause) {
+  public InitializationException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public InitialisationException(final Throwable cause) {
+  public InitializationException(final Throwable cause) {
     super(cause);
   }
 
-  public InitialisationException(
+  public InitializationException(
       final String message,
       final Throwable cause,
       final boolean enableSuppression,

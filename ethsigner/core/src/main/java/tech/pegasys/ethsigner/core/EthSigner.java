@@ -113,20 +113,20 @@ public final class EthSigner {
             VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
       }
     } catch (final NoSuchFileException e) {
-      throw new InitialisationException(
+      throw new InitializationException(
           "Requested file " + e.getMessage() + " does not exist at specified location.", e);
     } catch (final AccessDeniedException e) {
-      throw new InitialisationException(
+      throw new InitializationException(
           "Current user does not have permissions to access " + e.getMessage(), e);
     } catch (final IOException e) {
-      throw new InitialisationException("Failed to load TLS files " + e.getMessage(), e);
+      throw new InitializationException("Failed to load TLS files " + e.getMessage(), e);
     }
 
     return result;
   }
 
   public static JsonDecoder createJsonDecoder() {
-    // Force Transaction Deserialisation to fail if missing expected properties
+    // Force Transaction Deserialization to fail if missing expected properties
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
