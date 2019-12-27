@@ -49,7 +49,8 @@ public class OkHttpClientHelpers {
             new MatchingCertTrustManager(myCAPublicKey);
 
         final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, new TrustManager[] {insecureTrustManager}, new SecureRandom());
+        sslContext
+            .init(null, new TrustManager[]{insecureTrustManager}, SecureRandom.getInstanceStrong());
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), insecureTrustManager);
       } catch (final NoSuchAlgorithmException e) {
         fail("Unable to construct a TLS client during test setup, missing encryption algorithm.");
