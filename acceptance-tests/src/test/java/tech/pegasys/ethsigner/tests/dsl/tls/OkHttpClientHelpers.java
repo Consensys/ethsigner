@@ -34,7 +34,7 @@ public class OkHttpClientHelpers {
 
   public static OkHttpClient createOkHttpClient(final Optional<File> expectedCertificate) {
     final OkHttpClient.Builder clientBuilder =
-        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(2));
+        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
 
     if (expectedCertificate.isPresent()) {
 
