@@ -16,16 +16,23 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.Duration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.net.tls.VertxTrustOptions;
 import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
@@ -69,24 +76,57 @@ public final class EthSigner {
             .setHost(config.getHttpListenHost())
             .setReuseAddress(true)
             .setReusePort(true);
-    final Path dataPath = config.getDataPath();
 
     final Runner runner =
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
             clientOptions,
-            serverOptions,
+            applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
             transactionFactory,
             jsonDecoder,
-            dataPath);
+            config.getDataPath());
 
     runner.start();
   }
 
+  private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {
+
+    if (config.getTlsOptions().isEmpty()) {
+      return input;
+    }
+
+    final HttpServerOptions result = new HttpServerOptions(input);
+    result.setSsl(true);
+    final TlsOptions tlsConfig = config.getTlsOptions().get();
+    try {
+      final String keyStorePathname =
+          tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
+      final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
+      result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
+
+      if (tlsConfig.getWhitelistFingerprints().isPresent()) {
+        // result.setClientAuth(ClientAuth.REQUIRED);
+        result.setTrustOptions(
+            VertxTrustOptions.whitelistClients(
+                tlsConfig.getWhitelistFingerprints().get().toPath()));
+      }
+    } catch (final NoSuchFileException e) {
+      throw new InitialisationException(
+          "Requested file " + e.getMessage() + " does not exist at specified location.", e);
+    } catch (final AccessDeniedException e) {
+      throw new InitialisationException(
+          "Current user does not have permissions to access " + e.getMessage(), e);
+    } catch (final IOException e) {
+      throw new InitialisationException("Failed to load TLS files " + e.getMessage(), e);
+    }
+
+    return result;
+  }
+
   public static JsonDecoder createJsonDecoder() {
-    // Force TransactionDeserialisation to fail
+    // Force Transaction Deserialisation to fail if missing expected properties
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
@@ -104,5 +144,10 @@ public final class EthSigner {
         .connectTimeout(config.getDownstreamHttpRequestTimeout())
         .readTimeout(config.getDownstreamHttpRequestTimeout());
     return new HttpService(downstreamUrl, builder.build());
+  }
+
+  private static String readSecretFromFile(final Path path) throws IOException {
+    final byte[] fileContent = Files.readAllBytes(path);
+    return new String(fileContent, Charsets.UTF_8);
   }
 }

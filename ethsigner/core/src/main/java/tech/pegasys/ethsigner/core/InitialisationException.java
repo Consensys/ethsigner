@@ -12,31 +12,27 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+public class InitialisationException extends RuntimeException {
 
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.Optional;
+  public InitialisationException() {}
 
-import org.apache.logging.log4j.Level;
+  public InitialisationException(final String message) {
+    super(message);
+  }
 
-public interface Config {
+  public InitialisationException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
 
-  Level getLogLevel();
+  public InitialisationException(final Throwable cause) {
+    super(cause);
+  }
 
-  String getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  String getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
-
-  Path getDataPath();
-
-  Optional<TlsOptions> getTlsOptions();
+  public InitialisationException(
+      final String message,
+      final Throwable cause,
+      final boolean enableSuppression,
+      final boolean writableStackTrace) {
+    super(message, cause, enableSuppression, writableStackTrace);
+  }
 }

@@ -37,18 +37,23 @@ public class HttpServerService extends AbstractVerticle {
   @Override
   public void start(final Future<Void> startFuture) {
     httpServer = vertx.createHttpServer(serverOptions);
-    httpServer
-        .requestHandler(routes)
-        .listen(
-            result -> {
-              if (result.succeeded()) {
-                LOG.info("HTTP server service started on {}", httpServer.actualPort());
-                startFuture.complete();
-              } else {
-                LOG.error("HTTP server service failed to listen", result.cause());
-                startFuture.fail(result.cause());
-              }
-            });
+    try {
+      httpServer
+          .requestHandler(routes)
+          .listen(
+              result -> {
+                if (result.succeeded()) {
+                  LOG.info("HTTP server service started on {}", httpServer.actualPort());
+                  startFuture.complete();
+                } else {
+                  LOG.error("HTTP server service failed to listen", result.cause());
+                  startFuture.fail(result.cause());
+                }
+              });
+    } catch (final Exception e) {
+      startFuture.fail(e);
+      throw e;
+    }
   }
 
   @Override
