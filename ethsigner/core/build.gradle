@@ -43,6 +43,8 @@ dependencies {
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
 
+  implementation 'org.apache.tuweni:tuweni-net'
+
   testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'

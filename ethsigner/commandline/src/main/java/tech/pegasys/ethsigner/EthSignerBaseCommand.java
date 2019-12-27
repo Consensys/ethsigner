@@ -13,15 +13,19 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.Config;
+import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
@@ -43,6 +47,47 @@ import picocli.CommandLine.Option;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
+
+  static class TlsServerOptions implements TlsOptions {
+
+    @Option(
+        names = "--tls-keystore-file",
+        description =
+            "Path to a PKCS#12 formatted key store; used to enable TLS on inbound connections.",
+        arity = "1",
+        required = true)
+    private File keystoreFile;
+
+    @Option(
+        names = "--tls-keystore-password-file",
+        description = "Path to a file containing the password used to decrypt the keystore.",
+        arity = "1",
+        required = true)
+    private File keystorePasswordFile;
+
+    @Option(
+        names = "--tls-known-clients-file",
+        description =
+            "Path to a file containing the fingerprints of authorized clients. "
+                + "Any client may connect if not specified.",
+        arity = "1")
+    private final File clientWhitelistFile = null;
+
+    @Override
+    public File getKeyStoreFile() {
+      return keystoreFile;
+    }
+
+    @Override
+    public File getKeyStorePasswordFile() {
+      return keystorePasswordFile;
+    }
+
+    @Override
+    public Optional<File> getKnownClientsFile() {
+      return Optional.ofNullable(clientWhitelistFile);
+    }
+  }
 
   @Option(
       names = {"--logging", "-l"},
@@ -102,6 +147,9 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private Path dataPath;
 
+  @ArgGroup(exclusive = false)
+  private TlsServerOptions tlsServerOptions;
+
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -140,6 +188,11 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
+  }
+
+  @Override
+  public Optional<TlsOptions> getTlsOptions() {
+    return Optional.ofNullable(tlsServerOptions);
   }
 
   @Override
