@@ -69,7 +69,7 @@ public class EthSignerBaseCommand implements Config {
         names = "--tls-known-clients-file",
         description =
             "Path to a file containing the fingerprints of authorized clients. "
-                + "Any client may connect if not specified.",
+                + "Any client may connect if this option is not specified.",
         arity = "1")
     private final File clientWhitelistFile = null;
 

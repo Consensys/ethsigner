@@ -147,7 +147,7 @@ public class EthSignerProcessRunner {
       params.add("--tls-keystore-password-file");
       params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
       if (serverTlsOptions.getKnownClientsFile().isPresent()) {
-        params.add("--tls-client-whitelist-file");
+        params.add("--tls-known-clients-file");
         params.add(serverTlsOptions.getKnownClientsFile().get().toString());
       }
     }
