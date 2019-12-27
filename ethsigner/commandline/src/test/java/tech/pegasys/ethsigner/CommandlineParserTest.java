@@ -188,7 +188,6 @@ class CommandlineParserTest {
       cmdLine = removeFieldFrom(cmdLine, paramToRemove);
     }
 
-    // final String cmdLine = removeFieldFrom(parentCommandOptionsOnly(), paramToRemove);
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     for (final String paramToRemove : paramsToRemove) {

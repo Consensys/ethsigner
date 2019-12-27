@@ -107,7 +107,7 @@ public final class EthSigner {
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
 
       if (tlsConfig.getKnownClientsFile().isPresent()) {
-        // result.setClientAuth(ClientAuth.REQUIRED);
+        result.setClientAuth(ClientAuth.REQUIRED);
         result.setTrustOptions(
             VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
       }
