@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import tech.pegasys.ethsigner.core.TlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -81,8 +82,9 @@ public class ServerSideTlsAcceptanceTest {
     final URL sslCertificate = Resources.getResource("domain.pfx");
     final Path certPath = Path.of(sslCertificate.getPath());
 
-    final File expectedServerTlsCert =
-        Path.of(Resources.getResource("domain.crt").toURI()).toFile();
+    final ClientConfig clientConfig = new ClientConfig(
+        Path.of(Resources.getResource("domain.crt").toURI()).toFile(),
+        null);
 
     final Path passwordPath = writeString(dataPath.resolve("keystore.passwd"), "password");
 
@@ -109,7 +111,7 @@ public class ServerSideTlsAcceptanceTest {
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).build();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2), expectedServerTlsCert);
+    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2), clientConfig);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
@@ -130,5 +132,20 @@ public class ServerSideTlsAcceptanceTest {
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
     assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
+  }
+
+  @Test
+  void missingPasswordFileResultsInEthsignerExiting() {
+
+  }
+
+  @Test
+  void missingKeyStoreFileResultsInEthsignerExiting() {
+
+  }
+
+  @Test
+  void clientMissingFromWhiteListCannotConnectToEthSigner() {
+
   }
 }
