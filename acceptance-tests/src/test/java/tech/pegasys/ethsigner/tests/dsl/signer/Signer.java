@@ -47,6 +47,7 @@ import org.web3j.utils.Async;
 public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
+  private static final String PROCESS_NAME = "EthSigner";
 
   private final EthSignerProcessRunner runner;
   private final Duration pollingInverval;
@@ -93,7 +94,7 @@ public class Signer {
 
   public void start() {
     LOG.info("Starting EthSigner");
-    runner.start("EthSigner");
+    runner.start(PROCESS_NAME);
 
     final String httpJsonRpcUrl = url(runner.httpJsonRpcPort());
 
@@ -124,6 +125,10 @@ public class Signer {
   public void shutdown() {
     LOG.info("Shutting down EthSigner");
     runner.shutdown();
+  }
+
+  public boolean isRunning() {
+    return runner.isRunning(PROCESS_NAME);
   }
 
   public Transactions transactions() {

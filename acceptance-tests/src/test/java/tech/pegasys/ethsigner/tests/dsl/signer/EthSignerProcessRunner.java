@@ -174,6 +174,10 @@ public class EthSignerProcessRunner {
     }
   }
 
+  public boolean isRunning(final String processName) {
+    return (processes.get(processName) != null) && processes.get(processName).isAlive();
+  }
+
   private String executableLocation() {
     return "build/install/ethsigner/bin/ethsigner";
   }

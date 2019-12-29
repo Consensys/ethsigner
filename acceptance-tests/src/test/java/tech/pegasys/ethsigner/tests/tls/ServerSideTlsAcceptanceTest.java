@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.tests.tls;
 
 import static java.nio.file.Files.writeString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
@@ -73,51 +75,64 @@ public class ServerSideTlsAcceptanceTest {
   // 3. Convert to PKCS12
   // openssl pkcs12 -export -inkey domain.key -in domain.crt -out domain.pfx
   //
-  private static Signer ethSigner;
+  @TempDir
+  Path dataPath;
 
-  @TempDir Path dataPath;
+  private Signer createTlsEthSigner(final String keyPassword, final int fixedListenPort) {
+    try {
+      final URL sslCertificate = Resources.getResource("domain.pfx");
+      final Path certPath = Path.of(sslCertificate.getPath());
 
-  @BeforeEach
-  public void setup() throws IOException, URISyntaxException {
-    final URL sslCertificate = Resources.getResource("domain.pfx");
-    final Path certPath = Path.of(sslCertificate.getPath());
+      final ClientConfig clientConfig = new ClientConfig(
+          Path.of(Resources.getResource("domain.crt").toURI()).toFile(),
+          null);
 
-    final ClientConfig clientConfig = new ClientConfig(
-        Path.of(Resources.getResource("domain.crt").toURI()).toFile(),
-        null);
+      final Path passwordPath = dataPath.resolve("keystore.passwd");
+      if (keyPassword != null) {
+        writeString(passwordPath, keyPassword);
+      }
 
-    final Path passwordPath = writeString(dataPath.resolve("keystore.passwd"), "password");
+      final TlsOptions serverOptions =
+          new TlsOptions() {
 
-    final TlsOptions serverOptions =
-        new TlsOptions() {
+            @Override
+            public File getKeyStoreFile() {
+              return certPath.toFile();
+            }
 
-          @Override
-          public File getKeyStoreFile() {
-            return certPath.toFile();
-          }
+            @Override
+            public File getKeyStorePasswordFile() {
+              return passwordPath.toFile();
+            }
 
-          @Override
-          public File getKeyStorePasswordFile() {
-            return passwordPath.toFile();
-          }
+            @Override
+            public Optional<File> getKnownClientsFile() {
+              return Optional.empty();
+            }
+          };
 
-          @Override
-          public Optional<File> getKnownClientsFile() {
-            return Optional.empty();
-          }
-        };
+      final SignerConfigurationBuilder configBuilder =
+          new SignerConfigurationBuilder().withServerTlsOptions(serverOptions)
+              .withHttpRpcPort(fixedListenPort);
 
-    final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).build();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+      final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2), clientConfig);
-    ethSigner.start();
-    ethSigner.awaitStartupCompletion();
+      final Signer ethSigner =
+          new Signer(configBuilder.build(), nodeConfig, new NodePorts(1, 2), clientConfig);
+
+      return ethSigner;
+    } catch (final Exception e) {
+      fail("Failed to create EthSigner.", e);
+      return null;
+    }
   }
 
   @Test
   void ableToConnect() {
+    final Signer ethSigner = createTlsEthSigner("password", 0);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+
     assertThat(ethSigner.accounts().list()).isNotEmpty();
   }
 
@@ -125,6 +140,9 @@ public class ServerSideTlsAcceptanceTest {
   void nonTlsClientsCannotConnectToTlsEnabledEthSigner() {
     // The ethSigner object (and in-built requester are already TLS enabled, so need to make a new
     // http client which does not have TLS enabled
+    final Signer ethSigner = createTlsEthSigner("password", 0);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
     final HttpRequest rawRequests =
         new HttpRequest(
             ethSigner.getUrlEndpoint(), OkHttpClientHelpers.createOkHttpClient(Optional.empty()));
@@ -136,7 +154,10 @@ public class ServerSideTlsAcceptanceTest {
 
   @Test
   void missingPasswordFileResultsInEthsignerExiting() {
-
+    //arbitrary port to prevent waiting for portfile (during Start) to be created.
+    final Signer ethSigner = createTlsEthSigner(null, 9000);
+    ethSigner.start();
+    waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
 
   @Test
