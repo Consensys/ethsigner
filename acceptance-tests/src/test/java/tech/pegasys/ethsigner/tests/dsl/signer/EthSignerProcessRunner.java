@@ -149,6 +149,14 @@ public class EthSignerProcessRunner {
             .redirectErrorStream(true)
             .redirectInput(Redirect.INHERIT);
 
+    if (Boolean.getBoolean("debugSubProcess")) {
+      processBuilder
+          .environment()
+          .put(
+              "JAVA_OPTS",
+              "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+    }
+
     try {
       final Process process = processBuilder.start();
       outputProcessorExecutor.submit(() -> printOutput(processName, process));
@@ -222,8 +230,9 @@ public class EthSignerProcessRunner {
   }
 
   private void awaitPortsFile(final Path dataDir) {
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 30;
     final File file = new File(dataDir.toFile(), PORTS_FILENAME);
-    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+    Awaitility.waitAtMost(secondsToWait, TimeUnit.SECONDS)
         .until(
             () -> {
               if (file.exists()) {

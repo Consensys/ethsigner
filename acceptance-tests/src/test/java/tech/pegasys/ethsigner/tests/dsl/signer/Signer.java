@@ -43,6 +43,7 @@ public class Signer {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String HTTP_URL_FORMAT = "http://%s:%s";
+  private static final String PROCESS_NAME = "EthSigner";
 
   private final EthSignerProcessRunner runner;
   private final Duration pollingInverval;
@@ -113,7 +114,9 @@ public class Signer {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Signer to become responsive...");
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 30;
     waitFor(
+        secondsToWait,
         () ->
             assertThat(rawHttpRequests.get("/upcheck").status()).isEqualTo(HttpResponseStatus.OK));
     LOG.info("Signer is now responsive");
@@ -128,6 +131,5 @@ public class Signer {
   }
 
   private String url(final int port) {
-    return String.format(HTTP_URL_FORMAT, hostname, port);
   }
 }
