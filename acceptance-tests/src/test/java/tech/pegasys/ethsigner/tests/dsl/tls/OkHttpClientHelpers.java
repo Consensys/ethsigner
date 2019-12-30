@@ -55,14 +55,13 @@ public class OkHttpClientHelpers {
               clientTlsConfiguration.get().getClientCertificateToPresent();
           final KeyStore clientCertStore = loadP12KeyStore(clientCert.getPkcs12File(),
               clientCert.getPassword().toCharArray());
-          final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
+          final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
           kmf.init(clientCertStore, clientCert.getPassword().toCharArray());
           keyManagers = kmf.getKeyManagers();
         } else {
           keyManagers = null;
         }
 
-        //PUT EXPECTED SERVER CERT INTO OKHTTP (via TRUSTSTORE)
         final TlsCertificateDefinition serverCert =
             clientTlsConfiguration.get().getExpectedTlsServerCert();
         final KeyStore trustStore =
@@ -110,9 +109,10 @@ public class OkHttpClientHelpers {
 
     final StringJoiner joiner = new StringJoiner(":");
     for (final byte b : hash) {
-      joiner.add(String.format("%x", b));
+      joiner.add(String.format("%02X", b));
     }
 
-    Files.writeString(knownClientsPath, "localhost " + joiner.toString());
+    Files.writeString(knownClientsPath, "localhost " + joiner.toString() + "\n" +
+        "127.0.0.1 " + joiner.toString());
   }
 }

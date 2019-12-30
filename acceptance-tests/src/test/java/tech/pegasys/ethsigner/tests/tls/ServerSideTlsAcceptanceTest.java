@@ -17,11 +17,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.net.ssl.SSLHandshakeException;
-import org.bouncycastle.crypto.tls.ClientCertificateType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import tech.pegasys.ethsigner.core.TlsOptions;
@@ -36,7 +37,7 @@ import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
-public class ServerSideTlsAcceptanceTest {
+class ServerSideTlsAcceptanceTest {
 
   // To create a PKCS12 keystore file (containing a privKey and Certificate:
   // Read
@@ -79,13 +80,23 @@ public class ServerSideTlsAcceptanceTest {
 
   private Signer createTlsEthSigner(final TlsCertificateDefinition serverPresentedCerts,
       final TlsCertificateDefinition clientExpectedCert,
+      final TlsCertificateDefinition clientCertInServerWhitelist,
+      final TlsCertificateDefinition clientToPresent,
       final int fixedListenPort) {
 
     try {
-      /*
-      final Path fingerPrintFile = dataPath.resolve("known_clients");
-      generateClientFingerPrint(fingerPrintFile.toAbsolutePath(), certificateFile);
-       */
+      final SignerConfigurationBuilder configBuilder =
+          new SignerConfigurationBuilder().withHttpRpcPort(fixedListenPort);
+
+      final File fingerPrintFile;
+      if (clientCertInServerWhitelist != null) {
+        final Path fingerPrintFilePath = dataPath.resolve("known_clients");
+        generateClientFingerPrint(fingerPrintFilePath.toAbsolutePath(),
+            clientCertInServerWhitelist.getCertificateFile());
+        fingerPrintFile = fingerPrintFilePath.toFile();
+      } else {
+        fingerPrintFile = null;
+      }
 
       final Path passwordPath = dataPath.resolve("keystore.passwd");
       if (serverPresentedCerts.getPassword() != null) {
@@ -94,17 +105,15 @@ public class ServerSideTlsAcceptanceTest {
 
       final TlsOptions serverOptions =
           new BasicTlsOptions(serverPresentedCerts.getPkcs12File(), passwordPath.toFile(),
-              Optional.empty());
+              Optional.ofNullable(fingerPrintFile));
+      configBuilder.withServerTlsOptions(serverOptions);
 
-      final SignerConfigurationBuilder configBuilder =
-          new SignerConfigurationBuilder().withServerTlsOptions(serverOptions)
-              .withHttpRpcPort(fixedListenPort);
 
       final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
       final ClientConfig clientConfig;
       if (clientExpectedCert != null) {
-        clientConfig = new ClientConfig(clientExpectedCert, null);
+        clientConfig = new ClientConfig(clientExpectedCert, clientToPresent);
       } else {
         clientConfig = null;
       }
@@ -121,7 +130,7 @@ public class ServerSideTlsAcceptanceTest {
 
   @Test
   void ableToConnectWhenClientExpectsSameCertificateAsThatPresented() {
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, 0);
+    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
@@ -132,7 +141,7 @@ public class ServerSideTlsAcceptanceTest {
   void nonTlsClientsCannotConnectToTlsEnabledEthSigner() {
     // The ethSigner object (and in-built requester are already TLS enabled, so need to make a new
     // http client which does not have TLS enabled
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, 0);
+    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
     final HttpRequest rawRequests =
@@ -146,31 +155,31 @@ public class ServerSideTlsAcceptanceTest {
 
   @Test
   void missingPasswordFileResultsInEthsignerExiting() {
-    //arbitrary port to prevent waiting for portfile (during Start) to be created.
+    //arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition missingPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1", null);
-    final Signer ethSigner = createTlsEthSigner(missingPasswordCert, cert1, 9000);
+    final Signer ethSigner = createTlsEthSigner(missingPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
 
   @Test
   void ethSignerExitsIfPasswordDoesntMatchKeyStoreFile() {
-    //arbitrary port to prevent waiting for portfile (during Start) to be created.
+    //arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition wrongPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1", "wrongPassword");
-    final Signer ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, 9000);
+    final Signer ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
 
   @Test
   void clientCannotConnectIfExpectedServerCertDoesntMatchServerSuppliedCert() {
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, 0);
+    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
-    final ClientConfig clientConfig = new ClientConfig(cert2, cert1);
+    final ClientConfig clientConfig = new ClientConfig(cert2, null);
 
     final HttpRequest rawRequests =
         new HttpRequest(
@@ -188,10 +197,23 @@ public class ServerSideTlsAcceptanceTest {
   void missingKeyStoreFileResultsInEthsignerExiting() {
 
   }
+  */
 
   @Test
   void clientMissingFromWhiteListCannotConnectToEthSigner() {
+    final Signer ethSigner = createTlsEthSigner(cert1, cert1, cert1, cert1, 0);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+/*
+    final ClientConfig clientConfig = new ClientConfig(cert1, cert2);
+    final HttpRequest rawRequests =
+        new HttpRequest(
+            ethSigner.getUrlEndpoint(),
+            OkHttpClientHelpers.createOkHttpClient(Optional.of(clientConfig)));
 
+    final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
+
+    assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
+    */
   }
- */
 }

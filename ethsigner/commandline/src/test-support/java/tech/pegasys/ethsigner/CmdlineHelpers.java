@@ -24,7 +24,7 @@ public class CmdlineHelpers {
         + "--logging=INFO "
         + "--tls-keystore-file=./keystore.pfx "
         + "--tls-keystore-password-file=./keystore.passwd "
-        + "--tls-known-clients-file=./client_whitelist ";
+        + "--tls-known-clients-file=./known_clients ";
   }
 
   public static String removeFieldFrom(final String input, final String fieldName) {
