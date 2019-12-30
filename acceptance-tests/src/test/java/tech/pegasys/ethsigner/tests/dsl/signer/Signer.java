@@ -130,6 +130,5 @@ public class Signer {
     return rawHttpRequests;
   }
 
-  private String url(final int port) {
-  }
+  private String url(final int port) {}
 }
