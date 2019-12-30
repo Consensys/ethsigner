@@ -12,12 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
-public class ClientConfig {
+public class ClientTlsConfig {
 
   private final TlsCertificateDefinition expectedTlsServerCert;
   private final TlsCertificateDefinition clientCertificateToPresent;
 
-  public ClientConfig(
+  public ClientTlsConfig(
       final TlsCertificateDefinition expectedTlsServerCert,
       final TlsCertificateDefinition clientCertificateToPresent) {
     this.expectedTlsServerCert = expectedTlsServerCert;

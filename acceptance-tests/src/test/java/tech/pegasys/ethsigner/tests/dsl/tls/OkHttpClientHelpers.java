@@ -45,7 +45,7 @@ import okhttp3.OkHttpClient;
 public class OkHttpClientHelpers {
 
   public static OkHttpClient createOkHttpClient(
-      final Optional<ClientConfig> clientTlsConfiguration) {
+      final Optional<ClientTlsConfig> clientTlsConfiguration) {
     final OkHttpClient.Builder clientBuilder =
         new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
 

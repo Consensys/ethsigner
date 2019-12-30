@@ -19,10 +19,7 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import tech.pegasys.ethsigner.core.TlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.tls.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -30,10 +27,13 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.tls.ClientTlsConfig;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.net.ssl.SSLException;
@@ -117,15 +117,15 @@ class ServerSideTlsAcceptanceTest {
 
       final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-      final ClientConfig clientConfig;
+      final ClientTlsConfig clientTlsConfig;
       if (clientExpectedCert != null) {
-        clientConfig = new ClientConfig(clientExpectedCert, clientToPresent);
+        clientTlsConfig = new ClientTlsConfig(clientExpectedCert, clientToPresent);
       } else {
-        clientConfig = null;
+        clientTlsConfig = null;
       }
 
       final Signer ethSigner =
-          new Signer(configBuilder.build(), nodeConfig, new NodePorts(1, 2), clientConfig);
+          new Signer(configBuilder.build(), nodeConfig, new NodePorts(1, 2), clientTlsConfig);
 
       return ethSigner;
     } catch (final Exception e) {
@@ -152,7 +152,7 @@ class ServerSideTlsAcceptanceTest {
     ethSigner.awaitStartupCompletion();
     final HttpRequest rawRequests =
         new HttpRequest(
-            ethSigner.getUrlEndpoint(), OkHttpClientHelpers.createOkHttpClient(Optional.empty()));
+            ethSigner.getUrl(), OkHttpClientHelpers.createOkHttpClient(Optional.empty()));
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
@@ -185,12 +185,12 @@ class ServerSideTlsAcceptanceTest {
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
-    final ClientConfig clientConfig = new ClientConfig(cert2, null);
+    final ClientTlsConfig clientTlsConfig = new ClientTlsConfig(cert2, null);
 
     final HttpRequest rawRequests =
         new HttpRequest(
-            ethSigner.getUrlEndpoint(),
-            OkHttpClientHelpers.createOkHttpClient(Optional.of(clientConfig)));
+            ethSigner.getUrl(),
+            OkHttpClientHelpers.createOkHttpClient(Optional.of(clientTlsConfig)));
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
@@ -199,18 +199,19 @@ class ServerSideTlsAcceptanceTest {
 
   @Test
   void missingKeyStoreFileResultsInEthsignerExiting() throws IOException {
-    final TlsOptions serverOptions = new BasicTlsOptions(
-        dataPath.resolve("missing_keystore").toFile(),
-        Files.writeString(dataPath.resolve("password"), "password").toFile(),
-        Optional.empty()
-    );
+    final TlsOptions serverOptions =
+        new BasicTlsOptions(
+            dataPath.resolve("missing_keystore").toFile(),
+            Files.writeString(dataPath.resolve("password"), "password").toFile(),
+            Optional.empty());
 
     // Requires arbitrary port to avoid waiting for Ports file
     final SignerConfigurationBuilder configBuilder =
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).withHttpRpcPort(9000);
 
-    final Signer ethSigner = new Signer(configBuilder.build(), new NodeConfigurationBuilder().build(),
-        new NodePorts(1, 2));
+    final Signer ethSigner =
+        new Signer(
+            configBuilder.build(), new NodeConfigurationBuilder().build(), new NodePorts(1, 2));
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
@@ -221,11 +222,11 @@ class ServerSideTlsAcceptanceTest {
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
-    final ClientConfig clientConfig = new ClientConfig(cert1, cert2);
+    final ClientTlsConfig clientTlsConfig = new ClientTlsConfig(cert1, cert2);
     final HttpRequest rawRequests =
         new HttpRequest(
-            ethSigner.getUrlEndpoint(),
-            OkHttpClientHelpers.createOkHttpClient(Optional.of(clientConfig)));
+            ethSigner.getUrl(),
+            OkHttpClientHelpers.createOkHttpClient(Optional.of(clientTlsConfig)));
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 

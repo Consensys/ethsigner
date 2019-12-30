@@ -17,7 +17,6 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Besu;
-import tech.pegasys.ethsigner.tests.dsl.tls.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.Eea;
 import tech.pegasys.ethsigner.tests.dsl.Eth;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
@@ -28,6 +27,7 @@ import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.tls.ClientTlsConfig;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
 import java.time.Duration;
@@ -59,47 +59,37 @@ public class Signer {
   private Web3j jsonRpc;
   private RawJsonRpcRequests rawJsonRpcRequests;
   private HttpRequest rawHttpRequests;
-  private final SignerConfiguration signerConfig;
   private final String urlFormatting;
-  private final Optional<ClientConfig> clientConfiguration;
+  private final Optional<ClientTlsConfig> clientTlsConfig;
 
   public Signer(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
-    this(signerConfig, nodeConfig, nodePorts, Optional.empty());
+    this(signerConfig, nodeConfig, nodePorts, null);
   }
 
   public Signer(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts,
-      final ClientConfig clientConfiguration) {
-    this(signerConfig, nodeConfig, nodePorts, Optional.ofNullable(clientConfiguration));
-  }
-
-  public Signer(
-      final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts,
-      final Optional<ClientConfig> clientConfiguration) {
+      final ClientTlsConfig clientTlsConfig) {
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
     this.pollingInverval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
-    this.signerConfig = signerConfig;
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";
-    this.clientConfiguration = clientConfiguration;
+    this.clientTlsConfig = Optional.ofNullable(clientTlsConfig);
   }
 
   public void start() {
     LOG.info("Starting EthSigner");
     runner.start(PROCESS_NAME);
 
-    final String httpJsonRpcUrl = url(runner.httpJsonRpcPort());
+    final String httpJsonRpcUrl = getUrl();
 
     LOG.info("Http requests being submitted to : {} ", httpJsonRpcUrl);
 
-    final OkHttpClient httpClient = OkHttpClientHelpers.createOkHttpClient(clientConfiguration);
+    final OkHttpClient httpClient = OkHttpClientHelpers.createOkHttpClient(clientTlsConfig);
 
     final HttpService web3jHttpService = new HttpService(httpJsonRpcUrl, httpClient);
     this.jsonRpc =
@@ -116,9 +106,7 @@ public class Signer {
     this.privateContracts = new PrivateContracts(besu, eea);
     this.accounts = new Accounts(eth);
     this.rawJsonRpcRequests = new RawJsonRpcRequests(web3jHttpService, requestFactory);
-    this.rawHttpRequests =
-        new HttpRequest(
-            httpJsonRpcUrl, OkHttpClientHelpers.createOkHttpClient(clientConfiguration));
+    this.rawHttpRequests = new HttpRequest(httpJsonRpcUrl, httpClient);
   }
 
   public void shutdown() {
@@ -164,11 +152,7 @@ public class Signer {
     return rawHttpRequests;
   }
 
-  private String url(final int port) {
-    return String.format(urlFormatting, hostname, port);
-  }
-
-  public String getUrlEndpoint() {
-    return url(runner.httpJsonRpcPort());
+  public String getUrl() {
+    return String.format(urlFormatting, hostname, runner.httpJsonRpcPort());
   }
 }
