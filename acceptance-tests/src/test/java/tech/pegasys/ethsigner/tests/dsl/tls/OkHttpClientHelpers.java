@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -30,6 +31,7 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
@@ -46,19 +48,19 @@ public class OkHttpClientHelpers {
     if (clientTlsConfiguration.isPresent()) {
 
       try {
-        final FileInputStream myTrustedCAFileContent =
+        final FileInputStream serverCertStream =
             new FileInputStream(clientTlsConfiguration.get().getExpectedTlsServerCert());
         final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        final X509Certificate myCAPublicKey =
-            (X509Certificate) certificateFactory.generateCertificate(myTrustedCAFileContent);
+        final X509Certificate expectedServerCertificate =
+            (X509Certificate) certificateFactory.generateCertificate(serverCertStream);
 
-        final MatchingCertTrustManager insecureTrustManager =
-            new MatchingCertTrustManager(myCAPublicKey);
+        final MatchingCertTrustManager trustManager =
+            new MatchingCertTrustManager(expectedServerCertificate);
 
         final SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(
-            null, new TrustManager[]{insecureTrustManager}, SecureRandom.getInstanceStrong());
-        clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), insecureTrustManager);
+            null, new TrustManager[]{trustManager}, SecureRandom.getInstanceStrong());
+        clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
       } catch (final NoSuchAlgorithmException e) {
         fail("Unable to construct a TLS client during test setup, missing encryption algorithm.");
       } catch (final KeyManagementException e) {
@@ -73,7 +75,7 @@ public class OkHttpClientHelpers {
     return clientBuilder.build();
   }
 
-  public void generateClientFingerPrint(final Path knownClientsPath, final File certificateFile)
+  public static void generateClientFingerPrint(final Path knownClientsPath, final File certificateFile)
       throws IOException, NoSuchAlgorithmException {
     final MessageDigest digest = MessageDigest.getInstance("SHA-256");
     byte[] hash = digest.digest(Files.readAllBytes(certificateFile.toPath()));

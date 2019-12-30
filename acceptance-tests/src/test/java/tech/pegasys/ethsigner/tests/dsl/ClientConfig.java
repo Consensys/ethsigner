@@ -21,7 +21,7 @@ public class ClientConfig {
   private final File expectedTlsServerCert;
   private final File clientCertificateToPresent;
 
-  public ClientConfig(File expectedTlsServerCert, File clientCertificateToPresent) {
+  public ClientConfig(final File expectedTlsServerCert, final File clientCertificateToPresent) {
     this.expectedTlsServerCert = expectedTlsServerCert;
     this.clientCertificateToPresent = clientCertificateToPresent;
   }
