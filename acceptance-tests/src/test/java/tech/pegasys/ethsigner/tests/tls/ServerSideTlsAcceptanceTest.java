@@ -19,13 +19,6 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
-import javax.net.ssl.SSLHandshakeException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
@@ -37,6 +30,15 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class ServerSideTlsAcceptanceTest {
 
@@ -71,15 +73,15 @@ class ServerSideTlsAcceptanceTest {
   // 3. Convert to PKCS12
   // openssl pkcs12 -export -inkey domain.key -in cert.crt -out cert.pfx
   //
-  @TempDir
-  Path dataPath;
+  @TempDir Path dataPath;
 
   final TlsCertificateDefinition cert1 =
       TlsCertificateDefinition.loadFromResource("tls/cert1", "password");
   final TlsCertificateDefinition cert2 =
       TlsCertificateDefinition.loadFromResource("tls/cert2", "password2");
 
-  private Signer createTlsEthSigner(final TlsCertificateDefinition serverPresentedCerts,
+  private Signer createTlsEthSigner(
+      final TlsCertificateDefinition serverPresentedCerts,
       final TlsCertificateDefinition clientExpectedCert,
       final TlsCertificateDefinition clientCertInServerWhitelist,
       final TlsCertificateDefinition clientToPresent,
@@ -92,8 +94,8 @@ class ServerSideTlsAcceptanceTest {
       final File fingerPrintFile;
       if (clientCertInServerWhitelist != null) {
         final Path fingerPrintFilePath = dataPath.resolve("known_clients");
-        generateClientFingerPrint(fingerPrintFilePath.toAbsolutePath(),
-            clientCertInServerWhitelist.getCertificateFile());
+        generateClientFingerPrint(
+            fingerPrintFilePath.toAbsolutePath(), clientCertInServerWhitelist.getCertificateFile());
         fingerPrintFile = fingerPrintFilePath.toFile();
       } else {
         fingerPrintFile = null;
@@ -105,10 +107,11 @@ class ServerSideTlsAcceptanceTest {
       }
 
       final TlsOptions serverOptions =
-          new BasicTlsOptions(serverPresentedCerts.getPkcs12File(), passwordPath.toFile(),
+          new BasicTlsOptions(
+              serverPresentedCerts.getPkcs12File(),
+              passwordPath.toFile(),
               Optional.ofNullable(fingerPrintFile));
       configBuilder.withServerTlsOptions(serverOptions);
-
 
       final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -156,7 +159,7 @@ class ServerSideTlsAcceptanceTest {
 
   @Test
   void missingPasswordFileResultsInEthsignerExiting() {
-    //arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
+    // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition missingPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1", null);
     final Signer ethSigner = createTlsEthSigner(missingPasswordCert, cert1, null, null, 9000);
@@ -166,7 +169,7 @@ class ServerSideTlsAcceptanceTest {
 
   @Test
   void ethSignerExitsIfPasswordDoesntMatchKeyStoreFile() {
-    //arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
+    // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition wrongPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1", "wrongPassword");
     final Signer ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, null, null, 9000);
@@ -214,6 +217,6 @@ class ServerSideTlsAcceptanceTest {
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
-    assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
+    assertThat(thrown.getCause()).isInstanceOf(SSLException.class);
   }
 }

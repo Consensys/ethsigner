@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.tests.dsl.tls;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,8 +41,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
 import okhttp3.OkHttpClient;
-import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
 
 public class OkHttpClientHelpers {
 
@@ -55,8 +57,8 @@ public class OkHttpClientHelpers {
         if (clientTlsConfiguration.get().getClientCertificateToPresent() != null) {
           final TlsCertificateDefinition clientCert =
               clientTlsConfiguration.get().getClientCertificateToPresent();
-          final KeyStore clientCertStore = loadP12KeyStore(clientCert.getPkcs12File(),
-              clientCert.getPassword().toCharArray());
+          final KeyStore clientCertStore =
+              loadP12KeyStore(clientCert.getPkcs12File(), clientCert.getPassword().toCharArray());
           final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
           kmf.init(clientCertStore, clientCert.getPassword().toCharArray());
           keyManagers = kmf.getKeyManagers();
@@ -74,8 +76,8 @@ public class OkHttpClientHelpers {
         final X509TrustManager trustManager =
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext
-            .init(keyManagers, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
+        sslContext.init(
+            keyManagers, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
 
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
       } catch (final KeyStoreException | UnrecoverableKeyException e) {
@@ -103,15 +105,16 @@ public class OkHttpClientHelpers {
     return store;
   }
 
-  public static void generateClientFingerPrint(final Path knownClientsPath,
-      final File certificateFile)
+  public static void generateClientFingerPrint(
+      final Path knownClientsPath, final File certificateFile)
       throws IOException, NoSuchAlgorithmException, CertificateException {
     FileInputStream is = new FileInputStream(certificateFile);
     CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
     X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
 
     final String fingerprint = getFingerprint(cert);
-    Files.writeString(knownClientsPath, "localhost " + fingerprint);
+    Files.writeString(
+        knownClientsPath, "localhost " + fingerprint + "\n" + "127.0.0.1 " + fingerprint + "\n");
   }
 
   private static String getFingerprint(final X509Certificate cert)
@@ -127,6 +130,5 @@ public class OkHttpClientHelpers {
     }
 
     return joiner.toString().toLowerCase();
-
   }
 }

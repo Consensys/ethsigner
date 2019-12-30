@@ -30,7 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
-import java.io.File;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -149,8 +148,9 @@ public class Signer {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Signer to become responsive...");
-
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 30;
     waitFor(
+        secondsToWait,
         () ->
             assertThat(rawHttpRequests.get("/upcheck").status()).isEqualTo(HttpResponseStatus.OK));
     LOG.info("Signer is now responsive");

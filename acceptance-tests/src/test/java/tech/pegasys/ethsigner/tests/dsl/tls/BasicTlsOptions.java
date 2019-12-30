@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,14 +9,13 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
+import tech.pegasys.ethsigner.core.TlsOptions;
+
 import java.io.File;
 import java.util.Optional;
-import tech.pegasys.ethsigner.core.TlsOptions;
 
 public class BasicTlsOptions implements TlsOptions {
 
@@ -24,7 +23,9 @@ public class BasicTlsOptions implements TlsOptions {
   private final File keyStorePasswordFile;
   private final Optional<File> knownClientsFile;
 
-  public BasicTlsOptions(final File keyStoreFile, final File keyStorePasswordFile,
+  public BasicTlsOptions(
+      final File keyStoreFile,
+      final File keyStorePasswordFile,
       final Optional<File> knownClientsFile) {
     this.keyStoreFile = keyStoreFile;
     this.keyStorePasswordFile = keyStorePasswordFile;

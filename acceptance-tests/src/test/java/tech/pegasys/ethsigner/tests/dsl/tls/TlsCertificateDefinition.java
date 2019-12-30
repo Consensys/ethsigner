@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,16 +9,14 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
-import com.google.common.io.Resources;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
+
+import com.google.common.io.Resources;
 
 public class TlsCertificateDefinition {
 
@@ -30,11 +28,10 @@ public class TlsCertificateDefinition {
     return Path.of(subPath, filename).toString();
   }
 
-  public static TlsCertificateDefinition loadFromResource(final String resourceSubPath,
-      final String password) {
+  public static TlsCertificateDefinition loadFromResource(
+      final String resourceSubPath, final String password) {
     try {
-      final URL sslCertificate =
-          Resources.getResource(resourcePath(resourceSubPath, "cert.pfx"));
+      final URL sslCertificate = Resources.getResource(resourcePath(resourceSubPath, "cert.pfx"));
       final Path keystorePath = Path.of(sslCertificate.getPath());
 
       final File certificateFile =
@@ -47,8 +44,8 @@ public class TlsCertificateDefinition {
     }
   }
 
-  public TlsCertificateDefinition(final File pkcs12File, final File certificateFile,
-      final String password) {
+  public TlsCertificateDefinition(
+      final File pkcs12File, final File certificateFile, final String password) {
     this.certificateFile = certificateFile;
     this.pkcs12File = pkcs12File;
     this.password = password;
