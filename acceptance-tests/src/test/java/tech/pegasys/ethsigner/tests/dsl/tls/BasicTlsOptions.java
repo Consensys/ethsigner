@@ -20,9 +20,9 @@ import tech.pegasys.ethsigner.core.TlsOptions;
 
 public class BasicTlsOptions implements TlsOptions {
 
-  final File keyStoreFile;
-  final File keyStorePasswordFile;
-  final Optional<File> knownClientsFile;
+  private final File keyStoreFile;
+  private final File keyStorePasswordFile;
+  private final Optional<File> knownClientsFile;
 
   public BasicTlsOptions(final File keyStoreFile, final File keyStorePasswordFile,
       final Optional<File> knownClientsFile) {

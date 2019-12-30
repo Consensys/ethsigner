@@ -15,22 +15,24 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import java.io.File;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class ClientConfig {
 
-  private final File expectedTlsServerCert;
-  private final File clientCertificateToPresent;
+  private final TlsCertificateDefinition expectedTlsServerCert;
+  private final TlsCertificateDefinition clientCertificateToPresent;
 
-  public ClientConfig(final File expectedTlsServerCert, final File clientCertificateToPresent) {
+  public ClientConfig(final TlsCertificateDefinition expectedTlsServerCert,
+      final TlsCertificateDefinition clientCertificateToPresent) {
     this.expectedTlsServerCert = expectedTlsServerCert;
     this.clientCertificateToPresent = clientCertificateToPresent;
   }
 
-  public File getExpectedTlsServerCert() {
+  public TlsCertificateDefinition getExpectedTlsServerCert() {
     return expectedTlsServerCert;
   }
 
-  public File getClientCertificateToPresent() {
+  public TlsCertificateDefinition getClientCertificateToPresent() {
     return clientCertificateToPresent;
   }
 }
