@@ -19,6 +19,8 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
@@ -195,13 +197,23 @@ class ServerSideTlsAcceptanceTest {
     assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
   }
 
-  /*
-
   @Test
-  void missingKeyStoreFileResultsInEthsignerExiting() {
+  void missingKeyStoreFileResultsInEthsignerExiting() throws IOException {
+    final TlsOptions serverOptions = new BasicTlsOptions(
+        dataPath.resolve("missing_keystore").toFile(),
+        Files.writeString(dataPath.resolve("password"), "password").toFile(),
+        Optional.empty()
+    );
 
+    // Requires arbitrary port to avoid waiting for Ports file
+    final SignerConfigurationBuilder configBuilder =
+        new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).withHttpRpcPort(9000);
+
+    final Signer ethSigner = new Signer(configBuilder.build(), new NodeConfigurationBuilder().build(),
+        new NodePorts(1, 2));
+    ethSigner.start();
+    waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
-  */
 
   @Test
   void clientMissingFromWhiteListCannotConnectToEthSigner() {
