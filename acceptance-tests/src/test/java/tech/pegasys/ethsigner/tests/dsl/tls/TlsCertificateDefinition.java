@@ -37,11 +37,9 @@ public class TlsCertificateDefinition {
           Resources.getResource(resourcePath(resourceSubPath, "cert.pfx"));
       final Path keystorePath = Path.of(sslCertificate.getPath());
 
-      // The client and server are both presenting the same certificate - PoC at this stage.
       final File certificateFile =
           Path.of(Resources.getResource(resourcePath(resourceSubPath, "cert.crt")).toURI())
               .toFile();
-      final ClientConfig clientConfig = new ClientConfig(certificateFile, certificateFile);
 
       return new TlsCertificateDefinition(keystorePath.toFile(), certificateFile, password);
     } catch (final Exception e) {

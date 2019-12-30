@@ -104,7 +104,7 @@ public class ServerSideTlsAcceptanceTest {
 
       final ClientConfig clientConfig;
       if (clientExpectedCert != null) {
-        clientConfig = new ClientConfig(clientExpectedCert.getCertificateFile(), null);
+        clientConfig = new ClientConfig(clientExpectedCert, null);
       } else {
         clientConfig = null;
       }
@@ -170,7 +170,7 @@ public class ServerSideTlsAcceptanceTest {
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
-    final ClientConfig clientConfig = new ClientConfig(cert2.getCertificateFile(), null);
+    final ClientConfig clientConfig = new ClientConfig(cert2, cert1);
 
     final HttpRequest rawRequests =
         new HttpRequest(
