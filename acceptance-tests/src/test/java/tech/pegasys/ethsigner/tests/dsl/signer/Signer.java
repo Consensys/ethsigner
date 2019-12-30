@@ -149,6 +149,7 @@ public class Signer {
 
   public void awaitStartupCompletion() {
     LOG.info("Waiting for Signer to become responsive...");
+
     waitFor(
         () ->
             assertThat(rawHttpRequests.get("/upcheck").status()).isEqualTo(HttpResponseStatus.OK));

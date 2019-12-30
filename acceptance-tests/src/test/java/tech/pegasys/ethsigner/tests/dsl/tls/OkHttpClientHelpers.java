@@ -27,7 +27,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -48,14 +51,13 @@ public class OkHttpClientHelpers {
 
     if (clientTlsConfiguration.isPresent()) {
       try {
-        // PUT CLIENT CERTIFICATE INTO OKHTTP (via KeyStore)
         final KeyManager[] keyManagers;
         if (clientTlsConfiguration.get().getClientCertificateToPresent() != null) {
           final TlsCertificateDefinition clientCert =
               clientTlsConfiguration.get().getClientCertificateToPresent();
           final KeyStore clientCertStore = loadP12KeyStore(clientCert.getPkcs12File(),
               clientCert.getPassword().toCharArray());
-          final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+          final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
           kmf.init(clientCertStore, clientCert.getPassword().toCharArray());
           keyManagers = kmf.getKeyManagers();
         } else {
@@ -103,16 +105,28 @@ public class OkHttpClientHelpers {
 
   public static void generateClientFingerPrint(final Path knownClientsPath,
       final File certificateFile)
-      throws IOException, NoSuchAlgorithmException {
-    final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    byte[] hash = digest.digest(Files.readAllBytes(certificateFile.toPath()));
+      throws IOException, NoSuchAlgorithmException, CertificateException {
+    FileInputStream is = new FileInputStream(certificateFile);
+    CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+    X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
+
+    final String fingerprint = getFingerprint(cert);
+    Files.writeString(knownClientsPath, "localhost " + fingerprint);
+  }
+
+  private static String getFingerprint(final X509Certificate cert)
+      throws NoSuchAlgorithmException, CertificateEncodingException {
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    byte[] der = cert.getEncoded();
+    md.update(der);
+    byte[] digest = md.digest();
 
     final StringJoiner joiner = new StringJoiner(":");
-    for (final byte b : hash) {
+    for (final byte b : digest) {
       joiner.add(String.format("%02X", b));
     }
 
-    Files.writeString(knownClientsPath, "localhost " + joiner.toString() + "\n" +
-        "127.0.0.1 " + joiner.toString());
+    return joiner.toString().toLowerCase();
+
   }
 }

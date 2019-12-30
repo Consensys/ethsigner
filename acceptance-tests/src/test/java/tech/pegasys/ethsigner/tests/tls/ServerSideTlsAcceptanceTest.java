@@ -20,6 +20,7 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.net.ssl.SSLHandshakeException;
@@ -204,7 +205,7 @@ class ServerSideTlsAcceptanceTest {
     final Signer ethSigner = createTlsEthSigner(cert1, cert1, cert1, cert1, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
-/*
+
     final ClientConfig clientConfig = new ClientConfig(cert1, cert2);
     final HttpRequest rawRequests =
         new HttpRequest(
@@ -214,6 +215,5 @@ class ServerSideTlsAcceptanceTest {
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
     assertThat(thrown.getCause()).isInstanceOf(SSLHandshakeException.class);
-    */
   }
 }
