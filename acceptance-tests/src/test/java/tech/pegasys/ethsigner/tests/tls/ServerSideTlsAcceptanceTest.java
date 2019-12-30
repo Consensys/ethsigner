@@ -20,7 +20,7 @@ import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.generateClientFingerPrint;
 
 import tech.pegasys.ethsigner.core.TlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
+import tech.pegasys.ethsigner.tests.dsl.tls.ClientConfig;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;

@@ -14,8 +14,6 @@ package tech.pegasys.ethsigner.tests.dsl.tls;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
