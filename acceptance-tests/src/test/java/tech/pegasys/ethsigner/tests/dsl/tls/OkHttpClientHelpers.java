@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,19 +28,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.StringJoiner;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
-import org.apache.logging.log4j.core.net.ssl.TrustStoreConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.ClientConfig;
 
 public class OkHttpClientHelpers {
@@ -54,23 +49,18 @@ public class OkHttpClientHelpers {
     if (clientTlsConfiguration.isPresent()) {
       try {
         // PUT CLIENT CERTIFICATE INTO OKHTTP (via KeyStore)
-        /*
         final KeyManager[] keyManagers;
-        if(clientTlsConfiguration.get().getClientCertificateToPresent() != null) {
-          final TlsCertificateDefinition clientCert = clientTlsConfiguration.get().getClientCertificateToPresent();
-          final char[] clientCertPassword = clientCert.getPassword().toCharArray();
-          final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-          final FileInputStream fis = new FileInputStream(
-              clientTlsConfiguration.get().getClientCertificateToPresent().getPkcs12File());
-          keyStore.load(fis, clientCertPassword);
-
-          final KeyManagerFactory kmf = KeyManagerFactory.getInstance("X509");
-          kmf.init(keyStore, clientCertPassword);
+        if (clientTlsConfiguration.get().getClientCertificateToPresent() != null) {
+          final TlsCertificateDefinition clientCert =
+              clientTlsConfiguration.get().getClientCertificateToPresent();
+          final KeyStore clientCertStore = loadP12KeyStore(clientCert.getPkcs12File(),
+              clientCert.getPassword().toCharArray());
+          final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
+          kmf.init(clientCertStore, clientCert.getPassword().toCharArray());
           keyManagers = kmf.getKeyManagers();
         } else {
           keyManagers = null;
         }
-         */
 
         //PUT EXPECTED SERVER CERT INTO OKHTTP (via TRUSTSTORE)
         final TlsCertificateDefinition serverCert =
@@ -84,21 +74,17 @@ public class OkHttpClientHelpers {
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext
-            .init(null, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
+            .init(keyManagers, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
 
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
-      } catch (final KeyStoreException e) {
+      } catch (final KeyStoreException | UnrecoverableKeyException e) {
         fail("Unable to construct a TLS client during test setup, failed to setup keystore.", e);
       } catch (final NoSuchAlgorithmException e) {
         fail("Unable to construct a TLS client during test setup, missing encryption algorithm.");
       } catch (final KeyManagementException e) {
         fail("Unable to construct a TLS client during test setup due to KeyManagementException");
       } catch (final CertificateException e) {
-        fail("Unable to construct a X509 certificate for EthSigner client, using supplied file."); /*
-      } catch (final FileNotFoundException e) {
-        fail("Unable to construßct a TLS client during test setup, certificate file is missing.");
-      } catch (final IOException e) {
-        fail("Unable tpo construct a TLS client during test setup, unable to open file", e);*/
+        fail("Unable to construct a X509 certificate for EthSigner client, using supplied file.");
       }
     }
 
