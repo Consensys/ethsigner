@@ -81,7 +81,7 @@ public class OkHttpClientHelpers {
 
   private static KeyManager[] createKeyManagers(final TlsCertificateDefinition certToPresent)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-      UnrecoverableKeyException {
+          UnrecoverableKeyException {
     if (certToPresent == null) {
       return null;
     }

@@ -374,11 +374,7 @@ applicationDefaultJvmArgs = [
   "-Dvertx.disableFileCPResolving=true",
   // We shutdown log4j ourselves, as otherwise his shutdown hook runs before our own and whatever
   // happens during shutdown is not logged.
-  "-Dlog4j.shutdownHookEnabled=false",
-  // Bouncy Castle needs access to sun.security.provider, which is not open by default.
-  // This suppresses an illegal access warning.
-  '--add-opens',
-  'java.base/sun.security.provider=ALL-UNNAMED'
+  "-Dlog4j.shutdownHookEnabled=false"
 ]
 
 run {

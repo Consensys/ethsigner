@@ -36,7 +36,6 @@ dependencies {
   implementation project(':ethsigner:commandline')
 
   implementation 'com.google.guava:guava'
-  implementation 'org.bouncycastle:bcprov-jdk15on'
 
   implementation 'org.apache.logging.log4j:log4j-api'
   runtime 'org.apache.logging.log4j:log4j-core'

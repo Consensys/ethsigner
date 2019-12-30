@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -58,7 +57,7 @@ class CommandlineParserTest {
   }
 
   @Test
-  void fullyPopulatedCommandLineParsesIntoVariables() throws UnknownHostException {
+  void fullyPopulatedCommandLineParsesIntoVariables() {
     final boolean result =
         parser.parseCommandLine(
             (validBaseCommandOptions() + subCommand.getCommandName()).split(" "));
@@ -77,7 +76,7 @@ class CommandlineParserTest {
     assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
     assertThat(config.getTlsOptions().get().getKnownClientsFile())
-        .isEqualTo(Optional.of(new File("./client_whitelist")));
+        .isEqualTo(Optional.of(new File("./known_clients")));
   }
 
   @Test
