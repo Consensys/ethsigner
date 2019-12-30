@@ -50,27 +50,14 @@ public class OkHttpClientHelpers {
         new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
 
     if (clientTlsConfiguration.isPresent()) {
+      final ClientTlsConfig clientTlsConfig = clientTlsConfiguration.get();
       try {
-        final KeyManager[] keyManagers;
-        if (clientTlsConfiguration.get().getClientCertificateToPresent() != null) {
-          final TlsCertificateDefinition clientCert =
-              clientTlsConfiguration.get().getClientCertificateToPresent();
-          final KeyStore clientCertStore =
-              loadP12KeyStore(clientCert.getPkcs12File(), clientCert.getPassword().toCharArray());
-          final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
-          kmf.init(clientCertStore, clientCert.getPassword().toCharArray());
-          keyManagers = kmf.getKeyManagers();
-        } else {
-          keyManagers = null;
-        }
+        final KeyManager[] keyManagers =
+            createKeyManagers(clientTlsConfig.getClientCertificateToPresent());
 
-        final TlsCertificateDefinition serverCert =
-            clientTlsConfiguration.get().getExpectedTlsServerCert();
-        final KeyStore trustStore =
-            loadP12KeyStore(serverCert.getPkcs12File(), serverCert.getPassword().toCharArray());
         final TrustManagerFactory trustManagerFactory =
-            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init(trustStore);
+            createTrustManagerFactory(clientTlsConfig.getExpectedTlsServerCert());
+
         final X509TrustManager trustManager =
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -92,35 +79,63 @@ public class OkHttpClientHelpers {
     return clientBuilder.build();
   }
 
-  private static KeyStore loadP12KeyStore(final File pkcsFile, final char[] password)
+  private static KeyManager[] createKeyManagers(final TlsCertificateDefinition certToPresent)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+      UnrecoverableKeyException {
+    if (certToPresent == null) {
+      return null;
+    }
+
+    final String password = certToPresent.getPassword();
+
+    final KeyStore clientCertStore = loadP12KeyStore(certToPresent.getPkcs12File(), password);
+
+    final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
+    kmf.init(clientCertStore, password.toCharArray());
+    return kmf.getKeyManagers();
+  }
+
+  private static TrustManagerFactory createTrustManagerFactory(
+      final TlsCertificateDefinition serverCert)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
+
+    final KeyStore trustStore =
+        loadP12KeyStore(serverCert.getPkcs12File(), serverCert.getPassword());
+    final TrustManagerFactory trustManagerFactory =
+        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    trustManagerFactory.init(trustStore);
+
+    return trustManagerFactory;
+  }
+
+  private static KeyStore loadP12KeyStore(final File pkcsFile, final String password)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
     final KeyStore store = KeyStore.getInstance("pkcs12");
     try (final InputStream keystoreStream = new FileInputStream(pkcsFile)) {
-      store.load(keystoreStream, password);
+      store.load(keystoreStream, password.toCharArray());
     } catch (IOException e) {
       throw new RuntimeException("Unable to load keystore.", e);
     }
     return store;
   }
 
-  public static void generateClientFingerPrint(
+  public static void populateFingerprintFile(
       final Path knownClientsPath, final File certificateFile)
       throws IOException, NoSuchAlgorithmException, CertificateException {
-    FileInputStream is = new FileInputStream(certificateFile);
-    CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-    X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
+    final InputStream is = new FileInputStream(certificateFile);
+    final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+    final X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
 
-    final String fingerprint = getFingerprint(cert);
+    final String fingerprint = generateFingerprint(cert);
     Files.writeString(
         knownClientsPath, "localhost " + fingerprint + "\n" + "127.0.0.1 " + fingerprint + "\n");
   }
 
-  private static String getFingerprint(final X509Certificate cert)
+  private static String generateFingerprint(final X509Certificate cert)
       throws NoSuchAlgorithmException, CertificateEncodingException {
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    byte[] der = cert.getEncoded();
-    md.update(der);
-    byte[] digest = md.digest();
+    final MessageDigest md = MessageDigest.getInstance("SHA-256");
+    md.update(cert.getEncoded());
+    final byte[] digest = md.digest();
 
     final StringJoiner joiner = new StringJoiner(":");
     for (final byte b : digest) {
