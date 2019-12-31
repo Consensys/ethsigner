@@ -12,11 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
+import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+
 import org.apache.logging.log4j.Level;
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 
 public interface Config {
 

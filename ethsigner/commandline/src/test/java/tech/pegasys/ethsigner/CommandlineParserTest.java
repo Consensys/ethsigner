@@ -77,6 +77,14 @@ class CommandlineParserTest {
         .isEqualTo(new File("./keystore.passwd"));
     assertThat(config.getTlsOptions().get().getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
+    assertThat(config.getClientCertificateOptions().get().getStoreFile())
+        .isEqualTo(new File("./client_cert.pfx"));
+    assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
+        .isEqualTo(new File("./client_cert.passwd"));
+    assertThat(config.getWeb3TrustStoreOptions().get().getStoreFile())
+        .isEqualTo(new File("./web3_truststore.pfx"));
+    assertThat(config.getWeb3TrustStoreOptions().get().getStorePasswordFile())
+        .isEqualTo(new File("./web3_truststore.passwd"));
   }
 
   @Test
@@ -264,5 +272,51 @@ class CommandlineParserTest {
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions()).isEmpty();
+  }
+
+  @Test
+  void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
+    missingParameterShowsError(validBaseCommandOptions(), "tls-client-certificate-file");
+  }
+
+  @Test
+  void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
+    missingParameterShowsError(validBaseCommandOptions(), "tls-client-certificate-password-file");
+  }
+
+  @Test
+  void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-password-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(config.getClientCertificateOptions()).isEmpty();
+  }
+
+  @Test
+  void missingWeb3TruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
+    missingParameterShowsError(validBaseCommandOptions(), "tls-server-truststore-file");
+  }
+
+  @Test
+  void minssingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
+    missingParameterShowsError(validBaseCommandOptions(), "tls-server-truststore-password-file");
+  }
+
+  @Test
+  void cmdlineIsValidIfBothWeb3TruststoreAndPasswordAreMissing() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-password-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(config.getWeb3TrustStoreOptions()).isEmpty();
   }
 }

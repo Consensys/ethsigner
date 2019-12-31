@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -53,7 +52,7 @@ public class EthSignerBaseCommand implements Config {
   static class TlsClientCertificateOptions implements PkcsStoreConfig {
 
     @Option(
-        names = "--tls-client-cert-file",
+        names = "--tls-client-certificate-file",
         description =
             "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
                 + "a TLS-enabled web3 provider",
@@ -62,7 +61,7 @@ public class EthSignerBaseCommand implements Config {
     private File clientCertificateFile;
 
     @Option(
-        names = "--tls-client-cert-password-file",
+        names = "--tls-client-certificate-password-file",
         description = "Path to a file containing the password used to decrypt the client cert.",
         arity = "1",
         required = true)
@@ -79,13 +78,13 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-
   static class Web3ProviderTrustStore implements PkcsStoreConfig {
 
     @Option(
         names = "--tls-server-truststore-file",
-        description = "Path to a PKCS#12 formatted truststore, containing all trusted root "
-            + "certificates.",
+        description =
+            "Path to a PKCS#12 formatted truststore, containing all trusted root "
+                + "certificates.",
         arity = "1",
         required = true)
     private File truststoreFile;
