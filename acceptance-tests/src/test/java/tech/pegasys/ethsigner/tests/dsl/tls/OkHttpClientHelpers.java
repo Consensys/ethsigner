@@ -29,9 +29,10 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import javax.net.ssl.KeyManager;
@@ -40,6 +41,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.common.collect.Lists;
 import okhttp3.OkHttpClient;
 
 public class OkHttpClientHelpers {
@@ -120,15 +122,29 @@ public class OkHttpClientHelpers {
   }
 
   public static void populateFingerprintFile(
-      final Path knownClientsPath, final File certificateFile)
-      throws IOException, NoSuchAlgorithmException, CertificateException {
-    final InputStream is = new FileInputStream(certificateFile);
-    final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-    final X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
+      final Path knownClientsPath, final TlsCertificateDefinition certDef)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
-    final String fingerprint = generateFingerprint(cert);
-    Files.writeString(
-        knownClientsPath, "localhost " + fingerprint + "\n" + "127.0.0.1 " + fingerprint + "\n");
+    final List<X509Certificate> certs = getCertsFromPkcs12(certDef);
+    final StringBuilder fingerPrintsToAdd = new StringBuilder();
+    for (final X509Certificate cert : certs) {
+      final String fingerprint = generateFingerprint(cert);
+      fingerPrintsToAdd.append("localhost " + fingerprint + "\n");
+      fingerPrintsToAdd.append("127.0.0.1 " + fingerprint + "\n");
+    }
+    Files.writeString(knownClientsPath, fingerPrintsToAdd.toString());
+  }
+
+  public static List<X509Certificate> getCertsFromPkcs12(final TlsCertificateDefinition certDef)
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    final List<X509Certificate> results = Lists.newArrayList();
+
+    final KeyStore p12 = loadP12KeyStore(certDef.getPkcs12File(), certDef.getPassword());
+    final Enumeration<String> aliases = p12.aliases();
+    while (aliases.hasMoreElements()) {
+      results.add((X509Certificate) p12.getCertificate(aliases.nextElement()));
+    }
+    return results;
   }
 
   private static String generateFingerprint(final X509Certificate cert)

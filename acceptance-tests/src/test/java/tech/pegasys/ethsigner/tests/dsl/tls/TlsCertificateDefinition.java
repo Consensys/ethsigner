@@ -20,39 +20,24 @@ import com.google.common.io.Resources;
 
 public class TlsCertificateDefinition {
 
-  private File certificateFile;
   private File pkcs12File;
   private String password;
 
-  private static String resourcePath(final String subPath, final String filename) {
-    return Path.of(subPath, filename).toString();
-  }
-
   public static TlsCertificateDefinition loadFromResource(
-      final String resourceSubPath, final String password) {
+      final String resourcePath, final String password) {
     try {
-      final URL sslCertificate = Resources.getResource(resourcePath(resourceSubPath, "cert.pfx"));
+      final URL sslCertificate = Resources.getResource(resourcePath);
       final Path keystorePath = Path.of(sslCertificate.getPath());
 
-      final File certificateFile =
-          Path.of(Resources.getResource(resourcePath(resourceSubPath, "cert.crt")).toURI())
-              .toFile();
-
-      return new TlsCertificateDefinition(keystorePath.toFile(), certificateFile, password);
+      return new TlsCertificateDefinition(keystorePath.toFile(), password);
     } catch (final Exception e) {
       throw new RuntimeException("Failed to load TLS certificates", e);
     }
   }
 
-  public TlsCertificateDefinition(
-      final File pkcs12File, final File certificateFile, final String password) {
-    this.certificateFile = certificateFile;
+  public TlsCertificateDefinition(final File pkcs12File, final String password) {
     this.pkcs12File = pkcs12File;
     this.password = password;
-  }
-
-  public File getCertificateFile() {
-    return certificateFile;
   }
 
   public File getPkcs12File() {

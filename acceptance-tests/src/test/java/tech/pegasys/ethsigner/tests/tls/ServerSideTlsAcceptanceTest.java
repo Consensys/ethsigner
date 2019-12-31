@@ -73,14 +73,14 @@ class ServerSideTlsAcceptanceTest {
   // CMD    = openssl req -key domain.key -new -x509 -days 365 -out cert.crt -config conf
   // OUTPUT = cert.crt in the current working directory
   // 3. Convert to PKCS12
-  // openssl pkcs12 -export -inkey domain.key -in cert.crt -out cert.pfx
+  // openssl pkcs12 -export -inkey domain.key -in cert.crt -out cert1.pfx
   //
   @TempDir Path dataPath;
 
   final TlsCertificateDefinition cert1 =
-      TlsCertificateDefinition.loadFromResource("tls/cert1", "password");
+      TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
   final TlsCertificateDefinition cert2 =
-      TlsCertificateDefinition.loadFromResource("tls/cert2", "password2");
+      TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
   private Signer createTlsEthSigner(
       final TlsCertificateDefinition serverPresentedCerts,
@@ -96,8 +96,7 @@ class ServerSideTlsAcceptanceTest {
       final File fingerPrintFile;
       if (clientCertInServerWhitelist != null) {
         final Path fingerPrintFilePath = dataPath.resolve("known_clients");
-        populateFingerprintFile(
-            fingerPrintFilePath.toAbsolutePath(), clientCertInServerWhitelist.getCertificateFile());
+        populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist);
         fingerPrintFile = fingerPrintFilePath.toFile();
       } else {
         fingerPrintFile = null;
@@ -163,7 +162,7 @@ class ServerSideTlsAcceptanceTest {
   void missingPasswordFileResultsInEthsignerExiting() {
     // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition missingPasswordCert =
-        TlsCertificateDefinition.loadFromResource("tls/cert1", null);
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", null);
     final Signer ethSigner = createTlsEthSigner(missingPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
@@ -173,7 +172,7 @@ class ServerSideTlsAcceptanceTest {
   void ethSignerExitsIfPasswordDoesntMatchKeyStoreFile() {
     // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition wrongPasswordCert =
-        TlsCertificateDefinition.loadFromResource("tls/cert1", "wrongPassword");
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrongPassword");
     final Signer ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
