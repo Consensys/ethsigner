@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.core.TlsOptions;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.nio.file.Path;

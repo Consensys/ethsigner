@@ -12,6 +12,10 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import io.vertx.core.http.HttpClientOptions;
+import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
@@ -76,13 +80,49 @@ public final class EthSigner {
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
-            clientOptions,
+            applyConfigTlsSettingsTo(clientOptions),
             applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
             jsonDecoder,
             config.getDataPath());
 
     runner.start();
+  }
+
+  private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
+    final HttpClientOptions result = new HttpClientOptions(input);
+    boolean tlsIsRequired =
+        config.getWeb3TrustStoreOptions().isPresent() || config.getClientCertificateOptions()
+            .isPresent();
+
+    if (tlsIsRequired) {
+      result.setSsl(true);
+      try {
+      if (config.getWeb3TrustStoreOptions().isPresent()) {
+        result.setPfxTrustOptions(convertFrom(config.getWeb3TrustStoreOptions().get()));
+      } else {
+        result.setTrustAll(true);
+      }
+      } catch(final IOException e) {
+        throw new InitializationException("Failed to load web3 trust store.", e);
+      }
+
+      if (config.getClientCertificateOptions().isPresent()) {
+        try {
+          result.setPfxTrustOptions(convertFrom(config.getClientCertificateOptions().get()));
+        } catch(final IOException e) {
+          throw new InitializationException("Failed to load client certificate.", e);
+        }
+      }
+    }
+
+    return result;
+
+  }
+
+  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
+    final String password = readSecretFromFile(pkcsConfig.getStorePasswordFile().toPath());
+    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {
@@ -98,7 +138,8 @@ public final class EthSigner {
       final String keyStorePathname =
           tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
       final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
-      result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
+      result
+          .setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
 
       if (tlsConfig.getKnownClientsFile().isPresent()) {
         result.setClientAuth(ClientAuth.REQUIRED);

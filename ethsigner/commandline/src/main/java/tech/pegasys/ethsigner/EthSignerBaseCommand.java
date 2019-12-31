@@ -12,8 +12,10 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.Config;
-import tech.pegasys.ethsigner.core.TlsOptions;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
@@ -47,6 +49,64 @@ import picocli.CommandLine.Option;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
+
+  static class TlsClientCertificateOptions implements PkcsStoreConfig {
+
+    @Option(
+        names = "--tls-client-cert-file",
+        description =
+            "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
+                + "a TLS-enabled web3 provider",
+        arity = "1",
+        required = true)
+    private File clientCertificateFile;
+
+    @Option(
+        names = "--tls-client-cert-password-file",
+        description = "Path to a file containing the password used to decrypt the client cert.",
+        arity = "1",
+        required = true)
+    private File clientCertificatePasswordFile;
+
+    @Override
+    public File getStoreFile() {
+      return clientCertificateFile;
+    }
+
+    @Override
+    public File getStorePasswordFile() {
+      return clientCertificatePasswordFile;
+    }
+  }
+
+
+  static class Web3ProviderTrustStore implements PkcsStoreConfig {
+
+    @Option(
+        names = "--tls-server-truststore-file",
+        description = "Path to a PKCS#12 formatted truststore, containing all trusted root "
+            + "certificates.",
+        arity = "1",
+        required = true)
+    private File truststoreFile;
+
+    @Option(
+        names = "--tls-server-truststore-password-file",
+        description = "Path to a file containing the password used to decrypt the truststore.",
+        arity = "1",
+        required = true)
+    private File truststorePasswordFile;
+
+    @Override
+    public File getStoreFile() {
+      return truststoreFile;
+    }
+
+    @Override
+    public File getStorePasswordFile() {
+      return truststorePasswordFile;
+    }
+  }
 
   static class TlsServerOptions implements TlsOptions {
 
@@ -150,6 +210,12 @@ public class EthSignerBaseCommand implements Config {
   @ArgGroup(exclusive = false)
   private TlsServerOptions tlsServerOptions;
 
+  @ArgGroup(exclusive = false)
+  private TlsClientCertificateOptions clientTlsCertificateOptions;
+
+  @ArgGroup(exclusive = false)
+  private Web3ProviderTrustStore web3ProviderTrustStore;
+
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -193,6 +259,16 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Optional<TlsOptions> getTlsOptions() {
     return Optional.ofNullable(tlsServerOptions);
+  }
+
+  @Override
+  public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
+    return Optional.ofNullable(web3ProviderTrustStore);
+  }
+
+  @Override
+  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
   }
 
   @Override

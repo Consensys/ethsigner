@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
-import tech.pegasys.ethsigner.core.TlsOptions;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 
 import java.io.File;
 import java.util.Optional;

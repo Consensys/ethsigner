@@ -10,15 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core;
-
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
+package tech.pegasys.ethsigner.core.config;
 
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
-
 import org.apache.logging.log4j.Level;
+import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 
 public interface Config {
 
@@ -39,4 +37,8 @@ public interface Config {
   Path getDataPath();
 
   Optional<TlsOptions> getTlsOptions();
+
+  Optional<PkcsStoreConfig> getWeb3TrustStoreOptions();
+
+  Optional<PkcsStoreConfig> getClientCertificateOptions();
 }
