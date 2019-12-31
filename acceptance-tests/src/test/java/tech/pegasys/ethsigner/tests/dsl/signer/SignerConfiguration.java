@@ -12,7 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import tech.pegasys.ethsigner.core.TlsOptions;
+
 import java.time.Duration;
+import java.util.Optional;
 
 public class SignerConfiguration {
 
@@ -25,18 +28,21 @@ public class SignerConfiguration {
   private final int httpRpcPort;
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
+  private final Optional<TlsOptions> serverTlsOptions;
 
   public SignerConfiguration(
       final String chainId,
       final String hostname,
       final int httpRpcPort,
       final int webSocketPort,
-      final TransactionSignerParamsSupplier transactionSignerParamsSupplier) {
+      final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
+      final Optional<TlsOptions> serverTlsOptions) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
+    this.serverTlsOptions = serverTlsOptions;
   }
 
   public String hostname() {
@@ -61,6 +67,10 @@ public class SignerConfiguration {
 
   public int webSocketPort() {
     return webSocketPort;
+  }
+
+  public Optional<TlsOptions> serverTlsOptions() {
+    return serverTlsOptions;
   }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {

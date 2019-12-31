@@ -43,6 +43,7 @@ dependencies {
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
 
+  runtime 'org.bouncycastle:bcpkix-jdk15on'
   implementation 'org.apache.tuweni:tuweni-net'
 
   testImplementation 'io.vertx:vertx-codegen'

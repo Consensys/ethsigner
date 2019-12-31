@@ -109,8 +109,12 @@ public final class EthSigner {
 
       if (tlsConfig.getKnownClientsFile().isPresent()) {
         result.setClientAuth(ClientAuth.REQUIRED);
-        result.setTrustOptions(
-            VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
+        try {
+          result.setTrustOptions(
+              VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
+        } catch (final IllegalArgumentException e) {
+          throw new InitializationException("Illegally formatted client fingerprint file.");
+        }
       }
     } catch (final NoSuchFileException e) {
       throw new InitializationException(
