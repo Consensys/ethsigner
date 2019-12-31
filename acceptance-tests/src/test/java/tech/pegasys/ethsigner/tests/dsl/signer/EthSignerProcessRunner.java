@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
@@ -139,6 +140,17 @@ public class EthSignerProcessRunner {
       params.add("--data-path");
       params.add(dataPath.toAbsolutePath().toString());
     }
+    if (signerConfig.serverTlsOptions().isPresent()) {
+      final TlsOptions serverTlsOptions = signerConfig.serverTlsOptions().get();
+      params.add("--tls-keystore-file");
+      params.add(serverTlsOptions.getKeyStoreFile().toString());
+      params.add("--tls-keystore-password-file");
+      params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
+      if (serverTlsOptions.getKnownClientsFile().isPresent()) {
+        params.add("--tls-known-clients-file");
+        params.add(serverTlsOptions.getKnownClientsFile().get().toString());
+      }
+    }
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
@@ -148,6 +160,14 @@ public class EthSignerProcessRunner {
             .directory(new File(System.getProperty("user.dir")).getParentFile())
             .redirectErrorStream(true)
             .redirectInput(Redirect.INHERIT);
+
+    if (Boolean.getBoolean("debugSubProcess")) {
+      processBuilder
+          .environment()
+          .put(
+              "JAVA_OPTS",
+              "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+    }
 
     try {
       final Process process = processBuilder.start();
@@ -160,6 +180,10 @@ public class EthSignerProcessRunner {
     if (useDynamicPortAllocation) {
       loadPortsFile();
     }
+  }
+
+  public boolean isRunning(final String processName) {
+    return (processes.get(processName) != null) && processes.get(processName).isAlive();
   }
 
   private String executableLocation() {
@@ -222,8 +246,9 @@ public class EthSignerProcessRunner {
   }
 
   private void awaitPortsFile(final Path dataDir) {
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 30;
     final File file = new File(dataDir.toFile(), PORTS_FILENAME);
-    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+    Awaitility.waitAtMost(secondsToWait, TimeUnit.SECONDS)
         .until(
             () -> {
               if (file.exists()) {

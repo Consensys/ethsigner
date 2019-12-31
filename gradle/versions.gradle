@@ -62,5 +62,8 @@ dependencyManagement {
 
     dependency 'org.apache.tuweni:tuweni-toml:0.9.0'
     dependency 'org.apache.tuweni:tuweni-net:0.9.0'
+    
+    dependency 'org.bouncycastle:bcpkix-jdk15on:1.60'
+
   }
 }

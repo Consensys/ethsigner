@@ -12,9 +12,11 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import tech.pegasys.ethsigner.core.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class SignerConfigurationBuilder {
 
@@ -28,6 +30,7 @@ public class SignerConfigurationBuilder {
   private String keyVaultName;
   private Path multiKeySignerDirectory;
   private HashicorpVault hashicorpVault;
+  private TlsOptions serverTlsOptions;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -55,10 +58,20 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withServerTlsOptions(final TlsOptions serverTlsOptions) {
+    this.serverTlsOptions = serverTlsOptions;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(hashicorpVault, keyVaultName, multiKeySignerDirectory);
     return new SignerConfiguration(
-        CHAIN_ID, LOCALHOST, httpRpcPort, webSocketPort, transactionSignerParamsSupplier);
+        CHAIN_ID,
+        LOCALHOST,
+        httpRpcPort,
+        webSocketPort,
+        transactionSignerParamsSupplier,
+        Optional.ofNullable(serverTlsOptions));
   }
 }
