@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 public class HashicorpTransactionSignerTest {
 
-  private final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory();
+  private final HashicorpSigner hashicorpSigner = new HashicorpSigner();
 
   @Test
   public void vaultTimingOut() throws IOException {
@@ -36,7 +36,7 @@ public class HashicorpTransactionSignerTest {
 
     assertThatThrownBy(
             () ->
-                hashicorpSignerFactory.createSigner(
+                hashicorpSigner.createSigner(
                     new HashicorpConfig(
                         "signingKeyPath", "serverHost", 877, authFile.toPath(), 1L)))
         .isInstanceOf(TransactionSignerInitializationException.class);
@@ -47,7 +47,7 @@ public class HashicorpTransactionSignerTest {
 
     assertThatThrownBy(
             () ->
-                hashicorpSignerFactory.createSigner(
+                hashicorpSigner.createSigner(
                     new HashicorpConfig(
                         "signingKeyPath", "serverHost", 877, Paths.get("nonExistingFile"), 1L)))
         .isInstanceOf(TransactionSignerInitializationException.class);

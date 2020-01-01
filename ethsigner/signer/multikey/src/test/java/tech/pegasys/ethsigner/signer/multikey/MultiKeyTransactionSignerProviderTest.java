@@ -23,7 +23,7 @@ import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.copyMet
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSigner;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
@@ -46,7 +46,7 @@ class MultiKeyTransactionSignerProviderTest {
   private SigningMetadataTomlConfigLoader loader = mock(SigningMetadataTomlConfigLoader.class);
   final AzureKeyVaultTransactionSignerFactory azureFactory =
       new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-  private final HashicorpSignerFactory hashicorpFactory = new HashicorpSignerFactory();
+  private final HashicorpSigner hashicorpFactory = new HashicorpSigner();
   private MultiKeyTransactionSignerProvider signerFactory =
       new MultiKeyTransactionSignerProvider(loader, azureFactory, hashicorpFactory);
   private FileBasedSigningMetadataFile metadataFile;

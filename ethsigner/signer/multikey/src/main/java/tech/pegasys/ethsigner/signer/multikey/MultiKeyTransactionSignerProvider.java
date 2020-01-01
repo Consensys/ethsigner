@@ -17,7 +17,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSigner;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -38,12 +38,12 @@ public class MultiKeyTransactionSignerProvider
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
-  private final HashicorpSignerFactory hashicorpFactory;
+  private final HashicorpSigner hashicorpFactory;
 
   MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory,
-      final HashicorpSignerFactory hashicorpFactory) {
+      final HashicorpSigner hashicorpFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
     this.hashicorpFactory = hashicorpFactory;

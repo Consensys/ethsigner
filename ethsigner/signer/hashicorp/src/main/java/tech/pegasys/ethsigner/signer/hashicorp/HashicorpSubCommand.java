@@ -78,7 +78,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
         new HashicorpConfig(signingKeyPath, serverHost, serverPort, authFilePath, timeout);
-    final HashicorpSignerFactory factory = new HashicorpSignerFactory();
+    final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }
 

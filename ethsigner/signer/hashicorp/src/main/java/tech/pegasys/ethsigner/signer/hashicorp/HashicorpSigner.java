@@ -34,7 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class HashicorpSignerFactory {
+public class HashicorpSigner {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
@@ -45,14 +45,11 @@ public class HashicorpSignerFactory {
   private static final String TIMEOUT_MESSAGE =
       "Timeout while retrieving private key from Hashicorp Vault.";
 
-  public TransactionSigner createSigner(final HashicorpConfig hashicorpConfig) {
-    final String response =
-        requestSecretFromVault(
-            hashicorpConfig.getSigningKeyPath(),
-            hashicorpConfig.getPort(),
-            hashicorpConfig.getHost(),
-            hashicorpConfig.getAuthFilePath(),
-            hashicorpConfig.getTimeout());
+  private HashicorpConfig hashicorpConfig;
+
+  public TransactionSigner createSigner(HashicorpConfig hashicorpConfig) {
+    this.hashicorpConfig = hashicorpConfig;
+    final String response = requestSecretFromVault();
     final Credentials credentials = extractCredentialsFromJson(response);
     if (credentials.getAddress() != null) {
       LOG.debug("Successfully retrieved the credentials from the Hashicorp vault.");
@@ -60,15 +57,15 @@ public class HashicorpSignerFactory {
     return new CredentialTransactionSigner(credentials);
   }
 
-  private static String requestSecretFromVault(
-      final String signingKeyPath,
-      final int serverPort,
-      final String serverHost,
-      final Path authFilePath,
-      final long timeout) {
-    final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + signingKeyPath;
+  private String requestSecretFromVault() {
+    final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + hashicorpConfig.getSigningKeyPath();
 
-    return getVaultResponse(serverPort, serverHost, authFilePath, requestURI, timeout);
+    return getVaultResponse(
+        hashicorpConfig.getPort(),
+        hashicorpConfig.getHost(),
+        hashicorpConfig.getAuthFilePath(),
+        requestURI,
+        hashicorpConfig.getTimeout());
   }
 
   private static String getVaultResponse(
