@@ -50,8 +50,8 @@ public class OkHttpClientHelpers {
     try {
       final KeyManager[] keyManagers;
       final TrustManager[] trustManagers;
-
       final X509TrustManager trustManager;
+
       if (clientCertificate.isPresent()) {
         keyManagers = createKeyManagers(clientCertificate.get());
       } else {
@@ -75,20 +75,9 @@ public class OkHttpClientHelpers {
 
       clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
 
-    } catch (final KeyStoreException | UnrecoverableKeyException e) {
+    } catch (final KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
       throw new InitializationException(
-          "Unable to construct a TLS client during test setup, failed to setup keystore.", e);
-    } catch (final NoSuchAlgorithmException e) {
-      throw new InitializationException(
-          "Unable to construct a TLS client during test setup, missing encryption algorithm.");
-    } catch (final KeyManagementException e) {
-      throw new InitializationException(
-          "Unable to construct a TLS client during test setup due to KeyManagementException");
-    } catch (final CertificateException e) {
-      throw new InitializationException(
-          "Unable to construct a X509 certificate for EthSigner client, using supplied file.");
-    } catch (final IOException e) {
-      throw new InitializationException("Unable to load TLS Keystore/certificate", e);
+          "Failed to initialize TLS on the link to downstream web3 provider.", e);
     }
 
     return clientBuilder.build();
@@ -112,41 +101,68 @@ public class OkHttpClientHelpers {
     throw new InitializationException("Unable to find the default X509 trust manager.");
   }
 
-  private static KeyManager[] createKeyManagers(final PkcsStoreConfig certToPresent)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-          UnrecoverableKeyException, IOException {
+  private static KeyManager[] createKeyManagers(final PkcsStoreConfig certToPresent) {
     if (certToPresent == null) {
       return null;
     }
-    final String password = readSecretFromFile(certToPresent.getStorePasswordFile().toPath());
 
-    final KeyStore clientCertStore = loadP12KeyStore(certToPresent.getStoreFile(), password);
+    final String password;
+    try {
+      password = readSecretFromFile(certToPresent.getStorePasswordFile().toPath());
+    } catch (final IOException e) {
+      throw new InitializationException("Failed to load web3 client certificate password file", e);
+    }
 
-    final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
-    kmf.init(clientCertStore, password.toCharArray());
-    return kmf.getKeyManagers();
+    try {
+      final KeyStore clientCertStore = loadP12KeyStore(certToPresent.getStoreFile(), password);
+
+      final KeyManagerFactory kmf = KeyManagerFactory.getInstance("PKIX");
+      kmf.init(clientCertStore, password.toCharArray());
+      return kmf.getKeyManagers();
+    } catch (final KeyStoreException e) {
+      throw new InitializationException(
+          "Failed to load the PKCS#12 Keystore for client certificate presentation.", e);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new InitializationException("KeyManagerFactory cannot be found for PKIX", e);
+    } catch (UnrecoverableKeyException | CertificateException e) {
+      throw new InitializationException("Certificate unable to be read from keystore", e);
+    } catch (final IOException e) {
+      throw new InitializationException("Unable to load supplied client keystore", e);
+    }
   }
 
-  private static TrustManagerFactory createTrustManagerFactory(final PkcsStoreConfig serverCert)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+  private static TrustManagerFactory createTrustManagerFactory(final PkcsStoreConfig serverCert) {
 
-    final String password = readSecretFromFile(serverCert.getStorePasswordFile().toPath());
-    final KeyStore trustStore = loadP12KeyStore(serverCert.getStoreFile(), password);
-    final TrustManagerFactory trustManagerFactory =
-        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    trustManagerFactory.init(trustStore);
+    final String password;
+    try {
+      password = readSecretFromFile(serverCert.getStorePasswordFile().toPath());
+    } catch (final IOException e) {
+      throw new InitializationException("Failed to load web3 truststore password file", e);
+    }
 
-    return trustManagerFactory;
+    try {
+      final KeyStore trustStore = loadP12KeyStore(serverCert.getStoreFile(), password);
+      final TrustManagerFactory trustManagerFactory =
+          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      trustManagerFactory.init(trustStore);
+      return trustManagerFactory;
+    } catch (final KeyStoreException e) {
+      throw new InitializationException(
+          "Failed to load the PKCS#12 Keystore for web3 authenticating truststore.", e);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new InitializationException("Default TrustManagerFactory cannot be found.", e);
+    } catch (CertificateException e) {
+      throw new InitializationException("Certificate unable to be read from keystore", e);
+    } catch (final IOException e) {
+      throw new InitializationException("Failed to load the Web3 Trust store file", e);
+    }
   }
 
   private static KeyStore loadP12KeyStore(final File pkcsFile, final String password)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
     final KeyStore store = KeyStore.getInstance("pkcs12");
-    try (final InputStream keystoreStream = new FileInputStream(pkcsFile)) {
-      store.load(keystoreStream, password.toCharArray());
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to load keystore.", e);
-    }
+    final InputStream keystoreStream = new FileInputStream(pkcsFile);
+    store.load(keystoreStream, password.toCharArray());
     return store;
   }
 
