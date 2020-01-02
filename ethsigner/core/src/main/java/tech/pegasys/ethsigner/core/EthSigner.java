@@ -100,16 +100,15 @@ public final class EthSigner {
       try {
         if (config.getWeb3TrustStoreOptions().isPresent()) {
           result.setPfxTrustOptions(convertFrom(config.getWeb3TrustStoreOptions().get()));
-        } else {
-          result.setTrustAll(true);
         }
+        // else - use default truststore
       } catch (final IOException e) {
         throw new InitializationException("Failed to load web3 trust store.", e);
       }
 
       if (config.getClientCertificateOptions().isPresent()) {
         try {
-          result.setPfxTrustOptions(convertFrom(config.getClientCertificateOptions().get()));
+          result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
         } catch (final IOException e) {
           throw new InitializationException("Failed to load client certificate.", e);
         }

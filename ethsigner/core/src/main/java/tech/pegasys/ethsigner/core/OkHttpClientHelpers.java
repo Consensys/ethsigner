@@ -27,8 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.Optional;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -49,8 +47,6 @@ public class OkHttpClientHelpers {
 
     final OkHttpClient.Builder clientBuilder = input.newBuilder();
 
-    new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
-
     try {
       final KeyManager[] keyManagers;
       final TrustManager[] trustManagers;
@@ -69,23 +65,9 @@ public class OkHttpClientHelpers {
         trustManager = (X509TrustManager) trustManagers[0];
 
       } else {
+        // use default trust store
         trustManagers = null;
-        // Trust all servers
-        trustManager =
-            new X509TrustManager() {
-              @Override
-              public void checkClientTrusted(
-                  final X509Certificate[] chain, final String authType) {}
-
-              @Override
-              public void checkServerTrusted(
-                  final X509Certificate[] chain, final String authType) {}
-
-              @Override
-              public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[0];
-              }
-            };
+        trustManager = defaultTrustManager();
       }
 
       final SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -110,6 +92,24 @@ public class OkHttpClientHelpers {
     }
 
     return clientBuilder.build();
+  }
+
+  private static X509TrustManager defaultTrustManager()
+      throws NoSuchAlgorithmException, KeyStoreException {
+    final TrustManagerFactory trustManagerFactory =
+        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
+    trustManagerFactory.init((KeyStore) null);
+
+    System.out.println("JVM Default Trust Managers:");
+    for (TrustManager trustManager : trustManagerFactory.getTrustManagers()) {
+      System.out.println(trustManager);
+
+      if (trustManager instanceof X509TrustManager) {
+        return (X509TrustManager) trustManager;
+      }
+    }
+    throw new InitializationException("Unable to find the default X509 trust manager.");
   }
 
   private static KeyManager[] createKeyManagers(final PkcsStoreConfig certToPresent)
