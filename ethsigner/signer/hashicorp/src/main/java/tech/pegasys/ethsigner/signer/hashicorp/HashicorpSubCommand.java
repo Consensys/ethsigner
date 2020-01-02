@@ -43,32 +43,32 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
 
-  static class TlsClientCertificateOptions implements PkcsStoreConfig {
+  static class HashicorpTrustStore implements PkcsStoreConfig {
 
     @Option(
-        names = "--tls-client-certificate-file",
+        names = "--tls-server-truststore-file",
         description =
-            "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
-                + "a TLS-enabled web3 provider",
+            "Path to a PKCS#12 formatted truststore, containing all trusted root "
+                + "certificates.",
         arity = "1",
         required = true)
-    private File clientCertificateFile;
+    private File truststoreFile;
 
     @Option(
-        names = "--tls-client-certificate-password-file",
-        description = "Path to a file containing the password used to decrypt the client cert.",
+        names = "--tls-server-truststore-password-file",
+        description = "Path to a file containing the password used to decrypt the truststore.",
         arity = "1",
         required = true)
-    private File clientCertificatePasswordFile;
+    private File truststorePasswordFile;
 
     @Override
     public File getStoreFile() {
-      return clientCertificateFile;
+      return truststoreFile;
     }
 
     @Override
     public File getStorePasswordFile() {
-      return clientCertificatePasswordFile;
+      return truststorePasswordFile;
     }
   }
 
@@ -109,17 +109,12 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @ArgGroup(exclusive = false)
-  private TlsClientCertificateOptions clientTlsCertificateOptions;
+  private HashicorpTrustStore trustStore;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
         new HashicorpConfig(
-            signingKeyPath,
-            serverHost,
-            serverPort,
-            authFilePath,
-            timeout,
-            Optional.of(clientTlsCertificateOptions));
+            signingKeyPath, serverHost, serverPort, authFilePath, timeout, Optional.of(trustStore));
     final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }
@@ -136,7 +131,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   }
 
   public Optional<PkcsStoreConfig> getTlsOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
+    return Optional.ofNullable(trustStore);
   }
 
   @Override
@@ -147,7 +142,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
-        .add("tlsOptions", clientTlsCertificateOptions)
+        .add("tlsOptions", trustStore)
         .toString();
   }
 }
