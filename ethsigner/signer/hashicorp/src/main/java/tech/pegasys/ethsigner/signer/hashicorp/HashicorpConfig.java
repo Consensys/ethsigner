@@ -112,7 +112,8 @@ public class HashicorpConfig {
       checkNotNull(authFilePath, "Auth File Path was not set.");
       checkNotNull(timeout, "Timeout was not set.");
 
-      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout, Optional.ofNullable(tlsOptions));
+      return new HashicorpConfig(
+          signingKeyPath, host, port, authFilePath, timeout, Optional.ofNullable(tlsOptions));
     }
   }
 }
