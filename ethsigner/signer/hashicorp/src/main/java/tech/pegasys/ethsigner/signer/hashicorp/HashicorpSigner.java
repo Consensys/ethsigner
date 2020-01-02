@@ -87,7 +87,7 @@ public class HashicorpSigner {
         }
 
       } catch (final IOException e) {
-        throw new InitializationException("Failed to load web3 trust store.", e);
+        throw new InitializationException("Failed to load Hashicorp trust store.", e);
       }
 
       final HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
