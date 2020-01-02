@@ -114,7 +114,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
         new HashicorpConfig(
-            signingKeyPath, serverHost, serverPort, authFilePath, timeout, Optional.of(trustStore));
+            signingKeyPath, serverHost, serverPort, authFilePath, timeout, getTlsOptions());
     final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }
@@ -142,7 +142,6 @@ public class HashicorpSubCommand extends SignerSubCommand {
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
-        .add("tlsOptions", trustStore)
         .toString();
   }
 }
