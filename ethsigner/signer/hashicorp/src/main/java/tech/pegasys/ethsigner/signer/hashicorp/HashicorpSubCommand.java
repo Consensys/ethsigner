@@ -14,14 +14,18 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -38,6 +42,35 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
+
+  static class TlsClientCertificateOptions implements PkcsStoreConfig {
+
+    @Option(
+        names = "--tls-client-certificate-file",
+        description =
+            "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
+                + "a TLS-enabled web3 provider",
+        arity = "1",
+        required = true)
+    private File clientCertificateFile;
+
+    @Option(
+        names = "--tls-client-certificate-password-file",
+        description = "Path to a file containing the password used to decrypt the client cert.",
+        arity = "1",
+        required = true)
+    private File clientCertificatePasswordFile;
+
+    @Override
+    public File getStoreFile() {
+      return clientCertificateFile;
+    }
+
+    @Override
+    public File getStorePasswordFile() {
+      return clientCertificatePasswordFile;
+    }
+  }
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -75,9 +108,18 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
+  @ArgGroup(exclusive = false)
+  private TlsClientCertificateOptions clientTlsCertificateOptions;
+
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
-        new HashicorpConfig(signingKeyPath, serverHost, serverPort, authFilePath, timeout);
+        new HashicorpConfig(
+            signingKeyPath,
+            serverHost,
+            serverPort,
+            authFilePath,
+            timeout,
+            Optional.of(clientTlsCertificateOptions));
     final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }

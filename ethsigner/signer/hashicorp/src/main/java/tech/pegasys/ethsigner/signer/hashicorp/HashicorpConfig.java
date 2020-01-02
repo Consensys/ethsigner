@@ -14,7 +14,10 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class HashicorpConfig {
   private final String signingKeyPath;
@@ -22,18 +25,21 @@ public class HashicorpConfig {
   private final Integer port;
   private final Path authFilePath;
   private final Long timeout;
+  private final Optional<PkcsStoreConfig> tlsOptions;
 
   public HashicorpConfig(
       final String signingKeyPath,
       final String host,
       final Integer port,
       final Path authFilePath,
-      final Long timeout) {
+      final Long timeout,
+      final Optional<PkcsStoreConfig> tlsOptions) {
     this.signingKeyPath = signingKeyPath;
     this.host = host;
     this.port = port;
     this.authFilePath = authFilePath;
     this.timeout = timeout;
+    this.tlsOptions = tlsOptions;
   }
 
   public String getHost() {
@@ -56,6 +62,10 @@ public class HashicorpConfig {
     return signingKeyPath;
   }
 
+  public Optional<PkcsStoreConfig> getTlsOptions() {
+    return tlsOptions;
+  }
+
   public static class HashicorpConfigBuilder {
 
     private String signingKeyPath;
@@ -63,6 +73,7 @@ public class HashicorpConfig {
     private Integer port;
     private Path authFilePath;
     private Long timeout;
+    private Optional<PkcsStoreConfig> tlsOptions;
 
     public HashicorpConfigBuilder withSigningKeyPath(final String signingKeyPath) {
       this.signingKeyPath = signingKeyPath;
@@ -89,6 +100,11 @@ public class HashicorpConfig {
       return this;
     }
 
+    public HashicorpConfigBuilder withTlsOptions(final Optional<PkcsStoreConfig> tlsOptions) {
+      this.tlsOptions = tlsOptions;
+      return this;
+    }
+
     public HashicorpConfig build() {
       checkNotNull(signingKeyPath, "Signing Key Path was not set.");
       checkNotNull(host, "Host was not set.");
@@ -96,7 +112,7 @@ public class HashicorpConfig {
       checkNotNull(authFilePath, "Auth File Path was not set.");
       checkNotNull(timeout, "Timeout was not set.");
 
-      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout);
+      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout, tlsOptions);
     }
   }
 }

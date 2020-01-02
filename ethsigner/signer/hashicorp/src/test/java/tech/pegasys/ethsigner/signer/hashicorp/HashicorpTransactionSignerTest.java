@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,12 @@ public class HashicorpTransactionSignerTest {
             () ->
                 hashicorpSigner.createSigner(
                     new HashicorpConfig(
-                        "signingKeyPath", "serverHost", 877, authFile.toPath(), 1L)))
+                        "signingKeyPath",
+                        "serverHost",
+                        877,
+                        authFile.toPath(),
+                        1L,
+                        Optional.empty())))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
@@ -49,7 +55,12 @@ public class HashicorpTransactionSignerTest {
             () ->
                 hashicorpSigner.createSigner(
                     new HashicorpConfig(
-                        "signingKeyPath", "serverHost", 877, Paths.get("nonExistingFile"), 1L)))
+                        "signingKeyPath",
+                        "serverHost",
+                        877,
+                        Paths.get("nonExistingFile"),
+                        1L,
+                        Optional.empty())))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
 

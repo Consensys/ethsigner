@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.ethsigner.core.InitializationException;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
 
@@ -27,9 +29,11 @@ import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PfxOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -68,7 +72,7 @@ public class HashicorpSigner {
         hashicorpConfig.getTimeout());
   }
 
-  private static String getVaultResponse(
+  private String getVaultResponse(
       final int serverPort,
       final String serverHost,
       final Path authFilePath,
@@ -76,7 +80,18 @@ public class HashicorpSigner {
       final long timeout) {
     final Vertx vertx = Vertx.vertx();
     try {
-      final HttpClient httpClient = vertx.createHttpClient();
+      HttpClientOptions httpClientOptions = new HttpClientOptions();
+      try {
+        if (hashicorpConfig.getTlsOptions().isPresent()) {
+          httpClientOptions.setPfxTrustOptions(convertFrom(hashicorpConfig.getTlsOptions().get()));
+        }
+
+      } catch (final IOException e) {
+        throw new InitializationException("Failed to load web3 trust store.", e);
+      }
+
+      final HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
+
       final CompletableFuture<String> future = new CompletableFuture<>();
       final HttpClientRequest request =
           httpClient.request(
@@ -106,6 +121,11 @@ public class HashicorpSigner {
         vertx.close();
       }
     }
+  }
+
+  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
+    final String password = readTokenFromFile(pkcsConfig.getStorePasswordFile().toPath());
+    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
   }
 
   private static String readTokenFromFile(final Path path) {
