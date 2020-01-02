@@ -73,7 +73,7 @@ public class HashicorpConfig {
     private Integer port;
     private Path authFilePath;
     private Long timeout;
-    private Optional<PkcsStoreConfig> tlsOptions;
+    private PkcsStoreConfig tlsOptions;
 
     public HashicorpConfigBuilder withSigningKeyPath(final String signingKeyPath) {
       this.signingKeyPath = signingKeyPath;
@@ -100,7 +100,7 @@ public class HashicorpConfig {
       return this;
     }
 
-    public HashicorpConfigBuilder withTlsOptions(final Optional<PkcsStoreConfig> tlsOptions) {
+    public HashicorpConfigBuilder withTlsOptions(final PkcsStoreConfig tlsOptions) {
       this.tlsOptions = tlsOptions;
       return this;
     }
@@ -112,7 +112,7 @@ public class HashicorpConfig {
       checkNotNull(authFilePath, "Auth File Path was not set.");
       checkNotNull(timeout, "Timeout was not set.");
 
-      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout, tlsOptions);
+      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout, Optional.ofNullable(tlsOptions));
     }
   }
 }
