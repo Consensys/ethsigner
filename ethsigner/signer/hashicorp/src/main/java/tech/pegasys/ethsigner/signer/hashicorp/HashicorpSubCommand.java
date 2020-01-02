@@ -135,6 +135,10 @@ public class HashicorpSubCommand extends SignerSubCommand {
     return COMMAND_NAME;
   }
 
+  public Optional<PkcsStoreConfig> getTlsOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
+  }
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
@@ -143,6 +147,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
+        .add("tlsOptions", clientTlsCertificateOptions)
         .toString();
   }
 }

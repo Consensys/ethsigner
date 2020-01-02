@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 
@@ -24,13 +25,16 @@ import picocli.CommandLine;
 
 public class HashicorpSubCommandTest {
 
+  public static final String CLIENT_CERT_PFX = "./client_cert.pfx";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
       Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
   private static final String FIFTEEN = "15";
+  public static final String CLIENT_CERT_PASSWD = "./client_cert.passwd";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
+
   private HashicorpSubCommand hashiConfig;
 
   private boolean parseCommand(final String cmdLine) {
@@ -57,15 +61,19 @@ public class HashicorpSubCommandTest {
         + " --signing-key-path="
         + PATH_TO_SIGNING_KEY
         + " --timeout="
-        + FIFTEEN;
+        + FIFTEEN
+        + " --tls-client-certificate-file="
+        + CLIENT_CERT_PFX
+        + " --tls-client-certificate-password-file="
+        + CLIENT_CERT_PASSWD;
   }
 
-  private String removeFieldFrom(final String input, final String fieldname) {
-    return input.replaceAll("--" + fieldname + "=.*?(\\s|$)", "");
+  private String removeFieldFrom(final String input, final String fieldName) {
+    return input.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
   }
 
-  private String modifyField(final String input, final String fieldname, final String value) {
-    return input.replaceFirst("--" + fieldname + "=.*\\b", "--" + fieldname + "=" + value);
+  private String modifyField(final String input, final String fieldName, final String value) {
+    return input.replaceFirst("--" + fieldName + "=.*\\b", "--" + fieldName + "=" + value);
   }
 
   @Test
@@ -79,6 +87,11 @@ public class HashicorpSubCommandTest {
     assertThat(string).contains(PORT);
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
     assertThat(string).contains(FIFTEEN);
+
+    assertThat(hashiConfig.getTlsOptions().get().getStoreFile())
+        .isEqualTo(new File(CLIENT_CERT_PFX));
+    assertThat(hashiConfig.getTlsOptions().get().getStorePasswordFile())
+        .isEqualTo(new File(CLIENT_CERT_PASSWD));
   }
 
   @Test
@@ -113,6 +126,28 @@ public class HashicorpSubCommandTest {
     hcConfig = new HashicorpSubCommand();
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
+  }
+
+  @Test
+  void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
+    missingParameterShowsError("tls-client-certificate-file");
+  }
+
+  @Test
+  void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
+    missingParameterShowsError("tls-client-certificate-password-file");
+  }
+
+  @Test
+  void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
+    String cmdLine = validCommandLine();
+    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-password-file");
+
+    final boolean result = parseCommand(cmdLine);
+
+    assertThat(result).isTrue();
+    assertThat(hashiConfig.getTlsOptions()).isEmpty();
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
