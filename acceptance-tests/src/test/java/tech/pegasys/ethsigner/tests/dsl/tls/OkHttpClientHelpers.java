@@ -64,7 +64,7 @@ public class OkHttpClientHelpers {
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(
-            keyManagers, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
+            keyManagers, trustManagerFactory.getTrustManagers(), null);
 
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
       } catch (final KeyStoreException | UnrecoverableKeyException e) {
