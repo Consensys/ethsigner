@@ -24,6 +24,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Optional;
@@ -70,7 +71,7 @@ public class OkHttpClientHelpers {
       }
 
       final SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(keyManagers, trustManagers, null);
+      sslContext.init(keyManagers, trustManagers, new SecureRandom());
 
       clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
 
