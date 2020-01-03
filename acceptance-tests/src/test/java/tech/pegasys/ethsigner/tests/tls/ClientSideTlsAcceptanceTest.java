@@ -13,8 +13,9 @@
 package tech.pegasys.ethsigner.tests.tls;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static tech.pegasys.ethsigner.tests.tls.TlsEnabledHttpServer.createServer;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServer.createServer;
 
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -22,6 +23,8 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
+import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -38,9 +41,26 @@ import org.web3j.protocol.exceptions.ClientConnectionException;
 
 class ClientSideTlsAcceptanceTest {
 
+  private Signer createAndStartSigner(
+      final TlsCertificateDefinition presentedCert,
+      final TlsCertificateDefinition expectedWeb3ProviderCert,
+      final int downstreamWeb3Port,
+      final int listenPort,
+      final Path workDir)
+      throws IOException {
+    final Signer signer =
+        createSigner(
+            presentedCert, expectedWeb3ProviderCert, downstreamWeb3Port, listenPort, workDir);
+    signer.start();
+    signer.awaitStartupCompletion();
+
+    return signer;
+  }
+
   private Signer createSigner(
       final TlsCertificateDefinition presentedCert,
       final TlsCertificateDefinition expectedWeb3ProviderCert,
+      final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
       throws IOException {
@@ -58,13 +78,12 @@ class ClientSideTlsAcceptanceTest {
             expectedWeb3ProviderCert.getPkcs12File(), serverPasswordFile.toFile()));
     builder.withDownstreamKeyStore(
         new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
+    builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(listenPort, 9);
+    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, 9);
 
     final Signer signer = new Signer(builder.build(), nodeConfig, nodePorts);
-    signer.start();
-    signer.awaitStartupCompletion();
 
     return signer;
   }
@@ -82,7 +101,8 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer = createServer(serverCert, ethSignerCert, workDir);
 
     final Signer signer =
-        createSigner(ethSignerCert, serverCert, web3ProviderHttpServer.actualPort(), workDir);
+        createAndStartSigner(
+            ethSignerCert, serverCert, web3ProviderHttpServer.actualPort(), 0, workDir);
 
     assertThat(signer.accounts().balance("0x123456"))
         .isEqualTo(BigInteger.valueOf(MockBalanceReporter.REPORTED_BALANCE));
@@ -102,19 +122,44 @@ class ClientSideTlsAcceptanceTest {
         createServer(serverPresentedCert, ethSignerCert, workDir);
 
     final Signer signer =
-        createSigner(
+        createAndStartSigner(
             ethSignerCert,
             ethSignerExpectedServerCert,
             web3ProviderHttpServer.actualPort(),
+            0,
             workDir);
 
-    final Throwable thrown =
-        catchThrowable(
-            () ->
-                assertThat(signer.accounts().balance("0x123456"))
-                    .isEqualTo(BigInteger.valueOf(MockBalanceReporter.REPORTED_BALANCE)));
+    assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
+        .isInstanceOf(ClientConnectionException.class)
+        .hasMessageContaining("500");
+  }
 
-    assertThat(thrown).isInstanceOf(ClientConnectionException.class);
-    assertThat(thrown.getMessage()).contains("500");
+  @Test
+  void missingKeyStoreForEthSignerResultsTerminatesEthSigner(@TempDir Path workDir)
+      throws IOException {
+    final TlsCertificateDefinition serverPresentedCert =
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
+    final TlsCertificateDefinition ethSignerCert =
+        new TlsCertificateDefinition(
+            workDir.resolve("Missing_keyStore").toFile(), "arbitraryPassword");
+
+    // Ports are arbitrary as EthSigner should exit
+    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer.start();
+    waitFor(() -> assertThat(signer.isRunning()).isFalse());
+  }
+
+  @Test
+  void incorrectPasswordForWeb3ProviderKeyStroreResultsInEthSignerTerminating(@TempDir Path workDir)
+      throws IOException {
+    final TlsCertificateDefinition serverPresentedCert =
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
+    final TlsCertificateDefinition ethSignerCert =
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
+
+    // Ports are arbitrary as EthSigner should exit
+    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer.start();
+    waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }
 }
