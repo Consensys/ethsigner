@@ -153,7 +153,7 @@ public class EthSignerProcessRunner {
       }
     }
 
-    if(signerConfig.downstreamKeyStore().isPresent()) {
+    if (signerConfig.downstreamKeyStore().isPresent()) {
       final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamKeyStore().get();
       params.add("--tls-client-certificate-file");
       params.add(keyStoreConfig.getStoreFile().toString());
@@ -161,7 +161,7 @@ public class EthSignerProcessRunner {
       params.add(keyStoreConfig.getStorePasswordFile().toString());
     }
 
-    if(signerConfig.downstreamTrustStore().isPresent()) {
+    if (signerConfig.downstreamTrustStore().isPresent()) {
       final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamTrustStore().get();
       params.add("--tls-server-truststore-file");
       params.add(keyStoreConfig.getStoreFile().toString());

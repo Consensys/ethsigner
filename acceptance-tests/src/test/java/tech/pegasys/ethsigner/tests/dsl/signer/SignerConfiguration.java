@@ -80,9 +80,13 @@ public class SignerConfiguration {
     return serverTlsOptions;
   }
 
-  public Optional<PkcsStoreConfig> downstreamTrustStore() { return downstreamConnectionTrustStore; }
+  public Optional<PkcsStoreConfig> downstreamTrustStore() {
+    return downstreamConnectionTrustStore;
+  }
 
-  public Optional<PkcsStoreConfig> downstreamKeyStore() { return downstreamConnectionKeyStore; }
+  public Optional<PkcsStoreConfig> downstreamKeyStore() {
+    return downstreamConnectionKeyStore;
+  }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
     return transactionSignerParamsSupplier;
