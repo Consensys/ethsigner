@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
@@ -39,8 +40,10 @@ public class VertxRequestTransmitter {
   }
 
   private void handleException(final RoutingContext context, final Throwable thrown) {
-    if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
+    if (thrown instanceof TimeoutException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
+    } else if(thrown instanceof ConnectException) {
+      context.fail(BAD_GATEWAY.code(), thrown);
     } else {
       context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
     }
