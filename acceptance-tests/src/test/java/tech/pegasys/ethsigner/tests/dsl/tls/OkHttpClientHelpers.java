@@ -25,7 +25,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -63,8 +62,7 @@ public class OkHttpClientHelpers {
         final X509TrustManager trustManager =
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(
-            keyManagers, trustManagerFactory.getTrustManagers(), null);
+        sslContext.init(keyManagers, trustManagerFactory.getTrustManagers(), null);
 
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
       } catch (final KeyStoreException | UnrecoverableKeyException e) {
