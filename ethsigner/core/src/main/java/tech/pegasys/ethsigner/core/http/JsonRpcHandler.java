@@ -36,7 +36,7 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
   public JsonRpcHandler(
       final HttpResponseFactory responseFactory,
       final RequestMapper requestHandlerMapper,
-      JsonDecoder jsonDecoder) {
+      final JsonDecoder jsonDecoder) {
     this.responseFactory = responseFactory;
     this.requestHandlerMapper = requestHandlerMapper;
     this.jsonDecoder = jsonDecoder;
