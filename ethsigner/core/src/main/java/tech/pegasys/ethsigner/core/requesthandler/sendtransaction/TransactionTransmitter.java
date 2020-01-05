@@ -66,17 +66,11 @@ public class TransactionTransmitter {
   }
 
   private void createSignedTransactionBody() {
-    final String signedTransactionHexString;
+
     try {
       if (!transaction.isNonceUserSpecified()) {
         transaction.updateNonce();
       }
-
-      signedTransactionHexString = transactionSerializer.serialize(transaction);
-    } catch (final IllegalArgumentException e) {
-      LOG.debug("Failed to encode transaction: {}", transaction, e);
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
-      return;
     } catch (final RuntimeException e) {
       LOG.warn("Unable to get nonce from web3j provider.", e);
       final Throwable cause = e.getCause();
@@ -86,6 +80,15 @@ public class TransactionTransmitter {
       } else {
         routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
+      return;
+    }
+
+    final String signedTransactionHexString;
+    try {
+      signedTransactionHexString = transactionSerializer.serialize(transaction);
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("Failed to encode transaction: {}", transaction, e);
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return;
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
