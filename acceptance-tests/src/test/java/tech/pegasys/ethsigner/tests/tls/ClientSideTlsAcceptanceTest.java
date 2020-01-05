@@ -15,8 +15,24 @@ package tech.pegasys.ethsigner.tests.tls;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
+import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServer.createServer;
 
+import io.vertx.core.http.HttpServer;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.exceptions.ClientConnectionException;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Convert.Unit;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -25,19 +41,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import io.vertx.core.http.HttpServer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.web3j.protocol.exceptions.ClientConnectionException;
 
 class ClientSideTlsAcceptanceTest {
 
@@ -132,6 +135,21 @@ class ClientSideTlsAcceptanceTest {
     assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
         .isInstanceOf(ClientConnectionException.class)
         .hasMessageContaining("500");
+
+
+    final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            signer.accounts().richBenefactor().address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
+    signer.transactions().submit(transaction);
+
   }
 
   @Test
@@ -162,4 +180,11 @@ class ClientSideTlsAcceptanceTest {
     signer.start();
     waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }
+/*
+  @Test
+  void transmittingATransactionWithoutNonceToAServerWithMismatchedCertificatesProvidesBadGateway(
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+
+  }
+ */
 }

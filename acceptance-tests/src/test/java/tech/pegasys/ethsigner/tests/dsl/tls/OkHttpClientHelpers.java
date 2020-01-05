@@ -48,8 +48,13 @@ public class OkHttpClientHelpers {
 
   public static OkHttpClient createOkHttpClient(
       final Optional<ClientTlsConfig> clientTlsConfiguration) {
+
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 10;
+
     final OkHttpClient.Builder clientBuilder =
-        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
+        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(secondsToWait));
+
+
 
     if (clientTlsConfiguration.isPresent()) {
       final ClientTlsConfig clientTlsConfig = clientTlsConfiguration.get();
