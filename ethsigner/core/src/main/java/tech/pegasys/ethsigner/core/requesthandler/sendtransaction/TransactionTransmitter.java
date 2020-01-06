@@ -102,7 +102,7 @@ public class TransactionTransmitter {
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return Optional.empty();
     } catch (final Throwable thrown) {
-      LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
+      LOG.debug("Failed to encode transaction: {}", transaction, thrown);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       return Optional.empty();
     }
