@@ -15,8 +15,6 @@ package tech.pegasys.ethsigner.tests.tls.support;
 import static tech.pegasys.ethsigner.core.EthSigner.createJsonDecoder;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
 import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
@@ -29,6 +27,8 @@ import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.Vertx;
@@ -50,7 +50,8 @@ public class TlsEnabledHttpServer {
       final TlsCertificateDefinition serverCert,
       final TlsCertificateDefinition acceptedClientCerts,
       final Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, ExecutionException, InterruptedException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+          ExecutionException, InterruptedException {
 
     final Path serverFingerprintFile = workDir.resolve("server_known_clients");
     populateFingerprintFile(serverFingerprintFile, acceptedClientCerts);
