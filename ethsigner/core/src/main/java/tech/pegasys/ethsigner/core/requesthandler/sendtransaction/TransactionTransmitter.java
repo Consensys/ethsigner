@@ -34,6 +34,7 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.EncodeException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -71,27 +72,18 @@ public class TransactionTransmitter {
 
     try {
       sendTransaction(Json.encodeToBuffer(request.get()));
-    } catch (final IllegalArgumentException e) {
+    } catch (final IllegalArgumentException | EncodeException e) {
       LOG.debug("JSON Serialization failed for: {}", request, e);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
   private Optional<JsonRpcRequest> createSignedTransactionBody() {
-    try {
-      if (!transaction.isNonceUserSpecified()) {
-        transaction.updateNonce();
+
+    if (!transaction.isNonceUserSpecified()) {
+      if (!populateNonce()) {
+        return Optional.empty();
       }
-    } catch (final RuntimeException e) {
-      LOG.warn("Unable to get nonce from web3j provider.", e);
-      final Throwable cause = e.getCause();
-      if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
-        routingContext.fail(
-            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
-      } else {
-        routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
-      }
-      return Optional.empty();
     }
 
     final String signedTransactionHexString;
@@ -108,6 +100,23 @@ public class TransactionTransmitter {
     }
 
     return Optional.of(transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId()));
+  }
+
+  private boolean populateNonce() {
+    try {
+      transaction.updateNonce();
+      return true;
+    } catch (final RuntimeException e) {
+      LOG.warn("Unable to get nonce from web3j provider.", e);
+      final Throwable cause = e.getCause();
+      if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
+        routingContext.fail(
+            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+      } else {
+        routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
+      }
+    }
+    return false;
   }
 
   private void sendTransaction(final Buffer bodyContent) {
