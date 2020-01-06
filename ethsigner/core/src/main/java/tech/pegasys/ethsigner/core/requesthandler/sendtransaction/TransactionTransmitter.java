@@ -27,6 +27,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Optional;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -62,11 +63,21 @@ public class TransactionTransmitter {
   }
 
   public void send() {
-    createSignedTransactionBody();
+    final Optional<JsonRpcRequest> request = createSignedTransactionBody();
+
+    if (request.isEmpty()) {
+      return;
+    }
+
+    try {
+      sendTransaction(Json.encodeToBuffer(request.get()));
+    } catch (final IllegalArgumentException e) {
+      LOG.debug("JSON Serialization failed for: {}", request, e);
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+    }
   }
 
-  private void createSignedTransactionBody() {
-
+  private Optional<JsonRpcRequest> createSignedTransactionBody() {
     try {
       if (!transaction.isNonceUserSpecified()) {
         transaction.updateNonce();
@@ -80,7 +91,7 @@ public class TransactionTransmitter {
       } else {
         routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
-      return;
+      return Optional.empty();
     }
 
     final String signedTransactionHexString;
@@ -89,21 +100,14 @@ public class TransactionTransmitter {
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", transaction, e);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
-      return;
+      return Optional.empty();
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
-      return;
+      return Optional.empty();
     }
 
-    final JsonRpcRequest rawTransaction =
-        transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId());
-    try {
-      sendTransaction(Json.encodeToBuffer(rawTransaction));
-    } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Serialization failed for: {}", rawTransaction, e);
-      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
-    }
+    return Optional.of(transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId()));
   }
 
   private void sendTransaction(final Buffer bodyContent) {
