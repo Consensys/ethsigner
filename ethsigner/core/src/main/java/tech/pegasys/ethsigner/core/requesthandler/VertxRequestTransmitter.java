@@ -19,12 +19,12 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import java.net.ConnectException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLHandshakeException;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.web.RoutingContext;
-import javax.net.ssl.SSLHandshakeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +43,7 @@ public class VertxRequestTransmitter {
   private void handleException(final RoutingContext context, final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
-    } else if(thrown instanceof SSLHandshakeException) {
+    } else if (thrown instanceof SSLHandshakeException) {
       context.fail(BAD_GATEWAY.code(), thrown);
     } else {
       context.fail(INTERNAL_SERVER_ERROR.code(), thrown);

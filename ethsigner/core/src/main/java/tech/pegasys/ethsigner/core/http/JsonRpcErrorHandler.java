@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTI
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
-import java.net.ConnectException;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -26,6 +25,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
+import java.net.ConnectException;
 import java.util.Optional;
 
 import io.vertx.core.Handler;
@@ -84,10 +84,9 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       final JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
       return jsonRpcException.getJsonRpcError();
     } // in case of a timeout we may not have a failure exception so we use the status code
-    else if(context.failure() instanceof ConnectException) {
+    else if (context.failure() instanceof ConnectException) {
       return FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE;
-    }
-    else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
+    } else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
       return CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
     } else {
       return INTERNAL_ERROR;

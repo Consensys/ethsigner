@@ -54,8 +54,6 @@ public class OkHttpClientHelpers {
     final OkHttpClient.Builder clientBuilder =
         new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(secondsToWait));
 
-
-
     if (clientTlsConfiguration.isPresent()) {
       final ClientTlsConfig clientTlsConfig = clientTlsConfiguration.get();
       try {

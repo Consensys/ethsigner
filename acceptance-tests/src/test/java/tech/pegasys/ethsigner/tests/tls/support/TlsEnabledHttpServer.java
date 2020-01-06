@@ -42,7 +42,7 @@ import org.apache.tuweni.net.tls.VertxTrustOptions;
 
 public class TlsEnabledHttpServer {
 
-  //TODO: Need to kill the Vertx created in here :(
+  // TODO: Need to kill the Vertx created in here :(
 
   public static HttpServer createServer(
       final TlsCertificateDefinition serverCert,
