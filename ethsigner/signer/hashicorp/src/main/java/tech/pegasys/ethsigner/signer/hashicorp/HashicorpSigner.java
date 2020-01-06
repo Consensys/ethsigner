@@ -51,7 +51,7 @@ public class HashicorpSigner {
 
   private HashicorpConfig hashicorpConfig;
 
-  public TransactionSigner createSigner(HashicorpConfig hashicorpConfig) {
+  public TransactionSigner createSigner(final HashicorpConfig hashicorpConfig) {
     this.hashicorpConfig = hashicorpConfig;
     final String response = requestSecretFromVault();
     final Credentials credentials = extractCredentialsFromJson(response);
@@ -80,12 +80,11 @@ public class HashicorpSigner {
       final long timeout) {
     final Vertx vertx = Vertx.vertx();
     try {
-      HttpClientOptions httpClientOptions = new HttpClientOptions();
+      final HttpClientOptions httpClientOptions = new HttpClientOptions();
       try {
         if (hashicorpConfig.getTlsOptions().isPresent()) {
           httpClientOptions.setPfxTrustOptions(convertFrom(hashicorpConfig.getTlsOptions().get()));
         }
-
       } catch (final IOException e) {
         throw new InitializationException("Failed to load Hashicorp trust store.", e);
       }
