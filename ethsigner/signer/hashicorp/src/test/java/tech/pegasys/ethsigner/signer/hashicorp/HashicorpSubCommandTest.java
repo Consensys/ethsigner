@@ -62,9 +62,9 @@ public class HashicorpSubCommandTest {
         + PATH_TO_SIGNING_KEY
         + " --timeout="
         + FIFTEEN
-        + " --tls-server-truststore-file="
+        + " --tls-server-trust-store-file="
         + CLIENT_CERT_PFX
-        + " --tls-server-truststore-password-file="
+        + " --tls-server-trust-store-password-file="
         + CLIENT_CERT_PASSWD;
   }
 
@@ -130,19 +130,19 @@ public class HashicorpSubCommandTest {
 
   @Test
   void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError("tls-server-truststore-file");
+    missingParameterShowsError("tls-server-trust-store-file");
   }
 
   @Test
   void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
-    missingParameterShowsError("tls-server-truststore-password-file");
+    missingParameterShowsError("tls-server-trust-store-password-file");
   }
 
   @Test
   void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
     String cmdLine = validCommandLine();
-    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-password-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-server-trust-store-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-server-trust-store-password-file");
 
     final boolean result = parseCommand(cmdLine);
 

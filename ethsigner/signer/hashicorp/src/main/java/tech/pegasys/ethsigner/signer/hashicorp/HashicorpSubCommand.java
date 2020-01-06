@@ -46,29 +46,29 @@ public class HashicorpSubCommand extends SignerSubCommand {
   static class HashicorpTrustStore implements PkcsStoreConfig {
 
     @Option(
-        names = "--tls-server-truststore-file",
+        names = "--tls-server-trust-store-file",
         description =
-            "Path to a PKCS#12 formatted truststore, containing all trusted root "
+            "Path to a PKCS#12 formatted trust store, containing all trusted root "
                 + "certificates.",
         arity = "1",
         required = true)
-    private File truststoreFile;
+    private File trustStoreFile;
 
     @Option(
-        names = "--tls-server-truststore-password-file",
-        description = "Path to a file containing the password used to decrypt the truststore.",
+        names = "--tls-server-trust-store-password-file",
+        description = "Path to a file containing the password used to decrypt the trust store.",
         arity = "1",
         required = true)
-    private File truststorePasswordFile;
+    private File trustStorePasswordFile;
 
     @Override
     public File getStoreFile() {
-      return truststoreFile;
+      return trustStoreFile;
     }
 
     @Override
     public File getStorePasswordFile() {
-      return truststorePasswordFile;
+      return trustStorePasswordFile;
     }
   }
 
