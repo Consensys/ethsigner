@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServer.createServer;
 
+import java.util.concurrent.ExecutionException;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -91,7 +92,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerProvidesSpecifiedClientCertificateToDownStreamServer(@TempDir Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, ExecutionException, InterruptedException {
 
     final TlsCertificateDefinition serverCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
@@ -111,7 +112,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerDoesNotConnectToServerNotSpecifiedInTrustStore(@TempDir Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, ExecutionException, InterruptedException {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =

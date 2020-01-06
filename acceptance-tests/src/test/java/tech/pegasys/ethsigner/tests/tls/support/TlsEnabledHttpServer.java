@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.tests.tls.support;
 import static tech.pegasys.ethsigner.core.EthSigner.createJsonDecoder;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
 import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
@@ -48,7 +50,7 @@ public class TlsEnabledHttpServer {
       final TlsCertificateDefinition serverCert,
       final TlsCertificateDefinition acceptedClientCerts,
       final Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, ExecutionException, InterruptedException {
 
     final Path serverFingerprintFile = workDir.resolve("server_known_clients");
     populateFingerprintFile(serverFingerprintFile, acceptedClientCerts);
@@ -78,7 +80,11 @@ public class TlsEnabledHttpServer {
         .handler(new JsonRpcHandler(null, requestMapper, jsonDecoder));
 
     final HttpServer web3ProviderhttpServer = vertx.createHttpServer(web3HttpServerOptions);
-    web3ProviderhttpServer.requestHandler(router).listen(result -> {});
+
+    final CompletableFuture<Boolean> serverConfigured = new CompletableFuture<>();
+    web3ProviderhttpServer.requestHandler(router).listen(result -> serverConfigured.complete(true));
+
+    serverConfigured.get();
 
     return web3ProviderhttpServer;
   }
