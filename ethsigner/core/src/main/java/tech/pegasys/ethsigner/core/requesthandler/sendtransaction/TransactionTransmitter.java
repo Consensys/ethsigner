@@ -118,6 +118,11 @@ public class TransactionTransmitter {
       } else {
         routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
+      return;
+    } catch (final Throwable thrown) {
+      LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
+      routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      return;
     }
     return false;
   }

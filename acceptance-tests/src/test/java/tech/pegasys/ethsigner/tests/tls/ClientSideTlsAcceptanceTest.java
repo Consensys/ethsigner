@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.tls;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
@@ -134,21 +135,7 @@ class ClientSideTlsAcceptanceTest {
 
     assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
         .isInstanceOf(ClientConnectionException.class)
-        .hasMessageContaining("500");
-
-
-    final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
-    final Transaction transaction =
-        Transaction.createEtherTransaction(
-            signer.accounts().richBenefactor().address(),
-            null,
-            GAS_PRICE,
-            INTRINSIC_GAS,
-            RECIPIENT,
-            transferAmountWei);
-
-    signer.transactions().submit(transaction);
+        .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
 
   }
 
