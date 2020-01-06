@@ -142,7 +142,6 @@ class ClientSideTlsAcceptanceTest {
         .isInstanceOf(ClientConnectionException.class)
         .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
 
-
     //ensure submitting a transaction results in the same behaviour
     final Transaction transaction =
         Transaction.createEtherTransaction(
