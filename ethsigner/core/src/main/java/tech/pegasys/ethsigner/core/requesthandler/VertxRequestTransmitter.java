@@ -43,10 +43,13 @@ public class VertxRequestTransmitter {
   private void handleException(final RoutingContext context, final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
+      LOG.info("Threw a ", thrown);
     } else if (thrown instanceof SSLHandshakeException) {
       context.fail(BAD_GATEWAY.code(), thrown);
+      LOG.info("Threw a ", thrown);
     } else {
       context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
+      LOG.info("Threw a ", thrown);
     }
   }
 
