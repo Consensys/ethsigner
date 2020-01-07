@@ -33,6 +33,7 @@ class SigningEthSendTransactionWithChainIdIntegrationTest extends IntegrationTes
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
 
+  @SuppressWarnings("unused")
   @BeforeAll
   private static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(4123123123L);
