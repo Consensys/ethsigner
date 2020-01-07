@@ -162,8 +162,7 @@ class CommandlineParserTest {
   @Test
   void illegalSubCommandDisplaysErrorMessage() {
     // NOTE: all required params must be specified
-    final boolean result =
-        parser.parseCommandLine("--downstream-http-port=8500", "--chain-id=1", "illegalSubCommand");
+    parser.parseCommandLine("--downstream-http-port=8500", "--chain-id=1", "illegalSubCommand");
     assertThat(commandOutput.toString())
         .containsOnlyOnce("Did you mean: " + subCommand.getCommandName());
     assertThat(commandOutput.toString()).doesNotContain(defaultUsageText);
