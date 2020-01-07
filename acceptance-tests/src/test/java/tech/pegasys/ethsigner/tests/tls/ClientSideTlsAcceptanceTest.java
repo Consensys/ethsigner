@@ -18,11 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-import static tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServer.createServer;
 
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Convert.Unit;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -31,22 +27,36 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
+import tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.concurrent.ExecutionException;
 
 import io.vertx.core.http.HttpServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.exceptions.ClientConnectionException;
+import org.web3j.utils.Convert;
+import org.web3j.utils.Convert.Unit;
 
 class ClientSideTlsAcceptanceTest {
+
+  private TlsEnabledHttpServerFactory serverFactory;
+
+  @BeforeEach
+  void setup() {
+    serverFactory = new TlsEnabledHttpServerFactory();
+  }
+
+  @AfterEach
+  void cleanup() {
+    serverFactory.shutdown();
+  }
 
   private Signer createAndStartSigner(
       final TlsCertificateDefinition presentedCert,
@@ -72,7 +82,6 @@ class ClientSideTlsAcceptanceTest {
       final Path workDir)
       throws IOException {
 
-    // Create an EthSigner
     final Path clientPasswordFile =
         Files.writeString(workDir.resolve("clientKeystorePassword"), presentedCert.getPassword());
     final Path serverPasswordFile =
@@ -97,8 +106,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerProvidesSpecifiedClientCertificateToDownStreamServer(@TempDir Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
-          ExecutionException, InterruptedException {
+      throws IOException {
 
     final TlsCertificateDefinition serverCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
@@ -106,7 +114,8 @@ class ClientSideTlsAcceptanceTest {
         TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
     // Note: the HttpServer always responds with a JsonRpcSuccess, result=300.
-    final HttpServer web3ProviderHttpServer = createServer(serverCert, ethSignerCert, workDir);
+    final HttpServer web3ProviderHttpServer =
+        serverFactory.create(serverCert, ethSignerCert, workDir);
 
     final Signer signer =
         createAndStartSigner(
@@ -118,8 +127,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerDoesNotConnectToServerNotSpecifiedInTrustStore(@TempDir Path workDir)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
-          ExecutionException, InterruptedException {
+      throws IOException {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =
@@ -128,7 +136,7 @@ class ClientSideTlsAcceptanceTest {
         TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
     final HttpServer web3ProviderHttpServer =
-        createServer(serverPresentedCert, ethSignerCert, workDir);
+        serverFactory.create(serverPresentedCert, ethSignerCert, workDir);
 
     final Signer signer =
         createAndStartSigner(
@@ -142,7 +150,7 @@ class ClientSideTlsAcceptanceTest {
         .isInstanceOf(ClientConnectionException.class)
         .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
 
-    //ensure submitting a transaction results in the same behaviour
+    // ensure submitting a transaction results in the same behaviour
     final Transaction transaction =
         Transaction.createEtherTransaction(
             signer.accounts().richBenefactor().address(),
@@ -155,7 +163,6 @@ class ClientSideTlsAcceptanceTest {
     assertThatThrownBy(() -> signer.transactions().submit(transaction))
         .isInstanceOf(ClientConnectionException.class)
         .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
-
   }
 
   @Test
