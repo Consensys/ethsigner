@@ -25,10 +25,10 @@ public class CmdlineHelpers {
         + "--tls-keystore-file=./keystore.pfx "
         + "--tls-keystore-password-file=./keystore.passwd "
         + "--tls-known-clients-file=./known_clients "
-        + "--tls-client-certificate-file=./client_cert.pfx "
-        + "--tls-client-certificate-password-file=./client_cert.passwd "
-        + "--tls-server-truststore-file=./web3_truststore.pfx "
-        + "--tls-server-truststore-password-file=./web3_truststore.passwd ";
+        + "--downstream-http-tls-keystore-file=./client_cert.pfx "
+        + "--downstream-http-tls-keystore-password-file=./client_cert.passwd "
+        + "--downstream-http-tls-truststore-file=./web3_truststore.pfx "
+        + "--downstream-http-tls-truststore-password-file=./web3_truststore.passwd ";
   }
 
   public static String removeFieldFrom(final String input, final String fieldName) {

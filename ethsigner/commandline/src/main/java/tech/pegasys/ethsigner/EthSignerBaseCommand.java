@@ -52,7 +52,7 @@ public class EthSignerBaseCommand implements Config {
   static class TlsClientCertificateOptions implements PkcsStoreConfig {
 
     @Option(
-        names = "--tls-client-certificate-file",
+        names = "--downstream-http-tls-keystore-file",
         description =
             "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
                 + "a TLS-enabled web3 provider",
@@ -61,7 +61,7 @@ public class EthSignerBaseCommand implements Config {
     private File clientCertificateFile;
 
     @Option(
-        names = "--tls-client-certificate-password-file",
+        names = "--downstream-http-tls-keystore-password-file",
         description = "Path to a file containing the password used to decrypt the client cert.",
         arity = "1",
         required = true)
@@ -81,7 +81,7 @@ public class EthSignerBaseCommand implements Config {
   static class Web3ProviderTrustStore implements PkcsStoreConfig {
 
     @Option(
-        names = "--tls-server-truststore-file",
+        names = "--downstream-http-tls-truststore-file",
         description =
             "Path to a PKCS#12 formatted truststore, containing all trusted root "
                 + "certificates.",
@@ -90,7 +90,7 @@ public class EthSignerBaseCommand implements Config {
     private File truststoreFile;
 
     @Option(
-        names = "--tls-server-truststore-password-file",
+        names = "--downstream-http-tls-truststore-password-file",
         description = "Path to a file containing the password used to decrypt the truststore.",
         arity = "1",
         required = true)

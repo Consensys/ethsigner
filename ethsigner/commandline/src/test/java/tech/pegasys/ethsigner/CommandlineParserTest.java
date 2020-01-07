@@ -276,19 +276,20 @@ class CommandlineParserTest {
 
   @Test
   void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-client-certificate-file");
+    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-keystore-file");
   }
 
   @Test
   void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-client-certificate-password-file");
+    missingParameterShowsError(
+        validBaseCommandOptions(), "downstream-http-tls-keystore-password-file");
   }
 
   @Test
   void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-client-certificate-password-file");
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-file");
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-password-file");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -299,19 +300,20 @@ class CommandlineParserTest {
 
   @Test
   void missingWeb3TruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-server-truststore-file");
+    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-truststore-file");
   }
 
   @Test
   void minssingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-server-truststore-password-file");
+    missingParameterShowsError(
+        validBaseCommandOptions(), "downstream-http-tls-truststore-password-file");
   }
 
   @Test
   void cmdlineIsValidIfBothWeb3TruststoreAndPasswordAreMissing() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-server-truststore-password-file");
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-file");
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-password-file");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
