@@ -13,8 +13,6 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.io.IOException;
@@ -27,7 +25,6 @@ import java.time.Duration;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
@@ -75,17 +72,6 @@ public final class EthSigner {
             .setReuseAddress(true)
             .setReusePort(true);
 
-    final Vertx vertx = Vertx.vertx();
-
-    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
-        new VertxNonceRequestTransmitterFactory(
-            vertx.createHttpClient(clientOptions),
-            jsonDecoder,
-            config.getDownstreamHttpRequestTimeout().toMillis());
-
-    final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
-
     final Runner runner =
         new Runner(
             config.getChainId().id(),
@@ -93,9 +79,7 @@ public final class EthSigner {
             clientOptions,
             applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
-            transactionFactory,
             jsonDecoder,
-            vertx,
             config.getDataPath());
 
     runner.start();

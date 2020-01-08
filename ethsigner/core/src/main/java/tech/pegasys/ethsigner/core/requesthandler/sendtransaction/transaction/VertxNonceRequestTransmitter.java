@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -41,13 +42,13 @@ public class VertxNonceRequestTransmitter {
   private final MultiMap headers;
   private final HttpClient client;
   private final JsonDecoder decoder;
-  private final long requestTimeout;
+  private final Duration requestTimeout;
 
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
       final HttpClient client,
       final JsonDecoder decoder,
-      final long requestTimeout) {
+      final Duration requestTimeout) {
     this.headers = headers;
     this.client = client;
     this.decoder = decoder;
@@ -77,7 +78,7 @@ public class VertxNonceRequestTransmitter {
             "/",
             response -> response.bodyHandler(responseBody -> handleResponse(responseBody, result)));
 
-    request.setTimeout(requestTimeout);
+    request.setTimeout(requestTimeout.toMillis());
     request.headers().setAll(headers);
     request.exceptionHandler(result::completeExceptionally);
     request.headers().remove("Content-Length"); // created during 'end'.

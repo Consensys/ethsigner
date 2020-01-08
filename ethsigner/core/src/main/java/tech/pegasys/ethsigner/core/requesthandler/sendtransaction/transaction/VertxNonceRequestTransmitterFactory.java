@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 
+import java.time.Duration;
+
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpClient;
 
@@ -21,10 +23,10 @@ public class VertxNonceRequestTransmitterFactory {
 
   private final HttpClient client;
   private final JsonDecoder decoder;
-  private final long requestTimeout;
+  private final Duration requestTimeout;
 
   public VertxNonceRequestTransmitterFactory(
-      final HttpClient client, final JsonDecoder decoder, final long requestTimeout) {
+      final HttpClient client, final JsonDecoder decoder, final Duration requestTimeout) {
     this.client = client;
     this.decoder = decoder;
     this.requestTimeout = requestTimeout;
