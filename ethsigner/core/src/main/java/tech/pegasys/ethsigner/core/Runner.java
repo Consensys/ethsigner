@@ -60,7 +60,7 @@ public class Runner {
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private JsonDecoder jsonDecoder;
+  private final JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
@@ -132,7 +132,7 @@ public class Runner {
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
-            vertx.createHttpClient(clientOptions), jsonDecoder, httpRequestTimeout);
+            downStreamConnection, jsonDecoder, httpRequestTimeout);
 
     final TransactionFactory transactionFactory =
         new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);

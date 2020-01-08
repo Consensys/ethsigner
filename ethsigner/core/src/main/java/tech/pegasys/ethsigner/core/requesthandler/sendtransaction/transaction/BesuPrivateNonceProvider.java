@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
@@ -22,7 +21,6 @@ import org.web3j.utils.Base64String;
 
 public class BesuPrivateNonceProvider implements NonceProvider {
 
-  protected static int lastId = 0;
   private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
   private final String accountAddress;
   private final Base64String privacyGroupId;
@@ -45,9 +43,6 @@ public class BesuPrivateNonceProvider implements NonceProvider {
   protected JsonRpcRequest generateRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
     request.setParams(new Object[] {accountAddress, privacyGroupId});
-    lastId += 1;
-    request.setId(new JsonRpcRequestId(lastId));
-
     return request;
   }
 }

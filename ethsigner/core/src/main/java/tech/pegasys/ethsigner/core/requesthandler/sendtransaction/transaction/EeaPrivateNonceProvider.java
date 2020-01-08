@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
@@ -23,7 +22,6 @@ import org.web3j.utils.Base64String;
 
 public class EeaPrivateNonceProvider implements NonceProvider {
 
-  protected static int lastId = 0;
   private final String accountAddress;
   private final Base64String privateFrom;
   private final List<Base64String> privateFor;
@@ -49,8 +47,6 @@ public class EeaPrivateNonceProvider implements NonceProvider {
   protected JsonRpcRequest generateRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
     request.setParams(new Object[] {accountAddress, privateFrom, privateFor});
-    lastId += 1;
-    request.setId(new JsonRpcRequestId(lastId));
 
     return request;
   }

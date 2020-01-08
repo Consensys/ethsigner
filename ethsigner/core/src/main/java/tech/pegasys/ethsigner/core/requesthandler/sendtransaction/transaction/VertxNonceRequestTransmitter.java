@@ -16,12 +16,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -43,6 +45,7 @@ public class VertxNonceRequestTransmitter {
   private final HttpClient client;
   private final JsonDecoder decoder;
   private final Duration requestTimeout;
+  private static final AtomicInteger nextId = new AtomicInteger(0);
 
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
@@ -62,13 +65,15 @@ public class VertxNonceRequestTransmitter {
       final BigInteger nonce = result.get();
       LOG.debug("Supplying nonce of {}", nonce.toString());
       return nonce;
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (final InterruptedException | ExecutionException e) {
       throw new RuntimeException("Failed to retrieve nonce:" + e.getMessage(), e.getCause());
     }
   }
 
   private CompletableFuture<BigInteger> getNonceFromWeb3Provider(
       final JsonRpcRequest requestBody, final MultiMap headers) {
+
+    requestBody.setId(new JsonRpcRequestId(nextId.getAndAdd(1)));
 
     final CompletableFuture<BigInteger> result = new CompletableFuture<>();
 

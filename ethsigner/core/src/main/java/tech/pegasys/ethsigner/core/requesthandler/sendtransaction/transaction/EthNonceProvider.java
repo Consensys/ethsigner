@@ -13,14 +13,12 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
 
 public class EthNonceProvider implements NonceProvider {
 
-  private static int lastId = 0;
   private final String accountAddress;
   private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
 
@@ -40,8 +38,6 @@ public class EthNonceProvider implements NonceProvider {
   protected JsonRpcRequest generateRequest() {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_getTransactionCount");
     request.setParams(new Object[] {accountAddress, "pending"});
-    lastId += 1;
-    request.setId(new JsonRpcRequestId(lastId));
 
     return request;
   }
