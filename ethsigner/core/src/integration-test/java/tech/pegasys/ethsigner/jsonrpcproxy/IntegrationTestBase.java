@@ -129,15 +129,6 @@ public class IntegrationTestBase {
 
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
 
-    final Vertx vertx = Vertx.vertx();
-
-    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
-        new VertxNonceRequestTransmitterFactory(
-            vertx.createHttpClient(httpClientOptions), jsonDecoder, downstreamTimeout.toMillis());
-
-    final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
-
     runner =
         new Runner(
             chainId,
@@ -145,9 +136,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            transactionFactory,
             jsonDecoder,
-            vertx,
             dataPath);
     runner.start();
 
