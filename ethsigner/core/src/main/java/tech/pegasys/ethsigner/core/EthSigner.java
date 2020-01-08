@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.io.IOException;
@@ -26,15 +27,14 @@ import java.time.Duration;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
-import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.net.tls.VertxTrustOptions;
-import org.web3j.protocol.http.HttpService;
 
 public final class EthSigner {
 
@@ -64,9 +64,6 @@ public final class EthSigner {
 
     final JsonDecoder jsonDecoder = createJsonDecoder();
 
-    final HttpService web3jService = createWeb3jHttpService();
-    final TransactionFactory transactionFactory =
-        TransactionFactory.createFrom(web3jService, jsonDecoder);
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
@@ -78,6 +75,17 @@ public final class EthSigner {
             .setReuseAddress(true)
             .setReusePort(true);
 
+    final Vertx vertx = Vertx.vertx();
+
+    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
+        new VertxNonceRequestTransmitterFactory(
+            vertx.createHttpClient(clientOptions),
+            jsonDecoder,
+            config.getDownstreamHttpRequestTimeout().toMillis());
+
+    final TransactionFactory transactionFactory =
+        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
+
     final Runner runner =
         new Runner(
             config.getChainId().id(),
@@ -87,6 +95,7 @@ public final class EthSigner {
             downstreamHttpRequestTimeout,
             transactionFactory,
             jsonDecoder,
+            vertx,
             config.getDataPath());
 
     runner.start();
@@ -136,18 +145,6 @@ public final class EthSigner {
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
     return new JsonDecoder(jsonObjectMapper);
-  }
-
-  private HttpService createWeb3jHttpService() {
-    final String downstreamUrl =
-        "http://" + config.getDownstreamHttpHost() + ":" + config.getDownstreamHttpPort();
-    LOG.info("Downstream URL = {}", downstreamUrl);
-
-    final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-    builder
-        .connectTimeout(config.getDownstreamHttpRequestTimeout())
-        .readTimeout(config.getDownstreamHttpRequestTimeout());
-    return new HttpService(downstreamUrl, builder.build());
   }
 
   private static String readSecretFromFile(final Path path) throws IOException {

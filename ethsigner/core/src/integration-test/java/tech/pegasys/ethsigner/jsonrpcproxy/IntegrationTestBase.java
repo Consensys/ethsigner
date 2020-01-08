@@ -27,6 +27,7 @@ import static org.web3j.utils.Async.defaultExecutorService;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
@@ -55,6 +56,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
@@ -71,11 +73,9 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
-import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
@@ -122,21 +122,21 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(0);
     httpServerOptions.setHost("localhost");
 
-    final HttpService web3jService =
-        new HttpService(
-            "http://"
-                + httpClientOptions.getDefaultHost()
-                + ":"
-                + httpClientOptions.getDefaultPort());
-    final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Besu besu = Besu.build(web3jService);
-
     // Force TransactionDeserialisation to fail
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
+
+    final Vertx vertx = Vertx.vertx();
+
+    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
+        new VertxNonceRequestTransmitterFactory(
+            vertx.createHttpClient(httpClientOptions), jsonDecoder, downstreamTimeout.toMillis());
+
+    final TransactionFactory transactionFactory =
+        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
 
     runner =
         new Runner(
@@ -145,8 +145,9 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(besu, web3j, jsonDecoder, web3jService),
+            transactionFactory,
             jsonDecoder,
+            vertx,
             dataPath);
     runner.start();
 

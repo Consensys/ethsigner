@@ -73,6 +73,7 @@ public class Runner {
       final Duration httpRequestTimeout,
       final TransactionFactory transactionFactory,
       final JsonDecoder jsonDecoder,
+      final Vertx vertx,
       final Path dataPath) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
@@ -81,7 +82,7 @@ public class Runner {
     this.transactionFactory = transactionFactory;
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
-    this.vertx = Vertx.vertx();
+    this.vertx = vertx;
     this.httpServerService = new HttpServerService(router(), serverOptions);
   }
 

@@ -17,26 +17,17 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
-import java.util.List;
 
-import org.web3j.utils.Base64String;
+public class EthNonceProvider implements NonceProvider {
 
-public class EeaPrivateNonceProvider implements NonceProvider {
-
-  protected static int lastId = 0;
+  private static int lastId = 0;
   private final String accountAddress;
-  private final Base64String privateFrom;
-  private final List<Base64String> privateFor;
-  private VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
+  private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
 
-  public EeaPrivateNonceProvider(
+  public EthNonceProvider(
       final String accountAddress,
-      final Base64String privateFrom,
-      final List<Base64String> privateFor,
       final VertxNonceRequestTransmitter vertxNonceRequestTransmitter) {
     this.accountAddress = accountAddress;
-    this.privateFrom = privateFrom;
-    this.privateFor = privateFor;
     this.vertxNonceRequestTransmitter = vertxNonceRequestTransmitter;
   }
 
@@ -47,8 +38,8 @@ public class EeaPrivateNonceProvider implements NonceProvider {
   }
 
   protected JsonRpcRequest generateRequest() {
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
-    request.setParams(new Object[] {accountAddress, privateFrom, privateFor});
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_getTransactionCount");
+    request.setParams(new Object[] {accountAddress, "pending"});
     lastId += 1;
     request.setId(new JsonRpcRequestId(lastId));
 

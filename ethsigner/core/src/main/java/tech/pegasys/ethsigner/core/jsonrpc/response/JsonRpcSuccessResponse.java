@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc.response;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,8 +25,16 @@ public class JsonRpcSuccessResponse implements JsonRpcResponse {
   private final Object id;
   private final Object result;
 
+  @JsonCreator
   public JsonRpcSuccessResponse(
-      @JsonProperty("id") final Object id, @JsonProperty("result") final Object result) {
+      @JsonProperty("jsonrpc") final String version,
+      @JsonProperty("id") final Object id,
+      @JsonProperty("result") final Object result) {
+    this.id = id;
+    this.result = result;
+  }
+
+  public JsonRpcSuccessResponse(@JsonProperty final Object id, @JsonProperty final Object result) {
     this.id = id;
     this.result = result;
   }
