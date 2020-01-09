@@ -35,7 +35,7 @@ public class EeaSendTransactionJsonParametersTest {
   @BeforeEach
   public void setup() {
     // NOTE: the factory has been configured as per its use in the application.
-    factory = TransactionFactory.createFrom(null, EthSigner.createJsonDecoder());
+    factory = new TransactionFactory(EthSigner.createJsonDecoder(), null);
   }
 
   @Test

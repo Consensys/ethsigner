@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,21 +17,16 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.math.BigInteger;
 
-import org.web3j.utils.Base64String;
+public class EthNonceProvider implements NonceProvider {
 
-public class BesuPrivateNonceProvider implements NonceProvider {
-
-  private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
   private final String accountAddress;
-  private final Base64String privacyGroupId;
+  private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
 
-  public BesuPrivateNonceProvider(
+  public EthNonceProvider(
       final String accountAddress,
-      final Base64String privacyGroupId,
       final VertxNonceRequestTransmitter vertxNonceRequestTransmitter) {
-    this.vertxNonceRequestTransmitter = vertxNonceRequestTransmitter;
     this.accountAddress = accountAddress;
-    this.privacyGroupId = privacyGroupId;
+    this.vertxNonceRequestTransmitter = vertxNonceRequestTransmitter;
   }
 
   @Override
@@ -41,8 +36,9 @@ public class BesuPrivateNonceProvider implements NonceProvider {
   }
 
   protected JsonRpcRequest generateRequest() {
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
-    request.setParams(new Object[] {accountAddress, privacyGroupId});
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_getTransactionCount");
+    request.setParams(new Object[] {accountAddress, "pending"});
+
     return request;
   }
 }
