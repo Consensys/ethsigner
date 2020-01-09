@@ -14,12 +14,12 @@
 apply plugin: 'java-library'
 
 jar {
-  baseName 'ethsigner-core'
+  archiveBaseName = 'ethsigner-core'
   manifest {
     attributes(
-      'Specification-Title': baseName,
+      'Specification-Title': archiveBaseName,
       'Specification-Version': project.version,
-      'Implementation-Title': baseName,
+      'Implementation-Title': archiveBaseName,
       'Implementation-Version': calculateVersion()
       )
   }
@@ -29,22 +29,18 @@ jar {
 dependencies {
 
   implementation project(':ethsigner:signing-api')
-
   implementation 'com.google.guava:guava'
-
   implementation 'org.apache.logging.log4j:log4j-api'
-  runtime 'org.apache.logging.log4j:log4j-core'
-  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
-
   implementation 'org.web3j:crypto'
   implementation 'org.web3j:besu'
-
   implementation 'io.vertx:vertx-core'
   implementation 'io.vertx:vertx-web'
   implementation 'io.vertx:vertx-web-client'
-
-  runtime 'org.bouncycastle:bcpkix-jdk15on'
   implementation 'org.apache.tuweni:tuweni-net'
+
+  runtimeOnly 'org.apache.logging.log4j:log4j-core'
+  runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
+  runtimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
   testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
