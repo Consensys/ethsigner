@@ -73,7 +73,7 @@ public class VertxNonceRequestTransmitter {
   private CompletableFuture<BigInteger> getNonceFromWeb3Provider(
       final JsonRpcRequest requestBody, final MultiMap headers) {
 
-    requestBody.setId(new JsonRpcRequestId(nextId.getAndAdd(1)));
+    requestBody.setId(new JsonRpcRequestId(nextId.getAndIncrement()));
 
     final CompletableFuture<BigInteger> result = new CompletableFuture<>();
 

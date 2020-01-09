@@ -117,16 +117,14 @@ public class TransactionTransmitter {
           || cause instanceof TimeoutException) {
         routingContext.fail(
             GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
-      } else if(cause instanceof SSLHandshakeException) {
+      } else if (cause instanceof SSLHandshakeException) {
         routingContext.fail(BAD_GATEWAY.code(), cause);
       } else {
         routingContext.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
-      return;
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
-      return;
     }
     return false;
   }
