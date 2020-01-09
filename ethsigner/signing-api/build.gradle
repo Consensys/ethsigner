@@ -12,12 +12,12 @@
  */
 
 jar {
-  baseName 'signing-api'
+  archiveBaseName = 'signing-api'
   manifest {
     attributes(
-      'Specification-Title': baseName,
+      'Specification-Title': archiveBaseName,
       'Specification-Version': project.version,
-      'Implementation-Title': baseName,
+      'Implementation-Title': archiveBaseName,
       'Implementation-Version': calculateVersion()
       )
   }

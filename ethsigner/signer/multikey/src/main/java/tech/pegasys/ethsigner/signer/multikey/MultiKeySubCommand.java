@@ -45,7 +45,9 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   public MultiKeySubCommand() {}
 
-  @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
+  @SuppressWarnings("unused") // Picocli injects reference to command spec
+  @Spec
+  private CommandLine.Model.CommandSpec spec;
 
   @Option(
       names = {"-d", "--directory"},

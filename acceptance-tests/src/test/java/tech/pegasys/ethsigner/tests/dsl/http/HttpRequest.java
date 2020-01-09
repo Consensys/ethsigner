@@ -12,10 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.http;
 
-import static org.assertj.core.api.Assertions.fail;
-
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -38,20 +35,5 @@ public class HttpRequest {
     } catch (final IOException e) {
       throw new RuntimeException("Get request has failed", e);
     }
-  }
-
-  private SocketTimeoutException execute(final Request.Builder request) {
-    try {
-      client.newCall(request.build()).execute();
-      fail("Expecting to encounter an IOException ");
-    } catch (final IOException e) {
-      if (e instanceof SocketTimeoutException) {
-        return (SocketTimeoutException) e;
-      } else {
-        fail("Expecting to encounter a SocketTimeoutException, but got: " + e.getClass(), e);
-      }
-    }
-
-    return null;
   }
 }

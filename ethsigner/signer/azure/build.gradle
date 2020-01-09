@@ -12,12 +12,12 @@
  */
 
 jar {
-  baseName 'ethsigner-signer-azure'
+  archiveBaseName = 'ethsigner-signer-azure'
   manifest {
     attributes(
-      'Specification-Title': baseName,
+      'Specification-Title': archiveBaseName,
       'Specification-Version': project.version,
-      'Implementation-Title': baseName,
+      'Implementation-Title': archiveBaseName,
       'Implementation-Version': calculateVersion()
       )
   }
@@ -30,15 +30,13 @@ dependencies {
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
-
   implementation 'org.apache.logging.log4j:log4j-api'
-  runtime 'org.apache.logging.log4j:log4j-core'
-  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
-
   implementation 'org.web3j:core'
-
   implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
   implementation 'com.microsoft.aad:adal4j:0.0.2'
+
+  runtimeOnly 'org.apache.logging.log4j:log4j-core'
+  runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'

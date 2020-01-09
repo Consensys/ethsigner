@@ -31,6 +31,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "NullSigner";
 
+  @SuppressWarnings("unused")
   @Option(names = "--the-data", description = "Some data required for this subcommand", arity = "1")
   private Integer downstreamHttpPort;
 
