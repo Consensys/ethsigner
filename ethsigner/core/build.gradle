@@ -38,8 +38,7 @@ dependencies {
   implementation 'io.vertx:vertx-web-client'
   implementation 'org.apache.tuweni:tuweni-net'
 
-  api 'org.apache.logging.log4j:log4j-core'
-
+  runtimeOnly 'org.apache.logging.log4j:log4j-core'
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
   runtimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
