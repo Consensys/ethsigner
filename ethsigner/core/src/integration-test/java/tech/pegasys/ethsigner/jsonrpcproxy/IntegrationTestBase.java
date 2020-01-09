@@ -26,7 +26,6 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
@@ -71,11 +70,9 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.eea.Eea;
 import org.web3j.protocol.eea.JsonRpc2_0Eea;
-import org.web3j.protocol.http.HttpService;
 
 public class IntegrationTestBase {
 
@@ -122,15 +119,6 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(0);
     httpServerOptions.setHost("localhost");
 
-    final HttpService web3jService =
-        new HttpService(
-            "http://"
-                + httpClientOptions.getDefaultHost()
-                + ":"
-                + httpClientOptions.getDefaultPort());
-    final Web3j web3j = new JsonRpc2_0Web3j(web3jService, 2000, defaultExecutorService());
-    final Besu besu = Besu.build(web3jService);
-
     // Force TransactionDeserialisation to fail
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
@@ -145,7 +133,6 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            new TransactionFactory(besu, web3j, jsonDecoder, web3jService),
             jsonDecoder,
             dataPath);
     runner.start();
