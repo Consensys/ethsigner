@@ -28,6 +28,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -109,7 +110,9 @@ public class TransactionTransmitter {
     } catch (final RuntimeException e) {
       LOG.warn("Unable to get nonce from web3j provider.", e);
       final Throwable cause = e.getCause();
-      if (cause instanceof SocketException || cause instanceof SocketTimeoutException) {
+      if (cause instanceof SocketException
+          || cause instanceof SocketTimeoutException
+          || cause instanceof TimeoutException) {
         routingContext.fail(
             GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else {

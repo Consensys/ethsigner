@@ -27,6 +27,7 @@ import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalRespo
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.io.File;
@@ -58,9 +59,8 @@ public class Runner {
   private final TransactionSignerProvider transactionSignerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
-  private final TransactionFactory transactionFactory;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private JsonDecoder jsonDecoder;
+  private final JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
@@ -71,14 +71,12 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
-      final TransactionFactory transactionFactory,
       final JsonDecoder jsonDecoder,
       final Path dataPath) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
-    this.transactionFactory = transactionFactory;
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = Vertx.vertx();
@@ -131,6 +129,13 @@ public class Runner {
       final VertxRequestTransmitterFactory transmitterFactory) {
     final PassThroughHandler defaultHandler =
         new PassThroughHandler(downStreamConnection, transmitterFactory);
+
+    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
+        new VertxNonceRequestTransmitterFactory(
+            downStreamConnection, jsonDecoder, httpRequestTimeout);
+
+    final TransactionFactory transactionFactory =
+        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(

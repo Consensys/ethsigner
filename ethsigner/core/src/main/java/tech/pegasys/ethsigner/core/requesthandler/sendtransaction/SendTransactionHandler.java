@@ -64,7 +64,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {
-      transaction = transactionFactory.createTransaction(request);
+      transaction = transactionFactory.createTransaction(context, request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
