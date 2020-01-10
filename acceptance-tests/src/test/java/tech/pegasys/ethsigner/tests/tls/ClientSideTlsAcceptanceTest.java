@@ -47,6 +47,7 @@ import org.web3j.utils.Convert.Unit;
 class ClientSideTlsAcceptanceTest {
 
   private TlsEnabledHttpServerFactory serverFactory;
+  private static final int UNUSED_WS_PORT = 0;
 
   @BeforeEach
   void setup() {
@@ -97,8 +98,7 @@ class ClientSideTlsAcceptanceTest {
     builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    // arbitrary Node websocket port - is unused.
-    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, 0);
+    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
 
     final Signer signer = new Signer(builder.build(), nodeConfig, nodePorts);
 
