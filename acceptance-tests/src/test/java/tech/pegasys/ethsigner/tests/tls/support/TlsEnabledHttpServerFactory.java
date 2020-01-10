@@ -78,8 +78,6 @@ public class TlsEnabledHttpServerFactory {
               .setPath(serverCert.getPkcs12File().toString())
               .setPassword(serverCert.getPassword()));
 
-      final Vertx vertx = Vertx.vertx();
-
       final Router router = Router.router(vertx);
       final JsonDecoder jsonDecoder = createJsonDecoder();
       final RequestMapper requestMapper = new RequestMapper(new MockBalanceReporter());
