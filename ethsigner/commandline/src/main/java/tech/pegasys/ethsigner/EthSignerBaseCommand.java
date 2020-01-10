@@ -87,23 +87,23 @@ public class EthSignerBaseCommand implements Config {
                 + "certificates.",
         arity = "1",
         required = true)
-    private File truststoreFile;
+    private File trustStoreFile;
 
     @Option(
         names = "--downstream-http-tls-truststore-password-file",
         description = "Path to a file containing the password used to decrypt the truststore.",
         arity = "1",
         required = true)
-    private File truststorePasswordFile;
+    private File trustStorePasswordFile;
 
     @Override
     public File getStoreFile() {
-      return truststoreFile;
+      return trustStoreFile;
     }
 
     @Override
     public File getStorePasswordFile() {
-      return truststorePasswordFile;
+      return trustStorePasswordFile;
     }
   }
 
@@ -115,14 +115,14 @@ public class EthSignerBaseCommand implements Config {
             "Path to a PKCS#12 formatted key store; used to enable TLS on inbound connections.",
         arity = "1",
         required = true)
-    private File keystoreFile;
+    private File keyStoreFile;
 
     @Option(
         names = "--tls-keystore-password-file",
         description = "Path to a file containing the password used to decrypt the keystore.",
         arity = "1",
         required = true)
-    private File keystorePasswordFile;
+    private File keyStorePasswordFile;
 
     @Option(
         names = "--tls-known-clients-file",
@@ -134,12 +134,12 @@ public class EthSignerBaseCommand implements Config {
 
     @Override
     public File getKeyStoreFile() {
-      return keystoreFile;
+      return keyStoreFile;
     }
 
     @Override
     public File getKeyStorePasswordFile() {
-      return keystorePasswordFile;
+      return keyStorePasswordFile;
     }
 
     @Override

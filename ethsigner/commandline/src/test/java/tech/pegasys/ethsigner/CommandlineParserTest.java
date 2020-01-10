@@ -298,12 +298,12 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingWeb3TruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
+  void missingDownstreamTruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
     missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-truststore-file");
   }
 
   @Test
-  void minssingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
+  void missingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
     missingParameterShowsError(
         validBaseCommandOptions(), "downstream-http-tls-truststore-password-file");
   }

@@ -166,7 +166,7 @@ class ClientSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingKeyStoreForEthSignerResultsTerminatesEthSigner(@TempDir Path workDir)
+  void missingKeyStoreForEthSignerResultsInEthSignerTerminating(@TempDir Path workDir)
       throws IOException {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
@@ -181,7 +181,7 @@ class ClientSideTlsAcceptanceTest {
   }
 
   @Test
-  void incorrectPasswordForWeb3ProviderKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
+  void incorrectPasswordForDownstreamKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
       throws IOException {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
