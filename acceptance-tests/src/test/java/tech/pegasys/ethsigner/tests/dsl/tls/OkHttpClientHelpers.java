@@ -48,8 +48,11 @@ public class OkHttpClientHelpers {
 
   public static OkHttpClient createOkHttpClient(
       final Optional<ClientTlsConfig> clientTlsConfiguration) {
+
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 10;
+
     final OkHttpClient.Builder clientBuilder =
-        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(10));
+        new OkHttpClient.Builder().readTimeout(Duration.ofSeconds(secondsToWait));
 
     if (clientTlsConfiguration.isPresent()) {
       final ClientTlsConfig clientTlsConfig = clientTlsConfiguration.get();
@@ -63,8 +66,7 @@ public class OkHttpClientHelpers {
         final X509TrustManager trustManager =
             (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
         final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(
-            keyManagers, trustManagerFactory.getTrustManagers(), SecureRandom.getInstanceStrong());
+        sslContext.init(keyManagers, trustManagerFactory.getTrustManagers(), new SecureRandom());
 
         clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
       } catch (final KeyStoreException | UnrecoverableKeyException e) {

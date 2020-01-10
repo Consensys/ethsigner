@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.core.TlsOptions;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -20,7 +21,7 @@ import java.util.Optional;
 public class SignerConfiguration {
 
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
-  private static final Duration TIMEOUT = Duration.ofSeconds(2);
+  private static final Duration TIMEOUT = Duration.ofSeconds(5);
   public static final int UNASSIGNED_PORT = 0;
 
   private final String chainId;
@@ -29,6 +30,8 @@ public class SignerConfiguration {
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
+  private final Optional<PkcsStoreConfig> downstreamConnectionTrustStore;
+  private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
 
   public SignerConfiguration(
       final String chainId,
@@ -36,13 +39,17 @@ public class SignerConfiguration {
       final int httpRpcPort,
       final int webSocketPort,
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
-      final Optional<TlsOptions> serverTlsOptions) {
+      final Optional<TlsOptions> serverTlsOptions,
+      final Optional<PkcsStoreConfig> downstreamConnectionTrustStore,
+      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
     this.serverTlsOptions = serverTlsOptions;
+    this.downstreamConnectionTrustStore = downstreamConnectionTrustStore;
+    this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
   }
 
   public String hostname() {
@@ -71,6 +78,14 @@ public class SignerConfiguration {
 
   public Optional<TlsOptions> serverTlsOptions() {
     return serverTlsOptions;
+  }
+
+  public Optional<PkcsStoreConfig> downstreamTrustStore() {
+    return downstreamConnectionTrustStore;
+  }
+
+  public Optional<PkcsStoreConfig> downstreamKeyStore() {
+    return downstreamConnectionKeyStore;
   }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
