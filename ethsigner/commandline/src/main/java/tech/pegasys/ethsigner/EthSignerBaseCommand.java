@@ -112,7 +112,7 @@ public class EthSignerBaseCommand implements Config {
     @Option(
         names = "--tls-keystore-file",
         description =
-            "Path to a PKCS#12 formatted key store; used to enable TLS on inbound connections.",
+            "Path to a PKCS#12 formatted keystore; used to enable TLS on inbound connections.",
         arity = "1",
         required = true)
     private File keyStoreFile;

@@ -97,7 +97,8 @@ class ClientSideTlsAcceptanceTest {
     builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, 9);
+    // arbitrary Node websocket port - is unused.
+    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, 0);
 
     final Signer signer = new Signer(builder.build(), nodeConfig, nodePorts);
 
@@ -148,7 +149,7 @@ class ClientSideTlsAcceptanceTest {
 
     assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
         .isInstanceOf(ClientConnectionException.class)
-        .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
+        .hasMessageContaining(String.valueOf(BAD_GATEWAY.code()));
 
     // ensure submitting a transaction results in the same behaviour
     final Transaction transaction =
@@ -162,7 +163,7 @@ class ClientSideTlsAcceptanceTest {
 
     assertThatThrownBy(() -> signer.transactions().submit(transaction))
         .isInstanceOf(ClientConnectionException.class)
-        .hasMessageContaining(String.format("%d", BAD_GATEWAY.code()));
+        .hasMessageContaining(String.valueOf(BAD_GATEWAY.code()));
   }
 
   @Test
