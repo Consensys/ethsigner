@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.signer.multikey;
 
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
+import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -167,6 +168,23 @@ class SigningMetadataTomlConfigLoader {
         .withPort(table.getLong("port").intValue())
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
         .withTimeout(table.getLong("timeout"));
+
+    final Boolean tlsEnabled = table.getBoolean("tls-enabled");
+    builder.withTlsEnabled(tlsEnabled);
+    if (tlsEnabled) {
+      builder.withTrustStoreConfig(
+          new TrustStoreConfig() {
+            @Override
+            public Path getStoreFile() {
+              return makeRelativePathAbsolute(table.getString("tls-truststore-file"));
+            }
+
+            @Override
+            public Path getStorePasswordFile() {
+              return makeRelativePathAbsolute(table.getString("tls-truststore-password-file"));
+            }
+          });
+    }
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }

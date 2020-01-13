@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
+import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -26,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 
@@ -101,7 +103,18 @@ public class MultiKeyAcceptanceTestBase {
             .append("host = \"" + hashicorpVault.getIpAddress() + "\"\n")
             .append("port = " + hashicorpVault.getPort() + "\n")
             .append("auth-file  = \"" + authFile + "\"\n")
-            .append("timeout = 500\n");
+            .append("timeout = 500\n")
+            .append("tls-enabled = " + hashicorpVault.isTlsEnabled() + "\n");
+
+        final Optional<TrustStoreConfig> signerTrustConfig = hashicorpVault.getSignerTrustConfig();
+        if (signerTrustConfig.isPresent()) {
+          writer
+              .append("tls-truststore-file = \"" + signerTrustConfig.get().getStoreFile() + "\"\n")
+              .append(
+                  "tls-truststore-password-file = \""
+                      + signerTrustConfig.get().getStorePasswordFile()
+                      + "\"\n");
+        }
 
         writer.close();
       } catch (final IOException e) {

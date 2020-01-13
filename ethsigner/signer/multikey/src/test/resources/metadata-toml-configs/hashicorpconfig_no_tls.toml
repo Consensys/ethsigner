@@ -9,6 +9,4 @@ host = "Host"
 port = 9999
 auth-file = "/path/to/auth-file"
 timeout = 50
-tls-enabled = true
-tls-truststore-file="/path/to/truststore.pfx"
-tls-truststore-password-file="/path/to/truststore.pass"
+tls-enabled = false
