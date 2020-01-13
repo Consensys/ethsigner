@@ -14,8 +14,6 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
-
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -25,7 +23,8 @@ public class HashicorpConfig {
   private final Integer port;
   private final Path authFilePath;
   private final Long timeout;
-  private final Optional<PkcsStoreConfig> tlsOptions;
+  private final boolean tlsEnabled;
+  private final TrustStoreConfig trustStoreConfig;
 
   public HashicorpConfig(
       final String signingKeyPath,
@@ -33,13 +32,15 @@ public class HashicorpConfig {
       final Integer port,
       final Path authFilePath,
       final Long timeout,
-      final Optional<PkcsStoreConfig> tlsOptions) {
+      final boolean tlsEnabled,
+      final TrustStoreConfig trustStoreConfig) {
     this.signingKeyPath = signingKeyPath;
     this.host = host;
     this.port = port;
     this.authFilePath = authFilePath;
     this.timeout = timeout;
-    this.tlsOptions = tlsOptions;
+    this.tlsEnabled = tlsEnabled;
+    this.trustStoreConfig = trustStoreConfig;
   }
 
   public String getHost() {
@@ -62,8 +63,12 @@ public class HashicorpConfig {
     return signingKeyPath;
   }
 
-  public Optional<PkcsStoreConfig> getTlsOptions() {
-    return tlsOptions;
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
+  }
+
+  public Optional<TrustStoreConfig> getTrustStoreConfig() {
+    return Optional.ofNullable(trustStoreConfig);
   }
 
   public static class HashicorpConfigBuilder {
@@ -73,7 +78,8 @@ public class HashicorpConfig {
     private Integer port;
     private Path authFilePath;
     private Long timeout;
-    private PkcsStoreConfig tlsOptions;
+    private boolean tlsEnabled;
+    private TrustStoreConfig trustStoreConfig;
 
     public HashicorpConfigBuilder withSigningKeyPath(final String signingKeyPath) {
       this.signingKeyPath = signingKeyPath;
@@ -100,8 +106,13 @@ public class HashicorpConfig {
       return this;
     }
 
-    public HashicorpConfigBuilder withTlsOptions(final PkcsStoreConfig tlsOptions) {
-      this.tlsOptions = tlsOptions;
+    public HashicorpConfigBuilder withTlsEnabled(final boolean tlsEnabled) {
+      this.tlsEnabled = tlsEnabled;
+      return this;
+    }
+
+    public HashicorpConfigBuilder withTrustStoreConfig(final TrustStoreConfig trustStoreConfig) {
+      this.trustStoreConfig = trustStoreConfig;
       return this;
     }
 
@@ -113,7 +124,7 @@ public class HashicorpConfig {
       checkNotNull(timeout, "Timeout was not set.");
 
       return new HashicorpConfig(
-          signingKeyPath, host, port, authFilePath, timeout, Optional.ofNullable(tlsOptions));
+          signingKeyPath, host, port, authFilePath, timeout, tlsEnabled, trustStoreConfig);
     }
   }
 }

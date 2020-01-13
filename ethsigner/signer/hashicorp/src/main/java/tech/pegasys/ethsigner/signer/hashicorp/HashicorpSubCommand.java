@@ -14,12 +14,10 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
@@ -35,42 +33,12 @@ import picocli.CommandLine.Option;
     description = "Sign transactions with a key stored in a Hashicorp Vault.",
     mixinStandardHelpOptions = true)
 public class HashicorpSubCommand extends SignerSubCommand {
-
   static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
-
-  static class HashicorpTrustStore implements PkcsStoreConfig {
-
-    @Option(
-        names = "--tls-server-trust-store-file",
-        description =
-            "Path to a PKCS#12 formatted trust store, containing all trusted root "
-                + "certificates.",
-        arity = "1",
-        required = true)
-    private File trustStoreFile;
-
-    @Option(
-        names = "--tls-server-trust-store-password-file",
-        description = "Path to a file containing the password used to decrypt the trust store.",
-        arity = "1",
-        required = true)
-    private File trustStorePasswordFile;
-
-    @Override
-    public File getStoreFile() {
-      return trustStoreFile;
-    }
-
-    @Override
-    public File getStorePasswordFile() {
-      return trustStorePasswordFile;
-    }
-  }
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -84,6 +52,15 @@ public class HashicorpSubCommand extends SignerSubCommand {
       description = "Port of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
       arity = "1")
   private final Integer serverPort = DEFAULT_PORT;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--signing-key-path"},
+      description =
+          "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
+              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @Option(
       names = {"--timeout"},
@@ -99,22 +76,26 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private final Path authFilePath = null;
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--signing-key-path"},
-      description =
-          "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
-              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private String signingKeyPath = DEFAULT_KEY_PATH;
+      names = {"--tls-enabled"},
+      defaultValue = "true",
+      description = "Connect to Hashicorp Vault server using TLS (default: ${DEFAULT-VALUE})",
+      required = true)
+  private final Boolean tlsEnabled = true;
 
   @ArgGroup(exclusive = false)
-  private HashicorpTrustStore trustStore;
+  private final HashicorpTrustStoreConfig trustStoreConfig = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
         new HashicorpConfig(
-            signingKeyPath, serverHost, serverPort, authFilePath, timeout, getTlsOptions());
+            signingKeyPath,
+            serverHost,
+            serverPort,
+            authFilePath,
+            timeout,
+            isTlsEnabled(),
+            getTrustOptions());
     final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }
@@ -130,8 +111,12 @@ public class HashicorpSubCommand extends SignerSubCommand {
     return COMMAND_NAME;
   }
 
-  public Optional<PkcsStoreConfig> getTlsOptions() {
-    return Optional.ofNullable(trustStore);
+  public boolean isTlsEnabled() {
+    return Optional.ofNullable(tlsEnabled).orElse(false);
+  }
+
+  public TrustStoreConfig getTrustOptions() {
+    return trustStoreConfig;
   }
 
   @Override
@@ -142,6 +127,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
+        .add("tlsEnabled", isTlsEnabled())
         .toString();
   }
 }

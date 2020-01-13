@@ -13,8 +13,6 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.InitializationException;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
 
@@ -26,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -80,13 +79,15 @@ public class HashicorpSigner {
       final long timeout) {
     final Vertx vertx = Vertx.vertx();
     try {
-      final HttpClientOptions httpClientOptions = new HttpClientOptions();
-      try {
-        if (hashicorpConfig.getTlsOptions().isPresent()) {
-          httpClientOptions.setPfxTrustOptions(convertFrom(hashicorpConfig.getTlsOptions().get()));
-        }
-      } catch (final IOException e) {
-        throw new InitializationException("Failed to load Hashicorp trust store.", e);
+      final HttpClientOptions httpClientOptions =
+          new HttpClientOptions()
+              .setDefaultHost(serverHost)
+              .setDefaultPort(serverPort)
+              .setSsl(hashicorpConfig.isTlsEnabled());
+
+      if (isTrustOptionsRequired()) {
+        httpClientOptions.setPfxTrustOptions(
+            convertFrom(hashicorpConfig.getTrustStoreConfig().get()));
       }
 
       final HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
@@ -95,8 +96,6 @@ public class HashicorpSigner {
       final HttpClientRequest request =
           httpClient.request(
               HttpMethod.GET,
-              serverPort,
-              serverHost,
               requestURI,
               rh ->
                   rh.bodyHandler(
@@ -122,9 +121,15 @@ public class HashicorpSigner {
     }
   }
 
-  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
-    final String password = readTokenFromFile(pkcsConfig.getStorePasswordFile().toPath());
-    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
+  private boolean isTrustOptionsRequired() {
+    return hashicorpConfig.isTlsEnabled() && hashicorpConfig.getTrustStoreConfig().isPresent();
+  }
+
+  private static PfxOptions convertFrom(final TrustStoreConfig trustStoreConfig) {
+    final String password = readPasswordFromFile(trustStoreConfig.getStorePasswordFile());
+    return new PfxOptions()
+        .setPassword(password)
+        .setPath(trustStoreConfig.getStoreFile().toString());
   }
 
   private static String readTokenFromFile(final Path path) {
@@ -137,6 +142,21 @@ public class HashicorpSigner {
       throw new TransactionSignerInitializationException(message, e);
     }
     return authFileLines.get(0);
+  }
+
+  private static String readPasswordFromFile(final Path path) {
+    try (Stream<String> stream = Files.lines(path)) {
+      return stream
+          .findFirst()
+          .orElseThrow(
+              () ->
+                  new TransactionSignerInitializationException(
+                      String.format(
+                          "Unable to read truststore password from %s", path.toString())));
+    } catch (IOException e) {
+      throw new TransactionSignerInitializationException(
+          String.format("Unable to read truststore password file %s", path.toString()), e);
+    }
   }
 
   private static String getResponse(final CompletableFuture<String> future, final long timeout) {
