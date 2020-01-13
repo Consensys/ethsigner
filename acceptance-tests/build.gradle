@@ -22,6 +22,8 @@ dependencies {
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-core'
+  testImplementation 'io.vertx:vertx-web'
+  testImplementation 'org.apache.tuweni:tuweni-net'
   testImplementation 'org.web3j:crypto'
   testImplementation 'org.web3j:besu'
   testImplementation 'org.apache.logging.log4j:log4j-api'

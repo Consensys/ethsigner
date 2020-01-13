@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,16 +10,29 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core;
+package tech.pegasys.ethsigner.tests.tls.support;
+
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 
 import java.io.File;
-import java.util.Optional;
 
-public interface TlsOptions {
+public class BasicPkcsStoreConfig implements PkcsStoreConfig {
 
-  File getKeyStoreFile();
+  private final File storeFile;
+  private final File passwordFile;
 
-  File getKeyStorePasswordFile();
+  public BasicPkcsStoreConfig(final File storeFile, final File passwordFile) {
+    this.storeFile = storeFile;
+    this.passwordFile = passwordFile;
+  }
 
-  Optional<File> getKnownClientsFile();
+  @Override
+  public File getStoreFile() {
+    return storeFile;
+  }
+
+  @Override
+  public File getStorePasswordFile() {
+    return passwordFile;
+  }
 }

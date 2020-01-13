@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.web3j.crypto.CipherException;
 
 public class DefaultTestBase extends IntegrationTestBase {
+  @SuppressWarnings("unused")
   @BeforeAll
   private static void setupEthSigner() throws IOException, CipherException {
     setupEthSigner(DEFAULT_CHAIN_ID);

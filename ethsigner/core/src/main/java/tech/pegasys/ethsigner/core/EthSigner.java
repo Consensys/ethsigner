@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
@@ -26,6 +29,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import io.vertx.core.http.ClientAuth;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -76,13 +80,47 @@ public final class EthSigner {
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
-            clientOptions,
+            applyConfigTlsSettingsTo(clientOptions),
             applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
             jsonDecoder,
             config.getDataPath());
 
     runner.start();
+  }
+
+  private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
+    final HttpClientOptions result = new HttpClientOptions(input);
+    boolean tlsIsRequired =
+        config.getWeb3TrustStoreOptions().isPresent()
+            || config.getClientCertificateOptions().isPresent();
+
+    if (tlsIsRequired) {
+      result.setSsl(true);
+      try {
+        if (config.getWeb3TrustStoreOptions().isPresent()) {
+          result.setPfxTrustOptions(convertFrom(config.getWeb3TrustStoreOptions().get()));
+        }
+        // else - use default truststore
+      } catch (final IOException e) {
+        throw new InitializationException("Failed to load web3 trust store.", e);
+      }
+
+      if (config.getClientCertificateOptions().isPresent()) {
+        try {
+          result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
+        } catch (final IOException e) {
+          throw new InitializationException("Failed to load client certificate.", e);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
+    final String password = readSecretFromFile(pkcsConfig.getStorePasswordFile().toPath());
+    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {

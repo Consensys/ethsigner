@@ -13,12 +13,12 @@
 
 
 jar {
-  baseName 'ethsigner'
+  archiveBaseName = 'ethsigner'
   manifest {
     attributes(
-      'Specification-Title': baseName,
+      'Specification-Title': archiveBaseName,
       'Specification-Version': project.version,
-      'Implementation-Title': baseName,
+      'Implementation-Title': archiveBaseName,
       'Implementation-Version': calculateVersion()
       )
   }
@@ -36,8 +36,8 @@ dependencies {
   implementation project(':ethsigner:commandline')
 
   implementation 'com.google.guava:guava'
-
   implementation 'org.apache.logging.log4j:log4j-api'
-  runtime 'org.apache.logging.log4j:log4j-core'
-  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
+
+  runtimeOnly 'org.apache.logging.log4j:log4j-core'
+  runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 }

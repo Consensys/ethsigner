@@ -10,33 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core;
+package tech.pegasys.ethsigner.core.config;
 
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
-
-import java.nio.file.Path;
-import java.time.Duration;
+import java.io.File;
 import java.util.Optional;
 
-import org.apache.logging.log4j.Level;
+public interface TlsOptions {
 
-public interface Config {
+  File getKeyStoreFile();
 
-  Level getLogLevel();
+  File getKeyStorePasswordFile();
 
-  String getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  String getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
-
-  Path getDataPath();
-
-  Optional<TlsOptions> getTlsOptions();
+  Optional<File> getKnownClientsFile();
 }

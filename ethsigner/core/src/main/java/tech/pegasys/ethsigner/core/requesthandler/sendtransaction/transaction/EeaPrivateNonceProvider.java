@@ -25,7 +25,7 @@ public class EeaPrivateNonceProvider implements NonceProvider {
   private final String accountAddress;
   private final Base64String privateFrom;
   private final List<Base64String> privateFor;
-  private VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
+  private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
 
   public EeaPrivateNonceProvider(
       final String accountAddress,

@@ -15,7 +15,8 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.core.TlsOptions;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
@@ -151,6 +152,23 @@ public class EthSignerProcessRunner {
         params.add(serverTlsOptions.getKnownClientsFile().get().toString());
       }
     }
+
+    if (signerConfig.downstreamKeyStore().isPresent()) {
+      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamKeyStore().get();
+      params.add("--downstream-http-tls-keystore-file");
+      params.add(keyStoreConfig.getStoreFile().toString());
+      params.add("--downstream-http-tls-keystore-password-file");
+      params.add(keyStoreConfig.getStorePasswordFile().toString());
+    }
+
+    if (signerConfig.downstreamTrustStore().isPresent()) {
+      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamTrustStore().get();
+      params.add("--downstream-http-tls-truststore-file");
+      params.add(keyStoreConfig.getStoreFile().toString());
+      params.add("--downstream-http-tls-truststore-password-file");
+      params.add(keyStoreConfig.getStorePasswordFile().toString());
+    }
+
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);

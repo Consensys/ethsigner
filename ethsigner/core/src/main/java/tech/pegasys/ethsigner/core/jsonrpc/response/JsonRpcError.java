@@ -131,6 +131,7 @@ public enum JsonRpcError {
 
   // Gateway errors
   CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT(-32000, "Connection to downstream node timed out"),
+  FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE(-32000, "Failed to connect to downstream node"),
 
   // Transaction signing errors
   SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "No unlocked account matches the Sender");
