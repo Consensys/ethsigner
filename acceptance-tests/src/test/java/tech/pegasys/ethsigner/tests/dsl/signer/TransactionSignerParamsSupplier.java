@@ -52,6 +52,17 @@ public class TransactionSignerParamsSupplier {
       params.add(hashicorpVault.getIpAddress());
       params.add("--port");
       params.add(String.valueOf(hashicorpVault.getPort()));
+      params.add("--tls-enabled");
+      params.add(String.valueOf(hashicorpVault.isTlsEnabled()));
+      hashicorpVault
+          .getSignerTrustConfig()
+          .ifPresent(
+              trustStoreConfig -> {
+                params.add("--tls-truststore-file");
+                params.add(trustStoreConfig.getStoreFile().toString());
+                params.add("--tls-truststore-passwordfile");
+                params.add(trustStoreConfig.getStorePasswordFile().toString());
+              });
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
       params.add("--key-vault-name");

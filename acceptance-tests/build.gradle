@@ -18,6 +18,7 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
   testImplementation project(':ethsigner:core')
+  testImplementation project(':ethsigner:signer:hashicorp')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'

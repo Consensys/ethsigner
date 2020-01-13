@@ -12,16 +12,26 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.utils;
 
+import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
 import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+
+import java.util.Optional;
 
 import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpVault {
 
   private final HashicorpVaultDocker dockerContainer;
+  private final boolean tlsEnabled;
+  private final TrustStoreConfig signerTrustConfig;
 
-  private HashicorpVault(final HashicorpVaultDocker dockerContainer) {
+  private HashicorpVault(
+      final HashicorpVaultDocker dockerContainer,
+      final boolean tlsEnabled,
+      final TrustStoreConfig signerTrustConfig) {
     this.dockerContainer = dockerContainer;
+    this.tlsEnabled = tlsEnabled;
+    this.signerTrustConfig = signerTrustConfig;
   }
 
   public static HashicorpVault createVault(final DockerClient docker) {
@@ -29,7 +39,16 @@ public class HashicorpVault {
     hashicorpVaultDocker.start();
     hashicorpVaultDocker.awaitStartupCompletion();
     hashicorpVaultDocker.createTestData();
-    return new HashicorpVault(hashicorpVaultDocker);
+    return new HashicorpVault(hashicorpVaultDocker, false, null);
+  }
+
+  public static HashicorpVault createVaultWithTls(
+      final DockerClient docker, final TrustStoreConfig trustStoreConfig) {
+    final HashicorpVaultDocker hashicorpVaultDocker = new HashicorpVaultDocker(docker);
+    hashicorpVaultDocker.start();
+    hashicorpVaultDocker.awaitStartupCompletion();
+    hashicorpVaultDocker.createTestData();
+    return new HashicorpVault(hashicorpVaultDocker, true, trustStoreConfig);
   }
 
   public void shutdown() {
@@ -48,5 +67,13 @@ public class HashicorpVault {
 
   public String getVaultToken() {
     return dockerContainer.getVaultToken();
+  }
+
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
+  }
+
+  public Optional<TrustStoreConfig> getSignerTrustConfig() {
+    return Optional.ofNullable(signerTrustConfig);
   }
 }
