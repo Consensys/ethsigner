@@ -169,21 +169,27 @@ class SigningMetadataTomlConfigLoader {
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
         .withTimeout(table.getLong("timeout"));
 
-    final Boolean tlsEnabled = table.getBoolean("tls-enabled");
+    final Boolean tlsEnabled = table.getOptionalBoolean("tls-enabled").orElse(true);
     builder.withTlsEnabled(tlsEnabled);
     if (tlsEnabled) {
-      builder.withTrustStoreConfig(
-          new TrustStoreConfig() {
-            @Override
-            public Path getStoreFile() {
-              return makeRelativePathAbsolute(table.getString("tls-truststore-file"));
-            }
+      final Optional<String> tlsTrustStoreFile = table.getOptionalString("tls-truststore-file");
+      final Optional<String> tlsTrustStorePasswordFile =
+          table.getOptionalString("tls-truststore-password-file");
 
-            @Override
-            public Path getStorePasswordFile() {
-              return makeRelativePathAbsolute(table.getString("tls-truststore-password-file"));
-            }
-          });
+      if (tlsTrustStoreFile.isPresent() && tlsTrustStorePasswordFile.isPresent()) {
+        builder.withTrustStoreConfig(
+            new TrustStoreConfig() {
+              @Override
+              public Path getStoreFile() {
+                return makeRelativePathAbsolute(tlsTrustStoreFile.get());
+              }
+
+              @Override
+              public Path getStorePasswordFile() {
+                return makeRelativePathAbsolute(tlsTrustStorePasswordFile.get());
+              }
+            });
+      }
     }
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));

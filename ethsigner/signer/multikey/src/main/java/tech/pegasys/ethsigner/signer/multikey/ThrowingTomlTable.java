@@ -34,8 +34,11 @@ public class ThrowingTomlTable {
         .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
   }
 
-  public Boolean getBoolean(final String key) {
-    return Optional.ofNullable(table.getBoolean("tls-enabled"))
-        .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
+  public Optional<Boolean> getOptionalBoolean(final String key) {
+    return Optional.ofNullable(table.getBoolean(key));
+  }
+
+  public Optional<String> getOptionalString(final String key) {
+    return Optional.ofNullable(table.getString(key));
   }
 }
