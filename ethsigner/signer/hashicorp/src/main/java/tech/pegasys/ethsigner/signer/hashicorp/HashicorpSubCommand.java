@@ -77,7 +77,8 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private final Path authFilePath = null;
 
   @Option(
-      names = {"--tls-enabled"},
+      names = {"--no-tls-enabled"},
+      negatable = true,
       defaultValue = "true",
       description = "Connect to Hashicorp Vault server using TLS (default: ${DEFAULT-VALUE})",
       required = true)

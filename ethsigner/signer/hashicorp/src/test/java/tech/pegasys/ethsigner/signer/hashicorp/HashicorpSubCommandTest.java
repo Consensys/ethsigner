@@ -62,7 +62,6 @@ public class HashicorpSubCommandTest {
         + PATH_TO_SIGNING_KEY
         + " --timeout="
         + FIFTEEN
-        + " --tls-enabled=true"
         + " --tls-truststore-file="
         + CLIENT_CERT_PFX
         + " --tls-truststore-password-file="
@@ -79,7 +78,8 @@ public class HashicorpSubCommandTest {
         + " --signing-key-path="
         + PATH_TO_SIGNING_KEY
         + " --timeout="
-        + FIFTEEN;
+        + FIFTEEN
+        + " --no-tls-enabled";
   }
 
   private String removeFieldFrom(final String input, final String fieldName) {
@@ -121,7 +121,7 @@ public class HashicorpSubCommandTest {
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
     assertThat(string).contains(FIFTEEN);
 
-    assertThat(hashiConfig.isTlsEnabled()).isTrue();
+    assertThat(hashiConfig.isTlsEnabled()).isFalse();
     assertThat(hashiConfig.getTrustOptions()).isNull();
   }
 

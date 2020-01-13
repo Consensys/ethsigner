@@ -52,8 +52,9 @@ public class TransactionSignerParamsSupplier {
       params.add(hashicorpVault.getIpAddress());
       params.add("--port");
       params.add(String.valueOf(hashicorpVault.getPort()));
-      params.add("--tls-enabled");
-      params.add(String.valueOf(hashicorpVault.isTlsEnabled()));
+      final String tlsEnabledOption =
+          hashicorpVault.isTlsEnabled() ? "--tls-enabled" : "--no-tls-enabled";
+      params.add(tlsEnabledOption);
       hashicorpVault
           .getSignerTrustConfig()
           .ifPresent(
