@@ -53,15 +53,6 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private final Integer serverPort = DEFAULT_PORT;
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = {"--signing-key-path"},
-      description =
-          "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
-              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private String signingKeyPath = DEFAULT_KEY_PATH;
-
   @Option(
       names = {"--timeout"},
       description =
@@ -75,6 +66,15 @@ public class HashicorpSubCommand extends SignerSubCommand {
       required = true,
       arity = "1")
   private final Path authFilePath = null;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--signing-key-path"},
+      description =
+          "Path to a secret in the Hashicorp vault containing the private key used for signing transactions. The "
+              + "key needs to be a base 64 encoded private key for ECDSA for curve secp256k1 (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @Option(
       names = {"--no-tls-enabled"},
