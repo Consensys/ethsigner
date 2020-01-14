@@ -15,13 +15,13 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class MultiKeyAcceptanceTestBase {
       final Path tomlPath,
       final String keyPath,
       final String authFile,
-      final HashicorpVault hashicorpVault) {
+      final HashicorpNode hashicorpNode) {
     {
       try {
 
@@ -100,13 +100,13 @@ public class MultiKeyAcceptanceTestBase {
         writer
             .append("type = \"hashicorp-signer\"\n")
             .append("signing-key-path = \"" + keyPath + "\"\n")
-            .append("host = \"" + hashicorpVault.getIpAddress() + "\"\n")
-            .append("port = " + hashicorpVault.getPort() + "\n")
+            .append("host = \"" + hashicorpNode.getHost() + "\"\n")
+            .append("port = " + hashicorpNode.getPort() + "\n")
             .append("auth-file  = \"" + authFile + "\"\n")
             .append("timeout = 500\n")
-            .append("tls-enabled = " + hashicorpVault.isTlsEnabled() + "\n");
+            .append("tls-enabled = " + hashicorpNode.isTlsEnabled() + "\n");
 
-        final Optional<TrustStoreConfig> signerTrustConfig = hashicorpVault.getSignerTrustConfig();
+        final Optional<TrustStoreConfig> signerTrustConfig = hashicorpNode.getSignerTrustConfig();
         if (signerTrustConfig.isPresent()) {
           writer
               .append("tls-truststore-file = \"" + signerTrustConfig.get().getStoreFile() + "\"\n")

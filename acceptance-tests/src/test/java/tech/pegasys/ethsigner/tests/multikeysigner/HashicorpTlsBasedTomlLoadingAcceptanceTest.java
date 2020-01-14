@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
+class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
@@ -43,8 +43,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @BeforeAll
   static void setUpBase() throws IOException {
-    hashicorpNode =
-        HashicorpNode.createAndStartHashicorpWithoutTls(new DockerClientFactory().create());
+    hashicorpNode = HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create());
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));

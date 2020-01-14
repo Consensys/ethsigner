@@ -13,10 +13,10 @@
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker.absKeyPath;
+import static tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpVaultDocker.VAULT_SIGNING_KEY_GET_RESOURCE;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,11 +32,12 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-  private static HashicorpVault hashicorpVault;
+  private static HashicorpNode hashicorpNode;
 
   @BeforeAll
   static void preSetup() {
-    hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
+    hashicorpNode =
+        HashicorpNode.createAndStartHashicorpWithoutTls(new DockerClientFactory().create());
   }
 
   @Test
@@ -44,11 +45,14 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
       throws IOException {
 
     final Path authFilePath = tomlDirectory.resolve("hashicorpAuthFile");
-    Files.write(authFilePath, hashicorpVault.getVaultToken().getBytes(UTF_8));
+    Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
     final String authFilename = authFilePath.toAbsolutePath().toString();
 
     createHashicorpTomlFileAt(
-        tomlDirectory.resolve(FILENAME + ".toml"), absKeyPath, authFilename, hashicorpVault);
+        tomlDirectory.resolve(FILENAME + ".toml"),
+        VAULT_SIGNING_KEY_GET_RESOURCE,
+        authFilename,
+        hashicorpNode);
 
     setup(tomlDirectory);
     performTransaction();
@@ -56,9 +60,9 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
 
   @AfterAll
   static void tearDown() {
-    if (hashicorpVault != null) {
-      hashicorpVault.shutdown();
-      hashicorpVault = null;
+    if (hashicorpNode != null) {
+      hashicorpNode.shutdown();
+      hashicorpNode = null;
     }
   }
 }
