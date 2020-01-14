@@ -82,8 +82,12 @@ public class HashicorpSubCommandTest {
         + " --no-tls-enabled";
   }
 
-  private String removeFieldFrom(final String input, final String fieldName) {
-    return input.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+  private String removeFieldsFrom(final String input, final String... fieldNames) {
+    String updatedInput = input;
+    for (String fieldName : fieldNames) {
+      updatedInput = updatedInput.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+    }
+    return updatedInput;
   }
 
   private String modifyField(final String input, final String fieldName, final String value) {
@@ -171,10 +175,8 @@ public class HashicorpSubCommandTest {
 
   @Test
   void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
-    String cmdLine = validCommandLine();
-    cmdLine = removeFieldFrom(cmdLine, "tls-truststore-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-truststore-password-file");
-
+    final String cmdLine =
+        removeFieldsFrom(validCommandLine(), "tls-truststore-file", "tls-truststore-password-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
@@ -182,7 +184,7 @@ public class HashicorpSubCommandTest {
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = removeFieldsFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -191,7 +193,7 @@ public class HashicorpSubCommandTest {
       final String paramToRemove,
       final Supplier<String> actualValueGetter,
       final String expectedValue) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = removeFieldsFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).contains(expectedValue);
