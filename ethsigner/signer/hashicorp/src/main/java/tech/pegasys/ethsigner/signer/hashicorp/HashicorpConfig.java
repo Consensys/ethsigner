@@ -111,7 +111,8 @@ public class HashicorpConfig {
       return this;
     }
 
-    public HashicorpConfigBuilder withTrustStoreConfig(final PkcsTrustStoreConfig pkcsTrustStoreConfig) {
+    public HashicorpConfigBuilder withTrustStoreConfig(
+        final PkcsTrustStoreConfig pkcsTrustStoreConfig) {
       this.pkcsTrustStoreConfig = pkcsTrustStoreConfig;
       return this;
     }

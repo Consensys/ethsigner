@@ -277,8 +277,7 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
     assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
     assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString())
-        .isEqualTo("/path/to/auth-file");
+    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
     assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
   }
 

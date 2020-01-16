@@ -106,7 +106,8 @@ public class MultiKeyAcceptanceTestBase {
             .append("timeout = 500\n")
             .append("tls-enabled = " + hashicorpNode.isTlsEnabled() + "\n");
 
-        final Optional<PkcsTrustStoreConfig> signerTrustConfig = hashicorpNode.getSignerTrustConfig();
+        final Optional<PkcsTrustStoreConfig> signerTrustConfig =
+            hashicorpNode.getSignerTrustConfig();
         if (signerTrustConfig.isPresent()) {
           writer
               .append("tls-truststore-file = \"" + signerTrustConfig.get().getPath() + "\"\n")
