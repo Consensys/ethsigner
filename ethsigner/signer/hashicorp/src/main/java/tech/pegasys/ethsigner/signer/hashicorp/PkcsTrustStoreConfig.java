@@ -14,8 +14,7 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 
 import java.nio.file.Path;
 
-public interface TrustStoreConfig {
-  Path getStoreFile();
-
-  Path getStorePasswordFile();
+public interface PkcsTrustStoreConfig {
+  Path getPath();
+  Path getPasswordFilePath();
 }

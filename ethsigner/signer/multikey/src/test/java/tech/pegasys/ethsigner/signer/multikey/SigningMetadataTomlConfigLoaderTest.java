@@ -37,6 +37,7 @@ import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.UNKNOWN
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.UNKNOWN_TYPE_SIGNER_FILENAME;
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.copyMetadataFileToDirectory;
 
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -272,12 +273,13 @@ class SigningMetadataTomlConfigLoaderTest {
     final HashicorpSigningMetadataFile metadataFile =
         (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
 
-    assertThat(metadataFile.getConfig().getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(metadataFile.getConfig().getHost()).isEqualTo("Host");
-    assertThat(metadataFile.getConfig().getPort()).isEqualTo(9999);
-    assertThat(metadataFile.getConfig().getAuthFilePath().toString())
+    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
+    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
+    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
+    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
+    assertThat(hashicorpConfig.getAuthFilePath().toString())
         .isEqualTo("/path/to/auth-file");
-    assertThat(metadataFile.getConfig().getTimeout()).isEqualTo(50);
+    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
   }
 
   @Test
@@ -292,14 +294,14 @@ class SigningMetadataTomlConfigLoaderTest {
     final HashicorpSigningMetadataFile metadataFile =
         (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
 
-    assertThat(metadataFile.getConfig().getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(metadataFile.getConfig().getHost()).isEqualTo("Host");
-    assertThat(metadataFile.getConfig().getPort()).isEqualTo(9999);
-    assertThat(metadataFile.getConfig().getAuthFilePath().toString())
-        .isEqualTo("/path/to/auth-file");
-    assertThat(metadataFile.getConfig().getTimeout()).isEqualTo(50);
-    assertThat(metadataFile.getConfig().isTlsEnabled()).isFalse();
-    assertThat(metadataFile.getConfig().getTrustStoreConfig().isPresent()).isFalse();
+    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
+    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
+    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
+    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
+    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
+    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
+    assertThat(hashicorpConfig.isTlsEnabled()).isFalse();
+    assertThat(hashicorpConfig.getPkcsTrustStoreConfig().isPresent()).isFalse();
   }
 
   @Test

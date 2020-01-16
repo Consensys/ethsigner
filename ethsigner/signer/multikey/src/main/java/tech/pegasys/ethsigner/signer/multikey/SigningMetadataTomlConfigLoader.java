@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.signer.multikey;
 
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
-import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
+import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -178,14 +178,14 @@ class SigningMetadataTomlConfigLoader {
 
       if (tlsTrustStoreFile.isPresent() && tlsTrustStorePasswordFile.isPresent()) {
         builder.withTrustStoreConfig(
-            new TrustStoreConfig() {
+            new PkcsTrustStoreConfig() {
               @Override
-              public Path getStoreFile() {
+              public Path getPath() {
                 return makeRelativePathAbsolute(tlsTrustStoreFile.get());
               }
 
               @Override
-              public Path getStorePasswordFile() {
+              public Path getPasswordFilePath() {
                 return makeRelativePathAbsolute(tlsTrustStorePasswordFile.get());
               }
             });

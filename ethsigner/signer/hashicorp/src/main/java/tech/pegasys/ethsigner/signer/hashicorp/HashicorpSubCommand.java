@@ -85,7 +85,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private final Boolean tlsEnabled = true;
 
   @ArgGroup(exclusive = false)
-  private final HashicorpTrustStoreConfig trustStoreConfig = null;
+  private final HashicorpPkcsTrustStoreConfig trustStoreConfig = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
@@ -116,7 +116,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
     return Optional.ofNullable(tlsEnabled).orElse(false);
   }
 
-  public TrustStoreConfig getTrustOptions() {
+  public PkcsTrustStoreConfig getTrustOptions() {
     return trustStoreConfig;
   }
 

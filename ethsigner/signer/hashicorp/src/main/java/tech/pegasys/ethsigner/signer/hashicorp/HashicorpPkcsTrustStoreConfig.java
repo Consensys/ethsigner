@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 import picocli.CommandLine;
 
-class HashicorpTrustStoreConfig implements TrustStoreConfig {
+class HashicorpPkcsTrustStoreConfig implements PkcsTrustStoreConfig {
   private static final String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
 
   @CommandLine.Option(
@@ -37,12 +37,12 @@ class HashicorpTrustStoreConfig implements TrustStoreConfig {
   private Path trustStorePasswordFile;
 
   @Override
-  public Path getStoreFile() {
+  public Path getPath() {
     return trustStoreFile;
   }
 
   @Override
-  public Path getStorePasswordFile() {
+  public Path getPasswordFilePath() {
     return trustStorePasswordFile;
   }
 }

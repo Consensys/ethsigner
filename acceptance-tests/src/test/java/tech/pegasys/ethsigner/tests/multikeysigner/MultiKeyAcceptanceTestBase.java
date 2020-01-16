@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
-import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
+import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -106,13 +106,13 @@ public class MultiKeyAcceptanceTestBase {
             .append("timeout = 500\n")
             .append("tls-enabled = " + hashicorpNode.isTlsEnabled() + "\n");
 
-        final Optional<TrustStoreConfig> signerTrustConfig = hashicorpNode.getSignerTrustConfig();
+        final Optional<PkcsTrustStoreConfig> signerTrustConfig = hashicorpNode.getSignerTrustConfig();
         if (signerTrustConfig.isPresent()) {
           writer
-              .append("tls-truststore-file = \"" + signerTrustConfig.get().getStoreFile() + "\"\n")
+              .append("tls-truststore-file = \"" + signerTrustConfig.get().getPath() + "\"\n")
               .append(
                   "tls-truststore-password-file = \""
-                      + signerTrustConfig.get().getStorePasswordFile()
+                      + signerTrustConfig.get().getPasswordFilePath()
                       + "\"\n");
         }
 

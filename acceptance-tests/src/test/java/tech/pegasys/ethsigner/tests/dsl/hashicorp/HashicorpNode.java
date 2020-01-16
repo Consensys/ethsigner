@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.hashicorp;
 
-import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
+import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -71,20 +71,20 @@ public class HashicorpNode {
     return hashicorpVaultCertificate != null;
   }
 
-  public Optional<TrustStoreConfig> getSignerTrustConfig() {
+  public Optional<PkcsTrustStoreConfig> getSignerTrustConfig() {
     if (!isTlsEnabled()) {
       return Optional.empty();
     }
 
     return Optional.of(
-        new TrustStoreConfig() {
+        new PkcsTrustStoreConfig() {
           @Override
-          public Path getStoreFile() {
+          public Path getPath() {
             return Path.of(hashicorpVaultCertificate.getPfxTrustOptions().getPath());
           }
 
           @Override
-          public Path getStorePasswordFile() {
+          public Path getPasswordFilePath() {
             return hashicorpVaultCertificate.getPfxPasswordFile();
           }
         });

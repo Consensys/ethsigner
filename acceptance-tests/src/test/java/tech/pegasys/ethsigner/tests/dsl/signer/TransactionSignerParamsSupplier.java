@@ -60,9 +60,9 @@ public class TransactionSignerParamsSupplier {
           .ifPresent(
               trustStoreConfig -> {
                 params.add("--tls-truststore-file");
-                params.add(trustStoreConfig.getStoreFile().toString());
+                params.add(trustStoreConfig.getPath().toString());
                 params.add("--tls-truststore-password-file");
-                params.add(trustStoreConfig.getStorePasswordFile().toString());
+                params.add(trustStoreConfig.getPasswordFilePath().toString());
               });
     } else if (azureKeyVault != null) {
       params.add("azure-signer");

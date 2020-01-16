@@ -87,7 +87,7 @@ public class HashicorpSigner {
 
       if (isTrustOptionsRequired()) {
         httpClientOptions.setPfxTrustOptions(
-            convertFrom(hashicorpConfig.getTrustStoreConfig().get()));
+            convertFrom(hashicorpConfig.getPkcsTrustStoreConfig().get()));
       }
 
       final HttpClient httpClient = vertx.createHttpClient(httpClientOptions);
@@ -122,14 +122,14 @@ public class HashicorpSigner {
   }
 
   private boolean isTrustOptionsRequired() {
-    return hashicorpConfig.isTlsEnabled() && hashicorpConfig.getTrustStoreConfig().isPresent();
+    return hashicorpConfig.isTlsEnabled() && hashicorpConfig.getPkcsTrustStoreConfig().isPresent();
   }
 
-  private static PfxOptions convertFrom(final TrustStoreConfig trustStoreConfig) {
-    final String password = readPasswordFromFile(trustStoreConfig.getStorePasswordFile());
+  private static PfxOptions convertFrom(final PkcsTrustStoreConfig pkcsTrustStoreConfig) {
+    final String password = readPasswordFromFile(pkcsTrustStoreConfig.getPasswordFilePath());
     return new PfxOptions()
         .setPassword(password)
-        .setPath(trustStoreConfig.getStoreFile().toString());
+        .setPath(pkcsTrustStoreConfig.getPath().toString());
   }
 
   private static String readTokenFromFile(final Path path) {

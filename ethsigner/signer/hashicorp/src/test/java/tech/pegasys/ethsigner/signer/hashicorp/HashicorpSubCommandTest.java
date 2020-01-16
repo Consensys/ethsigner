@@ -108,8 +108,8 @@ public class HashicorpSubCommandTest {
 
     assertThat(hashiConfig.isTlsEnabled()).isTrue();
     assertThat(hashiConfig.getTrustOptions()).isNotNull();
-    assertThat(hashiConfig.getTrustOptions().getStoreFile()).isEqualTo(Path.of(CLIENT_CERT_PFX));
-    assertThat(hashiConfig.getTrustOptions().getStorePasswordFile())
+    assertThat(hashiConfig.getTrustOptions().getPath()).isEqualTo(Path.of(CLIENT_CERT_PFX));
+    assertThat(hashiConfig.getTrustOptions().getPasswordFilePath())
         .isEqualTo(Path.of(CLIENT_CERT_PASSWD));
   }
 
