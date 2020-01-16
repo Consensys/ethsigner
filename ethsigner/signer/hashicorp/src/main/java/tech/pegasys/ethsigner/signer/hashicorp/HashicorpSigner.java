@@ -155,7 +155,7 @@ public class HashicorpSigner {
                           "Unable to read truststore password from %s", path.toString())));
     } catch (IOException e) {
       throw new TransactionSignerInitializationException(
-          String.format("Unable to read truststore password file %s", path.toString()), e);
+          String.format("Unable to read truststore password file %s: %s", path.toString(), e.getMessage()), e);
     }
   }
 

@@ -28,6 +28,7 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import tech.pegasys.ethsigner.tests.VertxTlsUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -129,10 +130,8 @@ public class HashicorpVaultCertificate {
   }
 
   private void createPfxPasswordFile() throws IOException {
-    pfxPasswordFile =
-        Files.writeString(
-            Files.createTempFile(certificateDirectory, "ts_password", ".txt"),
-            DEFAULT_PFX_PASSWORD);
+    pfxPasswordFile = Files.createTempFile(certificateDirectory, "ts_password", ".txt");
+    Files.writeString(pfxPasswordFile, DEFAULT_PFX_PASSWORD, StandardCharsets.UTF_8);
   }
 
   private void cleanup() {
