@@ -135,6 +135,7 @@ public class HashicorpVaultCertificate {
   }
 
   private void cleanup() {
+    LOG.debug("Cleaning temporary directory and files");
     if (certificateDirectory != null) {
       try {
         deleteDirectory(certificateDirectory.toFile());
