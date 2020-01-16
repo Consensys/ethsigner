@@ -22,8 +22,11 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
@@ -34,37 +37,33 @@ import io.vertx.core.net.SelfSignedCertificate;
 public class VertxTlsUtil {
 
   public static PfxOptions convertToPfxKeyStore(
-      final Path parent, final SelfSignedCertificate selfSignedCertificate, final char[] password)
+      final SelfSignedCertificate selfSignedCertificate, final char[] password)
       throws IOException, GeneralSecurityException {
-    final PrivateKey privateKey = getPrivateKey(selfSignedCertificate.privateKeyPath());
-    final Certificate certificate = getCertificate(selfSignedCertificate.certificatePath());
-
-    final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-    keyStore.load(null);
-    keyStore.setKeyEntry("test", privateKey, password, new Certificate[] {certificate});
-
-    final Path pfxPath = Files.createTempFile(parent, "test", ".pfx");
-    try (FileOutputStream outputStream = new FileOutputStream(pfxPath.toFile())) {
-      keyStore.store(outputStream, password);
-    }
-
-    return new PfxOptions().setPath(pfxPath.toString()).setPassword(new String(password));
+    return convert(selfSignedCertificate, password, true);
   }
 
   public static PfxOptions convertToPfxTrustStore(
-      final Path parent, final SelfSignedCertificate selfSignedCertificate, final char[] password)
+      final SelfSignedCertificate selfSignedCertificate, final char[] password)
+      throws IOException, GeneralSecurityException {
+    return convert(selfSignedCertificate, password, false);
+  }
+
+  private static PfxOptions convert(
+      final SelfSignedCertificate selfSignedCertificate,
+      final char[] password,
+      final boolean isKeyStore)
       throws IOException, GeneralSecurityException {
     final Certificate certificate = getCertificate(selfSignedCertificate.certificatePath());
-
     final KeyStore keyStore = KeyStore.getInstance("PKCS12");
     keyStore.load(null);
-    keyStore.setCertificateEntry("testca", certificate);
-
-    final Path pfxPath = Files.createTempFile(parent, "test", ".pfx");
-    try (FileOutputStream outputStream = new FileOutputStream(pfxPath.toFile())) {
-      keyStore.store(outputStream, password);
+    if (isKeyStore) {
+      final PrivateKey privateKey = getPrivateKey(selfSignedCertificate.privateKeyPath());
+      keyStore.setKeyEntry("test", privateKey, password, new Certificate[] {certificate});
+    } else {
+      keyStore.setCertificateEntry("testca", certificate);
     }
 
+    final Path pfxPath = saveKeyStore(password, keyStore);
     return new PfxOptions().setPath(pfxPath.toString()).setPassword(new String(password));
   }
 
@@ -88,5 +87,16 @@ public class VertxTlsUtil {
     final byte[] pemCertificate = Files.readAllBytes(Paths.get(pemCertificatePath));
     final CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
     return certificateFactory.generateCertificate(new ByteArrayInputStream(pemCertificate));
+  }
+
+  private static Path saveKeyStore(final char[] password, final KeyStore keyStore)
+      throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    // Set<PosixFilePermission> ownerWritable = PosixFilePermissions.fromString("rw-r--r--");
+    // FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(ownerWritable);
+    final Path pfxPath = Files.createTempFile("test", ".pfx");
+    try (FileOutputStream outputStream = new FileOutputStream(pfxPath.toFile())) {
+      keyStore.store(outputStream, password);
+    }
+    return pfxPath;
   }
 }
