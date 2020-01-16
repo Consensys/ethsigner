@@ -69,7 +69,7 @@ public class HashicorpVaultDocker {
   private static final Path CONTAINER_MOUNT_PATH = Path.of("/vault/config");
 
   private final DockerClient docker;
-  private final HashicorpVaultCerts hashicorpVaultCerts;
+  private final HashicorpVaultCertificate hashicorpVaultCertificate;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private String vaultContainerId;
@@ -78,15 +78,15 @@ public class HashicorpVaultDocker {
   private String hashicorpRootToken;
 
   private HashicorpVaultDocker(
-      final DockerClient docker, final HashicorpVaultCerts hashicorpVaultCerts) {
+      final DockerClient docker, final HashicorpVaultCertificate hashicorpVaultCertificate) {
     this.docker = docker;
-    this.hashicorpVaultCerts = hashicorpVaultCerts;
+    this.hashicorpVaultCertificate = hashicorpVaultCertificate;
   }
 
   public static HashicorpVaultDocker createVaultDocker(
-      final DockerClient docker, final HashicorpVaultCerts hashicorpVaultCerts) {
+      final DockerClient docker, final HashicorpVaultCertificate hashicorpVaultCertificate) {
     final HashicorpVaultDocker hashicorpVaultDocker =
-        new HashicorpVaultDocker(docker, hashicorpVaultCerts);
+        new HashicorpVaultDocker(docker, hashicorpVaultCertificate);
     hashicorpVaultDocker.pullVaultImage();
     hashicorpVaultDocker.createVaultContainer();
     hashicorpVaultDocker.start();
@@ -112,7 +112,7 @@ public class HashicorpVaultDocker {
   }
 
   public boolean isTlsEnabled() {
-    return hashicorpVaultCerts != null;
+    return hashicorpVaultCertificate != null;
   }
 
   public String getHashicorpRootToken() {
@@ -392,7 +392,7 @@ public class HashicorpVaultDocker {
 
     if (isTlsEnabled()) {
       final Bind configBind =
-          new Bind(hashicorpVaultCerts.getCertificateDirectory().toString(), configVolume);
+          new Bind(hashicorpVaultCertificate.getCertificateDirectory().toString(), configVolume);
       hostConfig.withBinds(configBind);
     }
 
@@ -437,9 +437,9 @@ public class HashicorpVaultDocker {
       return ", \"tls_disable\":\"true\"";
     }
     final Path containerTlsCertPath =
-        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCerts.getTlsCertificate().getFileName());
+        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCertificate.getTlsCertificate().getFileName());
     final Path containerTlsKeyPath =
-        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCerts.getTlsPrivateKey().getFileName());
+        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCertificate.getTlsPrivateKey().getFileName());
 
     return String.format(
         ", \"tls_min_version\": \"tls12\", \"tls_cert_file\": \"%s\", \"tls_key_file\": \"%s\"",

@@ -12,33 +12,27 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.hashicorp;
 
-import static com.google.common.io.Resources.getResource;
-
 import tech.pegasys.ethsigner.signer.hashicorp.TrustStoreConfig;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpNode {
-  private static final Path TRUSTSTORE_PATH =
-      Paths.get(getResource("tls/hashicorp/truststore.pfx").getPath());
-  private static final Path TRUSTSTORE_PASSWORD_PATH =
-      Paths.get(getResource("tls/hashicorp/truststore_password.txt").getPath());
-  private final HashicorpVaultCerts hashicorpVaultCerts;
+  private final HashicorpVaultCertificate hashicorpVaultCertificate;
   private final DockerClient dockerClient;
   private HashicorpVaultDocker hashicorpVaultDocker;
 
   private HashicorpNode(
-      final DockerClient dockerClient, final HashicorpVaultCerts hashicorpVaultCerts) {
+      final DockerClient dockerClient, final HashicorpVaultCertificate hashicorpVaultCertificate) {
     this.dockerClient = dockerClient;
-    this.hashicorpVaultCerts = hashicorpVaultCerts;
+    this.hashicorpVaultCertificate = hashicorpVaultCertificate;
   }
 
   public static HashicorpNode createAndStartHashicorp(final DockerClient dockerClient) {
-    final HashicorpNode hashicorpNode = new HashicorpNode(dockerClient, new HashicorpVaultCerts());
+    final HashicorpNode hashicorpNode =
+        new HashicorpNode(dockerClient, HashicorpVaultCertificate.create());
     hashicorpNode.start();
     return hashicorpNode;
   }
@@ -51,7 +45,7 @@ public class HashicorpNode {
 
   private void start() {
     hashicorpVaultDocker =
-        HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultCerts);
+        HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultCertificate);
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -74,7 +68,7 @@ public class HashicorpNode {
   }
 
   public boolean isTlsEnabled() {
-    return hashicorpVaultCerts != null;
+    return hashicorpVaultCertificate != null;
   }
 
   public Optional<TrustStoreConfig> getSignerTrustConfig() {
@@ -86,12 +80,12 @@ public class HashicorpNode {
         new TrustStoreConfig() {
           @Override
           public Path getStoreFile() {
-            return TRUSTSTORE_PATH;
+            return Path.of(hashicorpVaultCertificate.getPfxTrustOptions().getPath());
           }
 
           @Override
           public Path getStorePasswordFile() {
-            return TRUSTSTORE_PASSWORD_PATH;
+            return hashicorpVaultCertificate.getPfxPasswordFile();
           }
         });
   }
