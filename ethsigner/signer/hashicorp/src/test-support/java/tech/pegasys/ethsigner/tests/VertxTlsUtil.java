@@ -91,8 +91,6 @@ public class VertxTlsUtil {
 
   private static Path saveKeyStore(final char[] password, final KeyStore keyStore)
       throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-    // Set<PosixFilePermission> ownerWritable = PosixFilePermissions.fromString("rw-r--r--");
-    // FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(ownerWritable);
     final Path pfxPath = Files.createTempFile("test", ".pfx");
     try (FileOutputStream outputStream = new FileOutputStream(pfxPath.toFile())) {
       keyStore.store(outputStream, password);

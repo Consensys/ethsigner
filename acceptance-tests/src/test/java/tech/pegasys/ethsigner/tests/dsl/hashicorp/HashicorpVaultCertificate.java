@@ -60,7 +60,7 @@ public class HashicorpVaultCertificate {
 
   public static HashicorpVaultCertificate create() {
     try {
-      HashicorpVaultCertificate hashicorpVaultCertificate = new HashicorpVaultCertificate();
+      final HashicorpVaultCertificate hashicorpVaultCertificate = new HashicorpVaultCertificate();
       hashicorpVaultCertificate.createCertificateDirectory();
       hashicorpVaultCertificate.createSelfSignedCertificates();
       hashicorpVaultCertificate.copyKeyCertificatesInCertificateDirectory();
@@ -68,7 +68,7 @@ public class HashicorpVaultCertificate {
       hashicorpVaultCertificate.createPfxPasswordFile();
       Runtime.getRuntime().addShutdownHook(new Thread(hashicorpVaultCertificate::cleanup));
       return hashicorpVaultCertificate;
-    } catch (IOException | GeneralSecurityException e) {
+    } catch (final IOException | GeneralSecurityException e) {
       LOG.error("Unable to initialise HashicorpVaultCertificates", e);
       throw new RuntimeException("Unable to initialise HashicorpVaultCertificates", e);
     }
@@ -76,8 +76,8 @@ public class HashicorpVaultCertificate {
 
   private void createCertificateDirectory() throws IOException {
     // allows docker process to have access
-    Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rwxr-xr-x");
-    FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(posixPermissions);
+    final Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rwxr-xr-x");
+    final FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(posixPermissions);
     certificateDirectory = createTempDirectory(MOUNTABLE_PARENT_DIR, TEMP_DIR_PREFIX, permissions);
     FileUtils.forceDeleteOnExit(certificateDirectory.toFile());
   }
@@ -104,8 +104,6 @@ public class HashicorpVaultCertificate {
   }
 
   private void createPfxPasswordFile() throws IOException {
-    // Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rw-r--r--");
-    // FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(posixPermissions);
     pfxPasswordFile = Files.createTempFile("ts_pass", ".txt");
     Files.writeString(pfxPasswordFile, DEFAULT_PFX_PASSWORD, StandardCharsets.UTF_8);
     FileUtils.forceDeleteOnExit(pfxPasswordFile.toFile());
