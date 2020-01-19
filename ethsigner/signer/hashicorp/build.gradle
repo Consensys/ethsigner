@@ -50,6 +50,9 @@ dependencies {
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
   integrationTestImplementation 'org.mockito:mockito-core'
+
+  testSupportImplementation 'org.apache.tuweni:tuweni-net'
+  testSupportImplementation 'org.bouncycastle:bcpkix-jdk15on'
 }
 
 configurations { testArtifacts }

@@ -14,20 +14,17 @@ package tech.pegasys.ethsigner.tests.dsl.hashicorp;
 
 import static java.nio.file.Files.createTempDirectory;
 
-import tech.pegasys.ethsigner.tests.VertxTlsUtil;
+import tech.pegasys.ethsigner.tests.tls.SelfSignedPfxStore;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.security.GeneralSecurityException;
 import java.util.Set;
 
 import io.vertx.core.net.PfxOptions;
-import io.vertx.core.net.SelfSignedCertificate;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,14 +44,11 @@ public class HashicorpVaultCertificate {
       Path.of(System.getProperty("user.home", System.getProperty("java.io.tmpdir", "/tmp")));
   private static final Logger LOG = LogManager.getLogger();
   private static final String TEMP_DIR_PREFIX = ".ethsigner-vault-dsl";
-  private static final String DEFAULT_PFX_PASSWORD = "changeit";
 
-  private SelfSignedCertificate selfSignedCertificate;
+  private SelfSignedPfxStore selfSignedPfxStore;
   private Path certificateDirectory;
   private Path tlsCertificate;
   private Path tlsPrivateKey;
-  private PfxOptions pfxTrustOptions;
-  private Path pfxPasswordFile;
 
   private HashicorpVaultCertificate() {}
 
@@ -64,11 +58,8 @@ public class HashicorpVaultCertificate {
       hashicorpVaultCertificate.createCertificateDirectory();
       hashicorpVaultCertificate.createSelfSignedCertificates();
       hashicorpVaultCertificate.copyKeyCertificatesInCertificateDirectory();
-      hashicorpVaultCertificate.createPfxOptions();
-      hashicorpVaultCertificate.createPfxPasswordFile();
-      Runtime.getRuntime().addShutdownHook(new Thread(hashicorpVaultCertificate::cleanup));
       return hashicorpVaultCertificate;
-    } catch (final IOException | GeneralSecurityException e) {
+    } catch (final Exception e) {
       LOG.error("Unable to initialise HashicorpVaultCertificates", e);
       throw new RuntimeException("Unable to initialise HashicorpVaultCertificates", e);
     }
@@ -82,37 +73,20 @@ public class HashicorpVaultCertificate {
     FileUtils.forceDeleteOnExit(certificateDirectory.toFile());
   }
 
-  private void createSelfSignedCertificates() {
-    selfSignedCertificate = SelfSignedCertificate.create("localhost");
+  private void createSelfSignedCertificates() throws Exception {
+    final Path tempDirectory = createTempDirectory("hashicorp_tls");
+    FileUtils.forceDeleteOnExit(tempDirectory.toFile());
+    selfSignedPfxStore = SelfSignedPfxStore.create(tempDirectory);
   }
 
   private void copyKeyCertificatesInCertificateDirectory() throws IOException {
-    final Path sourceCertificatePath = Path.of(selfSignedCertificate.certificatePath());
+    final Path sourceCertificatePath = selfSignedPfxStore.getCertificatePath();
     tlsCertificate = certificateDirectory.resolve(sourceCertificatePath.getFileName());
     Files.copy(sourceCertificatePath, tlsCertificate);
 
-    final Path sourcePrivateKeyPath = Path.of(selfSignedCertificate.privateKeyPath());
+    final Path sourcePrivateKeyPath = selfSignedPfxStore.getPrivateKeyPath();
     tlsPrivateKey = certificateDirectory.resolve(sourcePrivateKeyPath.getFileName());
     Files.copy(sourcePrivateKeyPath, tlsPrivateKey);
-  }
-
-  private void createPfxOptions() throws IOException, GeneralSecurityException {
-    pfxTrustOptions =
-        VertxTlsUtil.convertToPfxTrustStore(
-            selfSignedCertificate, DEFAULT_PFX_PASSWORD.toCharArray());
-    FileUtils.forceDeleteOnExit(Path.of(pfxTrustOptions.getPath()).toFile());
-  }
-
-  private void createPfxPasswordFile() throws IOException {
-    pfxPasswordFile = Files.createTempFile("ts_pass", ".txt");
-    Files.writeString(pfxPasswordFile, DEFAULT_PFX_PASSWORD, StandardCharsets.UTF_8);
-    FileUtils.forceDeleteOnExit(pfxPasswordFile.toFile());
-  }
-
-  private void cleanup() {
-    if (selfSignedCertificate != null) {
-      selfSignedCertificate.delete();
-    }
   }
 
   public Path getCertificateDirectory() {
@@ -128,10 +102,12 @@ public class HashicorpVaultCertificate {
   }
 
   public PfxOptions getPfxTrustOptions() {
-    return pfxTrustOptions;
+    return new PfxOptions()
+        .setPath(selfSignedPfxStore.getTrustStoreFile().toString())
+        .setPassword(new String(selfSignedPfxStore.getPassword()));
   }
 
   public Path getPfxPasswordFile() {
-    return pfxPasswordFile;
+    return selfSignedPfxStore.getPasswordFile();
   }
 }
