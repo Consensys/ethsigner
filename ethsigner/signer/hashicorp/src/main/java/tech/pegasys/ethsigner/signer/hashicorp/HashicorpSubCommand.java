@@ -77,11 +77,9 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private String signingKeyPath = DEFAULT_KEY_PATH;
 
   @Option(
-      names = {"--no-tls-enabled"},
-      negatable = true,
-      defaultValue = "true",
+      names = {"--tls-enabled"},
       description = "Connect to Hashicorp Vault server using TLS (default: ${DEFAULT-VALUE})",
-      required = true)
+      arity = "1")
   private final Boolean tlsEnabled = true;
 
   @ArgGroup(exclusive = false)
@@ -113,7 +111,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   }
 
   public boolean isTlsEnabled() {
-    return Optional.ofNullable(tlsEnabled).orElse(false);
+    return tlsEnabled;
   }
 
   public PkcsTrustStoreConfig getTrustOptions() {

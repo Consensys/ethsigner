@@ -79,7 +79,7 @@ public class HashicorpSubCommandTest {
         + PATH_TO_SIGNING_KEY
         + " --timeout="
         + FIFTEEN
-        + " --no-tls-enabled";
+        + " --tls-enabled=false";
   }
 
   private String removeFieldsFrom(final String input, final String... fieldNames) {
