@@ -115,10 +115,12 @@ public class EthSignerBaseCommand implements Config {
         required = true)
     private final File tlsKnownClientsFile = null;
 
+    @SuppressWarnings("UnusedVariable")
     @Option(
         names = "--tls-disable-client-authentication",
-        description = "If set, will allow any client to connect. Is mutually exclusive with "
-            + "--tls-known-clients-file.",
+        description =
+            "If set, will allow any client to connect. Is mutually exclusive with "
+                + "--tls-known-clients-file.",
         arity = "1",
         required = false)
     private final Boolean tlsDisableClientAuthentication = null;
