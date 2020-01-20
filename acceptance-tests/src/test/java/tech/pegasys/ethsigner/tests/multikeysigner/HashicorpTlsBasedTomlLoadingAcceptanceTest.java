@@ -61,17 +61,6 @@ class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }
 
-  @Test
-  void incorrectlyNamedHashicorpConfigFileIsNotLoaded() {
-    createHashicorpTomlFileAt(
-        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
-        VAULT_SIGNING_KEY_GET_RESOURCE,
-        authFilename,
-        hashicorpNode);
-    setup(tempDir);
-    assertThat(ethSigner.accounts().list()).isEmpty();
-  }
-
   @AfterEach
   void cleanTempDir() throws IOException {
     MoreFiles.deleteDirectoryContents(tempDir, RecursiveDeleteOption.ALLOW_INSECURE);
