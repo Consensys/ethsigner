@@ -61,15 +61,14 @@ public class HashicorpVaultDocker {
   private static final String SECRET_PATH = "/secret";
   private static final String SIGNING_KEY_RESOURCE = "/ethsignerSigningKey";
   private static final String VAULT_PUT_RESOURCE = SECRET_PATH + SIGNING_KEY_RESOURCE;
-  public static final String VAULT_SIGNING_KEY_GET_RESOURCE =
-      SECRET_PATH + "/data" + SIGNING_KEY_RESOURCE;
+  private static final String VAULT_SIGNING_KEY_PATH = SECRET_PATH + "/data" + SIGNING_KEY_RESOURCE;
 
   private static final String EXPECTED_FOR_SECRET_CREATION = "created_time";
   private static final String EXPECTED_FOR_STATUS = "Sealed";
   private static final Path CONTAINER_MOUNT_PATH = Path.of("/vault/config");
 
   private final DockerClient docker;
-  private final HashicorpVaultCertificate hashicorpVaultCertificate;
+  private final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private String vaultContainerId;
@@ -78,15 +77,17 @@ public class HashicorpVaultDocker {
   private String hashicorpRootToken;
 
   private HashicorpVaultDocker(
-      final DockerClient docker, final HashicorpVaultCertificate hashicorpVaultCertificate) {
+      final DockerClient docker,
+      final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate) {
     this.docker = docker;
-    this.hashicorpVaultCertificate = hashicorpVaultCertificate;
+    this.hashicorpVaultDockerCertificate = hashicorpVaultDockerCertificate;
   }
 
   public static HashicorpVaultDocker createVaultDocker(
-      final DockerClient docker, final HashicorpVaultCertificate hashicorpVaultCertificate) {
+      final DockerClient docker,
+      final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate) {
     final HashicorpVaultDocker hashicorpVaultDocker =
-        new HashicorpVaultDocker(docker, hashicorpVaultCertificate);
+        new HashicorpVaultDocker(docker, hashicorpVaultDockerCertificate);
     hashicorpVaultDocker.pullVaultImage();
     hashicorpVaultDocker.createVaultContainer();
     hashicorpVaultDocker.start();
@@ -112,11 +113,15 @@ public class HashicorpVaultDocker {
   }
 
   public boolean isTlsEnabled() {
-    return hashicorpVaultCertificate != null;
+    return hashicorpVaultDockerCertificate != null;
   }
 
   public String getHashicorpRootToken() {
     return hashicorpRootToken;
+  }
+
+  public String getVaultSigningKeyPath() {
+    return VAULT_SIGNING_KEY_PATH;
   }
 
   private void start() {
@@ -392,7 +397,8 @@ public class HashicorpVaultDocker {
 
     if (isTlsEnabled()) {
       final Bind configBind =
-          new Bind(hashicorpVaultCertificate.getCertificateDirectory().toString(), configVolume);
+          new Bind(
+              hashicorpVaultDockerCertificate.getCertificateDirectory().toString(), configVolume);
       hostConfig.withBinds(configBind);
     }
 
@@ -437,9 +443,11 @@ public class HashicorpVaultDocker {
       return ", \"tls_disable\":\"true\"";
     }
     final Path containerTlsCertPath =
-        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCertificate.getTlsCertificate().getFileName());
+        CONTAINER_MOUNT_PATH.resolve(
+            hashicorpVaultDockerCertificate.getTlsCertificate().getFileName());
     final Path containerTlsKeyPath =
-        CONTAINER_MOUNT_PATH.resolve(hashicorpVaultCertificate.getTlsPrivateKey().getFileName());
+        CONTAINER_MOUNT_PATH.resolve(
+            hashicorpVaultDockerCertificate.getTlsPrivateKey().getFileName());
 
     return String.format(
         ", \"tls_min_version\": \"tls12\", \"tls_cert_file\": \"%s\", \"tls_key_file\": \"%s\"",

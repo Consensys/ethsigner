@@ -88,10 +88,7 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   public void createHashicorpTomlFileAt(
-      final Path tomlPath,
-      final String keyPath,
-      final String authFile,
-      final HashicorpNode hashicorpNode) {
+      final Path tomlPath, final String authFile, final HashicorpNode hashicorpNode) {
     {
       try {
 
@@ -99,7 +96,7 @@ public class MultiKeyAcceptanceTestBase {
         writer.write("[signing]\n");
         writer
             .append("type = \"hashicorp-signer\"\n")
-            .append("signing-key-path = \"" + keyPath + "\"\n")
+            .append("signing-key-path = \"" + hashicorpNode.getSigningKeyPath() + "\"\n")
             .append("host = \"" + hashicorpNode.getHost() + "\"\n")
             .append("port = " + hashicorpNode.getPort() + "\n")
             .append("auth-file  = \"" + authFile + "\"\n")

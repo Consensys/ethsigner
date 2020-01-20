@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpVaultDocker.VAULT_SIGNING_KEY_GET_RESOURCE;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
@@ -49,10 +48,7 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
     final String authFilename = authFilePath.toAbsolutePath().toString();
 
     createHashicorpTomlFileAt(
-        tomlDirectory.resolve(FILENAME + ".toml"),
-        VAULT_SIGNING_KEY_GET_RESOURCE,
-        authFilename,
-        hashicorpNode);
+        tomlDirectory.resolve(FILENAME + ".toml"), authFilename, hashicorpNode);
 
     setup(tomlDirectory);
     performTransaction();

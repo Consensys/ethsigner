@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpVaultDocker.VAULT_SIGNING_KEY_GET_RESOURCE;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
@@ -83,7 +82,6 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     createHashicorpTomlFileAt(
         tempDir.resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
-        VAULT_SIGNING_KEY_GET_RESOURCE,
         authFilename,
         hashicorpNode);
 

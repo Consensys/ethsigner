@@ -20,19 +20,20 @@ import java.util.Optional;
 import com.github.dockerjava.api.DockerClient;
 
 public class HashicorpNode {
-  private final HashicorpVaultCertificate hashicorpVaultCertificate;
+  private final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate;
   private final DockerClient dockerClient;
   private HashicorpVaultDocker hashicorpVaultDocker;
 
   private HashicorpNode(
-      final DockerClient dockerClient, final HashicorpVaultCertificate hashicorpVaultCertificate) {
+      final DockerClient dockerClient,
+      final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate) {
     this.dockerClient = dockerClient;
-    this.hashicorpVaultCertificate = hashicorpVaultCertificate;
+    this.hashicorpVaultDockerCertificate = hashicorpVaultDockerCertificate;
   }
 
   public static HashicorpNode createAndStartHashicorp(final DockerClient dockerClient) {
     final HashicorpNode hashicorpNode =
-        new HashicorpNode(dockerClient, HashicorpVaultCertificate.create());
+        new HashicorpNode(dockerClient, HashicorpVaultDockerCertificate.create());
     hashicorpNode.start();
     return hashicorpNode;
   }
@@ -45,7 +46,7 @@ public class HashicorpNode {
 
   private void start() {
     hashicorpVaultDocker =
-        HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultCertificate);
+        HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultDockerCertificate);
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -63,12 +64,16 @@ public class HashicorpNode {
     return hashicorpVaultDocker.getIpAddress();
   }
 
+  public String getSigningKeyPath() {
+    return hashicorpVaultDocker.getVaultSigningKeyPath();
+  }
+
   public int getPort() {
     return hashicorpVaultDocker.getPort();
   }
 
   public boolean isTlsEnabled() {
-    return hashicorpVaultCertificate != null;
+    return hashicorpVaultDockerCertificate != null;
   }
 
   public Optional<PkcsTrustStoreConfig> getSignerTrustConfig() {
@@ -80,12 +85,12 @@ public class HashicorpNode {
         new PkcsTrustStoreConfig() {
           @Override
           public Path getPath() {
-            return Path.of(hashicorpVaultCertificate.getPfxTrustOptions().getPath());
+            return Path.of(hashicorpVaultDockerCertificate.getPfxTrustOptions().getPath());
           }
 
           @Override
           public Path getPasswordFilePath() {
-            return hashicorpVaultCertificate.getPfxPasswordFile();
+            return hashicorpVaultDockerCertificate.getPfxPasswordFile();
           }
         });
   }

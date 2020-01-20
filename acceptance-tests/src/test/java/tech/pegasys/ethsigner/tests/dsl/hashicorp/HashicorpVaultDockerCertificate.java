@@ -39,7 +39,7 @@ import org.apache.logging.log4j.Logger;
  * `user.home` is typically enabled in docker preference in MacOSx and Windows. See "docker ->
  * Preferences -> File Sharing" to manage mount points.
  */
-public class HashicorpVaultCertificate {
+public class HashicorpVaultDockerCertificate {
   private static final Path MOUNTABLE_PARENT_DIR =
       Path.of(System.getProperty("user.home", System.getProperty("java.io.tmpdir", "/tmp")));
   private static final Logger LOG = LogManager.getLogger();
@@ -50,15 +50,16 @@ public class HashicorpVaultCertificate {
   private Path tlsCertificate;
   private Path tlsPrivateKey;
 
-  private HashicorpVaultCertificate() {}
+  private HashicorpVaultDockerCertificate() {}
 
-  public static HashicorpVaultCertificate create() {
+  public static HashicorpVaultDockerCertificate create() {
     try {
-      final HashicorpVaultCertificate hashicorpVaultCertificate = new HashicorpVaultCertificate();
-      hashicorpVaultCertificate.createCertificateDirectory();
-      hashicorpVaultCertificate.createSelfSignedCertificates();
-      hashicorpVaultCertificate.copyKeyCertificatesInCertificateDirectory();
-      return hashicorpVaultCertificate;
+      final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate =
+          new HashicorpVaultDockerCertificate();
+      hashicorpVaultDockerCertificate.createCertificateDirectory();
+      hashicorpVaultDockerCertificate.createSelfSignedCertificates();
+      hashicorpVaultDockerCertificate.copyKeyCertificatesInCertificateDirectory();
+      return hashicorpVaultDockerCertificate;
     } catch (final Exception e) {
       LOG.error("Unable to initialise HashicorpVaultCertificates", e);
       throw new RuntimeException("Unable to initialise HashicorpVaultCertificates", e);
