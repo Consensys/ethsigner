@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
-import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -27,7 +26,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 
@@ -103,17 +101,16 @@ public class MultiKeyAcceptanceTestBase {
             .append("timeout = 500\n")
             .append("tls-enabled = " + hashicorpNode.isTlsEnabled() + "\n");
 
-        final Optional<PkcsTrustStoreConfig> signerTrustConfig =
-            hashicorpNode.getSignerTrustConfig();
-        if (signerTrustConfig.isPresent()) {
-          writer
-              .append("tls-truststore-file = \"" + signerTrustConfig.get().getPath() + "\"\n")
-              .append(
-                  "tls-truststore-password-file = \""
-                      + signerTrustConfig.get().getPasswordFilePath()
-                      + "\"\n");
-        }
-
+        final String tlsConfig =
+            hashicorpNode
+                .getSignerTrustConfig()
+                .map(
+                    config ->
+                        String.format(
+                            "tls-truststore-file = \"%s\"\ntls-truststore-password-file = \"%s\"\n",
+                            config.getPath(), config.getPasswordFilePath()))
+                .orElse("");
+        writer.append(tlsConfig);
         writer.close();
       } catch (final IOException e) {
         fail("Unable to create Hashicorp TOML file.");
