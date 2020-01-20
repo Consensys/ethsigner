@@ -119,7 +119,7 @@ public class EthSignerBaseCommand implements Config {
     @Option(
         names = "--tls-disable-client-authentication",
         description =
-            "If set, will allow any client to connect. Is mutually exclusive with "
+            "If true, will allow any client to connect. Is mutually exclusive with "
                 + "--tls-known-clients-file.",
         arity = "1",
         required = false)
