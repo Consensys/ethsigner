@@ -158,7 +158,7 @@ public class EthSignerBaseCommand implements Config {
 
     @Override
     public Optional<File> getKnownClientsFile() {
-      return Optional.ofNullable(tlsClientAuthentiation.tlsKnownClientsFile);
+      return Optional.ofNullable(tlsClientAuthentication.tlsKnownClientsFile);
     }
   }
 
