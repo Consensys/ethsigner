@@ -37,7 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class HashicorpSigner {
+public class HashicorpVaultSignerFactory {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";

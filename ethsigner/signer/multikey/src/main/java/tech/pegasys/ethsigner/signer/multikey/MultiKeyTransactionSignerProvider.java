@@ -17,7 +17,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSigner;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpVaultSignerFactory;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -38,15 +38,15 @@ public class MultiKeyTransactionSignerProvider
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
-  private final HashicorpSigner hashicorpSigner;
+  private final HashicorpVaultSignerFactory hashicorpVaultSignerFactory;
 
   MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory,
-      final HashicorpSigner hashicorpSigner) {
+      final HashicorpVaultSignerFactory hashicorpVaultSignerFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
-    this.hashicorpSigner = hashicorpSigner;
+    this.hashicorpVaultSignerFactory = hashicorpVaultSignerFactory;
   }
 
   @Override
@@ -87,7 +87,7 @@ public class MultiKeyTransactionSignerProvider
   public TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile) {
     final TransactionSigner signer;
     try {
-      signer = hashicorpSigner.createSigner(metadataFile.getConfig());
+      signer = hashicorpVaultSignerFactory.createSigner(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Failed to construct Hashicorp signer from " + metadataFile.getBaseFilename());
       return null;

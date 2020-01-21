@@ -25,13 +25,14 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class HashicorpTransactionSignerTest {
 
-  private final HashicorpSigner hashicorpSigner = new HashicorpSigner();
+  private final HashicorpVaultSignerFactory hashicorpVaultSignerFactory =
+      new HashicorpVaultSignerFactory();
 
   @Test
   public void vaultTimingOut(@TempDir final Path tempDirectory) throws IOException {
     assertThatThrownBy(
             () ->
-                hashicorpSigner.createSigner(
+                hashicorpVaultSignerFactory.createSigner(
                     new HashicorpConfig.HashicorpConfigBuilder()
                         .withSigningKeyPath("signingKeyPath")
                         .withHost("serverHost")
@@ -47,7 +48,7 @@ public class HashicorpTransactionSignerTest {
 
     assertThatThrownBy(
             () ->
-                hashicorpSigner.createSigner(
+                hashicorpVaultSignerFactory.createSigner(
                     new HashicorpConfig.HashicorpConfigBuilder()
                         .withSigningKeyPath("signingKeyPath")
                         .withHost("serverHost")
