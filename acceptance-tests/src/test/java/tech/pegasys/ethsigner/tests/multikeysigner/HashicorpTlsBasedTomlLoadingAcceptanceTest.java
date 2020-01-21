@@ -22,11 +22,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.google.common.io.MoreFiles;
-import com.google.common.io.RecursiveDeleteOption;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -37,28 +35,25 @@ class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
 
   private static HashicorpNode hashicorpNode;
 
-  @TempDir static Path tempDir;
-  private static String authFilename;
+  private String authFilename;
 
   @BeforeAll
-  static void setUpBase() throws IOException {
+  static void setUpBase() {
     hashicorpNode = HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create());
+  }
 
-    final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
+  @BeforeEach
+  void createAuthFile(@TempDir final Path tempDir) throws IOException {
+    final Path authFilePath = Files.createTempFile(tempDir, "hashicorpAuthFile", ".txt");
     Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
     authFilename = authFilePath.toAbsolutePath().toString();
   }
 
   @Test
-  void hashicorpSignerIsCreatedAndExpectedAddressIsReported() {
+  void hashicorpSignerIsCreatedAndExpectedAddressIsReported(@TempDir final Path tempDir) {
     createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), authFilename, hashicorpNode);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
-  }
-
-  @AfterEach
-  void cleanTempDir() throws IOException {
-    MoreFiles.deleteDirectoryContents(tempDir, RecursiveDeleteOption.ALLOW_INSECURE);
   }
 
   @AfterAll
