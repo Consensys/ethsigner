@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
@@ -76,18 +78,6 @@ public class HashicorpSubCommandTest {
         + " --timeout="
         + FIFTEEN
         + " --tls-enabled=false";
-  }
-
-  private String removeFieldsFrom(final String input, final String... fieldNames) {
-    String updatedInput = input;
-    for (String fieldName : fieldNames) {
-      updatedInput = updatedInput.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
-    }
-    return updatedInput;
-  }
-
-  private String modifyField(final String input, final String fieldName, final String value) {
-    return input.replaceFirst("--" + fieldName + "=.*\\b", "--" + fieldName + "=" + value);
   }
 
   @Test
@@ -160,7 +150,7 @@ public class HashicorpSubCommandTest {
 
   @Test
   void cmdlineIsValidIftlsKnownServerFileIsMissing() {
-    final String cmdLine = removeFieldsFrom(validCommandLine(), "tls-known-server-file");
+    final String cmdLine = removeFieldFrom(validCommandLine(), "tls-known-server-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
@@ -168,7 +158,7 @@ public class HashicorpSubCommandTest {
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldsFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -177,7 +167,7 @@ public class HashicorpSubCommandTest {
       final String paramToRemove,
       final Supplier<String> actualValueGetter,
       final String expectedValue) {
-    final String cmdLine = removeFieldsFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).contains(expectedValue);

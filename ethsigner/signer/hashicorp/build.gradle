@@ -45,6 +45,7 @@ dependencies {
   testImplementation 'io.vertx:vertx-codegen'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
+  testImplementation project(path: ':ethsigner:commandline', configuration: 'testSupportArtifacts')
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
