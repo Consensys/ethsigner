@@ -118,15 +118,13 @@ public class HashicorpSigner {
             .setDefaultPort(serverPort)
             .setSsl(hashicorpConfig.isTlsEnabled());
 
-    if (isTrustOptionsRequired()) {
-      httpClientOptions.setTrustOptions(
-          whitelistServers(hashicorpConfig.getTlsKnownServerFile().get()));
-    }
-    return httpClientOptions;
-  }
+    hashicorpConfig
+        .getTlsKnownServerFile()
+        .ifPresent(
+            knownServerFile ->
+                httpClientOptions.setTrustOptions(whitelistServers(knownServerFile)));
 
-  private boolean isTrustOptionsRequired() {
-    return hashicorpConfig.isTlsEnabled() && hashicorpConfig.getTlsKnownServerFile().isPresent();
+    return httpClientOptions;
   }
 
   private static String readTokenFromFile(final Path path) {
