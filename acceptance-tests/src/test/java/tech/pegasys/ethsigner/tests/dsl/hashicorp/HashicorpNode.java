@@ -95,7 +95,6 @@ public class HashicorpNode {
       Files.writeString(tempFile, String.format("%s:%d %s", getHost(), getPort(), hexFingerprint));
       return tempFile;
     } catch (final IOException e) {
-      e.printStackTrace();
       throw new UncheckedIOException(e);
     }
   }
