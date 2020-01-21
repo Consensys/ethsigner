@@ -175,7 +175,8 @@ class SigningMetadataTomlConfigLoader {
     builder.withTlsEnabled(tlsEnabled);
     if (tlsEnabled) {
       final Optional<Path> knownServerFile =
-          Optional.ofNullable(tomlTable.getString("tls-known-server-file")).map(Path::of);
+          Optional.ofNullable(tomlTable.getString("tls-known-server-file"))
+              .map(this::makeRelativePathAbsolute);
       builder.withTlsKnownServerFile(knownServerFile);
     }
 

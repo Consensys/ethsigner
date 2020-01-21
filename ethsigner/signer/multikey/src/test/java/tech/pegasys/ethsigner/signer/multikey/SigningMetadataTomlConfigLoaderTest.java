@@ -37,10 +37,8 @@ import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.UNKNOWN
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.UNKNOWN_TYPE_SIGNER_FILENAME;
 import static tech.pegasys.ethsigner.signer.multikey.MetadataFileFixture.copyMetadataFileToDirectory;
 
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
-import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
 import java.nio.file.Files;
@@ -259,83 +257,6 @@ class SigningMetadataTomlConfigLoaderTest {
         loader.loadAvailableSigningMetadataTomlConfigs();
 
     assertThat(metadataFiles.size()).isZero();
-  }
-
-  @Test
-  void hashicorpConfigIsLoadedIfHashicorpMetadataFileInDirectory() {
-    copyFileIntoConfigDirectory("hashicorpconfig.toml");
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-  }
-
-  @Test
-  void hashicorpConfigIsLoadedWithTlsDisabled() {
-    copyFileIntoConfigDirectory("hashicorpconfig_no_tls.toml");
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-    assertThat(hashicorpConfig.isTlsEnabled()).isFalse();
-    assertThat(hashicorpConfig.getTlsKnownServerFile().isPresent()).isFalse();
-  }
-
-  @Test
-  void hashicorpConfigWithIllegalValueTypeFailsToLoad() {
-    copyFileIntoConfigDirectory("hashicorpconfig_illegalValueType.toml");
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isZero();
-  }
-
-  @Test
-  void hashicorpConfigWithMissingFieldFailsToLoad() {
-    copyFileIntoConfigDirectory("hashicorpconfig_missingField.toml");
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isZero();
-  }
-
-  @Test
-  void relativeHashicorpAuthFileIsRelativeToLibraryRoot() {
-    copyFileIntoConfigDirectory("hashicorpconfig_relativePath.toml");
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    assertThat(metadataFile.getConfig().getAuthFilePath())
-        .isEqualTo(configsDirectory.resolve("./path/to/auth-file"));
   }
 
   @Test
