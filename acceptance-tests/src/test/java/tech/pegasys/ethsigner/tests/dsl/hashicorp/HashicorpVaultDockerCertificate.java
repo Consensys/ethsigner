@@ -58,8 +58,8 @@ public class HashicorpVaultDockerCertificate {
       hashicorpVaultDockerCertificate.copyKeyCertificatesInCertificateDirectory();
       return hashicorpVaultDockerCertificate;
     } catch (final Exception e) {
-      LOG.error("Unable to initialise HashicorpVaultCertificates", e);
-      throw new RuntimeException("Unable to initialise HashicorpVaultCertificates", e);
+      LOG.error("Unable to initialize HashicorpVaultCertificates", e);
+      throw new RuntimeException("Unable to initialize HashicorpVaultCertificates", e);
     }
   }
 
