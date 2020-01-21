@@ -113,17 +113,17 @@ public class EthSignerBaseCommand implements Config {
         description = "Path to a file containing the fingerprints of authorized clients.",
         arity = "1",
         required = true)
-    private final File tlsKnownClientsFile = null;
+    private File tlsKnownClientsFile = null;
 
     @SuppressWarnings("UnusedVariable")
     @Option(
         names = "--tls-disable-client-authentication",
         description =
-            "If true, will allow any client to connect. Is mutually exclusive with "
+            "If defined, will allow any client to connect. Is mutually exclusive with "
                 + "--tls-known-clients-file.",
-        arity = "1",
+        arity = "0",
         required = false)
-    private final Boolean tlsDisableClientAuthentication = null;
+    private Boolean tlsDisableClientAuthentication = false;
   }
 
   static class TlsServerOptions implements TlsOptions {
