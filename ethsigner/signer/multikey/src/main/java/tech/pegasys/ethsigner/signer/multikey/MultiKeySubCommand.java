@@ -64,10 +64,10 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
     final AzureKeyVaultTransactionSignerFactory azureFactory =
         new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-    final HashicorpSigner hashicorpFactory = new HashicorpSigner();
+    final HashicorpSigner hashicorpSigner = new HashicorpSigner();
 
     return new MultiKeyTransactionSignerProvider(
-        signingMetadataTomlConfigLoader, azureFactory, hashicorpFactory);
+        signingMetadataTomlConfigLoader, azureFactory, hashicorpSigner);
   }
 
   @Override

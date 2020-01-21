@@ -38,15 +38,15 @@ public class MultiKeyTransactionSignerProvider
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
-  private final HashicorpSigner hashicorpFactory;
+  private final HashicorpSigner hashicorpSigner;
 
   MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory,
-      final HashicorpSigner hashicorpFactory) {
+      final HashicorpSigner hashicorpSigner) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
-    this.hashicorpFactory = hashicorpFactory;
+    this.hashicorpSigner = hashicorpSigner;
   }
 
   @Override
@@ -87,7 +87,7 @@ public class MultiKeyTransactionSignerProvider
   public TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile) {
     final TransactionSigner signer;
     try {
-      signer = hashicorpFactory.createSigner(metadataFile.getConfig());
+      signer = hashicorpSigner.createSigner(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Failed to construct Hashicorp signer from " + metadataFile.getBaseFilename());
       return null;
