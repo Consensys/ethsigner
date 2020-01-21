@@ -33,12 +33,4 @@ public class ThrowingTomlTable {
     return Optional.ofNullable(table.getLong(key))
         .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
   }
-
-  public Optional<Boolean> getOptionalBoolean(final String key) {
-    return Optional.ofNullable(table.getBoolean(key));
-  }
-
-  public Optional<String> getOptionalString(final String key) {
-    return Optional.ofNullable(table.getString(key));
-  }
 }

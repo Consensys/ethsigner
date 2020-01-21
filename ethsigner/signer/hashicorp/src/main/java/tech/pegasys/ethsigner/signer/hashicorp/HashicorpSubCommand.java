@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
-import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -82,8 +81,12 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private final Boolean tlsEnabled = true;
 
-  @ArgGroup(exclusive = false)
-  private final HashicorpPkcsTrustStoreConfig trustStoreConfig = null;
+  @Option(
+      names = "--tls-known-server-file",
+      description =
+          "Path to the file containing Hashicorp Vault's host+port and self-signed certificate fingerprint",
+      arity = "1")
+  private final Path tlsKnownServerFile = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final HashicorpConfig config =
@@ -94,7 +97,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
             authFilePath,
             timeout,
             isTlsEnabled(),
-            getTrustOptions());
+            getTlsKnownServerFile());
     final HashicorpSigner factory = new HashicorpSigner();
     return factory.createSigner(config);
   }
@@ -114,8 +117,8 @@ public class HashicorpSubCommand extends SignerSubCommand {
     return tlsEnabled;
   }
 
-  public PkcsTrustStoreConfig getTrustOptions() {
-    return trustStoreConfig;
+  public Optional<Path> getTlsKnownServerFile() {
+    return Optional.ofNullable(tlsKnownServerFile);
   }
 
   @Override

@@ -14,8 +14,6 @@ package tech.pegasys.ethsigner.tests.dsl.hashicorp;
 
 import static java.nio.file.Files.createTempDirectory;
 
-import tech.pegasys.ethsigner.tests.tls.SelfSignedPfxStore;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,13 +22,12 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
-import io.vertx.core.net.PfxOptions;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * To run Hashicorp Vault docker in TLS mode, we create self-signed certificates in a temporary
+ * To run Hashicorp Vault docker in TLS mode, we copy self-signed certificates in a temporary
  * directory which can be mounted to docker.
  *
  * <p>The directory returned by Java system property java.io.tmpdir may not be mountable by docker
@@ -45,7 +42,7 @@ public class HashicorpVaultDockerCertificate {
   private static final Logger LOG = LogManager.getLogger();
   private static final String TEMP_DIR_PREFIX = ".ethsigner-vault-dsl";
 
-  private SelfSignedPfxStore selfSignedPfxStore;
+  private SelfSignedCertificate selfSignedCertificate;
   private Path certificateDirectory;
   private Path tlsCertificate;
   private Path tlsPrivateKey;
@@ -75,17 +72,15 @@ public class HashicorpVaultDockerCertificate {
   }
 
   private void createSelfSignedCertificates() throws Exception {
-    final Path tempDirectory = createTempDirectory("hashicorp_tls");
-    FileUtils.forceDeleteOnExit(tempDirectory.toFile());
-    selfSignedPfxStore = SelfSignedPfxStore.create(tempDirectory);
+    selfSignedCertificate = SelfSignedCertificate.generate();
   }
 
   private void copyKeyCertificatesInCertificateDirectory() throws IOException {
-    final Path sourceCertificatePath = selfSignedPfxStore.getCertificatePath();
+    final Path sourceCertificatePath = selfSignedCertificate.certificatePath();
     tlsCertificate = certificateDirectory.resolve(sourceCertificatePath.getFileName());
     Files.copy(sourceCertificatePath, tlsCertificate);
 
-    final Path sourcePrivateKeyPath = selfSignedPfxStore.getPrivateKeyPath();
+    final Path sourcePrivateKeyPath = selfSignedCertificate.privateKeyPath();
     tlsPrivateKey = certificateDirectory.resolve(sourcePrivateKeyPath.getFileName());
     Files.copy(sourcePrivateKeyPath, tlsPrivateKey);
   }
@@ -100,15 +95,5 @@ public class HashicorpVaultDockerCertificate {
 
   public Path getTlsPrivateKey() {
     return tlsPrivateKey;
-  }
-
-  public PfxOptions getPfxTrustOptions() {
-    return new PfxOptions()
-        .setPath(selfSignedPfxStore.getTrustStoreFile().toString())
-        .setPassword(new String(selfSignedPfxStore.getPassword()));
-  }
-
-  public Path getPfxPasswordFile() {
-    return selfSignedPfxStore.getPasswordFile();
   }
 }

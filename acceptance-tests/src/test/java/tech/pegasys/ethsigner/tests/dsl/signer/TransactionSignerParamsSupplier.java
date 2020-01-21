@@ -57,13 +57,11 @@ public class TransactionSignerParamsSupplier {
       }
 
       hashicorpNode
-          .getSignerTrustConfig()
+          .getKnownServerFilePath()
           .ifPresent(
               trustStoreConfig -> {
-                params.add("--tls-truststore-file");
-                params.add(trustStoreConfig.getPath().toString());
-                params.add("--tls-truststore-password-file");
-                params.add(trustStoreConfig.getPasswordFilePath().toString());
+                params.add("--tls-known-server-file");
+                params.add(trustStoreConfig.toString());
               });
     } else if (azureKeyVault != null) {
       params.add("azure-signer");

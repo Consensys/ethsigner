@@ -24,7 +24,7 @@ public class HashicorpConfig {
   private final Path authFilePath;
   private final Long timeout;
   private final boolean tlsEnabled;
-  private final PkcsTrustStoreConfig pkcsTrustStoreConfig;
+  private final Optional<Path> tlsKnownServerFile;
 
   public HashicorpConfig(
       final String signingKeyPath,
@@ -33,14 +33,14 @@ public class HashicorpConfig {
       final Path authFilePath,
       final Long timeout,
       final boolean tlsEnabled,
-      final PkcsTrustStoreConfig pkcsTrustStoreConfig) {
+      final Optional<Path> tlsKnownServerFile) {
     this.signingKeyPath = signingKeyPath;
     this.host = host;
     this.port = port;
     this.authFilePath = authFilePath;
     this.timeout = timeout;
     this.tlsEnabled = tlsEnabled;
-    this.pkcsTrustStoreConfig = pkcsTrustStoreConfig;
+    this.tlsKnownServerFile = tlsKnownServerFile;
   }
 
   public String getHost() {
@@ -67,8 +67,8 @@ public class HashicorpConfig {
     return tlsEnabled;
   }
 
-  public Optional<PkcsTrustStoreConfig> getPkcsTrustStoreConfig() {
-    return Optional.ofNullable(pkcsTrustStoreConfig);
+  public Optional<Path> getTlsKnownServerFile() {
+    return tlsKnownServerFile;
   }
 
   public static class HashicorpConfigBuilder {
@@ -79,7 +79,7 @@ public class HashicorpConfig {
     private Path authFilePath;
     private Long timeout;
     private boolean tlsEnabled;
-    private PkcsTrustStoreConfig pkcsTrustStoreConfig;
+    private Optional<Path> tlsKnownServerFile = Optional.empty();
 
     public HashicorpConfigBuilder withSigningKeyPath(final String signingKeyPath) {
       this.signingKeyPath = signingKeyPath;
@@ -111,9 +111,8 @@ public class HashicorpConfig {
       return this;
     }
 
-    public HashicorpConfigBuilder withTrustStoreConfig(
-        final PkcsTrustStoreConfig pkcsTrustStoreConfig) {
-      this.pkcsTrustStoreConfig = pkcsTrustStoreConfig;
+    public HashicorpConfigBuilder withTlsKnownServerFile(final Optional<Path> tlsKnownServerFile) {
+      this.tlsKnownServerFile = tlsKnownServerFile;
       return this;
     }
 
@@ -125,7 +124,7 @@ public class HashicorpConfig {
       checkNotNull(timeout, "Timeout was not set.");
 
       return new HashicorpConfig(
-          signingKeyPath, host, port, authFilePath, timeout, tlsEnabled, pkcsTrustStoreConfig);
+          signingKeyPath, host, port, authFilePath, timeout, tlsEnabled, tlsKnownServerFile);
     }
   }
 }

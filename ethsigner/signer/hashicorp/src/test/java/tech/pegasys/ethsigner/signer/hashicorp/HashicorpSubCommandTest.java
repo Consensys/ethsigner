@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 
@@ -25,14 +24,13 @@ import picocli.CommandLine;
 
 public class HashicorpSubCommandTest {
 
-  public static final String CLIENT_CERT_PFX = "./client_cert.pfx";
+  public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
       Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
   private static final String PORT = "23000";
   private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
   private static final String FIFTEEN = "15";
-  public static final String CLIENT_CERT_PASSWD = "./client_cert.passwd";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
 
   private HashicorpSubCommand hashiConfig;
@@ -62,10 +60,8 @@ public class HashicorpSubCommandTest {
         + PATH_TO_SIGNING_KEY
         + " --timeout="
         + FIFTEEN
-        + " --tls-truststore-file="
-        + CLIENT_CERT_PFX
-        + " --tls-truststore-password-file="
-        + CLIENT_CERT_PASSWD;
+        + " --tls-known-server-file="
+        + TLS_KNOWN_SERVER_FILE;
   }
 
   private String validWithoutTlsOptionsCommandLine() {
@@ -107,10 +103,9 @@ public class HashicorpSubCommandTest {
     assertThat(string).contains(FIFTEEN);
 
     assertThat(hashiConfig.isTlsEnabled()).isTrue();
-    assertThat(hashiConfig.getTrustOptions()).isNotNull();
-    assertThat(hashiConfig.getTrustOptions().getPath()).isEqualTo(Path.of(CLIENT_CERT_PFX));
-    assertThat(hashiConfig.getTrustOptions().getPasswordFilePath())
-        .isEqualTo(Path.of(CLIENT_CERT_PASSWD));
+    assertThat(hashiConfig.getTlsKnownServerFile().isPresent()).isTrue();
+    assertThat(hashiConfig.getTlsKnownServerFile().get().toString())
+        .isEqualTo(TLS_KNOWN_SERVER_FILE);
   }
 
   @Test
@@ -126,7 +121,7 @@ public class HashicorpSubCommandTest {
     assertThat(string).contains(FIFTEEN);
 
     assertThat(hashiConfig.isTlsEnabled()).isFalse();
-    assertThat(hashiConfig.getTrustOptions()).isNull();
+    assertThat(hashiConfig.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   @Test
@@ -164,23 +159,12 @@ public class HashicorpSubCommandTest {
   }
 
   @Test
-  void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError("tls-truststore-file");
-  }
-
-  @Test
-  void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
-    missingParameterShowsError("tls-truststore-password-file");
-  }
-
-  @Test
-  void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
-    final String cmdLine =
-        removeFieldsFrom(validCommandLine(), "tls-truststore-file", "tls-truststore-password-file");
+  void cmdlineIsValidIftlsKnownServerFileIsMissing() {
+    final String cmdLine = removeFieldsFrom(validCommandLine(), "tls-known-server-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
-    assertThat(hashiConfig.getTrustOptions()).isNull();
+    assertThat(hashiConfig.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   private void missingParameterShowsError(final String paramToRemove) {

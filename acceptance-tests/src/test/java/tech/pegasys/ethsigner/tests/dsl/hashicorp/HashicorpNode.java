@@ -12,17 +12,20 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.hashicorp;
 
-import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
-
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
 import com.github.dockerjava.api.DockerClient;
+import org.apache.tuweni.net.tls.TLS;
 
 public class HashicorpNode {
   private final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate;
   private final DockerClient dockerClient;
   private HashicorpVaultDocker hashicorpVaultDocker;
+  private Optional<Path> knownServerFile = Optional.empty();
 
   private HashicorpNode(
       final DockerClient dockerClient,
@@ -47,6 +50,9 @@ public class HashicorpNode {
   private void start() {
     hashicorpVaultDocker =
         HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultDockerCertificate);
+    if (isTlsEnabled()) {
+      knownServerFile = Optional.of(createKnownServerFile());
+    }
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
@@ -76,22 +82,19 @@ public class HashicorpNode {
     return hashicorpVaultDockerCertificate != null;
   }
 
-  public Optional<PkcsTrustStoreConfig> getSignerTrustConfig() {
-    if (!isTlsEnabled()) {
-      return Optional.empty();
+  public Optional<Path> getKnownServerFilePath() {
+    return knownServerFile;
+  }
+
+  private Path createKnownServerFile() {
+    try {
+      final Path tempFile = Files.createTempFile("knownServer", ".txt");
+      final String hexFingerprint =
+          TLS.certificateHexFingerprint(hashicorpVaultDockerCertificate.getTlsCertificate());
+      Files.writeString(tempFile, String.format("%s:%d %s", getHost(), getPort(), hexFingerprint));
+      return tempFile;
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
     }
-
-    return Optional.of(
-        new PkcsTrustStoreConfig() {
-          @Override
-          public Path getPath() {
-            return Path.of(hashicorpVaultDockerCertificate.getPfxTrustOptions().getPath());
-          }
-
-          @Override
-          public Path getPasswordFilePath() {
-            return hashicorpVaultDockerCertificate.getPfxPasswordFile();
-          }
-        });
   }
 }

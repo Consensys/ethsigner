@@ -300,7 +300,7 @@ class SigningMetadataTomlConfigLoaderTest {
     assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
     assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
     assertThat(hashicorpConfig.isTlsEnabled()).isFalse();
-    assertThat(hashicorpConfig.getPkcsTrustStoreConfig().isPresent()).isFalse();
+    assertThat(hashicorpConfig.getTlsKnownServerFile().isPresent()).isFalse();
   }
 
   @Test

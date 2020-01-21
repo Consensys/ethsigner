@@ -19,8 +19,6 @@ dependencies {
 
   testImplementation project(':ethsigner:core')
   testImplementation project(':ethsigner:signer:hashicorp')
-  testImplementation project(path: ':ethsigner:signer:hashicorp', configuration: 'testSupportArtifacts')
-
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'

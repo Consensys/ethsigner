@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.signer.multikey;
 
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
-import tech.pegasys.ethsigner.signer.hashicorp.PkcsTrustStoreConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -89,8 +88,9 @@ class SigningMetadataTomlConfigLoader {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
 
-      final Optional<ThrowingTomlTable> signingTable =
+      final Optional<TomlTable> tomlTable =
           getSigningTableFrom(file.getFileName().toString(), result);
+      final Optional<ThrowingTomlTable> signingTable = getThrowingSigningTableFrom(tomlTable);
       if (signingTable.isEmpty()) {
         return Optional.empty();
       }
@@ -118,11 +118,11 @@ class SigningMetadataTomlConfigLoader {
 
   private Optional<SigningMetadataFile> getFileBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
-    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
-    final ThrowingTomlTable table = signingTable.get();
+    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
 
     final String keyFilename = table.getString("key-file");
     final Path keyPath = makeRelativePathAbsolute(keyFilename);
@@ -134,13 +134,13 @@ class SigningMetadataTomlConfigLoader {
   private Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
 
-    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
     final AzureConfigBuilder builder;
-    final ThrowingTomlTable table = signingTable.get();
+    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
     builder = new AzureConfigBuilder();
     builder.withKeyVaultName(table.getString("key-vault-name"));
     builder.withKeyName(table.getString("key-name"));
@@ -153,14 +153,14 @@ class SigningMetadataTomlConfigLoader {
   private Optional<SigningMetadataFile> getHashicorpMetadataFromToml(
       final String filename, final TomlParseResult result) {
 
-    final Optional<ThrowingTomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
     final HashicorpConfig.HashicorpConfigBuilder builder =
         new HashicorpConfig.HashicorpConfigBuilder();
-    ThrowingTomlTable table = signingTable.get();
+    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
 
     builder
         .withSigningKeyPath(table.getString("signing-key-path"))
@@ -169,33 +169,20 @@ class SigningMetadataTomlConfigLoader {
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
         .withTimeout(table.getLong("timeout"));
 
-    final Boolean tlsEnabled = table.getOptionalBoolean("tls-enabled").orElse(true);
+    // optional
+    final TomlTable tomlTable = signingTable.get();
+    final Boolean tlsEnabled = tomlTable.getBoolean("tls-enabled", () -> true);
     builder.withTlsEnabled(tlsEnabled);
     if (tlsEnabled) {
-      final Optional<String> tlsTrustStoreFile = table.getOptionalString("tls-truststore-file");
-      final Optional<String> tlsTrustStorePasswordFile =
-          table.getOptionalString("tls-truststore-password-file");
-
-      if (tlsTrustStoreFile.isPresent() && tlsTrustStorePasswordFile.isPresent()) {
-        builder.withTrustStoreConfig(
-            new PkcsTrustStoreConfig() {
-              @Override
-              public Path getPath() {
-                return makeRelativePathAbsolute(tlsTrustStoreFile.get());
-              }
-
-              @Override
-              public Path getPasswordFilePath() {
-                return makeRelativePathAbsolute(tlsTrustStorePasswordFile.get());
-              }
-            });
-      }
+      final Optional<Path> knownServerFile =
+          Optional.ofNullable(tomlTable.getString("tls-known-server-file")).map(Path::of);
+      builder.withTlsKnownServerFile(knownServerFile);
     }
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }
 
-  private Optional<ThrowingTomlTable> getSigningTableFrom(
+  private Optional<TomlTable> getSigningTableFrom(
       final String filename, final TomlParseResult result) {
     final TomlTable signingTable = result.getTable("signing");
     if (signingTable == null) {
@@ -204,7 +191,11 @@ class SigningMetadataTomlConfigLoader {
               + " is a badly formed EthSigner metadata file - \"signing\" heading is missing.");
       return Optional.empty();
     }
-    return Optional.of(new ThrowingTomlTable(signingTable));
+    return Optional.of(signingTable);
+  }
+
+  private Optional<ThrowingTomlTable> getThrowingSigningTableFrom(Optional<TomlTable> tomlTable) {
+    return tomlTable.map(t -> new ThrowingTomlTable(t));
   }
 
   private String normalizeAddress(final String address) {

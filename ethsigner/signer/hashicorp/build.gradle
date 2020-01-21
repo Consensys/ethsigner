@@ -35,7 +35,9 @@ dependencies {
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.web3j:core'
   implementation 'io.vertx:vertx-core'
+  implementation 'org.apache.tuweni:tuweni-net'
 
+  runtimeOnly 'org.bouncycastle:bcpkix-jdk15on'
   runtimeOnly 'org.apache.logging.log4j:log4j-core'
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
@@ -50,18 +52,4 @@ dependencies {
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation 'org.mock-server:mockserver-netty'
   integrationTestImplementation 'org.mockito:mockito-core'
-
-  testSupportImplementation 'org.apache.tuweni:tuweni-net'
-  testSupportImplementation 'org.bouncycastle:bcpkix-jdk15on'
-}
-
-configurations { testArtifacts }
-task testJar (type: Jar) {
-  baseName = "${project.name}-test"
-  from sourceSets.test.output
-}
-
-artifacts {
-  testArtifacts testJar
-  testSupportArtifacts testSupportJar
 }
