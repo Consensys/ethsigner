@@ -76,13 +76,17 @@ public class HashicorpVaultDockerCertificate {
   }
 
   private void copyKeyCertificatesInCertificateDirectory() throws IOException {
+    final Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rw-r--r--");
+
     final Path sourceCertificatePath = selfSignedCertificate.certificatePath();
     tlsCertificate = certificateDirectory.resolve(sourceCertificatePath.getFileName());
     Files.copy(sourceCertificatePath, tlsCertificate);
+    Files.setPosixFilePermissions(tlsCertificate, posixPermissions);
 
     final Path sourcePrivateKeyPath = selfSignedCertificate.privateKeyPath();
     tlsPrivateKey = certificateDirectory.resolve(sourcePrivateKeyPath.getFileName());
     Files.copy(sourcePrivateKeyPath, tlsPrivateKey);
+    Files.setPosixFilePermissions(tlsPrivateKey, posixPermissions);
   }
 
   public Path getCertificateDirectory() {
