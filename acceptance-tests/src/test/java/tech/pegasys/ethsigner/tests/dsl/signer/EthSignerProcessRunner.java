@@ -150,6 +150,8 @@ public class EthSignerProcessRunner {
       if (serverTlsOptions.getKnownClientsFile().isPresent()) {
         params.add("--tls-known-clients-file");
         params.add(serverTlsOptions.getKnownClientsFile().get().toString());
+      } else {
+        params.add("--tls-allow-any-client");
       }
     }
 

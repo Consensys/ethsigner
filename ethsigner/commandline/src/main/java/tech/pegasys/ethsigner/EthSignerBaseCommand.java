@@ -117,13 +117,13 @@ public class EthSignerBaseCommand implements Config {
 
     @SuppressWarnings("UnusedVariable")
     @Option(
-        names = "--tls-disable-client-authentication",
+        names = "--tls-allow-any-client",
         description =
             "If defined, will allow any client to connect. Is mutually exclusive with "
                 + "--tls-known-clients-file.",
         arity = "0",
         required = false)
-    private Boolean tlsDisableClientAuthentication = false;
+    private Boolean tlsAllowAnyClient = false;
   }
 
   static class TlsServerOptions implements TlsOptions {
