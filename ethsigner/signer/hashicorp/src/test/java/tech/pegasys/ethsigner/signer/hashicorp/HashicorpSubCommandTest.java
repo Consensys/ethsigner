@@ -64,7 +64,7 @@ public class HashicorpSubCommandTest {
         + TLS_KNOWN_SERVER_FILE;
   }
 
-  private String validWithoutTlsOptionsCommandLine() {
+  private String validWithTlsDisabledCommandLine() {
     return "--auth-file="
         + THIS_IS_THE_PATH_TO_THE_FILE
         + " --host="
@@ -109,8 +109,8 @@ public class HashicorpSubCommandTest {
   }
 
   @Test
-  public void tlsOptionalCommandLineParsesIntoVariables() {
-    final boolean result = parseCommand(validWithoutTlsOptionsCommandLine());
+  public void commandLineWithTlsDisabledParsesIntoVariables() {
+    final boolean result = parseCommand(validWithTlsDisabledCommandLine());
 
     assertThat(result).isTrue();
     final String string = hashiConfig.toString();
