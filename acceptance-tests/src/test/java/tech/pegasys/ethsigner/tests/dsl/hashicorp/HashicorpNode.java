@@ -50,10 +50,11 @@ public class HashicorpNode {
   private void start() {
     hashicorpVaultDocker =
         HashicorpVaultDocker.createVaultDocker(dockerClient, hashicorpVaultDockerCertificate);
+    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+
     if (isTlsEnabled()) {
       knownServerFile = Optional.of(createKnownServerFile());
     }
-    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
   public void shutdown() {
@@ -94,6 +95,7 @@ public class HashicorpNode {
       Files.writeString(tempFile, String.format("%s:%d %s", getHost(), getPort(), hexFingerprint));
       return tempFile;
     } catch (final IOException e) {
+      e.printStackTrace();
       throw new UncheckedIOException(e);
     }
   }
