@@ -144,7 +144,7 @@ public class EthSignerBaseCommand implements Config {
     private File keyStorePasswordFile;
 
     @ArgGroup(multiplicity = "1")
-    private TlsClientAuthentication tlsClientAuthentiation;
+    private TlsClientAuthentication tlsClientAuthentication;
 
     @Override
     public File getKeyStoreFile() {

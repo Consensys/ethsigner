@@ -247,7 +247,7 @@ class CommandlineParserTest {
     assertThat(commandOutput.toString())
         .contains(
             "Missing required argument(s): (--tls-known-clients-file=<tlsKnownClientsFile> | "
-                + "--tls-disable-client-authentication)");
+                + "--tls-allow-any-client)");
   }
 
   @Test
