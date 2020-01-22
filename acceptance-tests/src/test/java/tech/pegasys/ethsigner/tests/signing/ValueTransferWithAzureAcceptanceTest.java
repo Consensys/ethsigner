@@ -44,6 +44,9 @@ public class ValueTransferWithAzureAcceptanceTest {
 
   @BeforeAll
   public static void setUpBase() {
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(ValueTransferWithAzureAcceptanceTest::tearDownBase));
+
     Assumptions.assumeTrue(
         System.getenv("ETHSIGNER_AZURE_CLIENT_ID") != null
             && System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET") != null,
@@ -62,6 +65,18 @@ public class ValueTransferWithAzureAcceptanceTest {
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+  }
+
+  static void tearDownBase() {
+    if (ethNode != null) {
+      ethNode.shutdown();
+      ethNode = null;
+    }
+
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+      ethSigner = null;
+    }
   }
 
   private Account richBenefactor() {
