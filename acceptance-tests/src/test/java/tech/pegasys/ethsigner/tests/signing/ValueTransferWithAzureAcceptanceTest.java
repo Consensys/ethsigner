@@ -29,6 +29,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -67,15 +68,19 @@ public class ValueTransferWithAzureAcceptanceTest {
     ethSigner.awaitStartupCompletion();
   }
 
+  @AfterAll
   static void tearDownBase() {
-    if (ethNode != null) {
-      ethNode.shutdown();
-      ethNode = null;
-    }
-
-    if (ethSigner != null) {
-      ethSigner.shutdown();
-      ethSigner = null;
+    try {
+      if (ethNode != null) {
+        ethNode.shutdown();
+        ethNode = null;
+      }
+    } catch (final Exception ignored) {
+    } finally {
+      if (ethSigner != null) {
+        ethSigner.shutdown();
+        ethSigner = null;
+      }
     }
   }
 
