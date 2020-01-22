@@ -75,7 +75,6 @@ public class ValueTransferWithAzureAcceptanceTest {
         ethNode.shutdown();
         ethNode = null;
       }
-    } catch (final Exception ignored) {
     } finally {
       if (ethSigner != null) {
         ethSigner.shutdown();
