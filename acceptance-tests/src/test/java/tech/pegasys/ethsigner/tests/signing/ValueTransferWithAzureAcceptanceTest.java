@@ -29,6 +29,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ public class ValueTransferWithAzureAcceptanceTest {
 
   @BeforeAll
   public static void setUpBase() {
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(ValueTransferWithAzureAcceptanceTest::tearDownBase));
+
     Assumptions.assumeTrue(
         System.getenv("ETHSIGNER_AZURE_CLIENT_ID") != null
             && System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET") != null,
@@ -62,6 +66,21 @@ public class ValueTransferWithAzureAcceptanceTest {
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+  }
+
+  @AfterAll
+  static void tearDownBase() {
+    try {
+      if (ethNode != null) {
+        ethNode.shutdown();
+        ethNode = null;
+      }
+    } finally {
+      if (ethSigner != null) {
+        ethSigner.shutdown();
+        ethSigner = null;
+      }
+    }
   }
 
   private Account richBenefactor() {
