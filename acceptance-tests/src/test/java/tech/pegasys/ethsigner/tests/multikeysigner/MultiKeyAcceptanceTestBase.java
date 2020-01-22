@@ -68,7 +68,7 @@ public class MultiKeyAcceptanceTestBase {
   public void createFileBasedTomlFileAt(
       final Path tomlPath, final String keyPath, final String passwordPath) {
     final String toml =
-        new TomlStringBuilder("[signing]\n")
+        new TomlStringBuilder("signing")
             .withQuotedString("type", "file-based-signer")
             .withQuotedString("key-file", keyPath)
             .withQuotedString("password-file", passwordPath)
