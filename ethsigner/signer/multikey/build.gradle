@@ -48,3 +48,7 @@ dependencies {
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
+
+artifacts {
+  testSupportArtifacts testSupportJar
+}

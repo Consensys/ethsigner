@@ -19,6 +19,7 @@ dependencies {
   testRuntimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
   testImplementation project(':ethsigner:core')
+  testImplementation project(path: ':ethsigner:signer:multikey', configuration: 'testSupportArtifacts')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
