@@ -42,51 +42,51 @@ public class HashicorpVaultDockerCertificate {
   private static final Logger LOG = LogManager.getLogger();
   private static final String TEMP_DIR_PREFIX = ".ethsigner-vault-dsl";
 
-  private SelfSignedCertificate selfSignedCertificate;
-  private Path certificateDirectory;
-  private Path tlsCertificate;
-  private Path tlsPrivateKey;
+  private final Path certificateDirectory;
+  private final Path tlsCertificate;
+  private final Path tlsPrivateKey;
 
-  private HashicorpVaultDockerCertificate() {}
+  private HashicorpVaultDockerCertificate(
+      final Path certificateDirectory, final Path tlsCertificate, final Path tlsPrivateKey) {
+    this.certificateDirectory = certificateDirectory;
+    this.tlsCertificate = tlsCertificate;
+    this.tlsPrivateKey = tlsPrivateKey;
+  }
 
   public static HashicorpVaultDockerCertificate create() {
     try {
-      final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate =
-          new HashicorpVaultDockerCertificate();
-      hashicorpVaultDockerCertificate.createCertificateDirectory();
-      hashicorpVaultDockerCertificate.createSelfSignedCertificates();
-      hashicorpVaultDockerCertificate.copyKeyCertificatesInCertificateDirectory();
-      return hashicorpVaultDockerCertificate;
+      final SelfSignedCertificate selfSignedCertificate = SelfSignedCertificate.generate();
+      final Path certificateDirectory = createDestinationCertificateDirectory();
+      final Path tlsCertificate =
+          copyCertificate(selfSignedCertificate.certificatePath(), certificateDirectory);
+      final Path tlsPrivateKey =
+          copyCertificate(selfSignedCertificate.privateKeyPath(), certificateDirectory);
+      return new HashicorpVaultDockerCertificate(
+          certificateDirectory, tlsCertificate, tlsPrivateKey);
     } catch (final Exception e) {
       LOG.error("Unable to initialize HashicorpVaultCertificates", e);
       throw new RuntimeException("Unable to initialize HashicorpVaultCertificates", e);
     }
   }
 
-  private void createCertificateDirectory() throws IOException {
+  private static Path createDestinationCertificateDirectory() throws IOException {
     // allows docker process to have access
     final Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rwxr-xr-x");
     final FileAttribute<?> permissions = PosixFilePermissions.asFileAttribute(posixPermissions);
-    certificateDirectory = createTempDirectory(MOUNTABLE_PARENT_DIR, TEMP_DIR_PREFIX, permissions);
+    final Path certificateDirectory =
+        createTempDirectory(MOUNTABLE_PARENT_DIR, TEMP_DIR_PREFIX, permissions);
     FileUtils.forceDeleteOnExit(certificateDirectory.toFile());
+    return certificateDirectory;
   }
 
-  private void createSelfSignedCertificates() throws Exception {
-    selfSignedCertificate = SelfSignedCertificate.generate();
-  }
-
-  private void copyKeyCertificatesInCertificateDirectory() throws IOException {
+  private static Path copyCertificate(
+      final Path sourceCertificatePath, final Path destinationDirectory) throws IOException {
     final Set<PosixFilePermission> posixPermissions = PosixFilePermissions.fromString("rw-r--r--");
-
-    final Path sourceCertificatePath = selfSignedCertificate.certificatePath();
-    tlsCertificate = certificateDirectory.resolve(sourceCertificatePath.getFileName());
-    Files.copy(sourceCertificatePath, tlsCertificate);
-    Files.setPosixFilePermissions(tlsCertificate, posixPermissions);
-
-    final Path sourcePrivateKeyPath = selfSignedCertificate.privateKeyPath();
-    tlsPrivateKey = certificateDirectory.resolve(sourcePrivateKeyPath.getFileName());
-    Files.copy(sourcePrivateKeyPath, tlsPrivateKey);
-    Files.setPosixFilePermissions(tlsPrivateKey, posixPermissions);
+    final Path destinationCertificatePath =
+        destinationDirectory.resolve(sourceCertificatePath.getFileName());
+    Files.copy(sourceCertificatePath, destinationCertificatePath);
+    Files.setPosixFilePermissions(destinationCertificatePath, posixPermissions);
+    return destinationCertificatePath;
   }
 
   public Path getCertificateDirectory() {
