@@ -128,7 +128,8 @@ public class HashicorpSubCommand extends SignerSubCommand {
         .add("authFilePath", authFilePath)
         .add("timeout", timeout)
         .add("signingKeyPath", signingKeyPath)
-        .add("tlsEnabled", isTlsEnabled())
+        .add("tlsEnabled", tlsEnabled)
+        .add("tlsKnownServerFile", tlsKnownServerFile)
         .toString();
   }
 }
