@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 public class HashicorpVaultSignerFactory {
-  private static final Logger LOG = LogManager.getLogger();
   private static final String VAULT_KV_MAP_KEY = "value";
   private static final String KEY_MISSING_MSG =
       "Required key [%s] doesn't exist in Hashicorp Vault Response";
