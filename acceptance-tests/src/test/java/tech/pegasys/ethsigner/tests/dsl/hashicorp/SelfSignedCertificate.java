@@ -78,7 +78,7 @@ public final class SelfSignedCertificate {
       return new SelfSignedCertificate(
           createPemCertificateFile(generateSelfSignedCertificate(keyPair)),
           createPemPrivateKeyFile(keyPair.getPrivate()));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }
