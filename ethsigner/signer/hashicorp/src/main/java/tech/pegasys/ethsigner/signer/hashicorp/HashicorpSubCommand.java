@@ -84,7 +84,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   @Option(
       names = "--tls-known-server-file",
       description =
-          "Path to the file containing Hashicorp Vault's host,port and self-signed certificate fingerprint",
+          "Path to the file containing Hashicorp Vault's host, port and self-signed certificate fingerprint",
       arity = "1")
   private final Path tlsKnownServerFile = null;
 
