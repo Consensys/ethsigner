@@ -59,7 +59,6 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @Test
   void incorrectlyNamedHashicorpConfigFileIsNotLoaded(@TempDir final Path tempDir) {
-    System.out.println("TEMP DIR: " + tempDir);
     createHashicorpTomlFileAt(
         tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
         authFilename,
