@@ -98,7 +98,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
             timeout,
             isTlsEnabled(),
             getTlsKnownServerFile());
-    return new HashicorpVaultSignerFactory().createSigner(config);
+    return HashicorpVaultSignerFactory.createSigner(config);
   }
 
   @Override

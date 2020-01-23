@@ -17,7 +17,6 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpVaultSignerFactory;
 
 import java.nio.file.Path;
 
@@ -64,11 +63,8 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
     final AzureKeyVaultTransactionSignerFactory azureFactory =
         new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-    final HashicorpVaultSignerFactory hashicorpVaultSignerFactory =
-        new HashicorpVaultSignerFactory();
 
-    return new MultiKeyTransactionSignerProvider(
-        signingMetadataTomlConfigLoader, azureFactory, hashicorpVaultSignerFactory);
+    return new MultiKeyTransactionSignerProvider(signingMetadataTomlConfigLoader, azureFactory);
   }
 
   @Override
