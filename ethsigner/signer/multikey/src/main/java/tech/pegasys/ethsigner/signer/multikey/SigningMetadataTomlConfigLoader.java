@@ -167,18 +167,11 @@ class SigningMetadataTomlConfigLoader {
         .withHost(table.getString("host"))
         .withPort(table.getLong("port").intValue())
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
-        .withTimeout(table.getLong("timeout"));
-
-    // optional
-    final TomlTable tomlTable = signingTable.get();
-    final Boolean tlsEnabled = tomlTable.getBoolean("tls-enabled", () -> true);
-    builder.withTlsEnabled(tlsEnabled);
-    if (tlsEnabled) {
-      final Optional<Path> knownServerFile =
-          Optional.ofNullable(tomlTable.getString("tls-known-server-file"))
-              .map(this::makeRelativePathAbsolute);
-      builder.withTlsKnownServerFile(knownServerFile);
-    }
+        .withTimeout(table.getLong("timeout"))
+        .withTlsEnabled(signingTable.get().getBoolean("tls-enabled", () -> true))
+        .withTlsKnownServerFile(
+            Optional.ofNullable(signingTable.get().getString("tls-known-server-file"))
+                .map(this::makeRelativePathAbsolute));
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }
@@ -195,8 +188,9 @@ class SigningMetadataTomlConfigLoader {
     return Optional.of(signingTable);
   }
 
-  private Optional<ThrowingTomlTable> getThrowingSigningTableFrom(Optional<TomlTable> tomlTable) {
-    return tomlTable.map(t -> new ThrowingTomlTable(t));
+  private Optional<ThrowingTomlTable> getThrowingSigningTableFrom(
+      final Optional<TomlTable> tomlTable) {
+    return tomlTable.map(ThrowingTomlTable::new);
   }
 
   private String normalizeAddress(final String address) {

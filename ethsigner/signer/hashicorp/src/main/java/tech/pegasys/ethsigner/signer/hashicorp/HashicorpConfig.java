@@ -68,7 +68,7 @@ public class HashicorpConfig {
   }
 
   public Optional<Path> getTlsKnownServerFile() {
-    return tlsKnownServerFile;
+    return tlsEnabled ? tlsKnownServerFile : Optional.empty();
   }
 
   public static class HashicorpConfigBuilder {
