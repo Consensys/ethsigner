@@ -54,15 +54,16 @@ public class TransactionSignerParamsSupplier {
       params.add(String.valueOf(hashicorpNode.getPort()));
       if (!hashicorpNode.isTlsEnabled()) {
         params.add("--tls-enabled=false");
+      } else {
+        hashicorpNode
+            .getKnownServerFilePath()
+            .ifPresent(
+                trustStoreConfig -> {
+                  params.add("--tls-known-server-file");
+                  params.add(trustStoreConfig.toString());
+                });
       }
 
-      hashicorpNode
-          .getKnownServerFilePath()
-          .ifPresent(
-              trustStoreConfig -> {
-                params.add("--tls-known-server-file");
-                params.add(trustStoreConfig.toString());
-              });
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
       params.add("--key-vault-name");
