@@ -18,32 +18,22 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 
-public class HashicorpKVResponseMapper {
+class HashicorpKVResponseMapper {
   protected static final String ERROR_INVALID_JSON =
       "Invalid response returned from Hashicorp Vault";
 
   /**
    * Convert Hashicorp KV Version 2 Secret Engine JSON response to map of key/values
    *
-   * @param json response from Hashicorp Vault
-   * @return All key/value pairs
+   * @param jsonResponse response from Hashicorp Vault wrapped in io.vertx.core.json.JsonObject
+   * @return All key/value pairs returned from particular secret
    */
-  public static Map<String, String> from(final String json) {
-    if (json == null) {
-      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
-    }
-    final JsonObject jsonResponse;
-    try {
-      jsonResponse = new JsonObject(json);
-    } catch (final DecodeException de) {
-      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON, de);
-    }
-
+  static Map<String, String> extractMapFromJson(final JsonObject jsonResponse) {
     // expecting Hashicorp kv-v2 secret engine compatible JSON json
     final JsonObject keyData =
         Optional.ofNullable(jsonResponse.getJsonObject("data"))
@@ -52,11 +42,9 @@ public class HashicorpKVResponseMapper {
     return Collections.unmodifiableMap(
         keyData.stream()
             .filter(entry -> Objects.nonNull(entry.getValue()))
-            .collect(
-                Collectors.toMap(Map.Entry::getKey, HashicorpKVResponseMapper::getValueToString)));
+            .collect(Collectors.toMap(Map.Entry::getKey, convertValueToString)));
   }
 
-  private static String getValueToString(final Map.Entry<String, Object> v) {
-    return v.getValue().toString();
-  }
+  private static Function<Map.Entry<String, Object>, String> convertValueToString =
+      entry -> entry.getValue().toString();
 }

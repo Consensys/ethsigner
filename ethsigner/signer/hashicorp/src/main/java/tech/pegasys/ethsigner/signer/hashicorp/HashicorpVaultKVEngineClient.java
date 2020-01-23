@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
+import static tech.pegasys.ethsigner.signer.hashicorp.HashicorpKVResponseMapper.ERROR_INVALID_JSON;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 
@@ -30,10 +31,12 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class HashicorpClient {
+public class HashicorpVaultKVEngineClient {
   private static final Logger LOG = LogManager.getLogger();
   private static final String HASHICORP_SECRET_ENGINE_VERSION = "/v1";
   private static final String AUTH_FILE_ERROR_MSG_FMT =
@@ -45,11 +48,11 @@ public class HashicorpClient {
 
   private final HashicorpConfig hashicorpConfig;
 
-  public HashicorpClient(final HashicorpConfig hashicorpConfig) {
+  public HashicorpVaultKVEngineClient(final HashicorpConfig hashicorpConfig) {
     this.hashicorpConfig = hashicorpConfig;
   }
 
-  public String requestSecretFromVault() {
+  public JsonObject requestData() {
     final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + hashicorpConfig.getSigningKeyPath();
     final Vertx vertx = Vertx.vertx();
     try {
@@ -60,7 +63,10 @@ public class HashicorpClient {
               hashicorpConfig.getAuthFilePath(),
               requestURI,
               hashicorpConfig.getTimeout());
-      return HashicorpKVResponseMapper.from(jsonResponse).getOrDefault("value", null);
+      return new JsonObject(jsonResponse);
+
+    } catch (final DecodeException de) {
+      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON, de);
     } finally {
       if (vertx != null) {
         vertx.close();
