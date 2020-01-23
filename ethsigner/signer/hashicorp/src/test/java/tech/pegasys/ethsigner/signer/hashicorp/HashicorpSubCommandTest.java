@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -35,11 +36,15 @@ public class HashicorpSubCommandTest {
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
 
-  private HashicorpSubCommand hashiConfig;
+  private HashicorpSubCommand hashicorpSubCommand;
+
+  @BeforeEach
+  void init() {
+    hashicorpSubCommand = new HashicorpSubCommand();
+  }
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpSubCommand();
-    final CommandLine commandLine = new CommandLine(hashiConfig);
+    final CommandLine commandLine = new CommandLine(hashicorpSubCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
@@ -85,16 +90,16 @@ public class HashicorpSubCommandTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    final String string = hashiConfig.toString();
+    final String string = hashicorpSubCommand.toString();
     assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
     assertThat(string).contains(HTTP_HOST_COM);
     assertThat(string).contains(PORT);
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
     assertThat(string).contains(FIFTEEN);
 
-    assertThat(hashiConfig.isTlsEnabled()).isTrue();
-    assertThat(hashiConfig.getTlsKnownServerFile().isPresent()).isTrue();
-    assertThat(hashiConfig.getTlsKnownServerFile().get().toString())
+    assertThat(hashicorpSubCommand.isTlsEnabled()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isPresent()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().get().toString())
         .isEqualTo(TLS_KNOWN_SERVER_FILE);
   }
 
@@ -103,15 +108,15 @@ public class HashicorpSubCommandTest {
     final boolean result = parseCommand(validWithTlsDisabledCommandLine());
 
     assertThat(result).isTrue();
-    final String string = hashiConfig.toString();
+    final String string = hashicorpSubCommand.toString();
     assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
     assertThat(string).contains(HTTP_HOST_COM);
     assertThat(string).contains(PORT);
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
     assertThat(string).contains(FIFTEEN);
 
-    assertThat(hashiConfig.isTlsEnabled()).isFalse();
-    assertThat(hashiConfig.getTlsKnownServerFile().isEmpty()).isTrue();
+    assertThat(hashicorpSubCommand.isTlsEnabled()).isFalse();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   @Test
@@ -154,7 +159,7 @@ public class HashicorpSubCommandTest {
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
-    assertThat(hashiConfig.getTlsKnownServerFile().isEmpty()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
