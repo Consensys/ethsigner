@@ -50,7 +50,7 @@ public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker);
+    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, true);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 

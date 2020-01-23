@@ -36,7 +36,7 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
   @BeforeAll
   static void preSetup() {
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorpWithoutTls(new DockerClientFactory().create());
+        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
   }
 
   @Test

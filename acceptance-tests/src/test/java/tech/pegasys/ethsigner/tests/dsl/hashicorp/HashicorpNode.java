@@ -27,6 +27,10 @@ public class HashicorpNode {
   private HashicorpVaultDocker hashicorpVaultDocker;
   private Optional<Path> knownServerFile = Optional.empty();
 
+  private HashicorpNode(final DockerClient dockerClient) {
+    this(dockerClient, null);
+  }
+
   private HashicorpNode(
       final DockerClient dockerClient,
       final HashicorpVaultDockerCertificate hashicorpVaultDockerCertificate) {
@@ -34,15 +38,12 @@ public class HashicorpNode {
     this.hashicorpVaultDockerCertificate = hashicorpVaultDockerCertificate;
   }
 
-  public static HashicorpNode createAndStartHashicorp(final DockerClient dockerClient) {
+  public static HashicorpNode createAndStartHashicorp(
+      final DockerClient dockerClient, final boolean withTls) {
     final HashicorpNode hashicorpNode =
-        new HashicorpNode(dockerClient, HashicorpVaultDockerCertificate.create());
-    hashicorpNode.start();
-    return hashicorpNode;
-  }
-
-  public static HashicorpNode createAndStartHashicorpWithoutTls(final DockerClient dockerClient) {
-    final HashicorpNode hashicorpNode = new HashicorpNode(dockerClient, null);
+        withTls
+            ? new HashicorpNode(dockerClient, HashicorpVaultDockerCertificate.create())
+            : new HashicorpNode(dockerClient);
     hashicorpNode.start();
     return hashicorpNode;
   }

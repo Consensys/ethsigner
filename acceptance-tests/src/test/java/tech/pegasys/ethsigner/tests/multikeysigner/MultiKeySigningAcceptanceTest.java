@@ -46,7 +46,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
     preChecks();
 
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorpWithoutTls(new DockerClientFactory().create());
+        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
     Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));

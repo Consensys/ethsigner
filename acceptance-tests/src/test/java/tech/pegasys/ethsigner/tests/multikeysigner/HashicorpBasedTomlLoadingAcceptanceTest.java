@@ -40,7 +40,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   @BeforeAll
   static void setUpBase() {
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorpWithoutTls(new DockerClientFactory().create());
+        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
   }
 
   @BeforeEach
