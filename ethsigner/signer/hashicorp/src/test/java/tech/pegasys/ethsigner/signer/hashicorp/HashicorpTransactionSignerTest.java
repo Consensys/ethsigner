@@ -26,7 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 public class HashicorpTransactionSignerTest {
 
   @Test
-  public void vaultTimingOut(@TempDir final Path tempDirectory) throws IOException {
+  public void vaultTimingOut(@TempDir final Path tempDirectory) {
     assertThatThrownBy(
             () ->
                 HashicorpVaultSignerFactory.createSigner(
@@ -35,7 +35,7 @@ public class HashicorpTransactionSignerTest {
                         .withHost("serverHost")
                         .withPort(877)
                         .withAuthFilePath(createAuthFile(tempDirectory))
-                        .withTimeout(Long.valueOf(1))
+                        .withTimeout(1L)
                         .build()))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
@@ -51,7 +51,7 @@ public class HashicorpTransactionSignerTest {
                         .withHost("serverHost")
                         .withPort(877)
                         .withAuthFilePath(Path.of("nonExistingFile"))
-                        .withTimeout(Long.valueOf(1))
+                        .withTimeout(1L)
                         .build()))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
