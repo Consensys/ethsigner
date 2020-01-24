@@ -132,18 +132,14 @@ public class HashicorpVaultKVEngineClient {
   }
 
   private String getResponse(final CompletableFuture<String> future, final long timeout) {
-    final String response;
     try {
-      response = future.get(timeout, TimeUnit.SECONDS);
+      return future.get(timeout, TimeUnit.SECONDS);
     } catch (final InterruptedException | ExecutionException e) {
-      final String message = RETRIEVE_PRIVATE_KEY_ERROR_MSG;
-      LOG.error(message, e);
-      throw new TransactionSignerInitializationException(message, e);
+      LOG.error(RETRIEVE_PRIVATE_KEY_ERROR_MSG, e);
+      throw new TransactionSignerInitializationException(RETRIEVE_PRIVATE_KEY_ERROR_MSG, e);
     } catch (final TimeoutException e) {
-      final String message = TIMEOUT_ERROR_MSG;
-      LOG.error(message, e);
-      throw new TransactionSignerInitializationException(message, e);
+      LOG.error(TIMEOUT_ERROR_MSG, e);
+      throw new TransactionSignerInitializationException(TIMEOUT_ERROR_MSG, e);
     }
-    return response;
   }
 }
