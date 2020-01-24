@@ -19,6 +19,8 @@ import java.util.Map;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HashicorpKVResponseMapperTest {
   private static final String validKVEngineJsonResponse =
@@ -31,8 +33,6 @@ class HashicorpKVResponseMapperTest {
           + "      \"destroyed\": false,"
           + "      \"version\": 1}}}";
 
-  private static final String validJson = "{\"data\": \"test\"}";
-
   @Test
   void mapExtractedFromValidJson() {
     final JsonObject jsonObject = new JsonObject(validKVEngineJsonResponse);
@@ -41,9 +41,15 @@ class HashicorpKVResponseMapperTest {
     Assertions.assertEquals("y", dataMap.get("x"));
   }
 
-  @Test
-  void exceptionRaisedWhenJsonIsNotFromKVEngine() {
-    final JsonObject jsonObject = new JsonObject(validJson);
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "{\"data\": \"test\"}",
+        "{\"data\": {\"test\":\"result\"}}",
+        "{\"test\": \"test\"}"
+      })
+  void exceptionRaisedWhenJsonIsNotFromKVEngine(String json) {
+    final JsonObject jsonObject = new JsonObject(json);
     Assertions.assertThrows(
         TransactionSignerInitializationException.class,
         () -> HashicorpKVResponseMapper.extractMapFromJson(jsonObject));

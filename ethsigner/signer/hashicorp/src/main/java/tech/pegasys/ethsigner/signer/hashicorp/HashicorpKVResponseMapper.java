@@ -17,8 +17,6 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.vertx.core.json.JsonObject;
@@ -28,23 +26,33 @@ class HashicorpKVResponseMapper {
       "Invalid response returned from Hashicorp Vault";
 
   /**
-   * Convert Hashicorp KV Version 2 Secret Engine JSON response to map of key/values
+   * Convert Hashicorp KV Version 2 Secret Engine JSON response to map of key/values.
    *
    * @param jsonResponse response from Hashicorp Vault wrapped in io.vertx.core.json.JsonObject
    * @return All key/value pairs returned from particular secret
    */
   static Map<String, String> extractMapFromJson(final JsonObject jsonResponse) {
-    // expecting Hashicorp kv-v2 secret engine compatible JSON json
-    final JsonObject keyData =
-        Optional.ofNullable(jsonResponse.getJsonObject("data"))
-            .map(jo -> jo.getJsonObject("data"))
-            .orElseThrow(() -> new TransactionSignerInitializationException(ERROR_INVALID_JSON));
+    final Object outerData = jsonResponse.getValue("data");
+    if (!(outerData instanceof JsonObject)) {
+      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
+    }
+    final JsonObject outerDataJsonObject = (JsonObject) outerData;
+
+    // inner data contains multiple key/value pairs
+    final Object innerData = outerDataJsonObject.getValue("data");
+    if (!(innerData instanceof JsonObject)) {
+      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
+    }
+    final JsonObject keyData = (JsonObject) innerData;
+
     return Collections.unmodifiableMap(
         keyData.stream()
             .filter(entry -> Objects.nonNull(entry.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, convertValueToString)));
+            .collect(
+                Collectors.toMap(Map.Entry::getKey, HashicorpKVResponseMapper::mapValueToString)));
   }
 
-  private static Function<Map.Entry<String, Object>, String> convertValueToString =
-      entry -> entry.getValue().toString();
+  private static String mapValueToString(final Map.Entry<String, Object> v) {
+    return v.getValue().toString();
+  }
 }
