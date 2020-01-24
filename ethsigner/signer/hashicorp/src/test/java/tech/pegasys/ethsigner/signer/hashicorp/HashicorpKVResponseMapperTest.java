@@ -48,7 +48,7 @@ class HashicorpKVResponseMapperTest {
         "{\"data\": {\"test\":\"result\"}}",
         "{\"test\": \"test\"}"
       })
-  void exceptionRaisedWhenJsonIsNotFromKVEngine(String json) {
+  void exceptionRaisedWhenJsonIsNotFromKVEngine(final String json) {
     final JsonObject jsonObject = new JsonObject(json);
     Assertions.assertThrows(
         TransactionSignerInitializationException.class,
