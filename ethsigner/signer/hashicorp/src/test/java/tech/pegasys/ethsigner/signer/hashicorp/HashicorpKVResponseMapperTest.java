@@ -34,7 +34,7 @@ class HashicorpKVResponseMapperTest {
           + "      \"version\": 1}}}";
 
   @Test
-  void mapExtractedFromValidJson() {
+  void extractKeyValuesFromValidJson() {
     final JsonObject jsonObject = new JsonObject(validKVEngineJsonResponse);
     final Map<String, String> dataMap = HashicorpKVResponseMapper.extractKeyValues(jsonObject);
     Assertions.assertEquals(2, dataMap.size());
