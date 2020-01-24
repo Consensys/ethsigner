@@ -88,9 +88,8 @@ class SigningMetadataTomlConfigLoader {
       final TomlParseResult result =
           TomlConfigFileParser.loadConfigurationFromFile(file.toAbsolutePath().toString());
 
-      final Optional<TomlTable> tomlTable =
+      final Optional<TomlTableAdapter> signingTable =
           getSigningTableFrom(file.getFileName().toString(), result);
-      final Optional<ThrowingTomlTable> signingTable = getThrowingSigningTableFrom(tomlTable);
       if (signingTable.isEmpty()) {
         return Optional.empty();
       }
@@ -118,11 +117,11 @@ class SigningMetadataTomlConfigLoader {
 
   private Optional<SigningMetadataFile> getFileBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
-    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTableAdapter> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
-    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
+    final TomlTableAdapter table = signingTable.get();
 
     final String keyFilename = table.getString("key-file");
     final Path keyPath = makeRelativePathAbsolute(keyFilename);
@@ -134,13 +133,13 @@ class SigningMetadataTomlConfigLoader {
   private Optional<SigningMetadataFile> getAzureBasedSigningMetadataFromToml(
       final String filename, final TomlParseResult result) {
 
-    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTableAdapter> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
     final AzureConfigBuilder builder;
-    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
+    final TomlTableAdapter table = signingTable.get();
     builder = new AzureConfigBuilder();
     builder.withKeyVaultName(table.getString("key-vault-name"));
     builder.withKeyName(table.getString("key-name"));
@@ -153,14 +152,14 @@ class SigningMetadataTomlConfigLoader {
   private Optional<SigningMetadataFile> getHashicorpMetadataFromToml(
       final String filename, final TomlParseResult result) {
 
-    final Optional<TomlTable> signingTable = getSigningTableFrom(filename, result);
+    final Optional<TomlTableAdapter> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
     final HashicorpConfig.HashicorpConfigBuilder builder =
         new HashicorpConfig.HashicorpConfigBuilder();
-    final ThrowingTomlTable table = getThrowingSigningTableFrom(signingTable).get();
+    final TomlTableAdapter table = signingTable.get();
 
     builder
         .withSigningKeyPath(table.getString("signing-key-path"))
@@ -168,15 +167,14 @@ class SigningMetadataTomlConfigLoader {
         .withPort(table.getLong("port").intValue())
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
         .withTimeout(table.getLong("timeout"))
-        .withTlsEnabled(signingTable.get().getBoolean("tls-enabled", () -> true))
+        .withTlsEnabled(table.getOptionalBoolean("tls-enabled").orElse(true))
         .withTlsKnownServerFile(
-            Optional.ofNullable(signingTable.get().getString("tls-known-server-file"))
-                .map(this::makeRelativePathAbsolute));
+            table.getOptionalString("tls-known-server-file").map(this::makeRelativePathAbsolute));
 
     return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
   }
 
-  private Optional<TomlTable> getSigningTableFrom(
+  private Optional<TomlTableAdapter> getSigningTableFrom(
       final String filename, final TomlParseResult result) {
     final TomlTable signingTable = result.getTable("signing");
     if (signingTable == null) {
@@ -185,12 +183,7 @@ class SigningMetadataTomlConfigLoader {
               + " is a badly formed EthSigner metadata file - \"signing\" heading is missing.");
       return Optional.empty();
     }
-    return Optional.of(signingTable);
-  }
-
-  private Optional<ThrowingTomlTable> getThrowingSigningTableFrom(
-      final Optional<TomlTable> tomlTable) {
-    return tomlTable.map(ThrowingTomlTable::new);
+    return Optional.of(new TomlTableAdapter(signingTable));
   }
 
   private String normalizeAddress(final String address) {

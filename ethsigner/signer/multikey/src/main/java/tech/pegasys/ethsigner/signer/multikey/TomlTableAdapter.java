@@ -16,11 +16,11 @@ import java.util.Optional;
 
 import org.apache.tuweni.toml.TomlTable;
 
-public class ThrowingTomlTable {
+public class TomlTableAdapter {
 
   private final TomlTable table;
 
-  public ThrowingTomlTable(final TomlTable table) {
+  public TomlTableAdapter(final TomlTable table) {
     this.table = table;
   }
 
@@ -32,5 +32,13 @@ public class ThrowingTomlTable {
   public Long getLong(final String key) {
     return Optional.ofNullable(table.getLong(key))
         .orElseThrow(() -> new IllegalArgumentException(key + " was not specified in TOML input."));
+  }
+
+  public Optional<String> getOptionalString(final String key) {
+    return Optional.ofNullable(table.getString(key));
+  }
+
+  public Optional<Boolean> getOptionalBoolean(final String key) {
+    return Optional.ofNullable(table.getBoolean(key));
   }
 }
