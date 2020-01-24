@@ -38,6 +38,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
+  public static final boolean DEFAULT_TLS_ENABLED = true;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -79,7 +80,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
       names = {"--tls-enabled"},
       description = "Connect to Hashicorp Vault server using TLS (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final Boolean tlsEnabled = true;
+  private final Boolean tlsEnabled = DEFAULT_TLS_ENABLED;
 
   @Option(
       names = "--tls-known-server-file",

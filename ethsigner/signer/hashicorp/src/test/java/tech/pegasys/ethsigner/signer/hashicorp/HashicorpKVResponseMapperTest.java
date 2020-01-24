@@ -36,7 +36,7 @@ class HashicorpKVResponseMapperTest {
   @Test
   void mapExtractedFromValidJson() {
     final JsonObject jsonObject = new JsonObject(validKVEngineJsonResponse);
-    final Map<String, String> dataMap = HashicorpKVResponseMapper.extractMapFromJson(jsonObject);
+    final Map<String, String> dataMap = HashicorpKVResponseMapper.extractKeyValues(jsonObject);
     Assertions.assertEquals(2, dataMap.size());
     Assertions.assertEquals("y", dataMap.get("x"));
   }
@@ -52,6 +52,6 @@ class HashicorpKVResponseMapperTest {
     final JsonObject jsonObject = new JsonObject(json);
     Assertions.assertThrows(
         TransactionSignerInitializationException.class,
-        () -> HashicorpKVResponseMapper.extractMapFromJson(jsonObject));
+        () -> HashicorpKVResponseMapper.extractKeyValues(jsonObject));
   }
 }

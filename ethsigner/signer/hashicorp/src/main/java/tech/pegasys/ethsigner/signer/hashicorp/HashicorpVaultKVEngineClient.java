@@ -46,17 +46,11 @@ public class HashicorpVaultKVEngineClient {
   private static final String TIMEOUT_ERROR_MSG =
       "Timeout while retrieving private key from Hashicorp Vault.";
 
-  private final HashicorpConfig hashicorpConfig;
-
-  public HashicorpVaultKVEngineClient(final HashicorpConfig hashicorpConfig) {
-    this.hashicorpConfig = hashicorpConfig;
-  }
-
-  public JsonObject requestData() {
+  public JsonObject requestData(final HashicorpConfig hashicorpConfig) {
     final String requestURI = HASHICORP_SECRET_ENGINE_VERSION + hashicorpConfig.getSigningKeyPath();
     final Vertx vertx = Vertx.vertx();
     try {
-      final HttpClient httpClient = vertx.createHttpClient(getHttpClientOptions());
+      final HttpClient httpClient = vertx.createHttpClient(getHttpClientOptions(hashicorpConfig));
       final String jsonResponse =
           getVaultResponse(
               httpClient,
@@ -74,7 +68,7 @@ public class HashicorpVaultKVEngineClient {
     }
   }
 
-  private HttpClientOptions getHttpClientOptions() {
+  private HttpClientOptions getHttpClientOptions(final HashicorpConfig hashicorpConfig) {
     final HttpClientOptions httpClientOptions =
         new HttpClientOptions()
             .setDefaultHost(hashicorpConfig.getHost())

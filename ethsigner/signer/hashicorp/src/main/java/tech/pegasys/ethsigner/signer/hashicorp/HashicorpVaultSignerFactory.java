@@ -27,8 +27,8 @@ public class HashicorpVaultSignerFactory {
       "Required key [%s] doesn't exist in Hashicorp Vault Response";
 
   public static TransactionSigner createSigner(final HashicorpConfig hashicorpConfig) {
-    final JsonObject jsonResponse = new HashicorpVaultKVEngineClient(hashicorpConfig).requestData();
-    final Map<String, String> dataMap = HashicorpKVResponseMapper.extractMapFromJson(jsonResponse);
+    final JsonObject jsonResponse = new HashicorpVaultKVEngineClient().requestData(hashicorpConfig);
+    final Map<String, String> dataMap = HashicorpKVResponseMapper.extractKeyValues(jsonResponse);
     if (!dataMap.containsKey(VAULT_KV_MAP_KEY)) {
       throw new TransactionSignerInitializationException(
           String.format(KEY_MISSING_MSG, VAULT_KV_MAP_KEY));

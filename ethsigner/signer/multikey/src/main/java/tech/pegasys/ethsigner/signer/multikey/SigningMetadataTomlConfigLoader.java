@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.multikey;
 
+import static tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand.DEFAULT_TLS_ENABLED;
+
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
@@ -167,7 +169,7 @@ class SigningMetadataTomlConfigLoader {
         .withPort(table.getLong("port").intValue())
         .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
         .withTimeout(table.getLong("timeout"))
-        .withTlsEnabled(table.getOptionalBoolean("tls-enabled").orElse(true))
+        .withTlsEnabled(table.getOptionalBoolean("tls-enabled").orElse(DEFAULT_TLS_ENABLED))
         .withTlsKnownServerFile(
             table.getOptionalString("tls-known-server-file").map(this::makeRelativePathAbsolute));
 

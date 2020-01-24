@@ -29,27 +29,26 @@ class HashicorpKVResponseMapper {
    * Convert Hashicorp KV Version 2 Secret Engine JSON response to map of key/values.
    *
    * @param jsonResponse response from Hashicorp Vault wrapped in io.vertx.core.json.JsonObject
-   * @return All key/value pairs returned from particular secret
+   * @return Map of all key/value pairs returned from particular secret
    */
-  static Map<String, String> extractMapFromJson(final JsonObject jsonResponse) {
-    final Object outerData = jsonResponse.getValue("data");
-    if (!(outerData instanceof JsonObject)) {
-      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
-    }
-    final JsonObject outerDataJsonObject = (JsonObject) outerData;
+  static Map<String, String> extractKeyValues(final JsonObject jsonResponse) {
+    final JsonObject outerDataJsonObject = getJsonObject(jsonResponse);
+    final JsonObject dataJsonObject = getJsonObject(outerDataJsonObject);
 
-    // inner data contains multiple key/value pairs
-    final Object innerData = outerDataJsonObject.getValue("data");
-    if (!(innerData instanceof JsonObject)) {
-      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
-    }
-    final JsonObject keyData = (JsonObject) innerData;
-
+    // second level data JSON structure contains multiple key/value pairs.
     return Collections.unmodifiableMap(
-        keyData.stream()
+        dataJsonObject.stream()
             .filter(entry -> Objects.nonNull(entry.getValue()))
             .collect(
                 Collectors.toMap(Map.Entry::getKey, HashicorpKVResponseMapper::mapValueToString)));
+  }
+
+  private static JsonObject getJsonObject(final JsonObject jsonResponse) {
+    final Object dataObject = jsonResponse.getValue("data");
+    if (!(dataObject instanceof JsonObject)) {
+      throw new TransactionSignerInitializationException(ERROR_INVALID_JSON);
+    }
+    return (JsonObject) dataObject;
   }
 
   private static String mapValueToString(final Map.Entry<String, Object> v) {
