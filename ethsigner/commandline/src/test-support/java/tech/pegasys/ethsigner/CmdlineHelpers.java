@@ -25,6 +25,7 @@ public class CmdlineHelpers {
         + "--tls-keystore-file=./keystore.pfx "
         + "--tls-keystore-password-file=./keystore.passwd "
         + "--tls-known-clients-file=./known_clients "
+        + "--tls-allow-ca-clients "
         + "--downstream-http-tls-keystore-file=./client_cert.pfx "
         + "--downstream-http-tls-keystore-password-file=./client_cert.passwd "
         + "--downstream-http-tls-truststore-file=./web3_truststore.pfx "

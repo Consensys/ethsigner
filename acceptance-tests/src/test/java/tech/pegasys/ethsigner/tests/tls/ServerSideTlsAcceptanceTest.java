@@ -30,6 +30,7 @@ import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.ClientTlsConfig;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+import tech.pegasys.ethsigner.tests.tls.support.BasicClientAuthConstraints;
 
 import java.io.File;
 import java.io.IOException;
@@ -111,7 +112,7 @@ class ServerSideTlsAcceptanceTest {
           new BasicTlsOptions(
               serverPresentedCerts.getPkcs12File(),
               passwordPath.toFile(),
-              Optional.ofNullable(fingerPrintFile));
+              Optional.of(BasicClientAuthConstraints.fromFile(fingerPrintFile)));
       configBuilder.withServerTlsOptions(serverOptions);
 
       final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

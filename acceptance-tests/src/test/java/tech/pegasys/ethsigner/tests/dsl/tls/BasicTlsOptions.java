@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 
 import java.io.File;
@@ -21,15 +22,15 @@ public class BasicTlsOptions implements TlsOptions {
 
   private final File keyStoreFile;
   private final File keyStorePasswordFile;
-  private final Optional<File> knownClientsFile;
+  private final Optional<ClientAuthConstraints> clientAuthConstraints;
 
   public BasicTlsOptions(
       final File keyStoreFile,
       final File keyStorePasswordFile,
-      final Optional<File> knownClientsFile) {
+      final Optional<ClientAuthConstraints> clientAuthConstraints) {
     this.keyStoreFile = keyStoreFile;
     this.keyStorePasswordFile = keyStorePasswordFile;
-    this.knownClientsFile = knownClientsFile;
+    this.clientAuthConstraints = clientAuthConstraints;
   }
 
   @Override
@@ -42,8 +43,7 @@ public class BasicTlsOptions implements TlsOptions {
     return keyStorePasswordFile;
   }
 
-  @Override
-  public Optional<File> getKnownClientsFile() {
-    return knownClientsFile;
+  public Optional<ClientAuthConstraints> getClientAuthConstraints() {
+    return clientAuthConstraints;
   }
 }

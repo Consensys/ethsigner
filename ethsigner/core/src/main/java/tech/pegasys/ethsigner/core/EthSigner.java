@@ -139,8 +139,8 @@ public final class EthSigner {
       final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
 
-      if (tlsConfig.getClientlAuthConstraints().isPresent()) {
-        final ClientAuthConstraints constraints = tlsConfig.getClientlAuthConstraints().get();
+      if (tlsConfig.getClientAuthConstraints().isPresent()) {
+        final ClientAuthConstraints constraints = tlsConfig.getClientAuthConstraints().get();
         result.setClientAuth(ClientAuth.REQUIRED);
         try {
           constraints

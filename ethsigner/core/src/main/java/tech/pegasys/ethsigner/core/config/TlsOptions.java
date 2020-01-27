@@ -21,5 +21,5 @@ public interface TlsOptions {
 
   File getKeyStorePasswordFile();
 
-  Optional<ClientAuthConstraints> getClientlAuthConstraints();
+  Optional<ClientAuthConstraints> getClientAuthConstraints();
 }

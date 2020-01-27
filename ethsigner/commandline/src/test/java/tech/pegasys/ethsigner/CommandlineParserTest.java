@@ -75,7 +75,7 @@ class CommandlineParserTest {
         .isEqualTo(new File("./keystore.pfx"));
     assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
-    assertThat(config.getTlsOptions().get().getKnownClientsFile())
+    assertThat(config.getTlsOptions().get().getClientAuthConstraints().get().getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(config.getClientCertificateOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
@@ -246,8 +246,8 @@ class CommandlineParserTest {
     assertThat(result).isFalse();
     assertThat(commandOutput.toString())
         .contains(
-            "Missing required argument(s): (--tls-known-clients-file=<tlsKnownClientsFile> | "
-                + "--tls-allow-any-client)");
+            "Missing required argument(s): (--tls-allow-any-client | "
+                + "[[--tls-known-clients-file=<tlsKnownClientsFile>] [--tls-allow-ca-clients]])");
   }
 
   @Test
@@ -270,7 +270,7 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    assertThat(config.getTlsOptions().get().getKnownClientsFile()).isEmpty();
+    assertThat(config.getTlsOptions().get().getClientAuthConstraints()).isEmpty();
   }
 
   @Test
