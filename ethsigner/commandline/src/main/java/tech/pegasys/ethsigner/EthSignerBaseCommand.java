@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -107,20 +108,45 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-  static class TlsClientAuthentication {
+  static class TlsAuthorisationMechanisms implements ClientAuthConstraints {
+
     @Option(
         names = "--tls-known-clients-file",
         description = "Path to a file containing the fingerprints of authorized clients.",
         arity = "1",
-        required = true)
+        required = false)
     private File tlsKnownClientsFile = null;
+
+    @SuppressWarnings("UnusedVariable")
+    @Option(
+        names = "--tls-allow-ca-clients",
+        description = "If defined, allows clients authorised by the CA to connect to Ethsigner.",
+        arity = "0",
+        required = false)
+    private Boolean tlsAllowCaClients = false;
+
+    @Override
+    public Optional<File> getKnownClientsFile() {
+      return Optional.ofNullable(tlsKnownClientsFile);
+    }
+
+    @Override
+    public boolean allowCaAuthorisedClients() {
+      return tlsAllowCaClients;
+    }
+  }
+
+  static class TlsClientAuthentication {
+
+    @ArgGroup(exclusive = false)
+    private TlsAuthorisationMechanisms authMechanisms;
 
     @SuppressWarnings("UnusedVariable")
     @Option(
         names = "--tls-allow-any-client",
         description =
-            "If defined, will allow any client to connect. Is mutually exclusive with "
-                + "--tls-known-clients-file.",
+            "If defined, will allow any client to connect. Is mutually exclusive with other "
+                + "client auth settings",
         arity = "0",
         required = false)
     private Boolean tlsAllowAnyClient = false;
@@ -157,8 +183,10 @@ public class EthSignerBaseCommand implements Config {
     }
 
     @Override
-    public Optional<File> getKnownClientsFile() {
-      return Optional.ofNullable(tlsClientAuthentication.tlsKnownClientsFile);
+    public Optional<ClientAuthConstraints> getClientlAuthConstraints() {
+      return tlsClientAuthentication.tlsAllowAnyClient
+          ? Optional.empty()
+          : Optional.of(tlsClientAuthentication.authMechanisms);
     }
   }
 

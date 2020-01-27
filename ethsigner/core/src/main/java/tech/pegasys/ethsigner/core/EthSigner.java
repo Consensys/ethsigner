@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -138,11 +139,17 @@ public final class EthSigner {
       final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
 
-      if (tlsConfig.getKnownClientsFile().isPresent()) {
+      if (tlsConfig.getClientlAuthConstraints().isPresent()) {
+        final ClientAuthConstraints constraints = tlsConfig.getClientlAuthConstraints().get();
         result.setClientAuth(ClientAuth.REQUIRED);
         try {
-          result.setTrustOptions(
-              VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
+          constraints
+              .getKnownClientsFile()
+              .ifPresent(
+                  whitelistFile ->
+                      result.setTrustOptions(
+                          VertxTrustOptions.whitelistClients(
+                              whitelistFile.toPath(), constraints.allowCaAuthorisedClients())));
         } catch (final IllegalArgumentException e) {
           throw new InitializationException("Illegally formatted client fingerprint file.");
         }
