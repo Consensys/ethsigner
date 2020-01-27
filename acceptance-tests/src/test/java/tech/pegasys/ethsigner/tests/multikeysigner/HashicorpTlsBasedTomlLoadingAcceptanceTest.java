@@ -28,7 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
+class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
@@ -39,8 +39,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @BeforeAll
   static void setUpBase() {
-    hashicorpNode =
-        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
+    hashicorpNode = HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), true);
   }
 
   @BeforeEach
@@ -55,16 +54,6 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
     createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), authFilename, hashicorpNode);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
-  }
-
-  @Test
-  void incorrectlyNamedHashicorpConfigFileIsNotLoaded(@TempDir final Path tempDir) {
-    createHashicorpTomlFileAt(
-        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
-        authFilename,
-        hashicorpNode);
-    setup(tempDir);
-    assertThat(ethSigner.accounts().list()).isEmpty();
   }
 
   @AfterAll

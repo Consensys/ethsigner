@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class HashicorpConfig {
   private final String signingKeyPath;
@@ -22,18 +23,24 @@ public class HashicorpConfig {
   private final Integer port;
   private final Path authFilePath;
   private final Long timeout;
+  private final boolean tlsEnabled;
+  private final Optional<Path> tlsKnownServerFile;
 
   public HashicorpConfig(
       final String signingKeyPath,
       final String host,
       final Integer port,
       final Path authFilePath,
-      final Long timeout) {
+      final Long timeout,
+      final boolean tlsEnabled,
+      final Optional<Path> tlsKnownServerFile) {
     this.signingKeyPath = signingKeyPath;
     this.host = host;
     this.port = port;
     this.authFilePath = authFilePath;
     this.timeout = timeout;
+    this.tlsEnabled = tlsEnabled;
+    this.tlsKnownServerFile = tlsKnownServerFile;
   }
 
   public String getHost() {
@@ -56,6 +63,14 @@ public class HashicorpConfig {
     return signingKeyPath;
   }
 
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
+  }
+
+  public Optional<Path> getTlsKnownServerFile() {
+    return tlsEnabled ? tlsKnownServerFile : Optional.empty();
+  }
+
   public static class HashicorpConfigBuilder {
 
     private String signingKeyPath;
@@ -63,6 +78,8 @@ public class HashicorpConfig {
     private Integer port;
     private Path authFilePath;
     private Long timeout;
+    private boolean tlsEnabled;
+    private Optional<Path> tlsKnownServerFile = Optional.empty();
 
     public HashicorpConfigBuilder withSigningKeyPath(final String signingKeyPath) {
       this.signingKeyPath = signingKeyPath;
@@ -89,6 +106,16 @@ public class HashicorpConfig {
       return this;
     }
 
+    public HashicorpConfigBuilder withTlsEnabled(final boolean tlsEnabled) {
+      this.tlsEnabled = tlsEnabled;
+      return this;
+    }
+
+    public HashicorpConfigBuilder withTlsKnownServerFile(final Optional<Path> tlsKnownServerFile) {
+      this.tlsKnownServerFile = tlsKnownServerFile;
+      return this;
+    }
+
     public HashicorpConfig build() {
       checkNotNull(signingKeyPath, "Signing Key Path was not set.");
       checkNotNull(host, "Host was not set.");
@@ -96,7 +123,8 @@ public class HashicorpConfig {
       checkNotNull(authFilePath, "Auth File Path was not set.");
       checkNotNull(timeout, "Timeout was not set.");
 
-      return new HashicorpConfig(signingKeyPath, host, port, authFilePath, timeout);
+      return new HashicorpConfig(
+          signingKeyPath, host, port, authFilePath, timeout, tlsEnabled, tlsKnownServerFile);
     }
   }
 }

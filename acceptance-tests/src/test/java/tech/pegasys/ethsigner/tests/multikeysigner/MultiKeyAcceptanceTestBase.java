@@ -14,17 +14,17 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
+import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterEach;
@@ -53,60 +53,55 @@ public class MultiKeyAcceptanceTestBase {
 
   public void createAzureTomlFileAt(
       final Path tomlPath, final String clientId, final String clientSecret) {
-    try {
-
-      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
-      writer.write("[signing]\n");
-      writer
-          .append("type = \"azure-signer\"\n")
-          .append("key-vault-name = \"ethsignertestkey\"\n")
-          .append("key-name = \"TestKey\"\n")
-          .append("key-version = \"7c01fe58d68148bba5824ce418241092\"\n")
-          .append("client-id = \"" + clientId + "\"\n")
-          .append("client-secret = \"" + clientSecret + "\"\n");
-      writer.close();
-    } catch (final IOException e) {
-      fail("Unable to create Azure TOML file.");
-    }
+    final String toml =
+        new TomlStringBuilder("signing")
+            .withQuotedString("type", "azure-signer")
+            .withQuotedString("key-vault-name", "ethsignertestkey")
+            .withQuotedString("key-name", "TestKey")
+            .withQuotedString("key-version", "7c01fe58d68148bba5824ce418241092")
+            .withQuotedString("client-id", clientId)
+            .withQuotedString("client-secret", clientSecret)
+            .build();
+    createTomlFile(tomlPath, toml);
   }
 
   public void createFileBasedTomlFileAt(
       final Path tomlPath, final String keyPath, final String passwordPath) {
-    try {
-      final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
-      writer.write("[signing]\n");
-      writer
-          .append("type = \"file-based-signer\"\n")
-          .append("key-file = \"" + keyPath + "\"\n")
-          .append("password-file = \"" + passwordPath + "\"\n");
-      writer.close();
-    } catch (final IOException e) {
-      fail("Unable to create Azure TOML file.");
-    }
+    final String toml =
+        new TomlStringBuilder("signing")
+            .withQuotedString("type", "file-based-signer")
+            .withQuotedString("key-file", keyPath)
+            .withQuotedString("password-file", passwordPath)
+            .build();
+
+    createTomlFile(tomlPath, toml);
   }
 
   public void createHashicorpTomlFileAt(
-      final Path tomlPath,
-      final String keyPath,
-      final String authFile,
-      final HashicorpVault hashicorpVault) {
-    {
-      try {
+      final Path tomlPath, final String authFile, final HashicorpNode hashicorpNode) {
 
-        final FileWriter writer = new FileWriter(tomlPath.toFile(), StandardCharsets.UTF_8);
-        writer.write("[signing]\n");
-        writer
-            .append("type = \"hashicorp-signer\"\n")
-            .append("signing-key-path = \"" + keyPath + "\"\n")
-            .append("host = \"" + hashicorpVault.getIpAddress() + "\"\n")
-            .append("port = " + hashicorpVault.getPort() + "\n")
-            .append("auth-file  = \"" + authFile + "\"\n")
-            .append("timeout = 500\n");
+    final String toml =
+        new TomlStringBuilder("signing")
+            .withQuotedString("type", "hashicorp-signer")
+            .withQuotedString("signing-key-path", hashicorpNode.getSigningKeyPath())
+            .withQuotedString("host", hashicorpNode.getHost())
+            .withNonQuotedString("port", String.valueOf(hashicorpNode.getPort()))
+            .withQuotedString("auth-file", authFile)
+            .withNonQuotedString("timeout", "500")
+            .withNonQuotedString("tls-enabled", String.valueOf(hashicorpNode.isTlsEnabled()))
+            .withQuotedString(
+                "tls-known-server-file",
+                hashicorpNode.getKnownServerFilePath().orElse(Path.of("/optional")).toString())
+            .build();
 
-        writer.close();
-      } catch (final IOException e) {
-        fail("Unable to create Hashicorp TOML file.");
-      }
+    createTomlFile(tomlPath, toml);
+  }
+
+  private void createTomlFile(final Path tomlPath, final String toml) {
+    try {
+      Files.writeString(tomlPath, toml);
+    } catch (final IOException e) {
+      fail("Unable to create TOML file.");
     }
   }
 }

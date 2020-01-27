@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,29 +29,41 @@ import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
 
-  private final HashicorpVault hashicorpVault;
+  private final HashicorpNode hashicorpNode;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
   public TransactionSignerParamsSupplier(
-      final HashicorpVault hashicorpVault,
+      final HashicorpNode hashicorpNode,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {
-    this.hashicorpVault = hashicorpVault;
+    this.hashicorpNode = hashicorpNode;
     this.azureKeyVault = azureKeyVault;
     this.multiKeySignerDirectory = multiKeySignerDirectory;
   }
 
   public Collection<String> get() {
     final ArrayList<String> params = new ArrayList<>();
-    if (hashicorpVault != null) {
+    if (hashicorpNode != null) {
       params.add("hashicorp-signer");
       params.add("--auth-file");
-      params.add(createVaultAuthFile(hashicorpVault.getVaultToken()).getAbsolutePath());
+      params.add(createVaultAuthFile(hashicorpNode.getVaultToken()).getAbsolutePath());
       params.add("--host");
-      params.add(hashicorpVault.getIpAddress());
+      params.add(hashicorpNode.getHost());
       params.add("--port");
-      params.add(String.valueOf(hashicorpVault.getPort()));
+      params.add(String.valueOf(hashicorpNode.getPort()));
+      if (!hashicorpNode.isTlsEnabled()) {
+        params.add("--tls-enabled=false");
+      } else {
+        hashicorpNode
+            .getKnownServerFilePath()
+            .ifPresent(
+                trustStoreConfig -> {
+                  params.add("--tls-known-server-file");
+                  params.add(trustStoreConfig.toString());
+                });
+      }
+
     } else if (azureKeyVault != null) {
       params.add("azure-signer");
       params.add("--key-vault-name");

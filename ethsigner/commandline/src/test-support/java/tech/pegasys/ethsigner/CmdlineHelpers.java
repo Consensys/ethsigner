@@ -31,8 +31,12 @@ public class CmdlineHelpers {
         + "--downstream-http-tls-truststore-password-file=./web3_truststore.passwd ";
   }
 
-  public static String removeFieldFrom(final String input, final String fieldName) {
-    return input.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+  public static String removeFieldFrom(final String input, final String... fieldNames) {
+    String updatedInput = input;
+    for (String fieldName : fieldNames) {
+      updatedInput = updatedInput.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+    }
+    return updatedInput;
   }
 
   public static String modifyField(final String input, final String fieldName, final String value) {
