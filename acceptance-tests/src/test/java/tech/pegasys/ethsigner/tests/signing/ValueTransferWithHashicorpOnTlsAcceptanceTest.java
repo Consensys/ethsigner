@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
-public class ValueTransferWithHashicorpAcceptanceTest {
+public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
 
@@ -47,10 +47,10 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   public static void setUpBase() {
 
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
+        .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, false);
+    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, true);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 

@@ -19,8 +19,7 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAc
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
-import tech.pegasys.ethsigner.tests.hashicorpvault.HashicorpVaultDocker;
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,16 +39,17 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   @TempDir static Path tempDir;
   private static String authFilename;
 
-  private static HashicorpVault hashicorpVault;
+  private static HashicorpNode hashicorpNode;
 
   @BeforeAll
   static void preSetup() throws IOException {
     preChecks();
 
-    hashicorpVault = HashicorpVault.createVault(new DockerClientFactory().create());
+    hashicorpNode =
+        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
 
     final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
-    Files.write(authFilePath, hashicorpVault.getVaultToken().getBytes(UTF_8));
+    Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
     authFilename = authFilePath.toAbsolutePath().toString();
   }
 
@@ -82,9 +82,8 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
     createHashicorpTomlFileAt(
         tempDir.resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
-        HashicorpVaultDocker.absKeyPath,
         authFilename,
-        hashicorpVault);
+        hashicorpNode);
 
     setup(tempDir);
 
@@ -94,9 +93,9 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @AfterAll
   static void tearDown() {
-    if (hashicorpVault != null) {
-      hashicorpVault.shutdown();
-      hashicorpVault = null;
+    if (hashicorpNode != null) {
+      hashicorpNode.shutdown();
+      hashicorpNode = null;
     }
   }
 }

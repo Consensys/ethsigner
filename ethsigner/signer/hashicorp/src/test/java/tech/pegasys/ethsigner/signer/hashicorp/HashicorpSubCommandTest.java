@@ -13,17 +13,21 @@
 package tech.pegasys.ethsigner.signer.hashicorp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 public class HashicorpSubCommandTest {
 
+  public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
       Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
@@ -31,16 +35,21 @@ public class HashicorpSubCommandTest {
   private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private HashicorpSubCommand hashiConfig;
+
+  private HashicorpSubCommand hashicorpSubCommand;
+
+  @BeforeEach
+  void init() {
+    hashicorpSubCommand = new HashicorpSubCommand();
+  }
 
   private boolean parseCommand(final String cmdLine) {
-    hashiConfig = new HashicorpSubCommand();
-    final CommandLine commandLine = new CommandLine(hashiConfig);
+    final CommandLine commandLine = new CommandLine(hashicorpSubCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     try {
-      commandLine.parse(cmdLine.split(" "));
+      commandLine.parseArgs(cmdLine.split(" "));
     } catch (final CommandLine.ParameterException e) {
       return false;
     }
@@ -57,15 +66,23 @@ public class HashicorpSubCommandTest {
         + " --signing-key-path="
         + PATH_TO_SIGNING_KEY
         + " --timeout="
-        + FIFTEEN;
+        + FIFTEEN
+        + " --tls-known-server-file="
+        + TLS_KNOWN_SERVER_FILE;
   }
 
-  private String removeFieldFrom(final String input, final String fieldname) {
-    return input.replaceAll("--" + fieldname + "=.*?(\\s|$)", "");
-  }
-
-  private String modifyField(final String input, final String fieldname, final String value) {
-    return input.replaceFirst("--" + fieldname + "=.*\\b", "--" + fieldname + "=" + value);
+  private String validWithTlsDisabledCommandLine() {
+    return "--auth-file="
+        + THIS_IS_THE_PATH_TO_THE_FILE
+        + " --host="
+        + HTTP_HOST_COM
+        + " --port="
+        + PORT
+        + " --signing-key-path="
+        + PATH_TO_SIGNING_KEY
+        + " --timeout="
+        + FIFTEEN
+        + " --tls-enabled=false";
   }
 
   @Test
@@ -73,12 +90,33 @@ public class HashicorpSubCommandTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    final String string = hashiConfig.toString();
+    final String string = hashicorpSubCommand.toString();
     assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
     assertThat(string).contains(HTTP_HOST_COM);
     assertThat(string).contains(PORT);
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
     assertThat(string).contains(FIFTEEN);
+
+    assertThat(hashicorpSubCommand.isTlsEnabled()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isPresent()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().get().toString())
+        .isEqualTo(TLS_KNOWN_SERVER_FILE);
+  }
+
+  @Test
+  public void commandLineWithTlsDisabledParsesIntoVariables() {
+    final boolean result = parseCommand(validWithTlsDisabledCommandLine());
+
+    assertThat(result).isTrue();
+    final String string = hashicorpSubCommand.toString();
+    assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(string).contains(HTTP_HOST_COM);
+    assertThat(string).contains(PORT);
+    assertThat(string).contains(PATH_TO_SIGNING_KEY);
+    assertThat(string).contains(FIFTEEN);
+
+    assertThat(hashicorpSubCommand.isTlsEnabled()).isFalse();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   @Test
@@ -113,6 +151,15 @@ public class HashicorpSubCommandTest {
     hcConfig = new HashicorpSubCommand();
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
+  }
+
+  @Test
+  void cmdlineIsValidIftlsKnownServerFileIsMissing() {
+    final String cmdLine = removeFieldFrom(validCommandLine(), "tls-known-server-file");
+    final boolean result = parseCommand(cmdLine);
+
+    assertThat(result).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   private void missingParameterShowsError(final String paramToRemove) {

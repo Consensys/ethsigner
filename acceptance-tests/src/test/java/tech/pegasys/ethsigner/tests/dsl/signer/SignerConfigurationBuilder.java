@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.utils.HashicorpVault;
+import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class SignerConfigurationBuilder {
   private int webSocketPort;
   private String keyVaultName;
   private Path multiKeySignerDirectory;
-  private HashicorpVault hashicorpVault;
+  private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
   private PkcsStoreConfig downstreamTrustStore;
   private PkcsStoreConfig downstreamKeystore;
@@ -45,8 +45,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withHashicorpSigner(final HashicorpVault hashicorpVault) {
-    this.hashicorpVault = hashicorpVault;
+  public SignerConfigurationBuilder withHashicorpSigner(final HashicorpNode hashicorpNode) {
+    this.hashicorpNode = hashicorpNode;
     return this;
   }
 
@@ -78,7 +78,7 @@ public class SignerConfigurationBuilder {
 
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(hashicorpVault, keyVaultName, multiKeySignerDirectory);
+        new TransactionSignerParamsSupplier(hashicorpNode, keyVaultName, multiKeySignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID,
         LOCALHOST,

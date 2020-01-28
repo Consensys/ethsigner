@@ -49,7 +49,7 @@ public class Signer {
   private static final String PROCESS_NAME = "EthSigner";
 
   private final EthSignerProcessRunner runner;
-  private final Duration pollingInverval;
+  private final Duration pollingInterval;
   private final String hostname;
 
   private Accounts accounts;
@@ -75,7 +75,7 @@ public class Signer {
       final NodePorts nodePorts,
       final ClientTlsConfig clientTlsConfig) {
     this.runner = new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
-    this.pollingInverval = signerConfig.pollingInterval();
+    this.pollingInterval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";
     this.clientTlsConfig = Optional.ofNullable(clientTlsConfig);
@@ -94,7 +94,7 @@ public class Signer {
     final HttpService web3jHttpService = new HttpService(httpJsonRpcUrl, httpClient);
     this.jsonRpc =
         new JsonRpc2_0Web3j(
-            web3jHttpService, pollingInverval.toMillis(), Async.defaultExecutorService());
+            web3jHttpService, pollingInterval.toMillis(), Async.defaultExecutorService());
     final JsonRpc2_0Besu besuJsonRpc = new JsonRpc2_0Besu(web3jHttpService);
 
     final Eth eth = new Eth(jsonRpc);

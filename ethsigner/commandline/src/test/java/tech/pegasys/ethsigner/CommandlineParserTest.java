@@ -237,69 +237,11 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingTlsKnownClientFileShowsErrorIfTlsClientAuthenticationIsNotDisabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .contains(
-            "Missing required argument(s): (--tls-allow-any-client | "
-                + "[[--tls-known-clients-file=<tlsKnownClientsFile>] [--tls-allow-ca-clients]])");
-  }
-
-  @Test
-  void settingTlsAllowCaClientsAndEnablingAnyClientConnectionShowsError() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    cmdLine += "--tls-allow-any-client ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("expected only one match but got");
-  }
-
-  @Test
-  void settingTlsKnownClientsFileClientsAndEnablingAnyClientConnectionShowsError() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
-    cmdLine += "--tls-allow-any-client ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("expected only one match but got");
-  }
-
-
-  @Test
-  void tlsClientAuthenticationCanBeDisabledByRemovingKnownClientsAndSettingOption() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
-    cmdLine += "--tls-allow-any-client ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getTlsOptions().get().getClientAuthConstraints()).isEmpty();
-  }
-
-  @Test
-  void parsingShouldFailIfTlsDisableClientAuthenticationHasAValue() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    cmdLine += "--tls-allow-any-client=false ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--tls-allow-any-client");
-    assertThat(commandOutput.toString()).contains("should be specified without 'false' parameter");
+  void missingTlsClientWhitelistIsValid() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "tls-known-clients-file",
+        () -> config.getTlsOptions().get().getKnownClientsFile(),
+        Optional.empty());
   }
 
   @Test
@@ -324,7 +266,6 @@ class CommandlineParserTest {
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-file");
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-password-file");
     cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 

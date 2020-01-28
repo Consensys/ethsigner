@@ -25,15 +25,18 @@ public class CmdlineHelpers {
         + "--tls-keystore-file=./keystore.pfx "
         + "--tls-keystore-password-file=./keystore.passwd "
         + "--tls-known-clients-file=./known_clients "
-        + "--tls-allow-ca-clients "
         + "--downstream-http-tls-keystore-file=./client_cert.pfx "
         + "--downstream-http-tls-keystore-password-file=./client_cert.passwd "
         + "--downstream-http-tls-truststore-file=./web3_truststore.pfx "
         + "--downstream-http-tls-truststore-password-file=./web3_truststore.passwd ";
   }
 
-  public static String removeFieldFrom(final String input, final String fieldName) {
-    return input.replaceAll("--" + fieldName + ".*?(\\s|$)", "");
+  public static String removeFieldFrom(final String input, final String... fieldNames) {
+    String updatedInput = input;
+    for (String fieldName : fieldNames) {
+      updatedInput = updatedInput.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+    }
+    return updatedInput;
   }
 
   public static String modifyField(final String input, final String fieldName, final String value) {
