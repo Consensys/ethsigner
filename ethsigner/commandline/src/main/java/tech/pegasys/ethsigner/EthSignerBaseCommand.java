@@ -113,15 +113,13 @@ public class EthSignerBaseCommand implements Config {
     @Option(
         names = "--tls-known-clients-file",
         description = "Path to a file containing the fingerprints of authorized clients.",
-        arity = "1",
-        required = false)
+        arity = "1")
     private File tlsKnownClientsFile = null;
 
     @Option(
         names = "--tls-allow-ca-clients",
         description = "If defined, allows clients authorised by the CA to connect to Ethsigner.",
-        arity = "0",
-        required = false)
+        arity = "0")
     private Boolean tlsAllowCaClients = false;
 
     @Override
@@ -146,8 +144,7 @@ public class EthSignerBaseCommand implements Config {
         description =
             "If defined, will allow any client to connect. Is mutually exclusive with other "
                 + "client auth settings",
-        arity = "0",
-        required = false)
+        arity = "0")
     private Boolean tlsAllowAnyClient = false;
   }
 
@@ -168,7 +165,7 @@ public class EthSignerBaseCommand implements Config {
         required = true)
     private File keyStorePasswordFile;
 
-    @ArgGroup(multiplicity = "1")
+    @ArgGroup(multiplicity = "1", exclusive=true)
     private TlsClientAuthentication tlsClientAuthentication;
 
     @Override

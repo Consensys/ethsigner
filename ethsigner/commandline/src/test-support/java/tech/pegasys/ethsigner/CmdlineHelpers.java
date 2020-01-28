@@ -33,7 +33,7 @@ public class CmdlineHelpers {
   }
 
   public static String removeFieldFrom(final String input, final String fieldName) {
-    return input.replaceAll("--" + fieldName + "=.*?(\\s|$)", "");
+    return input.replaceAll("--" + fieldName + ".*?(\\s|$)", "");
   }
 
   public static String modifyField(final String input, final String fieldName, final String value) {

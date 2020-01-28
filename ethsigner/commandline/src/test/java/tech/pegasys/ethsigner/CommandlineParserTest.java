@@ -240,6 +240,7 @@ class CommandlineParserTest {
   void missingTlsKnownClientFileShowsErrorIfTlsClientAuthenticationIsNotDisabled() {
     String cmdLine = validBaseCommandOptions();
     cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
@@ -251,8 +252,9 @@ class CommandlineParserTest {
   }
 
   @Test
-  void settingTlsKnownClientAndDisablingClientAuthenticationShowsError() {
+  void settingTlsAllowCaClientsAndEnablingAnyClientConnectionShowsError() {
     String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
     cmdLine += "--tls-allow-any-client ";
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -262,9 +264,23 @@ class CommandlineParserTest {
   }
 
   @Test
+  void settingTlsKnownClientsFileClientsAndEnablingAnyClientConnectionShowsError() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
+    cmdLine += "--tls-allow-any-client ";
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("expected only one match but got");
+  }
+
+
+  @Test
   void tlsClientAuthenticationCanBeDisabledByRemovingKnownClientsAndSettingOption() {
     String cmdLine = validBaseCommandOptions();
     cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
     cmdLine += "--tls-allow-any-client ";
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -308,6 +324,7 @@ class CommandlineParserTest {
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-file");
     cmdLine = removeFieldFrom(cmdLine, "tls-keystore-password-file");
     cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-allow-ca-clients");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
