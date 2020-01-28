@@ -19,5 +19,5 @@ public interface ClientAuthConstraints {
 
   Optional<File> getKnownClientsFile();
 
-  boolean allowCaAuthorisedClients();
+  boolean isCaAuthorisedClientAllowed();
 }

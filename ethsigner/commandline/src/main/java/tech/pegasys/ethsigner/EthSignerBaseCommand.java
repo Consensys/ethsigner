@@ -128,7 +128,7 @@ public class EthSignerBaseCommand implements Config {
     }
 
     @Override
-    public boolean allowCaAuthorisedClients() {
+    public boolean isCaAuthorisedClientAllowed() {
       return tlsAllowCaClients;
     }
   }

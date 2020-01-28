@@ -82,7 +82,7 @@ class CommandlineParserTest {
         .isEqualTo(new File("./keystore.passwd"));
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
-    assertThat(tlsClientConstaints.allowCaAuthorisedClients()).isTrue();
+    assertThat(tlsClientConstaints.isCaAuthorisedClientAllowed()).isTrue();
     assertThat(config.getClientCertificateOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
     assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
