@@ -160,7 +160,7 @@ public class EthSignerProcessRunner {
                   .get()
                   .toString());
         }
-        if(serverTlsOptions.getClientAuthConstraints().get().allowCaAuthorisedClients()) {
+        if (serverTlsOptions.getClientAuthConstraints().get().allowCaAuthorisedClients()) {
           params.add("--tls-allow-ca-clients");
         }
       }

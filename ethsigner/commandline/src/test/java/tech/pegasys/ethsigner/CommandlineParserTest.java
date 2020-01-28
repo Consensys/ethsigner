@@ -78,7 +78,12 @@ class CommandlineParserTest {
     assertThat(config.getTlsOptions().get().getClientAuthConstraints().get().getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(
-        config.getTlsOptions().get().getClientAuthConstraints().get().allowCaAuthorisedClients())
+            config
+                .getTlsOptions()
+                .get()
+                .getClientAuthConstraints()
+                .get()
+                .allowCaAuthorisedClients())
         .isTrue();
     assertThat(config.getClientCertificateOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
