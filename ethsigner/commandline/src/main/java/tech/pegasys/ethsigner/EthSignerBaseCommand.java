@@ -12,14 +12,15 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
+import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
+import tech.pegasys.ethsigner.config.PicoCliWeb3ProviderTrustStore;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -49,142 +50,6 @@ import picocli.CommandLine.Option;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
-
-  static class TlsClientCertificateOptions implements PkcsStoreConfig {
-
-    @Option(
-        names = "--downstream-http-tls-keystore-file",
-        description =
-            "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
-                + "a TLS-enabled web3 provider",
-        arity = "1",
-        required = true)
-    private File clientCertificateFile;
-
-    @Option(
-        names = "--downstream-http-tls-keystore-password-file",
-        description = "Path to a file containing the password used to decrypt the client cert.",
-        arity = "1",
-        required = true)
-    private File clientCertificatePasswordFile;
-
-    @Override
-    public File getStoreFile() {
-      return clientCertificateFile;
-    }
-
-    @Override
-    public File getStorePasswordFile() {
-      return clientCertificatePasswordFile;
-    }
-  }
-
-  static class Web3ProviderTrustStore implements PkcsStoreConfig {
-
-    @Option(
-        names = "--downstream-http-tls-truststore-file",
-        description =
-            "Path to a PKCS#12 formatted truststore, containing all trusted root "
-                + "certificates.",
-        arity = "1",
-        required = true)
-    private File trustStoreFile;
-
-    @Option(
-        names = "--downstream-http-tls-truststore-password-file",
-        description = "Path to a file containing the password used to decrypt the truststore.",
-        arity = "1",
-        required = true)
-    private File trustStorePasswordFile;
-
-    @Override
-    public File getStoreFile() {
-      return trustStoreFile;
-    }
-
-    @Override
-    public File getStorePasswordFile() {
-      return trustStorePasswordFile;
-    }
-  }
-
-  static class TlsClientAuthorizationMechanisms implements ClientAuthConstraints {
-
-    @Option(
-        names = "--tls-known-clients-file",
-        description = "Path to a file containing the fingerprints of authorized clients.",
-        arity = "1")
-    private File tlsKnownClientsFile = null;
-
-    @Option(
-        names = "--tls-allow-ca-clients",
-        description = "If defined, allows clients authorized by the CA to connect to Ethsigner.",
-        arity = "0")
-    private Boolean tlsAllowCaClients = false;
-
-    @Override
-    public Optional<File> getKnownClientsFile() {
-      return Optional.ofNullable(tlsKnownClientsFile);
-    }
-
-    @Override
-    public boolean isCaAuthorizedClientAllowed() {
-      return tlsAllowCaClients;
-    }
-  }
-
-  static class TlsClientAuthentication {
-
-    @SuppressWarnings("UnusedVariable")
-    @ArgGroup(exclusive = false)
-    private TlsClientAuthorizationMechanisms authMechanisms;
-
-    @Option(
-        names = "--tls-allow-any-client",
-        description =
-            "If defined, will allow any client to connect. Is mutually exclusive with other "
-                + "client authentication settings",
-        arity = "0")
-    private Boolean tlsAllowAnyClient = false;
-  }
-
-  static class TlsServerOptions implements TlsOptions {
-
-    @Option(
-        names = "--tls-keystore-file",
-        description =
-            "Path to a PKCS#12 formatted keystore; used to enable TLS on inbound connections.",
-        arity = "1",
-        required = true)
-    private File keyStoreFile;
-
-    @Option(
-        names = "--tls-keystore-password-file",
-        description = "Path to a file containing the password used to decrypt the keystore.",
-        arity = "1",
-        required = true)
-    private File keyStorePasswordFile;
-
-    @ArgGroup(multiplicity = "1", exclusive = true)
-    private TlsClientAuthentication tlsClientAuthentication;
-
-    @Override
-    public File getKeyStoreFile() {
-      return keyStoreFile;
-    }
-
-    @Override
-    public File getKeyStorePasswordFile() {
-      return keyStorePasswordFile;
-    }
-
-    @Override
-    public Optional<ClientAuthConstraints> getClientAuthConstraints() {
-      return tlsClientAuthentication.tlsAllowAnyClient
-          ? Optional.empty()
-          : Optional.of(tlsClientAuthentication.authMechanisms);
-    }
-  }
 
   @Option(
       names = {"--logging", "-l"},
@@ -245,13 +110,13 @@ public class EthSignerBaseCommand implements Config {
   private Path dataPath;
 
   @ArgGroup(exclusive = false)
-  private TlsServerOptions tlsServerOptions;
+  private PicoCliTlsServerOptions picoCliTlsServerOptions;
 
   @ArgGroup(exclusive = false)
-  private TlsClientCertificateOptions clientTlsCertificateOptions;
+  private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
 
   @ArgGroup(exclusive = false)
-  private Web3ProviderTrustStore web3ProviderTrustStore;
+  private PicoCliWeb3ProviderTrustStore picoCliWeb3ProviderTrustStore;
 
   @Override
   public Level getLogLevel() {
@@ -295,12 +160,12 @@ public class EthSignerBaseCommand implements Config {
 
   @Override
   public Optional<TlsOptions> getTlsOptions() {
-    return Optional.ofNullable(tlsServerOptions);
+    return Optional.ofNullable(picoCliTlsServerOptions);
   }
 
   @Override
   public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
-    return Optional.ofNullable(web3ProviderTrustStore);
+    return Optional.ofNullable(picoCliWeb3ProviderTrustStore);
   }
 
   @Override
