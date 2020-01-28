@@ -147,17 +147,22 @@ public class EthSignerProcessRunner {
       params.add(serverTlsOptions.getKeyStoreFile().toString());
       params.add("--tls-keystore-password-file");
       params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
-      if (serverTlsOptions.getClientAuthConstraints().get().getKnownClientsFile().isPresent()) {
-        params.add("--tls-known-clients-file");
-        params.add(
-            serverTlsOptions
-                .getClientAuthConstraints()
-                .get()
-                .getKnownClientsFile()
-                .get()
-                .toString());
-      } else {
+      if (serverTlsOptions.getClientAuthConstraints().isEmpty()) {
         params.add("--tls-allow-any-client");
+      } else {
+        if (serverTlsOptions.getClientAuthConstraints().get().getKnownClientsFile().isPresent()) {
+          params.add("--tls-known-clients-file");
+          params.add(
+              serverTlsOptions
+                  .getClientAuthConstraints()
+                  .get()
+                  .getKnownClientsFile()
+                  .get()
+                  .toString());
+        }
+        if(serverTlsOptions.getClientAuthConstraints().get().allowCaAuthorisedClients()) {
+          params.add("--tls-allow-ca-clients");
+        }
       }
     }
 
