@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -150,17 +151,12 @@ public class EthSignerProcessRunner {
       if (serverTlsOptions.getClientAuthConstraints().isEmpty()) {
         params.add("--tls-allow-any-client");
       } else {
-        if (serverTlsOptions.getClientAuthConstraints().get().getKnownClientsFile().isPresent()) {
+        final ClientAuthConstraints constraints = serverTlsOptions.getClientAuthConstraints().get();
+        if (constraints.getKnownClientsFile().isPresent()) {
           params.add("--tls-known-clients-file");
-          params.add(
-              serverTlsOptions
-                  .getClientAuthConstraints()
-                  .get()
-                  .getKnownClientsFile()
-                  .get()
-                  .toString());
+          params.add(constraints.getKnownClientsFile().get().toString());
         }
-        if (serverTlsOptions.getClientAuthConstraints().get().allowCaAuthorisedClients()) {
+        if (constraints.allowCaAuthorisedClients()) {
           params.add("--tls-allow-ca-clients");
         }
       }

@@ -27,12 +27,6 @@ public class BasicClientAuthConstraints implements ClientAuthConstraints {
     this.allowCaClients = false;
   }
 
-  public BasicClientAuthConstraints(
-      final Optional<File> knownClientsFile, final boolean allowCaClients) {
-    this.knownClientsFile = knownClientsFile;
-    this.allowCaClients = allowCaClients;
-  }
-
   public static BasicClientAuthConstraints fromFile(final File knownClientsFile) {
     return new BasicClientAuthConstraints(Optional.ofNullable(knownClientsFile));
   }
