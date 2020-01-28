@@ -39,11 +39,11 @@ public class BasicClientAuthConstraints implements ClientAuthConstraints {
 
   @Override
   public Optional<File> getKnownClientsFile() {
-    return Optional.empty();
+    return knownClientsFile;
   }
 
   @Override
   public boolean allowCaAuthorisedClients() {
-    return false;
+    return allowCaClients;
   }
 }
