@@ -107,6 +107,25 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
+  static class TlsClientAuthentication {
+    @Option(
+        names = "--tls-known-clients-file",
+        description = "Path to a file containing the fingerprints of authorized clients.",
+        arity = "1",
+        required = true)
+    private File tlsKnownClientsFile = null;
+
+    @SuppressWarnings("UnusedVariable")
+    @Option(
+        names = "--tls-allow-any-client",
+        description =
+            "If defined, will allow any client to connect. Is mutually exclusive with "
+                + "--tls-known-clients-file.",
+        arity = "0",
+        required = false)
+    private Boolean tlsAllowAnyClient = false;
+  }
+
   static class TlsServerOptions implements TlsOptions {
 
     @Option(
@@ -124,13 +143,8 @@ public class EthSignerBaseCommand implements Config {
         required = true)
     private File keyStorePasswordFile;
 
-    @Option(
-        names = "--tls-known-clients-file",
-        description =
-            "Path to a file containing the fingerprints of authorized clients. "
-                + "Any client may connect if this option is not specified.",
-        arity = "1")
-    private final File clientWhitelistFile = null;
+    @ArgGroup(multiplicity = "1")
+    private TlsClientAuthentication tlsClientAuthentication;
 
     @Override
     public File getKeyStoreFile() {
@@ -144,7 +158,7 @@ public class EthSignerBaseCommand implements Config {
 
     @Override
     public Optional<File> getKnownClientsFile() {
-      return Optional.ofNullable(clientWhitelistFile);
+      return Optional.ofNullable(tlsClientAuthentication.tlsKnownClientsFile);
     }
   }
 

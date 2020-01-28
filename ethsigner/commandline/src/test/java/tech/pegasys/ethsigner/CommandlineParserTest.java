@@ -237,11 +237,53 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingTlsClientWhitelistIsValid() {
-    missingOptionalParameterIsValidAndMeetsDefault(
-        "tls-known-clients-file",
-        () -> config.getTlsOptions().get().getKnownClientsFile(),
-        Optional.empty());
+  void missingTlsKnownClientFileShowsErrorIfTlsClientAuthenticationIsNotDisabled() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString())
+        .contains(
+            "Missing required argument(s): (--tls-known-clients-file=<tlsKnownClientsFile> | "
+                + "--tls-allow-any-client)");
+  }
+
+  @Test
+  void settingTlsKnownClientAndDisablingClientAuthenticationShowsError() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine += "--tls-allow-any-client ";
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("expected only one match but got");
+  }
+
+  @Test
+  void tlsClientAuthenticationCanBeDisabledByRemovingKnownClientsAndSettingOption() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine += "--tls-allow-any-client ";
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(config.getTlsOptions().get().getKnownClientsFile()).isEmpty();
+  }
+
+  @Test
+  void parsingShouldFailIfTlsDisableClientAuthenticationHasAValue() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine += "--tls-allow-any-client=false ";
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
+    assertThat(commandOutput.toString()).contains("--tls-allow-any-client");
+    assertThat(commandOutput.toString()).contains("should be specified without 'false' parameter");
   }
 
   @Test
