@@ -34,7 +34,7 @@ public class BasicClientAuthConstraints implements ClientAuthConstraints {
   }
 
   public static BasicClientAuthConstraints fromFile(final File knownClientsFile) {
-    return new BasicClientAuthConstraints(Optional.of(knownClientsFile));
+    return new BasicClientAuthConstraints(Optional.ofNullable(knownClientsFile));
   }
 
   @Override

@@ -78,12 +78,12 @@ class CommandlineParserTest {
     assertThat(config.getTlsOptions().get().getClientAuthConstraints().get().getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(
-        config
-            .getTlsOptions()
-            .get()
-            .getClientAuthConstraints()
-            .get()
-            .allowCaAuthorisedClients())
+            config
+                .getTlsOptions()
+                .get()
+                .getClientAuthConstraints()
+                .get()
+                .allowCaAuthorisedClients())
         .isTrue();
     assertThat(config.getClientCertificateOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
@@ -271,8 +271,13 @@ class CommandlineParserTest {
   @Test
   void ethSignerStartsValidlyIfNoTlsOptionsAreSet() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-keystore-file", "tls-keystore-password-file",
-        "tls-known-clients-file", "tls-allow-ca-clients");
+    cmdLine =
+        removeFieldFrom(
+            cmdLine,
+            "tls-keystore-file",
+            "tls-keystore-password-file",
+            "tls-known-clients-file",
+            "tls-allow-ca-clients");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
