@@ -47,7 +47,7 @@ public class BasicClientAuthConstraints implements ClientAuthConstraints {
   }
 
   @Override
-  public boolean isCaAuthorisedClientAllowed() {
+  public boolean isCaAuthorizedClientAllowed() {
     return allowCaClients;
   }
 }

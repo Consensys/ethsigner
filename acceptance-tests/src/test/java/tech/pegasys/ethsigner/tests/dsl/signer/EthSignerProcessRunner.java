@@ -183,7 +183,6 @@ public class EthSignerProcessRunner {
     }
 
     if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
-      // NEED TO CREATE a JKS trust store, and set env-Vars to point to it.
       final TlsCertificateDefinition overriddenCaTrustStore =
           signerConfig.getOverriddenCaTrustStore().get();
       final Path overridenCaTrustStorePath =
