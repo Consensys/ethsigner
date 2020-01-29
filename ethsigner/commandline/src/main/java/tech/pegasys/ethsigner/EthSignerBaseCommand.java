@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -107,22 +108,43 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-  static class TlsClientAuthentication {
+  static class TlsClientAuthorizationMechanisms implements ClientAuthConstraints {
+
     @Option(
         names = "--tls-known-clients-file",
         description = "Path to a file containing the fingerprints of authorized clients.",
-        arity = "1",
-        required = true)
+        arity = "1")
     private File tlsKnownClientsFile = null;
 
+    @Option(
+        names = "--tls-allow-ca-clients",
+        description = "If defined, allows clients authorized by the CA to connect to Ethsigner.",
+        arity = "0")
+    private Boolean tlsAllowCaClients = false;
+
+    @Override
+    public Optional<File> getKnownClientsFile() {
+      return Optional.ofNullable(tlsKnownClientsFile);
+    }
+
+    @Override
+    public boolean isCaAuthorizedClientAllowed() {
+      return tlsAllowCaClients;
+    }
+  }
+
+  static class TlsClientAuthentication {
+
     @SuppressWarnings("UnusedVariable")
+    @ArgGroup(exclusive = false)
+    private TlsClientAuthorizationMechanisms authMechanisms;
+
     @Option(
         names = "--tls-allow-any-client",
         description =
-            "If defined, will allow any client to connect. Is mutually exclusive with "
-                + "--tls-known-clients-file.",
-        arity = "0",
-        required = false)
+            "If defined, will allow any client to connect. Is mutually exclusive with other "
+                + "client authentication settings",
+        arity = "0")
     private Boolean tlsAllowAnyClient = false;
   }
 
@@ -143,7 +165,7 @@ public class EthSignerBaseCommand implements Config {
         required = true)
     private File keyStorePasswordFile;
 
-    @ArgGroup(multiplicity = "1")
+    @ArgGroup(multiplicity = "1", exclusive = true)
     private TlsClientAuthentication tlsClientAuthentication;
 
     @Override
@@ -157,8 +179,10 @@ public class EthSignerBaseCommand implements Config {
     }
 
     @Override
-    public Optional<File> getKnownClientsFile() {
-      return Optional.ofNullable(tlsClientAuthentication.tlsKnownClientsFile);
+    public Optional<ClientAuthConstraints> getClientAuthConstraints() {
+      return tlsClientAuthentication.tlsAllowAnyClient
+          ? Optional.empty()
+          : Optional.of(tlsClientAuthentication.authMechanisms);
     }
   }
 

@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -129,24 +130,29 @@ public final class EthSigner {
       return input;
     }
 
-    final HttpServerOptions result = new HttpServerOptions(input);
+    HttpServerOptions result = new HttpServerOptions(input);
     result.setSsl(true);
     final TlsOptions tlsConfig = config.getTlsOptions().get();
+
+    result = applyTlsKeyStore(result, tlsConfig);
+
+    if (tlsConfig.getClientAuthConstraints().isPresent()) {
+      result = applyClientAuthentication(result, tlsConfig.getClientAuthConstraints().get());
+    }
+
+    return result;
+  }
+
+  private static HttpServerOptions applyTlsKeyStore(
+      final HttpServerOptions input, final TlsOptions tlsConfig) {
+    final HttpServerOptions result = new HttpServerOptions(input);
+
     try {
       final String keyStorePathname =
           tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
       final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
-
-      if (tlsConfig.getKnownClientsFile().isPresent()) {
-        result.setClientAuth(ClientAuth.REQUIRED);
-        try {
-          result.setTrustOptions(
-              VertxTrustOptions.whitelistClients(tlsConfig.getKnownClientsFile().get().toPath()));
-        } catch (final IllegalArgumentException e) {
-          throw new InitializationException("Illegally formatted client fingerprint file.");
-        }
-      }
+      return result;
     } catch (final NoSuchFileException e) {
       throw new InitializationException(
           "Requested file " + e.getMessage() + " does not exist at specified location.", e);
@@ -155,6 +161,24 @@ public final class EthSigner {
           "Current user does not have permissions to access " + e.getMessage(), e);
     } catch (final IOException e) {
       throw new InitializationException("Failed to load TLS files " + e.getMessage(), e);
+    }
+  }
+
+  private static HttpServerOptions applyClientAuthentication(
+      final HttpServerOptions input, final ClientAuthConstraints constraints) {
+    final HttpServerOptions result = new HttpServerOptions(input);
+
+    result.setClientAuth(ClientAuth.REQUIRED);
+    try {
+      constraints
+          .getKnownClientsFile()
+          .ifPresent(
+              whitelistFile ->
+                  result.setTrustOptions(
+                      VertxTrustOptions.whitelistClients(
+                          whitelistFile.toPath(), constraints.isCaAuthorizedClientAllowed())));
+    } catch (final IllegalArgumentException e) {
+      throw new InitializationException("Illegally formatted client fingerprint file.");
     }
 
     return result;
