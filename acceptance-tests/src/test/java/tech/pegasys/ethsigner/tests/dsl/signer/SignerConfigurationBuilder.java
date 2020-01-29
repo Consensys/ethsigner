@@ -12,14 +12,13 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import java.security.KeyStore;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class SignerConfigurationBuilder {
 
@@ -83,7 +82,6 @@ public class SignerConfigurationBuilder {
     this.overridenCaTrustStore = keystore;
     return this;
   }
-
 
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =

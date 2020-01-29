@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,12 +9,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.tls.support;
 
-import com.google.common.collect.Lists;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -33,19 +31,17 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.StringJoiner;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class CertificateHelpers {
 
   public static KeyManager[] createKeyManagers(final TlsCertificateDefinition certToPresent)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-      UnrecoverableKeyException {
+          UnrecoverableKeyException {
     if (certToPresent == null) {
       return null;
     }
@@ -72,7 +68,6 @@ public class CertificateHelpers {
     return trustManagerFactory;
   }
 
-
   public static KeyStore loadP12KeyStore(final File pkcsFile, final String password)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
     final KeyStore store = KeyStore.getInstance("pkcs12");
@@ -86,7 +81,8 @@ public class CertificateHelpers {
 
   public static void populateFingerprintFile(
       final Path knownClientsPath, final TlsCertificateDefinition certDef)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
+          UnrecoverableKeyException {
 
     final List<X509Certificate> certs = certDef.certificates();
     final StringBuilder fingerPrintsToAdd = new StringBuilder();
@@ -97,7 +93,6 @@ public class CertificateHelpers {
     }
     Files.writeString(knownClientsPath, fingerPrintsToAdd.toString());
   }
-
 
   public static String generateFingerprint(final X509Certificate cert)
       throws NoSuchAlgorithmException, CertificateEncodingException {
@@ -113,8 +108,8 @@ public class CertificateHelpers {
     return joiner.toString().toLowerCase();
   }
 
-  public static Path createJksTrustStore(final Path parentDir,
-      final TlsCertificateDefinition certDef) {
+  public static Path createJksTrustStore(
+      final Path parentDir, final TlsCertificateDefinition certDef) {
     try {
       List<X509Certificate> certsInDef = certDef.certificates();
 
@@ -124,8 +119,8 @@ public class CertificateHelpers {
       final Certificate certificate = certsInDef.get(0);
       ks.setCertificateEntry("clientCert", certificate);
       final PrivateKey privKey = certDef.keys().get(0);
-      ks.setKeyEntry("client", privKey, certDef.getPassword().toCharArray(),
-          new Certificate[]{certificate});
+      ks.setKeyEntry(
+          "client", privKey, certDef.getPassword().toCharArray(), new Certificate[] {certificate});
 
       final Path tempKeystore = parentDir.resolve("keystore.jks");
       try (final FileOutputStream output = new FileOutputStream(tempKeystore.toFile())) {
@@ -133,9 +128,8 @@ public class CertificateHelpers {
       }
 
       return tempKeystore;
-    } catch(final Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to construct a JKS keystore.");
     }
   }
-
 }

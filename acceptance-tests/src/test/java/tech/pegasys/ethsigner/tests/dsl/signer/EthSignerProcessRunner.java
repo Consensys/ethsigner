@@ -21,6 +21,7 @@ import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +46,6 @@ import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class EthSignerProcessRunner {
 
@@ -160,7 +160,7 @@ public class EthSignerProcessRunner {
           params.add("--tls-known-clients-file");
           params.add(constraints.getKnownClientsFile().get().toString());
         }
-        if (constraints.isCaAuthorisedClientAllowed()) {
+        if (constraints.isCaAuthorizedClientAllowed()) {
           params.add("--tls-allow-ca-clients");
         }
       }
@@ -185,8 +185,7 @@ public class EthSignerProcessRunner {
     if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
       final TlsCertificateDefinition overriddenCaTrustStore =
           signerConfig.getOverriddenCaTrustStore().get();
-      final Path overridenCaTrustStorePath =
-          createJksTrustStore(dataPath, overriddenCaTrustStore);
+      final Path overridenCaTrustStorePath = createJksTrustStore(dataPath, overriddenCaTrustStore);
       javaOpts.append(
           "-Djavax.net.ssl.trustStore=" + overridenCaTrustStorePath.toAbsolutePath().toString());
       javaOpts.append(" ");

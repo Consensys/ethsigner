@@ -16,34 +16,19 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createKeyManagers;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createTrustManagerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Optional;
-import java.util.StringJoiner;
 import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import com.google.common.collect.Lists;
 import okhttp3.OkHttpClient;
 
 public class OkHttpClientHelpers {

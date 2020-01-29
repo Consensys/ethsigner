@@ -12,13 +12,12 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import java.security.KeyStore;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.time.Duration;
 import java.util.Optional;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class SignerConfiguration {
 
@@ -93,7 +92,9 @@ public class SignerConfiguration {
     return downstreamConnectionKeyStore;
   }
 
-  public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() { return overriddenCaTrustStore; }
+  public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() {
+    return overriddenCaTrustStore;
+  }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
     return transactionSignerParamsSupplier;
