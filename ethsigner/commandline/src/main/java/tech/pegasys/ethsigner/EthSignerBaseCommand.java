@@ -108,7 +108,7 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-  static class TlsAuthorisationMechanisms implements ClientAuthConstraints {
+  static class TlsClientAuthorisationMechanisms implements ClientAuthConstraints {
 
     @Option(
         names = "--tls-known-clients-file",
@@ -137,7 +137,7 @@ public class EthSignerBaseCommand implements Config {
 
     @SuppressWarnings("UnusedVariable")
     @ArgGroup(exclusive = false)
-    private TlsAuthorisationMechanisms authMechanisms;
+    private TlsClientAuthorisationMechanisms authMechanisms;
 
     @Option(
         names = "--tls-allow-any-client",
