@@ -143,7 +143,7 @@ public class EthSignerBaseCommand implements Config {
         names = "--tls-allow-any-client",
         description =
             "If defined, will allow any client to connect. Is mutually exclusive with other "
-                + "client auth settings",
+                + "client authentication settings",
         arity = "0")
     private Boolean tlsAllowAnyClient = false;
   }
