@@ -127,14 +127,14 @@ public class OkHttpClientHelpers {
       final Path knownClientsPath, final TlsCertificateDefinition certDef)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
-    final List<X509Certificate> certs = getCertsFromPkcs12(certDef);
-    final StringBuilder fingerPrintsToAdd = new StringBuilder();
-    for (final X509Certificate cert : certs) {
-      final String fingerprint = generateFingerprint(cert);
-      fingerPrintsToAdd.append("localhost " + fingerprint + "\n");
-      fingerPrintsToAdd.append("127.0.0.1 " + fingerprint + "\n");
-    }
-    Files.writeString(knownClientsPath, fingerPrintsToAdd.toString());
+      final List<X509Certificate> certs = getCertsFromPkcs12(certDef);
+      final StringBuilder fingerPrintsToAdd = new StringBuilder();
+      for (final X509Certificate cert : certs) {
+        final String fingerprint = generateFingerprint(cert);
+        fingerPrintsToAdd.append("localhost " + fingerprint + "\n");
+        fingerPrintsToAdd.append("127.0.0.1 " + fingerprint + "\n");
+      }
+      Files.writeString(knownClientsPath, fingerPrintsToAdd.toString());
   }
 
   public static List<X509Certificate> getCertsFromPkcs12(final TlsCertificateDefinition certDef)

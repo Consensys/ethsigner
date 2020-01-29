@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.config.PicoCliDownstreamTrustStore;
 import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
-import tech.pegasys.ethsigner.config.PicoCliDownstreamTrustStore;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
