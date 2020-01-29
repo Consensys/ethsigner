@@ -32,8 +32,8 @@ public class PicoCliTlsServerOptions implements TlsOptions {
     @Option(
         names = "--tls-allow-any-client",
         description =
-            "If defined, will allow any client to connect. Is mutually exclusive with other "
-                + "client authentication settings",
+            "If defined, any client may connect, regardless of presented certificate. This cannot "
+                + "be set if either a whitelist or CA clients have been enabled.",
         arity = "0")
     private Boolean tlsAllowAnyClient = false;
   }

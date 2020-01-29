@@ -18,12 +18,12 @@ import java.io.File;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliWeb3ProviderTrustStore implements PkcsStoreConfig {
+public class PicoCliDownstreamTrustStore implements PkcsStoreConfig {
 
   @Option(
       names = "--downstream-http-tls-truststore-file",
       description =
-          "Path to a PKCS#12 formatted truststore, containing all trusted root " + "certificates.",
+          "Path to a PKCS#12 formatted truststore, containing all trusted root certificates.",
       arity = "1",
       required = true)
   private File trustStoreFile;

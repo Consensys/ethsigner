@@ -24,7 +24,7 @@ public class PicoCliTlsClientCertificateOptions implements PkcsStoreConfig {
       names = "--downstream-http-tls-keystore-file",
       description =
           "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
-              + "a TLS-enabled web3 provider",
+              + "a TLS-enabled web3 provider.",
       arity = "1",
       required = true)
   private File clientCertificateFile;

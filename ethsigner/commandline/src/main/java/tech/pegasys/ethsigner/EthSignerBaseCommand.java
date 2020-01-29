@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
-import tech.pegasys.ethsigner.config.PicoCliWeb3ProviderTrustStore;
+import tech.pegasys.ethsigner.config.PicoCliDownstreamTrustStore;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -116,7 +116,7 @@ public class EthSignerBaseCommand implements Config {
   private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
 
   @ArgGroup(exclusive = false)
-  private PicoCliWeb3ProviderTrustStore picoCliWeb3ProviderTrustStore;
+  private PicoCliDownstreamTrustStore picoCliDownstreamTrustStore;
 
   @Override
   public Level getLogLevel() {
@@ -165,7 +165,7 @@ public class EthSignerBaseCommand implements Config {
 
   @Override
   public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
-    return Optional.ofNullable(picoCliWeb3ProviderTrustStore);
+    return Optional.ofNullable(picoCliDownstreamTrustStore);
   }
 
   @Override
