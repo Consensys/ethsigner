@@ -156,7 +156,7 @@ public class EthSignerProcessRunner {
           params.add("--tls-known-clients-file");
           params.add(constraints.getKnownClientsFile().get().toString());
         }
-        if (constraints.isCaAuthorisedClientAllowed()) {
+        if (constraints.isCaAuthorizedClientAllowed()) {
           params.add("--tls-allow-ca-clients");
         }
       }

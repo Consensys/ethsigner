@@ -176,7 +176,7 @@ public final class EthSigner {
               whitelistFile ->
                   result.setTrustOptions(
                       VertxTrustOptions.whitelistClients(
-                          whitelistFile.toPath(), constraints.isCaAuthorisedClientAllowed())));
+                          whitelistFile.toPath(), constraints.isCaAuthorizedClientAllowed())));
     } catch (final IllegalArgumentException e) {
       throw new InitializationException("Illegally formatted client fingerprint file.");
     }

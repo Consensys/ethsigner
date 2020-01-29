@@ -108,7 +108,7 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-  static class TlsClientAuthorisationMechanisms implements ClientAuthConstraints {
+  static class TlsClientAuthorizationMechanisms implements ClientAuthConstraints {
 
     @Option(
         names = "--tls-known-clients-file",
@@ -118,7 +118,7 @@ public class EthSignerBaseCommand implements Config {
 
     @Option(
         names = "--tls-allow-ca-clients",
-        description = "If defined, allows clients authorised by the CA to connect to Ethsigner.",
+        description = "If defined, allows clients authorized by the CA to connect to Ethsigner.",
         arity = "0")
     private Boolean tlsAllowCaClients = false;
 
@@ -128,7 +128,7 @@ public class EthSignerBaseCommand implements Config {
     }
 
     @Override
-    public boolean isCaAuthorisedClientAllowed() {
+    public boolean isCaAuthorizedClientAllowed() {
       return tlsAllowCaClients;
     }
   }
@@ -137,7 +137,7 @@ public class EthSignerBaseCommand implements Config {
 
     @SuppressWarnings("UnusedVariable")
     @ArgGroup(exclusive = false)
-    private TlsClientAuthorisationMechanisms authMechanisms;
+    private TlsClientAuthorizationMechanisms authMechanisms;
 
     @Option(
         names = "--tls-allow-any-client",
