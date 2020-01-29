@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
@@ -44,6 +45,7 @@ import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class EthSignerProcessRunner {
 
@@ -122,6 +124,8 @@ public class EthSignerProcessRunner {
   public void start(final String processName) {
     final String loggingLevel = "DEBUG";
 
+    final StringBuilder javaOpts = new StringBuilder();
+
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
     params.add("--logging");
@@ -178,6 +182,19 @@ public class EthSignerProcessRunner {
       params.add(keyStoreConfig.getStorePasswordFile().toString());
     }
 
+    if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
+      // NEED TO CREATE a JKS trust store, and set env-Vars to point to it.
+      final TlsCertificateDefinition overriddenCaTrustStore =
+          signerConfig.getOverriddenCaTrustStore().get();
+      final Path overridenCaTrustStorePath =
+          createJksTrustStore(dataPath, overriddenCaTrustStore);
+      javaOpts.append(
+          "-Djavax.net.ssl.trustStore=" + overridenCaTrustStorePath.toAbsolutePath().toString());
+      javaOpts.append(" ");
+      javaOpts.append("-Djavax.net.ssl.trustStorePassword=" + overriddenCaTrustStore.getPassword());
+      javaOpts.append(" ");
+    }
+
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
@@ -189,12 +206,9 @@ public class EthSignerProcessRunner {
             .redirectInput(Redirect.INHERIT);
 
     if (Boolean.getBoolean("debugSubProcess")) {
-      processBuilder
-          .environment()
-          .put(
-              "JAVA_OPTS",
-              "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+      javaOpts.append("-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
     }
+    processBuilder.environment().put("JAVA_OPTS", javaOpts.toString());
 
     try {
       final Process process = processBuilder.start();

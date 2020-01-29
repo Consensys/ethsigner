@@ -12,11 +12,13 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import java.security.KeyStore;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 
 import java.time.Duration;
 import java.util.Optional;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class SignerConfiguration {
 
@@ -32,6 +34,7 @@ public class SignerConfiguration {
   private final Optional<TlsOptions> serverTlsOptions;
   private final Optional<PkcsStoreConfig> downstreamConnectionTrustStore;
   private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
+  private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
 
   public SignerConfiguration(
       final String chainId,
@@ -41,7 +44,8 @@ public class SignerConfiguration {
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
       final Optional<PkcsStoreConfig> downstreamConnectionTrustStore,
-      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore) {
+      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore,
+      final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
@@ -50,6 +54,7 @@ public class SignerConfiguration {
     this.serverTlsOptions = serverTlsOptions;
     this.downstreamConnectionTrustStore = downstreamConnectionTrustStore;
     this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
+    this.overriddenCaTrustStore = overriddenCaTrustStore;
   }
 
   public String hostname() {
@@ -87,6 +92,8 @@ public class SignerConfiguration {
   public Optional<PkcsStoreConfig> downstreamKeyStore() {
     return downstreamConnectionKeyStore;
   }
+
+  public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() { return overriddenCaTrustStore; }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
     return transactionSignerParamsSupplier;

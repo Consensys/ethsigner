@@ -12,11 +12,24 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.loadP12KeyStore;
+
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 
 import com.google.common.io.Resources;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.List;
 
 public class TlsCertificateDefinition {
 
@@ -47,4 +60,32 @@ public class TlsCertificateDefinition {
   public String getPassword() {
     return password;
   }
+
+  public List<X509Certificate> certificates()
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+    final List<X509Certificate> results = Lists.newArrayList();
+
+    final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
+    final Enumeration<String> aliases = p12.aliases();
+    while (aliases.hasMoreElements()) {
+      String alias = aliases.nextElement();
+      results.add((X509Certificate) p12.getCertificate(alias));
+    }
+    return results;
+  }
+
+  public List<PrivateKey> keys()
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+    final List<PrivateKey> results = Lists.newArrayList();
+
+    final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
+    final Enumeration<String> aliases = p12.aliases();
+    Key theKey;
+    while (aliases.hasMoreElements()) {
+      String alias = aliases.nextElement();
+      results.add((PrivateKey) p12.getKey(alias, password.toCharArray()));
+    }
+    return results;
+  }
+
 }

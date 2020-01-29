@@ -13,23 +13,7 @@
 package tech.pegasys.ethsigner.tests.tls.support;
 
 import static tech.pegasys.ethsigner.core.EthSigner.createJsonDecoder;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
-
-import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
-import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
-import tech.pegasys.ethsigner.core.http.RequestMapper;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import com.google.common.collect.Lists;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -42,7 +26,22 @@ import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.apache.tuweni.net.tls.VertxTrustOptions;
+import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
+import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
+import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
+import tech.pegasys.ethsigner.core.http.RequestMapper;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public class TlsEnabledHttpServerFactory {
 
@@ -100,12 +99,7 @@ public class TlsEnabledHttpServerFactory {
 
       serversCreated.add(web3ProviderhttpServer);
       return web3ProviderhttpServer;
-    } catch (KeyStoreException
-        | NoSuchAlgorithmException
-        | CertificateException
-        | IOException
-        | ExecutionException
-        | InterruptedException e) {
+    } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | ExecutionException | InterruptedException | UnrecoverableKeyException e) {
       throw new RuntimeException("Failed to construct a TLS Enabled Server", e);
     }
   }
