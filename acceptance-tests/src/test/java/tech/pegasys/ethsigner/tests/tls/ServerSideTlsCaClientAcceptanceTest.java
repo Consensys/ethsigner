@@ -35,14 +35,14 @@ import javax.net.ssl.SSLException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class ServerSideTlsCaClient {
+public class ServerSideTlsCaClientAcceptanceTest {
 
   private static final TlsCertificateDefinition serverCert =
       TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
   private static final TlsCertificateDefinition clientCert =
       TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
-  Signer createEthSigner(final TlsCertificateDefinition certInCa, final Path testDir)
+  private Signer createEthSigner(final TlsCertificateDefinition certInCa, final Path testDir)
       throws Exception {
 
     final Path passwordPath = testDir.resolve("keystore.passwd");

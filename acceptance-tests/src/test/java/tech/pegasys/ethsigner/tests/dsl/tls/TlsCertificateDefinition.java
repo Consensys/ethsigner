@@ -17,7 +17,6 @@ import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.loadP1
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -82,7 +81,7 @@ public class TlsCertificateDefinition {
 
     final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
     final Enumeration<String> aliases = p12.aliases();
-    
+
     while (aliases.hasMoreElements()) {
       String alias = aliases.nextElement();
       results.add((PrivateKey) p12.getKey(alias, password.toCharArray()));
