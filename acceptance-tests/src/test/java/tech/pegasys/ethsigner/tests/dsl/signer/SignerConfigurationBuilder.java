@@ -67,8 +67,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamKnownServers(final File knownServersFile) {
-    this.downstreamKnownServers = knownServersFile;
+  public SignerConfigurationBuilder withDownstreamKnownServers(final File downstreamKnownServers) {
+    this.downstreamKnownServers = downstreamKnownServers;
     return this;
   }
 

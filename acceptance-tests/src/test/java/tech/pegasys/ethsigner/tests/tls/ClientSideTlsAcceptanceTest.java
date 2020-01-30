@@ -190,7 +190,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void incorrectPasswordForDownstreamKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+      throws Exception {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =
