@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public class SignerConfigurationBuilder {
   private Path multiKeySignerDirectory;
   private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
-  private PkcsStoreConfig downstreamTrustStore;
+  private File downstreamTrustStore;
   private PkcsStoreConfig downstreamKeystore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
@@ -66,7 +67,7 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamTrustStore(final PkcsStoreConfig truststore) {
+  public SignerConfigurationBuilder withDownstreamTrustStore(final File truststore) {
     this.downstreamTrustStore = truststore;
     return this;
   }

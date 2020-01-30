@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
+
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -92,19 +94,16 @@ public final class EthSigner {
   private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
     final HttpClientOptions result = new HttpClientOptions(input);
     boolean tlsIsRequired =
-        config.getWeb3TrustStoreOptions().isPresent()
+        config.getWeb3ProviderKnownServersFile().isPresent()
             || config.getClientCertificateOptions().isPresent();
 
     if (tlsIsRequired) {
       result.setSsl(true);
-      try {
-        if (config.getWeb3TrustStoreOptions().isPresent()) {
-          result.setPfxTrustOptions(convertFrom(config.getWeb3TrustStoreOptions().get()));
-        }
-        // else - use default truststore
-      } catch (final IOException e) {
-        throw new InitializationException("Failed to load web3 trust store.", e);
-      }
+      config
+          .getWeb3ProviderKnownServersFile()
+          .ifPresent(
+              knownServerFile ->
+                  result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
 
       if (config.getClientCertificateOptions().isPresent()) {
         try {

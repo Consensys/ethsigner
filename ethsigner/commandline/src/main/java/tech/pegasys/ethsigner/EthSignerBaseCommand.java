@@ -78,35 +78,6 @@ public class EthSignerBaseCommand implements Config {
     }
   }
 
-  static class Web3ProviderTrustStore implements PkcsStoreConfig {
-
-    @Option(
-        names = "--downstream-http-tls-truststore-file",
-        description =
-            "Path to a PKCS#12 formatted truststore, containing all trusted root "
-                + "certificates.",
-        arity = "1",
-        required = true)
-    private File trustStoreFile;
-
-    @Option(
-        names = "--downstream-http-tls-truststore-password-file",
-        description = "Path to a file containing the password used to decrypt the truststore.",
-        arity = "1",
-        required = true)
-    private File trustStorePasswordFile;
-
-    @Override
-    public File getStoreFile() {
-      return trustStoreFile;
-    }
-
-    @Override
-    public File getStorePasswordFile() {
-      return trustStorePasswordFile;
-    }
-  }
-
   static class TlsClientAuthentication {
     @Option(
         names = "--tls-known-clients-file",
@@ -161,6 +132,13 @@ public class EthSignerBaseCommand implements Config {
       return Optional.ofNullable(tlsClientAuthentication.tlsKnownClientsFile);
     }
   }
+
+  @Option(
+      names = "--downstream-http-tls-known-servers-file",
+      description = "Path to a file containing the fingerprints of authorized servers",
+      arity = "1",
+      required = false)
+  private File downstreamKnownServersFile;
 
   @Option(
       names = {"--logging", "-l"},
@@ -226,9 +204,6 @@ public class EthSignerBaseCommand implements Config {
   @ArgGroup(exclusive = false)
   private TlsClientCertificateOptions clientTlsCertificateOptions;
 
-  @ArgGroup(exclusive = false)
-  private Web3ProviderTrustStore web3ProviderTrustStore;
-
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -275,13 +250,13 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
-    return Optional.ofNullable(web3ProviderTrustStore);
+  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
+  public Optional<File> getWeb3ProviderKnownServersFile() {
+    return Optional.ofNullable(downstreamKnownServersFile);
   }
 
   @Override

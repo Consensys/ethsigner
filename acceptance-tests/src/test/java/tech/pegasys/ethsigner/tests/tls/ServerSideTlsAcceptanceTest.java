@@ -96,7 +96,7 @@ class ServerSideTlsAcceptanceTest {
       final File fingerPrintFile;
       if (clientCertInServerWhitelist != null) {
         final Path fingerPrintFilePath = dataPath.resolve("known_clients");
-        populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist);
+        populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist, Optional.empty());
         fingerPrintFile = fingerPrintFilePath.toFile();
       } else {
         fingerPrintFile = null;

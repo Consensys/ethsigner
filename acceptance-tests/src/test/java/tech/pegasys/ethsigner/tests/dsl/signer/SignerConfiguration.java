@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class SignerConfiguration {
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
-  private final Optional<PkcsStoreConfig> downstreamConnectionTrustStore;
+  private final Optional<File> downstreamConnectionTrustStore;
   private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
 
   public SignerConfiguration(
@@ -40,7 +41,7 @@ public class SignerConfiguration {
       final int webSocketPort,
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
-      final Optional<PkcsStoreConfig> downstreamConnectionTrustStore,
+      final Optional<File> downstreamConnectionTrustStore,
       final Optional<PkcsStoreConfig> downstreamConnectionKeyStore) {
     this.chainId = chainId;
     this.hostname = hostname;
@@ -80,7 +81,7 @@ public class SignerConfiguration {
     return serverTlsOptions;
   }
 
-  public Optional<PkcsStoreConfig> downstreamTrustStore() {
+  public Optional<File> downstreamTrustStore() {
     return downstreamConnectionTrustStore;
   }
 
