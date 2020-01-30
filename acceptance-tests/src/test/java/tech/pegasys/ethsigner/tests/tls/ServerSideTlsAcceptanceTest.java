@@ -19,6 +19,7 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -30,8 +31,8 @@ import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.ClientTlsConfig;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+import tech.pegasys.ethsigner.tests.tls.support.BasicClientAuthConstraints;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -93,13 +94,13 @@ class ServerSideTlsAcceptanceTest {
       final SignerConfigurationBuilder configBuilder =
           new SignerConfigurationBuilder().withHttpRpcPort(fixedListenPort);
 
-      final File fingerPrintFile;
+      final ClientAuthConstraints clientAuthConstraints;
       if (clientCertInServerWhitelist != null) {
         final Path fingerPrintFilePath = dataPath.resolve("known_clients");
         populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist, Optional.empty());
-        fingerPrintFile = fingerPrintFilePath.toFile();
+        clientAuthConstraints = BasicClientAuthConstraints.fromFile(fingerPrintFilePath.toFile());
       } else {
-        fingerPrintFile = null;
+        clientAuthConstraints = null;
       }
 
       final Path passwordPath = dataPath.resolve("keystore.passwd");
@@ -111,7 +112,7 @@ class ServerSideTlsAcceptanceTest {
           new BasicTlsOptions(
               serverPresentedCerts.getPkcs12File(),
               passwordPath.toFile(),
-              Optional.ofNullable(fingerPrintFile));
+              Optional.ofNullable(clientAuthConstraints));
       configBuilder.withServerTlsOptions(serverOptions);
 
       final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

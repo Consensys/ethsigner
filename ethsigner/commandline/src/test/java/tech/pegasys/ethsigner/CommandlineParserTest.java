@@ -18,6 +18,8 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
@@ -64,6 +66,9 @@ class CommandlineParserTest {
 
     assertThat(result).isTrue();
 
+    final ClientAuthConstraints tlsClientConstaints =
+        config.getTlsOptions().get().getClientAuthConstraints().get();
+
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getDownstreamHttpHost()).isEqualTo("8.8.8.8");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
@@ -75,8 +80,9 @@ class CommandlineParserTest {
         .isEqualTo(new File("./keystore.pfx"));
     assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
-    assertThat(config.getTlsOptions().get().getKnownClientsFile())
+    assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
+    assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
     assertThat(config.getClientCertificateOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
     assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
@@ -235,20 +241,6 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingTlsKnownClientFileShowsErrorIfTlsClientAuthenticationIsNotDisabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .contains(
-            "Missing required argument(s): (--tls-known-clients-file=<tlsKnownClientsFile> | "
-                + "--tls-allow-any-client)");
-  }
-
-  @Test
   void settingTlsKnownClientAndDisablingClientAuthenticationShowsError() {
     String cmdLine = validBaseCommandOptions();
     cmdLine += "--tls-allow-any-client ";
@@ -262,19 +254,29 @@ class CommandlineParserTest {
   @Test
   void tlsClientAuthenticationCanBeDisabledByRemovingKnownClientsAndSettingOption() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
     cmdLine += "--tls-allow-any-client ";
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    assertThat(config.getTlsOptions().get().getKnownClientsFile()).isEmpty();
+    assertThat(config.getTlsOptions().get().getClientAuthConstraints()).isEmpty();
+  }
+
+  @Test
+  void notExplicitlySettingTlsClientAuthFailsParsing() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isFalse();
   }
 
   @Test
   void parsingShouldFailIfTlsDisableClientAuthenticationHasAValue() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
     cmdLine += "--tls-allow-any-client=false ";
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -282,6 +284,14 @@ class CommandlineParserTest {
     assertThat(result).isFalse();
     assertThat(commandOutput.toString()).contains("--tls-allow-any-client");
     assertThat(commandOutput.toString()).contains("should be specified without 'false' parameter");
+  }
+
+  @Test
+  void missingTlsClientWhitelistIsValidIfCaIsSpecified() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "tls-known-clients-file",
+        () -> config.getTlsOptions().get().getClientAuthConstraints().get().getKnownClientsFile(),
+        Optional.empty());
   }
 
   @Test
@@ -303,9 +313,13 @@ class CommandlineParserTest {
   @Test
   void ethSignerStartsValidlyIfNoTlsOptionsAreSet() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-keystore-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-keystore-password-file");
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file");
+    cmdLine =
+        removeFieldFrom(
+            cmdLine,
+            "tls-keystore-file",
+            "tls-keystore-password-file",
+            "tls-known-clients-file",
+            "tls-allow-ca-clients");
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
