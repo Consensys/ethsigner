@@ -170,8 +170,8 @@ public class EthSignerProcessRunner {
       params.add(keyStoreConfig.getStorePasswordFile().toString());
     }
 
-    if (signerConfig.downstreamTrustStore().isPresent()) {
-      final File keyStoreConfigFile = signerConfig.downstreamTrustStore().get();
+    if (signerConfig.downstreamKnownServers().isPresent()) {
+      final File keyStoreConfigFile = signerConfig.downstreamKnownServers().get();
       params.add("--downstream-http-tls-known-servers-file");
       params.add(keyStoreConfigFile.getAbsolutePath());
     }

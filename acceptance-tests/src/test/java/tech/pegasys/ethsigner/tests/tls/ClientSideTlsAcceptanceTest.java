@@ -99,7 +99,7 @@ class ClientSideTlsAcceptanceTest {
 
     populateFingerprintFile(
         fingerPrintFilePath, expectedWeb3ProviderCert, downstreamWeb3ServerPort);
-    builder.withDownstreamTrustStore(fingerPrintFilePath.toFile());
+    builder.withDownstreamKnownServers(fingerPrintFilePath.toFile());
     builder.withDownstreamKeyStore(
         new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
     builder.withHttpRpcPort(listenPort);
@@ -175,7 +175,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void missingKeyStoreForEthSignerResultsInEthSignerTerminating(@TempDir Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+      throws Exception {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =

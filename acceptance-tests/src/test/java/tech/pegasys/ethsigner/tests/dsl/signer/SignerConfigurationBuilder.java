@@ -33,7 +33,7 @@ public class SignerConfigurationBuilder {
   private Path multiKeySignerDirectory;
   private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
-  private File downstreamTrustStore;
+  private File downstreamKnownServers;
   private PkcsStoreConfig downstreamKeystore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
@@ -67,8 +67,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamTrustStore(final File truststore) {
-    this.downstreamTrustStore = truststore;
+  public SignerConfigurationBuilder withDownstreamKnownServers(final File knownServersFile) {
+    this.downstreamKnownServers = knownServersFile;
     return this;
   }
 
@@ -87,7 +87,7 @@ public class SignerConfigurationBuilder {
         webSocketPort,
         transactionSignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
-        Optional.ofNullable(downstreamTrustStore),
+        Optional.ofNullable(downstreamKnownServers),
         Optional.ofNullable(downstreamKeystore));
   }
 }

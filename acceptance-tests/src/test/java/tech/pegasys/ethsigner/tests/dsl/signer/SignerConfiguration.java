@@ -31,7 +31,7 @@ public class SignerConfiguration {
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
-  private final Optional<File> downstreamConnectionTrustStore;
+  private final Optional<File> downstreamConnectionKnownServers;
   private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
 
   public SignerConfiguration(
@@ -41,7 +41,7 @@ public class SignerConfiguration {
       final int webSocketPort,
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
-      final Optional<File> downstreamConnectionTrustStore,
+      final Optional<File> downstreamConnectionKnownServers,
       final Optional<PkcsStoreConfig> downstreamConnectionKeyStore) {
     this.chainId = chainId;
     this.hostname = hostname;
@@ -49,7 +49,7 @@ public class SignerConfiguration {
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
     this.serverTlsOptions = serverTlsOptions;
-    this.downstreamConnectionTrustStore = downstreamConnectionTrustStore;
+    this.downstreamConnectionKnownServers = downstreamConnectionKnownServers;
     this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
   }
 
@@ -81,8 +81,8 @@ public class SignerConfiguration {
     return serverTlsOptions;
   }
 
-  public Optional<File> downstreamTrustStore() {
-    return downstreamConnectionTrustStore;
+  public Optional<File> downstreamKnownServers() {
+    return downstreamConnectionKnownServers;
   }
 
   public Optional<PkcsStoreConfig> downstreamKeyStore() {

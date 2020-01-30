@@ -94,24 +94,21 @@ public final class EthSigner {
 
   private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
     final HttpClientOptions result = new HttpClientOptions(input);
-    boolean tlsIsRequired =
+
+    result.setSsl(
         config.getWeb3ProviderKnownServersFile().isPresent()
-            || config.getClientCertificateOptions().isPresent();
+            || config.getClientCertificateOptions().isPresent());
 
-    if (tlsIsRequired) {
-      result.setSsl(true);
-      config
-          .getWeb3ProviderKnownServersFile()
-          .ifPresent(
-              knownServerFile ->
-                  result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
+    config
+        .getWeb3ProviderKnownServersFile()
+        .ifPresent(
+            knownServerFile -> result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
 
-      if (config.getClientCertificateOptions().isPresent()) {
-        try {
-          result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
-        } catch (final IOException e) {
-          throw new InitializationException("Failed to load client certificate.", e);
-        }
+    if (config.getClientCertificateOptions().isPresent()) {
+      try {
+        result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
+      } catch (final IOException e) {
+        throw new InitializationException("Failed to load client certificate.", e);
       }
     }
 
