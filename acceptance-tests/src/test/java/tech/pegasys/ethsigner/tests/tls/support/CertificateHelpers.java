@@ -32,6 +32,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -80,18 +81,21 @@ public class CertificateHelpers {
   }
 
   public static void populateFingerprintFile(
-      final Path knownClientsPath, final TlsCertificateDefinition certDef)
+      final Path knownHostsPath,
+      final TlsCertificateDefinition certDef,
+      final Optional<Integer> port)
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
           UnrecoverableKeyException {
 
     final List<X509Certificate> certs = certDef.certificates();
     final StringBuilder fingerPrintsToAdd = new StringBuilder();
+    final String portFragment = port.map(p -> String.format(":%d", p)).orElse("");
     for (final X509Certificate cert : certs) {
       final String fingerprint = generateFingerprint(cert);
-      fingerPrintsToAdd.append("localhost " + fingerprint + "\n");
-      fingerPrintsToAdd.append("127.0.0.1 " + fingerprint + "\n");
+      fingerPrintsToAdd.append("localhost" + portFragment + " " + fingerprint + "\n");
+      fingerPrintsToAdd.append("127.0.0.1" + portFragment + " " + fingerprint + "\n");
     }
-    Files.writeString(knownClientsPath, fingerPrintsToAdd.toString());
+    Files.writeString(knownHostsPath, fingerPrintsToAdd.toString());
   }
 
   public static String generateFingerprint(final X509Certificate cert)

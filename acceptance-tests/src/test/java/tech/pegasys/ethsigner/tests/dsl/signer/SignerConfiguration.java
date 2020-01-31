@@ -44,6 +44,7 @@ public class SignerConfiguration {
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
       final Optional<File> downstreamConnectionKnownServers,
+      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore,
       final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
