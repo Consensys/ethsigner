@@ -69,8 +69,7 @@ public class ServerSideTlsCaClientAcceptanceTest {
 
   @Test
   void clientWithCertificateNotInCertificateAuthorityCanConnectAndQueryAccounts(
-      @TempDir final Path tempDir)
-      throws Exception {
+      @TempDir final Path tempDir) throws Exception {
     final Signer ethSigner = createEthSigner(clientCert, tempDir);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
