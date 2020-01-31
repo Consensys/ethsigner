@@ -32,8 +32,8 @@ import com.google.common.io.Resources;
 
 public class TlsCertificateDefinition {
 
-  private File pkcs12File;
-  private String password;
+  private final File pkcs12File;
+  private final String password;
 
   public static TlsCertificateDefinition loadFromResource(
       final String resourcePath, final String password) {
@@ -61,15 +61,13 @@ public class TlsCertificateDefinition {
   }
 
   public List<X509Certificate> certificates()
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-          UnrecoverableKeyException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
     final List<X509Certificate> results = Lists.newArrayList();
 
     final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
     final Enumeration<String> aliases = p12.aliases();
     while (aliases.hasMoreElements()) {
-      String alias = aliases.nextElement();
-      results.add((X509Certificate) p12.getCertificate(alias));
+      results.add((X509Certificate) p12.getCertificate(aliases.nextElement()));
     }
     return results;
   }
@@ -83,8 +81,7 @@ public class TlsCertificateDefinition {
     final Enumeration<String> aliases = p12.aliases();
 
     while (aliases.hasMoreElements()) {
-      String alias = aliases.nextElement();
-      results.add((PrivateKey) p12.getKey(alias, password.toCharArray()));
+      results.add((PrivateKey) p12.getKey(aliases.nextElement(), password.toCharArray()));
     }
     return results;
   }

@@ -84,16 +84,15 @@ public class CertificateHelpers {
       final Path knownHostsPath,
       final TlsCertificateDefinition certDef,
       final Optional<Integer> port)
-      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
-          UnrecoverableKeyException {
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
     final List<X509Certificate> certs = certDef.certificates();
     final StringBuilder fingerPrintsToAdd = new StringBuilder();
     final String portFragment = port.map(p -> String.format(":%d", p)).orElse("");
     for (final X509Certificate cert : certs) {
       final String fingerprint = generateFingerprint(cert);
-      fingerPrintsToAdd.append("localhost" + portFragment + " " + fingerprint + "\n");
-      fingerPrintsToAdd.append("127.0.0.1" + portFragment + " " + fingerprint + "\n");
+      fingerPrintsToAdd.append("localhost" + portFragment + " " + fingerprint + "%n");
+      fingerPrintsToAdd.append("127.0.0.1" + portFragment + " " + fingerprint + "%n");
     }
     Files.writeString(knownHostsPath, fingerPrintsToAdd.toString());
   }
@@ -115,7 +114,7 @@ public class CertificateHelpers {
   public static Path createJksTrustStore(
       final Path parentDir, final TlsCertificateDefinition certDef) {
     try {
-      List<X509Certificate> certsInDef = certDef.certificates();
+      final List<X509Certificate> certsInDef = certDef.certificates();
 
       final KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(null, null);

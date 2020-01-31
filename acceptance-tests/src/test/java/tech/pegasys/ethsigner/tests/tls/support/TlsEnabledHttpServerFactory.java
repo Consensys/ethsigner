@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Optional;
@@ -102,13 +101,12 @@ public class TlsEnabledHttpServerFactory {
 
       serversCreated.add(web3ProviderhttpServer);
       return web3ProviderhttpServer;
-    } catch (KeyStoreException
+    } catch (final KeyStoreException
         | NoSuchAlgorithmException
         | CertificateException
         | IOException
         | ExecutionException
-        | InterruptedException
-        | UnrecoverableKeyException e) {
+        | InterruptedException e) {
       throw new RuntimeException("Failed to construct a TLS Enabled Server", e);
     }
   }
