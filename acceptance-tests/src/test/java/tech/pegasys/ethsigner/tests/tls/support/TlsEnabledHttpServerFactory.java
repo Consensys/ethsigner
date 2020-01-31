@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -66,7 +67,7 @@ public class TlsEnabledHttpServerFactory {
     try {
 
       final Path serverFingerprintFile = workDir.resolve("server_known_clients");
-      populateFingerprintFile(serverFingerprintFile, acceptedClientCerts);
+      populateFingerprintFile(serverFingerprintFile, acceptedClientCerts, Optional.empty());
 
       final HttpServerOptions web3HttpServerOptions = new HttpServerOptions();
       web3HttpServerOptions.setSsl(true);

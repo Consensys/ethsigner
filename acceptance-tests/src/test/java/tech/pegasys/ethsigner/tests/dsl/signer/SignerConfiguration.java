@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class SignerConfiguration {
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
-  private final Optional<PkcsStoreConfig> downstreamConnectionTrustStore;
+  private final Optional<File> downstreamConnectionKnownServers;
   private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
   private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
 
@@ -42,8 +43,7 @@ public class SignerConfiguration {
       final int webSocketPort,
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
-      final Optional<PkcsStoreConfig> downstreamConnectionTrustStore,
-      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore,
+      final Optional<File> downstreamConnectionKnownServers,
       final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
@@ -51,7 +51,7 @@ public class SignerConfiguration {
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
     this.serverTlsOptions = serverTlsOptions;
-    this.downstreamConnectionTrustStore = downstreamConnectionTrustStore;
+    this.downstreamConnectionKnownServers = downstreamConnectionKnownServers;
     this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
     this.overriddenCaTrustStore = overriddenCaTrustStore;
   }
@@ -84,8 +84,8 @@ public class SignerConfiguration {
     return serverTlsOptions;
   }
 
-  public Optional<PkcsStoreConfig> downstreamTrustStore() {
-    return downstreamConnectionTrustStore;
+  public Optional<File> downstreamKnownServers() {
+    return downstreamConnectionKnownServers;
   }
 
   public Optional<PkcsStoreConfig> downstreamKeyStore() {

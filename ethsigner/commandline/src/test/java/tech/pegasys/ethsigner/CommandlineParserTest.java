@@ -87,10 +87,8 @@ class CommandlineParserTest {
         .isEqualTo(new File("./client_cert.pfx"));
     assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
         .isEqualTo(new File("./client_cert.passwd"));
-    assertThat(config.getWeb3TrustStoreOptions().get().getStoreFile())
-        .isEqualTo(new File("./web3_truststore.pfx"));
-    assertThat(config.getWeb3TrustStoreOptions().get().getStorePasswordFile())
-        .isEqualTo(new File("./web3_truststore.passwd"));
+    assertThat(config.getWeb3ProviderKnownServersFile().get())
+        .isEqualTo(new File("./knownServers.txt"));
   }
 
   @Test
@@ -354,26 +352,14 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingDownstreamTruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-truststore-file");
-  }
-
-  @Test
-  void missingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "downstream-http-tls-truststore-password-file");
-  }
-
-  @Test
-  void cmdlineIsValidIfBothWeb3TruststoreAndPasswordAreMissing() {
+  void cmdlineIsValidIfWeb3TruststoreIsMissing() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-file");
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-password-file");
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    assertThat(config.getWeb3TrustStoreOptions()).isEmpty();
+    assertThat(config.getWeb3ProviderKnownServersFile()).isEmpty();
   }
 }
