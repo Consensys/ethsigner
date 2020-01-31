@@ -41,7 +41,7 @@ public class BesuPrivateNonceProvider implements NonceProvider {
   }
 
   protected JsonRpcRequest generateRequest() {
-    final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getTransactionCount");
     request.setParams(new Object[] {accountAddress, privacyGroupId});
     return request;
   }
