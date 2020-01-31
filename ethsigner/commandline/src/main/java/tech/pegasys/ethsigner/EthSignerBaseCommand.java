@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.config.PicoCliDownstreamTrustStore;
 import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -21,6 +20,7 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -50,6 +50,13 @@ import picocli.CommandLine.Option;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
+
+  @Option(
+      names = "--downstream-http-tls-known-servers-file",
+      description = "Path to a file containing the fingerprints of authorized servers",
+      arity = "1",
+      required = false)
+  private File downstreamKnownServersFile;
 
   @Option(
       names = {"--logging", "-l"},
@@ -115,9 +122,6 @@ public class EthSignerBaseCommand implements Config {
   @ArgGroup(exclusive = false)
   private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTrustStore picoCliDownstreamTrustStore;
-
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -164,13 +168,13 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
-    return Optional.ofNullable(picoCliDownstreamTrustStore);
+  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
+  public Optional<File> getWeb3ProviderKnownServersFile() {
+    return Optional.ofNullable(downstreamKnownServersFile);
   }
 
   @Override
