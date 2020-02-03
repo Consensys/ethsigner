@@ -36,10 +36,13 @@ import tech.pegasys.ethsigner.tests.tls.support.BasicClientAuthConstraints;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -141,6 +144,27 @@ class ServerSideTlsAcceptanceTest {
     ethSigner.awaitStartupCompletion();
 
     assertThat(ethSigner.accounts().list()).isNotEmpty();
+  }
+
+  @Test
+  void getAverageTimeToGetAccounts() {
+    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
+    ethSigner.start();
+    ethSigner.awaitStartupCompletion();
+
+    final List<Long> values = Lists.newArrayList();
+    long cumulativeTotal = 0;
+    int maxIterations = 100;
+    for (int i = 0; i < maxIterations; i++) {
+      final long msAtStart = System.currentTimeMillis();
+      ethSigner.accounts().list();
+      long timeDelta = System.currentTimeMillis() - msAtStart;
+      values.add(timeDelta);
+      cumulativeTotal += timeDelta;
+    }
+    final double averageOperationDurationMs = cumulativeTotal / (double) maxIterations;
+    System.out.println(String.format("Avg = %.2f", averageOperationDurationMs));
+    System.out.println(StringUtils.join(values, ", "));
   }
 
   @Test

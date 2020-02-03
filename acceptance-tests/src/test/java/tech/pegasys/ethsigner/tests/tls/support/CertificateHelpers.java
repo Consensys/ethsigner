@@ -91,8 +91,8 @@ public class CertificateHelpers {
     final String portFragment = port.map(p -> String.format(":%d", p)).orElse("");
     for (final X509Certificate cert : certs) {
       final String fingerprint = generateFingerprint(cert);
-      fingerPrintsToAdd.append("localhost" + portFragment + " " + fingerprint + "%n");
-      fingerPrintsToAdd.append("127.0.0.1" + portFragment + " " + fingerprint + "%n");
+      fingerPrintsToAdd.append(String.format("localhost%s %s%n", portFragment, fingerprint));
+      fingerPrintsToAdd.append(String.format("127.0.0.1%s %s%n", portFragment, fingerprint));
     }
     Files.writeString(knownHostsPath, fingerPrintsToAdd.toString());
   }
