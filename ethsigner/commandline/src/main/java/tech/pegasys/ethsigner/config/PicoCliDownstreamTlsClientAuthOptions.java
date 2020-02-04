@@ -18,7 +18,7 @@ import java.io.File;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliTlsClientCertificateOptions implements PkcsStoreConfig {
+public class PicoCliDownstreamTlsClientAuthOptions implements PkcsStoreConfig {
 
   @Option(
       names = "--downstream-http-tls-keystore-file",

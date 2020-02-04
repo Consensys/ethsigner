@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -76,19 +77,35 @@ class CommandlineParserTest {
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
     assertThat(config.getTlsOptions()).isNotEmpty();
-    assertThat(config.getTlsOptions().get().getKeyStoreFile())
-        .isEqualTo(new File("./keystore.pfx"));
-    assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
+    assertThat(config.getTlsOptions().get().getStoreFile()).isEqualTo(new File("./keystore.pfx"));
+    assertThat(config.getTlsOptions().get().getStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
-    assertThat(config.getClientCertificateOptions().get().getStoreFile())
+
+    final Optional<DownstreamTlsOptions> downstreamTlsOptionsOptional =
+        config.getDownstreamTlsOptions();
+    assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
+    final DownstreamTlsOptions downstreamTlsOptions = downstreamTlsOptionsOptional.get();
+    assertThat(downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
-    assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
+    assertThat(
+            downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStorePasswordFile())
         .isEqualTo(new File("./client_cert.passwd"));
-    assertThat(config.getWeb3ProviderKnownServersFile().get())
+    assertThat(
+            downstreamTlsOptions
+                .getDownstreamTlsServerTrustOptions()
+                .get()
+                .getKnownServerFile()
+                .get())
         .isEqualTo(new File("./knownServers.txt"));
+    assertThat(
+            downstreamTlsOptions
+                .getDownstreamTlsServerTrustOptions()
+                .get()
+                .isCaSignedServerCertificateAllowed())
+        .isTrue();
   }
 
   @Test
@@ -348,11 +365,12 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    assertThat(config.getClientCertificateOptions()).isEmpty();
+    assertThat(config.getDownstreamTlsOptions().get().getDownstreamTlsClientAuthOptions())
+        .isEmpty();
   }
 
   @Test
-  void cmdlineIsValidIfWeb3TruststoreIsMissing() {
+  void cmdlineIsValidIfDownstreamTrustOptionsAreMissing() {
     String cmdLine = validBaseCommandOptions();
     cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
 
@@ -360,6 +378,85 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    assertThat(config.getWeb3ProviderKnownServersFile()).isEmpty();
+    assertThat(config.getDownstreamTlsOptions().get().getDownstreamTlsServerTrustOptions())
+        .isEmpty();
+  }
+
+  @Test
+  void cmdlineIsValidIfDownstreamTrustKnownServerIsMissingAndCaAuthorizedIsEnabled() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
+    cmdLine += "--downstream-http-tls-ca-signed-enabled=true ";
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(
+            config
+                .getDownstreamTlsOptions()
+                .get()
+                .getDownstreamTlsServerTrustOptions()
+                .get()
+                .isCaSignedServerCertificateAllowed())
+        .isTrue();
+  }
+
+  @Test
+  void cmdlineIsValidIfDownstreamTrustKnownServerIsMissingAndCaAuthorizedIsDisabled() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
+    cmdLine += "--downstream-http-tls-ca-signed-enabled=false ";
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(
+            config
+                .getDownstreamTlsOptions()
+                .get()
+                .getDownstreamTlsServerTrustOptions()
+                .get()
+                .isCaSignedServerCertificateAllowed())
+        .isFalse();
+  }
+
+  @Test
+  void cmdlineIsValidIfDownstreamCaAuthorizedIsEnabledWithoutValue() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
+    cmdLine += "--downstream-http-tls-ca-signed-enabled ";
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(
+            config
+                .getDownstreamTlsOptions()
+                .get()
+                .getDownstreamTlsServerTrustOptions()
+                .get()
+                .isCaSignedServerCertificateAllowed())
+        .isTrue();
+  }
+
+  @Test
+  void cmdlineIsValidIfAllDownstreamTlsOptionsAreMissing() {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine =
+        removeFieldFrom(
+            cmdLine,
+            "downstream-http-tls-known-servers-file",
+            "downstream-http-tls-ca-signed-enabled",
+            "downstream-http-tls-keystore-file",
+            "downstream-http-tls-keystore-password-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).isTrue();
+    assertThat(config.getDownstreamTlsOptions()).isEmpty();
   }
 }

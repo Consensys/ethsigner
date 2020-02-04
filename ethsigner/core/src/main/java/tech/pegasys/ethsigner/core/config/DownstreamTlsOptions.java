@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,33 +12,10 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
-import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
-
-import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Optional;
 
-import org.apache.logging.log4j.Level;
+public interface DownstreamTlsOptions {
+  Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions();
 
-public interface Config {
-
-  Level getLogLevel();
-
-  String getDownstreamHttpHost();
-
-  Integer getDownstreamHttpPort();
-
-  Duration getDownstreamHttpRequestTimeout();
-
-  String getHttpListenHost();
-
-  Integer getHttpListenPort();
-
-  ChainIdProvider getChainId();
-
-  Path getDataPath();
-
-  Optional<TlsOptions> getTlsOptions();
-
-  Optional<DownstreamTlsOptions> getDownstreamTlsOptions();
+  Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions();
 }

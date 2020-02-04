@@ -16,23 +16,26 @@ import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
+import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import io.vertx.core.http.ClientAuth;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -92,27 +95,56 @@ public final class EthSigner {
     runner.start();
   }
 
-  private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
-    final HttpClientOptions result = new HttpClientOptions(input);
+  private WebClientOptions applyConfigTlsSettingsTo(final WebClientOptions input) {
+    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
+        config.getDownstreamTlsOptions();
+    if (optionalDownstreamTlsOptions.isEmpty()) {
+      return input;
+    }
 
-    result.setSsl(
-        config.getWeb3ProviderKnownServersFile().isPresent()
-            || config.getClientCertificateOptions().isPresent());
+    final WebClientOptions result = new WebClientOptions(input);
+    final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
+    final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions =
+        downstreamTlsOptions.getDownstreamTlsClientAuthOptions();
 
-    config
-        .getWeb3ProviderKnownServersFile()
-        .ifPresent(
-            knownServerFile -> result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
+    result.setSsl(true);
 
-    if (config.getClientCertificateOptions().isPresent()) {
+    setDownstreamTlsTrustOptions(result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
+
+    if (optionalDownstreamTlsClientAuthOptions.isPresent()) {
       try {
-        result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
+        result.setPfxKeyCertOptions(convertFrom(optionalDownstreamTlsClientAuthOptions.get()));
       } catch (final IOException e) {
         throw new InitializationException("Failed to load client certificate.", e);
       }
     }
 
     return result;
+  }
+
+  private void setDownstreamTlsTrustOptions(
+      final WebClientOptions result,
+      final Optional<DownstreamTrustOptions> optionalDownstreamTrustOptions) {
+    if (optionalDownstreamTrustOptions.isPresent()) {
+      final Optional<File> optionalKnownServerFile =
+          optionalDownstreamTrustOptions.get().getKnownServerFile();
+      if (optionalKnownServerFile.isPresent()) {
+        final Path knownServerFile = optionalKnownServerFile.get().toPath();
+        try {
+          result.setTrustOptions(
+              whitelistServers(
+                  knownServerFile,
+                  optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
+        } catch (RuntimeException e) {
+          throw new InitializationException("Failed to load known server file.", e);
+        }
+      } else if (!optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()) {
+        // this means user does not want to trust any server certificate at all, neither CA-signed
+        // nor self-signed.
+        throw new InitializationException(
+            "Downstream TLS CA signed option must be enabled when known server file is not specified");
+      }
+    }
   }
 
   private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
@@ -144,9 +176,8 @@ public final class EthSigner {
     final HttpServerOptions result = new HttpServerOptions(input);
 
     try {
-      final String keyStorePathname =
-          tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
-      final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
+      final String keyStorePathname = tlsConfig.getStoreFile().toPath().toAbsolutePath().toString();
+      final String password = readSecretFromFile(tlsConfig.getStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
       return result;
     } catch (final NoSuchFileException e) {
