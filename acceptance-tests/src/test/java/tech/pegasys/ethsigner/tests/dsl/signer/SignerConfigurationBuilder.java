@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ public class SignerConfigurationBuilder {
   private TlsOptions serverTlsOptions;
   private File downstreamKnownServers;
   private PkcsStoreConfig downstreamKeystore;
+  private TlsCertificateDefinition overridenCaTrustStore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -77,6 +79,11 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
+  public SignerConfigurationBuilder withOverriddenCA(final TlsCertificateDefinition keystore) {
+    this.overridenCaTrustStore = keystore;
+    return this;
+  }
+
   public SignerConfiguration build() {
     final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
         new TransactionSignerParamsSupplier(hashicorpNode, keyVaultName, multiKeySignerDirectory);
@@ -88,6 +95,7 @@ public class SignerConfigurationBuilder {
         transactionSignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
         Optional.ofNullable(downstreamKnownServers),
-        Optional.ofNullable(downstreamKeystore));
+        Optional.ofNullable(downstreamKeystore),
+        Optional.ofNullable(overridenCaTrustStore));
   }
 }

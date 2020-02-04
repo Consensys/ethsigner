@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;

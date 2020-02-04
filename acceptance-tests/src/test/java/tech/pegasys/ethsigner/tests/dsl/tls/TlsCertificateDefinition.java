@@ -12,16 +12,28 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.tls;
 
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.loadP12KeyStore;
+
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
 public class TlsCertificateDefinition {
 
-  private File pkcs12File;
-  private String password;
+  private final File pkcs12File;
+  private final String password;
 
   public static TlsCertificateDefinition loadFromResource(
       final String resourcePath, final String password) {
@@ -46,5 +58,31 @@ public class TlsCertificateDefinition {
 
   public String getPassword() {
     return password;
+  }
+
+  public List<X509Certificate> certificates()
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    final List<X509Certificate> results = Lists.newArrayList();
+
+    final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
+    final Enumeration<String> aliases = p12.aliases();
+    while (aliases.hasMoreElements()) {
+      results.add((X509Certificate) p12.getCertificate(aliases.nextElement()));
+    }
+    return results;
+  }
+
+  public List<PrivateKey> keys()
+      throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+          UnrecoverableKeyException {
+    final List<PrivateKey> results = Lists.newArrayList();
+
+    final KeyStore p12 = loadP12KeyStore(pkcs12File, password);
+    final Enumeration<String> aliases = p12.aliases();
+
+    while (aliases.hasMoreElements()) {
+      results.add((PrivateKey) p12.getKey(aliases.nextElement(), password.toCharArray()));
+    }
+    return results;
   }
 }

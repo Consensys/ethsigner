@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.tests.tls.support;
 
 import static tech.pegasys.ethsigner.core.EthSigner.createJsonDecoder;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -101,7 +101,7 @@ public class TlsEnabledHttpServerFactory {
 
       serversCreated.add(web3ProviderhttpServer);
       return web3ProviderhttpServer;
-    } catch (KeyStoreException
+    } catch (final KeyStoreException
         | NoSuchAlgorithmException
         | CertificateException
         | IOException

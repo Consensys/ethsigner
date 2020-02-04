@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.File;
 import java.time.Duration;
@@ -33,6 +34,7 @@ public class SignerConfiguration {
   private final Optional<TlsOptions> serverTlsOptions;
   private final Optional<File> downstreamConnectionKnownServers;
   private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
+  private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
 
   public SignerConfiguration(
       final String chainId,
@@ -42,7 +44,8 @@ public class SignerConfiguration {
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
       final Optional<File> downstreamConnectionKnownServers,
-      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore) {
+      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore,
+      final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
@@ -51,6 +54,7 @@ public class SignerConfiguration {
     this.serverTlsOptions = serverTlsOptions;
     this.downstreamConnectionKnownServers = downstreamConnectionKnownServers;
     this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
+    this.overriddenCaTrustStore = overriddenCaTrustStore;
   }
 
   public String hostname() {
@@ -87,6 +91,10 @@ public class SignerConfiguration {
 
   public Optional<PkcsStoreConfig> downstreamKeyStore() {
     return downstreamConnectionKeyStore;
+  }
+
+  public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() {
+    return overriddenCaTrustStore;
   }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
