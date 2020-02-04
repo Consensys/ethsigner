@@ -14,13 +14,25 @@ package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.core.EthSigner;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+
 import java.math.BigInteger;
 import java.util.Optional;
 
 import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class EthSendTransactionJsonParametersTest {
+
+  private TransactionFactory factory;
+
+  @BeforeEach
+  public void setup() {
+    // NOTE: the factory has been configured as per its use in the application.
+    factory = new TransactionFactory(EthSigner.createJsonDecoder(), null);
+  }
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(
       final JsonObject object, final String key) {
@@ -34,7 +46,7 @@ public class EthSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -50,7 +62,7 @@ public class EthSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.gas()).isEqualTo(getStringAsOptionalBigInteger(parameters, "gas"));
     assertThat(txnParams.gasPrice())
@@ -67,7 +79,7 @@ public class EthSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.sender()).isEqualTo("invalidFromAddress");
   }
@@ -79,7 +91,7 @@ public class EthSendTransactionJsonParametersTest {
 
     final JsonRpcRequest request = wrapParametersInRequest(parameters);
     final EthSendTransactionJsonParameters txnParams =
-        EthSendTransactionJsonParameters.from(request);
+        factory.fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     assertThat(txnParams.receiver()).contains("invalidToAddress");
   }

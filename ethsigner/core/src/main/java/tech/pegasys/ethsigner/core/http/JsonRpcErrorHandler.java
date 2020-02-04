@@ -12,11 +12,14 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -35,9 +38,12 @@ import org.apache.logging.log4j.Logger;
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
   private static final Logger LOG = LogManager.getLogger();
   private final HttpResponseFactory httpResponseFactory;
+  private final JsonDecoder jsonDecoder;
 
-  public JsonRpcErrorHandler(final HttpResponseFactory httpResponseFactory) {
+  public JsonRpcErrorHandler(
+      final HttpResponseFactory httpResponseFactory, JsonDecoder jsonDecoder) {
     this.httpResponseFactory = httpResponseFactory;
+    this.jsonDecoder = jsonDecoder;
   }
 
   @Override
@@ -58,7 +64,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {
     try {
-      return Optional.of(Json.decodeValue(context.getBodyAsString(), JsonRpcRequest.class));
+      return Optional.of(jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class));
     } catch (final DecodeException e) {
       LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
       return Optional.empty();
@@ -78,7 +84,9 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       final JsonRpcException jsonRpcException = (JsonRpcException) context.failure();
       return jsonRpcException.getJsonRpcError();
     } // in case of a timeout we may not have a failure exception so we use the status code
-    else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
+    else if (context.statusCode() == BAD_GATEWAY.code()) {
+      return FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE;
+    } else if (context.statusCode() == GATEWAY_TIMEOUT.code()) {
       return CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
     } else {
       return INTERNAL_ERROR;

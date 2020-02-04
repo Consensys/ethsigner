@@ -12,23 +12,32 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.Config;
+import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
+import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
+import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
-    description = "This command runs the EthSigner.",
+    description =
+        "This command runs the EthSigner.\n"
+            + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
     mixinStandardHelpOptions = true,
@@ -43,19 +52,28 @@ import picocli.CommandLine.Option;
 public class EthSignerBaseCommand implements Config {
 
   @Option(
+      names = "--downstream-http-tls-known-servers-file",
+      description = "Path to a file containing the fingerprints of authorized servers",
+      arity = "1",
+      required = false)
+  private File downstreamKnownServersFile;
+
+  @Option(
       names = {"--logging", "-l"},
       paramLabel = "<LOG VERBOSITY LEVEL>",
       description =
           "Logging verbosity levels: OFF, FATAL, WARN, INFO, DEBUG, TRACE, ALL (default: INFO)")
   private final Level logLevel = Level.INFO;
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-host",
       description =
           "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final InetAddress downstreamHttpHost = InetAddress.getLoopbackAddress();
+  private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
@@ -76,7 +94,7 @@ public class EthSignerBaseCommand implements Config {
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final InetAddress httpListenHost = InetAddress.getLoopbackAddress();
+  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
 
   @Option(
       names = {"--http-listen-port"},
@@ -98,13 +116,19 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private Path dataPath;
 
+  @ArgGroup(exclusive = false)
+  private PicoCliTlsServerOptions picoCliTlsServerOptions;
+
+  @ArgGroup(exclusive = false)
+  private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
+
   @Override
   public Level getLogLevel() {
     return logLevel;
   }
 
   @Override
-  public InetAddress getDownstreamHttpHost() {
+  public String getDownstreamHttpHost() {
     return downstreamHttpHost;
   }
 
@@ -114,7 +138,7 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public InetAddress getHttpListenHost() {
+  public String getHttpListenHost() {
     return httpListenHost;
   }
 
@@ -136,6 +160,21 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Duration getDownstreamHttpRequestTimeout() {
     return Duration.ofMillis(downstreamHttpRequestTimeout);
+  }
+
+  @Override
+  public Optional<TlsOptions> getTlsOptions() {
+    return Optional.ofNullable(picoCliTlsServerOptions);
+  }
+
+  @Override
+  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
+  }
+
+  @Override
+  public Optional<File> getWeb3ProviderKnownServersFile() {
+    return Optional.ofNullable(downstreamKnownServersFile);
   }
 
   @Override

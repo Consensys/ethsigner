@@ -12,30 +12,31 @@
  */
 package tech.pegasys.ethsigner.signer.hashicorp;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class HashicorpTransactionSignerTest {
 
   @Test
-  public void vaultTimingOut() throws IOException {
-
-    final File authFile = createFile();
-
+  public void vaultTimingOut(@TempDir final Path tempDirectory) {
     assertThatThrownBy(
             () ->
-                HashicorpSignerFactory.createSigner(
-                    "signingKeyPath", 877, "serverHost", authFile.toPath(), 1))
+                HashicorpVaultSignerFactory.createSigner(
+                    new HashicorpConfig.HashicorpConfigBuilder()
+                        .withSigningKeyPath("signingKeyPath")
+                        .withHost("serverHost")
+                        .withPort(877)
+                        .withAuthFilePath(createAuthFile(tempDirectory))
+                        .withTimeout(1L)
+                        .build()))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
@@ -44,17 +45,20 @@ public class HashicorpTransactionSignerTest {
 
     assertThatThrownBy(
             () ->
-                HashicorpSignerFactory.createSigner(
-                    "signingKeyPath", 877, "serverHost", Paths.get("nonExistingFile"), 1))
+                HashicorpVaultSignerFactory.createSigner(
+                    new HashicorpConfig.HashicorpConfigBuilder()
+                        .withSigningKeyPath("signingKeyPath")
+                        .withHost("serverHost")
+                        .withPort(877)
+                        .withAuthFilePath(Path.of("nonExistingFile"))
+                        .withTimeout(1L)
+                        .build()))
         .isInstanceOf(TransactionSignerInitializationException.class);
   }
 
-  @SuppressWarnings("UnstableApiUsage")
-  private static File createFile() throws IOException {
-    final Path path = Files.createTempFile("file", ".file");
-    Files.write(path, "something".getBytes(UTF_8));
-    final File keyFile = path.toFile();
-    keyFile.deleteOnExit();
-    return keyFile;
+  private Path createAuthFile(final Path tempDirectory) throws IOException {
+    final Path tempFile = Files.createTempFile(tempDirectory, "file", ".file");
+    Files.writeString(tempFile, "something");
+    return tempFile;
   }
 }

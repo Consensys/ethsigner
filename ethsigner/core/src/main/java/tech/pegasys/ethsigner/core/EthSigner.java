@@ -12,18 +12,33 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
+import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
+
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.Config;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
+import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import io.vertx.core.http.ClientAuth;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
-import okhttp3.OkHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.protocol.http.HttpService;
+import org.apache.tuweni.net.tls.VertxTrustOptions;
 
 public final class EthSigner {
 
@@ -51,45 +66,131 @@ public final class EthSigner {
       return;
     }
 
-    final HttpService web3jService = createWeb3jHttpService();
-    final TransactionFactory transactionFactory = TransactionFactory.createFrom(web3jService);
+    final JsonDecoder jsonDecoder = createJsonDecoder();
+
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
-            .setDefaultHost(config.getDownstreamHttpHost().getHostAddress());
+            .setDefaultHost(config.getDownstreamHttpHost());
     final HttpServerOptions serverOptions =
         new HttpServerOptions()
             .setPort(config.getHttpListenPort())
-            .setHost(config.getHttpListenHost().getHostAddress())
+            .setHost(config.getHttpListenHost())
             .setReuseAddress(true)
             .setReusePort(true);
-    final Path dataPath = config.getDataPath();
 
     final Runner runner =
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
-            clientOptions,
-            serverOptions,
+            applyConfigTlsSettingsTo(clientOptions),
+            applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
-            transactionFactory,
-            dataPath);
+            jsonDecoder,
+            config.getDataPath());
 
     runner.start();
   }
 
-  private HttpService createWeb3jHttpService() {
-    final String downstreamUrl =
-        "http://"
-            + config.getDownstreamHttpHost().getHostName()
-            + ":"
-            + config.getDownstreamHttpPort();
-    LOG.info("Downstream URL = {}", downstreamUrl);
+  private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
+    final HttpClientOptions result = new HttpClientOptions(input);
 
-    final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-    builder
-        .connectTimeout(config.getDownstreamHttpRequestTimeout())
-        .readTimeout(config.getDownstreamHttpRequestTimeout());
-    return new HttpService(downstreamUrl, builder.build());
+    result.setSsl(
+        config.getWeb3ProviderKnownServersFile().isPresent()
+            || config.getClientCertificateOptions().isPresent());
+
+    config
+        .getWeb3ProviderKnownServersFile()
+        .ifPresent(
+            knownServerFile -> result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
+
+    if (config.getClientCertificateOptions().isPresent()) {
+      try {
+        result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
+      } catch (final IOException e) {
+        throw new InitializationException("Failed to load client certificate.", e);
+      }
+    }
+
+    return result;
+  }
+
+  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
+    final String password = readSecretFromFile(pkcsConfig.getStorePasswordFile().toPath());
+    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
+  }
+
+  private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {
+
+    if (config.getTlsOptions().isEmpty()) {
+      return input;
+    }
+
+    HttpServerOptions result = new HttpServerOptions(input);
+    result.setSsl(true);
+    final TlsOptions tlsConfig = config.getTlsOptions().get();
+
+    result = applyTlsKeyStore(result, tlsConfig);
+
+    if (tlsConfig.getClientAuthConstraints().isPresent()) {
+      result = applyClientAuthentication(result, tlsConfig.getClientAuthConstraints().get());
+    }
+
+    return result;
+  }
+
+  private static HttpServerOptions applyTlsKeyStore(
+      final HttpServerOptions input, final TlsOptions tlsConfig) {
+    final HttpServerOptions result = new HttpServerOptions(input);
+
+    try {
+      final String keyStorePathname =
+          tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
+      final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
+      result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
+      return result;
+    } catch (final NoSuchFileException e) {
+      throw new InitializationException(
+          "Requested file " + e.getMessage() + " does not exist at specified location.", e);
+    } catch (final AccessDeniedException e) {
+      throw new InitializationException(
+          "Current user does not have permissions to access " + e.getMessage(), e);
+    } catch (final IOException e) {
+      throw new InitializationException("Failed to load TLS files " + e.getMessage(), e);
+    }
+  }
+
+  private static HttpServerOptions applyClientAuthentication(
+      final HttpServerOptions input, final ClientAuthConstraints constraints) {
+    final HttpServerOptions result = new HttpServerOptions(input);
+
+    result.setClientAuth(ClientAuth.REQUIRED);
+    try {
+      constraints
+          .getKnownClientsFile()
+          .ifPresent(
+              whitelistFile ->
+                  result.setTrustOptions(
+                      VertxTrustOptions.whitelistClients(
+                          whitelistFile.toPath(), constraints.isCaAuthorizedClientAllowed())));
+    } catch (final IllegalArgumentException e) {
+      throw new InitializationException("Illegally formatted client fingerprint file.");
+    }
+
+    return result;
+  }
+
+  public static JsonDecoder createJsonDecoder() {
+    // Force Transaction Deserialization to fail if missing expected properties
+    final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+
+    return new JsonDecoder(jsonObjectMapper);
+  }
+
+  private static String readSecretFromFile(final Path path) throws IOException {
+    final byte[] fileContent = Files.readAllBytes(path);
+    return new String(fileContent, Charsets.UTF_8);
   }
 }

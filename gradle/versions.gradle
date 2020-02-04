@@ -13,10 +13,10 @@
 
 dependencyManagement {
   dependencies {
-    dependency 'com.google.errorprone:error_prone_check_api:2.3.2'
-    dependency 'com.google.errorprone:error_prone_core:2.3.2'
-    dependency 'com.google.errorprone:error_prone_annotation:2.3.2'
-    dependency 'com.google.errorprone:error_prone_test_helpers:2.3.2'
+    dependency 'com.google.errorprone:error_prone_check_api:2.3.4'
+    dependency 'com.google.errorprone:error_prone_core:2.3.4'
+    dependency 'com.google.errorprone:error_prone_annotation:2.3.4'
+    dependency 'com.google.errorprone:error_prone_test_helpers:2.3.4'
 
     dependency 'com.google.guava:guava:27.0.1-jre'
 
@@ -26,13 +26,13 @@ dependencyManagement {
 
     dependency 'commons-cli:commons-cli:1.4'
 
-    dependency 'info.picocli:picocli:3.9.2'
+    dependency 'info.picocli:picocli:4.1.4'
 
-    dependency 'io.vertx:vertx-codegen:3.6.3'
-    dependency 'io.vertx:vertx-core:3.6.3'
-    dependency 'io.vertx:vertx-unit:3.6.3'
-    dependency 'io.vertx:vertx-web:3.6.3'
-    dependency 'io.vertx:vertx-web-client:3.6.3'
+    dependency 'io.vertx:vertx-codegen:3.8.2'
+    dependency 'io.vertx:vertx-core:3.8.2'
+    dependency 'io.vertx:vertx-unit:3.8.2'
+    dependency 'io.vertx:vertx-web:3.8.2'
+    dependency 'io.vertx:vertx-web-client:3.8.2'
 
     dependency 'io.rest-assured:rest-assured:3.0.7'
 
@@ -50,6 +50,7 @@ dependencyManagement {
 
     dependency 'org.mockito:mockito-core:3.0.0'
     dependency 'org.mockito:mockito-junit-jupiter:3.0.0'
+    dependency 'org.mockito:mockito-inline:2.13.0'
 
     dependency 'org.awaitility:awaitility:3.1.6'
 
@@ -58,5 +59,11 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.5'
     dependency 'org.web3j:crypto:4.5.5'
     dependency 'org.web3j:besu:4.5.5'
+
+    dependency 'org.apache.tuweni:tuweni-toml:0.9.0'
+    dependency 'org.apache.tuweni:tuweni-net:0.9.0'
+    
+    dependency 'org.bouncycastle:bcpkix-jdk15on:1.60'
+
   }
 }

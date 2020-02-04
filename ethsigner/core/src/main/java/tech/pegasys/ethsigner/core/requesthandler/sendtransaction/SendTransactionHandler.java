@@ -22,13 +22,14 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.signing.TransactionSerialiser;
+import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import java.util.Optional;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.DecodeException;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,13 +64,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {
-      transaction = transactionFactory.createTransaction(request);
+      transaction = transactionFactory.createTransaction(context, request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
-    } catch (final IllegalArgumentException e) {
-      LOG.debug("JSON Deserialisation failed for request: {}", request.getParams(), e);
+    } catch (final IllegalArgumentException | DecodeException e) {
+      LOG.debug("JSON Deserialization failed for request: {}", request.getParams(), e);
       context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
       return;
     }
@@ -84,24 +85,24 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
-    final TransactionSerialiser transactionSerialiser =
-        new TransactionSerialiser(transactionSigner.get(), chainId);
-    sendTransaction(transaction, transactionSerialiser, context, request);
+    final TransactionSerializer transactionSerializer =
+        new TransactionSerializer(transactionSigner.get(), chainId);
+    sendTransaction(transaction, transactionSerializer, context, request);
   }
 
   private void sendTransaction(
       final Transaction transaction,
-      final TransactionSerialiser transactionSerialiser,
+      final TransactionSerializer transactionSerializer,
       final RoutingContext routingContext,
       final JsonRpcRequest request) {
     final TransactionTransmitter transmitter =
-        createTransactionTransmitter(transaction, transactionSerialiser, routingContext, request);
+        createTransactionTransmitter(transaction, transactionSerializer, routingContext, request);
     transmitter.send();
   }
 
   private TransactionTransmitter createTransactionTransmitter(
       final Transaction transaction,
-      final TransactionSerialiser transactionSerialiser,
+      final TransactionSerializer transactionSerializer,
       final RoutingContext routingContext,
       final JsonRpcRequest request) {
 
@@ -110,7 +111,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return new RetryingTransactionTransmitter(
           ethNodeClient,
           transaction,
-          transactionSerialiser,
+          transactionSerializer,
           vertxTransmitterFactory,
           new NonceTooLowRetryMechanism(MAX_NONCE_RETRIES),
           routingContext);
@@ -119,7 +120,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return new TransactionTransmitter(
           ethNodeClient,
           transaction,
-          transactionSerialiser,
+          transactionSerializer,
           vertxTransmitterFactory,
           routingContext);
     }

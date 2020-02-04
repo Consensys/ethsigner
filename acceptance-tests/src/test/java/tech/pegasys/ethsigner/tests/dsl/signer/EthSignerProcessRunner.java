@@ -14,9 +14,14 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,15 +32,18 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
@@ -139,6 +147,21 @@ public class EthSignerProcessRunner {
       params.add("--data-path");
       params.add(dataPath.toAbsolutePath().toString());
     }
+
+    params.addAll(createServerTlsArgs());
+    params.addAll(createDownstreamTlsArgs());
+
+    final StringJoiner javaOpts = new StringJoiner(" ");
+
+    if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
+      final TlsCertificateDefinition overriddenCaTrustStore =
+          signerConfig.getOverriddenCaTrustStore().get();
+      final Path overriddenCaTrustStorePath = createJksTrustStore(dataPath, overriddenCaTrustStore);
+      javaOpts.add(
+          "-Djavax.net.ssl.trustStore=" + overriddenCaTrustStorePath.toAbsolutePath().toString());
+      javaOpts.add("-Djavax.net.ssl.trustStorePassword=" + overriddenCaTrustStore.getPassword());
+    }
+
     params.addAll(signerConfig.transactionSignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
@@ -148,6 +171,11 @@ public class EthSignerProcessRunner {
             .directory(new File(System.getProperty("user.dir")).getParentFile())
             .redirectErrorStream(true)
             .redirectInput(Redirect.INHERIT);
+
+    if (Boolean.getBoolean("debugSubProcess")) {
+      javaOpts.add("-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+    }
+    processBuilder.environment().put("JAVA_OPTS", javaOpts.toString());
 
     try {
       final Process process = processBuilder.start();
@@ -160,6 +188,55 @@ public class EthSignerProcessRunner {
     if (useDynamicPortAllocation) {
       loadPortsFile();
     }
+  }
+
+  private Collection<? extends String> createServerTlsArgs() {
+    final List<String> params = Lists.newArrayList();
+
+    if (signerConfig.serverTlsOptions().isPresent()) {
+      final TlsOptions serverTlsOptions = signerConfig.serverTlsOptions().get();
+      params.add("--tls-keystore-file");
+      params.add(serverTlsOptions.getKeyStoreFile().toString());
+      params.add("--tls-keystore-password-file");
+      params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
+      if (serverTlsOptions.getClientAuthConstraints().isEmpty()) {
+        params.add("--tls-allow-any-client");
+      } else {
+        final ClientAuthConstraints constraints = serverTlsOptions.getClientAuthConstraints().get();
+        if (constraints.getKnownClientsFile().isPresent()) {
+          params.add("--tls-known-clients-file");
+          params.add(constraints.getKnownClientsFile().get().toString());
+        }
+        if (constraints.isCaAuthorizedClientAllowed()) {
+          params.add("--tls-allow-ca-clients");
+        }
+      }
+    }
+    return params;
+  }
+
+  private Collection<? extends String> createDownstreamTlsArgs() {
+    final List<String> params = Lists.newArrayList();
+
+    if (signerConfig.downstreamKeyStore().isPresent()) {
+      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamKeyStore().get();
+      params.add("--downstream-http-tls-keystore-file");
+      params.add(keyStoreConfig.getStoreFile().toString());
+      params.add("--downstream-http-tls-keystore-password-file");
+      params.add(keyStoreConfig.getStorePasswordFile().toString());
+    }
+
+    if (signerConfig.downstreamKnownServers().isPresent()) {
+      final File keyStoreConfigFile = signerConfig.downstreamKnownServers().get();
+      params.add("--downstream-http-tls-known-servers-file");
+      params.add(keyStoreConfigFile.getAbsolutePath());
+    }
+
+    return params;
+  }
+
+  public boolean isRunning(final String processName) {
+    return (processes.get(processName) != null) && processes.get(processName).isAlive();
   }
 
   private String executableLocation() {
@@ -222,8 +299,9 @@ public class EthSignerProcessRunner {
   }
 
   private void awaitPortsFile(final Path dataDir) {
+    final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 30;
     final File file = new File(dataDir.toFile(), PORTS_FILENAME);
-    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
+    Awaitility.waitAtMost(secondsToWait, TimeUnit.SECONDS)
         .until(
             () -> {
               if (file.exists()) {

@@ -16,12 +16,16 @@ dependencies {
   testRuntimeOnly 'javax.activation:activation'
   testRuntimeOnly 'org.apache.logging.log4j:log4j-core'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+  testRuntimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
   testImplementation project(':ethsigner:core')
+  testImplementation project(path: ':ethsigner:signer:multikey', configuration: 'testSupportArtifacts')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-core'
+  testImplementation 'io.vertx:vertx-web'
+  testImplementation 'org.apache.tuweni:tuweni-net'
   testImplementation 'org.web3j:crypto'
   testImplementation 'org.web3j:besu'
   testImplementation 'org.apache.logging.log4j:log4j-api'
@@ -37,5 +41,7 @@ task acceptanceTest(type: Test) {
   group = 'verification'
 
   useJUnitPlatform()
+  // toggle to show standard out and standard error of the test JVM(s) on the console
+  testLogging.showStandardStreams = false
 }
 acceptanceTest.dependsOn(rootProject.installDist)

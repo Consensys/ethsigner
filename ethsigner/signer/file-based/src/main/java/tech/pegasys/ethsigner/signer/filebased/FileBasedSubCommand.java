@@ -29,8 +29,7 @@ import picocli.CommandLine.Spec;
 /** File-based authentication related sub-command */
 @Command(
     name = FileBasedSubCommand.COMMAND_NAME,
-    description =
-        "This command ensures transactions are signed by a key stored in an encrypted file.",
+    description = "Sign transactions with a key stored in an encrypted V3 Keystore file.",
     mixinStandardHelpOptions = true)
 public class FileBasedSubCommand extends SignerSubCommand {
 
@@ -38,11 +37,13 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   public FileBasedSubCommand() {}
 
-  @Spec private CommandLine.Model.CommandSpec spec; // Picocli injects reference to command spec
+  @SuppressWarnings("unused") // Picocli injects reference to command spec
+  @Spec
+  private CommandLine.Model.CommandSpec spec;
 
   @Option(
       names = {"-p", "--password-file"},
-      description = "The path to a file containing the passwordFile used to decrypt the keyfile.",
+      description = "The path to a file containing the password used to decrypt the keyfile.",
       required = true,
       arity = "1")
   private Path passwordFilePath;

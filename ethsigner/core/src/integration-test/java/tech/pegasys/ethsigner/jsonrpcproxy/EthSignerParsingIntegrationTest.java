@@ -16,13 +16,13 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.PARSE_ER
 
 import org.junit.jupiter.api.Test;
 
-class EthSignerParsingIntegrationTest extends IntegrationTestBase {
+class EthSignerParsingIntegrationTest extends DefaultTestBase {
 
   private static final Object NO_ID = null;
 
   @Test
   void parseErrorResponseWhenJsonRequestIsMalformed() {
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(MALFORMED_JSON), response.ethSigner(NO_ID, PARSE_ERROR));
   }
 }

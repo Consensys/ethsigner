@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthAccounts;
 
-class EthAccountsIntegrationTest extends IntegrationTestBase {
+class EthAccountsIntegrationTest extends DefaultTestBase {
 
   @Test
   void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {
@@ -37,7 +37,7 @@ class EthAccountsIntegrationTest extends IntegrationTestBase {
     final JsonRpcSuccessResponse responseBody =
         new JsonRpcSuccessResponse(requestBody.getId(), singletonList(unlockedAccount));
 
-    sendRequestThenVerifyResponse(
+    sendPostRequestAndVerifyResponse(
         request.ethSigner(Json.encode(requestBody)),
         response.ethSigner(expectedHeaders, Json.encode(responseBody)));
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,66 +12,42 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.web3j.protocol.Web3jService;
-import org.web3j.protocol.core.Request;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.utils.Base64String;
 
 public class EeaPrivateNonceProvider implements NonceProvider {
 
-  private static final Logger LOG = LogManager.getLogger();
-
-  private final Web3jService web3jService;
   private final String accountAddress;
   private final Base64String privateFrom;
   private final List<Base64String> privateFor;
+  private final VertxNonceRequestTransmitter vertxNonceRequestTransmitter;
 
   public EeaPrivateNonceProvider(
-      final Web3jService web3jService,
       final String accountAddress,
       final Base64String privateFrom,
-      final List<Base64String> privateFor) {
-    this.web3jService = web3jService;
+      final List<Base64String> privateFor,
+      final VertxNonceRequestTransmitter vertxNonceRequestTransmitter) {
     this.accountAddress = accountAddress;
     this.privateFrom = privateFrom;
     this.privateFor = privateFor;
+    this.vertxNonceRequestTransmitter = vertxNonceRequestTransmitter;
   }
 
   @Override
   public BigInteger getNonce() {
-    return getNonceFromClient();
+    final JsonRpcRequest request = generateRequest();
+    return vertxNonceRequestTransmitter.requestNonce(request);
   }
 
-  private BigInteger getNonceFromClient() {
+  protected JsonRpcRequest generateRequest() {
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "priv_getEeaTransactionCount");
+    request.setParams(new Object[] {accountAddress, privateFrom, privateFor});
 
-    final Request<?, EthGetTransactionCount> request =
-        new Request<>(
-            "priv_getEeaTransactionCount",
-            Lists.newArrayList(accountAddress, privateFrom, privateFor),
-            web3jService,
-            EthGetTransactionCount.class);
-
-    try {
-      LOG.trace(
-          "Retrieving Transaction count from eea provider for account {}; privateFrom {}; privateFor {}. ",
-          accountAddress,
-          privateFrom,
-          privateFor);
-      final EthGetTransactionCount count = request.send();
-      final BigInteger transactionCount = count.getTransactionCount();
-      LOG.trace("Reported transaction count for {} is {}", accountAddress, transactionCount);
-      return transactionCount;
-    } catch (final IOException e) {
-      throw new RuntimeException("Unable to determine nonce from eea provider.", e);
-    }
+    return request;
   }
 }

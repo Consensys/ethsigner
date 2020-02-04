@@ -12,12 +12,18 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+
+import java.io.File;
 import java.time.Duration;
+import java.util.Optional;
 
 public class SignerConfiguration {
 
   private static final Duration POLLING_INTERVAL = Duration.ofMillis(500);
-  private static final Duration TIMEOUT = Duration.ofSeconds(1);
+  private static final Duration TIMEOUT = Duration.ofSeconds(5);
   public static final int UNASSIGNED_PORT = 0;
 
   private final String chainId;
@@ -25,18 +31,30 @@ public class SignerConfiguration {
   private final int httpRpcPort;
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
+  private final Optional<TlsOptions> serverTlsOptions;
+  private final Optional<File> downstreamConnectionKnownServers;
+  private final Optional<PkcsStoreConfig> downstreamConnectionKeyStore;
+  private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
 
   public SignerConfiguration(
       final String chainId,
       final String hostname,
       final int httpRpcPort,
       final int webSocketPort,
-      final TransactionSignerParamsSupplier transactionSignerParamsSupplier) {
+      final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
+      final Optional<TlsOptions> serverTlsOptions,
+      final Optional<File> downstreamConnectionKnownServers,
+      final Optional<PkcsStoreConfig> downstreamConnectionKeyStore,
+      final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
+    this.serverTlsOptions = serverTlsOptions;
+    this.downstreamConnectionKnownServers = downstreamConnectionKnownServers;
+    this.downstreamConnectionKeyStore = downstreamConnectionKeyStore;
+    this.overriddenCaTrustStore = overriddenCaTrustStore;
   }
 
   public String hostname() {
@@ -61,6 +79,22 @@ public class SignerConfiguration {
 
   public int webSocketPort() {
     return webSocketPort;
+  }
+
+  public Optional<TlsOptions> serverTlsOptions() {
+    return serverTlsOptions;
+  }
+
+  public Optional<File> downstreamKnownServers() {
+    return downstreamConnectionKnownServers;
+  }
+
+  public Optional<PkcsStoreConfig> downstreamKeyStore() {
+    return downstreamConnectionKeyStore;
+  }
+
+  public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() {
+    return overriddenCaTrustStore;
   }
 
   public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {

@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.core.InitializationException;
+
 import java.io.PrintStream;
 import java.util.List;
 
@@ -63,7 +65,7 @@ public class CommandlineParser {
       handleParameterException(ex);
     } catch (final ExecutionException ex) {
       commandLine.usage(output);
-    } catch (final TransactionSignerInitializationException ex) {
+    } catch (final TransactionSignerInitializationException | InitializationException ex) {
       // perform no-op (user output already supplied in ExceptionHandler)
     } catch (final Exception ex) {
       LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
@@ -103,6 +105,10 @@ public class CommandlineParser {
           output.println("Cause: " + ex.getCause().getMessage());
           ex.getCommandLine().usage(output);
           throw (TransactionSignerInitializationException) ex.getCause();
+        } else if (ex.getCause() instanceof InitializationException) {
+          output.println("Failed to initialize EthSigner");
+          output.println("Cause: " + ex.getCause().getMessage());
+          throw (InitializationException) ex.getCause();
         }
       }
       throw ex;

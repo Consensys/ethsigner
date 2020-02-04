@@ -16,13 +16,13 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import java.text.SimpleDateFormat
 
 plugins {
-  id 'com.diffplug.gradle.spotless' version '3.17.0'
+  id 'com.diffplug.gradle.spotless' version '3.27.0'
   id 'com.jfrog.bintray' version '1.8.4'
   id 'com.github.ben-manes.versions' version '0.20.0'
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'io.spring.dependency-management' version '1.0.6.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.4.8' apply false
-  id 'net.ltgt.errorprone' version '0.6.1'
+  id 'net.ltgt.errorprone' version '1.1.1'
   id 'net.researchgate.release' version '2.7.0'
 }
 
@@ -113,14 +113,9 @@ allprojects {
   targetCompatibility = 11
 
   repositories {
-    if ("$System.env.JENKINS_URL" == 'https://jenkins.pegasys.tech/') {
-      maven { url "https://nexus.int.pegasys.tech/repository/consensys-pegasys/" }
-      maven { url "https://nexus.int.pegasys.tech/repository/jcenter/" }
-    } else {
-      jcenter()
-      mavenCentral()
-      maven { url  "https://consensys.bintray.com/pegasys-repo" }
-    }
+    jcenter()
+    mavenCentral()
+    maven { url  "https://consensys.bintray.com/pegasys-repo" }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
@@ -166,7 +161,7 @@ allprojects {
     ]
 
     options.errorprone {
-      excludedPaths '.*/(generated/*.*|.*ReferenceTest_.*)'
+      excludedPaths = '.*/(generated/*.*|.*ReferenceTest_.*)'
 
       // Our equals need to be symmetric, this checker doesn't respect that.
       check('EqualsGetClass', CheckSeverity.OFF)
@@ -326,7 +321,7 @@ subprojects {
   }
 
   task testSupportJar (type: Jar) {
-    baseName = "${project.name}-support-test"
+    archiveBaseName = "${project.name}-support-test"
     from sourceSets.testSupport.output
   }
 
@@ -342,6 +337,8 @@ subprojects {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+
+    jvmArgs = ['-Xms512m', '-Xmx1g']
 
     useJUnitPlatform()
   }
@@ -407,7 +404,7 @@ startScripts {
 }
 
 dependencies {
-  compile project(':ethsigner:app')
+  implementation project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
 }
 
@@ -430,7 +427,7 @@ distTar {
     delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
   }
   compression = Compression.GZIP
-  extension = 'tar.gz'
+  archiveExtension = 'tar.gz'
 }
 
 distZip {
@@ -462,7 +459,8 @@ tasks.register("dockerDistUntar") {
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def image = project.hasProperty('release.releaseVersion') ? "pegasyseng/ethsigner:" + project.property('release.releaseVersion') : "pegasyseng/ethsigner:develop"
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def dockerBuildDir = "build/docker-ethsigner/"
   workingDir "${dockerBuildDir}"
 
@@ -475,6 +473,42 @@ task distDocker(type: Exec) {
 
   executable "sh"
   args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+}
+
+task testDocker(type: Exec) {
+  dependsOn distDocker
+  def dockerReportsDir = "docker/reports/"
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  workingDir "docker"
+
+  doFirst {
+    new File(dockerReportsDir).mkdir()
+  }
+
+  executable "sh"
+  args "-c", "bash test.sh ${image}"
+}
+
+task dockerUpload(type: Exec) {
+  dependsOn distDocker
+  def imageName = "pegasyseng/ethsigner"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  def cmd = "docker push '${image}'"
+  def additionalTags = []
+
+  if (project.hasProperty('branch') && project.property('branch') == 'master') {
+    additionalTags.add('develop')
+  }
+
+  if (!(version ==~ /.*-SNAPSHOT/)) {
+    additionalTags.add('latest')
+    additionalTags.add(version.split(/\./)[0..1].join('.'))
+  }
+
+  additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
+  executable "sh"
+  args "-c", cmd
 }
 
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
@@ -584,12 +618,13 @@ bintray {
   key = bintrayKey
 
   filesSpec {
-    from distTar.destinationDir.path
-    from distZip.destinationDir.path
+    from distTar.destinationDirectory
+    from distZip.destinationDirectory
     into '.'
   }
 
   publish = true
+  override = version.endsWith('SNAPSHOT')
 
   pkg = bintrayPackage
 }

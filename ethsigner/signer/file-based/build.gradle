@@ -12,12 +12,12 @@
  */
 
 jar {
-  baseName 'ethsigner-signer-file-based'
+  archiveBaseName = 'ethsigner-signer-file-based'
   manifest {
     attributes(
-      'Specification-Title': baseName,
+      'Specification-Title': archiveBaseName,
       'Specification-Version': project.version,
-      'Implementation-Title': baseName,
+      'Implementation-Title': archiveBaseName,
       'Implementation-Version': calculateVersion()
       )
   }
@@ -28,15 +28,13 @@ dependencies {
 
   implementation project(':ethsigner:commandline')
   implementation project(':ethsigner:signing-api')
-
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
-
   implementation 'org.apache.logging.log4j:log4j-api'
-  runtime 'org.apache.logging.log4j:log4j-core'
-  runtime 'org.apache.logging.log4j:log4j-slf4j-impl'
-
   implementation 'org.web3j:core'
+
+  runtimeOnly 'org.apache.logging.log4j:log4j-core'
+  runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'
