@@ -419,7 +419,8 @@ class CommandlineParserTest {
                 .getDownstreamTlsServerTrustOptions()
                 .get()
                 .isCaSignedServerCertificateAllowed())
-        .isFalse();
+        .isFalse(); // NOTE: In this test it results in valid parsing, in actual execution, this
+    // will raise error
   }
 
   @Test
