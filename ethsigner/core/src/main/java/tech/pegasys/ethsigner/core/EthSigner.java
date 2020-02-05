@@ -23,7 +23,6 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
@@ -98,51 +97,48 @@ public final class EthSigner {
   private WebClientOptions applyConfigTlsSettingsTo(final WebClientOptions input) {
     final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
         config.getDownstreamTlsOptions();
-    if (optionalDownstreamTlsOptions.isEmpty()) {
+    if (optionalDownstreamTlsOptions.isEmpty() || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
       return input;
     }
 
     final WebClientOptions result = new WebClientOptions(input);
     final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
-    final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions =
-        downstreamTlsOptions.getDownstreamTlsClientAuthOptions();
-
     result.setSsl(true);
 
-    setDownstreamTlsTrustOptions(result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
+    applyDownstreamTlsTrustOptions(result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
+    applyDownstreamClientAuthOptions(result, downstreamTlsOptions.getDownstreamTlsClientAuthOptions());
 
+    return result;
+  }
+
+  private void applyDownstreamTlsTrustOptions(
+      final WebClientOptions result,
+      final Optional<DownstreamTrustOptions> optionalDownstreamTrustOptions) {
+
+    if (optionalDownstreamTrustOptions.isPresent()) {
+      final Optional<Path> optionalKnownServerFile =
+          optionalDownstreamTrustOptions.get().getKnownServerFile();
+      if (optionalKnownServerFile.isPresent()) {
+        final Path knownServerFile = optionalKnownServerFile.get();
+        try {
+          result.setTrustOptions(
+              whitelistServers(knownServerFile, optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
+        } catch (RuntimeException e) {
+          throw new InitializationException("Failed to load known server file.", e);
+        }
+      } else if (!optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()) {
+        throw new InitializationException(
+            "Downstream TLS CA-signed option cannot be disabled when known-server file is not specified");
+      }
+    }
+  }
+
+  private void applyDownstreamClientAuthOptions(final WebClientOptions result, final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions) {
     if (optionalDownstreamTlsClientAuthOptions.isPresent()) {
       try {
         result.setPfxKeyCertOptions(convertFrom(optionalDownstreamTlsClientAuthOptions.get()));
       } catch (final IOException e) {
         throw new InitializationException("Failed to load client certificate.", e);
-      }
-    }
-
-    return result;
-  }
-
-  private void setDownstreamTlsTrustOptions(
-      final WebClientOptions result,
-      final Optional<DownstreamTrustOptions> optionalDownstreamTrustOptions) {
-    if (optionalDownstreamTrustOptions.isPresent()) {
-      final Optional<File> optionalKnownServerFile =
-          optionalDownstreamTrustOptions.get().getKnownServerFile();
-      if (optionalKnownServerFile.isPresent()) {
-        final Path knownServerFile = optionalKnownServerFile.get().toPath();
-        try {
-          result.setTrustOptions(
-              whitelistServers(
-                  knownServerFile,
-                  optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
-        } catch (RuntimeException e) {
-          throw new InitializationException("Failed to load known server file.", e);
-        }
-      } else if (!optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()) {
-        // this means user does not want to trust any server certificate at all, neither CA-signed
-        // nor self-signed.
-        throw new InitializationException(
-            "Downstream TLS CA signed option must be enabled when known server file is not specified");
       }
     }
   }

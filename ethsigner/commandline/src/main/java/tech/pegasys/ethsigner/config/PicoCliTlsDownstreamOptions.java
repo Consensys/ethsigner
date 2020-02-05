@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.config;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
@@ -21,11 +23,23 @@ import java.util.Optional;
 import picocli.CommandLine.ArgGroup;
 
 public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
+  @Option(
+          names = "--downstream-http-tls-enabled",
+          description = "Flag to enable TLS connection to web3 provider",
+          arity="0",
+          required=true)
+  private boolean tlsEnabled = false;
+
   @ArgGroup(exclusive = false)
   private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
 
   @ArgGroup(exclusive = false)
   private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
+
+  @Override
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
+  }
 
   @Override
   public Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions() {

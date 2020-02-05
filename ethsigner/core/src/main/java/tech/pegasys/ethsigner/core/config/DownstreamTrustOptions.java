@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public interface DownstreamTrustOptions {
-  Optional<File> getKnownServerFile();
+  Optional<Path> getKnownServerFile();
 
   boolean isCaSignedServerCertificateAllowed();
 }

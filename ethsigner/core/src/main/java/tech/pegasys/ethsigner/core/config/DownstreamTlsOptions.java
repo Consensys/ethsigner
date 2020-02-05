@@ -15,6 +15,8 @@ package tech.pegasys.ethsigner.core.config;
 import java.util.Optional;
 
 public interface DownstreamTlsOptions {
+  boolean isTlsEnabled();
+
   Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions();
 
   Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions();

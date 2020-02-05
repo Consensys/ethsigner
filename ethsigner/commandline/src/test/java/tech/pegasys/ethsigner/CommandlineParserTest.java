@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -88,18 +89,21 @@ class CommandlineParserTest {
         config.getDownstreamTlsOptions();
     assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
     final DownstreamTlsOptions downstreamTlsOptions = downstreamTlsOptionsOptional.get();
+    assertThat(downstreamTlsOptions.isTlsEnabled()).isTrue();
+
     assertThat(downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStoreFile())
         .isEqualTo(new File("./client_cert.pfx"));
     assertThat(
             downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStorePasswordFile())
         .isEqualTo(new File("./client_cert.passwd"));
+
     assertThat(
             downstreamTlsOptions
                 .getDownstreamTlsServerTrustOptions()
                 .get()
                 .getKnownServerFile()
                 .get())
-        .isEqualTo(new File("./knownServers.txt"));
+        .isEqualTo(Path.of("./knownServers.txt"));
     assertThat(
             downstreamTlsOptions
                 .getDownstreamTlsServerTrustOptions()
