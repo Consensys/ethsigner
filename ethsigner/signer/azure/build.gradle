@@ -28,13 +28,14 @@ dependencies {
   implementation project(':ethsigner:commandline')
   implementation project(':ethsigner:signing-api')
 
-  implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
+  implementation 'com.microsoft.aad:adal4j'
+  implementation 'com.microsoft.azure:azure-keyvault'
+  implementation 'info.picocli:picocli'
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.web3j:core'
-  implementation 'com.microsoft.azure:azure-keyvault'
-  implementation 'com.microsoft.aad:adal4j'
 
+  runtimeOnly 'com.squareup.okhttp3:okhttp'
   runtimeOnly 'org.apache.logging.log4j:log4j-core'
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
