@@ -32,6 +32,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
+import static java.util.Arrays.asList;
+
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
     description =
@@ -162,6 +164,14 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Optional<DownstreamTlsOptions> getDownstreamTlsOptions() {
     return Optional.ofNullable(picoCliTlsDownstreamOptions);
+  }
+
+  void validateOptions() {
+
+  }
+
+  private void issueOptionWarnings() {
+    // Check that P2P options are able to work
   }
 
   @Override

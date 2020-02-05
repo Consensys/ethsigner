@@ -26,19 +26,15 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
       arity = "0",
+      required = true,
       order = 15)
   private boolean tlsEnabled = false;
 
-  @ArgGroup(exclusive = false, order = 16)
-  private PicoCliDownstreamOptionalTlsOptions optionalTlsOptions;
+  @ArgGroup(exclusive = false)
+  private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
 
-  static class PicoCliDownstreamOptionalTlsOptions {
-    @ArgGroup(exclusive = false)
-    private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
-
-    @ArgGroup(exclusive = false)
-    private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
-  }
+  @ArgGroup(exclusive = false)
+  private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
 
   @Override
   public boolean isTlsEnabled() {
@@ -47,11 +43,11 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
 
   @Override
   public Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions() {
-    return Optional.ofNullable(optionalTlsOptions).map(o -> o.downstreamTlsClientAuthOptions);
+    return Optional.ofNullable(downstreamTlsClientAuthOptions);
   }
 
   @Override
   public Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions() {
-    return Optional.ofNullable(optionalTlsOptions).map(o -> o.downstreamServerTrustOptions);
+    return Optional.ofNullable(downstreamServerTrustOptions);
   }
 }
