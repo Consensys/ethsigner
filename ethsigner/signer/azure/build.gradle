@@ -32,15 +32,15 @@ dependencies {
   implementation 'com.google.guava:guava'
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.web3j:core'
-  implementation 'com.microsoft.azure:azure-keyvault:1.2.1'
-  implementation 'com.microsoft.aad:adal4j:0.0.2'
+  implementation 'com.microsoft.azure:azure-keyvault'
+  implementation 'com.microsoft.aad:adal4j'
 
   runtimeOnly 'org.apache.logging.log4j:log4j-core'
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.mockito:mockito-inline:2.13.0'
+  testImplementation 'org.mockito:mockito-inline'
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-junit-jupiter'
 
