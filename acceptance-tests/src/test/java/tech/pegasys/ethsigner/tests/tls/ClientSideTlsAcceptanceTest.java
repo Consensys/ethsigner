@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Optional;
 
@@ -71,7 +72,8 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+          UnrecoverableKeyException {
     final Signer signer =
         createSigner(
             presentedCert, expectedWeb3ProviderCert, downstreamWeb3Port, listenPort, workDir);
@@ -87,7 +89,8 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+          UnrecoverableKeyException {
 
     final Path clientPasswordFile =
         Files.writeString(workDir.resolve("clientKeystorePassword"), presentedCert.getPassword());

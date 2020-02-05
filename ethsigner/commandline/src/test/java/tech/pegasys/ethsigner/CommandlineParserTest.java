@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -87,29 +86,7 @@ class CommandlineParserTest {
 
     final Optional<DownstreamTlsOptions> downstreamTlsOptionsOptional =
         config.getDownstreamTlsOptions();
-    assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
-    final DownstreamTlsOptions downstreamTlsOptions = downstreamTlsOptionsOptional.get();
-    assertThat(downstreamTlsOptions.isTlsEnabled()).isTrue();
-
-    assertThat(downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStoreFile())
-        .isEqualTo(new File("./client_cert.pfx"));
-    assertThat(
-            downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get().getStorePasswordFile())
-        .isEqualTo(new File("./client_cert.passwd"));
-
-    assertThat(
-            downstreamTlsOptions
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .getKnownServerFile()
-                .get())
-        .isEqualTo(Path.of("./knownServers.txt"));
-    assertThat(
-            downstreamTlsOptions
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isTrue();
+    assertThat(downstreamTlsOptionsOptional.isEmpty()).isTrue();
   }
 
   @Test
@@ -346,122 +323,5 @@ class CommandlineParserTest {
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions()).isEmpty();
-  }
-
-  @Test
-  void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-keystore-file");
-  }
-
-  @Test
-  void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "downstream-http-tls-keystore-password-file");
-  }
-
-  @Test
-  void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-file");
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-password-file");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getDownstreamTlsOptions().get().getDownstreamTlsClientAuthOptions())
-        .isEmpty();
-  }
-
-  @Test
-  void cmdlineIsValidIfDownstreamTrustOptionsAreMissing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getDownstreamTlsOptions().get().getDownstreamTlsServerTrustOptions())
-        .isEmpty();
-  }
-
-  @Test
-  void cmdlineIsValidIfDownstreamTrustKnownServerIsMissingAndCaAuthorizedIsEnabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
-    cmdLine += "--downstream-http-tls-ca-signed-enabled=true ";
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(
-            config
-                .getDownstreamTlsOptions()
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isTrue();
-  }
-
-  @Test
-  void cmdlineIsValidIfDownstreamTrustKnownServerIsMissingAndCaAuthorizedIsDisabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
-    cmdLine += "--downstream-http-tls-ca-signed-enabled=false ";
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(
-            config
-                .getDownstreamTlsOptions()
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isFalse(); // NOTE: In this test it results in valid parsing, in actual execution, this
-    // will raise error
-  }
-
-  @Test
-  void cmdlineIsValidIfDownstreamCaAuthorizedIsEnabledWithoutValue() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-known-servers-file");
-    cmdLine += "--downstream-http-tls-ca-signed-enabled ";
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(
-            config
-                .getDownstreamTlsOptions()
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isTrue();
-  }
-
-  @Test
-  void cmdlineIsValidIfAllDownstreamTlsOptionsAreMissing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine =
-        removeFieldFrom(
-            cmdLine,
-            "downstream-http-tls-known-servers-file",
-            "downstream-http-tls-ca-signed-enabled",
-            "downstream-http-tls-keystore-file",
-            "downstream-http-tls-keystore-password-file");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getDownstreamTlsOptions()).isEmpty();
   }
 }

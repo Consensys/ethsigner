@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import picocli.CommandLine;
-import picocli.CommandLine.Option;
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
@@ -21,20 +19,26 @@ import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import java.util.Optional;
 
 import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Option;
 
 public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
   @Option(
-          names = "--downstream-http-tls-enabled",
-          description = "Flag to enable TLS connection to web3 provider",
-          arity="0",
-          required=true)
+      names = "--downstream-http-tls-enabled",
+      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
+      arity = "0",
+      order = 15)
   private boolean tlsEnabled = false;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
+  @ArgGroup(exclusive = false, order = 16)
+  private PicoCliDownstreamOptionalTlsOptions optionalTlsOptions;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
+  static class PicoCliDownstreamOptionalTlsOptions {
+    @ArgGroup(exclusive = false)
+    private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
+
+    @ArgGroup(exclusive = false)
+    private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
+  }
 
   @Override
   public boolean isTlsEnabled() {
@@ -43,11 +47,11 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
 
   @Override
   public Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions() {
-    return Optional.ofNullable(downstreamTlsClientAuthOptions);
+    return Optional.ofNullable(optionalTlsOptions).map(o -> o.downstreamTlsClientAuthOptions);
   }
 
   @Override
   public Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions() {
-    return Optional.ofNullable(downstreamServerTrustOptions);
+    return Optional.ofNullable(optionalTlsOptions).map(o -> o.downstreamServerTrustOptions);
   }
 }

@@ -97,7 +97,8 @@ public final class EthSigner {
   private WebClientOptions applyConfigTlsSettingsTo(final WebClientOptions input) {
     final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
         config.getDownstreamTlsOptions();
-    if (optionalDownstreamTlsOptions.isEmpty() || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
+    if (optionalDownstreamTlsOptions.isEmpty()
+        || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
       return input;
     }
 
@@ -105,8 +106,10 @@ public final class EthSigner {
     final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
     result.setSsl(true);
 
-    applyDownstreamTlsTrustOptions(result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
-    applyDownstreamClientAuthOptions(result, downstreamTlsOptions.getDownstreamTlsClientAuthOptions());
+    applyDownstreamTlsTrustOptions(
+        result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
+    applyDownstreamClientAuthOptions(
+        result, downstreamTlsOptions.getDownstreamTlsClientAuthOptions());
 
     return result;
   }
@@ -122,7 +125,9 @@ public final class EthSigner {
         final Path knownServerFile = optionalKnownServerFile.get();
         try {
           result.setTrustOptions(
-              whitelistServers(knownServerFile, optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
+              whitelistServers(
+                  knownServerFile,
+                  optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
         } catch (RuntimeException e) {
           throw new InitializationException("Failed to load known server file.", e);
         }
@@ -133,7 +138,9 @@ public final class EthSigner {
     }
   }
 
-  private void applyDownstreamClientAuthOptions(final WebClientOptions result, final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions) {
+  private void applyDownstreamClientAuthOptions(
+      final WebClientOptions result,
+      final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions) {
     if (optionalDownstreamTlsClientAuthOptions.isPresent()) {
       try {
         result.setPfxKeyCertOptions(convertFrom(optionalDownstreamTlsClientAuthOptions.get()));

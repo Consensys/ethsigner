@@ -12,25 +12,28 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import picocli.CommandLine.Option;
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
+import picocli.CommandLine.Option;
+
 public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions {
   @Option(
       names = "--downstream-http-tls-disallow-ca-signed",
       description = "Flag to disallow CA signed server certificates.",
-      arity="0")
+      arity = "0",
+      order = 19)
   private boolean tlsDisallowCaSignedCert = false;
 
   @Option(
       names = "--downstream-http-tls-known-servers-file",
-      description = "Path to a file containing the hostname, port and certificate fingerprints of authorized servers",
-      required=true,
-      arity = "1"
-  )
+      description =
+          "Path to a file containing the hostname, port and certificate fingerprints of authorized servers",
+      required = true,
+      arity = "1",
+      order = 20)
   private Path tlsknownServersFile;
 
   @Override

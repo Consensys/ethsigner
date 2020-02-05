@@ -26,14 +26,16 @@ public class PicoCliDownstreamTlsClientAuthOptions implements PkcsStoreConfig {
           "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
               + "a TLS-enabled web3 provider.",
       arity = "1",
-      required = true)
+      required = true,
+      order = 17)
   private File clientCertificateFile;
 
   @Option(
       names = "--downstream-http-tls-keystore-password-file",
       description = "Path to a file containing the password used to decrypt the client cert.",
       arity = "1",
-      required = true)
+      required = true,
+      order = 18)
   private File clientCertificatePasswordFile;
 
   @Override
