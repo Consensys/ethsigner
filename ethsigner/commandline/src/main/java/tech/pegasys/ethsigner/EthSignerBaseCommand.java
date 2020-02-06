@@ -179,7 +179,7 @@ public class EthSignerBaseCommand implements Config {
    * @param commandLine the CommandLine instance
    * @param logger The Logger to use to print the warning
    */
-  @Deprecated(forRemoval = true)
+  @Deprecated
   void validateOptions(final CommandLine commandLine, final Logger logger) {
     if (getDownstreamTlsOptions().isPresent()) {
       CommandLineUtils.checkOptionDependencies(
