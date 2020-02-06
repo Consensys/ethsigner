@@ -17,6 +17,8 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
+import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -67,7 +69,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
 
   @Test
   void downstreamTlsOptionsAreEmptyByDefault() {
-    String cmdLine = validBaseCommandOptions();
+    final String cmdLine = validBaseCommandOptions();
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -115,37 +117,21 @@ class CommandlineParserDownstreamTlsOptionsTest {
         config.getDownstreamTlsOptions();
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
-    assertThat(optionalDownstreamTlsOptions.get().isTlsEnabled()).as("TLS Enabled").isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsServerTrustOptions().isPresent())
-        .isTrue();
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .getKnownServerFile()
-                .get())
-        .isEqualTo(Path.of("./test.txt"));
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isFalse();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsClientAuthOptions().isPresent())
-        .isTrue();
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsClientAuthOptions()
-                .get()
-                .getStoreFile())
-        .isEqualTo(Path.of("./test.ks").toFile());
+    final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
+    assertThat(downstreamTlsOptions.isTlsEnabled()).as("TLS Enabled").isTrue();
+    assertThat(downstreamTlsOptions.getDownstreamTlsServerTrustOptions().isPresent()).isTrue();
+    final DownstreamTrustOptions downstreamTrustOptions =
+        downstreamTlsOptions.getDownstreamTlsServerTrustOptions().get();
+    assertThat(downstreamTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(downstreamTrustOptions.isCaSignedServerCertificateAllowed()).isFalse();
+
+    final PkcsStoreConfig pkcsStoreConfig =
+        downstreamTlsOptions.getDownstreamTlsClientAuthOptions().get();
+    assertThat(pkcsStoreConfig.getStoreFile()).isEqualTo(Path.of("./test.ks").toFile());
   }
 
   @Test
-  void cmdLineShowsWarningIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
+  void cmdLineFailsIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
     String cmdLine = validBaseCommandOptions();
     cmdLine +=
         "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
@@ -153,12 +139,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
-    assertThat(result).isTrue();
-    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
-        config.getDownstreamTlsOptions();
-    assertThat(optionalDownstreamTlsOptions.isPresent()).isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().isTlsEnabled()).isFalse();
-    // TODO: Mock LOG that it contains required warning msg
+    assertThat(result).isTrue(); // this will fail once we upgrade to picocli 4.2
   }
 
   @Test
@@ -189,29 +170,13 @@ class CommandlineParserDownstreamTlsOptionsTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
-        config.getDownstreamTlsOptions();
-    assertThat(optionalDownstreamTlsOptions.isPresent()).isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().isTlsEnabled()).isFalse();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsServerTrustOptions().isPresent())
-        .isTrue();
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .getKnownServerFile()
-                .get())
-        .isEqualTo(Path.of("./test.txt"));
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isFalse();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsClientAuthOptions().isEmpty())
-        .isTrue();
+    final DownstreamTlsOptions downstreamTlsOptions = config.getDownstreamTlsOptions().get();
+    assertThat(downstreamTlsOptions.isTlsEnabled()).isFalse();
+    final DownstreamTrustOptions downstreamTrustOptions =
+        downstreamTlsOptions.getDownstreamTlsServerTrustOptions().get();
+    assertThat(downstreamTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(downstreamTrustOptions.isCaSignedServerCertificateAllowed()).isFalse();
+    assertThat(downstreamTlsOptions.getDownstreamTlsClientAuthOptions().isEmpty()).isTrue();
   }
 
   @Test
@@ -223,29 +188,15 @@ class CommandlineParserDownstreamTlsOptionsTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
-    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
-        config.getDownstreamTlsOptions();
-    assertThat(optionalDownstreamTlsOptions.isPresent()).isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().isTlsEnabled()).isFalse();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsServerTrustOptions().isPresent())
-        .isTrue();
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .getKnownServerFile()
-                .get())
-        .isEqualTo(Path.of("./test.txt"));
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsServerTrustOptions()
-                .get()
-                .isCaSignedServerCertificateAllowed())
-        .isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsClientAuthOptions().isEmpty())
-        .isTrue();
+
+    final DownstreamTlsOptions downstreamTlsOptions = config.getDownstreamTlsOptions().get();
+    assertThat(downstreamTlsOptions.isTlsEnabled()).isFalse();
+    assertThat(downstreamTlsOptions.getDownstreamTlsServerTrustOptions().isPresent()).isTrue();
+    final DownstreamTrustOptions downstreamTrustOptions =
+        downstreamTlsOptions.getDownstreamTlsServerTrustOptions().get();
+    assertThat(downstreamTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(downstreamTrustOptions.isCaSignedServerCertificateAllowed()).isTrue();
+    assertThat(downstreamTlsOptions.getDownstreamTlsClientAuthOptions().isEmpty()).isTrue();
   }
 
   @Test
