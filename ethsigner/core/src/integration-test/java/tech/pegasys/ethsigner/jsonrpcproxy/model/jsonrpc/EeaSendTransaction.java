@@ -22,9 +22,6 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
 
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.Builder;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.ValueHolder;
-
 import java.util.Optional;
 
 import io.vertx.core.json.JsonObject;
@@ -40,7 +37,7 @@ public class EeaSendTransaction {
   public static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
   public static final String PRIVATE_FOR = "GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=";
 
-  private static final String DEFAULT_VALUE = "0x0";
+  public static final String DEFAULT_VALUE = "0x0";
 
   /**
    * Due to the underlying server mocking, When only a single request is used, the contents does not
@@ -65,21 +62,6 @@ public class EeaSendTransaction {
   public Request<Object, EthSendTransaction> request(
       final PrivateTransaction.Builder privateTransactionBuilder) {
     return request(privateTransactionBuilder.build());
-  }
-
-  public Builder defaultTransaction() {
-    return new PrivateTransaction.Builder()
-        .withFrom(UNLOCKED_ACCOUNT)
-        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-        .withGasPrice("0x9184e72a000")
-        .withGas("0x76c0")
-        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-        .withValue(DEFAULT_VALUE)
-        .withData(
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
-        .withPrivateFrom(PRIVATE_FROM)
-        .withPrivateFor(singletonList(PRIVATE_FOR))
-        .withRestriction("restricted");
   }
 
   private Request<Object, EthSendTransaction> createRequest(final JsonObject transaction) {

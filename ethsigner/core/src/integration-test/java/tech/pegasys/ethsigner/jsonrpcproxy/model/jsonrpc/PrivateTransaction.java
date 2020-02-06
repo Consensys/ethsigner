@@ -12,6 +12,12 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
+import static java.util.Collections.singletonList;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.DEFAULT_VALUE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FOR;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FROM;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.UNLOCKED_ACCOUNT;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -97,20 +103,19 @@ public class PrivateTransaction {
     return privacyGroupId;
   }
 
-  public static class ValueHolder<T> {
-    private final T value;
-
-    public ValueHolder(final T value) {
-      this.value = value;
-    }
-
-    public T getValue() {
-      return value;
-    }
-
-    public static <T> ValueHolder<T> valueOf(final T t) {
-      return new ValueHolder<>(t);
-    }
+  public static Builder defaultTransaction() {
+    return new PrivateTransaction.Builder()
+        .withFrom(UNLOCKED_ACCOUNT)
+        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
+        .withGasPrice("0x9184e72a000")
+        .withGas("0x76c0")
+        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
+        .withValue(DEFAULT_VALUE)
+        .withData(
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+        .withPrivateFrom(PRIVATE_FROM)
+        .withPrivateFor(singletonList(PRIVATE_FOR))
+        .withRestriction("restricted");
   }
 
   public static class Builder {
@@ -136,7 +141,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutNonce() {
+    public Builder missingNonce() {
       this.nonce = Optional.empty();
       return this;
     }
@@ -146,7 +151,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutGasPrice() {
+    public Builder missingGasPrice() {
       this.gasPrice = Optional.empty();
       return this;
     }
@@ -156,7 +161,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutGas() {
+    public Builder missingGas() {
       this.gas = Optional.empty();
       return this;
     }
@@ -166,7 +171,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutTo() {
+    public Builder missingTo() {
       this.to = Optional.empty();
       return this;
     }
@@ -176,7 +181,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutValue() {
+    public Builder missingValue() {
       this.value = Optional.empty();
       return this;
     }
@@ -186,7 +191,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutData() {
+    public Builder missingData() {
       this.data = Optional.empty();
       return this;
     }
@@ -196,7 +201,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutPrivateFrom() {
+    public Builder missingPrivateFrom() {
       this.privateFrom = Optional.empty();
       return this;
     }
@@ -206,7 +211,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutPrivateFor() {
+    public Builder missingPrivateFor() {
       this.privateFor = Optional.empty();
       return this;
     }
@@ -216,7 +221,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutPrivacyGroupId() {
+    public Builder missingPrivacyGroupId() {
       this.privacyGroupId = Optional.empty();
       return this;
     }
@@ -226,7 +231,7 @@ public class PrivateTransaction {
       return this;
     }
 
-    public Builder withoutRestriction() {
+    public Builder missingRestriction() {
       this.restriction = Optional.empty();
       return this;
     }

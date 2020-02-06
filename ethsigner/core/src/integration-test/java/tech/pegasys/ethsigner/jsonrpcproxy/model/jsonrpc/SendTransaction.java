@@ -15,9 +15,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
 
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.ValueHolder;
-import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction.Builder;
-
 import java.util.Optional;
 
 import io.vertx.core.json.JsonObject;
@@ -57,29 +54,6 @@ public class SendTransaction {
 
   public Request<?, EthSendTransaction> request(final Transaction.Builder transactionBuilder) {
     return request(transactionBuilder.build());
-  }
-
-  public Builder smartContract() {
-    return new Builder()
-        .withFrom(UNLOCKED_ACCOUNT)
-        .withGas("0x76c0")
-        .withGasPrice("0x9184e72a000")
-        .withValue(FIELD_VALUE_DEFAULT)
-        .withNonce("0x1")
-        .withData(
-            "0x608060405234801561001057600080fd5b50604051602080610114833981016040525160005560e1806100336000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416632a1afcd98114605757806360fe47b114607b5780636d4ce63c146092575b600080fd5b348015606257600080fd5b50606960a4565b60408051918252519081900360200190f35b348015608657600080fd5b50609060043560aa565b005b348015609d57600080fd5b50606960af565b60005481565b600055565b600054905600a165627a7a72305820ade758a90b7d6841e99ca64c339eda0498d86ec9a97d5dcdeb3f12e3500079130029000000000000000000000000000000000000000000000000000000000000000a");
-  }
-
-  public Builder defaultTransaction() {
-    return new Transaction.Builder()
-        .withFrom(UNLOCKED_ACCOUNT)
-        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
-        .withGasPrice("0x9184e72a000")
-        .withGas("0x76c0")
-        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
-        .withValue("0x9184e72a")
-        .withData(
-            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
   }
 
   private Request<?, EthSendTransaction> createRequest(final JsonObject transaction) {

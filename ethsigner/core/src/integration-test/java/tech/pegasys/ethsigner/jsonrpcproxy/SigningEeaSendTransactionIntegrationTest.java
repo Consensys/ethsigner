@@ -43,13 +43,13 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
-  private PrivateTransaction.Builder transactionBuilder;
+  private final PrivateTransaction.Builder transactionBuilder =
+      PrivateTransaction.defaultTransaction();
 
   @BeforeEach
   void setUp() {
     sendTransaction = new EeaSendTransaction();
     sendRawTransaction = new EeaSendRawTransaction(eeaJsonRpc(), credentials);
-    transactionBuilder = sendTransaction.defaultTransaction();
     final TransactionCountResponder getTransactionResponse =
         new TransactionCountResponder(nonce -> nonce.add(ONE), EEA_GET_TRANSACTION_COUNT);
     clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
@@ -81,7 +81,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(ethNodeResponseBody));
   }
 
@@ -152,7 +152,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void invalidParamsResponseWhenMissingSenderAddress() {
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutPrivateFrom())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingPrivateFrom())),
         response.ethSigner(INVALID_PARAMS));
   }
 
@@ -161,7 +161,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(""));
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withoutTo()));
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.missingTo()));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -179,7 +179,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(""));
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withoutTo()));
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.missingTo()));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -216,9 +216,9 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signTransactionWhenMissingReceiverAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(transactionBuilder.withoutTo());
+        sendTransaction.request(transactionBuilder.missingTo());
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withoutTo()));
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.missingTo()));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -236,7 +236,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(null));
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withoutTo()));
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.missingTo()));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
@@ -252,7 +252,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signTransactionWhenMissingValue() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(transactionBuilder.withoutValue());
+        sendTransaction.request(transactionBuilder.missingValue());
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
             sendTransaction.request(transactionBuilder.withValue(FIELD_VALUE_DEFAULT)));
@@ -298,7 +298,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signTransactionWhenMissingGas() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(transactionBuilder.withoutGas());
+        sendTransaction.request(transactionBuilder.missingGas());
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
             sendTransaction.request(transactionBuilder.withGas(FIELD_GAS_DEFAULT)));
@@ -346,7 +346,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signTransactionWhenMissingGasPrice() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(transactionBuilder.withoutGasPrice());
+        sendTransaction.request(transactionBuilder.missingGasPrice());
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
             sendTransaction.request(transactionBuilder.withGasPrice(FIELD_GAS_PRICE_DEFAULT)));
@@ -393,7 +393,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signSendTransactionWhenMissingData() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(transactionBuilder.withoutData());
+        sendTransaction.request(transactionBuilder.missingData());
     final String sendRawTransactionRequest =
         sendRawTransaction.request(
             sendTransaction.request(transactionBuilder.withData(FIELD_DATA_DEFAULT)));
@@ -443,7 +443,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         response.ethNode(successResponseFromWeb3Provider));
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(successResponseFromWeb3Provider));
   }
 
@@ -477,7 +477,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         response.ethNode(successResponseFromWeb3Provider));
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(successResponseFromWeb3Provider));
   }
 
@@ -489,7 +489,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         request.ethNode(rawTransactionWithInitialNonce), response.ethNode(INVALID_PARAMS));
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(INVALID_PARAMS));
   }
 
@@ -498,7 +498,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     setupEthNodeResponse(".*eea_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 6);
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(INTERNAL_ERROR));
   }
 
@@ -508,21 +508,21 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     timeoutRequest(".*eea_sendRawTransaction.*");
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
   }
 
   @Test
   void invalidParamsResponseWhenMissingPrivateFrom() {
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutPrivateFrom())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingPrivateFrom())),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
   void invalidParamsResponseWhenMissingPrivateFor() {
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutPrivateFor())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingPrivateFor())),
         response.ethSigner(INVALID_PARAMS));
   }
 
@@ -536,7 +536,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void invalidParamsResponseWhenMissingRestriction() {
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutRestriction())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingRestriction())),
         response.ethSigner(INVALID_PARAMS));
   }
 
@@ -561,7 +561,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
     setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.withoutNonce())),
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(ethNodeResponseBody));
     final String expectedBody =
         String.format(

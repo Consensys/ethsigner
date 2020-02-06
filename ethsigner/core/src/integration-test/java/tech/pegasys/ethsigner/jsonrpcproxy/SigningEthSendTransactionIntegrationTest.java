@@ -40,13 +40,12 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
-  private Transaction.Builder transactionBuilder;
+  private final Transaction.Builder transactionBuilder = Transaction.defaultTransaction();
 
   @BeforeEach
   void setUp() {
     sendTransaction = new SendTransaction();
     sendRawTransaction = new SendRawTransaction(jsonRpc(), credentials);
-    transactionBuilder = sendTransaction.defaultTransaction();
     final TransactionCountResponder getTransactionResponse =
         new TransactionCountResponder(nonce -> nonce.add(ONE), ETH_GET_TRANSACTION_COUNT);
     clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
@@ -409,7 +408,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signSendTransactionWhenContract() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(sendTransaction.smartContract());
+        sendTransaction.request(Transaction.smartContract());
     final String sendRawTransactionRequest = sendRawTransaction.request(sendTransactionRequest);
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
@@ -428,7 +427,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void signSendTransaction() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
-        sendTransaction.request(sendTransaction.defaultTransaction());
+        sendTransaction.request(Transaction.smartContract());
     final String sendRawTransactionRequest = sendRawTransaction.request(sendTransactionRequest);
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
