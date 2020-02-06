@@ -217,7 +217,7 @@ public class EthSignerProcessRunner {
     return params;
   }
 
-  private Collection<? extends String> createDownstreamTlsArgs() {
+  private Collection<String> createDownstreamTlsArgs() {
     final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
         signerConfig.downstreamTlsOptions();
     if (optionalDownstreamTlsOptions.isEmpty()
@@ -256,7 +256,7 @@ public class EthSignerProcessRunner {
               }
             });
 
-    return params;
+    return Collections.unmodifiableCollection(params);
   }
 
   public boolean isRunning(final String processName) {
