@@ -28,7 +28,7 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
       arity = "0",
       required = true,
       order = 15)
-  private boolean tlsEnabled = false;
+  private boolean tlsEnabled;
 
   @ArgGroup(exclusive = false)
   private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;

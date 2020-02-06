@@ -18,11 +18,10 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,27 +29,26 @@ import picocli.CommandLine;
 
 class CommandlineParserDownstreamTlsOptionsTest {
 
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
+  private final StringWriter commandStdOutput = new StringWriter();
+  private final StringWriter commandErrOutput = new StringWriter();
+  private final PrintWriter stdOut = new PrintWriter(commandStdOutput, true);
+  private final PrintWriter stdErr = new PrintWriter(commandErrOutput, true);
 
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
   private NullSignerSubCommand subCommand;
   private String defaultUsageText;
-  private String nullCommandHelp;
 
   @BeforeEach
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, stdOut, stdErr);
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
     commandLine.addSubcommand(subCommand.getCommandName(), subCommand);
     defaultUsageText = commandLine.getUsageMessage();
-    nullCommandHelp =
-        commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
 
   private void missingParameterShowsError(final String input, final String... paramsToRemove) {
@@ -62,9 +60,9 @@ class CommandlineParserDownstreamTlsOptionsTest {
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+      assertThat(commandErrOutput.toString()).contains("--" + paramToRemove, "Missing");
     }
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   @Test
@@ -147,7 +145,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
   }
 
   @Test
-  void cmdLineIsValidIfDownstreamClientAuthOptionsAreSpecified() {
+  void cmdLineShowsWarningIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
     String cmdLine = validBaseCommandOptions();
     cmdLine +=
         "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
@@ -160,17 +158,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
         config.getDownstreamTlsOptions();
     assertThat(optionalDownstreamTlsOptions.isPresent()).isTrue();
     assertThat(optionalDownstreamTlsOptions.get().isTlsEnabled()).isFalse();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsServerTrustOptions().isEmpty())
-        .isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getDownstreamTlsClientAuthOptions().isPresent())
-        .isTrue();
-    assertThat(
-            optionalDownstreamTlsOptions
-                .get()
-                .getDownstreamTlsClientAuthOptions()
-                .get()
-                .getStoreFile())
-        .isEqualTo(Path.of("./test.ks").toFile());
+    // TODO: Mock LOG that it contains required warning msg
   }
 
   @Test
@@ -264,9 +252,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
   void downstreamKnownServerIsRequiredIfCASignedDisable() {
     String cmdLine = validBaseCommandOptions();
     cmdLine += "--downstream-http-tls-disallow-ca-signed ";
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     missingParameterShowsError(cmdLine, "downstream-http-tls-known-servers-file");
   }

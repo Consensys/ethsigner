@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner;
 
+import static java.util.Arrays.asList;
+
 import tech.pegasys.ethsigner.config.PicoCliTlsDownstreamOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -19,6 +21,7 @@ import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.util.CommandLineUtils;
 
 import java.net.InetAddress;
 import java.nio.file.Path;
@@ -27,12 +30,12 @@ import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
-
-import static java.util.Arrays.asList;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -166,12 +169,30 @@ public class EthSignerBaseCommand implements Config {
     return Optional.ofNullable(picoCliTlsDownstreamOptions);
   }
 
-  void validateOptions() {
-
+  /**
+   * Validate dependent options which are not enforceable by PicoCLI
+   *
+   * @param commandLine the CommandLine instance
+   * @param logger The Logger to use to print the warning
+   */
+  void validateOptions(final CommandLine commandLine, final Logger logger) {
+    issueOptionWarnings(commandLine, logger);
   }
 
-  private void issueOptionWarnings() {
-    // Check that P2P options are able to work
+  private void issueOptionWarnings(final CommandLine commandLine, final Logger logger) {
+    // Check that downstream TLS options are able to work
+    if (getDownstreamTlsOptions().isPresent()) {
+      CommandLineUtils.checkOptionDependencies(
+          logger,
+          commandLine,
+          "--downstream-http-tls-enabled",
+          !getDownstreamTlsOptions().get().isTlsEnabled(),
+          asList(
+              "--downstream-http-tls-keystore-file",
+              "--downstream-http-tls-keystore-password-file",
+              "--downstream-http-tls-known-servers-file",
+              "--downstream-http-tls-disallow-ca-signed"));
+    }
   }
 
   @Override

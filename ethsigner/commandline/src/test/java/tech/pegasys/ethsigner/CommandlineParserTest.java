@@ -21,9 +21,9 @@ import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.util.Optional;
@@ -36,8 +36,10 @@ import picocli.CommandLine;
 
 class CommandlineParserTest {
 
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
+  private final StringWriter commandStdOutput = new StringWriter();
+  private final PrintWriter stdOut = new PrintWriter(commandStdOutput, true);
+  private final StringWriter commandErrOutput = new StringWriter();
+  private final PrintWriter stdErr = new PrintWriter(commandErrOutput, true);
 
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
@@ -49,7 +51,7 @@ class CommandlineParserTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, stdOut, stdErr);
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
@@ -93,29 +95,29 @@ class CommandlineParserTest {
   void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelp() {
     final boolean result = parser.parseCommandLine("--help");
     assertThat(result).isTrue();
-    assertThat(commandOutput.toString()).isEqualTo(defaultUsageText);
+    assertThat(commandStdOutput.toString()).isEqualTo(defaultUsageText);
   }
 
   @Test
   void mainCommandHelpIsDisplayedWhenNoOptionsOtherThanHelpWithoutDashes() {
     final boolean result = parser.parseCommandLine("help");
     assertThat(result).isTrue();
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   @Test
   void reverseHelpRequestShowsSubCommandHelp() {
     final boolean result = parser.parseCommandLine("help", subCommand.getCommandName());
     assertThat(result).isTrue();
-    assertThat(commandOutput.toString()).isEqualTo(nullCommandHelp);
+    assertThat(commandStdOutput.toString()).isEqualTo(nullCommandHelp);
   }
 
   @Test
   void missingSubCommandShowsErrorAndUsageText() {
     final boolean result = parser.parseCommandLine(validBaseCommandOptions().split(" "));
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .contains(MISSING_SUBCOMMAND_ERROR + System.lineSeparator() + defaultUsageText);
+    assertThat(commandErrOutput.toString()).contains(MISSING_SUBCOMMAND_ERROR);
+    assertThat(commandStdOutput.toString()).contains(defaultUsageText);
   }
 
   @Test
@@ -123,9 +125,10 @@ class CommandlineParserTest {
     final String args = modifyField(validBaseCommandOptions(), "downstream-http-port", "abc");
     final boolean result = parser.parseCommandLine(args.split(" "));
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
-    assertThat(commandOutput.toString()).endsWith(defaultUsageText);
+    assertThat(commandErrOutput.toString())
+        .contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandStdOutput.toString()).endsWith(defaultUsageText);
   }
 
   @Test
@@ -173,9 +176,9 @@ class CommandlineParserTest {
   void illegalSubCommandDisplaysErrorMessage() {
     // NOTE: all required params must be specified
     parser.parseCommandLine("--downstream-http-port=8500", "--chain-id=1", "illegalSubCommand");
-    assertThat(commandOutput.toString())
+    assertThat(commandStdOutput.toString())
         .containsOnlyOnce("Did you mean: " + subCommand.getCommandName());
-    assertThat(commandOutput.toString()).doesNotContain(defaultUsageText);
+    assertThat(commandStdOutput.toString()).doesNotContain(defaultUsageText);
   }
 
   @Test
@@ -187,7 +190,7 @@ class CommandlineParserTest {
             "--nonExistentOption=9",
             subCommand.getCommandName());
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   private void missingParameterShowsError(final String input, final String... paramsToRemove) {
@@ -199,9 +202,9 @@ class CommandlineParserTest {
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
+      assertThat(commandErrOutput.toString()).contains("--" + paramToRemove, "Missing");
     }
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
@@ -213,14 +216,14 @@ class CommandlineParserTest {
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
-    assertThat(commandOutput.toString()).isEmpty();
+    assertThat(commandStdOutput.toString()).isEmpty();
   }
 
   @Test
   void creatingSignerDisplaysFailureToCreateSignerText() {
     subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, stdOut, stdErr);
     parser.registerSigner(subCommand);
 
     final boolean result =
@@ -228,14 +231,15 @@ class CommandlineParserTest {
             (validBaseCommandOptions() + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
+    assertThat(commandErrOutput.toString())
         .isEqualTo(
             CommandlineParser.SIGNER_CREATION_ERROR
                 + System.lineSeparator()
                 + "Cause: "
                 + NullSignerSubCommand.ERROR_MSG
-                + System.lineSeparator()
-                + nullCommandHelp);
+                + System.lineSeparator());
+
+    assertThat(commandStdOutput.toString()).isEqualTo(nullCommandHelp);
   }
 
   @Test
@@ -246,7 +250,7 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("expected only one match but got");
+    assertThat(commandErrOutput.toString()).contains("expected only one match but got");
   }
 
   @Test
@@ -280,8 +284,9 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--tls-allow-any-client");
-    assertThat(commandOutput.toString()).contains("should be specified without 'false' parameter");
+    assertThat(commandErrOutput.toString()).contains("--tls-allow-any-client");
+    assertThat(commandErrOutput.toString())
+        .contains("should be specified without 'false' parameter");
   }
 
   @Test
