@@ -20,12 +20,17 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
+import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
+import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
+import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+import tech.pegasys.ethsigner.tests.tls.support.BasicDownstreamTlsOptions;
+import tech.pegasys.ethsigner.tests.tls.support.BasicDownstreamTrustOptions;
 import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
 import tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServerFactory;
@@ -102,9 +107,16 @@ class ClientSideTlsAcceptanceTest {
 
     populateFingerprintFile(
         fingerPrintFilePath, expectedWeb3ProviderCert, downstreamWeb3ServerPort);
-    builder.withDownstreamKnownServers(fingerPrintFilePath.toFile());
-    builder.withDownstreamKeyStore(
-        new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
+
+    final Optional<PkcsStoreConfig> downstreamClientAuthOptions =
+        Optional.of(
+            new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
+    final Optional<DownstreamTrustOptions> downstreamTrustOptions =
+        Optional.of(new BasicDownstreamTrustOptions(Optional.of(fingerPrintFilePath), true));
+    final DownstreamTlsOptions downstreamTlsOptions =
+        new BasicDownstreamTlsOptions(true, downstreamClientAuthOptions, downstreamTrustOptions);
+    builder.withDownstreamTlsOptions(downstreamTlsOptions);
+
     builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

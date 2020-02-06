@@ -170,17 +170,17 @@ public class EthSignerBaseCommand implements Config {
   }
 
   /**
-   * Validate dependent options which are not enforceable by PicoCLI
+   * Validate dependent options which are not enforceable by PicoCLI.
+   *
+   * <p>See https://github.com/remkop/picocli/issues/938
+   *
+   * <p>Note: This method will be removed once PicoCLI 4.2 is released.
    *
    * @param commandLine the CommandLine instance
    * @param logger The Logger to use to print the warning
    */
+  @Deprecated(forRemoval = true)
   void validateOptions(final CommandLine commandLine, final Logger logger) {
-    issueOptionWarnings(commandLine, logger);
-  }
-
-  private void issueOptionWarnings(final CommandLine commandLine, final Logger logger) {
-    // Check that downstream TLS options are able to work
     if (getDownstreamTlsOptions().isPresent()) {
       CommandLineUtils.checkOptionDependencies(
           logger,

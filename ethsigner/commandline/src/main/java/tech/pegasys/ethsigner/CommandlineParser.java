@@ -64,7 +64,8 @@ public class CommandlineParser {
     }
 
     final int resultCode = commandLine.execute(args);
-    baseCommand.validateOptions(commandLine, LOG);
+    baseCommand.validateOptions(
+        commandLine, LOG); // marked to be removed when picocli 4.2 is released
     return resultCode == CommandLine.ExitCode.OK;
   }
 

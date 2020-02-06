@@ -10,37 +10,32 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.tests.tls.support;
 
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
-import picocli.CommandLine.Option;
+public class BasicDownstreamTrustOptions implements DownstreamTrustOptions {
+  private final Optional<Path> knownServerFile;
+  private final boolean isCaSignedServerCertificateAllowed;
 
-public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions {
-  @Option(
-      names = "--downstream-http-tls-disallow-ca-signed",
-      description = "Disable CA signed server certificates to be trusted.",
-      arity = "0")
-  private boolean tlsDisallowCaSignedCert = false;
-
-  @Option(
-      names = "--downstream-http-tls-known-servers-file",
-      description =
-          "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust.",
-      required = true,
-      arity = "1")
-  private Path tlsknownServersFile;
+  public BasicDownstreamTrustOptions(
+      final Optional<Path> knownServerFile, final boolean isCaSignedServerCertificateAllowed) {
+    Objects.requireNonNull(knownServerFile);
+    this.knownServerFile = knownServerFile;
+    this.isCaSignedServerCertificateAllowed = isCaSignedServerCertificateAllowed;
+  }
 
   @Override
   public Optional<Path> getKnownServerFile() {
-    return Optional.ofNullable(tlsknownServersFile);
+    return knownServerFile;
   }
 
   @Override
   public boolean isCaSignedServerCertificateAllowed() {
-    return !tlsDisallowCaSignedCert;
+    return isCaSignedServerCertificateAllowed;
   }
 }

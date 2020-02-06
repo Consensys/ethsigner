@@ -10,43 +10,43 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.tests.tls.support;
 
 import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 
+import java.util.Objects;
 import java.util.Optional;
 
-import picocli.CommandLine.ArgGroup;
-import picocli.CommandLine.Option;
+public class BasicDownstreamTlsOptions implements DownstreamTlsOptions {
+  private final boolean isTlsEnabled;
+  private final Optional<PkcsStoreConfig> downstreamTlsClientAuthOptions;
+  private final Optional<DownstreamTrustOptions> downstreamTlsTrustOptions;
 
-public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
-  @Option(
-      names = "--downstream-http-tls-enabled",
-      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
-      arity = "0",
-      required = true)
-  private boolean tlsEnabled = false;
-
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
-
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
+  public BasicDownstreamTlsOptions(
+      final boolean isTlsEnabled,
+      final Optional<PkcsStoreConfig> downstreamTlsClientAuthOptions,
+      final Optional<DownstreamTrustOptions> downstreamTlsTrustOptions) {
+    Objects.requireNonNull(downstreamTlsClientAuthOptions);
+    Objects.requireNonNull(downstreamTlsTrustOptions);
+    this.isTlsEnabled = isTlsEnabled;
+    this.downstreamTlsClientAuthOptions = downstreamTlsClientAuthOptions;
+    this.downstreamTlsTrustOptions = downstreamTlsTrustOptions;
+  }
 
   @Override
   public boolean isTlsEnabled() {
-    return tlsEnabled;
+    return isTlsEnabled;
   }
 
   @Override
   public Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions() {
-    return Optional.ofNullable(downstreamTlsClientAuthOptions);
+    return downstreamTlsClientAuthOptions;
   }
 
   @Override
   public Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions() {
-    return Optional.ofNullable(downstreamServerTrustOptions);
+    return downstreamTlsTrustOptions;
   }
 }

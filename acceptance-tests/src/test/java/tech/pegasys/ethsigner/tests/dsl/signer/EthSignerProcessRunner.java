@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -33,9 +33,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
@@ -216,21 +218,43 @@ public class EthSignerProcessRunner {
   }
 
   private Collection<? extends String> createDownstreamTlsArgs() {
-    final List<String> params = Lists.newArrayList();
-
-    if (signerConfig.downstreamKeyStore().isPresent()) {
-      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamKeyStore().get();
-      params.add("--downstream-http-tls-keystore-file");
-      params.add(keyStoreConfig.getStoreFile().toString());
-      params.add("--downstream-http-tls-keystore-password-file");
-      params.add(keyStoreConfig.getStorePasswordFile().toString());
+    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
+        signerConfig.downstreamTlsOptions();
+    if (optionalDownstreamTlsOptions.isEmpty()
+        || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
+      return Collections.emptyList();
     }
 
-    if (signerConfig.downstreamKnownServers().isPresent()) {
-      final File keyStoreConfigFile = signerConfig.downstreamKnownServers().get();
-      params.add("--downstream-http-tls-known-servers-file");
-      params.add(keyStoreConfigFile.getAbsolutePath());
-    }
+    final List<String> params = new ArrayList<>();
+    params.add("--downstream-http-tls-enabled");
+
+    final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
+    downstreamTlsOptions
+        .getDownstreamTlsClientAuthOptions()
+        .ifPresent(
+            pkcsStoreConfig -> {
+              params.add("--downstream-http-tls-keystore-file");
+              params.add(pkcsStoreConfig.getStoreFile().toString());
+              params.add("--downstream-http-tls-keystore-password-file");
+              params.add(pkcsStoreConfig.getStorePasswordFile().toString());
+            });
+
+    downstreamTlsOptions
+        .getDownstreamTlsServerTrustOptions()
+        .ifPresent(
+            downstreamTrustOptions -> {
+              downstreamTrustOptions
+                  .getKnownServerFile()
+                  .ifPresent(
+                      knownServerFile -> {
+                        params.add("--downstream-http-tls-known-servers-file");
+                        params.add(knownServerFile.toAbsolutePath().toString());
+                      });
+
+              if (!downstreamTrustOptions.isCaSignedServerCertificateAllowed()) {
+                params.add("--downstream-http-tls-disallow-ca-signed");
+              }
+            });
 
     return params;
   }
