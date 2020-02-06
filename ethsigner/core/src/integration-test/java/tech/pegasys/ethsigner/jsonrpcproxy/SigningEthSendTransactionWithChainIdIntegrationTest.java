@@ -50,9 +50,11 @@ class SigningEthSendTransactionWithChainIdIntegrationTest extends IntegrationTes
 
   @Test
   void signSendTransactionWhenContractWithLongChainId() {
-    final Request<?, EthSendTransaction> sendTransactionRequest = sendTransaction.smartContract();
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.request(sendTransaction.smartContract());
     final String sendRawTransactionRequest =
-        sendRawTransaction.request(sendTransaction.smartContract(), 4123123123L);
+        sendRawTransaction.request(
+            sendTransaction.request(sendTransaction.smartContract()), 4123123123L);
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102688888888");

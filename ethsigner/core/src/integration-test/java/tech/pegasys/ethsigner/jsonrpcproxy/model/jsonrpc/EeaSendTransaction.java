@@ -48,7 +48,6 @@ public class EeaSendTransaction {
    */
   public Request<Object, EthSendTransaction> request(final PrivateTransaction privateTransaction) {
     final JsonObject jsonObject = new JsonObject();
-
     putValue(jsonObject, FIELD_FROM, privateTransaction.getFrom());
     putValue(jsonObject, FIELD_NONCE, privateTransaction.getNonce());
     putValue(jsonObject, FIELD_GAS_PRICE, privateTransaction.getGasPrice());
@@ -61,11 +60,6 @@ public class EeaSendTransaction {
     putValue(jsonObject, FIELD_PRIVACY_GROUP_ID, privateTransaction.getPrivacyGroupId());
     putValue(jsonObject, FIELD_RESTRICTION, privateTransaction.getRestriction());
     return createRequest(jsonObject);
-  }
-
-  private <T> void putValue(
-      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
-    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
   }
 
   public Request<Object, EthSendTransaction> request(
@@ -94,5 +88,10 @@ public class EeaSendTransaction {
             "eea_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);
     eea_sendTransaction.setId(DEFAULT_ID);
     return eea_sendTransaction;
+  }
+
+  private <T> void putValue(
+      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
+    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
   }
 }
