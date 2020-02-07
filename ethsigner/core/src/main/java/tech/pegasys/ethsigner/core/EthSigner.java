@@ -179,8 +179,9 @@ public final class EthSigner {
     final HttpServerOptions result = new HttpServerOptions(input);
 
     try {
-      final String keyStorePathname = tlsConfig.getStoreFile().toPath().toAbsolutePath().toString();
-      final String password = readSecretFromFile(tlsConfig.getStorePasswordFile().toPath());
+      final String keyStorePathname =
+          tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
+      final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
       return result;
     } catch (final NoSuchFileException e) {

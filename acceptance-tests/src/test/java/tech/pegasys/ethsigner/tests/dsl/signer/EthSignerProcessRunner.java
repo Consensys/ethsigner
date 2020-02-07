@@ -198,9 +198,9 @@ public class EthSignerProcessRunner {
     if (signerConfig.serverTlsOptions().isPresent()) {
       final TlsOptions serverTlsOptions = signerConfig.serverTlsOptions().get();
       params.add("--tls-keystore-file");
-      params.add(serverTlsOptions.getStoreFile().toString());
+      params.add(serverTlsOptions.getKeyStoreFile().toString());
       params.add("--tls-keystore-password-file");
-      params.add(serverTlsOptions.getStorePasswordFile().toString());
+      params.add(serverTlsOptions.getKeyStorePasswordFile().toString());
       if (serverTlsOptions.getClientAuthConstraints().isEmpty()) {
         params.add("--tls-allow-any-client");
       } else {

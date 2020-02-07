@@ -34,12 +34,12 @@ public class BasicTlsOptions implements TlsOptions {
   }
 
   @Override
-  public File getStoreFile() {
+  public File getKeyStoreFile() {
     return keyStoreFile;
   }
 
   @Override
-  public File getStorePasswordFile() {
+  public File getKeyStorePasswordFile() {
     return keyStorePasswordFile;
   }
 

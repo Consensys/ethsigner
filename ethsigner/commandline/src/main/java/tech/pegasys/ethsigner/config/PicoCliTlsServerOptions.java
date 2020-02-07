@@ -57,12 +57,12 @@ public class PicoCliTlsServerOptions implements TlsOptions {
   private TlsClientAuthentication tlsClientAuthentication;
 
   @Override
-  public File getStoreFile() {
+  public File getKeyStoreFile() {
     return keyStoreFile;
   }
 
   @Override
-  public File getStorePasswordFile() {
+  public File getKeyStorePasswordFile() {
     return keyStorePasswordFile;
   }
 

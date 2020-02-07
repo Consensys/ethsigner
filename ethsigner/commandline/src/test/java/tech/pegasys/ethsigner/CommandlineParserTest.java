@@ -77,8 +77,9 @@ class CommandlineParserTest {
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
     assertThat(config.getTlsOptions()).isNotEmpty();
-    assertThat(config.getTlsOptions().get().getStoreFile()).isEqualTo(new File("./keystore.pfx"));
-    assertThat(config.getTlsOptions().get().getStorePasswordFile())
+    assertThat(config.getTlsOptions().get().getKeyStoreFile())
+        .isEqualTo(new File("./keystore.pfx"));
+    assertThat(config.getTlsOptions().get().getKeyStorePasswordFile())
         .isEqualTo(new File("./keystore.passwd"));
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));

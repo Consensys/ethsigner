@@ -12,8 +12,14 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
+import java.io.File;
 import java.util.Optional;
 
-public interface TlsOptions extends PkcsStoreConfig {
+public interface TlsOptions {
+
+  File getKeyStoreFile();
+
+  File getKeyStorePasswordFile();
+
   Optional<ClientAuthConstraints> getClientAuthConstraints();
 }
