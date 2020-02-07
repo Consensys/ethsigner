@@ -32,9 +32,10 @@ public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions 
   private Path tlsknownServersFile;
 
   @Option(
-          names = "--downstream-http-tls-invalidate-ca-signed",
-          description = "If set, Ethsigner will not use the system's CA to validate received server certificates",
-          arity = "0")
+      names = "--downstream-http-tls-invalidate-ca-signed",
+      description =
+          "If set, Ethsigner will not use the system's CA to validate received server certificates",
+      arity = "0")
   private boolean tlsInvalidateCASigned = false;
 
   @Override
