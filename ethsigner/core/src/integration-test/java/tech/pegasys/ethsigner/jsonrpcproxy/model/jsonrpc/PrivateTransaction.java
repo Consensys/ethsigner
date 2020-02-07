@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class PrivateTransaction {
+  // Values are held using a value holder as an Optional cannot contain a null value and we want to
+  // represent missing values using Optional.empty, null values and non-null values
   private final Optional<ValueHolder<String>> from;
   private final Optional<ValueHolder<String>> nonce;
   private final Optional<ValueHolder<String>> gasPrice;
