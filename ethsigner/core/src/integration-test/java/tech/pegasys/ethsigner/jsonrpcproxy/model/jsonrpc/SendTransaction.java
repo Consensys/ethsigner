@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
 import java.util.Optional;
 
@@ -62,8 +63,4 @@ public class SendTransaction {
     return eea_sendTransaction;
   }
 
-  private <T> void putValue(
-      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
-    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
-  }
 }

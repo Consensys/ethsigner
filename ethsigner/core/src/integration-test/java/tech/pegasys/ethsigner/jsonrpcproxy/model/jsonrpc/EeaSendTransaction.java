@@ -21,6 +21,7 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
 import java.util.Optional;
 
@@ -72,8 +73,4 @@ public class EeaSendTransaction {
     return eea_sendTransaction;
   }
 
-  private <T> void putValue(
-      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
-    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
-  }
 }
