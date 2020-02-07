@@ -16,8 +16,6 @@ import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
-import java.util.Optional;
-
 import io.vertx.core.json.JsonObject;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -61,10 +59,5 @@ public class SendTransaction {
             "eth_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);
     eea_sendTransaction.setId(DEFAULT_ID);
     return eea_sendTransaction;
-  }
-
-  private <T> void putValue(
-      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
-    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
   }
 }
