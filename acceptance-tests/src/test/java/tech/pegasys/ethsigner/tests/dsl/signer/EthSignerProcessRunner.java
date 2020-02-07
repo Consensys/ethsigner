@@ -252,7 +252,7 @@ public class EthSignerProcessRunner {
                       });
 
               if (!downstreamTrustOptions.isCaSignedServerCertificateAllowed()) {
-                params.add("--downstream-http-tls-disallow-ca-signed");
+                params.add("--downstream-http-tls-invalidate-ca-signed");
               }
             });
 
