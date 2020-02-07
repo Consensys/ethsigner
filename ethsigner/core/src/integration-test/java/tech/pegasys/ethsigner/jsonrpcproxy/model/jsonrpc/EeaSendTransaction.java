@@ -23,8 +23,6 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
-import java.util.Optional;
-
 import io.vertx.core.json.JsonObject;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -72,5 +70,4 @@ public class EeaSendTransaction {
     eea_sendTransaction.setId(DEFAULT_ID);
     return eea_sendTransaction;
   }
-
 }
