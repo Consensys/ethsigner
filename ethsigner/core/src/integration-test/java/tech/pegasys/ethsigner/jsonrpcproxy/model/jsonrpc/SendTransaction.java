@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.jsonrpcproxy.IntegrationTestBase.DEFAULT_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
 import java.util.Optional;
 

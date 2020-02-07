@@ -99,7 +99,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsTooShort() {
+  void invalidParamsResponseWhenFromAddressIsTooShort() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -108,7 +108,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsTooLong() {
+  void invalidParamsResponseWhenFromAddressIsTooLong() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -117,7 +117,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+  void invalidParamsResponseWhenFromAddressMissingHexPrefix() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -126,7 +126,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
+  void invalidParamsResponseWhenFromAddressIsMalformedHex() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -135,14 +135,14 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsWhenSenderAddressIsEmpty() {
+  void invalidParamsWhenFromAddressIsEmpty() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.withFrom(""))),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
+  void signTransactionWhenFromAddressCaseMismatchesUnlockedAccount() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(
             transactionBuilder.withFrom("0x7577919ae5df4941180eac211965f275CDCE314D"));
@@ -163,14 +163,14 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenMissingSenderAddress() {
+  void invalidParamsResponseWhenMissingFromAddress() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingPrivateFrom())),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  void signTransactionWhenReceiverAddressIsEmpty() {
+  void signTransactionWhenToAddressIsEmpty() {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(""));
     final String sendRawTransactionRequest =
@@ -188,7 +188,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenEmptyReceiverAddress() {
+  void signTransactionWhenEmptyToAddress() {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(""));
     final String sendRawTransactionRequest =
@@ -206,7 +206,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
+  void signTransactionWhenToHasAddressMissingHexPrefix() {
     final Request<Object, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(
             transactionBuilder.withTo("7577919ae5df4941180eac211965f275CDCE314D"));
@@ -227,7 +227,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenMissingReceiverAddress() {
+  void signTransactionWhenMissingToAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.missingTo());
     final String sendRawTransactionRequest =
@@ -245,7 +245,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenReceiverAddressIsNull() {
+  void signTransactionWhenToAddressIsNull() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(null));
     final String sendRawTransactionRequest =

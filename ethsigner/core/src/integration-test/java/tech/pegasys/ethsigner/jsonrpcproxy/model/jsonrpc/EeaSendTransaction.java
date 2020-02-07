@@ -21,8 +21,7 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_NONCE;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_TO;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE;
-
-import java.util.Optional;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.TransactionJsonUtil.putValue;
 
 import io.vertx.core.json.JsonObject;
 import org.web3j.protocol.core.Request;
@@ -71,10 +70,5 @@ public class EeaSendTransaction {
             "eea_sendTransaction", singletonList(transaction), null, EthSendTransaction.class);
     eea_sendTransaction.setId(DEFAULT_ID);
     return eea_sendTransaction;
-  }
-
-  private <T> void putValue(
-      final JsonObject jsonObject, final String field, final Optional<ValueHolder<T>> value) {
-    value.ifPresent(valueHolder -> jsonObject.put(field, valueHolder.getValue()));
   }
 }
