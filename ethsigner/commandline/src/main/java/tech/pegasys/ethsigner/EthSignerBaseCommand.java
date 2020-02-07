@@ -44,6 +44,7 @@ import picocli.CommandLine.Option;
             + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
+    sortOptions = false,
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
     header = "Usage:",
@@ -55,36 +56,26 @@ import picocli.CommandLine.Option;
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+          names = {"--chain-id"},
+          description = "The Chain Id that will be the intended recipient for signed transactions",
+          required = true,
+          arity = "1")
+  private long chainId;
+
+  @Option(
+          names = {"--data-path"},
+          description = "The path to a directory to store temporary files",
+          arity = "1")
+  private Path dataPath;
+
   @Option(
       names = {"--logging", "-l"},
       paramLabel = "<LOG VERBOSITY LEVEL>",
       description =
           "Logging verbosity levels: OFF, FATAL, WARN, INFO, DEBUG, TRACE, ALL (default: INFO)")
   private final Level logLevel = Level.INFO;
-
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = "--downstream-http-host",
-      description =
-          "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
-
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = "--downstream-http-port",
-      description = "The endpoint to which received requests are forwarded",
-      required = true,
-      arity = "1")
-  private Integer downstreamHttpPort;
-
-  @SuppressWarnings("FieldMayBeFinal")
-  @Option(
-      names = {"--downstream-http-request-timeout"},
-      description =
-          "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -99,22 +90,32 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
-  @SuppressWarnings("FieldMayBeFinal")
-  @Option(
-      names = {"--chain-id"},
-      description = "The Chain Id that will be the intended recipient for signed transactions",
-      required = true,
-      arity = "1")
-  private long chainId;
-
-  @Option(
-      names = {"--data-path"},
-      description = "The path to a directory to store temporary files",
-      arity = "1")
-  private Path dataPath;
-
   @ArgGroup(exclusive = false)
   private PicoCliTlsServerOptions picoCliTlsServerOptions;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+          names = "--downstream-http-host",
+          description =
+                  "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+          arity = "1")
+  private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+          names = "--downstream-http-port",
+          description = "The endpoint to which received requests are forwarded",
+          required = true,
+          arity = "1")
+  private Integer downstreamHttpPort;
+
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+          names = {"--downstream-http-request-timeout"},
+          description =
+                  "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+          arity = "1")
+  private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @ArgGroup(exclusive = false)
   private PicoCliTlsDownstreamOptions picoCliTlsDownstreamOptions;

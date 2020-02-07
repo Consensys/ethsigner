@@ -23,12 +23,6 @@ import picocli.CommandLine.Option;
 
 public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions {
   @Option(
-      names = "--downstream-http-tls-disallow-ca-signed",
-      description = "Disable CA signed server certificates to be trusted.",
-      arity = "0")
-  private boolean tlsDisallowCaSignedCert = false;
-
-  @Option(
       names = "--downstream-http-tls-known-servers-file",
       description =
           "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust.",
@@ -37,6 +31,12 @@ public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions 
       arity = "1")
   private Path tlsknownServersFile;
 
+  @Option(
+          names = "--downstream-http-tls-invalidate-ca-signed",
+          description = "If set, Ethsigner will not use the system's CA to validate received server certificates",
+          arity = "0")
+  private boolean tlsInvalidateCASigned = false;
+
   @Override
   public Optional<Path> getKnownServerFile() {
     return Optional.ofNullable(tlsknownServersFile);
@@ -44,6 +44,6 @@ public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions 
 
   @Override
   public boolean isCaSignedServerCertificateAllowed() {
-    return !tlsDisallowCaSignedCert;
+    return !tlsInvalidateCASigned;
   }
 }
