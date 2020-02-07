@@ -60,7 +60,7 @@ public class EeaSendRawTransaction {
     final JsonObject transaction = params.get(0);
     final String privacyGroupId = transaction.getString("privacyGroupId");
     final RawPrivateTransaction rawTransaction =
-        privacyGroupId.isEmpty()
+        privacyGroupId == null
             ? createEeaRawPrivateTransaction(transaction)
             : createBesuRawPrivateTransaction(transaction, privacyGroupId);
 

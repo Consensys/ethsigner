@@ -20,11 +20,13 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVACY_GROUP_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.privacyGroupIdTransaction;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE_DEFAULT;
-import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.EEA_GET_TRANSACTION_COUNT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.PRIV_EEA_GET_TRANSACTION_COUNT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.PRIV_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
@@ -39,8 +41,11 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
-  private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
+  private static final String GET_EEA_TX_COUNT_REQUEST_BODY_TEMPLATE =
       "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}";
+
+  private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
+      "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getTransactionCount\",\"params\":[\"%s\",\"%s\"]}";
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
@@ -51,9 +56,16 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   void setUp() {
     sendTransaction = new EeaSendTransaction();
     sendRawTransaction = new EeaSendRawTransaction(eeaJsonRpc(), credentials);
-    final TransactionCountResponder getTransactionResponse =
-        new TransactionCountResponder(nonce -> nonce.add(ONE), EEA_GET_TRANSACTION_COUNT);
-    clientAndServer.when(getTransactionResponse.request()).respond(getTransactionResponse);
+
+    final TransactionCountResponder privEeaGetTransactionResponse =
+        new TransactionCountResponder(nonce -> nonce.add(ONE), PRIV_EEA_GET_TRANSACTION_COUNT);
+    clientAndServer
+        .when(privEeaGetTransactionResponse.request())
+        .respond(privEeaGetTransactionResponse);
+
+    final TransactionCountResponder privGetTransactionResponse =
+        new TransactionCountResponder(nonce -> nonce.add(ONE), PRIV_GET_TRANSACTION_COUNT);
+    clientAndServer.when(privGetTransactionResponse.request()).respond(privGetTransactionResponse);
   }
 
   @Test
@@ -431,8 +443,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
   @Test
   void signSendTransactionWithPrivacyGroupId() {
-    final PrivateTransaction privateTransaction =
-        PrivateTransaction.privacyGroupIdTransaction().build();
+    final PrivateTransaction privateTransaction = privacyGroupIdTransaction().build();
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(privateTransaction);
     final String sendRawTransactionRequest =
@@ -500,6 +511,42 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(successResponseFromWeb3Provider));
+  }
+
+  @Test
+  void missingNonceResultsInRequestToPrivGetEeaTransactionCount() {
+    final String ethNodeResponseBody = "VALID_RESPONSE";
+    final String requestBody =
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
+    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
+        response.ethSigner(ethNodeResponseBody));
+    final String expectedBody =
+        String.format(
+            GET_EEA_TX_COUNT_REQUEST_BODY_TEMPLATE,
+            EeaSendTransaction.UNLOCKED_ACCOUNT,
+            EeaSendTransaction.PRIVATE_FROM,
+            EeaSendTransaction.PRIVATE_FOR);
+    verifyEthNodeReceived(expectedBody);
+  }
+
+  @Test
+  void missingNonceForTransactionWithPrivacyGroupIdResultsInRequestToPrivGetTransactionCount() {
+    final String ethNodeResponseBody = "VALID_RESPONSE";
+    final String requestBody =
+        sendRawTransaction.request(
+            sendTransaction.request(privacyGroupIdTransaction().withNonce("0x1")));
+    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(privacyGroupIdTransaction().missingNonce())),
+        response.ethSigner(ethNodeResponseBody));
+    final String expectedBody =
+        String.format(
+            GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
+            EeaSendTransaction.UNLOCKED_ACCOUNT,
+            EeaSendTransaction.PRIVACY_GROUP_ID);
+    verifyEthNodeReceived(expectedBody);
   }
 
   @Test
@@ -582,23 +629,5 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionWithBothPrivateFromAndPrivacyGroupId)),
         response.ethSigner(INVALID_PARAMS));
-  }
-
-  @Test
-  void missingNonceResultsInRequestToPrivGetEeaTransactionCount() {
-    final String ethNodeResponseBody = "VALID_RESPONSE";
-    final String requestBody =
-        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
-    setUpEthNodeResponse(request.ethNode(requestBody), response.ethNode(ethNodeResponseBody));
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(ethNodeResponseBody));
-    final String expectedBody =
-        String.format(
-            GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
-            EeaSendTransaction.UNLOCKED_ACCOUNT,
-            EeaSendTransaction.PRIVATE_FROM,
-            EeaSendTransaction.PRIVATE_FOR);
-    verifyEthNodeReceived(expectedBody);
   }
 }
