@@ -82,7 +82,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsTooShort() {
+  void invalidParamsResponseWhenFromAddressIsTooShort() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -91,7 +91,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsTooLong() {
+  void invalidParamsResponseWhenFromAddressIsTooLong() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -100,7 +100,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressMissingHexPrefix() {
+  void invalidParamsResponseWhenFromAddressMissingHexPrefix() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -109,7 +109,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenSenderAddressIsMalformedHex() {
+  void invalidParamsResponseWhenFromAddressIsMalformedHex() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
             sendTransaction.request(
@@ -118,14 +118,14 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsWhenSenderAddressIsEmpty() {
+  void invalidParamsWhenFromAddressIsEmpty() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.withFrom(""))),
         response.ethSigner(INVALID_PARAMS));
   }
 
   @Test
-  void signTransactionWhenSenderAddressCaseMismatchesUnlockedAccount() {
+  void signTransactionWhenFromAddressCaseMismatchesUnlockedAccount() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(
             transactionBuilder.withFrom("0x7577919ae5df4941180eac211965f275CDCE314D"));
@@ -146,7 +146,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenMissingSenderAddress() {
+  void invalidParamsResponseWhenMissingFromAddress() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingFrom())),
         response.ethSigner(INVALID_PARAMS));
