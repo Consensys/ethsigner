@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.config;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 
 import java.nio.file.Path;
@@ -30,6 +32,7 @@ public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions 
       names = "--downstream-http-tls-known-servers-file",
       description =
           "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust.",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true,
       arity = "1")
   private Path tlsknownServersFile;
