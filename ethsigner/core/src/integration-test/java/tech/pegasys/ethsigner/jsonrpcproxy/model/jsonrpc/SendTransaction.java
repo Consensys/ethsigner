@@ -34,8 +34,6 @@ public class SendTransaction {
   public static final String FIELD_GAS_PRICE = "gasPrice";
   public static final String FIELD_DATA = "data";
 
-  private static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
-
   /**
    * Due to the underlying server mocking, When only a single request is used, the contents does not
    * actually matter, only their equivalence does.
