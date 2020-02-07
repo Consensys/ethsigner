@@ -133,7 +133,7 @@ public final class EthSigner {
         }
       } else if (!optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()) {
         throw new InitializationException(
-            "Must specify a known-server file if CA-signed option is disbabled");
+            "Must specify a known-server file if CA-signed option is disabled");
       }
     }
   }
