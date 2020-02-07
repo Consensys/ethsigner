@@ -153,7 +153,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenEmptyReceiverAddress() {
+  void signTransactionWhenEmptyToAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(""));
     final String sendRawTransactionRequest =
@@ -171,7 +171,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenEmpty0xReceiverAddress() {
+  void signTransactionWhenEmpty0xToAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo("0x"));
     final String sendRawTransactionRequest =
@@ -189,7 +189,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenReceiverHasAddressMissingHexPrefix() {
+  void signTransactionWhenToHasAddressMissingHexPrefix() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(
             transactionBuilder.withTo("7577919ae5df4941180eac211965f275CDCE314D"));
@@ -210,7 +210,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenMissingReceiverAddress() {
+  void signTransactionWhenMissingToAddress() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.missingTo());
     final String sendRawTransactionRequest =
@@ -228,7 +228,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void signTransactionWhenReceiverAddressIsNull() {
+  void signTransactionWhenToAddressIsNull() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(transactionBuilder.withTo(null));
     final String sendRawTransactionRequest =
