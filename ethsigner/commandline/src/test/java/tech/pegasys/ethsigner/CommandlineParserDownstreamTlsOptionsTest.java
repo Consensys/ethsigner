@@ -20,8 +20,8 @@ import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
 import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -31,10 +31,8 @@ import picocli.CommandLine;
 
 class CommandlineParserDownstreamTlsOptionsTest {
 
-  private final StringWriter commandStdOutput = new StringWriter();
-  private final StringWriter commandErrOutput = new StringWriter();
-  private final PrintWriter stdOut = new PrintWriter(commandStdOutput, true);
-  private final PrintWriter stdErr = new PrintWriter(commandErrOutput, true);
+  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
+  private final PrintStream outPrintStream = new PrintStream(commandOutput);
 
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
@@ -45,7 +43,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, stdOut, stdErr);
+    parser = new CommandlineParser(config, outPrintStream);
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
@@ -62,9 +60,9 @@ class CommandlineParserDownstreamTlsOptionsTest {
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).isFalse();
     for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandErrOutput.toString()).contains("--" + paramToRemove, "Missing");
+      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
     }
-    assertThat(commandStdOutput.toString()).containsOnlyOnce(defaultUsageText);
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
   @Test

@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.InitializationException;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -22,8 +22,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
+import picocli.CommandLine.ExecutionException;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.RunLast;
 
 public class CommandlineParser {
 
@@ -31,18 +33,15 @@ public class CommandlineParser {
 
   private final List<SignerSubCommand> signers = Lists.newArrayList();
   private final EthSignerBaseCommand baseCommand;
-  private final PrintWriter stdOut;
-  private final PrintWriter stdErr;
+  private final PrintStream output;
 
   public static final String MISSING_SUBCOMMAND_ERROR = "Signer subcommand must be defined.";
   public static final String SIGNER_CREATION_ERROR =
       "Failed to construct a signer from supplied arguments.";
 
-  public CommandlineParser(
-      final EthSignerBaseCommand baseCommand, final PrintWriter stdOut, final PrintWriter stdErr) {
+  public CommandlineParser(final EthSignerBaseCommand baseCommand, final PrintStream output) {
     this.baseCommand = baseCommand;
-    this.stdOut = stdOut;
-    this.stdErr = stdErr;
+    this.output = output;
   }
 
   public void registerSigner(final SignerSubCommand signerSubCommand) {
@@ -54,54 +53,66 @@ public class CommandlineParser {
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
-    commandLine.setOut(stdOut);
-    commandLine.setErr(stdErr);
-    commandLine.setExecutionExceptionHandler(this::handleExecutionException);
-    commandLine.setParameterExceptionHandler(this::handleParseException);
 
     for (final SignerSubCommand subcommand : signers) {
       commandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
 
-    final int resultCode = commandLine.execute(args);
-    baseCommand.validateOptions(
-        commandLine, LOG); // marked to be removed when picocli 4.2 is released
-    return resultCode == CommandLine.ExitCode.OK;
+    try {
+      commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
+      baseCommand.validateOptions(commandLine, LOG);
+      return true;
+    } catch (final ParameterException ex) {
+      handleParameterException(ex);
+    } catch (final ExecutionException ex) {
+      commandLine.usage(output);
+    } catch (final TransactionSignerInitializationException | InitializationException ex) {
+      // perform no-op (user output already supplied in ExceptionHandler)
+    } catch (final Exception ex) {
+      LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
+      output.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
+    }
+    return false;
   }
 
-  private int handleParseException(ParameterException ex, String[] args) {
+  private void handleParameterException(final ParameterException ex) {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
-      ex.printStackTrace(stdErr);
+      ex.printStackTrace(output);
     }
 
-    stdErr.println(ex.getMessage());
+    output.println(ex.getMessage());
 
-    if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, stdOut)) {
-      ex.getCommandLine().usage(stdOut, Ansi.AUTO);
+    if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, output)) {
+      ex.getCommandLine().usage(output, Ansi.AUTO);
     }
-
-    return ex.getCommandLine().getCommandSpec().exitCodeOnInvalidInput();
   }
 
-  private int handleExecutionException(
-      final Exception ex, final CommandLine commandLine, final CommandLine.ParseResult parseResult)
-      throws Exception {
-    if (!parseResult.hasSubcommand()) {
-      stdErr.println(MISSING_SUBCOMMAND_ERROR);
-    } else {
-      if (ex instanceof TransactionSignerInitializationException) {
-        stdErr.println(SIGNER_CREATION_ERROR);
-        stdErr.println("Cause: " + ex.getMessage());
-      } else if (ex instanceof InitializationException) {
-        stdErr.println("Failed to initialize EthSigner");
-        stdErr.println("Cause: " + ex.getMessage());
-      } else {
-        LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
-        stdErr.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
-      }
+  class ExceptionHandler<R> implements CommandLine.IExceptionHandler2<R> {
+
+    @Override
+    public R handleParseException(final ParameterException ex, final String[] args) {
+      throw ex;
     }
-    commandLine.usage(stdOut);
-    return commandLine.getCommandSpec().exitCodeOnExecutionException();
+
+    @Override
+    public R handleExecutionException(
+        final CommandLine.ExecutionException ex, final CommandLine.ParseResult parseResult) {
+      if (!parseResult.hasSubcommand()) {
+        output.println(MISSING_SUBCOMMAND_ERROR);
+      } else {
+        if (ex.getCause() instanceof TransactionSignerInitializationException) {
+          output.println(SIGNER_CREATION_ERROR);
+          output.println("Cause: " + ex.getCause().getMessage());
+          ex.getCommandLine().usage(output);
+          throw (TransactionSignerInitializationException) ex.getCause();
+        } else if (ex.getCause() instanceof InitializationException) {
+          output.println("Failed to initialize EthSigner");
+          output.println("Cause: " + ex.getCause().getMessage());
+          throw (InitializationException) ex.getCause();
+        }
+      }
+      throw ex;
+    }
   }
 }
