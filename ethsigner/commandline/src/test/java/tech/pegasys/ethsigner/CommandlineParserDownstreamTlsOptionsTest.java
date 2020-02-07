@@ -105,7 +105,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
     cmdLine +=
         "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
     cmdLine +=
-        "--downstream-http-tls-disallow-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
+        "--downstream-http-tls-invalidate-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -162,7 +162,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
   void cmdLineIsValidForAllDownstreamTrustOptions() {
     String cmdLine = validBaseCommandOptions();
     cmdLine +=
-        "--downstream-http-tls-disallow-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
+        "--downstream-http-tls-invalidate-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -200,7 +200,7 @@ class CommandlineParserDownstreamTlsOptionsTest {
   @Test
   void downstreamKnownServerIsRequiredIfCASignedDisable() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine += "--downstream-http-tls-disallow-ca-signed ";
+    cmdLine += "--downstream-http-tls-invalidate-ca-signed ";
     parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     missingParameterShowsError(cmdLine, "downstream-http-tls-known-servers-file");
