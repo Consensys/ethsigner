@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVACY_GROUP_ID;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_PRICE_DEFAULT;
@@ -429,6 +430,26 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
+  void signSendTransactionWithPrivacyGroupId() {
+    final PrivateTransaction privateTransaction =
+        PrivateTransaction.privacyGroupIdTransaction().build();
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.request(privateTransaction);
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(sendTransaction.request(privateTransaction));
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
   void missingNonceResultsInNewNonceBeingCreatedAndResent() {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x0")));
@@ -551,6 +572,15 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   void invalidParamsResponseWhenRestrictionHasInvalidValue() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.withRestriction("invalid"))),
+        response.ethSigner(INVALID_PARAMS));
+  }
+
+  @Test
+  void invalidParamsResponseWhenBothPrivateForAndPrivacyGroupAreUsed() {
+    final PrivateTransaction transactionWithBothPrivateFromAndPrivacyGroupId =
+        transactionBuilder.withPrivacyGroupId(PRIVACY_GROUP_ID).build();
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(transactionWithBothPrivateFromAndPrivacyGroupId)),
         response.ethSigner(INVALID_PARAMS));
   }
 
