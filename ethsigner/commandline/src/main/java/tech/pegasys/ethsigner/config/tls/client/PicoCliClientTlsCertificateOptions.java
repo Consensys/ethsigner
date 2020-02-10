@@ -10,17 +10,17 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.config.tls.client;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliDownstreamTlsClientAuthOptions implements PkcsStoreConfig {
+class PicoCliClientTlsCertificateOptions implements ClientTlsCertificateOptions {
 
   @Option(
       names = "--downstream-http-tls-keystore-file",
@@ -30,7 +30,7 @@ public class PicoCliDownstreamTlsClientAuthOptions implements PkcsStoreConfig {
       arity = "1",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private File clientCertificateFile;
+  private Path clientCertificateFile;
 
   @Option(
       names = "--downstream-http-tls-keystore-password-file",
@@ -38,15 +38,15 @@ public class PicoCliDownstreamTlsClientAuthOptions implements PkcsStoreConfig {
       arity = "1",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private File clientCertificatePasswordFile;
+  private Path clientCertificatePasswordFile;
 
   @Override
-  public File getStoreFile() {
+  public Path getKeyStoreFile() {
     return clientCertificateFile;
   }
 
   @Override
-  public File getStorePasswordFile() {
+  public Path getKeyStorePasswordFile() {
     return clientCertificatePasswordFile;
   }
 }

@@ -14,11 +14,11 @@ package tech.pegasys.ethsigner;
 
 import static java.util.Arrays.asList;
 
-import tech.pegasys.ethsigner.config.PicoCliTlsDownstreamOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
+import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.util.CommandLineUtils;
@@ -118,7 +118,7 @@ public class EthSignerBaseCommand implements Config {
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
   @ArgGroup(exclusive = false)
-  private PicoCliTlsDownstreamOptions picoCliTlsDownstreamOptions;
+  private PicoCliClientTlsOptions clientTlsOptions;
 
   @Override
   public Level getLogLevel() {
@@ -166,8 +166,8 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Optional<DownstreamTlsOptions> getDownstreamTlsOptions() {
-    return Optional.ofNullable(picoCliTlsDownstreamOptions);
+  public Optional<ClientTlsOptions> getClientTlsOptions() {
+    return Optional.ofNullable(clientTlsOptions);
   }
 
   /**
@@ -182,12 +182,12 @@ public class EthSignerBaseCommand implements Config {
    */
   @Deprecated
   void validateOptions(final CommandLine commandLine, final Logger logger) {
-    if (getDownstreamTlsOptions().isPresent()) {
+    if (getClientTlsOptions().isPresent()) {
       CommandLineUtils.checkOptionDependencies(
           logger,
           commandLine,
           "--downstream-http-tls-enabled",
-          !getDownstreamTlsOptions().get().isTlsEnabled(),
+          !getClientTlsOptions().get().isTlsEnabled(),
           asList(
               "--downstream-http-tls-keystore-file",
               "--downstream-http-tls-keystore-password-file",
@@ -207,6 +207,7 @@ public class EthSignerBaseCommand implements Config {
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
         .add("dataPath", dataPath)
+        .add("clientTlsOptions", clientTlsOptions)
         .toString();
   }
 }

@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
@@ -218,7 +218,7 @@ public class EthSignerProcessRunner {
   }
 
   private Collection<String> createDownstreamTlsArgs() {
-    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions =
         signerConfig.downstreamTlsOptions();
     if (optionalDownstreamTlsOptions.isEmpty()
         || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
@@ -228,19 +228,19 @@ public class EthSignerProcessRunner {
     final List<String> params = new ArrayList<>();
     params.add("--downstream-http-tls-enabled");
 
-    final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
-    downstreamTlsOptions
-        .getDownstreamTlsClientAuthOptions()
+    final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
+    clientTlsOptions
+        .getClientTlsCertificateOptions()
         .ifPresent(
             pkcsStoreConfig -> {
               params.add("--downstream-http-tls-keystore-file");
-              params.add(pkcsStoreConfig.getStoreFile().toString());
+              params.add(pkcsStoreConfig.getKeyStoreFile().toString());
               params.add("--downstream-http-tls-keystore-password-file");
-              params.add(pkcsStoreConfig.getStorePasswordFile().toString());
+              params.add(pkcsStoreConfig.getKeyStorePasswordFile().toString());
             });
 
-    downstreamTlsOptions
-        .getDownstreamTlsServerTrustOptions()
+    clientTlsOptions
+        .getClientTlsTrustOptions()
         .ifPresent(
             downstreamTrustOptions -> {
               downstreamTrustOptions

@@ -19,7 +19,7 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -85,8 +85,7 @@ class CommandlineParserTest {
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
 
-    final Optional<DownstreamTlsOptions> downstreamTlsOptionsOptional =
-        config.getDownstreamTlsOptions();
+    final Optional<ClientTlsOptions> downstreamTlsOptionsOptional = config.getClientTlsOptions();
     assertThat(downstreamTlsOptionsOptional.isEmpty()).isTrue();
   }
 

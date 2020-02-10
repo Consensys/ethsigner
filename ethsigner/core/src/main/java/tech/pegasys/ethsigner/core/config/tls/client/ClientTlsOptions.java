@@ -10,29 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.tls.support;
+package tech.pegasys.ethsigner.core.config.tls.client;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import java.util.Optional;
 
-import java.io.File;
+public interface ClientTlsOptions {
+  boolean isTlsEnabled();
 
-public class BasicPkcsStoreConfig implements PkcsStoreConfig {
+  Optional<ClientTlsCertificateOptions> getClientTlsCertificateOptions();
 
-  private final File storeFile;
-  private final File passwordFile;
-
-  public BasicPkcsStoreConfig(final File storeFile, final File passwordFile) {
-    this.storeFile = storeFile;
-    this.passwordFile = passwordFile;
-  }
-
-  @Override
-  public File getStoreFile() {
-    return storeFile;
-  }
-
-  @Override
-  public File getStorePasswordFile() {
-    return passwordFile;
-  }
+  Optional<ClientTlsTrustOptions> getClientTlsTrustOptions();
 }

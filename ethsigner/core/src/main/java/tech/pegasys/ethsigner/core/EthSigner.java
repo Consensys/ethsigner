@@ -16,10 +16,10 @@ import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
-import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
@@ -95,28 +95,25 @@ public final class EthSigner {
   }
 
   private WebClientOptions applyConfigTlsSettingsTo(final WebClientOptions input) {
-    final Optional<DownstreamTlsOptions> optionalDownstreamTlsOptions =
-        config.getDownstreamTlsOptions();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
     if (optionalDownstreamTlsOptions.isEmpty()
         || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
       return input;
     }
 
     final WebClientOptions result = new WebClientOptions(input);
-    final DownstreamTlsOptions downstreamTlsOptions = optionalDownstreamTlsOptions.get();
+    final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
     result.setSsl(true);
 
-    applyDownstreamTlsTrustOptions(
-        result, downstreamTlsOptions.getDownstreamTlsServerTrustOptions());
-    applyDownstreamClientAuthOptions(
-        result, downstreamTlsOptions.getDownstreamTlsClientAuthOptions());
+    applyDownstreamTlsTrustOptions(result, clientTlsOptions.getClientTlsTrustOptions());
+    applyDownstreamClientAuthOptions(result, clientTlsOptions.getClientTlsCertificateOptions());
 
     return result;
   }
 
   private void applyDownstreamTlsTrustOptions(
       final WebClientOptions result,
-      final Optional<DownstreamTrustOptions> optionalDownstreamTrustOptions) {
+      final Optional<ClientTlsTrustOptions> optionalDownstreamTrustOptions) {
 
     if (optionalDownstreamTrustOptions.isPresent()) {
       final Optional<Path> optionalKnownServerFile =
@@ -140,7 +137,7 @@ public final class EthSigner {
 
   private void applyDownstreamClientAuthOptions(
       final WebClientOptions result,
-      final Optional<PkcsStoreConfig> optionalDownstreamTlsClientAuthOptions) {
+      final Optional<ClientTlsCertificateOptions> optionalDownstreamTlsClientAuthOptions) {
     if (optionalDownstreamTlsClientAuthOptions.isPresent()) {
       try {
         result.setPfxKeyCertOptions(convertFrom(optionalDownstreamTlsClientAuthOptions.get()));
@@ -150,9 +147,10 @@ public final class EthSigner {
     }
   }
 
-  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
-    final String password = readSecretFromFile(pkcsConfig.getStorePasswordFile().toPath());
-    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
+  private static PfxOptions convertFrom(final ClientTlsCertificateOptions pkcsConfig)
+      throws IOException {
+    final String password = readSecretFromFile(pkcsConfig.getKeyStorePasswordFile());
+    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getKeyStoreFile().toString());
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {

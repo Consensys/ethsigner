@@ -10,18 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.config.tls.client;
 
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
-import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.util.Optional;
 
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
-public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
+public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @Option(
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
@@ -30,10 +30,10 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
   private boolean tlsEnabled = false;
 
   @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsClientAuthOptions downstreamTlsClientAuthOptions;
+  private PicoCliClientTlsCertificateOptions clientTlsCertificateOptions;
 
   @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTlsTrustOptions downstreamServerTrustOptions;
+  private PicoCliClientTlsTrustOptions clientTlsTrustOptions;
 
   @Override
   public boolean isTlsEnabled() {
@@ -41,12 +41,12 @@ public class PicoCliTlsDownstreamOptions implements DownstreamTlsOptions {
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getDownstreamTlsClientAuthOptions() {
-    return Optional.ofNullable(downstreamTlsClientAuthOptions);
+  public Optional<ClientTlsCertificateOptions> getClientTlsCertificateOptions() {
+    return Optional.ofNullable(clientTlsCertificateOptions);
   }
 
   @Override
-  public Optional<DownstreamTrustOptions> getDownstreamTlsServerTrustOptions() {
-    return Optional.ofNullable(downstreamServerTrustOptions);
+  public Optional<ClientTlsTrustOptions> getClientTlsTrustOptions() {
+    return Optional.ofNullable(clientTlsTrustOptions);
   }
 }

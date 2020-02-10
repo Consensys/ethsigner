@@ -10,22 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.tls.support;
+package tech.pegasys.ethsigner.tests.tls.support.client;
 
-import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Optional;
 
-public class BasicDownstreamTrustOptions implements DownstreamTrustOptions {
+public class BasicClientTlsTrustOptions implements ClientTlsTrustOptions {
   private final Optional<Path> knownServerFile;
   private final boolean isCaSignedServerCertificateAllowed;
 
-  public BasicDownstreamTrustOptions(
-      final Optional<Path> knownServerFile, final boolean isCaSignedServerCertificateAllowed) {
-    Objects.requireNonNull(knownServerFile);
-    this.knownServerFile = knownServerFile;
+  public BasicClientTlsTrustOptions(
+      final Path knownServerFile, final boolean isCaSignedServerCertificateAllowed) {
+    this.knownServerFile = Optional.ofNullable(knownServerFile);
     this.isCaSignedServerCertificateAllowed = isCaSignedServerCertificateAllowed;
   }
 

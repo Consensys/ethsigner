@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.core.config.DownstreamTlsOptions;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
@@ -33,7 +33,7 @@ public class SignerConfigurationBuilder {
   private Path multiKeySignerDirectory;
   private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
-  private DownstreamTlsOptions downstreamTlsOptions;
+  private ClientTlsOptions clientTlsOptions;
   private TlsCertificateDefinition overriddenCaTrustStore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
@@ -68,8 +68,8 @@ public class SignerConfigurationBuilder {
   }
 
   public SignerConfigurationBuilder withDownstreamTlsOptions(
-      final DownstreamTlsOptions downstreamTlsOptions) {
-    this.downstreamTlsOptions = downstreamTlsOptions;
+      final ClientTlsOptions clientTlsOptions) {
+    this.clientTlsOptions = clientTlsOptions;
     return this;
   }
 
@@ -88,7 +88,7 @@ public class SignerConfigurationBuilder {
         webSocketPort,
         transactionSignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
-        Optional.ofNullable(downstreamTlsOptions),
+        Optional.ofNullable(clientTlsOptions),
         Optional.ofNullable(overriddenCaTrustStore));
   }
 }

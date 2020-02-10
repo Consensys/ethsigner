@@ -10,18 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.config.tls.client;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
-import tech.pegasys.ethsigner.core.config.DownstreamTrustOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliDownstreamTlsTrustOptions implements DownstreamTrustOptions {
+class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   @Option(
       names = "--downstream-http-tls-known-servers-file",
       description =
