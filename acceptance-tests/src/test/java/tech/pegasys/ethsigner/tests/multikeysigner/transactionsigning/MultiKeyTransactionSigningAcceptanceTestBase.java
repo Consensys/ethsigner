@@ -87,7 +87,7 @@ public class MultiKeyTransactionSigningAcceptanceTestBase extends MultiKeyAccept
   }
 
   @AfterAll
-  public static void tearDownBase() {
+  public static synchronized void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
       ethNode = null;
