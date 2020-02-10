@@ -237,7 +237,7 @@ public class EthSignerProcessRunner {
 
   public synchronized boolean isRunning(final String processName) {
     final Process process = processes.get(processName);
-    if(process == null) {
+    if (process == null) {
       LOG.info("No record exists for requested process.");
       return true;
     } else {
