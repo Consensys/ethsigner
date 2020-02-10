@@ -54,6 +54,7 @@ import org.web3j.utils.Convert.Unit;
 class ClientSideTlsAcceptanceTest {
 
   private TlsEnabledHttpServerFactory serverFactory;
+  private Signer signer = null;
   private static final int UNUSED_WS_PORT = 0;
 
   @BeforeEach
@@ -64,6 +65,10 @@ class ClientSideTlsAcceptanceTest {
   @AfterEach
   void cleanup() {
     serverFactory.shutdown();
+    if(signer != null) {
+      signer.shutdown();
+      signer = null;
+    }
   }
 
   private Signer createAndStartSigner(
@@ -110,7 +115,7 @@ class ClientSideTlsAcceptanceTest {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
 
-    final Signer signer = new Signer(builder.build(), nodeConfig, nodePorts);
+    signer = new Signer(builder.build(), nodeConfig, nodePorts);
 
     return signer;
   }
@@ -128,8 +133,7 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer =
         serverFactory.create(serverCert, ethSignerCert, workDir);
 
-    final Signer signer =
-        createAndStartSigner(
+    signer = createAndStartSigner(
             ethSignerCert, serverCert, web3ProviderHttpServer.actualPort(), 0, workDir);
 
     assertThat(signer.accounts().balance("0x123456"))
@@ -186,7 +190,7 @@ class ClientSideTlsAcceptanceTest {
             workDir.resolve("Missing_keyStore").toFile(), "arbitraryPassword");
 
     // Ports are arbitrary as EthSigner should exit
-    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
     signer.start();
     waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }
@@ -200,7 +204,7 @@ class ClientSideTlsAcceptanceTest {
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
 
     // Ports are arbitrary as EthSigner should exit
-    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
     signer.start();
     waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }

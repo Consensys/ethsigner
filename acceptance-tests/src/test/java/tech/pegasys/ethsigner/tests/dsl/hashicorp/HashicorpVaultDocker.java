@@ -101,6 +101,7 @@ public class HashicorpVaultDocker {
     if (docker != null && vaultContainerId != null) {
       stopVaultContainer();
       removeVaultContainer();
+      vaultContainerId = null;
     }
   }
 
