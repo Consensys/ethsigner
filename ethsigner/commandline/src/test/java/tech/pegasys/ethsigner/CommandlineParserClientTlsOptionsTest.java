@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
+import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -23,6 +24,7 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,36 +53,15 @@ class CommandlineParserClientTlsOptionsTest {
     defaultUsageText = commandLine.getUsageMessage();
   }
 
-  private void missingParameterShowsError(final String input, final String... paramsToRemove) {
-    String cmdLine = input;
-    for (final String paramToRemove : paramsToRemove) {
-      cmdLine = removeFieldFrom(cmdLine, paramToRemove);
-    }
-
-    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
-    assertThat(result).isFalse();
-    for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
-    }
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
-  }
-
   @Test
-  void downstreamTlsOptionsAreEmptyByDefault() {
-    final String cmdLine = validBaseCommandOptions();
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).as("CLI Parse result").isTrue();
-    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
-    assertThat(optionalDownstreamTlsOptions.isEmpty()).as("Downstream TLS Options").isTrue();
-  }
-
-  @Test
-  void cmdLineIsValidIfDownstreamTlsIsEnabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine += "--downstream-http-tls-enabled ";
+  void cmdLineIsValidIfOnlyDownstreamTlsIsEnabled() {
+    final String cmdLine =
+        removeFieldFrom(
+            validBaseCommandOptions(),
+            "downstream-http-tls-keystore-file",
+            "downstream-http-tls-keystore-password-file",
+            "downstream-http-tls-invalidate-ca-signed",
+            "downstream-http-tls-known-servers-file");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -97,12 +78,7 @@ class CommandlineParserClientTlsOptionsTest {
 
   @Test
   void cmdLineIsValidWithAllTlsOptions() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine += "--downstream-http-tls-enabled ";
-    cmdLine +=
-        "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
-    cmdLine +=
-        "--downstream-http-tls-invalidate-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
+    final String cmdLine = validBaseCommandOptions();
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -126,46 +102,53 @@ class CommandlineParserClientTlsOptionsTest {
 
   @Test
   void cmdLineFailsIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine +=
-        "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
+    final String cmdLine =
+        removeFieldFrom(validBaseCommandOptions(), "downstream-http-tls-enabled");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
-    assertThat(result).isTrue(); // this will fail once we upgrade to picocli 4.2
+    // At the moment, the parse will only print warning message via configured logger.
+    // This will start failing once we upgrade to picocli 4.2
+    assertThat(result).isTrue();
   }
 
   @Test
   void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine +=
-        "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
-
-    missingParameterShowsError(cmdLine, "downstream-http-tls-keystore-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        cmdLine,
+        List.of("downstream-http-tls-keystore-file"));
   }
 
   @Test
   void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
     String cmdLine = validBaseCommandOptions();
-    cmdLine +=
-        "--downstream-http-tls-keystore-file=./test.ks --downstream-http-tls-keystore-password-file=./test.pass ";
-
-    missingParameterShowsError(cmdLine, "downstream-http-tls-keystore-password-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        cmdLine,
+        List.of("downstream-http-tls-keystore-password-file"));
   }
 
   @Test
-  void cmdLineIsValidForAllDownstreamTrustOptions() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine +=
-        "--downstream-http-tls-invalidate-ca-signed --downstream-http-tls-known-servers-file=./test.txt ";
+  void cmdLineIsValidWhenTlsClientCertificateOptionsAreMissing() {
+    final String cmdLine =
+        removeFieldFrom(
+            validBaseCommandOptions(),
+            "downstream-http-tls-keystore-file",
+            "downstream-http-tls-keystore-password-file");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isTrue();
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.isTlsEnabled()).isFalse();
+    assertThat(clientTlsOptions.isTlsEnabled()).isTrue();
     final ClientTlsTrustOptions clientTlsTrustOptions =
         clientTlsOptions.getClientTlsTrustOptions().get();
     assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
@@ -174,9 +157,13 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
-  void cmdLineIsValidIfDownstreamKnownServerIsSpecified() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine += "--downstream-http-tls-known-servers-file=./test.txt ";
+  void cmdLineIsValidIfOnlyDownstreamKnownServerIsSpecified() {
+    final String cmdLine =
+        removeFieldFrom(
+            validBaseCommandOptions(),
+            "downstream-http-tls-keystore-file",
+            "downstream-http-tls-keystore-password-file",
+            "downstream-http-tls-invalidate-ca-signed");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -184,7 +171,6 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(result).isTrue();
 
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.isTlsEnabled()).isFalse();
     assertThat(clientTlsOptions.getClientTlsTrustOptions().isPresent()).isTrue();
     final ClientTlsTrustOptions clientTlsTrustOptions =
         clientTlsOptions.getClientTlsTrustOptions().get();
@@ -194,11 +180,12 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
-  void downstreamKnownServerIsRequiredIfCASignedDisable() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine += "--downstream-http-tls-invalidate-ca-signed ";
-    parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    missingParameterShowsError(cmdLine, "downstream-http-tls-known-servers-file");
+  void downstreamKnownServerIsRequiredIfCASignedDisableWithoutKnownServersFile() {
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("downstream-http-tls-known-servers-file"));
   }
 }

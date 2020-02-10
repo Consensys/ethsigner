@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
+import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -86,7 +88,7 @@ class CommandlineParserTest {
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
 
     final Optional<ClientTlsOptions> downstreamTlsOptionsOptional = config.getClientTlsOptions();
-    assertThat(downstreamTlsOptionsOptional.isEmpty()).isTrue();
+    assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
   }
 
   @Test
@@ -130,7 +132,12 @@ class CommandlineParserTest {
 
   @Test
   void missingRequiredParamShowsAppropriateError() {
-    missingParameterShowsError("downstream-http-port");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("downstream-http-port"));
   }
 
   @Test
@@ -187,20 +194,6 @@ class CommandlineParserTest {
             "--nonExistentOption=9",
             subCommand.getCommandName());
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
-  }
-
-  private void missingParameterShowsError(final String input, final String... paramsToRemove) {
-    String cmdLine = input;
-    for (final String paramToRemove : paramsToRemove) {
-      cmdLine = removeFieldFrom(cmdLine, paramToRemove);
-    }
-
-    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
-    assertThat(result).isFalse();
-    for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
-    }
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
@@ -294,18 +287,32 @@ class CommandlineParserTest {
 
   @Test
   void missingTlsKeyStorePasswordShowsErrorWhenKeystorePasswordIsSet() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-keystore-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-file"));
   }
 
   @Test
   void missingTlsPasswordFileShowsErrorWhenKeyStoreIsSet() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-keystore-password-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-password-file"));
   }
 
   @Test
   void specifyingOnlyTheTlsClientWhiteListShowsError() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "tls-keystore-file", "tls-keystore-password-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-file", "tls-keystore-password-file"));
   }
 
   @Test
