@@ -35,6 +35,7 @@ public class EeaSendTransaction {
   public static final String UNLOCKED_ACCOUNT = "0x7577919ae5df4941180eac211965f275cdce314d";
   public static final String PRIVATE_FROM = "ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=";
   public static final String PRIVATE_FOR = "GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w=";
+  public static final String PRIVACY_GROUP_ID = "/xzRjCLioUBkm5LYuzll61GXyrD5x7bvXzQk/ovJA/4=";
 
   public static final String DEFAULT_VALUE = "0x0";
 

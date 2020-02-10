@@ -58,16 +58,12 @@ public class EeaSendRawTransaction {
       throw new IllegalStateException("eeaSendTransaction request must have only 1 parameter");
     }
     final JsonObject transaction = params.get(0);
+    final String privacyGroupId = transaction.getString("privacyGroupId");
     final RawPrivateTransaction rawTransaction =
-        RawPrivateTransaction.createTransaction(
-            valueToBigDecimal(transaction.getString("nonce")),
-            valueToBigDecimal(transaction.getString("gasPrice")),
-            valueToBigDecimal(transaction.getString("gas")),
-            transaction.getString("to"),
-            transaction.getString("data"),
-            valueToBase64String(transaction.getString("privateFrom")),
-            privateFor(transaction.getJsonArray("privateFor")),
-            Restriction.fromString(transaction.getString("restriction")));
+        privacyGroupId == null
+            ? createEeaRawPrivateTransaction(transaction)
+            : createBesuRawPrivateTransaction(transaction, privacyGroupId);
+
     final byte[] signedTransaction =
         PrivateTransactionEncoder.signMessage(rawTransaction, chainId, credentials);
     final String value = "0x" + BaseEncoding.base16().encode(signedTransaction).toLowerCase();
@@ -91,6 +87,31 @@ public class EeaSendRawTransaction {
 
   private Base64String valueToBase64String(final String value) {
     return value == null ? null : Base64String.wrap(value);
+  }
+
+  private RawPrivateTransaction createBesuRawPrivateTransaction(
+      final JsonObject transaction, final String privacyGroupId) {
+    return RawPrivateTransaction.createTransaction(
+        valueToBigDecimal(transaction.getString("nonce")),
+        valueToBigDecimal(transaction.getString("gasPrice")),
+        valueToBigDecimal(transaction.getString("gas")),
+        transaction.getString("to"),
+        transaction.getString("data"),
+        valueToBase64String(transaction.getString("privateFrom")),
+        valueToBase64String(privacyGroupId),
+        Restriction.fromString(transaction.getString("restriction")));
+  }
+
+  private RawPrivateTransaction createEeaRawPrivateTransaction(final JsonObject transaction) {
+    return RawPrivateTransaction.createTransaction(
+        valueToBigDecimal(transaction.getString("nonce")),
+        valueToBigDecimal(transaction.getString("gasPrice")),
+        valueToBigDecimal(transaction.getString("gas")),
+        transaction.getString("to"),
+        transaction.getString("data"),
+        valueToBase64String(transaction.getString("privateFrom")),
+        privateFor(transaction.getJsonArray("privateFor")),
+        Restriction.fromString(transaction.getString("restriction")));
   }
 
   public String request(final String value) {
