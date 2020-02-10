@@ -25,8 +25,8 @@ class PicoCliClientTlsCertificateOptions implements ClientTlsCertificateOptions 
   @Option(
       names = "--downstream-http-tls-keystore-file",
       description =
-          "Path to a PKCS#12 formatted keystore containing key and certificate to present to "
-              + "a TLS-enabled web3 provider that requires client authentication.",
+          "Path to a PKCS#12 formatted keystore containing the key and certificate "
+              + "to present to a TLS-enabled web3 provider that requires client authentication.",
       arity = "1",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
