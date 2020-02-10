@@ -36,7 +36,9 @@ public class CommandLineUtils {
    * @param dependentOptionsNames a list of option names that can't be used if condition is met.
    *     Example: if --miner-coinbase is in the list and condition is that --miner-enabled should
    *     not be false, we log a warning.
+   * @deprecated This method will not be required once PicoCLI 4.2 is released
    */
+  @Deprecated
   public static void checkOptionDependencies(
       final Logger logger,
       final CommandLine commandLine,
