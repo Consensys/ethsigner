@@ -28,7 +28,7 @@ public interface CommandLineParserAssertions {
       final ByteArrayOutputStream outputStream,
       final String defaultUsageText,
       final String inputCmdLine,
-      List<String> paramsToRemove) {
+      final List<String> paramsToRemove) {
     final String cmdLine =
         removeFieldFrom(inputCmdLine, paramsToRemove.stream().toArray(String[]::new));
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
