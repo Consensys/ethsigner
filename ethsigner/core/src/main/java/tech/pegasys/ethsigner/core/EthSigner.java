@@ -105,52 +105,62 @@ public final class EthSigner {
     final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
     result.setSsl(true);
 
-    applyDownstreamTlsTrustOptions(result, clientTlsOptions.getClientTlsTrustOptions());
-    applyDownstreamClientAuthOptions(result, clientTlsOptions.getClientTlsCertificateOptions());
+    applyClientTlsTrustOptions(result, clientTlsOptions.getClientTlsTrustOptions());
+    applyClientTlsCertificateOptions(result, clientTlsOptions.getClientTlsCertificateOptions());
 
     return result;
   }
 
-  private void applyDownstreamTlsTrustOptions(
-      final WebClientOptions result,
-      final Optional<ClientTlsTrustOptions> optionalDownstreamTrustOptions) {
+  private void applyClientTlsTrustOptions(
+      final WebClientOptions webClientOptions,
+      final Optional<ClientTlsTrustOptions> optionalClientTlsTrustOptions) {
 
-    if (optionalDownstreamTrustOptions.isPresent()) {
-      final Optional<Path> optionalKnownServerFile =
-          optionalDownstreamTrustOptions.get().getKnownServerFile();
-      if (optionalKnownServerFile.isPresent()) {
-        final Path knownServerFile = optionalKnownServerFile.get();
-        try {
-          result.setTrustOptions(
-              whitelistServers(
-                  knownServerFile,
-                  optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()));
-        } catch (RuntimeException e) {
-          throw new InitializationException("Failed to load known server file.", e);
-        }
-      } else if (!optionalDownstreamTrustOptions.get().isCaSignedServerCertificateAllowed()) {
-        throw new InitializationException(
-            "Must specify a known-server file if CA-signed option is disabled");
-      }
+    if (optionalClientTlsTrustOptions.isEmpty()) {
+      return; // CA trust is enabled by default.
+    }
+
+    final Optional<Path> optionalKnownServerFile =
+        optionalClientTlsTrustOptions.get().getKnownServerFile();
+    final boolean allowCATrust =
+        optionalClientTlsTrustOptions.get().isCaSignedServerCertificateAllowed();
+
+    if (optionalKnownServerFile.isEmpty() && !allowCATrust) {
+      throw new InitializationException(
+          "Must specify a known-server file if CA-signed option is disabled");
+    }
+
+    try {
+      webClientOptions.setTrustOptions(
+          whitelistServers(
+              optionalKnownServerFile.get(),
+              optionalClientTlsTrustOptions.get().isCaSignedServerCertificateAllowed()));
+    } catch (RuntimeException e) {
+      throw new InitializationException("Failed to load known server file.", e);
     }
   }
 
-  private void applyDownstreamClientAuthOptions(
-      final WebClientOptions result,
-      final Optional<ClientTlsCertificateOptions> optionalDownstreamTlsClientAuthOptions) {
-    if (optionalDownstreamTlsClientAuthOptions.isPresent()) {
-      try {
-        result.setPfxKeyCertOptions(convertFrom(optionalDownstreamTlsClientAuthOptions.get()));
-      } catch (final IOException e) {
-        throw new InitializationException("Failed to load client certificate.", e);
-      }
+  private void applyClientTlsCertificateOptions(
+      final WebClientOptions webClientOptions,
+      final Optional<ClientTlsCertificateOptions> optionalClientTlsCertificateOptions) {
+
+    if (optionalClientTlsCertificateOptions.isEmpty()) {
+      return;
+    }
+
+    try {
+      webClientOptions.setPfxKeyCertOptions(convertFrom(optionalClientTlsCertificateOptions.get()));
+    } catch (final IOException e) {
+      throw new InitializationException("Failed to load client certificate keystore.", e);
     }
   }
 
-  private static PfxOptions convertFrom(final ClientTlsCertificateOptions pkcsConfig)
-      throws IOException {
-    final String password = readSecretFromFile(pkcsConfig.getKeyStorePasswordFile());
-    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getKeyStoreFile().toString());
+  private static PfxOptions convertFrom(
+      final ClientTlsCertificateOptions clientTlsCertificateOptions) throws IOException {
+    final String password =
+        readSecretFromFile(clientTlsCertificateOptions.getKeyStorePasswordFile());
+    return new PfxOptions()
+        .setPassword(password)
+        .setPath(clientTlsCertificateOptions.getKeyStoreFile().toString());
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {
