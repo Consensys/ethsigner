@@ -65,7 +65,7 @@ class ClientSideTlsAcceptanceTest {
   @AfterEach
   void cleanup() {
     serverFactory.shutdown();
-    if(signer != null) {
+    if (signer != null) {
       signer.shutdown();
       signer = null;
     }
@@ -133,7 +133,8 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer =
         serverFactory.create(serverCert, ethSignerCert, workDir);
 
-    signer = createAndStartSigner(
+    signer =
+        createAndStartSigner(
             ethSignerCert, serverCert, web3ProviderHttpServer.actualPort(), 0, workDir);
 
     assertThat(signer.accounts().balance("0x123456"))
