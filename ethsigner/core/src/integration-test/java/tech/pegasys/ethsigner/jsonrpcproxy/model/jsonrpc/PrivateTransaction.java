@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc;
 
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.DEFAULT_VALUE;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVACY_GROUP_ID;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FOR;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FROM;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.UNLOCKED_ACCOUNT;
@@ -117,6 +118,21 @@ public class PrivateTransaction {
             "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
         .withPrivateFrom(PRIVATE_FROM)
         .withPrivateFor(singletonList(PRIVATE_FOR))
+        .withRestriction("restricted");
+  }
+
+  public static Builder privacyGroupIdTransaction() {
+    return new PrivateTransaction.Builder()
+        .withFrom(UNLOCKED_ACCOUNT)
+        .withNonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2")
+        .withGasPrice("0x9184e72a000")
+        .withGas("0x76c0")
+        .withTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567")
+        .withValue(DEFAULT_VALUE)
+        .withData(
+            "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675")
+        .withPrivateFrom(PRIVATE_FROM)
+        .withPrivacyGroupId(PRIVACY_GROUP_ID)
         .withRestriction("restricted");
   }
 
