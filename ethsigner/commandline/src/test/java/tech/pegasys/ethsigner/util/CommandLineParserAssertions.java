@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public interface CommandLineParserAssertions {
-  static void parseCommandLineWithMissingParamsShowsError(
+public final class CommandLineParserAssertions {
+  public static void parseCommandLineWithMissingParamsShowsError(
       final CommandlineParser parser,
       final ByteArrayOutputStream outputStream,
       final String defaultUsageText,

@@ -39,6 +39,7 @@ public final class EthSigner {
 
   private final Config config;
   private final TransactionSignerProvider transactionSignerProvider;
+  private final WebClientOptionsFactory webClientOptionsFactory = new WebClientOptionsFactory();
 
   public EthSigner(final Config config, final TransactionSignerProvider transactionSignerProvider) {
     this.config = config;
@@ -72,7 +73,7 @@ public final class EthSigner {
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
-            new WebClientOptionsBuilder().build(config),
+            webClientOptionsFactory.getWebClientOptions(config),
             applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
             jsonDecoder,

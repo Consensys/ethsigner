@@ -27,8 +27,8 @@ import java.util.Optional;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 
-class WebClientOptionsBuilder {
-  public WebClientOptions build(final Config config) {
+class WebClientOptionsFactory {
+  public WebClientOptions getWebClientOptions(final Config config) {
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
