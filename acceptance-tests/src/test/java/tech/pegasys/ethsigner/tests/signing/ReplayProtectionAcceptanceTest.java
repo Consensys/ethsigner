@@ -63,10 +63,12 @@ public class ReplayProtectionAcceptanceTest {
   public void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
   }
 
