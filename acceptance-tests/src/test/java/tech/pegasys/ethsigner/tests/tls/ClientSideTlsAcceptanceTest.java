@@ -154,7 +154,7 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer =
         serverFactory.create(serverPresentedCert, ethSignerCert, workDir);
 
-    final Signer signer =
+    signer =
         createAndStartSigner(
             ethSignerCert,
             ethSignerExpectedServerCert,
