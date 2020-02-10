@@ -235,8 +235,14 @@ public class EthSignerProcessRunner {
     return params;
   }
 
-  public boolean isRunning(final String processName) {
-    return (processes.get(processName) != null) && processes.get(processName).isAlive();
+  public synchronized boolean isRunning(final String processName) {
+    final Process process = processes.get(processName);
+    if(process == null) {
+      LOG.info("No record exists for requested process.");
+      return true;
+    } else {
+      return process.isAlive();
+    }
   }
 
   private String executableLocation() {

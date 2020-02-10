@@ -94,8 +94,7 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-          UnrecoverableKeyException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
 
     final Path clientPasswordFile =
         Files.writeString(workDir.resolve("clientKeystorePassword"), presentedCert.getPassword());
