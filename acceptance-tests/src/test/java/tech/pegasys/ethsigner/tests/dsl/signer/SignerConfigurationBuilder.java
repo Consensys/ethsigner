@@ -12,12 +12,11 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -34,9 +33,8 @@ public class SignerConfigurationBuilder {
   private Path multiKeySignerDirectory;
   private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
-  private File downstreamKnownServers;
-  private PkcsStoreConfig downstreamKeystore;
-  private TlsCertificateDefinition overridenCaTrustStore;
+  private ClientTlsOptions clientTlsOptions;
+  private TlsCertificateDefinition overriddenCaTrustStore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -69,18 +67,14 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamKnownServers(final File downstreamKnownServers) {
-    this.downstreamKnownServers = downstreamKnownServers;
-    return this;
-  }
-
-  public SignerConfigurationBuilder withDownstreamKeyStore(final PkcsStoreConfig keystore) {
-    this.downstreamKeystore = keystore;
+  public SignerConfigurationBuilder withDownstreamTlsOptions(
+      final ClientTlsOptions clientTlsOptions) {
+    this.clientTlsOptions = clientTlsOptions;
     return this;
   }
 
   public SignerConfigurationBuilder withOverriddenCA(final TlsCertificateDefinition keystore) {
-    this.overridenCaTrustStore = keystore;
+    this.overriddenCaTrustStore = keystore;
     return this;
   }
 
@@ -94,8 +88,7 @@ public class SignerConfigurationBuilder {
         webSocketPort,
         transactionSignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
-        Optional.ofNullable(downstreamKnownServers),
-        Optional.ofNullable(downstreamKeystore),
-        Optional.ofNullable(overridenCaTrustStore));
+        Optional.ofNullable(clientTlsOptions),
+        Optional.ofNullable(overriddenCaTrustStore));
   }
 }
