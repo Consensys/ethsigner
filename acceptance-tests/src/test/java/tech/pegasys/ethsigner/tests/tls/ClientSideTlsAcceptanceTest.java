@@ -20,15 +20,20 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
-import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
 import tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServerFactory;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicClientTlsOptions;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicClientTlsTrustOptions;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicKeyStoreOptions;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -102,9 +107,15 @@ class ClientSideTlsAcceptanceTest {
 
     populateFingerprintFile(
         fingerPrintFilePath, expectedWeb3ProviderCert, downstreamWeb3ServerPort);
-    builder.withDownstreamKnownServers(fingerPrintFilePath.toFile());
-    builder.withDownstreamKeyStore(
-        new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
+
+    final KeyStoreOptions keyStoreOptions =
+        new BasicKeyStoreOptions(presentedCert.getPkcs12File().toPath(), clientPasswordFile);
+    final ClientTlsTrustOptions clientTlsTrustOptions =
+        new BasicClientTlsTrustOptions(fingerPrintFilePath, true);
+    final ClientTlsOptions clientTlsOptions =
+        new BasicClientTlsOptions(keyStoreOptions, clientTlsTrustOptions);
+    builder.withDownstreamTlsOptions(clientTlsOptions);
+
     builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();

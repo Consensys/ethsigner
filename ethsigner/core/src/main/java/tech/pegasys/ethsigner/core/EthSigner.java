@@ -12,30 +12,23 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
-
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.core.util.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.time.Duration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import io.vertx.core.http.ClientAuth;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
-import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.net.tls.VertxTrustOptions;
@@ -46,6 +39,7 @@ public final class EthSigner {
 
   private final Config config;
   private final TransactionSignerProvider transactionSignerProvider;
+  private final WebClientOptionsFactory webClientOptionsFactory = new WebClientOptionsFactory();
 
   public EthSigner(final Config config, final TransactionSignerProvider transactionSignerProvider) {
     this.config = config;
@@ -68,10 +62,6 @@ public final class EthSigner {
 
     final JsonDecoder jsonDecoder = createJsonDecoder();
 
-    final WebClientOptions clientOptions =
-        new WebClientOptions()
-            .setDefaultPort(config.getDownstreamHttpPort())
-            .setDefaultHost(config.getDownstreamHttpHost());
     final HttpServerOptions serverOptions =
         new HttpServerOptions()
             .setPort(config.getHttpListenPort())
@@ -83,41 +73,13 @@ public final class EthSigner {
         new Runner(
             config.getChainId().id(),
             transactionSignerProvider,
-            applyConfigTlsSettingsTo(clientOptions),
+            webClientOptionsFactory.createWebClientOptions(config),
             applyConfigTlsSettingsTo(serverOptions),
             downstreamHttpRequestTimeout,
             jsonDecoder,
             config.getDataPath());
 
     runner.start();
-  }
-
-  private HttpClientOptions applyConfigTlsSettingsTo(final HttpClientOptions input) {
-    final HttpClientOptions result = new HttpClientOptions(input);
-
-    result.setSsl(
-        config.getWeb3ProviderKnownServersFile().isPresent()
-            || config.getClientCertificateOptions().isPresent());
-
-    config
-        .getWeb3ProviderKnownServersFile()
-        .ifPresent(
-            knownServerFile -> result.setTrustOptions(whitelistServers(knownServerFile.toPath())));
-
-    if (config.getClientCertificateOptions().isPresent()) {
-      try {
-        result.setPfxKeyCertOptions(convertFrom(config.getClientCertificateOptions().get()));
-      } catch (final IOException e) {
-        throw new InitializationException("Failed to load client certificate.", e);
-      }
-    }
-
-    return result;
-  }
-
-  private static PfxOptions convertFrom(final PkcsStoreConfig pkcsConfig) throws IOException {
-    final String password = readSecretFromFile(pkcsConfig.getStorePasswordFile().toPath());
-    return new PfxOptions().setPassword(password).setPath(pkcsConfig.getStoreFile().toString());
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {
@@ -146,7 +108,8 @@ public final class EthSigner {
     try {
       final String keyStorePathname =
           tlsConfig.getKeyStoreFile().toPath().toAbsolutePath().toString();
-      final String password = readSecretFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
+      final String password =
+          FileUtil.readFirstLineFromFile(tlsConfig.getKeyStorePasswordFile().toPath());
       result.setPfxKeyCertOptions(new PfxOptions().setPath(keyStorePathname).setPassword(password));
       return result;
     } catch (final NoSuchFileException e) {
@@ -187,10 +150,5 @@ public final class EthSigner {
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
     return new JsonDecoder(jsonObjectMapper);
-  }
-
-  private static String readSecretFromFile(final Path path) throws IOException {
-    final byte[] fileContent = Files.readAllBytes(path);
-    return new String(fileContent, Charsets.UTF_8);
   }
 }

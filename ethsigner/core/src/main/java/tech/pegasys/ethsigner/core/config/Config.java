@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
@@ -39,9 +39,7 @@ public interface Config {
 
   Path getDataPath();
 
-  Optional<File> getWeb3ProviderKnownServersFile();
-
   Optional<TlsOptions> getTlsOptions();
 
-  Optional<PkcsStoreConfig> getClientCertificateOptions();
+  Optional<ClientTlsOptions> getClientTlsOptions();
 }
