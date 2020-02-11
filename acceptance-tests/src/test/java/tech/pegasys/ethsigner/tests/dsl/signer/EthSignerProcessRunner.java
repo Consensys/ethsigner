@@ -240,7 +240,7 @@ public class EthSignerProcessRunner {
     final Process process = processes.get(processName);
     if (process == null) {
       LOG.info("No record exists for requested process.");
-      return true;
+      return false;
     } else {
       return process.isAlive();
     }
