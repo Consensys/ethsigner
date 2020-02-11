@@ -230,7 +230,7 @@ public class EthSignerProcessRunner {
 
     final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
     clientTlsOptions
-        .getClientTlsCertificateOptions()
+        .getTlsCertificateOptions()
         .ifPresent(
             pkcsStoreConfig -> {
               params.add("--downstream-http-tls-keystore-file");
@@ -240,7 +240,7 @@ public class EthSignerProcessRunner {
             });
 
     clientTlsOptions
-        .getClientTlsTrustOptions()
+        .getTlsTrustOptions()
         .ifPresent(
             downstreamTrustOptions -> {
               downstreamTrustOptions

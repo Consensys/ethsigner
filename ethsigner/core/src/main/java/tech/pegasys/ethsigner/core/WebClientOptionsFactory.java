@@ -48,9 +48,8 @@ class WebClientOptionsFactory {
 
     final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
 
-    applyClientTlsTrustOptions(webClientOptions, clientTlsOptions.getClientTlsTrustOptions());
-    applyClientTlsCertificateOptions(
-        webClientOptions, clientTlsOptions.getClientTlsCertificateOptions());
+    applyClientTlsTrustOptions(webClientOptions, clientTlsOptions.getTlsTrustOptions());
+    applyClientTlsCertificateOptions(webClientOptions, clientTlsOptions.getTlsCertificateOptions());
   }
 
   private void applyClientTlsTrustOptions(

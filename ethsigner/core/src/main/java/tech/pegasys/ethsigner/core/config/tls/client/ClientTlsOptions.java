@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface ClientTlsOptions {
   boolean isTlsEnabled();
 
-  Optional<ClientTlsCertificateOptions> getClientTlsCertificateOptions();
+  Optional<ClientTlsCertificateOptions> getTlsCertificateOptions();
 
-  Optional<ClientTlsTrustOptions> getClientTlsTrustOptions();
+  Optional<ClientTlsTrustOptions> getTlsTrustOptions();
 }

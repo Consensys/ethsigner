@@ -30,10 +30,10 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   private boolean tlsEnabled = false;
 
   @ArgGroup(exclusive = false)
-  private PicoCliClientTlsCertificateOptions clientTlsCertificateOptions;
+  private PicoCliClientTlsCertificateOptions tlsCertificateOptions;
 
   @ArgGroup(exclusive = false)
-  private PicoCliClientTlsTrustOptions clientTlsTrustOptions;
+  private PicoCliClientTlsTrustOptions tlsTrustOptions;
 
   @Override
   public boolean isTlsEnabled() {
@@ -41,12 +41,12 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Optional<ClientTlsCertificateOptions> getClientTlsCertificateOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
+  public Optional<ClientTlsCertificateOptions> getTlsCertificateOptions() {
+    return Optional.ofNullable(tlsCertificateOptions);
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getClientTlsTrustOptions() {
-    return Optional.ofNullable(clientTlsTrustOptions);
+  public Optional<ClientTlsTrustOptions> getTlsTrustOptions() {
+    return Optional.ofNullable(tlsTrustOptions);
   }
 }

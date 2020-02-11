@@ -20,16 +20,16 @@ import java.util.Optional;
 
 public class BasicClientTlsOptions implements ClientTlsOptions {
   private final boolean isTlsEnabled;
-  private final Optional<ClientTlsCertificateOptions> clientTlsCertificateOptions;
-  private final Optional<ClientTlsTrustOptions> clientTlsTrustOptions;
+  private final Optional<ClientTlsCertificateOptions> tlsCertificateOptions;
+  private final Optional<ClientTlsTrustOptions> tlsTrustOptions;
 
   public BasicClientTlsOptions(
       final boolean isTlsEnabled,
-      final ClientTlsCertificateOptions clientTlsCertificateOptions,
-      final ClientTlsTrustOptions clientTlsTrustOptions) {
+      final ClientTlsCertificateOptions tlsCertificateOptions,
+      final ClientTlsTrustOptions tlsTrustOptions) {
     this.isTlsEnabled = isTlsEnabled;
-    this.clientTlsCertificateOptions = Optional.ofNullable(clientTlsCertificateOptions);
-    this.clientTlsTrustOptions = Optional.ofNullable(clientTlsTrustOptions);
+    this.tlsCertificateOptions = Optional.ofNullable(tlsCertificateOptions);
+    this.tlsTrustOptions = Optional.ofNullable(tlsTrustOptions);
   }
 
   @Override
@@ -38,12 +38,12 @@ public class BasicClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Optional<ClientTlsCertificateOptions> getClientTlsCertificateOptions() {
-    return clientTlsCertificateOptions;
+  public Optional<ClientTlsCertificateOptions> getTlsCertificateOptions() {
+    return tlsCertificateOptions;
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getClientTlsTrustOptions() {
-    return clientTlsTrustOptions;
+  public Optional<ClientTlsTrustOptions> getTlsTrustOptions() {
+    return tlsTrustOptions;
   }
 }
