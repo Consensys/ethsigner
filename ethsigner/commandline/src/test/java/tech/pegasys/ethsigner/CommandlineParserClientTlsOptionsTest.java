@@ -91,7 +91,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(clientTlsOptions.getTlsTrustOptions().isPresent()).isTrue();
     final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTlsTrustOptions().get();
     assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaSignedServerCertificateAllowed()).isFalse();
+    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
 
     final ClientTlsCertificateOptions clientTlsCertificateOptions =
         clientTlsOptions.getTlsCertificateOptions().get();
@@ -149,7 +149,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(clientTlsOptions.isTlsEnabled()).isTrue();
     final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTlsTrustOptions().get();
     assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaSignedServerCertificateAllowed()).isFalse();
+    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
     assertThat(clientTlsOptions.getTlsCertificateOptions().isEmpty()).isTrue();
   }
 
@@ -171,7 +171,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(clientTlsOptions.getTlsTrustOptions().isPresent()).isTrue();
     final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTlsTrustOptions().get();
     assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaSignedServerCertificateAllowed()).isTrue();
+    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isTrue();
     assertThat(clientTlsOptions.getTlsCertificateOptions().isEmpty()).isTrue();
   }
 

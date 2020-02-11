@@ -62,8 +62,7 @@ class WebClientOptionsFactory {
 
     final Optional<Path> optionalKnownServerFile =
         optionalClientTlsTrustOptions.get().getKnownServerFile();
-    final boolean allowCATrust =
-        optionalClientTlsTrustOptions.get().isCaSignedServerCertificateAllowed();
+    final boolean allowCATrust = optionalClientTlsTrustOptions.get().isCaAuthRequired();
 
     if (optionalKnownServerFile.isEmpty() && !allowCATrust) {
       throw new InitializationException(

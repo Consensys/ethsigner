@@ -18,5 +18,5 @@ import java.util.Optional;
 public interface ClientTlsTrustOptions {
   Optional<Path> getKnownServerFile();
 
-  boolean isCaSignedServerCertificateAllowed();
+  boolean isCaAuthRequired();
 }

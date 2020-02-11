@@ -29,7 +29,7 @@ public class CmdlineHelpers {
         + "--downstream-http-tls-enabled "
         + "--downstream-http-tls-keystore-file=./test.ks "
         + "--downstream-http-tls-keystore-password-file=./test.pass "
-        + "--downstream-http-tls-invalidate-ca-signed "
+        + "--downstream-http-tls-ca-auth-disabled "
         + "--downstream-http-tls-known-servers-file=./test.txt ";
   }
 

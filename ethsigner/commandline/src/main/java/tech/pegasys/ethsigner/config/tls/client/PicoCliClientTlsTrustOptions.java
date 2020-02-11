@@ -32,11 +32,10 @@ class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   private Path knownServersFile;
 
   @Option(
-      names = "--downstream-http-tls-invalidate-ca-signed",
-      description =
-          "If set, Ethsigner will not use the system's CA to validate received server certificates",
+      names = "--downstream-http-tls-ca-auth-disabled",
+      description = "If set, will not use the system's CA to validate received server certificates",
       arity = "0")
-  private boolean invalidateCaSigned = false;
+  private boolean caAuthDisabled = false;
 
   @Override
   public Optional<Path> getKnownServerFile() {
@@ -44,7 +43,7 @@ class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   }
 
   @Override
-  public boolean isCaSignedServerCertificateAllowed() {
-    return !invalidateCaSigned;
+  public boolean isCaAuthRequired() {
+    return !caAuthDisabled;
   }
 }

@@ -251,8 +251,8 @@ public class EthSignerProcessRunner {
                         params.add(knownServerFile.toAbsolutePath().toString());
                       });
 
-              if (!downstreamTrustOptions.isCaSignedServerCertificateAllowed()) {
-                params.add("--downstream-http-tls-invalidate-ca-signed");
+              if (!downstreamTrustOptions.isCaAuthRequired()) {
+                params.add("--downstream-http-tls-ca-auth-disabled");
               }
             });
 

@@ -33,7 +33,7 @@ public class BasicClientTlsTrustOptions implements ClientTlsTrustOptions {
   }
 
   @Override
-  public boolean isCaSignedServerCertificateAllowed() {
+  public boolean isCaAuthRequired() {
     return isCaSignedServerCertificateAllowed;
   }
 }

@@ -192,7 +192,7 @@ public class EthSignerBaseCommand implements Config {
               "--downstream-http-tls-keystore-file",
               "--downstream-http-tls-keystore-password-file",
               "--downstream-http-tls-known-servers-file",
-              "--downstream-http-tls-invalidate-ca-signed"));
+              "--downstream-http-tls-ca-auth-disabled"));
     }
   }
 
