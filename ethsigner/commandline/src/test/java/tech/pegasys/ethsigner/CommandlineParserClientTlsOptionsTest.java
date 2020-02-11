@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -98,6 +99,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(clientTlsCertificateOptions.getKeyStoreFile()).isEqualTo(Path.of("./test.ks"));
   }
 
+  @Disabled("Should be enable once PicoCLI 4.2 is updated")
   @Test
   void cmdLineFailsIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
     final String cmdLine =
@@ -106,9 +108,7 @@ class CommandlineParserClientTlsOptionsTest {
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
-    // At the moment, the parse will only print warning message via configured logger.
-    // This will start failing once we upgrade to picocli 4.2
-    assertThat(result).isTrue();
+    assertThat(result).isFalse();
   }
 
   @Test
