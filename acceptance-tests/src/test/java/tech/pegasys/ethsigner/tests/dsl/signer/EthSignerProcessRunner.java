@@ -54,12 +54,12 @@ import org.awaitility.Awaitility;
 
 public class EthSignerProcessRunner {
 
-  private static final Logger LOG = LogManager.getLogger();
-  private static final Logger PROCESS_LOG =
+  private final Logger LOG = LogManager.getLogger();
+  private final Logger PROCESS_LOG =
       LogManager.getLogger("tech.pegasys.ethsigner.SubProcessLog");
 
-  private static final String PORTS_FILENAME = "ethsigner.ports";
-  private static final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
+  private final String PORTS_FILENAME = "ethsigner.ports";
+  private final String HTTP_JSON_RPC_KEY = "http-jsonrpc";
 
   private final Map<String, Process> processes = new HashMap<>();
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();

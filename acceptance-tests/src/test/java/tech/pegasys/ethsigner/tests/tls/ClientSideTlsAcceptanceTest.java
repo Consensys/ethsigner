@@ -82,8 +82,7 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-          UnrecoverableKeyException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
     final Signer signer =
         createSigner(
             presentedCert, expectedWeb3ProviderCert, downstreamWeb3Port, listenPort, workDir);

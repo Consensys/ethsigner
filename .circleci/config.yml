@@ -198,6 +198,8 @@ workflows:
     jobs:
       - build
       - acceptanceTests
+          requires:
+            - build
       - azureTests:
           filters:
             branches:
