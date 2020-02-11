@@ -48,45 +48,44 @@ class WebClientOptionsFactory {
 
     final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
 
-    applyClientTlsTrustOptions(webClientOptions, clientTlsOptions.getTrustOptions());
-    applyClientTlsCertificateOptions(webClientOptions, clientTlsOptions.getKeyStoreOptions());
+    applyTrustOptions(webClientOptions, clientTlsOptions.getTrustOptions());
+    applyKeyStoreOptions(webClientOptions, clientTlsOptions.getKeyStoreOptions());
   }
 
-  private void applyClientTlsTrustOptions(
+  private void applyTrustOptions(
       final WebClientOptions webClientOptions,
-      final Optional<ClientTlsTrustOptions> optionalClientTlsTrustOptions) {
+      final Optional<ClientTlsTrustOptions> optionalTrustOptions) {
 
-    if (optionalClientTlsTrustOptions.isEmpty()) {
+    if (optionalTrustOptions.isEmpty()) {
       return; // CA trust is enabled by default.
     }
 
-    final Optional<Path> optionalKnownServerFile =
-        optionalClientTlsTrustOptions.get().getKnownServerFile();
-    final boolean allowCATrust = optionalClientTlsTrustOptions.get().isCaAuthRequired();
+    final Optional<Path> optionalKnownServerFile = optionalTrustOptions.get().getKnownServerFile();
+    final boolean caAuthRequired = optionalTrustOptions.get().isCaAuthRequired();
 
-    if (optionalKnownServerFile.isEmpty() && !allowCATrust) {
+    if (optionalKnownServerFile.isEmpty() && !caAuthRequired) {
       throw new InitializationException(
           "Must specify a known-server file if CA-signed option is disabled");
     }
 
     try {
       webClientOptions.setTrustOptions(
-          whitelistServers(optionalKnownServerFile.get(), allowCATrust));
+          whitelistServers(optionalKnownServerFile.get(), caAuthRequired));
     } catch (RuntimeException e) {
       throw new InitializationException("Failed to load known server file.", e);
     }
   }
 
-  private void applyClientTlsCertificateOptions(
+  private void applyKeyStoreOptions(
       final WebClientOptions webClientOptions,
-      final Optional<KeyStoreOptions> optionalClientTlsCertificateOptions) {
+      final Optional<KeyStoreOptions> optionalKeyStoreOptions) {
 
-    if (optionalClientTlsCertificateOptions.isEmpty()) {
+    if (optionalKeyStoreOptions.isEmpty()) {
       return;
     }
 
     try {
-      webClientOptions.setPfxKeyCertOptions(convertFrom(optionalClientTlsCertificateOptions.get()));
+      webClientOptions.setPfxKeyCertOptions(convertFrom(optionalKeyStoreOptions.get()));
     } catch (final IOException e) {
       throw new InitializationException("Failed to load client certificate keystore.", e);
     }
