@@ -12,38 +12,34 @@
  */
 package tech.pegasys.ethsigner.tests.tls.support.client;
 
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.util.Optional;
 
 public class BasicClientTlsOptions implements ClientTlsOptions {
-  private final boolean isTlsEnabled;
-  private final Optional<ClientTlsCertificateOptions> tlsCertificateOptions;
+  private final Optional<KeyStoreOptions> tlsCertificateOptions;
   private final Optional<ClientTlsTrustOptions> tlsTrustOptions;
 
   public BasicClientTlsOptions(
-      final boolean isTlsEnabled,
-      final ClientTlsCertificateOptions tlsCertificateOptions,
-      final ClientTlsTrustOptions tlsTrustOptions) {
-    this.isTlsEnabled = isTlsEnabled;
+      final KeyStoreOptions tlsCertificateOptions, final ClientTlsTrustOptions tlsTrustOptions) {
     this.tlsCertificateOptions = Optional.ofNullable(tlsCertificateOptions);
     this.tlsTrustOptions = Optional.ofNullable(tlsTrustOptions);
   }
 
   @Override
-  public boolean isTlsEnabled() {
-    return isTlsEnabled;
+  public boolean isEnabled() {
+    return true;
   }
 
   @Override
-  public Optional<ClientTlsCertificateOptions> getTlsCertificateOptions() {
+  public Optional<KeyStoreOptions> getKeyStoreOptions() {
     return tlsCertificateOptions;
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getTlsTrustOptions() {
+  public Optional<ClientTlsTrustOptions> getTrustOptions() {
     return tlsTrustOptions;
   }
 }

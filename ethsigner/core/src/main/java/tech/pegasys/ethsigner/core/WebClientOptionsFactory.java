@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.core;
 import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
 
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.core.util.FileUtil;
@@ -40,7 +40,7 @@ class WebClientOptionsFactory {
 
   private void applyTlsOptions(final WebClientOptions webClientOptions, final Config config) {
     final Optional<ClientTlsOptions> optionalClientTlsOptions = config.getClientTlsOptions();
-    if (optionalClientTlsOptions.isEmpty() || !optionalClientTlsOptions.get().isTlsEnabled()) {
+    if (optionalClientTlsOptions.isEmpty()) {
       return;
     }
 
@@ -48,8 +48,8 @@ class WebClientOptionsFactory {
 
     final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
 
-    applyClientTlsTrustOptions(webClientOptions, clientTlsOptions.getTlsTrustOptions());
-    applyClientTlsCertificateOptions(webClientOptions, clientTlsOptions.getTlsCertificateOptions());
+    applyClientTlsTrustOptions(webClientOptions, clientTlsOptions.getTrustOptions());
+    applyClientTlsCertificateOptions(webClientOptions, clientTlsOptions.getKeyStoreOptions());
   }
 
   private void applyClientTlsTrustOptions(
@@ -79,7 +79,7 @@ class WebClientOptionsFactory {
 
   private void applyClientTlsCertificateOptions(
       final WebClientOptions webClientOptions,
-      final Optional<ClientTlsCertificateOptions> optionalClientTlsCertificateOptions) {
+      final Optional<KeyStoreOptions> optionalClientTlsCertificateOptions) {
 
     if (optionalClientTlsCertificateOptions.isEmpty()) {
       return;
@@ -92,12 +92,10 @@ class WebClientOptionsFactory {
     }
   }
 
-  private PfxOptions convertFrom(final ClientTlsCertificateOptions clientTlsCertificateOptions)
-      throws IOException {
-    final String password =
-        FileUtil.readFirstLineFromFile(clientTlsCertificateOptions.getKeyStorePasswordFile());
+  private PfxOptions convertFrom(final KeyStoreOptions keyStoreOptions) throws IOException {
+    final String password = FileUtil.readFirstLineFromFile(keyStoreOptions.getPasswordFile());
     return new PfxOptions()
         .setPassword(password)
-        .setPath(clientTlsCertificateOptions.getKeyStoreFile().toString());
+        .setPath(keyStoreOptions.getKeyStoreFile().toString());
   }
 }

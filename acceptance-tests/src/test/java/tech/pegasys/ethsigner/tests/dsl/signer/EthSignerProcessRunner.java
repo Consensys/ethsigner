@@ -218,29 +218,27 @@ public class EthSignerProcessRunner {
   }
 
   private Collection<String> createDownstreamTlsArgs() {
-    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions =
-        signerConfig.downstreamTlsOptions();
-    if (optionalDownstreamTlsOptions.isEmpty()
-        || !optionalDownstreamTlsOptions.get().isTlsEnabled()) {
+    final Optional<ClientTlsOptions> optionalClientTlsOptions = signerConfig.clientTlsOptions();
+    if (optionalClientTlsOptions.isEmpty()) {
       return Collections.emptyList();
     }
 
     final List<String> params = new ArrayList<>();
     params.add("--downstream-http-tls-enabled");
 
-    final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
+    final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
     clientTlsOptions
-        .getTlsCertificateOptions()
+        .getKeyStoreOptions()
         .ifPresent(
             pkcsStoreConfig -> {
               params.add("--downstream-http-tls-keystore-file");
               params.add(pkcsStoreConfig.getKeyStoreFile().toString());
               params.add("--downstream-http-tls-keystore-password-file");
-              params.add(pkcsStoreConfig.getKeyStorePasswordFile().toString());
+              params.add(pkcsStoreConfig.getPasswordFile().toString());
             });
 
     clientTlsOptions
-        .getTlsTrustOptions()
+        .getTrustOptions()
         .ifPresent(
             downstreamTrustOptions -> {
               downstreamTrustOptions

@@ -12,19 +12,18 @@
  */
 package tech.pegasys.ethsigner.tests.tls.support.client;
 
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 
 import java.nio.file.Path;
 
-public class BasicClientTlsCertificateOptions implements ClientTlsCertificateOptions {
+public class BasicKeyStoreOptions implements KeyStoreOptions {
 
   private final Path keyStoreFile;
-  private final Path keystorePasswordFile;
+  private final Path passwordFile;
 
-  public BasicClientTlsCertificateOptions(
-      final Path keyStoreFile, final Path keystorePasswordFile) {
+  public BasicKeyStoreOptions(final Path keyStoreFile, final Path passwordFile) {
     this.keyStoreFile = keyStoreFile;
-    this.keystorePasswordFile = keystorePasswordFile;
+    this.passwordFile = passwordFile;
   }
 
   @Override
@@ -33,7 +32,7 @@ public class BasicClientTlsCertificateOptions implements ClientTlsCertificateOpt
   }
 
   @Override
-  public Path getKeyStorePasswordFile() {
-    return keystorePasswordFile;
+  public Path getPasswordFile() {
+    return passwordFile;
   }
 }

@@ -187,7 +187,7 @@ public class EthSignerBaseCommand implements Config {
           logger,
           commandLine,
           "--downstream-http-tls-enabled",
-          !getClientTlsOptions().get().isTlsEnabled(),
+          !getClientTlsOptions().get().isEnabled(),
           asList(
               "--downstream-http-tls-keystore-file",
               "--downstream-http-tls-keystore-password-file",

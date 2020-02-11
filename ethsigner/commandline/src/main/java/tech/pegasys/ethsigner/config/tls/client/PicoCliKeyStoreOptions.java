@@ -14,13 +14,13 @@ package tech.pegasys.ethsigner.config.tls.client;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 
 import java.nio.file.Path;
 
 import picocli.CommandLine.Option;
 
-class PicoCliClientTlsCertificateOptions implements ClientTlsCertificateOptions {
+class PicoCliKeyStoreOptions implements KeyStoreOptions {
 
   @Option(
       names = "--downstream-http-tls-keystore-file",
@@ -30,7 +30,7 @@ class PicoCliClientTlsCertificateOptions implements ClientTlsCertificateOptions 
       arity = "1",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private Path clientCertificateFile;
+  private Path keyStoreFile;
 
   @Option(
       names = "--downstream-http-tls-keystore-password-file",
@@ -38,15 +38,15 @@ class PicoCliClientTlsCertificateOptions implements ClientTlsCertificateOptions 
       arity = "1",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private Path clientCertificatePasswordFile;
+  private Path passwordFile;
 
   @Override
   public Path getKeyStoreFile() {
-    return clientCertificateFile;
+    return keyStoreFile;
   }
 
   @Override
-  public Path getKeyStorePasswordFile() {
-    return clientCertificatePasswordFile;
+  public Path getPasswordFile() {
+    return passwordFile;
   }
 }

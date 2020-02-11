@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsCertificateOptions;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
@@ -30,23 +30,23 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   private boolean tlsEnabled = false;
 
   @ArgGroup(exclusive = false)
-  private PicoCliClientTlsCertificateOptions tlsCertificateOptions;
+  private PicoCliKeyStoreOptions tlsCertificateOptions;
 
   @ArgGroup(exclusive = false)
   private PicoCliClientTlsTrustOptions tlsTrustOptions;
 
   @Override
-  public boolean isTlsEnabled() {
+  public boolean isEnabled() {
     return tlsEnabled;
   }
 
   @Override
-  public Optional<ClientTlsCertificateOptions> getTlsCertificateOptions() {
+  public Optional<KeyStoreOptions> getKeyStoreOptions() {
     return Optional.ofNullable(tlsCertificateOptions);
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getTlsTrustOptions() {
+  public Optional<ClientTlsTrustOptions> getTrustOptions() {
     return Optional.ofNullable(tlsTrustOptions);
   }
 }

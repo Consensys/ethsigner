@@ -31,7 +31,7 @@ public class SignerConfiguration {
   private final int webSocketPort;
   private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
-  private final Optional<ClientTlsOptions> downstreamTlsOptions;
+  private final Optional<ClientTlsOptions> clientTlsOptions;
   private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
 
   public SignerConfiguration(
@@ -41,7 +41,7 @@ public class SignerConfiguration {
       final int webSocketPort,
       final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
-      final Optional<ClientTlsOptions> downstreamTlsOptions,
+      final Optional<ClientTlsOptions> clientTlsOptions,
       final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
     this.chainId = chainId;
     this.hostname = hostname;
@@ -49,7 +49,7 @@ public class SignerConfiguration {
     this.webSocketPort = webSocketPort;
     this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
     this.serverTlsOptions = serverTlsOptions;
-    this.downstreamTlsOptions = downstreamTlsOptions;
+    this.clientTlsOptions = clientTlsOptions;
     this.overriddenCaTrustStore = overriddenCaTrustStore;
   }
 
@@ -81,8 +81,8 @@ public class SignerConfiguration {
     return serverTlsOptions;
   }
 
-  public Optional<ClientTlsOptions> downstreamTlsOptions() {
-    return downstreamTlsOptions;
+  public Optional<ClientTlsOptions> clientTlsOptions() {
+    return clientTlsOptions;
   }
 
   public Optional<TlsCertificateDefinition> getOverriddenCaTrustStore() {

@@ -12,12 +12,15 @@
  */
 package tech.pegasys.ethsigner.core.config.tls.client;
 
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
+
 import java.util.Optional;
 
 public interface ClientTlsOptions {
-  boolean isTlsEnabled();
+  @Deprecated // this method will not be required once we are on PicoCLI 4.2.0
+  boolean isEnabled();
 
-  Optional<ClientTlsCertificateOptions> getTlsCertificateOptions();
+  Optional<KeyStoreOptions> getKeyStoreOptions();
 
-  Optional<ClientTlsTrustOptions> getTlsTrustOptions();
+  Optional<ClientTlsTrustOptions> getTrustOptions();
 }
