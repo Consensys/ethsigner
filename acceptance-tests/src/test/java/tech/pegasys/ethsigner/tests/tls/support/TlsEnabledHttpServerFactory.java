@@ -89,17 +89,17 @@ public class TlsEnabledHttpServerFactory {
           .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
           .handler(new JsonRpcHandler(null, requestMapper, jsonDecoder));
 
-      final HttpServer web3ProviderhttpServer = vertx.createHttpServer(web3HttpServerOptions);
+      final HttpServer web3ProviderHttpServer = vertx.createHttpServer(web3HttpServerOptions);
 
       final CompletableFuture<Boolean> serverConfigured = new CompletableFuture<>();
-      web3ProviderhttpServer
+      web3ProviderHttpServer
           .requestHandler(router)
           .listen(result -> serverConfigured.complete(true));
 
       serverConfigured.get();
 
-      serversCreated.add(web3ProviderhttpServer);
-      return web3ProviderhttpServer;
+      serversCreated.add(web3ProviderHttpServer);
+      return web3ProviderHttpServer;
     } catch (KeyStoreException
         | NoSuchAlgorithmException
         | CertificateException
