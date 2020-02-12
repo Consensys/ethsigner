@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5 RC
+
+### Known Issues
+
+### Features Added
+- TLS connection to Hashicorp
+- Incoming and outgoing TLS connection
+
+### Bugs Fixed 
+- JWT token was not being passed in header: https://pegasys1.atlassian.net/browse/ES-84
+
 ## 0.4.0
 
 ### Known Issues
