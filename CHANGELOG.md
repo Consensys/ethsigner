@@ -10,7 +10,7 @@
 - Upgraded PicoCLI to 4.1.4
 
 ### Bugs Fixed 
-- Received headers are now forwarded to the web3 provider, resolving an issue where JWT token was not being passed in header: https://github.com/PegaSysEng/ethsigner/pull/208
+- Received headers are now forwarded to the web3 provider, resolving an issue where JWT token was not being passed in header https://github.com/PegaSysEng/ethsigner/pull/208
 - Resolved an issue where private transactions using privacyGroupId without a nonce failed https://github.com/PegaSysEng/ethsigner/pull/215
 
 ## 0.4.0
