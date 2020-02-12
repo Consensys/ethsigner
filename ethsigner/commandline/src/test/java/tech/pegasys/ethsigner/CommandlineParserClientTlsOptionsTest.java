@@ -116,7 +116,7 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
-  void cmdLineFailsIfDownstreamTLSOptionsAreUsedWithoutTlsEnabled() {
+  void cmdLineFailsIfDownstreamTlsOptionsAreUsedWithoutTlsEnabled() {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
