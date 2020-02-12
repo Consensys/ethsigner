@@ -5,11 +5,13 @@
 ### Known Issues
 
 ### Features Added
-- TLS can now be enabled on connection to Hashicorp
-- TLS can now be enabled on incoming and outgoing TLS connection to web3 provider 
+- Added TLS support for incoming and outgoing RPC endpoints
+- Added TLS support for connecting to Hashicorp vault
+- Upgraded PicoCLI to 4.1.4
 
 ### Bugs Fixed 
-- JWT token was not being passed in header: https://pegasys1.atlassian.net/browse/ES-84
+- Received headers are now forwarded to the web3 provider, resolving an issue where JWT token was not being passed in header: https://github.com/PegaSysEng/ethsigner/pull/208
+- Resolved an issue where private transactions using privacyGroupId without a nonce failed https://github.com/PegaSysEng/ethsigner/pull/215
 
 ## 0.4.0
 
