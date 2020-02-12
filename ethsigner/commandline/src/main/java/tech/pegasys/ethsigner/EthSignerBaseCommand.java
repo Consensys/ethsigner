@@ -12,12 +12,11 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.config.PicoCliDownstreamTrustStore;
-import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
+import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
@@ -40,6 +39,7 @@ import picocli.CommandLine.Option;
             + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
+    sortOptions = false,
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
     header = "Usage:",
@@ -51,12 +51,42 @@ import picocli.CommandLine.Option;
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--chain-id"},
+      description = "The Chain Id that will be the intended recipient for signed transactions",
+      required = true,
+      arity = "1")
+  private long chainId;
+
+  @Option(
+      names = {"--data-path"},
+      description = "The path to a directory to store temporary files",
+      arity = "1")
+  private Path dataPath;
+
   @Option(
       names = {"--logging", "-l"},
       paramLabel = "<LOG VERBOSITY LEVEL>",
       description =
           "Logging verbosity levels: OFF, FATAL, WARN, INFO, DEBUG, TRACE, ALL (default: INFO)")
   private final Level logLevel = Level.INFO;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--http-listen-host"},
+      description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
+
+  @Option(
+      names = {"--http-listen-port"},
+      description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private final Integer httpListenPort = 8545;
+
+  @ArgGroup(exclusive = false)
+  private PicoCliTlsServerOptions picoCliTlsServerOptions;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -82,41 +112,8 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = {"--http-listen-host"},
-      description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
-
-  @Option(
-      names = {"--http-listen-port"},
-      description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private final Integer httpListenPort = 8545;
-
-  @SuppressWarnings("FieldMayBeFinal")
-  @Option(
-      names = {"--chain-id"},
-      description = "The Chain Id that will be the intended recipient for signed transactions",
-      required = true,
-      arity = "1")
-  private long chainId;
-
-  @Option(
-      names = {"--data-path"},
-      description = "The path to a directory to store temporary files",
-      arity = "1")
-  private Path dataPath;
-
   @ArgGroup(exclusive = false)
-  private PicoCliTlsServerOptions picoCliTlsServerOptions;
-
-  @ArgGroup(exclusive = false)
-  private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
-
-  @ArgGroup(exclusive = false)
-  private PicoCliDownstreamTrustStore picoCliDownstreamTrustStore;
+  private PicoCliClientTlsOptions clientTlsOptions;
 
   @Override
   public Level getLogLevel() {
@@ -164,13 +161,8 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getWeb3TrustStoreOptions() {
-    return Optional.ofNullable(picoCliDownstreamTrustStore);
-  }
-
-  @Override
-  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
+  public Optional<ClientTlsOptions> getClientTlsOptions() {
+    return Optional.ofNullable(clientTlsOptions);
   }
 
   @Override
@@ -184,6 +176,7 @@ public class EthSignerBaseCommand implements Config {
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
         .add("dataPath", dataPath)
+        .add("clientTlsOptions", clientTlsOptions)
         .toString();
   }
 }

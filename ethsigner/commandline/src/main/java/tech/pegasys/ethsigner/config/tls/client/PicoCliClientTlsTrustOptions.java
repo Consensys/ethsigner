@@ -10,39 +10,40 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.config.tls.client;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
-import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliClientAuthConstraints implements ClientAuthConstraints {
-
+class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   @Option(
-      names = "--tls-known-clients-file",
-      description = "Path to a file containing the fingerprints of authorized clients.",
+      names = "--downstream-http-tls-known-servers-file",
+      description =
+          "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust.",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      required = true,
       arity = "1")
-  private File tlsKnownClientsFile = null;
+  private Path knownServersFile;
 
   @Option(
-      names = "--tls-allow-ca-clients",
-      description = "If defined, allows clients authorized by the CA to connect to Ethsigner.",
+      names = "--downstream-http-tls-ca-auth-disabled",
+      description = "If set, will not use the system's CA to validate received server certificates",
       arity = "0")
-  private Boolean tlsAllowCaClients = false;
+  private boolean caAuthDisabled = false;
 
   @Override
-  public Optional<File> getKnownClientsFile() {
-    return Optional.ofNullable(tlsKnownClientsFile);
+  public Optional<Path> getKnownServerFile() {
+    return Optional.ofNullable(knownServersFile);
   }
 
   @Override
-  public boolean isCaAuthorizedClientAllowed() {
-    return tlsAllowCaClients;
+  public boolean isCaAuthRequired() {
+    return !caAuthDisabled;
   }
 }

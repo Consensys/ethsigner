@@ -12,9 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -32,8 +33,8 @@ public class SignerConfigurationBuilder {
   private Path multiKeySignerDirectory;
   private HashicorpNode hashicorpNode;
   private TlsOptions serverTlsOptions;
-  private PkcsStoreConfig downstreamTrustStore;
-  private PkcsStoreConfig downstreamKeystore;
+  private ClientTlsOptions clientTlsOptions;
+  private TlsCertificateDefinition overriddenCaTrustStore;
 
   public SignerConfigurationBuilder withHttpRpcPort(final int port) {
     httpRpcPort = port;
@@ -66,13 +67,14 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamTrustStore(final PkcsStoreConfig truststore) {
-    this.downstreamTrustStore = truststore;
+  public SignerConfigurationBuilder withDownstreamTlsOptions(
+      final ClientTlsOptions clientTlsOptions) {
+    this.clientTlsOptions = clientTlsOptions;
     return this;
   }
 
-  public SignerConfigurationBuilder withDownstreamKeyStore(final PkcsStoreConfig keystore) {
-    this.downstreamKeystore = keystore;
+  public SignerConfigurationBuilder withOverriddenCA(final TlsCertificateDefinition keystore) {
+    this.overriddenCaTrustStore = keystore;
     return this;
   }
 
@@ -86,7 +88,7 @@ public class SignerConfigurationBuilder {
         webSocketPort,
         transactionSignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
-        Optional.ofNullable(downstreamTrustStore),
-        Optional.ofNullable(downstreamKeystore));
+        Optional.ofNullable(clientTlsOptions),
+        Optional.ofNullable(overriddenCaTrustStore));
   }
 }

@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.config;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 
@@ -43,6 +45,7 @@ public class PicoCliTlsServerOptions implements TlsOptions {
       description =
           "Path to a PKCS#12 formatted keystore; used to enable TLS on inbound connections.",
       arity = "1",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
   private File keyStoreFile;
 
@@ -50,6 +53,7 @@ public class PicoCliTlsServerOptions implements TlsOptions {
       names = "--tls-keystore-password-file",
       description = "Path to a file containing the password used to decrypt the keystore.",
       arity = "1",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
   private File keyStorePasswordFile;
 

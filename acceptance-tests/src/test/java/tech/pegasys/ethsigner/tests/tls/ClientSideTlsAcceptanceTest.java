@@ -18,23 +18,35 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
-import tech.pegasys.ethsigner.tests.tls.support.BasicPkcsStoreConfig;
 import tech.pegasys.ethsigner.tests.tls.support.MockBalanceReporter;
 import tech.pegasys.ethsigner.tests.tls.support.TlsEnabledHttpServerFactory;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicClientTlsOptions;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicClientTlsTrustOptions;
+import tech.pegasys.ethsigner.tests.tls.support.client.BasicKeyStoreOptions;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Optional;
 
 import io.vertx.core.http.HttpServer;
+import org.bouncycastle.util.Integers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,7 +77,8 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+          UnrecoverableKeyException {
     final Signer signer =
         createSigner(
             presentedCert, expectedWeb3ProviderCert, downstreamWeb3Port, listenPort, workDir);
@@ -81,20 +94,28 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
+          UnrecoverableKeyException {
 
     final Path clientPasswordFile =
         Files.writeString(workDir.resolve("clientKeystorePassword"), presentedCert.getPassword());
-    final Path serverPasswordFile =
-        Files.writeString(
-            workDir.resolve("clientTrustStorePassword"), expectedWeb3ProviderCert.getPassword());
 
+    final Path fingerPrintFilePath = workDir.resolve("known_servers");
     final SignerConfigurationBuilder builder = new SignerConfigurationBuilder();
-    builder.withDownstreamTrustStore(
-        new BasicPkcsStoreConfig(
-            expectedWeb3ProviderCert.getPkcs12File(), serverPasswordFile.toFile()));
-    builder.withDownstreamKeyStore(
-        new BasicPkcsStoreConfig(presentedCert.getPkcs12File(), clientPasswordFile.toFile()));
+    final Optional<Integer> downstreamWeb3ServerPort =
+        Optional.of(Integers.valueOf(downstreamWeb3Port));
+
+    populateFingerprintFile(
+        fingerPrintFilePath, expectedWeb3ProviderCert, downstreamWeb3ServerPort);
+
+    final KeyStoreOptions keyStoreOptions =
+        new BasicKeyStoreOptions(presentedCert.getPkcs12File().toPath(), clientPasswordFile);
+    final ClientTlsTrustOptions clientTlsTrustOptions =
+        new BasicClientTlsTrustOptions(fingerPrintFilePath, true);
+    final ClientTlsOptions clientTlsOptions =
+        new BasicClientTlsOptions(keyStoreOptions, clientTlsTrustOptions);
+    builder.withDownstreamTlsOptions(clientTlsOptions);
+
     builder.withHttpRpcPort(listenPort);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
@@ -107,7 +128,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerProvidesSpecifiedClientCertificateToDownStreamServer(@TempDir Path workDir)
-      throws IOException {
+      throws Exception {
 
     final TlsCertificateDefinition serverCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
@@ -128,7 +149,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void ethSignerDoesNotConnectToServerNotSpecifiedInTrustStore(@TempDir Path workDir)
-      throws IOException {
+      throws Exception {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =
@@ -168,7 +189,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void missingKeyStoreForEthSignerResultsInEthSignerTerminating(@TempDir Path workDir)
-      throws IOException {
+      throws Exception {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =
@@ -183,7 +204,7 @@ class ClientSideTlsAcceptanceTest {
 
   @Test
   void incorrectPasswordForDownstreamKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
-      throws IOException {
+      throws Exception {
     final TlsCertificateDefinition serverPresentedCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =

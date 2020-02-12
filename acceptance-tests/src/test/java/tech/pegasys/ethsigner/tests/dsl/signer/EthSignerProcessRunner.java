@@ -14,12 +14,14 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,15 +32,20 @@ import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
@@ -142,6 +149,52 @@ public class EthSignerProcessRunner {
       params.add("--data-path");
       params.add(dataPath.toAbsolutePath().toString());
     }
+
+    params.addAll(createServerTlsArgs());
+    params.addAll(createDownstreamTlsArgs());
+
+    final StringJoiner javaOpts = new StringJoiner(" ");
+
+    if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
+      final TlsCertificateDefinition overriddenCaTrustStore =
+          signerConfig.getOverriddenCaTrustStore().get();
+      final Path overriddenCaTrustStorePath = createJksTrustStore(dataPath, overriddenCaTrustStore);
+      javaOpts.add(
+          "-Djavax.net.ssl.trustStore=" + overriddenCaTrustStorePath.toAbsolutePath().toString());
+      javaOpts.add("-Djavax.net.ssl.trustStorePassword=" + overriddenCaTrustStore.getPassword());
+    }
+
+    params.addAll(signerConfig.transactionSignerParamsSupplier().get());
+
+    LOG.info("Creating EthSigner process with params {}", params);
+
+    final ProcessBuilder processBuilder =
+        new ProcessBuilder(params)
+            .directory(new File(System.getProperty("user.dir")).getParentFile())
+            .redirectErrorStream(true)
+            .redirectInput(Redirect.INHERIT);
+
+    if (Boolean.getBoolean("debugSubProcess")) {
+      javaOpts.add("-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+    }
+    processBuilder.environment().put("JAVA_OPTS", javaOpts.toString());
+
+    try {
+      final Process process = processBuilder.start();
+      outputProcessorExecutor.submit(() -> printOutput(processName, process));
+      processes.put(processName, process);
+    } catch (final IOException e) {
+      LOG.error("Error starting EthSigner process", e);
+    }
+
+    if (useDynamicPortAllocation) {
+      loadPortsFile();
+    }
+  }
+
+  private Collection<? extends String> createServerTlsArgs() {
+    final List<String> params = Lists.newArrayList();
+
     if (signerConfig.serverTlsOptions().isPresent()) {
       final TlsOptions serverTlsOptions = signerConfig.serverTlsOptions().get();
       params.add("--tls-keystore-file");
@@ -161,52 +214,47 @@ public class EthSignerProcessRunner {
         }
       }
     }
+    return params;
+  }
 
-    if (signerConfig.downstreamKeyStore().isPresent()) {
-      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamKeyStore().get();
-      params.add("--downstream-http-tls-keystore-file");
-      params.add(keyStoreConfig.getStoreFile().toString());
-      params.add("--downstream-http-tls-keystore-password-file");
-      params.add(keyStoreConfig.getStorePasswordFile().toString());
+  private Collection<String> createDownstreamTlsArgs() {
+    final Optional<ClientTlsOptions> optionalClientTlsOptions = signerConfig.clientTlsOptions();
+    if (optionalClientTlsOptions.isEmpty()) {
+      return Collections.emptyList();
     }
 
-    if (signerConfig.downstreamTrustStore().isPresent()) {
-      final PkcsStoreConfig keyStoreConfig = signerConfig.downstreamTrustStore().get();
-      params.add("--downstream-http-tls-truststore-file");
-      params.add(keyStoreConfig.getStoreFile().toString());
-      params.add("--downstream-http-tls-truststore-password-file");
-      params.add(keyStoreConfig.getStorePasswordFile().toString());
-    }
+    final List<String> params = new ArrayList<>();
+    params.add("--downstream-http-tls-enabled");
 
-    params.addAll(signerConfig.transactionSignerParamsSupplier().get());
+    final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
+    clientTlsOptions
+        .getKeyStoreOptions()
+        .ifPresent(
+            pkcsStoreConfig -> {
+              params.add("--downstream-http-tls-keystore-file");
+              params.add(pkcsStoreConfig.getKeyStoreFile().toString());
+              params.add("--downstream-http-tls-keystore-password-file");
+              params.add(pkcsStoreConfig.getPasswordFile().toString());
+            });
 
-    LOG.info("Creating EthSigner process with params {}", params);
+    clientTlsOptions
+        .getTrustOptions()
+        .ifPresent(
+            downstreamTrustOptions -> {
+              downstreamTrustOptions
+                  .getKnownServerFile()
+                  .ifPresent(
+                      knownServerFile -> {
+                        params.add("--downstream-http-tls-known-servers-file");
+                        params.add(knownServerFile.toAbsolutePath().toString());
+                      });
 
-    final ProcessBuilder processBuilder =
-        new ProcessBuilder(params)
-            .directory(new File(System.getProperty("user.dir")).getParentFile())
-            .redirectErrorStream(true)
-            .redirectInput(Redirect.INHERIT);
+              if (!downstreamTrustOptions.isCaAuthRequired()) {
+                params.add("--downstream-http-tls-ca-auth-disabled");
+              }
+            });
 
-    if (Boolean.getBoolean("debugSubProcess")) {
-      processBuilder
-          .environment()
-          .put(
-              "JAVA_OPTS",
-              "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
-    }
-
-    try {
-      final Process process = processBuilder.start();
-      outputProcessorExecutor.submit(() -> printOutput(processName, process));
-      processes.put(processName, process);
-    } catch (final IOException e) {
-      LOG.error("Error starting EthSigner process", e);
-    }
-
-    if (useDynamicPortAllocation) {
-      loadPortsFile();
-    }
+    return Collections.unmodifiableCollection(params);
   }
 
   public boolean isRunning(final String processName) {

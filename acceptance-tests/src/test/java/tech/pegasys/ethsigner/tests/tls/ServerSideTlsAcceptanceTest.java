@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -97,7 +97,7 @@ class ServerSideTlsAcceptanceTest {
       final ClientAuthConstraints clientAuthConstraints;
       if (clientCertInServerWhitelist != null) {
         final Path fingerPrintFilePath = dataPath.resolve("known_clients");
-        populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist);
+        populateFingerprintFile(fingerPrintFilePath, clientCertInServerWhitelist, Optional.empty());
         clientAuthConstraints = BasicClientAuthConstraints.fromFile(fingerPrintFilePath.toFile());
       } else {
         clientAuthConstraints = null;

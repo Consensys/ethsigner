@@ -17,14 +17,17 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
+import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -83,14 +86,9 @@ class CommandlineParserTest {
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
-    assertThat(config.getClientCertificateOptions().get().getStoreFile())
-        .isEqualTo(new File("./client_cert.pfx"));
-    assertThat(config.getClientCertificateOptions().get().getStorePasswordFile())
-        .isEqualTo(new File("./client_cert.passwd"));
-    assertThat(config.getWeb3TrustStoreOptions().get().getStoreFile())
-        .isEqualTo(new File("./web3_truststore.pfx"));
-    assertThat(config.getWeb3TrustStoreOptions().get().getStorePasswordFile())
-        .isEqualTo(new File("./web3_truststore.passwd"));
+
+    final Optional<ClientTlsOptions> downstreamTlsOptionsOptional = config.getClientTlsOptions();
+    assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
   }
 
   @Test
@@ -134,7 +132,12 @@ class CommandlineParserTest {
 
   @Test
   void missingRequiredParamShowsAppropriateError() {
-    missingParameterShowsError("downstream-http-port");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("downstream-http-port"));
   }
 
   @Test
@@ -191,20 +194,6 @@ class CommandlineParserTest {
             "--nonExistentOption=9",
             subCommand.getCommandName());
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
-  }
-
-  private void missingParameterShowsError(final String input, final String... paramsToRemove) {
-    String cmdLine = input;
-    for (final String paramToRemove : paramsToRemove) {
-      cmdLine = removeFieldFrom(cmdLine, paramToRemove);
-    }
-
-    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
-    assertThat(result).isFalse();
-    for (final String paramToRemove : paramsToRemove) {
-      assertThat(commandOutput.toString()).contains("--" + paramToRemove, "Missing");
-    }
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
@@ -298,18 +287,32 @@ class CommandlineParserTest {
 
   @Test
   void missingTlsKeyStorePasswordShowsErrorWhenKeystorePasswordIsSet() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-keystore-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-file"));
   }
 
   @Test
   void missingTlsPasswordFileShowsErrorWhenKeyStoreIsSet() {
-    missingParameterShowsError(validBaseCommandOptions(), "tls-keystore-password-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-password-file"));
   }
 
   @Test
   void specifyingOnlyTheTlsClientWhiteListShowsError() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "tls-keystore-file", "tls-keystore-password-file");
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("tls-keystore-file", "tls-keystore-password-file"));
   }
 
   @Test
@@ -327,53 +330,5 @@ class CommandlineParserTest {
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions()).isEmpty();
-  }
-
-  @Test
-  void missingClientCertificateFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-keystore-file");
-  }
-
-  @Test
-  void missingClientCertificatePasswordFileDisplaysErrorIfCertificateIsStillIncluded() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "downstream-http-tls-keystore-password-file");
-  }
-
-  @Test
-  void cmdlineIsValidIfBothClientCertAndPasswordAreMissing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-file");
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-keystore-password-file");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getClientCertificateOptions()).isEmpty();
-  }
-
-  @Test
-  void missingDownstreamTruststoreFileDisplaysErrorIfPasswordIsStillIncluded() {
-    missingParameterShowsError(validBaseCommandOptions(), "downstream-http-tls-truststore-file");
-  }
-
-  @Test
-  void missingWeb3TruststorePasswordFileDisplaysErrorIfTruststoreIsStillIncluded() {
-    missingParameterShowsError(
-        validBaseCommandOptions(), "downstream-http-tls-truststore-password-file");
-  }
-
-  @Test
-  void cmdlineIsValidIfBothWeb3TruststoreAndPasswordAreMissing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-file");
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-tls-truststore-password-file");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isTrue();
-    assertThat(config.getWeb3TrustStoreOptions()).isEmpty();
   }
 }

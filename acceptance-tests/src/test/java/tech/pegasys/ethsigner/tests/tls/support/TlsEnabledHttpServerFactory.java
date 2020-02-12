@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.tests.tls.support;
 
 import static tech.pegasys.ethsigner.core.EthSigner.createJsonDecoder;
-import static tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers.populateFingerprintFile;
+import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -28,6 +28,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -65,7 +66,7 @@ public class TlsEnabledHttpServerFactory {
     try {
 
       final Path serverFingerprintFile = workDir.resolve("server_known_clients");
-      populateFingerprintFile(serverFingerprintFile, acceptedClientCerts);
+      populateFingerprintFile(serverFingerprintFile, acceptedClientCerts, Optional.empty());
 
       final HttpServerOptions web3HttpServerOptions = new HttpServerOptions();
       web3HttpServerOptions.setSsl(true);
@@ -100,7 +101,7 @@ public class TlsEnabledHttpServerFactory {
 
       serversCreated.add(web3ProviderHttpServer);
       return web3ProviderHttpServer;
-    } catch (KeyStoreException
+    } catch (final KeyStoreException
         | NoSuchAlgorithmException
         | CertificateException
         | IOException
