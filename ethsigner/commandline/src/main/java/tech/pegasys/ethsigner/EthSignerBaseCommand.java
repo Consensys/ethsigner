@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import static java.util.Arrays.asList;
-
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -21,7 +19,6 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
-import tech.pegasys.ethsigner.util.CommandLineUtils;
 
 import java.net.InetAddress;
 import java.nio.file.Path;
@@ -30,8 +27,6 @@ import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
-import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
@@ -168,32 +163,6 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Optional<ClientTlsOptions> getClientTlsOptions() {
     return Optional.ofNullable(clientTlsOptions);
-  }
-
-  /**
-   * Validate dependent options which are not enforceable by PicoCLI.
-   *
-   * <p>See https://github.com/remkop/picocli/issues/938
-   *
-   * <p>Note: This method will be removed once PicoCLI 4.2 is released.
-   *
-   * @param commandLine the CommandLine instance
-   * @param logger The Logger to use to print the warning
-   */
-  @Deprecated
-  void validateOptions(final CommandLine commandLine, final Logger logger) {
-    if (getClientTlsOptions().isPresent()) {
-      CommandLineUtils.checkOptionDependencies(
-          logger,
-          commandLine,
-          "--downstream-http-tls-enabled",
-          !getClientTlsOptions().get().isEnabled(),
-          asList(
-              "--downstream-http-tls-keystore-file",
-              "--downstream-http-tls-keystore-password-file",
-              "--downstream-http-tls-known-servers-file",
-              "--downstream-http-tls-ca-auth-disabled"));
-    }
   }
 
   @Override

@@ -29,11 +29,6 @@ public class BasicClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public boolean isEnabled() {
-    return true;
-  }
-
-  @Override
   public Optional<KeyStoreOptions> getKeyStoreOptions() {
     return tlsCertificateOptions;
   }
