@@ -22,6 +22,7 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
 public class PicoCliClientTlsOptions implements ClientTlsOptions {
+  @SuppressWarnings("UnusedVariable")
   @Option(
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
