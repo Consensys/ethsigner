@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
@@ -77,6 +76,25 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
+  void cmdLineIsValidWithoutDownstreamTlsOptions() {
+    final String cmdLine =
+        removeFieldFrom(
+            validBaseCommandOptions(),
+            "downstream-http-tls-enabled",
+            "downstream-http-tls-keystore-file",
+            "downstream-http-tls-keystore-password-file",
+            "downstream-http-tls-ca-auth-disabled",
+            "downstream-http-tls-known-servers-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isEmpty()).as("Downstream TLS Options").isTrue();
+  }
+
+  @Test
   void cmdLineIsValidWithAllTlsOptions() {
     final String cmdLine = validBaseCommandOptions();
 
@@ -97,16 +115,14 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(keyStoreOptions.getKeyStoreFile()).isEqualTo(Path.of("./test.ks"));
   }
 
-  @Disabled("Should be enable once PicoCLI 4.2 is updated")
   @Test
-  void cmdLineFailsIfDownstreamKeystoreIsUsedWithoutTlsEnabled() {
-    final String cmdLine =
-        removeFieldFrom(validBaseCommandOptions(), "downstream-http-tls-enabled");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).isFalse();
+  void cmdLineFailsIfDownstreamTlsOptionsAreUsedWithoutTlsEnabled() {
+    parseCommandLineWithMissingParamsShowsError(
+        parser,
+        commandOutput,
+        defaultUsageText,
+        validBaseCommandOptions(),
+        List.of("downstream-http-tls-enabled"));
   }
 
   @Test

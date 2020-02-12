@@ -17,9 +17,6 @@ import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import java.util.Optional;
 
 public interface ClientTlsOptions {
-  @Deprecated // this method will not be required once we are on PicoCLI 4.2.0
-  boolean isEnabled();
-
   Optional<KeyStoreOptions> getKeyStoreOptions();
 
   Optional<ClientTlsTrustOptions> getTrustOptions();
