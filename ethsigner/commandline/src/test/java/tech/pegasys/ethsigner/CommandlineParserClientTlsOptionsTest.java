@@ -122,7 +122,7 @@ class CommandlineParserClientTlsOptionsTest {
         commandOutput,
         defaultUsageText,
         validBaseCommandOptions(),
-        List.of("downstream-http-tls-keystore-file"));
+        List.of("downstream-http-tls-enabled"));
   }
 
   @Test
