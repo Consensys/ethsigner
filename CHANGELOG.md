@@ -5,8 +5,8 @@
 ### Known Issues
 
 ### Features Added
-- TLS connection to Hashicorp
-- Incoming and outgoing TLS connection
+- TLS can now be enabled on connection to Hashicorp
+- TLS can now be enabled on incoming and outgoing TLS connection to web3 provider 
 
 ### Bugs Fixed 
 - JWT token was not being passed in header: https://pegasys1.atlassian.net/browse/ES-84
