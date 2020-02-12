@@ -197,7 +197,7 @@ workflows:
   default:
     jobs:
       - build
-      - acceptanceTests
+      - acceptanceTests:
           requires:
             - build
       - azureTests:
