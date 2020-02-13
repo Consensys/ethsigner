@@ -23,7 +23,7 @@ executors:
       JAVA_TOOL_OPTIONS: -Xmx4096m
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4 -Xmx4096m
 
-  executor_machine:
+  executor_machine: # 2cpu , 8G ram
     machine:
       image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
       docker_layer_caching: true

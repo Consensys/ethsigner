@@ -110,7 +110,6 @@ public class CommandlineParser {
           output.println("Cause: " + ex.getCause().getMessage());
           throw (InitializationException) ex.getCause();
         }
-        output.println(ex.getMessage());
       }
       throw ex;
     }
