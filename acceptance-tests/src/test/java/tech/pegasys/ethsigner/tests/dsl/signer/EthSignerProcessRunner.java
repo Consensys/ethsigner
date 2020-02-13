@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
+import java.io.InputStream;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -127,7 +128,7 @@ public class EthSignerProcessRunner {
   }
 
   public void start(final String processName) {
-    final String loggingLevel = "DEBUG";
+    final String loggingLevel = "TRACE";
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
@@ -264,6 +265,7 @@ public class EthSignerProcessRunner {
       LOG.info("No record exists for requested process.");
       return false;
     } else {
+      LOG.info("Process is running = {}", process.isAlive());
       return process.isAlive();
     }
   }
@@ -274,23 +276,29 @@ public class EthSignerProcessRunner {
 
   private void printOutput(final String name, final Process process) {
     if (process.isAlive()) {
-      try (final BufferedReader in =
-          new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
-        String line = in.readLine();
-        while (line != null) {
-          PROCESS_LOG.info("{}: {}", name, line);
-          line = in.readLine();
-        }
-      } catch (final IOException e) {
-        LOG.error("Failed to read output from process", e);
-      }
+      printStream(process.getErrorStream(), name);
+      printStream(process.getInputStream(), name);
     } else {
       PROCESS_LOG.info("Process {} has terminated, and is not producing output.", name);
     }
   }
 
+  private void printStream(final InputStream streamToPrint, final String prefix) {
+    try (final BufferedReader in =
+        new BufferedReader(new InputStreamReader(streamToPrint, UTF_8))) {
+      String line = in.readLine();
+      while (line != null) {
+        PROCESS_LOG.info("{}: {}", prefix, line);
+        line = in.readLine();
+      }
+    } catch (final IOException e) {
+      LOG.error("Failed to read output from process", e);
+    }
+  }
+
   private void killProcess(final String name, final Process process) {
     LOG.info("Killing {} process", name);
+    LOG.info("Process is alive? = {}", process.isAlive());
 
     Awaitility.waitAtMost(30, TimeUnit.SECONDS)
         .until(
