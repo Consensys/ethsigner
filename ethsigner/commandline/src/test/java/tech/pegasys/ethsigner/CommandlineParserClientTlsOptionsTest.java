@@ -60,7 +60,7 @@ class CommandlineParserClientTlsOptionsTest {
             validBaseCommandOptions(),
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled",
+            "downstream-http-tls-ca-auth-enabled",
             "downstream-http-tls-known-servers-file");
 
     final boolean result =
@@ -83,7 +83,7 @@ class CommandlineParserClientTlsOptionsTest {
             "downstream-http-tls-enabled",
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled",
+            "downstream-http-tls-ca-auth-enabled",
             "downstream-http-tls-known-servers-file");
 
     final boolean result =
@@ -173,7 +173,7 @@ class CommandlineParserClientTlsOptionsTest {
             validBaseCommandOptions(),
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled");
+            "downstream-http-tls-ca-auth-enabled");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));

@@ -250,7 +250,8 @@ public class EthSignerProcessRunner {
                       });
 
               if (!downstreamTrustOptions.isCaAuthRequired()) {
-                params.add("--downstream-http-tls-ca-auth-disabled");
+                params.add("--downstream-http-tls-ca-auth-enabled");
+                params.add("false");
               }
             });
 
