@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
@@ -67,7 +67,7 @@ public class AzureSubCommand extends SignerSubCommand {
       names = {"--client-secret-path"},
       description =
           "Path to a file containing the secret used to access the vault (along with client-id)",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
       required = true)
   private Path clientSecretPath;
 

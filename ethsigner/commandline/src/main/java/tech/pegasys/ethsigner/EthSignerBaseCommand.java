@@ -12,9 +12,9 @@
  */
 package tech.pegasys.ethsigner;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_DIRECTORY_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
@@ -68,7 +68,7 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {"--data-path"},
       description = "The path to a directory to store temporary files",
-      paramLabel = MANDATORY_DIRECTORY_FORMAT_HELP,
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
       arity = "1")
   private Path dataPath;
 

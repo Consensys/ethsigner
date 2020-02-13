@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.signer.multikey;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_DIRECTORY_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
@@ -54,7 +54,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
       names = {"-d", "--directory"},
       description = "The path to a directory containing signing metadata TOML files",
       required = true,
-      paramLabel = MANDATORY_DIRECTORY_FORMAT_HELP,
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
       arity = "1")
   private Path directoryPath;
 
