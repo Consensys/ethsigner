@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
@@ -92,6 +93,19 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(result).as("CLI Parse result").isTrue();
     final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
     assertThat(optionalDownstreamTlsOptions.isEmpty()).as("Downstream TLS Options").isTrue();
+  }
+
+  @Test
+  void cmdLineIsValidWithCaAuthEnabledEqualsTrue() {
+    final String cmdLine =
+        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
   }
 
   @Test
