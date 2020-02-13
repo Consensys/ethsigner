@@ -121,7 +121,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon --parallel acceptanceTest --test "ClientSideTls*"
+            ./gradlew --no-daemon --parallel acceptanceTest --tests "ClientSideTls*"
       - notify            
       - capture_test_results
 
