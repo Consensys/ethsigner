@@ -27,7 +27,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
@@ -128,7 +127,7 @@ public class EthSignerProcessRunner {
   }
 
   public void start(final String processName) {
-    final String loggingLevel = "TRACE";
+    final String loggingLevel = "DEBUG";
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());
@@ -259,15 +258,8 @@ public class EthSignerProcessRunner {
     return Collections.unmodifiableCollection(params);
   }
 
-  public synchronized boolean isRunning(final String processName) {
-    final Process process = processes.get(processName);
-    if (process == null) {
-      LOG.info("No record exists for requested process.");
-      return false;
-    } else {
-      LOG.info("Process is running = {}", process.isAlive());
-      return process.isAlive();
-    }
+  public boolean isRunning(final String processName) {
+    return (processes.get(processName) != null) && processes.get(processName).isAlive();
   }
 
   private String executableLocation() {
@@ -275,20 +267,11 @@ public class EthSignerProcessRunner {
   }
 
   private void printOutput(final String name, final Process process) {
-    if (process.isAlive()) {
-      printStream(process.getErrorStream(), name);
-      printStream(process.getInputStream(), name);
-    } else {
-      PROCESS_LOG.info("Process {} has terminated, and is not producing output.", name);
-    }
-  }
-
-  private void printStream(final InputStream streamToPrint, final String prefix) {
     try (final BufferedReader in =
-        new BufferedReader(new InputStreamReader(streamToPrint, UTF_8))) {
+        new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
       String line = in.readLine();
       while (line != null) {
-        PROCESS_LOG.info("{}: {}", prefix, line);
+        PROCESS_LOG.info("{}: {}", name, line);
         line = in.readLine();
       }
     } catch (final IOException e) {
@@ -298,7 +281,6 @@ public class EthSignerProcessRunner {
 
   private void killProcess(final String name, final Process process) {
     LOG.info("Killing {} process", name);
-    LOG.info("Process is alive? = {}", process.isAlive());
 
     Awaitility.waitAtMost(30, TimeUnit.SECONDS)
         .until(

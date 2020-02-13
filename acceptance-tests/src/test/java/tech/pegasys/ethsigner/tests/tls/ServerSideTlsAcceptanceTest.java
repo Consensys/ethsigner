@@ -79,9 +79,9 @@ class ServerSideTlsAcceptanceTest {
   //
   @TempDir Path dataPath;
 
-  private static final TlsCertificateDefinition cert1 =
+  final TlsCertificateDefinition cert1 =
       TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
-  private static final TlsCertificateDefinition cert2 =
+  final TlsCertificateDefinition cert2 =
       TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
   private Signer ethSigner = null;

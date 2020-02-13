@@ -36,11 +36,6 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   private PicoCliClientTlsTrustOptions trustOptions;
 
   @Override
-  public boolean isEnabled() {
-    return tlsEnabled;
-  }
-
-  @Override
   public Optional<KeyStoreOptions> getKeyStoreOptions() {
     return Optional.ofNullable(keyStoreOptions);
   }

@@ -68,7 +68,7 @@ public class ReadTimeoutAcceptanceTest {
   }
 
   @AfterEach
-  public synchronized void tearDown() {
+  public void tearDown() {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }

@@ -69,7 +69,7 @@ public class ValueTransferWithAzureAcceptanceTest {
   }
 
   @AfterAll
-  static synchronized void tearDownBase() {
+  static void tearDownBase() {
     try {
       if (ethNode != null) {
         ethNode.shutdown();

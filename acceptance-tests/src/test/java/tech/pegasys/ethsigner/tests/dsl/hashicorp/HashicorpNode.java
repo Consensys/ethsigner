@@ -58,7 +58,7 @@ public class HashicorpNode {
     }
   }
 
-  public synchronized void shutdown() {
+  public void shutdown() {
     if (hashicorpVaultDocker != null) {
       hashicorpVaultDocker.shutdown();
       hashicorpVaultDocker = null;

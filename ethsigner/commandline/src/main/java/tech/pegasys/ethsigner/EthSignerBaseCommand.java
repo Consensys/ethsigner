@@ -170,32 +170,6 @@ public class EthSignerBaseCommand implements Config {
     return Optional.ofNullable(clientTlsOptions);
   }
 
-  /**
-   * Validate dependent options which are not enforceable by PicoCLI.
-   *
-   * <p>See https://github.com/remkop/picocli/issues/938
-   *
-   * <p>Note: This method will be removed once PicoCLI 4.2 is released.
-   *
-   * @param commandLine the CommandLine instance
-   * @param logger The Logger to use to print the warning
-   */
-  @Deprecated
-  void validateOptions(final CommandLine commandLine, final Logger logger) {
-    if (getClientTlsOptions().isPresent()) {
-      CommandLineUtils.checkOptionDependencies(
-          logger,
-          commandLine,
-          "--downstream-http-tls-enabled",
-          !getClientTlsOptions().get().isEnabled(),
-          asList(
-              "--downstream-http-tls-keystore-file",
-              "--downstream-http-tls-keystore-password-file",
-              "--downstream-http-tls-known-servers-file",
-              "--downstream-http-tls-ca-auth-disabled"));
-    }
-  }
-
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
