@@ -80,7 +80,12 @@ public class Runner {
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = Vertx.vertx();
-    this.httpServerService = new HttpServerService(router(), serverOptions);
+    try {
+      this.httpServerService = new HttpServerService(router(), serverOptions);
+    } catch(final Exception e) {
+      vertx.close();
+      throw e;
+    }
   }
 
   public void start() {
