@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0
+
+### Known Issues
+
+### Features Added
+- Added TLS support for incoming and outgoing RPC endpoints
+- Added TLS support for connecting to Hashicorp vault
+- Upgraded PicoCLI to 4.1.4
+
+### Bugs Fixed 
+- Received headers are now forwarded to the web3 provider, resolving an issue where JWT token was not being passed in header https://github.com/PegaSysEng/ethsigner/pull/208
+- Resolved an issue where private transactions using privacyGroupId without a nonce failed https://github.com/PegaSysEng/ethsigner/pull/215
+
 ## 0.4.0
 
 ### Known Issues

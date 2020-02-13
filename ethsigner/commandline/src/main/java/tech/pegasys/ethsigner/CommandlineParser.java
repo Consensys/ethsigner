@@ -68,8 +68,8 @@ public class CommandlineParser {
     } catch (final TransactionSignerInitializationException | InitializationException ex) {
       // perform no-op (user output already supplied in ExceptionHandler)
     } catch (final Exception ex) {
-      LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
-      output.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
+      LOG.error("EthSigner has suffered an unrecoverable failure", ex);
+      output.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
     }
     return false;
   }
