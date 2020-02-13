@@ -40,7 +40,7 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
     final PrivateTransaction contract =
         PrivateTransaction.createContractTransaction(
             richBenefactor().address(),
-            richBenefactor().nextNonceAndIncrement(),
+            BigInteger.ZERO,
             GAS_PRICE,
             GAS_LIMIT,
             BigInteger.ZERO,
@@ -62,7 +62,7 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
     final PrivateTransaction transaction =
         PrivateTransaction.createEtherTransaction(
             richBenefactor().address(),
-            Optional.of(richBenefactor().nextNonceAndIncrement()),
+            Optional.of(BigInteger.ZERO),
             GAS_PRICE,
             GAS_LIMIT,
             RECIPIENT,
