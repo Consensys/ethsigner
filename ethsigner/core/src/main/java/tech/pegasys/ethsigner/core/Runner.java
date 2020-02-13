@@ -172,6 +172,7 @@ public class Runner {
 
   private void deploymentFailed(final Throwable cause) {
     LOG.error("Vertx deployment failed", cause);
+    vertx.close();
     System.exit(1);
   }
 
