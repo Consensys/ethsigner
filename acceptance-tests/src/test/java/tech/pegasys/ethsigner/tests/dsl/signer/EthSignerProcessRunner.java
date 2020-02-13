@@ -273,15 +273,19 @@ public class EthSignerProcessRunner {
   }
 
   private void printOutput(final String name, final Process process) {
-    try (final BufferedReader in =
-        new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
-      String line = in.readLine();
-      while (line != null) {
-        PROCESS_LOG.info("{}: {}", name, line);
-        line = in.readLine();
+    if(process.isAlive()) {
+      try (final BufferedReader in =
+          new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
+        String line = in.readLine();
+        while (line != null) {
+          PROCESS_LOG.info("{}: {}", name, line);
+          line = in.readLine();
+        }
+      } catch (final IOException e) {
+        LOG.error("Failed to read output from process", e);
       }
-    } catch (final IOException e) {
-      LOG.error("Failed to read output from process", e);
+    } else {
+      PROCESS_LOG.info("Process {} has terminated, and is not producing output.", name);
     }
   }
 
