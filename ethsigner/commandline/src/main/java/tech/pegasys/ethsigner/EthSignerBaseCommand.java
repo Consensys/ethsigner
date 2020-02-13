@@ -61,6 +61,7 @@ public class EthSignerBaseCommand implements Config {
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
       required = true,
+      paramLabel = MANDATORY_LONG_FORMAT_HELP,
       arity = "1")
   private long chainId;
 
