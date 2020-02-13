@@ -25,7 +25,7 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @SuppressWarnings("UnusedVariable")
   @Option(
       names = "--downstream-http-tls-enabled",
-      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
+      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
       arity = "0",
       required = true)
   private boolean tlsEnabled = false;
