@@ -273,7 +273,7 @@ public class EthSignerProcessRunner {
   }
 
   private void printOutput(final String name, final Process process) {
-    if(process.isAlive()) {
+    if (process.isAlive()) {
       try (final BufferedReader in =
           new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
         String line = in.readLine();
