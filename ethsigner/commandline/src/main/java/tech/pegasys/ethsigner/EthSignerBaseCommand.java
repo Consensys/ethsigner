@@ -12,6 +12,11 @@
  */
 package tech.pegasys.ethsigner;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_DIRECTORY_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -31,12 +36,6 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
-
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_DIRECTORY_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
-
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(

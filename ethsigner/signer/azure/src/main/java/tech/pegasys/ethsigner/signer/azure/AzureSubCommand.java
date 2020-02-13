@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
-import tech.pegasys.ethsigner.DefaultCommandValues;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
@@ -26,8 +27,6 @@ import java.nio.file.Path;
 import com.google.common.base.Charsets;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
