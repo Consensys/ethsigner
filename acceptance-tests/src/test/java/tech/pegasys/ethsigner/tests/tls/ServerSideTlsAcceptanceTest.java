@@ -160,7 +160,7 @@ class ServerSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingPasswordFileResultsInEthsignerExiting() {
+  void missingPasswordFileResultsInEthSignerExiting() {
     // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition missingPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", null);
@@ -198,7 +198,7 @@ class ServerSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingKeyStoreFileResultsInEthsignerExiting() throws IOException {
+  void missingKeyStoreFileResultsInEthSignerExiting() throws IOException {
     final TlsOptions serverOptions =
         new BasicTlsOptions(
             dataPath.resolve("missing_keystore").toFile(),
