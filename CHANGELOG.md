@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5 RC
+## 0.5.0
 
 ### Known Issues
 
