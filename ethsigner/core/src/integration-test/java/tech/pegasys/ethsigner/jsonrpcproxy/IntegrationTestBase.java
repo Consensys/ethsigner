@@ -24,7 +24,10 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import tech.pegasys.ethsigner.core.Runner;
+import tech.pegasys.ethsigner.core.Context;
+import tech.pegasys.ethsigner.core.HttpServerServiceFactory;
+import tech.pegasys.ethsigner.core.VerticleManager;
+import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -54,6 +57,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
@@ -85,7 +89,7 @@ public class IntegrationTestBase {
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
-  private static Runner runner;
+  private static VerticleManager verticleManager;
   static ClientAndServer clientAndServer;
   static Credentials credentials;
 
@@ -126,16 +130,28 @@ public class IntegrationTestBase {
 
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
 
-    runner =
-        new Runner(
-            chainId,
-            transactionSignerProvider,
-            httpClientOptions,
-            httpServerOptions,
-            downstreamTimeout,
-            jsonDecoder,
-            dataPath);
-    runner.start();
+    final Vertx vertx = Vertx.vertx();
+    try {
+      final Context context =
+          new Context(
+              chainId,
+              transactionSignerProvider,
+              httpClientOptions,
+              httpServerOptions,
+              downstreamTimeout,
+              jsonDecoder,
+              dataPath,
+              vertx);
+
+      final HttpServerService serverService = HttpServerServiceFactory.create(context);
+
+      verticleManager = new VerticleManager(context, serverService);
+      verticleManager.start();
+    } catch (final Throwable t) {
+      LOG.error("Unhandled exception launching Ethsigner.", t);
+      vertx.close();
+      throw t;
+    }
 
     final Path portsFile = dataPath.resolve(PORTS_FILENAME);
     waitForNonEmptyFileToExist(portsFile);
@@ -171,9 +187,9 @@ public class IntegrationTestBase {
   @AfterAll
   public static void teardown() {
     clientAndServer.stop();
-    runner.stop();
+    verticleManager.stop();
     clientAndServer = null;
-    runner = null;
+    verticleManager = null;
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {

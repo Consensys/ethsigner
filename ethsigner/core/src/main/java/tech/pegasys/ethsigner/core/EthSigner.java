@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.core.util.FileUtil;
@@ -26,6 +27,7 @@ import java.time.Duration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
@@ -69,17 +71,28 @@ public final class EthSigner {
             .setReuseAddress(true)
             .setReusePort(true);
 
-    final Runner runner =
-        new Runner(
-            config.getChainId().id(),
-            transactionSignerProvider,
-            webClientOptionsFactory.createWebClientOptions(config),
-            applyConfigTlsSettingsTo(serverOptions),
-            downstreamHttpRequestTimeout,
-            jsonDecoder,
-            config.getDataPath());
+    final Vertx vertx = Vertx.vertx();
+    try {
+      final Context context =
+          new Context(
+              config.getChainId().id(),
+              transactionSignerProvider,
+              webClientOptionsFactory.createWebClientOptions(config),
+              applyConfigTlsSettingsTo(serverOptions),
+              downstreamHttpRequestTimeout,
+              jsonDecoder,
+              config.getDataPath(),
+              vertx);
 
-    runner.start();
+      final HttpServerService serverService = HttpServerServiceFactory.create(context);
+
+      final VerticleManager verticleManager = new VerticleManager(context, serverService);
+      verticleManager.start();
+    } catch (final Throwable t) {
+      LOG.error("Unhandled exception launching Ethsigner.", t);
+      vertx.close();
+      throw t;
+    }
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {

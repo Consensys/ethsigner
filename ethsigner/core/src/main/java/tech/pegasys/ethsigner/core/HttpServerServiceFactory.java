@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -28,80 +28,33 @@ import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.Properties;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-public class Runner {
+public class HttpServerServiceFactory {
 
-  private static final Logger LOG = LogManager.getLogger();
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
   private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
-  private final long chainId;
-  private final TransactionSignerProvider transactionSignerProvider;
-  private final HttpClientOptions clientOptions;
-  private final Duration httpRequestTimeout;
-  private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private final JsonDecoder jsonDecoder;
-  private final Path dataPath;
-  private final Vertx vertx;
-  private final HttpServerService httpServerService;
-
-  public Runner(
-      final long chainId,
-      final TransactionSignerProvider transactionSignerProvider,
-      final HttpClientOptions clientOptions,
-      final HttpServerOptions serverOptions,
-      final Duration httpRequestTimeout,
-      final JsonDecoder jsonDecoder,
-      final Path dataPath) {
-    this.chainId = chainId;
-    this.transactionSignerProvider = transactionSignerProvider;
-    this.clientOptions = clientOptions;
-    this.httpRequestTimeout = httpRequestTimeout;
-    this.jsonDecoder = jsonDecoder;
-    this.dataPath = dataPath;
-    this.vertx = Vertx.vertx();
-    try {
-      this.httpServerService = new HttpServerService(router(), serverOptions);
-    } catch (final Exception e) {
-      vertx.close();
-      throw e;
-    }
+  public static HttpServerService create(final Context context) {
+    return new HttpServerService(router(context), context.getServerOptions());
   }
 
-  public void start() {
-    vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
-  }
-
-  public void stop() {
-    vertx.close();
-  }
-
-  private Router router() {
-    final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
+  private static Router router(final Context context) {
+    final Vertx vertx = context.getVertx();
+    final JsonDecoder jsonDecoder = context.getJsonDecoder();
+    final HttpClient downStreamConnection = vertx.createHttpClient(context.getClientOptions());
     final VertxRequestTransmitterFactory transmitterFactory =
-        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
+        responseBodyHandler ->
+            new VertxRequestTransmitter(context.getHttpRequestTimeout(), responseBodyHandler);
     final RequestMapper requestMapper =
-        createRequestMapper(downStreamConnection, transmitterFactory);
+        createRequestMapper(context, downStreamConnection, transmitterFactory);
 
     final Router router = Router.router(vertx);
 
@@ -112,7 +65,7 @@ public class Runner {
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
+        .handler(new JsonRpcHandler(context.getResponseFactory(), requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -129,24 +82,27 @@ public class Runner {
     return router;
   }
 
-  private RequestMapper createRequestMapper(
+  private static RequestMapper createRequestMapper(
+      final Context context,
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
+    final JsonDecoder jsonDecoder = context.getJsonDecoder();
+
     final PassThroughHandler defaultHandler =
         new PassThroughHandler(downStreamConnection, transmitterFactory);
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout);
+            downStreamConnection, jsonDecoder, context.getHttpRequestTimeout());
 
     final TransactionFactory transactionFactory =
         new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            chainId,
+            context.getChainId(),
             downStreamConnection,
-            transactionSignerProvider,
+            context.getTransactionSignerProvider(),
             transactionFactory,
             transmitterFactory);
 
@@ -156,48 +112,11 @@ public class Runner {
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
+            context.getResponseFactory(),
+            new EthAccountsBodyProvider(
+                () -> context.getTransactionSignerProvider().availableAddresses()),
             jsonDecoder));
 
     return requestMapper;
-  }
-
-  private void httpServerServiceDeployment(final AsyncResult<String> result) {
-    if (result.succeeded()) {
-      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
-
-      if (dataPath != null) {
-        writePortsToFile(httpServerService);
-      }
-    } else {
-      deploymentFailed(result.cause());
-    }
-  }
-
-  private void deploymentFailed(final Throwable cause) {
-    LOG.error("Vertx deployment failed", cause);
-    vertx.close();
-    System.exit(1);
-  }
-
-  private void writePortsToFile(final HttpServerService httpService) {
-    final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
-    portsFile.deleteOnExit();
-
-    final Properties properties = new Properties();
-    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
-
-    LOG.info(
-        "Writing ethsigner.ports file: {}, with contents: {}",
-        portsFile.getAbsolutePath(),
-        properties);
-    try (final FileOutputStream fileOutputStream = new FileOutputStream(portsFile)) {
-      properties.store(
-          fileOutputStream,
-          "This file contains the ports used by the running instance of Web3Provider. This file will be deleted after the node is shutdown.");
-    } catch (final Exception e) {
-      LOG.warn("Error writing ports file", e);
-    }
   }
 }
