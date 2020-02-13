@@ -14,4 +14,8 @@ package tech.pegasys.ethsigner;
 
 public interface DefaultCommandValues {
   String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
+  String MANDATORY_DIRECTORY_FORMAT_HELP = "<DIRECTORY>";
+  String MANDATORY_HOST_FORMAT_HELP = "<HOST>";
+  String MANDATORY_PORT_FORMAT_HELP = "<PORT>";
+  String MANDATORY_LONG_FORMAT_HELP = "<LONG>";
 }

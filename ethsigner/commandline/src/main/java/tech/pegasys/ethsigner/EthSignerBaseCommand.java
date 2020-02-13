@@ -32,6 +32,12 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_DIRECTORY_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
+
+
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
     description =
@@ -62,6 +68,7 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {"--data-path"},
       description = "The path to a directory to store temporary files",
+      paramLabel = MANDATORY_DIRECTORY_FORMAT_HELP,
       arity = "1")
   private Path dataPath;
 
@@ -76,12 +83,14 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
   private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
 
   @Option(
       names = {"--http-listen-port"},
       description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_PORT_FORMAT_HELP,
       arity = "1")
   private final Integer httpListenPort = 8545;
 
@@ -93,6 +102,7 @@ public class EthSignerBaseCommand implements Config {
       names = "--downstream-http-host",
       description =
           "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
   private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
@@ -100,6 +110,7 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
+      paramLabel = MANDATORY_PORT_FORMAT_HELP,
       required = true,
       arity = "1")
   private Integer downstreamHttpPort;
@@ -109,6 +120,7 @@ public class EthSignerBaseCommand implements Config {
       names = {"--downstream-http-request-timeout"},
       description =
           "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_LONG_FORMAT_HELP,
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
