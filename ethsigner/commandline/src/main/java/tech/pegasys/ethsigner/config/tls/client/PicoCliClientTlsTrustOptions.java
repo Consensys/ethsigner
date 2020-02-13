@@ -33,7 +33,8 @@ class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
 
   @Option(
       names = "--downstream-http-tls-ca-auth-enabled",
-      description = "If set, will use the system's CA to validate received server certificates",
+      description =
+          "If set, will use the system's CA to validate received server certificates (default: true)",
       arity = "1")
   private boolean caAuthEnabled = true;
 
