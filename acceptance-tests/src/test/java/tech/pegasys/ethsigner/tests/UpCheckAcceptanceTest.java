@@ -51,7 +51,7 @@ public class UpCheckAcceptanceTest {
   }
 
   @AfterAll
-  static void tearDownBase() {
+  static synchronized void tearDownBase() {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }

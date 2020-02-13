@@ -66,7 +66,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethSigner.awaitStartupCompletion();
   }
 
-  static void tearDownBase() {
+  static synchronized void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
       ethNode = null;
