@@ -82,7 +82,7 @@ public class Runner {
     this.vertx = Vertx.vertx();
     try {
       this.httpServerService = new HttpServerService(router(), serverOptions);
-    } catch(final Exception e) {
+    } catch (final Exception e) {
       vertx.close();
       throw e;
     }
