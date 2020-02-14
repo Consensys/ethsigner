@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.signer.azure;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
@@ -36,24 +38,28 @@ public class AzureSubCommand extends SignerSubCommand {
       names = {"--keyvault-name", "--key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
       required = true,
+      paramLabel = "<KEY_VAULT_NAME>",
       arity = "1")
   private String keyVaultName;
 
   @Option(
       names = {"--key-name"},
       description = "The name of the key which is to be used",
+      paramLabel = "<KEY_NAME>",
       required = true)
   private String keyName;
 
   @Option(
       names = {"--key-version"},
       description = "The version of the requested key to use",
+      paramLabel = "<KEY_VERSION>",
       required = true)
   private String keyVersion;
 
   @Option(
       names = {"--client-id"},
       description = "The ID used to authenticate with Azure key vault",
+      paramLabel = "<CLIENT_ID>",
       required = true)
   private String clientId;
 
@@ -61,6 +67,7 @@ public class AzureSubCommand extends SignerSubCommand {
       names = {"--client-secret-path"},
       description =
           "Path to a file containing the secret used to access the vault (along with client-id)",
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
       required = true)
   private Path clientSecretPath;
 
