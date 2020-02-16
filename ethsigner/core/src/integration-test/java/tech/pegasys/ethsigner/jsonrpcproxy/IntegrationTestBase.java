@@ -24,9 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import tech.pegasys.ethsigner.core.Context;
-import tech.pegasys.ethsigner.core.HttpServerServiceFactory;
-import tech.pegasys.ethsigner.core.http.HttpServerService;
+import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
@@ -49,8 +47,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -90,7 +86,8 @@ public class IntegrationTestBase {
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
-  private static Context context;
+  private static Vertx vertx;
+  private static Runner runner;
   static ClientAndServer clientAndServer;
   static Credentials credentials;
 
@@ -131,31 +128,27 @@ public class IntegrationTestBase {
 
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
 
-    final Vertx vertx = Vertx.vertx();
-    context =
-        new Context(
+    vertx = Vertx.vertx();
+    runner =
+        new Runner(
             chainId,
             transactionSignerProvider,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
             jsonDecoder,
+            dataPath,
             vertx);
+    runner.start();
 
-    final HttpServerService serverService = HttpServerServiceFactory.create(context);
-    try {
-      serverService.waitUntilStarted();
-    } catch (final ExecutionException | InterruptedException e) {
-      LOG.error("Failed to start the EthSigner HTTP server");
-      throw new RuntimeException(e);
-    }
-
-    LOG.info("Http server has started");
-    RestAssured.port = serverService.actualPort();
+    final Path portsFile = dataPath.resolve(PORTS_FILENAME);
+    waitForNonEmptyFileToExist(portsFile);
+    final int ethSignerPort = httpJsonRpcPort(portsFile);
+    RestAssured.port = ethSignerPort;
 
     LOG.info(
         "Started ethSigner on port {}, eth stub node on port {}",
-        serverService.actualPort(),
+        ethSignerPort,
         clientAndServer.getLocalPort());
 
     unlockedAccount =
@@ -182,8 +175,9 @@ public class IntegrationTestBase {
   @AfterAll
   public static void teardown() {
     clientAndServer.stop();
-    context.getVertx().close();
+    vertx.close();
     clientAndServer = null;
+    runner = null;
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
