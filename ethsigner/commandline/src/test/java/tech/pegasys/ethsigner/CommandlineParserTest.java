@@ -147,7 +147,7 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingDownStreamHostDefaultsToLoopback() {
+  void missingDownstreamHostDefaultsToLoopback() {
     missingOptionalParameterIsValidAndMeetsDefault(
         "downstream-http-host",
         config::getDownstreamHttpHost,
@@ -155,7 +155,7 @@ class CommandlineParserTest {
   }
 
   @Test
-  void missingDownStreamPortDefaultsTo8545() {
+  void missingDownstreamPortDefaultsTo8545() {
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-port", config::getHttpListenPort, 8545);
   }
