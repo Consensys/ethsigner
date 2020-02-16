@@ -12,6 +12,10 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.Router;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -86,8 +90,11 @@ public final class EthSigner {
               applyConfigTlsSettingsTo(serverOptions),
               downstreamHttpRequestTimeout);
 
+      final HttpServer httpServer = vertx.createHttpServer(context.getServerOptions());
       final HttpServerServiceFactory serviceFactory = new HttpServerServiceFactory(vertx, jsonDecoder);
-      final HttpServerService serverService = serviceFactory.create(context);
+      final Handler<HttpServerRequest> router = serviceFactory.requestHandler(context);
+
+      final HttpServerService serverService = new HttpServerService(router, httpServer);
       serverService.waitUntilStarted();
 
       LOG.info("Http server has started");

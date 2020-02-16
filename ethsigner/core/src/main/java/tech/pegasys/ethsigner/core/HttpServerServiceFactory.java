@@ -54,12 +54,7 @@ public class HttpServerServiceFactory {
     this.jsonDecoder = jsonDecoder;
   }
 
-  public HttpServerService create(final Context context) {
-    final HttpServer httpServer = vertx.createHttpServer(context.getServerOptions());
-    return new HttpServerService(requestHandler(context), httpServer);
-  }
-
-  private Handler<HttpServerRequest> requestHandler(final Context context) {
+  public Handler<HttpServerRequest> requestHandler(final Context context) {
     final HttpClient downStreamConnection = vertx.createHttpClient(context.getClientOptions());
     final VertxRequestTransmitterFactory transmitterFactory =
         responseBodyHandler ->
