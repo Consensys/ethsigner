@@ -12,16 +12,10 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-
-import java.nio.file.Path;
-import java.time.Duration;
-
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import java.time.Duration;
+import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 public class Context {
 
@@ -29,10 +23,6 @@ public class Context {
   private final TransactionSignerProvider transactionSignerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
-  private final HttpResponseFactory responseFactory = new HttpResponseFactory();
-  private final JsonDecoder jsonDecoder;
-  private final Path dataPath;
-  private final Vertx vertx;
   private final HttpServerOptions serverOptions;
 
   public Context(
@@ -40,21 +30,14 @@ public class Context {
       final TransactionSignerProvider transactionSignerProvider,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
-      final Duration httpRequestTimeout,
-      final JsonDecoder jsonDecoder,
-      final Path dataPath,
-      final Vertx vertx) {
+      final Duration httpRequestTimeout) {
 
     this.chainId = chainId;
 
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
-    this.jsonDecoder = jsonDecoder;
-    this.dataPath = dataPath;
     this.serverOptions = serverOptions;
-
-    this.vertx = vertx;
   }
 
   public long getChainId() {
@@ -71,22 +54,6 @@ public class Context {
 
   public Duration getHttpRequestTimeout() {
     return httpRequestTimeout;
-  }
-
-  public HttpResponseFactory getResponseFactory() {
-    return responseFactory;
-  }
-
-  public JsonDecoder getJsonDecoder() {
-    return jsonDecoder;
-  }
-
-  public Path getDataPath() {
-    return dataPath;
-  }
-
-  public Vertx getVertx() {
-    return vertx;
   }
 
   public HttpServerOptions getServerOptions() {

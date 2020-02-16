@@ -12,66 +12,49 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
+import java.util.concurrent.CompletableFuture;
+
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
+import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class HttpServerService extends AbstractVerticle {
+public class HttpServerService {
 
   private static final Logger LOG = LogManager.getLogger();
-  private static final int UNASSIGNED_PORT = 0;
+  private final Handler<HttpServerRequest> requestHandler;
 
-  private final HttpServerOptions serverOptions;
-  private final Router routes;
   private HttpServer httpServer;
 
-  public HttpServerService(final Router routes, final HttpServerOptions serverOptions) {
-    this.serverOptions = serverOptions;
-    this.routes = routes;
+  public HttpServerService(final Handler<HttpServerRequest> requestHandler,
+      final HttpServer httpServer) {
+    this.httpServer = httpServer;
+    this.requestHandler = requestHandler;
   }
 
-  @Override
-  public void start(final Future<Void> startFuture) {
-    httpServer = vertx.createHttpServer(serverOptions);
-    try {
-      httpServer
-          .requestHandler(routes)
-          .listen(
-              result -> {
-                if (result.succeeded()) {
-                  LOG.info("HTTP server service started on {}", httpServer.actualPort());
-                  startFuture.complete();
-                } else {
-                  LOG.error("HTTP server service failed to listen", result.cause());
-                  startFuture.fail(result.cause());
-                }
-              });
-    } catch (final Exception e) {
-      startFuture.fail(e);
-      throw e;
-    }
-  }
-
-  @Override
-  public void stop(final Future<Void> stopFuture) {
-    httpServer.close(
-        result -> {
-          if (result.succeeded()) {
-            stopFuture.complete();
-          } else {
-            stopFuture.fail(result.cause());
-          }
-        });
+  public void waitUntilStarted() throws ExecutionException, InterruptedException {
+    final CompletableFuture<Void> serverStartupComplete = new CompletableFuture<>();
+    httpServer
+        .requestHandler(requestHandler)
+        .listen(
+            result -> {
+              if (result.succeeded()) {
+                LOG.info("HTTP server service started on {}", httpServer.actualPort());
+                serverStartupComplete.complete(null);
+              } else {
+                LOG.error("HTTP server service failed to listen", result.cause());
+                serverStartupComplete.completeExceptionally(result.cause());
+              }
+            });
+    serverStartupComplete.get();
   }
 
   public int actualPort() {
-    if (httpServer == null) {
-      return UNASSIGNED_PORT;
-    }
     return httpServer.actualPort();
   }
 }

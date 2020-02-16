@@ -58,7 +58,7 @@ import org.web3j.utils.Convert.Unit;
 class ClientSideTlsAcceptanceTest {
 
   private TlsEnabledHttpServerFactory serverFactory;
-  private Signer signer = null;
+  private Signer signer;
   private static final int UNUSED_WS_PORT = 0;
 
   @BeforeEach

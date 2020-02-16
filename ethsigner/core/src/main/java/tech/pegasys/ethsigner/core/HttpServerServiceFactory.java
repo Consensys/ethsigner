@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -42,13 +45,21 @@ public class HttpServerServiceFactory {
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
   private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
-  public static HttpServerService create(final Context context) {
-    return new HttpServerService(router(context), context.getServerOptions());
+  private final HttpResponseFactory responseFactory = new HttpResponseFactory();
+  private final Vertx vertx;
+  private final JsonDecoder jsonDecoder;
+
+  public HttpServerServiceFactory(final Vertx vertx, final JsonDecoder jsonDecoder) {
+    this.vertx = vertx;
+    this.jsonDecoder = jsonDecoder;
   }
 
-  private static Router router(final Context context) {
-    final Vertx vertx = context.getVertx();
-    final JsonDecoder jsonDecoder = context.getJsonDecoder();
+  public HttpServerService create(final Context context) {
+    final HttpServer httpServer = vertx.createHttpServer(context.getServerOptions());
+    return new HttpServerService(requestHandler(context), httpServer);
+  }
+
+  private Handler<HttpServerRequest> requestHandler(final Context context) {
     final HttpClient downStreamConnection = vertx.createHttpClient(context.getClientOptions());
     final VertxRequestTransmitterFactory transmitterFactory =
         responseBodyHandler ->
@@ -65,7 +76,7 @@ public class HttpServerServiceFactory {
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(context.getResponseFactory(), requestMapper, jsonDecoder));
+        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -82,11 +93,10 @@ public class HttpServerServiceFactory {
     return router;
   }
 
-  private static RequestMapper createRequestMapper(
+  private RequestMapper createRequestMapper(
       final Context context,
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
-    final JsonDecoder jsonDecoder = context.getJsonDecoder();
 
     final PassThroughHandler defaultHandler =
         new PassThroughHandler(downStreamConnection, transmitterFactory);
@@ -112,7 +122,7 @@ public class HttpServerServiceFactory {
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler(
-            context.getResponseFactory(),
+            responseFactory,
             new EthAccountsBodyProvider(
                 () -> context.getTransactionSignerProvider().availableAddresses()),
             jsonDecoder));

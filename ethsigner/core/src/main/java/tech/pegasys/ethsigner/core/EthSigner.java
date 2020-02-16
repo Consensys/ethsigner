@@ -20,10 +20,15 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.core.util.FileUtil;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.NoSuchFileException;
 import java.time.Duration;
+import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,19 +84,25 @@ public final class EthSigner {
               transactionSignerProvider,
               webClientOptionsFactory.createWebClientOptions(config),
               applyConfigTlsSettingsTo(serverOptions),
-              downstreamHttpRequestTimeout,
-              jsonDecoder,
-              config.getDataPath(),
-              vertx);
+              downstreamHttpRequestTimeout);
 
-      final HttpServerService serverService = HttpServerServiceFactory.create(context);
+      final HttpServerServiceFactory serviceFactory = new HttpServerServiceFactory(vertx, jsonDecoder);
+      final HttpServerService serverService = serviceFactory.create(context);
+      serverService.waitUntilStarted();
 
-      final VerticleManager verticleManager = new VerticleManager(context, serverService);
-      verticleManager.start();
+      LOG.info("Http server has started");
+      if(config.getDataPath() != null) {
+        writePortsToFile(config.getDataPath().resolve("ethsigner.ports").toFile(), serverService);
+      }
+
+    } catch (final ExecutionException e) {
+      LOG.error("Failed to start Http Server.", e.getCause());
+      vertx.close();
+      throw new InitializationException(e.getCause());
     } catch (final Throwable t) {
       LOG.error("Unhandled exception launching Ethsigner.", t);
       vertx.close();
-      throw t;
+      throw new InitializationException(t.getCause());
     }
   }
 
@@ -163,5 +174,22 @@ public final class EthSigner {
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
     return new JsonDecoder(jsonObjectMapper);
+  }
+
+  public static void writePortsToFile(final File portsFile, final HttpServerService httpService) {
+    final Properties properties = new Properties();
+    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
+
+    LOG.info(
+        "Writing ethsigner.ports file: {}, with contents: {}",
+        portsFile.getAbsolutePath(),
+        properties);
+    try (final FileOutputStream fileOutputStream = new FileOutputStream(portsFile)) {
+      properties.store(
+          fileOutputStream,
+          "This file contains the ports used by the running instance of Web3Provider. This file will be deleted after the node is shutdown.");
+    } catch (final Exception e) {
+      LOG.warn("Error writing ports file", e);
+    }
   }
 }

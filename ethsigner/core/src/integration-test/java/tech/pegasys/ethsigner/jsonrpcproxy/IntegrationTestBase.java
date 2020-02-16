@@ -26,7 +26,6 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Context;
 import tech.pegasys.ethsigner.core.HttpServerServiceFactory;
-import tech.pegasys.ethsigner.core.VerticleManager;
 import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
@@ -50,6 +49,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -89,7 +90,7 @@ public class IntegrationTestBase {
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
-  private static VerticleManager verticleManager;
+  private static Context context;
   static ClientAndServer clientAndServer;
   static Credentials credentials;
 
@@ -131,36 +132,30 @@ public class IntegrationTestBase {
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
 
     final Vertx vertx = Vertx.vertx();
+    context =
+        new Context(
+            chainId,
+            transactionSignerProvider,
+            httpClientOptions,
+            httpServerOptions,
+            downstreamTimeout,
+            jsonDecoder,
+            vertx);
+
+    final HttpServerService serverService = HttpServerServiceFactory.create(context);
     try {
-      final Context context =
-          new Context(
-              chainId,
-              transactionSignerProvider,
-              httpClientOptions,
-              httpServerOptions,
-              downstreamTimeout,
-              jsonDecoder,
-              dataPath,
-              vertx);
-
-      final HttpServerService serverService = HttpServerServiceFactory.create(context);
-
-      verticleManager = new VerticleManager(context, serverService);
-      verticleManager.start();
-    } catch (final Throwable t) {
-      LOG.error("Unhandled exception launching Ethsigner.", t);
-      vertx.close();
-      throw t;
+      serverService.waitUntilStarted();
+    } catch (final ExecutionException | InterruptedException e) {
+      LOG.error("Failed to start the EthSigner HTTP server");
+      throw new RuntimeException(e);
     }
 
-    final Path portsFile = dataPath.resolve(PORTS_FILENAME);
-    waitForNonEmptyFileToExist(portsFile);
-    final int ethSignerPort = httpJsonRpcPort(portsFile);
-    RestAssured.port = ethSignerPort;
+    LOG.info("Http server has started");
+    RestAssured.port = serverService.actualPort();
 
     LOG.info(
         "Started ethSigner on port {}, eth stub node on port {}",
-        ethSignerPort,
+        serverService.actualPort(),
         clientAndServer.getLocalPort());
 
     unlockedAccount =
@@ -187,9 +182,8 @@ public class IntegrationTestBase {
   @AfterAll
   public static void teardown() {
     clientAndServer.stop();
-    verticleManager.stop();
+    context.getVertx().close();
     clientAndServer = null;
-    verticleManager = null;
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
