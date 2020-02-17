@@ -230,8 +230,6 @@ class CommandlineParserTest {
                 + "Cause: "
                 + NullSignerSubCommand.ERROR_MSG);
     assertThat(commandOutput.toString()).contains(nullCommandHelp);
-    // + System.lineSeparator()
-    //        + nullCommandHelp
   }
 
   @Test
