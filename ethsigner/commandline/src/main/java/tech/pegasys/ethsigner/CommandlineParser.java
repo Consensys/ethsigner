@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
 
 import java.io.PrintStream;
@@ -59,9 +60,6 @@ public class CommandlineParser {
     }
 
     try {
-      // parseArgs ensures all args are populated and can then be validated prior to any setup
-      commandLine.parseArgs(args);
-      baseCommand.validateOptions(commandLine, LOG);
       commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
       return true;
     } catch (final ParameterException ex) {
@@ -112,6 +110,8 @@ public class CommandlineParser {
           output.println("Failed to initialize EthSigner");
           output.println("Cause: " + ex.getCause().getMessage());
           throw (InitializationException) ex.getCause();
+        } else if (ex.getCause() instanceof InvalidCommandLineOptionsException) {
+          output.println(ex.getCause().getMessage());
         }
       }
       throw ex;

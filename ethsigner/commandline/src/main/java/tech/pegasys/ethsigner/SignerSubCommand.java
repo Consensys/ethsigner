@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.EthSigner;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,8 +32,17 @@ public abstract class SignerSubCommand implements Runnable {
 
   public abstract String getCommandName();
 
+  protected void validateArgs() throws InitializationException {
+    if (config != null) {
+      config.validateArgs();
+    }
+  }
+
   @Override
   public void run() throws TransactionSignerInitializationException {
+
+    validateArgs();
+
     // set log level per CLI flags
     System.out.println("Setting logging level to " + config.getLogLevel().name());
     Configurator.setAllLevels("", config.getLogLevel());

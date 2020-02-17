@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
+import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -32,13 +33,10 @@ import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
-import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParameterException;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -195,16 +193,13 @@ public class EthSignerBaseCommand implements Config {
         .toString();
   }
 
-  void validateOptions(final CommandLine commandLine, final Logger logger) {
-
+  void validateArgs() {
     if (getClientTlsOptions().isPresent()) {
       final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
       final Optional<Path> optionsKnownServerFile =
           getClientTlsOptions().get().getKnownServersFile();
-      // validate that combination of options is sensible
       if (optionsKnownServerFile.isEmpty() && !caAuth) {
-        throw new ParameterException(
-            commandLine,
+        throw new InvalidCommandLineOptionsException(
             "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");
       }
     }
