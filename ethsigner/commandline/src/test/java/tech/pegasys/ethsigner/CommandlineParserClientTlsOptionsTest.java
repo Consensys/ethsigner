@@ -71,7 +71,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("TLS Enabled").isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getKnownServersFile()).isNull();
+    assertThat(optionalDownstreamTlsOptions.get().getKnownServersFile().isEmpty()).isTrue();
     assertThat(optionalDownstreamTlsOptions.get().getKeyStoreOptions().isEmpty()).isTrue();
   }
 
@@ -106,7 +106,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
-    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
     assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
 
     final KeyStoreOptions keyStoreOptions = clientTlsOptions.getKeyStoreOptions().get();
@@ -158,7 +158,7 @@ class CommandlineParserClientTlsOptionsTest {
 
     assertThat(result).isTrue();
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
     assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }
@@ -178,7 +178,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(result).isTrue();
 
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
     assertThat(clientTlsOptions.isCaAuthEnabled()).isTrue();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }

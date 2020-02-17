@@ -199,9 +199,10 @@ public class EthSignerBaseCommand implements Config {
 
     if (getClientTlsOptions().isPresent()) {
       final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
-      final Path optionsKnownServerFile = getClientTlsOptions().get().getKnownServersFile();
+      final Optional<Path> optionsKnownServerFile =
+          getClientTlsOptions().get().getKnownServersFile();
       // validate that combination of options is sensible
-      if (optionsKnownServerFile == null && !caAuth) {
+      if (optionsKnownServerFile.isEmpty() && !caAuth) {
         throw new ParameterException(
             commandLine,
             "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");

@@ -61,7 +61,7 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Path getKnownServersFile() {
-    return knownServersFile;
+  public Optional<Path> getKnownServersFile() {
+    return Optional.ofNullable(knownServersFile);
   }
 }

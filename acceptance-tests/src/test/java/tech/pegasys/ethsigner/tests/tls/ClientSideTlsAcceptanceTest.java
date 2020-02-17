@@ -111,7 +111,7 @@ class ClientSideTlsAcceptanceTest {
     final KeyStoreOptions keyStoreOptions =
         new BasicKeyStoreOptions(presentedCert.getPkcs12File().toPath(), clientPasswordFile);
     final ClientTlsOptions clientTlsOptions =
-        new BasicClientTlsOptions(keyStoreOptions, fingerPrintFilePath, true);
+        new BasicClientTlsOptions(keyStoreOptions, Optional.of(fingerPrintFilePath), true);
     builder.withDownstreamTlsOptions(clientTlsOptions);
 
     builder.withHttpRpcPort(listenPort);

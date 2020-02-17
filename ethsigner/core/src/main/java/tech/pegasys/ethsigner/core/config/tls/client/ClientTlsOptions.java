@@ -20,7 +20,7 @@ import java.util.Optional;
 public interface ClientTlsOptions {
   Optional<KeyStoreOptions> getKeyStoreOptions();
 
-  Path getKnownServersFile();
+  Optional<Path> getKnownServersFile();
 
   boolean isCaAuthEnabled();
 }

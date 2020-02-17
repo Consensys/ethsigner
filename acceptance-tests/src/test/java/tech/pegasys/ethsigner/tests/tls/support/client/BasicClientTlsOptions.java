@@ -20,12 +20,12 @@ import java.util.Optional;
 
 public class BasicClientTlsOptions implements ClientTlsOptions {
   private final Optional<KeyStoreOptions> tlsCertificateOptions;
-  private final Path knownServersFile;
+  private final Optional<Path> knownServersFile;
   private final boolean caAuthEnabled;
 
   public BasicClientTlsOptions(
       final KeyStoreOptions tlsCertificateOptions,
-      final Path knownServersFile,
+      final Optional<Path> knownServersFile,
       final boolean caAuthEnabled) {
     this.tlsCertificateOptions = Optional.ofNullable(tlsCertificateOptions);
     this.knownServersFile = knownServersFile;
@@ -38,7 +38,7 @@ public class BasicClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Path getKnownServersFile() {
+  public Optional<Path> getKnownServersFile() {
     return knownServersFile;
   }
 

@@ -238,9 +238,9 @@ public class EthSignerProcessRunner {
               params.add(pkcsStoreConfig.getPasswordFile().toString());
             });
 
-    if (clientTlsOptions.getKnownServersFile() != null) {
+    if (clientTlsOptions.getKnownServersFile().isPresent()) {
       params.add("--downstream-http-tls-known-servers-file");
-      params.add(clientTlsOptions.getKnownServersFile().toAbsolutePath().toString());
+      params.add(clientTlsOptions.getKnownServersFile().get().toAbsolutePath().toString());
     }
     if (!clientTlsOptions.isCaAuthEnabled()) {
       params.add("--downstream-http-tls-ca-auth-enabled");

@@ -56,19 +56,22 @@ class WebClientOptionsFactory {
 
   private void applyTrustOptions(
       final WebClientOptions webClientOptions,
-      final Path knownServerFile,
+      final Optional<Path> knownServerFile,
       final boolean caAuthEnabled) {
 
-    if (knownServerFile == null && !caAuthEnabled) {
+    if (knownServerFile.isPresent()) {
+      try {
+        webClientOptions.setTrustOptions(whitelistServers(knownServerFile.get(), caAuthEnabled));
+      } catch (RuntimeException e) {
+        throw new InitializationException("Failed to load known server file.", e);
+      }
+    }
+
+    if (knownServerFile.isEmpty() && !caAuthEnabled) {
       throw new InitializationException(
           "Must specify a known-server file if CA-signed option is disabled");
     }
-
-    try {
-      webClientOptions.setTrustOptions(whitelistServers(knownServerFile, caAuthEnabled));
-    } catch (RuntimeException e) {
-      throw new InitializationException("Failed to load known server file.", e);
-    }
+    // otherwise knownServerFile is empty and caAuthEnabled is true which is the default situation
   }
 
   private void applyKeyStoreOptions(
