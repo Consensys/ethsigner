@@ -98,7 +98,7 @@ public class CommandlineParser {
         errorWriter.println("Failed to initialize EthSigner");
         errorWriter.println("Cause: " + ex.getMessage());
       } else {
-        LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
+        LOG.error("EthSigner has suffered an unrecoverable failure", ex);
         errorWriter.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
       }
     }
