@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import javax.net.ssl.SSLException;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -41,6 +42,16 @@ public class ServerSideTlsCaClientAcceptanceTest {
       TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
   private static final TlsCertificateDefinition clientCert =
       TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
+
+  private Signer ethSigner = null;
+
+  @AfterEach
+  void cleanup() {
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+      ethSigner = null;
+    }
+  }
 
   private Signer createEthSigner(final TlsCertificateDefinition certInCa, final Path testDir)
       throws Exception {
@@ -70,7 +81,7 @@ public class ServerSideTlsCaClientAcceptanceTest {
   @Test
   void clientWithCertificateNotInCertificateAuthorityCanConnectAndQueryAccounts(
       @TempDir final Path tempDir) throws Exception {
-    final Signer ethSigner = createEthSigner(clientCert, tempDir);
+    ethSigner = createEthSigner(clientCert, tempDir);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
@@ -79,7 +90,7 @@ public class ServerSideTlsCaClientAcceptanceTest {
 
   @Test
   void clientNotInCaFailedToConnectToEthSigner(@TempDir final Path tempDir) throws Exception {
-    final Signer ethSigner = createEthSigner(clientCert, tempDir);
+    ethSigner = createEthSigner(clientCert, tempDir);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

@@ -26,6 +26,7 @@ import java.time.Duration;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PfxOptions;
@@ -69,17 +70,24 @@ public final class EthSigner {
             .setReuseAddress(true)
             .setReusePort(true);
 
-    final Runner runner =
-        new Runner(
-            config.getChainId().id(),
-            transactionSignerProvider,
-            webClientOptionsFactory.createWebClientOptions(config),
-            applyConfigTlsSettingsTo(serverOptions),
-            downstreamHttpRequestTimeout,
-            jsonDecoder,
-            config.getDataPath());
+    final Vertx vertx = Vertx.vertx();
+    try {
+      final Runner runner =
+          new Runner(
+              config.getChainId().id(),
+              transactionSignerProvider,
+              webClientOptionsFactory.createWebClientOptions(config),
+              applyConfigTlsSettingsTo(serverOptions),
+              downstreamHttpRequestTimeout,
+              jsonDecoder,
+              config.getDataPath(),
+              vertx);
 
-    runner.start();
+      runner.start();
+    } catch (final Throwable t) {
+      vertx.close();
+      throw new InitializationException("Failed to create http service.", t);
+    }
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {

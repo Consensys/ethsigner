@@ -185,6 +185,7 @@ public class EthSignerProcessRunner {
       processes.put(processName, process);
     } catch (final IOException e) {
       LOG.error("Error starting EthSigner process", e);
+      throw new RuntimeException("Failed to start the Ethsigner process");
     }
 
     if (useDynamicPortAllocation) {

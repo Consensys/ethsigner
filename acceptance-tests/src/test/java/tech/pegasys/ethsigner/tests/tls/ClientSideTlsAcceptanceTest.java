@@ -41,7 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Optional;
 
@@ -59,6 +58,7 @@ import org.web3j.utils.Convert.Unit;
 class ClientSideTlsAcceptanceTest {
 
   private TlsEnabledHttpServerFactory serverFactory;
+  private Signer signer;
   private static final int UNUSED_WS_PORT = 0;
 
   @BeforeEach
@@ -69,6 +69,10 @@ class ClientSideTlsAcceptanceTest {
   @AfterEach
   void cleanup() {
     serverFactory.shutdown();
+    if (signer != null) {
+      signer.shutdown();
+      signer = null;
+    }
   }
 
   private Signer createAndStartSigner(
@@ -77,8 +81,7 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-          UnrecoverableKeyException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
     final Signer signer =
         createSigner(
             presentedCert, expectedWeb3ProviderCert, downstreamWeb3Port, listenPort, workDir);
@@ -94,8 +97,7 @@ class ClientSideTlsAcceptanceTest {
       final int downstreamWeb3Port,
       final int listenPort,
       final Path workDir)
-      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException,
-          UnrecoverableKeyException {
+      throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
 
     final Path clientPasswordFile =
         Files.writeString(workDir.resolve("clientKeystorePassword"), presentedCert.getPassword());
@@ -121,7 +123,7 @@ class ClientSideTlsAcceptanceTest {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
 
-    final Signer signer = new Signer(builder.build(), nodeConfig, nodePorts);
+    signer = new Signer(builder.build(), nodeConfig, nodePorts);
 
     return signer;
   }
@@ -139,7 +141,7 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer =
         serverFactory.create(serverCert, ethSignerCert, workDir);
 
-    final Signer signer =
+    signer =
         createAndStartSigner(
             ethSignerCert, serverCert, web3ProviderHttpServer.actualPort(), 0, workDir);
 
@@ -160,7 +162,7 @@ class ClientSideTlsAcceptanceTest {
     final HttpServer web3ProviderHttpServer =
         serverFactory.create(serverPresentedCert, ethSignerCert, workDir);
 
-    final Signer signer =
+    signer =
         createAndStartSigner(
             ethSignerCert,
             ethSignerExpectedServerCert,
@@ -197,7 +199,7 @@ class ClientSideTlsAcceptanceTest {
             workDir.resolve("Missing_keyStore").toFile(), "arbitraryPassword");
 
     // Ports are arbitrary as EthSigner should exit
-    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
     signer.start();
     waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }
@@ -211,7 +213,7 @@ class ClientSideTlsAcceptanceTest {
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
 
     // Ports are arbitrary as EthSigner should exit
-    final Signer signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
     signer.start();
     waitFor(() -> assertThat(signer.isRunning()).isFalse());
   }

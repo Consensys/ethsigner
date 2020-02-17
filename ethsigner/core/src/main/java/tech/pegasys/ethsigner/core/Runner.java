@@ -72,23 +72,20 @@ public class Runner {
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
       final JsonDecoder jsonDecoder,
-      final Path dataPath) {
+      final Path dataPath,
+      final Vertx vertx) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
-    this.vertx = Vertx.vertx();
+    this.vertx = vertx;
     this.httpServerService = new HttpServerService(router(), serverOptions);
   }
 
   public void start() {
     vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
-  }
-
-  public void stop() {
-    vertx.close();
   }
 
   private Router router() {
@@ -172,6 +169,7 @@ public class Runner {
 
   private void deploymentFailed(final Throwable cause) {
     LOG.error("Vertx deployment failed", cause);
+    vertx.close();
     System.exit(1);
   }
 

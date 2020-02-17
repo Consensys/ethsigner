@@ -60,13 +60,15 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  public synchronized void tearDown() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
   }
 

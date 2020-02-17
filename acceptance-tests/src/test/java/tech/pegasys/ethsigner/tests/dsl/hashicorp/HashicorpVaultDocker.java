@@ -97,10 +97,11 @@ public class HashicorpVaultDocker {
     return hashicorpVaultDocker;
   }
 
-  public void shutdown() {
+  public synchronized void shutdown() {
     if (docker != null && vaultContainerId != null) {
       stopVaultContainer();
       removeVaultContainer();
+      vaultContainerId = null;
     }
   }
 
