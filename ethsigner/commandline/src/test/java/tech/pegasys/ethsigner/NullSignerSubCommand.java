@@ -57,6 +57,8 @@ public class NullSignerSubCommand extends SignerSubCommand {
 
   @Override
   public void run() {
+    // parseArgs ensures all args are populated and can then be validated prior to any setup
+    super.validateArgs();
     if (shouldThrow) {
       throw new TransactionSignerInitializationException(ERROR_MSG);
     }

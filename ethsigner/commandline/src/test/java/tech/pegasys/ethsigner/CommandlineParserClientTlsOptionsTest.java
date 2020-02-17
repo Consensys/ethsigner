@@ -13,13 +13,13 @@
 package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -60,7 +60,7 @@ class CommandlineParserClientTlsOptionsTest {
             validBaseCommandOptions(),
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled",
+            "downstream-http-tls-ca-auth-enabled",
             "downstream-http-tls-known-servers-file");
 
     final boolean result =
@@ -71,7 +71,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("TLS Enabled").isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getTrustOptions().isEmpty()).isTrue();
+    assertThat(optionalDownstreamTlsOptions.get().getKnownServersFile().isEmpty()).isTrue();
     assertThat(optionalDownstreamTlsOptions.get().getKeyStoreOptions().isEmpty()).isTrue();
   }
 
@@ -83,7 +83,7 @@ class CommandlineParserClientTlsOptionsTest {
             "downstream-http-tls-enabled",
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled",
+            "downstream-http-tls-ca-auth-enabled",
             "downstream-http-tls-known-servers-file");
 
     final boolean result =
@@ -106,10 +106,8 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
-    assertThat(clientTlsOptions.getTrustOptions().isPresent()).isTrue();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
 
     final KeyStoreOptions keyStoreOptions = clientTlsOptions.getKeyStoreOptions().get();
     assertThat(keyStoreOptions.getKeyStoreFile()).isEqualTo(Path.of("./test.ks"));
@@ -160,9 +158,8 @@ class CommandlineParserClientTlsOptionsTest {
 
     assertThat(result).isTrue();
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }
 
@@ -173,7 +170,7 @@ class CommandlineParserClientTlsOptionsTest {
             validBaseCommandOptions(),
             "downstream-http-tls-keystore-file",
             "downstream-http-tls-keystore-password-file",
-            "downstream-http-tls-ca-auth-disabled");
+            "downstream-http-tls-ca-auth-enabled");
 
     final boolean result =
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
@@ -181,20 +178,45 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(result).isTrue();
 
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.getTrustOptions().isPresent()).isTrue();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isTrue();
+    assertThat(clientTlsOptions.getKnownServersFile().get()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isTrue();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }
 
   @Test
-  void downstreamKnownServerIsRequiredIfCASignedDisableWithoutKnownServersFile() {
+  void downstreamKnownServerIsRequiredIfCaSignedDisableWithoutKnownServersFile() {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
         defaultUsageText,
-        validBaseCommandOptions(),
+        validBaseCommandOptions() + subCommand.getCommandName(),
         List.of("downstream-http-tls-known-servers-file"));
+  }
+
+  @Test
+  void cmdLineIsValidWithCaAuthEnabledExplicitly() {
+    final String cmdLine =
+        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
+  }
+
+  @Test
+  void downstreamKnownServerIsNotRequiredIfCaSignedEnabledExplicitly() {
+    final String cmdLine0 =
+        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
+    final String cmdLine = removeFieldFrom(cmdLine0, "downstream-http-tls-known-servers-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
   }
 }

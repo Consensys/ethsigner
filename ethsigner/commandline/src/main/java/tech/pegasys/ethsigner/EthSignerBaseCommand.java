@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
+import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
@@ -190,5 +191,17 @@ public class EthSignerBaseCommand implements Config {
         .add("dataPath", dataPath)
         .add("clientTlsOptions", clientTlsOptions)
         .toString();
+  }
+
+  void validateArgs() {
+    if (getClientTlsOptions().isPresent()) {
+      final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
+      final Optional<Path> optionsKnownServerFile =
+          getClientTlsOptions().get().getKnownServersFile();
+      if (optionsKnownServerFile.isEmpty() && !caAuth) {
+        throw new InvalidCommandLineOptionsException(
+            "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");
+      }
+    }
   }
 }
