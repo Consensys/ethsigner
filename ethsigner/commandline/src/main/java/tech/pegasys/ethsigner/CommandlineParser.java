@@ -59,8 +59,10 @@ public class CommandlineParser {
     }
 
     try {
-      commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
+      // parseArgs ensures all args are populated and can then be validated prior to any setup
+      commandLine.parseArgs(args);
       baseCommand.validateOptions(commandLine, LOG);
+      commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
       return true;
     } catch (final ParameterException ex) {
       handleParameterException(ex);
