@@ -16,7 +16,6 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -57,14 +56,12 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getTrustOptions() {
-    // don't validate here just send options through if present
-    if (caAuthEnabled && knownServersFile == null) {
-      return Optional.empty();
-    }
-    PicoCliClientTlsTrustOptions trustOptions = new PicoCliClientTlsTrustOptions();
-    trustOptions.setCaAuthEnabled(caAuthEnabled);
-    trustOptions.setKnownServersFile(knownServersFile);
-    return Optional.ofNullable(trustOptions);
+  public boolean isCaAuthEnabled() {
+    return caAuthEnabled;
+  }
+
+  @Override
+  public Path getKnownServersFile() {
+    return knownServersFile;
   }
 }

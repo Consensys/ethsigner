@@ -238,23 +238,14 @@ public class EthSignerProcessRunner {
               params.add(pkcsStoreConfig.getPasswordFile().toString());
             });
 
-    clientTlsOptions
-        .getTrustOptions()
-        .ifPresent(
-            downstreamTrustOptions -> {
-              downstreamTrustOptions
-                  .getKnownServerFile()
-                  .ifPresent(
-                      knownServerFile -> {
-                        params.add("--downstream-http-tls-known-servers-file");
-                        params.add(knownServerFile.toAbsolutePath().toString());
-                      });
-
-              if (!downstreamTrustOptions.isCaAuthRequired()) {
-                params.add("--downstream-http-tls-ca-auth-enabled");
-                params.add("false");
-              }
-            });
+    if (clientTlsOptions.getKnownServersFile() != null) {
+      params.add("--downstream-http-tls-known-servers-file");
+      params.add(clientTlsOptions.getKnownServersFile().toAbsolutePath().toString());
+    }
+    if (!clientTlsOptions.isCaAuthEnabled()) {
+      params.add("--downstream-http-tls-ca-auth-enabled");
+      params.add("false");
+    }
 
     return Collections.unmodifiableCollection(params);
   }

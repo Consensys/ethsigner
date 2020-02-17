@@ -14,10 +14,13 @@ package tech.pegasys.ethsigner.core.config.tls.client;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 public interface ClientTlsOptions {
   Optional<KeyStoreOptions> getKeyStoreOptions();
 
-  Optional<ClientTlsTrustOptions> getTrustOptions();
+  Path getKnownServersFile();
+
+  boolean isCaAuthEnabled();
 }

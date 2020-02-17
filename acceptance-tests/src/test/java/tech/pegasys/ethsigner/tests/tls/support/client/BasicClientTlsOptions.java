@@ -14,18 +14,22 @@ package tech.pegasys.ethsigner.tests.tls.support.client;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class BasicClientTlsOptions implements ClientTlsOptions {
   private final Optional<KeyStoreOptions> tlsCertificateOptions;
-  private final Optional<ClientTlsTrustOptions> tlsTrustOptions;
+  private final Path knownServersFile;
+  private final boolean caAuthEnabled;
 
   public BasicClientTlsOptions(
-      final KeyStoreOptions tlsCertificateOptions, final ClientTlsTrustOptions tlsTrustOptions) {
+      final KeyStoreOptions tlsCertificateOptions,
+      final Path knownServersFile,
+      final boolean caAuthEnabled) {
     this.tlsCertificateOptions = Optional.ofNullable(tlsCertificateOptions);
-    this.tlsTrustOptions = Optional.ofNullable(tlsTrustOptions);
+    this.knownServersFile = knownServersFile;
+    this.caAuthEnabled = caAuthEnabled;
   }
 
   @Override
@@ -34,7 +38,12 @@ public class BasicClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getTrustOptions() {
-    return tlsTrustOptions;
+  public Path getKnownServersFile() {
+    return knownServersFile;
+  }
+
+  @Override
+  public boolean isCaAuthEnabled() {
+    return caAuthEnabled;
   }
 }

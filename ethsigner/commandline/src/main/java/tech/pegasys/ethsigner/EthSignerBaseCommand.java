@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
@@ -198,14 +197,11 @@ public class EthSignerBaseCommand implements Config {
 
   void validateOptions(final CommandLine commandLine, final Logger logger) {
 
-    if (getClientTlsOptions().isPresent()
-        && getClientTlsOptions().get().getTrustOptions().isPresent()) {
-      final ClientTlsTrustOptions clientTlsTrustOptions =
-          getClientTlsOptions().get().getTrustOptions().get();
-      final boolean caAuth = clientTlsTrustOptions.isCaAuthRequired();
-      final Optional<Path> optionsKnownServerFile = clientTlsTrustOptions.getKnownServerFile();
+    if (getClientTlsOptions().isPresent()) {
+      final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
+      final Path optionsKnownServerFile = getClientTlsOptions().get().getKnownServersFile();
       // validate that combination of options is sensible
-      if (optionsKnownServerFile.isEmpty() && !caAuth) {
+      if (optionsKnownServerFile == null && !caAuth) {
         throw new ParameterException(
             commandLine,
             "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");

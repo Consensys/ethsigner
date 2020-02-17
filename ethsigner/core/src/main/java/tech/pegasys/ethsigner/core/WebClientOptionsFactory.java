@@ -17,7 +17,6 @@ import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.core.util.FileUtil;
 
 import java.io.IOException;
@@ -48,29 +47,25 @@ class WebClientOptionsFactory {
 
     final ClientTlsOptions clientTlsOptions = optionalClientTlsOptions.get();
 
-    applyTrustOptions(webClientOptions, clientTlsOptions.getTrustOptions());
+    applyTrustOptions(
+        webClientOptions,
+        clientTlsOptions.getKnownServersFile(),
+        clientTlsOptions.isCaAuthEnabled());
     applyKeyStoreOptions(webClientOptions, clientTlsOptions.getKeyStoreOptions());
   }
 
   private void applyTrustOptions(
       final WebClientOptions webClientOptions,
-      final Optional<ClientTlsTrustOptions> optionalTrustOptions) {
+      final Path knownServerFile,
+      final boolean caAuthEnabled) {
 
-    if (optionalTrustOptions.isEmpty()) {
-      return; // CA trust is enabled by default.
-    }
-
-    final Optional<Path> optionalKnownServerFile = optionalTrustOptions.get().getKnownServerFile();
-    final boolean caAuthRequired = optionalTrustOptions.get().isCaAuthRequired();
-
-    if (optionalKnownServerFile.isEmpty() && !caAuthRequired) {
+    if (knownServerFile == null && !caAuthEnabled) {
       throw new InitializationException(
           "Must specify a known-server file if CA-signed option is disabled");
     }
 
     try {
-      webClientOptions.setTrustOptions(
-          whitelistServers(optionalKnownServerFile.get(), caAuthRequired));
+      webClientOptions.setTrustOptions(whitelistServers(knownServerFile, caAuthEnabled));
     } catch (RuntimeException e) {
       throw new InitializationException("Failed to load known server file.", e);
     }

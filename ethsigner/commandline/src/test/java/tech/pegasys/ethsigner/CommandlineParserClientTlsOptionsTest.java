@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseComma
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -72,7 +71,7 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("TLS Enabled").isTrue();
-    assertThat(optionalDownstreamTlsOptions.get().getTrustOptions().isEmpty()).isTrue();
+    assertThat(optionalDownstreamTlsOptions.get().getKnownServersFile()).isNull();
     assertThat(optionalDownstreamTlsOptions.get().getKeyStoreOptions().isEmpty()).isTrue();
   }
 
@@ -107,10 +106,8 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
 
     final ClientTlsOptions clientTlsOptions = optionalDownstreamTlsOptions.get();
-    assertThat(clientTlsOptions.getTrustOptions().isPresent()).isTrue();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
+    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
 
     final KeyStoreOptions keyStoreOptions = clientTlsOptions.getKeyStoreOptions().get();
     assertThat(keyStoreOptions.getKeyStoreFile()).isEqualTo(Path.of("./test.ks"));
@@ -161,9 +158,8 @@ class CommandlineParserClientTlsOptionsTest {
 
     assertThat(result).isTrue();
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isFalse();
+    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isFalse();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }
 
@@ -182,10 +178,8 @@ class CommandlineParserClientTlsOptionsTest {
     assertThat(result).isTrue();
 
     final ClientTlsOptions clientTlsOptions = config.getClientTlsOptions().get();
-    assertThat(clientTlsOptions.getTrustOptions().isPresent()).isTrue();
-    final ClientTlsTrustOptions clientTlsTrustOptions = clientTlsOptions.getTrustOptions().get();
-    assertThat(clientTlsTrustOptions.getKnownServerFile().get()).isEqualTo(Path.of("./test.txt"));
-    assertThat(clientTlsTrustOptions.isCaAuthRequired()).isTrue();
+    assertThat(clientTlsOptions.getKnownServersFile()).isEqualTo(Path.of("./test.txt"));
+    assertThat(clientTlsOptions.isCaAuthEnabled()).isTrue();
     assertThat(clientTlsOptions.getKeyStoreOptions().isEmpty()).isTrue();
   }
 
