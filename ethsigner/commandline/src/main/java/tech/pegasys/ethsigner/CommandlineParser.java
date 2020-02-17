@@ -99,7 +99,7 @@ public class CommandlineParser {
         errorWriter.println("Cause: " + ex.getMessage());
       } else {
         LOG.error("EthSigner has suffered an unrecoverable failure", ex);
-        errorWriter.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
+        errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
       }
     }
 
