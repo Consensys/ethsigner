@@ -22,9 +22,9 @@ import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseComma
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.util.List;
@@ -38,8 +38,10 @@ import picocli.CommandLine;
 
 class CommandlineParserTest {
 
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
+  private final StringWriter commandOutput = new StringWriter();
+  private final StringWriter commandError = new StringWriter();
+  private final PrintWriter outputWriter = new PrintWriter(commandOutput, true);
+  private final PrintWriter errorWriter = new PrintWriter(commandError, true);
 
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
@@ -51,7 +53,7 @@ class CommandlineParserTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, outputWriter, errorWriter);
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
@@ -116,8 +118,8 @@ class CommandlineParserTest {
   void missingSubCommandShowsErrorAndUsageText() {
     final boolean result = parser.parseCommandLine(validBaseCommandOptions().split(" "));
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .contains(MISSING_SUBCOMMAND_ERROR + System.lineSeparator() + defaultUsageText);
+    assertThat(commandError.toString()).contains(MISSING_SUBCOMMAND_ERROR);
+    assertThat(commandOutput.toString()).contains(defaultUsageText);
   }
 
   @Test
@@ -125,9 +127,8 @@ class CommandlineParserTest {
     final String args = modifyField(validBaseCommandOptions(), "downstream-http-port", "abc");
     final boolean result = parser.parseCommandLine(args.split(" "));
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--downstream-http-port", "'abc' is not an int");
+    assertThat(commandError.toString()).contains("--downstream-http-port", "'abc' is not an int");
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
-    assertThat(commandOutput.toString()).endsWith(defaultUsageText);
   }
 
   @Test
@@ -135,6 +136,7 @@ class CommandlineParserTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("downstream-http-port"));
@@ -213,7 +215,7 @@ class CommandlineParserTest {
   void creatingSignerDisplaysFailureToCreateSignerText() {
     subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, outputWriter, errorWriter);
     parser.registerSigner(subCommand);
 
     final boolean result =
@@ -221,14 +223,15 @@ class CommandlineParserTest {
             (validBaseCommandOptions() + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString())
-        .isEqualTo(
+    assertThat(commandError.toString())
+        .contains(
             CommandlineParser.SIGNER_CREATION_ERROR
                 + System.lineSeparator()
                 + "Cause: "
-                + NullSignerSubCommand.ERROR_MSG
-                + System.lineSeparator()
-                + nullCommandHelp);
+                + NullSignerSubCommand.ERROR_MSG);
+    assertThat(commandOutput.toString()).contains(nullCommandHelp);
+    // + System.lineSeparator()
+    //        + nullCommandHelp
   }
 
   @Test
@@ -239,7 +242,7 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("expected only one match but got");
+    assertThat(commandError.toString()).contains("expected only one match but got");
   }
 
   @Test
@@ -273,8 +276,8 @@ class CommandlineParserTest {
         parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
 
     assertThat(result).isFalse();
-    assertThat(commandOutput.toString()).contains("--tls-allow-any-client");
-    assertThat(commandOutput.toString()).contains("should be specified without 'false' parameter");
+    assertThat(commandError.toString()).contains("--tls-allow-any-client");
+    assertThat(commandError.toString()).contains("should be specified without 'false' parameter");
   }
 
   @Test
@@ -290,6 +293,7 @@ class CommandlineParserTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("tls-keystore-file"));
@@ -300,6 +304,7 @@ class CommandlineParserTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("tls-keystore-password-file"));
@@ -310,6 +315,7 @@ class CommandlineParserTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("tls-keystore-file", "tls-keystore-password-file"));

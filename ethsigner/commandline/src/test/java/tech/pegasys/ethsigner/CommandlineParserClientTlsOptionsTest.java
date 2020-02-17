@@ -21,8 +21,8 @@ import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +33,10 @@ import picocli.CommandLine;
 
 class CommandlineParserClientTlsOptionsTest {
 
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-  private final PrintStream outPrintStream = new PrintStream(commandOutput);
+  private final StringWriter commandOutput = new StringWriter();
+  private final StringWriter commandError = new StringWriter();
+  private final PrintWriter outputWriter = new PrintWriter(commandOutput, true);
+  private final PrintWriter errorWriter = new PrintWriter(commandError, true);
 
   private EthSignerBaseCommand config;
   private CommandlineParser parser;
@@ -45,7 +47,7 @@ class CommandlineParserClientTlsOptionsTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outPrintStream);
+    parser = new CommandlineParser(config, outputWriter, errorWriter);
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
@@ -120,6 +122,7 @@ class CommandlineParserClientTlsOptionsTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("downstream-http-tls-enabled"));
@@ -131,6 +134,7 @@ class CommandlineParserClientTlsOptionsTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         cmdLine,
         List.of("downstream-http-tls-keystore-file"));
@@ -142,6 +146,7 @@ class CommandlineParserClientTlsOptionsTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         cmdLine,
         List.of("downstream-http-tls-keystore-password-file"));
@@ -193,6 +198,7 @@ class CommandlineParserClientTlsOptionsTest {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
+        commandError,
         defaultUsageText,
         validBaseCommandOptions(),
         List.of("downstream-http-tls-known-servers-file"));

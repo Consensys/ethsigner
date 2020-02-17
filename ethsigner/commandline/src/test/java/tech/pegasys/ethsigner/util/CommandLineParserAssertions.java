@@ -17,7 +17,7 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
 
 import tech.pegasys.ethsigner.CommandlineParser;
 
-import java.io.ByteArrayOutputStream;
+import java.io.Writer;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
 public final class CommandLineParserAssertions {
   public static void parseCommandLineWithMissingParamsShowsError(
       final CommandlineParser parser,
-      final ByteArrayOutputStream outputStream,
+      final Writer outputWriter,
+      final Writer errorWriter,
       final String defaultUsageText,
       final String inputCmdLine,
       final List<String> paramsToRemove) {
@@ -34,16 +35,16 @@ public final class CommandLineParserAssertions {
     final boolean result = parser.parseCommandLine(cmdLine.split(" "));
     assertThat(result).as("Parse Results After Removing Params").isFalse();
 
-    final String output = outputStream.toString();
+    final String output = errorWriter.toString();
     final String patternStart = "(.*)Missing required (argument|option)(.*)(";
     final String patternMiddle =
         paramsToRemove.stream().map(s -> "(.*)--" + s + "(.*)").collect(Collectors.joining("|"));
-    final String patternEnd = ")(.*)\\sUsage:";
+    final String patternEnd = ")(.*)\\s";
 
     boolean isMatched =
         Pattern.compile(patternStart + patternMiddle + patternEnd).matcher(output).find();
     assertThat(isMatched).isTrue();
 
-    assertThat(output).containsOnlyOnce(defaultUsageText);
+    assertThat(outputWriter.toString()).containsOnlyOnce(defaultUsageText);
   }
 }
