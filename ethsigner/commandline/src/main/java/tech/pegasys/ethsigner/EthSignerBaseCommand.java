@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
@@ -32,10 +33,13 @@ import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -190,5 +194,22 @@ public class EthSignerBaseCommand implements Config {
         .add("dataPath", dataPath)
         .add("clientTlsOptions", clientTlsOptions)
         .toString();
+  }
+
+  void validateOptions(final CommandLine commandLine, final Logger logger) {
+
+    if (getClientTlsOptions().isPresent()
+        && getClientTlsOptions().get().getTrustOptions().isPresent()) {
+      final ClientTlsTrustOptions clientTlsTrustOptions =
+          getClientTlsOptions().get().getTrustOptions().get();
+      final boolean caAuth = clientTlsTrustOptions.isCaAuthRequired();
+      final Optional<Path> optionsKnownServerFile = clientTlsTrustOptions.getKnownServerFile();
+      // validate that combination of options is sensible
+      if (optionsKnownServerFile.isEmpty() && !caAuth) {
+        throw new ParameterException(
+            commandLine,
+            "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");
+      }
+    }
   }
 }

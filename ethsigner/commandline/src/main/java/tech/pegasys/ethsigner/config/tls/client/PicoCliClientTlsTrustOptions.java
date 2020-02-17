@@ -34,7 +34,7 @@ class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   @Option(
       names = "--downstream-http-tls-ca-auth-enabled",
       description =
-          "If set, will use the system's CA to validate received server certificates. Defaults to disabled.",
+          "If set, will use the system's CA to validate received server certificates. Defaults to enabled.",
       arity = "1")
   private boolean caAuthEnabled = true;
 
@@ -46,5 +46,13 @@ class PicoCliClientTlsTrustOptions implements ClientTlsTrustOptions {
   @Override
   public boolean isCaAuthRequired() {
     return caAuthEnabled;
+  }
+
+  public void setCaAuthEnabled(final boolean caAuthEnabled) {
+    this.caAuthEnabled = caAuthEnabled;
+  }
+
+  public void setKnownServersFile(final Path knownServersFile) {
+    this.knownServersFile = knownServersFile;
   }
 }

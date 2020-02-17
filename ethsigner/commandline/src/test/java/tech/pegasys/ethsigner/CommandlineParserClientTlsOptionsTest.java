@@ -96,19 +96,6 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
-  void cmdLineIsValidWithCaAuthEnabledEqualsTrue() {
-    final String cmdLine =
-        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
-
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
-    assertThat(result).as("CLI Parse result").isTrue();
-    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
-    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
-  }
-
-  @Test
   void cmdLineIsValidWithAllTlsOptions() {
     final String cmdLine = validBaseCommandOptions();
 
@@ -203,12 +190,39 @@ class CommandlineParserClientTlsOptionsTest {
   }
 
   @Test
-  void downstreamKnownServerIsRequiredIfCASignedDisableWithoutKnownServersFile() {
+  void downstreamKnownServerIsRequiredIfCaSignedDisableWithoutKnownServersFile() {
     parseCommandLineWithMissingParamsShowsError(
         parser,
         commandOutput,
         defaultUsageText,
-        validBaseCommandOptions(),
+        validBaseCommandOptions() + subCommand.getCommandName(),
         List.of("downstream-http-tls-known-servers-file"));
+  }
+
+  @Test
+  void cmdLineIsValidWithCaAuthEnabledExplicitly() {
+    final String cmdLine =
+        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
+  }
+
+  @Test
+  void downstreamKnownServerIsNotRequiredIfCaSignedEnabledExplicitly() {
+    final String cmdLine0 =
+        modifyField(validBaseCommandOptions(), "downstream-http-tls-ca-auth-enabled", "true");
+    final String cmdLine = removeFieldFrom(cmdLine0, "downstream-http-tls-known-servers-file");
+
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+
+    assertThat(result).as("CLI Parse result").isTrue();
+    final Optional<ClientTlsOptions> optionalDownstreamTlsOptions = config.getClientTlsOptions();
+    assertThat(optionalDownstreamTlsOptions.isPresent()).as("Downstream TLS Options").isTrue();
   }
 }

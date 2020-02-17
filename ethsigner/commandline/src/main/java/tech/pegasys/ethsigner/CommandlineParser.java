@@ -60,6 +60,7 @@ public class CommandlineParser {
 
     try {
       commandLine.parseWithHandlers(new RunLast().useOut(output), new ExceptionHandler<>(), args);
+      baseCommand.validateOptions(commandLine, LOG);
       return true;
     } catch (final ParameterException ex) {
       handleParameterException(ex);
