@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
 
 import java.io.PrintWriter;
@@ -97,6 +98,8 @@ public class CommandlineParser {
       } else if (ex instanceof InitializationException) {
         errorWriter.println("Failed to initialize EthSigner");
         errorWriter.println("Cause: " + ex.getMessage());
+      } else if(ex instanceof InvalidCommandLineOptionsException) {
+        errorWriter.println(ex.getCause().getMessage());
       } else {
         LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
         errorWriter.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());

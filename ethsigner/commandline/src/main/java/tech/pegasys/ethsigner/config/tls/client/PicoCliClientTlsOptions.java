@@ -12,10 +12,12 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsTrustOptions;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 import picocli.CommandLine.ArgGroup;
@@ -25,7 +27,7 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @SuppressWarnings("UnusedVariable")
   @Option(
       names = "--downstream-http-tls-enabled",
-      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled",
+      description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
       arity = "0",
       required = true)
   private boolean tlsEnabled = false;
@@ -33,8 +35,20 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @ArgGroup(exclusive = false)
   private PicoCliKeyStoreOptions keyStoreOptions;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliClientTlsTrustOptions trustOptions;
+  @Option(
+      names = "--downstream-http-tls-known-servers-file",
+      description =
+          "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust. Must be specified if CA auth is disabled.",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      arity = "1")
+  private Path knownServersFile;
+
+  @Option(
+      names = "--downstream-http-tls-ca-auth-enabled",
+      description =
+          "If set, will use the system's CA to validate received server certificates. Defaults to enabled.",
+      arity = "1")
+  private boolean caAuthEnabled = true;
 
   @Override
   public Optional<KeyStoreOptions> getKeyStoreOptions() {
@@ -42,7 +56,12 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   }
 
   @Override
-  public Optional<ClientTlsTrustOptions> getTrustOptions() {
-    return Optional.ofNullable(trustOptions);
+  public boolean isCaAuthEnabled() {
+    return caAuthEnabled;
+  }
+
+  @Override
+  public Optional<Path> getKnownServersFile() {
+    return Optional.ofNullable(knownServersFile);
   }
 }
