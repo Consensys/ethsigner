@@ -101,8 +101,8 @@ public class CommandlineParser {
       } else if (ex instanceof InvalidCommandLineOptionsException) {
         errorWriter.println(ex.getMessage());
       } else {
-        LOG.error("Ethsigner has suffered an unrecoverable failure", ex);
-        errorWriter.println("Ethsigner has suffered an unrecoverable failure " + ex.toString());
+        LOG.error("EthSigner has suffered an unrecoverable failure", ex);
+        errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
       }
     }
 
