@@ -57,7 +57,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
 
   @Override
   public void run() {
-    // parseArgs ensures all args are populated and can then be validated prior to any setup
+    // this is required to do any non-PicoCLI validation of args prior to setup
     super.validateArgs();
     if (shouldThrow) {
       throw new TransactionSignerInitializationException(ERROR_MSG);
