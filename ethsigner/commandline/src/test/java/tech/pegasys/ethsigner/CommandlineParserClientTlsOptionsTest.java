@@ -42,6 +42,7 @@ class CommandlineParserClientTlsOptionsTest {
   private CommandlineParser parser;
   private NullSignerSubCommand subCommand;
   private String defaultUsageText;
+  private String subSignerDefaultUsageText;
 
   @BeforeEach
   void setup() {
@@ -53,6 +54,8 @@ class CommandlineParserClientTlsOptionsTest {
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
     commandLine.addSubcommand(subCommand.getCommandName(), subCommand);
     defaultUsageText = commandLine.getUsageMessage();
+    subSignerDefaultUsageText =
+        commandLine.getSubcommands().get(subCommand.getCommandName()).getUsageMessage();
   }
 
   @Test
@@ -194,7 +197,7 @@ class CommandlineParserClientTlsOptionsTest {
         parser,
         commandOutput,
         commandError,
-        defaultUsageText,
+        subSignerDefaultUsageText,
         validBaseCommandOptions() + subCommand.getCommandName(),
         List.of("downstream-http-tls-known-servers-file"));
   }
