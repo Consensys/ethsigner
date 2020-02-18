@@ -70,7 +70,7 @@ public class CommandlineParser {
     return resultCode == CommandLine.ExitCode.OK;
   }
 
-  private int handleParseException(ParameterException ex, String[] args) {
+  private int handleParseException(final ParameterException ex, final String[] args) {
     if (baseCommand.getLogLevel() != null
         && Level.DEBUG.isMoreSpecificThan(baseCommand.getLogLevel())) {
       ex.printStackTrace(errorWriter);
