@@ -1,12 +1,14 @@
 # Changelog
 
+## 0.6.0
+
+Changed CLI option name from `--downstream-http-tls-ca-auth-disabled` to `--downstream-http-tls-ca-auth-enabled` https://github.com/PegaSysEng/ethsigner/pull/230
+
 ## 0.5.0
 
-### Known Issues
-
 ### Features Added
-- Added TLS support for incoming and outgoing RPC endpoints
-- Added TLS support for connecting to Hashicorp vault
+- [Added TLS support for incoming and outgoing RPC endpoints](https://docs.ethsigner.pegasys.tech/en/latest/Concepts/TLS/)
+- [Added TLS support for connecting to Hashicorp vault](https://docs.ethsigner.pegasys.tech/en/latest/Concepts/TLS/)
 - Upgraded PicoCLI to 4.1.4
 
 ### Bugs Fixed 
@@ -15,8 +17,6 @@
 
 ## 0.4.0
 
-### Known Issues
-
 ### Features Added
 - Multi-key signing: Ethsigner is initialised with a directory containing a number of TOML metadata files, each of which describe a key which may be used for signing. Upon reception of a Transaction, Ethsigner loads the corresponding metadata file, and signs the Transaction with the key defined therein.
 - Relaxed definition of 'optional' when parsing eth_SendTransaction (empty string, null an "0x" are deemed a missing optional parameter).
@@ -24,7 +24,6 @@
 - CI moved from Jenkins to CircleCI
 - Updated to Web3j 4.5.5
 - Updated to JUnit 5
-
 
 ### Bugs Fixed
 - When a private transaction is submitted without a nonce, a nonce is generated and inserted. However, if the supplied nonce is too low, the transaction is not resubmitted with a new nonce. Rather an error is returned to the caller (resolved in Besu 1.2.5).
@@ -36,14 +35,12 @@
 ### Known Issues
 - When a private transaction is submitted without a nonce, a nonce is generated and inserted. However, if the supplied nonce is too low, the transaction is not resubmitted with a new nonce. Rather an error is returned to the caller.
 
-
 ### Features Added
 - Updated to use Web3j 4.5.0
 - Accepts Private Transactions addressed with "PrivacyGroupId", not just "PrivateFor"
 
 ### Bugs Fixed
 - Private Transactions without nonces are now accepted and the nonce populated (see "Known Issues")
-
 
 ## 0.2.0
 
