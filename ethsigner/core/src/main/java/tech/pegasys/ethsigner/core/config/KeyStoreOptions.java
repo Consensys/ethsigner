@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.config;
 
-import java.io.File;
+import java.nio.file.Path;
 
-public interface PkcsStoreConfig {
+public interface KeyStoreOptions {
 
-  File getStoreFile();
+  Path getKeyStoreFile();
 
-  File getStorePasswordFile();
+  Path getPasswordFile();
 }

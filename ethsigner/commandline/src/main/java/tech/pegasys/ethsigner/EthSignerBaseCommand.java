@@ -12,15 +12,20 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.config.PicoCliTlsClientCertificateOptions;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
+
+import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
+import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
 import tech.pegasys.ethsigner.core.config.Config;
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -40,6 +45,7 @@ import picocli.CommandLine.Option;
             + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
     abbreviateSynopsis = true,
     name = "ethsigner",
+    sortOptions = false,
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
     header = "Usage:",
@@ -51,12 +57,21 @@ import picocli.CommandLine.Option;
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
 
+  @SuppressWarnings("FieldMayBeFinal")
   @Option(
-      names = "--downstream-http-tls-known-servers-file",
-      description = "Path to a file containing the fingerprints of authorized servers",
-      arity = "1",
-      required = false)
-  private File downstreamKnownServersFile;
+      names = {"--chain-id"},
+      description = "The Chain Id that will be the intended recipient for signed transactions",
+      required = true,
+      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      arity = "1")
+  private long chainId;
+
+  @Option(
+      names = {"--data-path"},
+      description = "The path to a directory to store temporary files",
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      arity = "1")
+  private Path dataPath;
 
   @Option(
       names = {"--logging", "-l"},
@@ -67,9 +82,28 @@ public class EthSignerBaseCommand implements Config {
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
+      names = {"--http-listen-host"},
+      description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
+      arity = "1")
+  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
+
+  @Option(
+      names = {"--http-listen-port"},
+      description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_PORT_FORMAT_HELP,
+      arity = "1")
+  private final Integer httpListenPort = 8545;
+
+  @ArgGroup(exclusive = false)
+  private PicoCliTlsServerOptions picoCliTlsServerOptions;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
       names = "--downstream-http-host",
       description =
           "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
   private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
@@ -77,6 +111,7 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
+      paramLabel = MANDATORY_PORT_FORMAT_HELP,
       required = true,
       arity = "1")
   private Integer downstreamHttpPort;
@@ -86,41 +121,12 @@ public class EthSignerBaseCommand implements Config {
       names = {"--downstream-http-request-timeout"},
       description =
           "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_LONG_FORMAT_HELP,
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
-  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
-  @Option(
-      names = {"--http-listen-host"},
-      description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
-
-  @Option(
-      names = {"--http-listen-port"},
-      description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
-      arity = "1")
-  private final Integer httpListenPort = 8545;
-
-  @SuppressWarnings("FieldMayBeFinal")
-  @Option(
-      names = {"--chain-id"},
-      description = "The Chain Id that will be the intended recipient for signed transactions",
-      required = true,
-      arity = "1")
-  private long chainId;
-
-  @Option(
-      names = {"--data-path"},
-      description = "The path to a directory to store temporary files",
-      arity = "1")
-  private Path dataPath;
-
   @ArgGroup(exclusive = false)
-  private PicoCliTlsServerOptions picoCliTlsServerOptions;
-
-  @ArgGroup(exclusive = false)
-  private PicoCliTlsClientCertificateOptions clientTlsCertificateOptions;
+  private PicoCliClientTlsOptions clientTlsOptions;
 
   @Override
   public Level getLogLevel() {
@@ -168,13 +174,8 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public Optional<PkcsStoreConfig> getClientCertificateOptions() {
-    return Optional.ofNullable(clientTlsCertificateOptions);
-  }
-
-  @Override
-  public Optional<File> getWeb3ProviderKnownServersFile() {
-    return Optional.ofNullable(downstreamKnownServersFile);
+  public Optional<ClientTlsOptions> getClientTlsOptions() {
+    return Optional.ofNullable(clientTlsOptions);
   }
 
   @Override
@@ -188,6 +189,19 @@ public class EthSignerBaseCommand implements Config {
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
         .add("dataPath", dataPath)
+        .add("clientTlsOptions", clientTlsOptions)
         .toString();
+  }
+
+  void validateArgs() {
+    if (getClientTlsOptions().isPresent()) {
+      final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
+      final Optional<Path> optionsKnownServerFile =
+          getClientTlsOptions().get().getKnownServersFile();
+      if (optionsKnownServerFile.isEmpty() && !caAuth) {
+        throw new InvalidCommandLineOptionsException(
+            "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");
+      }
+    }
   }
 }

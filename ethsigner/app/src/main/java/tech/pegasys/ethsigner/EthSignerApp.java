@@ -12,17 +12,24 @@
  */
 package tech.pegasys.ethsigner;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import tech.pegasys.ethsigner.signer.azure.AzureSubCommand;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSubCommand;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand;
 import tech.pegasys.ethsigner.signer.multikey.MultiKeySubCommand;
+
+import java.io.PrintWriter;
 
 public class EthSignerApp {
 
   public static void main(final String... args) {
 
     final EthSignerBaseCommand baseCommand = new EthSignerBaseCommand();
-    final CommandlineParser cmdLineParser = new CommandlineParser(baseCommand, System.out);
+    final PrintWriter outputWriter = new PrintWriter(System.out, true, UTF_8);
+    final PrintWriter errorWriter = new PrintWriter(System.err, true, UTF_8);
+    final CommandlineParser cmdLineParser =
+        new CommandlineParser(baseCommand, outputWriter, errorWriter);
     cmdLineParser.registerSigner(new HashicorpSubCommand());
     cmdLineParser.registerSigner(new FileBasedSubCommand());
     cmdLineParser.registerSigner(new AzureSubCommand());

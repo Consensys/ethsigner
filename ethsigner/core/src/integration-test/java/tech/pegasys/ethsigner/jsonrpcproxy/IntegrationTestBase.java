@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
 import org.apache.logging.log4j.LogManager;
@@ -85,6 +86,7 @@ public class IntegrationTestBase {
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
+  private static Vertx vertx;
   private static Runner runner;
   static ClientAndServer clientAndServer;
   static Credentials credentials;
@@ -126,6 +128,7 @@ public class IntegrationTestBase {
 
     final JsonDecoder jsonDecoder = new JsonDecoder(jsonObjectMapper);
 
+    vertx = Vertx.vertx();
     runner =
         new Runner(
             chainId,
@@ -134,7 +137,8 @@ public class IntegrationTestBase {
             httpServerOptions,
             downstreamTimeout,
             jsonDecoder,
-            dataPath);
+            dataPath,
+            vertx);
     runner.start();
 
     final Path portsFile = dataPath.resolve(PORTS_FILENAME);
@@ -171,7 +175,7 @@ public class IntegrationTestBase {
   @AfterAll
   public static void teardown() {
     clientAndServer.stop();
-    runner.stop();
+    vertx.close();
     clientAndServer = null;
     runner = null;
   }

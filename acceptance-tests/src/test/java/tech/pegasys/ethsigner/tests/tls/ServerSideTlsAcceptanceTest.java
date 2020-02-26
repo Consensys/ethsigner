@@ -40,6 +40,7 @@ import java.util.Optional;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -82,6 +83,16 @@ class ServerSideTlsAcceptanceTest {
       TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
   final TlsCertificateDefinition cert2 =
       TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
+
+  private Signer ethSigner = null;
+
+  @AfterEach
+  void cleanup() {
+    if (ethSigner != null) {
+      ethSigner.shutdown();
+      ethSigner = null;
+    }
+  }
 
   private Signer createTlsEthSigner(
       final TlsCertificateDefinition serverPresentedCerts,
@@ -136,7 +147,7 @@ class ServerSideTlsAcceptanceTest {
 
   @Test
   void ableToConnectWhenClientExpectsSameCertificateAsThatPresented() {
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
+    ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
@@ -147,7 +158,7 @@ class ServerSideTlsAcceptanceTest {
   void nonTlsClientsCannotConnectToTlsEnabledEthSigner() {
     // The ethSigner object (and in-built requester are already TLS enabled, so need to make a new
     // http client which does not have TLS enabled
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
+    ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
     final HttpRequest rawRequests =
@@ -160,11 +171,11 @@ class ServerSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingPasswordFileResultsInEthsignerExiting() {
+  void missingPasswordFileResultsInEthSignerExiting() {
     // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition missingPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", null);
-    final Signer ethSigner = createTlsEthSigner(missingPasswordCert, cert1, null, null, 9000);
+    ethSigner = createTlsEthSigner(missingPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
@@ -174,14 +185,14 @@ class ServerSideTlsAcceptanceTest {
     // arbitrary listen-port to prevent waiting for portfile (during Start) to be created.
     final TlsCertificateDefinition wrongPasswordCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrongPassword");
-    final Signer ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, null, null, 9000);
+    ethSigner = createTlsEthSigner(wrongPasswordCert, cert1, null, null, 9000);
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }
 
   @Test
   void clientCannotConnectIfExpectedServerCertDoesntMatchServerSuppliedCert() {
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
+    ethSigner = createTlsEthSigner(cert1, cert1, null, null, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 
@@ -198,7 +209,7 @@ class ServerSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingKeyStoreFileResultsInEthsignerExiting() throws IOException {
+  void missingKeyStoreFileResultsInEthSignerExiting() throws IOException {
     final TlsOptions serverOptions =
         new BasicTlsOptions(
             dataPath.resolve("missing_keystore").toFile(),
@@ -209,7 +220,7 @@ class ServerSideTlsAcceptanceTest {
     final SignerConfigurationBuilder configBuilder =
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).withHttpRpcPort(9000);
 
-    final Signer ethSigner =
+    ethSigner =
         new Signer(
             configBuilder.build(), new NodeConfigurationBuilder().build(), new NodePorts(1, 2));
     ethSigner.start();
@@ -218,7 +229,7 @@ class ServerSideTlsAcceptanceTest {
 
   @Test
   void clientMissingFromWhiteListCannotConnectToEthSigner() {
-    final Signer ethSigner = createTlsEthSigner(cert1, cert1, cert1, cert1, 0);
+    ethSigner = createTlsEthSigner(cert1, cert1, cert1, cert1, 0);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

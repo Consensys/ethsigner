@@ -10,39 +10,43 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.config.tls.client;
 
-import tech.pegasys.ethsigner.core.config.PkcsStoreConfig;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
-import java.io.File;
+import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
+
+import java.nio.file.Path;
 
 import picocli.CommandLine.Option;
 
-public class PicoCliTlsClientCertificateOptions implements PkcsStoreConfig {
+class PicoCliKeyStoreOptions implements KeyStoreOptions {
 
   @Option(
       names = "--downstream-http-tls-keystore-file",
       description =
-          "Path to a PKCS#12 formatted keystore, contains TLS certificate to present to "
-              + "a TLS-enabled web3 provider.",
+          "Path to a PKCS#12 formatted keystore containing the key and certificate "
+              + "to present to a TLS-enabled web3 provider that requires client authentication.",
       arity = "1",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private File clientCertificateFile;
+  private Path keyStoreFile;
 
   @Option(
       names = "--downstream-http-tls-keystore-password-file",
-      description = "Path to a file containing the password used to decrypt the client cert.",
+      description = "Path to a file containing the password used to decrypt the keystore.",
       arity = "1",
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
       required = true)
-  private File clientCertificatePasswordFile;
+  private Path passwordFile;
 
   @Override
-  public File getStoreFile() {
-    return clientCertificateFile;
+  public Path getKeyStoreFile() {
+    return keyStoreFile;
   }
 
   @Override
-  public File getStorePasswordFile() {
-    return clientCertificatePasswordFile;
+  public Path getPasswordFile() {
+    return passwordFile;
   }
 }

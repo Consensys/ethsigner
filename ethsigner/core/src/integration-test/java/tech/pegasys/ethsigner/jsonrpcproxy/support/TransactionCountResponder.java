@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.jsonrpcproxy.support;
 
 import static org.mockserver.model.HttpResponse.response;
-import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -35,12 +34,16 @@ public class TransactionCountResponder implements ExpectationResponseCallback {
   private static final Logger LOG = LogManager.getLogger();
 
   public enum TRANSACTION_COUNT_METHOD {
-    ETH_GET_TRANSACTION_COUNT,
-    EEA_GET_TRANSACTION_COUNT
-  }
+    ETH_GET_TRANSACTION_COUNT(".*eth_getTransactionCount.*"),
+    PRIV_EEA_GET_TRANSACTION_COUNT(".*priv_getEeaTransactionCount.*"),
+    PRIV_GET_TRANSACTION_COUNT(".*priv_getTransactionCount.*");
 
-  private static final String ETH_REQUEST_REGEX_PATTERN = ".*eth_getTransactionCount.*";
-  private static final String EEA_REQUEST_REGEX_PATTERN = ".*priv_getEeaTransactionCount.*";
+    private final String regexPattern;
+
+    TRANSACTION_COUNT_METHOD(final String regexPattern) {
+      this.regexPattern = regexPattern;
+    }
+  }
 
   private BigInteger nonce = BigInteger.ZERO;
   private final Function<BigInteger, BigInteger> nonceMutator;
@@ -49,8 +52,7 @@ public class TransactionCountResponder implements ExpectationResponseCallback {
   public TransactionCountResponder(
       final Function<BigInteger, BigInteger> nonceMutator, final TRANSACTION_COUNT_METHOD method) {
     this.nonceMutator = nonceMutator;
-    this.regexPattern =
-        method == ETH_GET_TRANSACTION_COUNT ? ETH_REQUEST_REGEX_PATTERN : EEA_REQUEST_REGEX_PATTERN;
+    this.regexPattern = method.regexPattern;
   }
 
   @Override

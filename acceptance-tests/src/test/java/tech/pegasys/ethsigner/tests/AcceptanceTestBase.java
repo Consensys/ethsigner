@@ -83,13 +83,15 @@ public class AcceptanceTestBase {
   }
 
   @AfterAll
-  public static void tearDownBase() {
+  public static synchronized void tearDownBase() {
     if (ethNode != null) {
       ethNode.shutdown();
+      ethNode = null;
     }
 
     if (ethSigner != null) {
       ethSigner.shutdown();
+      ethSigner = null;
     }
   }
 }

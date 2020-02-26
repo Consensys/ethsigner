@@ -26,9 +26,11 @@ public class CmdlineHelpers {
         + "--tls-keystore-password-file=./keystore.passwd "
         + "--tls-known-clients-file=./known_clients "
         + "--tls-allow-ca-clients "
-        + "--downstream-http-tls-keystore-file=./client_cert.pfx "
-        + "--downstream-http-tls-keystore-password-file=./client_cert.passwd "
-        + "--downstream-http-tls-known-servers-file=./knownServers.txt ";
+        + "--downstream-http-tls-enabled "
+        + "--downstream-http-tls-keystore-file=./test.ks "
+        + "--downstream-http-tls-keystore-password-file=./test.pass "
+        + "--downstream-http-tls-ca-auth-enabled=false "
+        + "--downstream-http-tls-known-servers-file=./test.txt ";
   }
 
   public static String removeFieldFrom(final String input, final String... fieldNames) {

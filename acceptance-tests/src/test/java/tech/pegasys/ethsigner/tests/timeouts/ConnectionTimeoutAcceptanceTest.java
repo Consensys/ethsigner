@@ -55,7 +55,7 @@ public class ConnectionTimeoutAcceptanceTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  public synchronized void tearDown() {
     if (ethSigner != null) {
       ethSigner.shutdown();
     }
