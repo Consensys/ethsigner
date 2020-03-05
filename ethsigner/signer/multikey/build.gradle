@@ -30,6 +30,9 @@ dependencies {
   implementation project(':ethsigner:signer:file-based')
   implementation project(':ethsigner:signer:azure')
   implementation project(':ethsigner:signer:hashicorp')
+  implementation 'tech.pegasys.signers:hashicorp-vault'
+
+  implementation 'io.vertx:vertx-core'
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
@@ -45,6 +48,7 @@ dependencies {
   testImplementation 'org.mockito:mockito-inline'
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-junit-jupiter'
+  testImplementation(group: 'tech.pegasys.signers', name: 'hashicorp', classifier: 'test-fixtures')
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

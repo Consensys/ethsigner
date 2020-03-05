@@ -22,12 +22,21 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.signing.hashicorp.TrustStoreType;
+import tech.pegasys.signing.hashicorp.config.ConnectionParameters;
+import tech.pegasys.signing.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signing.hashicorp.config.KeyDefinition;
+import tech.pegasys.signing.hashicorp.config.TlsOptions;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.Vertx;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -37,6 +46,7 @@ import picocli.CommandLine.Option;
     description = "Sign transactions with a key stored in a Hashicorp Vault.",
     mixinStandardHelpOptions = true)
 public class HashicorpSubCommand extends SignerSubCommand {
+
   static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
@@ -44,6 +54,9 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
   public static final boolean DEFAULT_TLS_ENABLED = true;
+
+  private static final String AUTH_FILE_ERROR_MSG_FMT =
+      "Unable to read file containing the authentication information for Hashicorp Vault: %s";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -101,16 +114,33 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private final Path tlsKnownServerFile = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    final HashicorpConfig config =
-        new HashicorpConfig(
-            signingKeyPath,
-            serverHost,
-            serverPort,
-            authFilePath,
-            timeout,
-            isTlsEnabled(),
-            getTlsKnownServerFile());
-    return HashicorpVaultSignerFactory.createSigner(config);
+    TlsOptions tlsOptions = null;
+    if (tlsEnabled) {
+      if (tlsKnownServerFile != null) {
+        tlsOptions =
+            new TlsOptions(Optional.of(TrustStoreType.WHITELIST), tlsKnownServerFile, null);
+      } else {
+        tlsOptions = new TlsOptions(Optional.empty(), null, null);
+      }
+    }
+
+    final String token = readTokenFromFile(authFilePath);
+
+    final HashicorpKeyConfig keyConfig =
+        new HashicorpKeyConfig(
+            new ConnectionParameters(
+                serverHost,
+                Optional.of(serverPort),
+                Optional.ofNullable(tlsOptions),
+                Optional.of(timeout)),
+            new KeyDefinition(signingKeyPath, Optional.empty(), token));
+
+    final HashicorpSignerFactory factory = new HashicorpSignerFactory(Vertx.vertx());
+    try {
+      return factory.create(keyConfig);
+    } finally {
+      factory.shutdown();
+    }
   }
 
   @Override
@@ -130,6 +160,20 @@ public class HashicorpSubCommand extends SignerSubCommand {
 
   public Optional<Path> getTlsKnownServerFile() {
     return Optional.ofNullable(tlsKnownServerFile);
+  }
+
+  private String readTokenFromFile(final Path path) {
+    try (final Stream<String> stream = Files.lines(path)) {
+      return stream
+          .findFirst()
+          .orElseThrow(
+              () ->
+                  new TransactionSignerInitializationException(
+                      String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString())));
+    } catch (final IOException e) {
+      throw new TransactionSignerInitializationException(
+          String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString()));
+    }
   }
 
   @Override

@@ -12,19 +12,15 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -35,24 +31,15 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   private static HashicorpNode hashicorpNode;
 
-  private String authFilename;
-
   @BeforeAll
   static void setUpBase() {
     hashicorpNode =
         HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
   }
 
-  @BeforeEach
-  void createAuthFile(@TempDir final Path tempDir) throws IOException {
-    final Path authFilePath = Files.createTempFile(tempDir, "hashicorpAuthFile", ".txt");
-    Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
-    authFilename = authFilePath.toAbsolutePath().toString();
-  }
-
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported(@TempDir final Path tempDir) {
-    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), authFilename, hashicorpNode);
+    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), hashicorpNode);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }
@@ -60,9 +47,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
   @Test
   void incorrectlyNamedHashicorpConfigFileIsNotLoaded(@TempDir final Path tempDir) {
     createHashicorpTomlFileAt(
-        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
-        authFilename,
-        hashicorpNode);
+        tempDir.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"), hashicorpNode);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).isEmpty();
   }

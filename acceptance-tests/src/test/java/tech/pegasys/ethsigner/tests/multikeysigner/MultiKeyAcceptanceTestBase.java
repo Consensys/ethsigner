@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
+import tech.pegasys.plus.plugin.encryptedstorage.encryption.util.HashicorpConfigUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -77,22 +78,23 @@ public class MultiKeyAcceptanceTestBase {
     createTomlFile(tomlPath, toml);
   }
 
-  public void createHashicorpTomlFileAt(
-      final Path tomlPath, final String authFile, final HashicorpNode hashicorpNode) {
+  public void createHashicorpTomlFileAt(final Path tomlPath, final HashicorpNode hashicorpNode) {
+    final String hashicorpSignerToml =
+        HashicorpConfigUtil.createTomlConfig(
+            hashicorpNode.getHost(),
+            hashicorpNode.getPort(),
+            hashicorpNode.getVaultToken(),
+            hashicorpNode.getSigningKeyPath(),
+            null,
+            10_000,
+            hashicorpNode.isTlsEnabled(),
+            "WHITELIST",
+            hashicorpNode.getKnownServerFilePath().orElse(Path.of("/optional")).toString(),
+            null);
 
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", hashicorpNode.getSigningKeyPath())
-            .withQuotedString("host", hashicorpNode.getHost())
-            .withNonQuotedString("port", String.valueOf(hashicorpNode.getPort()))
-            .withQuotedString("auth-file", authFile)
-            .withNonQuotedString("timeout", "500")
-            .withNonQuotedString("tls-enabled", String.valueOf(hashicorpNode.isTlsEnabled()))
-            .withQuotedString(
-                "tls-known-server-file",
-                hashicorpNode.getKnownServerFilePath().orElse(Path.of("/optional")).toString())
-            .build();
+    final TomlStringBuilder tomlBuilder = new TomlStringBuilder("signing");
+    tomlBuilder.withQuotedString("type", "hashicorp-signer");
+    final String toml = tomlBuilder.build() + hashicorpSignerToml;
 
     createTomlFile(tomlPath, toml);
   }

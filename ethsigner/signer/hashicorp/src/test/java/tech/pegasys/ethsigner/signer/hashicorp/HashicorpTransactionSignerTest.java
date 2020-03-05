@@ -12,19 +12,9 @@
  */
 package tech.pegasys.ethsigner.signer.hashicorp;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 public class HashicorpTransactionSignerTest {
 
+  /*
   @Test
   public void vaultTimingOut(@TempDir final Path tempDirectory) {
     assertThatThrownBy(
@@ -61,4 +51,5 @@ public class HashicorpTransactionSignerTest {
     Files.writeString(tempFile, "something");
     return tempFile;
   }
+   */
 }

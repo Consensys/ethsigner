@@ -52,6 +52,9 @@ public class TransactionSignerParamsSupplier {
       params.add(hashicorpNode.getHost());
       params.add("--port");
       params.add(String.valueOf(hashicorpNode.getPort()));
+      params.add("--signing-key-path");
+      params.add(hashicorpNode.getSigningKeyPath());
+      //params.add()
       if (!hashicorpNode.isTlsEnabled()) {
         params.add("--tls-enabled=false");
       } else {

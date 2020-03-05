@@ -68,5 +68,8 @@ dependencyManagement {
     dependency 'org.web3j:besu:4.5.14'
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
+
+    dependency 'tech.pegasys.signers:hashicorp-vault:0.0.1-SNAPSHOT'
+    dependency 'tech.pegasys.signers:hashicorp:0.0.1-SNAPSHOT'
   }
 }
