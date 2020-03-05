@@ -17,19 +17,17 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingA
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
-
+import com.google.common.io.Resources;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-
-import com.google.common.io.Resources;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 

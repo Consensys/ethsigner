@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
-import tech.pegasys.plus.plugin.encryptedstorage.encryption.util.HashicorpConfigUtil;
+import tech.pegasys.signing.hashicorp.HashicorpConfigUtil;
 import tech.pegasys.signing.hashicorp.config.HashicorpKeyConfig;
 
 import java.io.IOException;

@@ -14,9 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
-
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -24,8 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.google.common.io.Resources;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 public class TransactionSignerParamsSupplier {
 
@@ -54,7 +52,7 @@ public class TransactionSignerParamsSupplier {
       params.add(String.valueOf(hashicorpNode.getPort()));
       params.add("--signing-key-path");
       params.add(hashicorpNode.getSigningKeyPath());
-      //params.add()
+      // params.add()
       if (!hashicorpNode.isTlsEnabled()) {
         params.add("--tls-enabled=false");
       } else {
