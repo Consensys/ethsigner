@@ -29,7 +29,8 @@ import picocli.CommandLine.Option;
 /** Raw sub-command - DO NOT USE IN PRODUCTION, Private Key is in plain text */
 @Command(
     name = RawSubCommand.COMMAND_NAME,
-    description = "Sign transactions with an unecrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
+    description =
+        "Sign transactions with an unecrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
     mixinStandardHelpOptions = true)
 public class RawSubCommand extends SignerSubCommand {
   static final String COMMAND_NAME = "raw-signer";
