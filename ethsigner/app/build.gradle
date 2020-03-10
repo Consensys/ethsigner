@@ -33,6 +33,7 @@ dependencies {
   implementation project(':ethsigner:signer:file-based')
   implementation project(':ethsigner:signer:multikey')
   implementation project(':ethsigner:signer:azure')
+  implementation project(':ethsigner:signer:raw')
   implementation project(':ethsigner:commandline')
 
   implementation 'com.google.guava:guava'
