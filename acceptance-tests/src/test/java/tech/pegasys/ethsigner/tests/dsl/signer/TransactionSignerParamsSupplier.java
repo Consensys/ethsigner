@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.google.common.io.Resources;
+import tech.pegasys.ethsigner.tests.dsl.Accounts;
+import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -22,8 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+
+import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
 

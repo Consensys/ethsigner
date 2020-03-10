@@ -21,14 +21,14 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
+import tech.pegasys.signing.hashicorp.HashicorpConfigUtil;
+import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterEach;
-import tech.pegasys.signing.hashicorp.HashicorpConfigUtil;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 public class MultiKeyAcceptanceTestBase {
 

@@ -15,10 +15,10 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
+import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
 
 public class SignerConfigurationBuilder {
 
