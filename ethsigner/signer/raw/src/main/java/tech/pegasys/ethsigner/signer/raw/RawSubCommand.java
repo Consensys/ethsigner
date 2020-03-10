@@ -31,8 +31,10 @@ import picocli.CommandLine.Option;
     name = RawSubCommand.COMMAND_NAME,
     description =
         "Sign transactions with an unecrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
-    mixinStandardHelpOptions = true)
+    mixinStandardHelpOptions = true,
+    hidden = true)
 public class RawSubCommand extends SignerSubCommand {
+
   static final String COMMAND_NAME = "raw-signer";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
