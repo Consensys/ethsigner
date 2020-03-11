@@ -26,7 +26,7 @@ class IllegalSignatureCreationTest {
 
   @Test
   void ensureSignaturesCreatedHavePositiveValues() {
-    // This problem was identified in Zendesk ticket 32060, which identified a specific
+    // This problem was identified in Github Issue #247, which identified a specific
     // transaction being signed with a given key, resulted in the transaction being rejected by
     // Besu due to "INVALID SIGNATURE" - ultimately, it was came down to byte[] --> BigInt resulting
     // in negative value.
