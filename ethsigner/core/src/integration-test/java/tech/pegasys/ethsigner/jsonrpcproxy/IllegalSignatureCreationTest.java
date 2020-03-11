@@ -25,7 +25,11 @@ import org.web3j.crypto.Credentials;
 class IllegalSignatureCreationTest {
 
   @Test
-  void ensureZenDesk32060IsResolved() {
+  void ensureSignaturesCreatedHavePositiveValues() {
+    // This problem was identified in Zendesk ticket 32060, which identified a specific
+    // transaction being signed with a given key, resulted in the transaction being rejected by
+    // Besu due to "INVALID SIGNATURE" - ultimately, it was came down to byte[] --> BigInt resulting
+    // in negative value.
     final long chainId = 44844;
 
     final EthSendTransactionJsonParameters txnParams =
@@ -40,7 +44,7 @@ class IllegalSignatureCreationTest {
     final EthTransaction txn = new EthTransaction(txnParams, null, null);
     final byte[] serialisedBytes = txn.rlpEncode(chainId);
 
-    CredentialTransactionSigner signer =
+    final CredentialTransactionSigner signer =
         new CredentialTransactionSigner(
             Credentials.create("ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"));
 
