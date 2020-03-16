@@ -16,7 +16,6 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -47,7 +46,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withHashicorpSigner(final HashicorpSigningParams hashicorpNode) {
+  public SignerConfigurationBuilder withHashicorpSigner(
+      final HashicorpSigningParams hashicorpNode) {
     this.hashicorpNode = hashicorpNode;
     return this;
   }

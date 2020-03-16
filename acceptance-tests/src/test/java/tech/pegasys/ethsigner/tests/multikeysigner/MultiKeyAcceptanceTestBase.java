@@ -15,11 +15,6 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -30,6 +25,13 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
 import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterEach;
 
 public class MultiKeyAcceptanceTestBase {
 
@@ -79,15 +81,17 @@ public class MultiKeyAcceptanceTestBase {
     createTomlFile(tomlPath, toml);
   }
 
-  public void createHashicorpTomlFileAt(final Path tomlPath,
-      final HashicorpSigningParams hashicorpNode) {
+  public void createHashicorpTomlFileAt(
+      final Path tomlPath, final HashicorpSigningParams hashicorpNode) {
 
     try {
       final Optional<SelfSignedCertificate> tlsCert = hashicorpNode.getServerCertificate();
       String trustStorePath = null;
       if (tlsCert.isPresent()) {
-        trustStorePath = createFingerprintFile(tomlPath.getParent(), tlsCert.get(),
-            Optional.of(hashicorpNode.getPort())).toString();
+        trustStorePath =
+            createFingerprintFile(
+                    tomlPath.getParent(), tlsCert.get(), Optional.of(hashicorpNode.getPort()))
+                .toString();
       }
 
       final String hashicorpSignerToml =

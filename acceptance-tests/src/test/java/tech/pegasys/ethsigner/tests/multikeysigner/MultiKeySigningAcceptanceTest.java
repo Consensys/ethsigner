@@ -12,18 +12,14 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -57,8 +53,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   }
 
   @Test
-  void multipleSignersAreCreatedAndExpectedAddressAreReported()
-      throws URISyntaxException {
+  void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
 
     createAzureTomlFileAt(
         tempDir.resolve(AzureBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),

@@ -15,21 +15,21 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
-import java.security.cert.CertificateEncodingException;
-import java.util.Optional;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
+import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import com.google.common.io.Resources;
-import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 
 public class TransactionSignerParamsSupplier {
 
@@ -66,11 +66,12 @@ public class TransactionSignerParamsSupplier {
         final Path trustStoreParentDir;
         try {
           trustStoreParentDir = Files.createTempDirectory("knownServerPath");
-        final Path trustStorePath = createFingerprintFile(trustStoreParentDir, tlsCert,
-              Optional.of(hashicorpNode.getPort()));
+          final Path trustStorePath =
+              createFingerprintFile(
+                  trustStoreParentDir, tlsCert, Optional.of(hashicorpNode.getPort()));
           params.add("--tls-known-server-file");
           params.add(trustStorePath.toString());
-        } catch (final IOException|CertificateEncodingException  e) {
+        } catch (final IOException | CertificateEncodingException e) {
           throw new RuntimeException("Failed to construct hashicorp trust store file.");
         }
       }

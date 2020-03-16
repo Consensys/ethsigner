@@ -14,14 +14,16 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
+
 import java.nio.file.Path;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
-import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
 class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
@@ -32,8 +34,8 @@ class HashicorpTlsBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
 
   @BeforeAll
   static void setUpBase() {
-    hashicorpNode = HashicorpHelpers
-        .createLoadedHashicorpVault(new DockerClientFactory().create(), true);
+    hashicorpNode =
+        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), true);
   }
 
   @Test

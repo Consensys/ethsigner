@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,14 +9,13 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.node;
 
-import java.util.Optional;
 import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
+
+import java.util.Optional;
 
 public class HashicorpSigningParams {
 
@@ -24,8 +23,8 @@ public class HashicorpSigningParams {
   final String secretPath;
   final String secretName;
 
-  public HashicorpSigningParams(final HashicorpNode hashicorpNode, final String secretPath,
-      final String secretName) {
+  public HashicorpSigningParams(
+      final HashicorpNode hashicorpNode, final String secretPath, final String secretName) {
     this.hashicorpNode = hashicorpNode;
     this.secretPath = secretPath;
     this.secretName = secretName;

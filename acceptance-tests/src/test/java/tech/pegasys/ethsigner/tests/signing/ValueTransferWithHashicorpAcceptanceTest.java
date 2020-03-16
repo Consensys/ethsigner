@@ -16,12 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import com.github.dockerjava.api.DockerClient;
-import java.math.BigInteger;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.utils.Convert;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
@@ -33,6 +27,14 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
+
+import java.math.BigInteger;
+
+import com.github.dockerjava.api.DockerClient;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.utils.Convert;
 
 public class ValueTransferWithHashicorpAcceptanceTest {
 
