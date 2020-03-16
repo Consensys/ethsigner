@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.signer.azure.AzureSubCommand;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSubCommand;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand;
 import tech.pegasys.ethsigner.signer.multikey.MultiKeySubCommand;
+import tech.pegasys.ethsigner.signer.raw.RawSubCommand;
 
 import java.io.PrintWriter;
 
@@ -34,6 +35,7 @@ public class EthSignerApp {
     cmdLineParser.registerSigner(new FileBasedSubCommand());
     cmdLineParser.registerSigner(new AzureSubCommand());
     cmdLineParser.registerSigner(new MultiKeySubCommand());
+    cmdLineParser.registerSigner(new RawSubCommand());
 
     cmdLineParser.parseCommandLine(args);
   }
