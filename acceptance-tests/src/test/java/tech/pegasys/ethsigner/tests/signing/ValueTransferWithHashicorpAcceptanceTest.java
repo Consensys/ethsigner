@@ -12,13 +12,19 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
+import com.github.dockerjava.api.DockerClient;
+import java.math.BigInteger;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.utils.Convert;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -27,15 +33,6 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
-
-import java.math.BigInteger;
-
-import com.github.dockerjava.api.DockerClient;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.utils.Convert;
 
 public class ValueTransferWithHashicorpAcceptanceTest {
 
@@ -43,7 +40,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
 
   private static Node ethNode;
   private static Signer ethSigner;
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
   public static void setUpBase() {
@@ -52,10 +49,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, false);
-    hashicorpNode.addSecretsToVault(singletonMap("value", "827xxxxxx"), "acceptanceTestPath");
-    final HashicorpSigningParams hashicorpParams =
-        new HashicorpSigningParams(hashicorpNode, "acceptanceTestPath", "value");
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, false);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -64,7 +58,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpParams).build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpNode).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();

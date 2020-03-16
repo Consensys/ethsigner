@@ -12,27 +12,26 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
-
 import java.nio.file.Path;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
 public class MultiKeyHashicorpTransactionSignerAcceptanceTest
     extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
   static void preSetup() {
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
+        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
   }
 
   @Test

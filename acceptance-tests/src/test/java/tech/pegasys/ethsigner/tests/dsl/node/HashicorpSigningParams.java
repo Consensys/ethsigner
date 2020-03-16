@@ -24,8 +24,8 @@ public class HashicorpSigningParams {
   final String secretPath;
   final String secretName;
 
-  public HashicorpSigningParams(HashicorpNode hashicorpNode, String secretPath,
-      String secretName) {
+  public HashicorpSigningParams(final HashicorpNode hashicorpNode, final String secretPath,
+      final String secretName) {
     this.hashicorpNode = hashicorpNode;
     this.secretPath = secretPath;
     this.secretName = secretName;
@@ -47,11 +47,15 @@ public class HashicorpSigningParams {
     return hashicorpNode.getServerCertificate();
   }
 
-  public String getSecretPath() {
-    return secretPath;
+  public String getSecretHttpPath() {
+    return hashicorpNode.getHttpApiPathForSecret(secretPath);
   }
 
   public String getSecretName() {
     return secretName;
+  }
+
+  public void shutdown() {
+    hashicorpNode.shutdown();
   }
 }

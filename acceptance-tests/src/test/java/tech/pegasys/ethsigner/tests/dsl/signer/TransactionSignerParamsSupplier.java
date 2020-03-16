@@ -15,12 +15,10 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
-import java.nio.file.attribute.FileAttribute;
 import java.security.cert.CertificateEncodingException;
 import java.util.Optional;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +46,7 @@ public class TransactionSignerParamsSupplier {
     this.multiKeySignerDirectory = multiKeySignerDirectory;
   }
 
-  public Collection<String> get() throws IOException, CertificateEncodingException {
+  public Collection<String> get() {
     final ArrayList<String> params = new ArrayList<>();
     if (hashicorpNode != null) {
       params.add("hashicorp-signer");
@@ -59,17 +57,22 @@ public class TransactionSignerParamsSupplier {
       params.add("--port");
       params.add(String.valueOf(hashicorpNode.getPort()));
       params.add("--signing-key-path");
-      params.add(hashicorpNode.getSecretPath());
+      params.add(hashicorpNode.getSecretHttpPath());
 
-      if (!hashicorpNode.getServerCertificate().isEmpty()) {
+      if (hashicorpNode.getServerCertificate().isEmpty()) {
         params.add("--tls-enabled=false");
       } else {
         final SelfSignedCertificate tlsCert = hashicorpNode.getServerCertificate().get();
-        final Path trustStoreParentDir = Files.createTempDirectory("knownServerPath");
+        final Path trustStoreParentDir;
+        try {
+          trustStoreParentDir = Files.createTempDirectory("knownServerPath");
         final Path trustStorePath = createFingerprintFile(trustStoreParentDir, tlsCert,
               Optional.of(hashicorpNode.getPort()));
-        params.add("--tls-known-server-file");
-        params.add(trustStorePath.toString());
+          params.add("--tls-known-server-file");
+          params.add(trustStorePath.toString());
+        } catch (final IOException|CertificateEncodingException  e) {
+          throw new RuntimeException("Failed to construct hashicorp trust store file.");
+        }
       }
 
     } else if (azureKeyVault != null) {

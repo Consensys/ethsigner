@@ -15,8 +15,12 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
-import java.security.cert.CertificateEncodingException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -26,13 +30,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
 import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import org.junit.jupiter.api.AfterEach;
 
 public class MultiKeyAcceptanceTestBase {
 
@@ -82,35 +79,38 @@ public class MultiKeyAcceptanceTestBase {
     createTomlFile(tomlPath, toml);
   }
 
-  public void createHashicorpTomlFileAt(final Path tomlPath, final HashicorpNode hashicorpNode,
-      final String signingKeyPath, final String secretName)
-      throws IOException, CertificateEncodingException {
+  public void createHashicorpTomlFileAt(final Path tomlPath,
+      final HashicorpSigningParams hashicorpNode) {
 
-    final Optional<SelfSignedCertificate> tlsCert = hashicorpNode.getServerCertificate();
-    String trustStorePath = null;
-    if(tlsCert.isPresent()) {
-      trustStorePath = createFingerprintFile(tomlPath.getParent(), tlsCert.get(),
-          Optional.of(hashicorpNode.getPort())).toString();
+    try {
+      final Optional<SelfSignedCertificate> tlsCert = hashicorpNode.getServerCertificate();
+      String trustStorePath = null;
+      if (tlsCert.isPresent()) {
+        trustStorePath = createFingerprintFile(tomlPath.getParent(), tlsCert.get(),
+            Optional.of(hashicorpNode.getPort())).toString();
+      }
+
+      final String hashicorpSignerToml =
+          HashicorpConfigUtil.createTomlConfig(
+              hashicorpNode.getHost(),
+              hashicorpNode.getPort(),
+              hashicorpNode.getVaultToken(),
+              hashicorpNode.getSecretHttpPath(),
+              hashicorpNode.getSecretName(),
+              10_000,
+              tlsCert.isPresent(),
+              tlsCert.map(ignored -> "WHITELIST").orElse(null),
+              trustStorePath,
+              null);
+
+      final TomlStringBuilder tomlBuilder = new TomlStringBuilder("signing");
+      tomlBuilder.withQuotedString("type", "hashicorp-signer");
+      final String toml = tomlBuilder.build() + hashicorpSignerToml;
+
+      createTomlFile(tomlPath, toml);
+    } catch (final Exception e) {
+      throw new RuntimeException("Failed to construct a valid hashicorp TOML file", e);
     }
-
-    final String hashicorpSignerToml =
-        HashicorpConfigUtil.createTomlConfig(
-            hashicorpNode.getHost(),
-            hashicorpNode.getPort(),
-            hashicorpNode.getVaultToken(),
-            signingKeyPath,
-            secretName,
-            10_000,
-            tlsCert.isPresent(),
-            tlsCert.map(ignored -> "WHITELIST").orElse(null),
-            trustStorePath,
-            null);
-
-    final TomlStringBuilder tomlBuilder = new TomlStringBuilder("signing");
-    tomlBuilder.withQuotedString("type", "hashicorp-signer");
-    final String toml = tomlBuilder.build() + hashicorpSignerToml;
-
-    createTomlFile(tomlPath, toml);
   }
 
   private void createTomlFile(final Path tomlPath, final String toml) {

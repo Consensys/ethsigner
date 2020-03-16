@@ -14,32 +14,32 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
-
 import java.nio.file.Path;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
 class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
   static final String HASHICORP_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
   static void setUpBase() {
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
+        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
+
   }
 
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported(@TempDir final Path tempDir) {
-    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), hashicorpNode, "value", );
+    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), hashicorpNode);
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }
