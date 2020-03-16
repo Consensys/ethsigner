@@ -16,7 +16,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
-import java.security.cert.CertificateEncodingException;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -128,7 +127,7 @@ public class EthSignerProcessRunner {
   }
 
   public void start(final String processName) {
-    final String loggingLevel = "TRACE";
+    final String loggingLevel = "DEBUG";
 
     final List<String> params = new ArrayList<>();
     params.add(executableLocation());

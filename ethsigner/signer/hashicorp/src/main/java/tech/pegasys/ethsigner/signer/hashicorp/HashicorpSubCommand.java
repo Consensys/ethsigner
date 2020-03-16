@@ -46,7 +46,6 @@ import picocli.CommandLine.Option;
     description = "Sign transactions with a key stored in a Hashicorp Vault.",
     mixinStandardHelpOptions = true)
 public class HashicorpSubCommand extends SignerSubCommand {
-
   static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
   private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";

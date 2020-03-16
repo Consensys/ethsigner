@@ -18,8 +18,6 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -74,7 +72,7 @@ public class ReplayProtectionAcceptanceTest {
     }
   }
 
-  private void setUp(final String genesis) throws IOException, CertificateEncodingException {
+  private void setUp(final String genesis) {
     final NodeConfiguration nodeConfig =
         new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
@@ -89,7 +87,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void wrongChainId() throws IOException, CertificateEncodingException {
+  public void wrongChainId() {
     setUp("eth_hash_4404.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
@@ -109,7 +107,7 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   @Test
-  public void unnecessaryChainId() throws IOException, CertificateEncodingException {
+  public void unnecessaryChainId() {
     setUp("eth_hash_2018_no_replay_protection.json");
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =

@@ -15,8 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.Besu;
 import tech.pegasys.ethsigner.tests.dsl.Eea;

@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class HashicorpSigningMetadataTomlConfigLoaderTest {
-
   @TempDir Path configsDirectory;
 
   private SigningMetadataTomlConfigLoader loader;
