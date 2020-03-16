@@ -15,10 +15,10 @@ package tech.pegasys.ethsigner.signer.hashicorp;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
-import tech.pegasys.signing.hashicorp.HashicorpConnection;
-import tech.pegasys.signing.hashicorp.HashicorpConnectionFactory;
-import tech.pegasys.signing.hashicorp.HashicorpException;
-import tech.pegasys.signing.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.HashicorpConnection;
+import tech.pegasys.signers.hashicorp.HashicorpConnectionFactory;
+import tech.pegasys.signers.hashicorp.HashicorpException;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 
 import io.vertx.core.Vertx;
 import org.web3j.crypto.Credentials;

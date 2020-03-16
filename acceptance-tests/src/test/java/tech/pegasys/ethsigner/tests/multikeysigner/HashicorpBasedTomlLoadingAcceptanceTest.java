@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.nio.file.Path;
 
@@ -39,7 +39,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @Test
   void hashicorpSignerIsCreatedAndExpectedAddressIsReported(@TempDir final Path tempDir) {
-    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), hashicorpNode);
+    createHashicorpTomlFileAt(tempDir.resolve(FILENAME + ".toml"), hashicorpNode, "value", );
     setup(tempDir);
     assertThat(ethSigner.accounts().list()).containsOnly(HASHICORP_ETHEREUM_ADDRESS);
   }

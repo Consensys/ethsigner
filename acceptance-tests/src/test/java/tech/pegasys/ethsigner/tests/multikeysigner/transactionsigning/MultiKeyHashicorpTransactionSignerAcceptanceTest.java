@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.nio.file.Path;
 

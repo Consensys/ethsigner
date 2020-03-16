@@ -17,8 +17,8 @@ import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
-import tech.pegasys.signing.hashicorp.config.HashicorpKeyConfig;
-import tech.pegasys.signing.hashicorp.config.loader.toml.TomlConfigLoader;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.config.loader.toml.TomlConfigLoader;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;

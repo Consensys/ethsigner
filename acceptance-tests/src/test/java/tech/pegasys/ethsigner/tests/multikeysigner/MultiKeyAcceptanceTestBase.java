@@ -13,7 +13,10 @@
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
+import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
+import java.security.cert.CertificateEncodingException;
+import java.util.Optional;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -21,8 +24,9 @@ import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
-import tech.pegasys.signing.hashicorp.HashicorpConfigUtil;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
+import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
+import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -78,18 +82,28 @@ public class MultiKeyAcceptanceTestBase {
     createTomlFile(tomlPath, toml);
   }
 
-  public void createHashicorpTomlFileAt(final Path tomlPath, final HashicorpNode hashicorpNode) {
+  public void createHashicorpTomlFileAt(final Path tomlPath, final HashicorpNode hashicorpNode,
+      final String signingKeyPath, final String secretName)
+      throws IOException, CertificateEncodingException {
+
+    final Optional<SelfSignedCertificate> tlsCert = hashicorpNode.getServerCertificate();
+    String trustStorePath = null;
+    if(tlsCert.isPresent()) {
+      trustStorePath = createFingerprintFile(tomlPath.getParent(), tlsCert.get(),
+          Optional.of(hashicorpNode.getPort())).toString();
+    }
+
     final String hashicorpSignerToml =
         HashicorpConfigUtil.createTomlConfig(
             hashicorpNode.getHost(),
             hashicorpNode.getPort(),
             hashicorpNode.getVaultToken(),
-            hashicorpNode.getSigningKeyPath(),
-            null,
+            signingKeyPath,
+            secretName,
             10_000,
-            hashicorpNode.isTlsEnabled(),
-            "WHITELIST",
-            hashicorpNode.getKnownServerFilePath().orElse(Path.of("/optional")).toString(),
+            tlsCert.isPresent(),
+            tlsCert.map(ignored -> "WHITELIST").orElse(null),
+            trustStorePath,
             null);
 
     final TomlStringBuilder tomlBuilder = new TomlStringBuilder("signing");

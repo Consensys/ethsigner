@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.tests.signing;
 
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
@@ -19,13 +20,14 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.math.BigInteger;
 
@@ -51,6 +53,9 @@ public class ValueTransferWithHashicorpAcceptanceTest {
 
     final DockerClient docker = new DockerClientFactory().create();
     hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, false);
+    hashicorpNode.addSecretsToVault(singletonMap("value", "827xxxxxx"), "acceptanceTestPath");
+    final HashicorpSigningParams hashicorpParams =
+        new HashicorpSigningParams(hashicorpNode, "acceptanceTestPath", "value");
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
@@ -59,7 +64,7 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpNode).build();
+        new SignerConfigurationBuilder().withHashicorpSigner(hashicorpParams).build();
 
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();

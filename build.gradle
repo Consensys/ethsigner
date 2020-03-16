@@ -116,9 +116,6 @@ allprojects {
     jcenter()
     mavenCentral()
     maven { url  "https://consensys.bintray.com/pegasys-repo" }
-    flatDir {
-      dirs '/Users/tmm/projects/signers/keystorage/hashicorp/build/libs'
-    }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }

@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.signer.multikey.metadata;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.signer.multikey.MultiSignerFactory;
-import tech.pegasys.signing.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 
 public class HashicorpSigningMetadataFile extends SigningMetadataFile {
 

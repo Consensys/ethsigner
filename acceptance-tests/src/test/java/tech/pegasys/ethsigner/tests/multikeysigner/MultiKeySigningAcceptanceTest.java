@@ -18,7 +18,7 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAc
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.signing.hashicorp.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.signers.hashicorp.dsl.HashicorpNode;
 
 import java.io.File;
 import java.net.URISyntaxException;
