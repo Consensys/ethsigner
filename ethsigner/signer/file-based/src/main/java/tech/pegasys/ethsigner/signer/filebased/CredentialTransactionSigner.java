@@ -34,8 +34,8 @@ public class CredentialTransactionSigner implements TransactionSigner {
     final SignatureData signature = Sign.signMessage(data, credentials.getEcKeyPair());
     return new Signature(
         new BigInteger(signature.getV()),
-        new BigInteger(signature.getR()),
-        new BigInteger(signature.getS()));
+        new BigInteger(1, signature.getR()),
+        new BigInteger(1, signature.getS()));
   }
 
   @Override

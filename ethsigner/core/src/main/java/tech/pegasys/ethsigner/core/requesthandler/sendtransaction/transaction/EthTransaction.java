@@ -36,7 +36,7 @@ public class EthTransaction implements Transaction {
   private final JsonRpcRequestId id;
   private BigInteger nonce;
 
-  EthTransaction(
+  public EthTransaction(
       final EthSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final JsonRpcRequestId id) {
