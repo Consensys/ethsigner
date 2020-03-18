@@ -110,35 +110,37 @@ public class HashicorpSubCommand extends SignerSubCommand {
           "Path to the file containing Hashicorp Vault's host, port and self-signed certificate fingerprint",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
-  private final Path tlsKnownServerFile = null;
+  private Path tlsKnownServerFile = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    TlsOptions tlsOptions = null;
-    if (tlsEnabled) {
-      if (tlsKnownServerFile != null) {
-        tlsOptions =
-            new TlsOptions(Optional.of(TrustStoreType.WHITELIST), tlsKnownServerFile, null);
-      } else {
-        tlsOptions = new TlsOptions(Optional.empty(), null, null);
-      }
-    }
-
-    final String token = readTokenFromFile(authFilePath);
 
     final HashicorpKeyConfig keyConfig =
         new HashicorpKeyConfig(
             new ConnectionParameters(
                 serverHost,
                 Optional.of(serverPort),
-                Optional.ofNullable(tlsOptions),
+                Optional.ofNullable(generateTlsOptions()),
                 Optional.of(timeout)),
-            new KeyDefinition(signingKeyPath, Optional.empty(), token));
+            new KeyDefinition(signingKeyPath, Optional.empty(), readTokenFromFile(authFilePath)));
 
     final HashicorpSignerFactory factory = new HashicorpSignerFactory(Vertx.vertx());
     try {
       return factory.create(keyConfig);
     } finally {
       factory.shutdown();
+    }
+  }
+
+  private TlsOptions generateTlsOptions() {
+
+    if (!tlsEnabled) {
+      return null;
+    }
+
+    if (tlsKnownServerFile != null) {
+      return new TlsOptions(Optional.of(TrustStoreType.WHITELIST), tlsKnownServerFile, null);
+    } else {
+      return new TlsOptions(Optional.empty(), null, null);
     }
   }
 

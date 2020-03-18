@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
+import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
 import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
 
@@ -64,13 +65,12 @@ public class HashicorpSigningMetadataTomlConfigLoaderTest {
 
     final HashicorpKeyConfig hashicorpConfig = metadataFile.getConfig();
 
-    assertThat(hashicorpConfig.getConnectionParams().getServerHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getConnectionParams().getServerPort().get()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getConnectionParams().getTimeoutMilliseconds().get())
-        .isEqualTo(10000);
-    assertThat(hashicorpConfig.getConnectionParams().getTlsOptions()).isNotEmpty();
-    assertThat(hashicorpConfig.getConnectionParams().getTlsOptions().get().getTrustStoreType())
-        .isEmpty();
+    final ConnectionParameters connectionParams = hashicorpConfig.getConnectionParams();
+    assertThat(connectionParams.getServerHost()).isEqualTo("Host");
+    assertThat(connectionParams.getServerPort().get()).isEqualTo(9999);
+    assertThat(connectionParams.getTimeoutMilliseconds().get()).isEqualTo(10000);
+    assertThat(connectionParams.getTlsOptions()).isNotEmpty();
+    assertThat(connectionParams.getTlsOptions().get().getTrustStoreType()).isEmpty();
     assertThat(hashicorpConfig.getKeyDefinition().getKeyPath()).isEqualTo("/path/to/key");
     assertThat(hashicorpConfig.getKeyDefinition().getKeyName().get()).isEqualTo("key_name");
     assertThat(hashicorpConfig.getKeyDefinition().getToken()).isEqualTo("token");
