@@ -12,13 +12,10 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,24 +28,18 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
 
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
   static void preSetup() {
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
+        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
   }
 
   @Test
-  void hashicorpLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory)
-      throws IOException {
+  void hashicorpLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
 
-    final Path authFilePath = tomlDirectory.resolve("hashicorpAuthFile");
-    Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
-    final String authFilename = authFilePath.toAbsolutePath().toString();
-
-    createHashicorpTomlFileAt(
-        tomlDirectory.resolve(FILENAME + ".toml"), authFilename, hashicorpNode);
+    createHashicorpTomlFileAt(tomlDirectory.resolve(FILENAME + ".toml"), hashicorpNode);
 
     setup(tomlDirectory);
     performTransaction();

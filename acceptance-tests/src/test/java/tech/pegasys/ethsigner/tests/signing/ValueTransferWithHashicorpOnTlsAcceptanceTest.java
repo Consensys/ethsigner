@@ -18,8 +18,9 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -41,7 +42,7 @@ public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
 
   private static Node ethNode;
   private static Signer ethSigner;
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
   public static void setUpBase() {
@@ -50,7 +51,7 @@ public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpNode.createAndStartHashicorp(docker, true);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, true);
 
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 

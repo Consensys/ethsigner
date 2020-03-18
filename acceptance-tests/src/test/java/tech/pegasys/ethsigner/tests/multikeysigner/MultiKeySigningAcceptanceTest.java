@@ -12,19 +12,17 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.io.Resources;
@@ -37,20 +35,14 @@ import org.junit.jupiter.api.io.TempDir;
 class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
   @TempDir static Path tempDir;
-  private static String authFilename;
 
-  private static HashicorpNode hashicorpNode;
+  private static HashicorpSigningParams hashicorpNode;
 
   @BeforeAll
-  static void preSetup() throws IOException {
+  static void preSetup() {
     preChecks();
-
     hashicorpNode =
-        HashicorpNode.createAndStartHashicorp(new DockerClientFactory().create(), false);
-
-    final Path authFilePath = tempDir.resolve("hashicorpAuthFile");
-    Files.write(authFilePath, hashicorpNode.getVaultToken().getBytes(UTF_8));
-    authFilename = authFilePath.toAbsolutePath().toString();
+        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
   }
 
   static void preChecks() {
@@ -81,9 +73,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
             .getAbsolutePath());
 
     createHashicorpTomlFileAt(
-        tempDir.resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
-        authFilename,
-        hashicorpNode);
+        tempDir.resolve(HashicorpBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"), hashicorpNode);
 
     setup(tempDir);
 

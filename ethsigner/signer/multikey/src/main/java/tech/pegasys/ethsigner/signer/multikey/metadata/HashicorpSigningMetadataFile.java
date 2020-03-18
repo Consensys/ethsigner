@@ -13,20 +13,20 @@
 package tech.pegasys.ethsigner.signer.multikey.metadata;
 
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.MultiSignerFactory;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 
 public class HashicorpSigningMetadataFile extends SigningMetadataFile {
 
-  private final HashicorpConfig hashicorpConfig;
+  private final HashicorpKeyConfig hashicorpConfig;
 
   public HashicorpSigningMetadataFile(
-      final String filename, final HashicorpConfig hashicorpConfig) {
+      final String filename, final HashicorpKeyConfig hashicorpConfig) {
     super(filename);
     this.hashicorpConfig = hashicorpConfig;
   }
 
-  public HashicorpConfig getConfig() {
+  public HashicorpKeyConfig getConfig() {
     return hashicorpConfig;
   }
 

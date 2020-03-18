@@ -20,6 +20,7 @@ dependencies {
 
   testImplementation project(':ethsigner:core')
   testImplementation project(path: ':ethsigner:signer:multikey', configuration: 'testSupportArtifacts')
+  testImplementation(group: 'tech.pegasys.signers.internal', name: 'hashicorp', classifier: 'test-fixtures')
 
   testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'

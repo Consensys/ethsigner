@@ -22,12 +22,21 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.signers.hashicorp.TrustStoreType;
+import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.config.KeyDefinition;
+import tech.pegasys.signers.hashicorp.config.TlsOptions;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.Vertx;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -44,6 +53,9 @@ public class HashicorpSubCommand extends SignerSubCommand {
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
   public static final boolean DEFAULT_TLS_ENABLED = true;
+
+  private static final String AUTH_FILE_ERROR_MSG_FMT =
+      "Unable to read file containing the authentication information for Hashicorp Vault: %s";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -98,19 +110,38 @@ public class HashicorpSubCommand extends SignerSubCommand {
           "Path to the file containing Hashicorp Vault's host, port and self-signed certificate fingerprint",
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
-  private final Path tlsKnownServerFile = null;
+  private Path tlsKnownServerFile = null;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    final HashicorpConfig config =
-        new HashicorpConfig(
-            signingKeyPath,
-            serverHost,
-            serverPort,
-            authFilePath,
-            timeout,
-            isTlsEnabled(),
-            getTlsKnownServerFile());
-    return HashicorpVaultSignerFactory.createSigner(config);
+
+    final HashicorpKeyConfig keyConfig =
+        new HashicorpKeyConfig(
+            new ConnectionParameters(
+                serverHost,
+                Optional.of(serverPort),
+                Optional.ofNullable(generateTlsOptions()),
+                Optional.of(timeout)),
+            new KeyDefinition(signingKeyPath, Optional.empty(), readTokenFromFile(authFilePath)));
+
+    final HashicorpSignerFactory factory = new HashicorpSignerFactory(Vertx.vertx());
+    try {
+      return factory.create(keyConfig);
+    } finally {
+      factory.shutdown();
+    }
+  }
+
+  private TlsOptions generateTlsOptions() {
+
+    if (!tlsEnabled) {
+      return null;
+    }
+
+    if (tlsKnownServerFile != null) {
+      return new TlsOptions(Optional.of(TrustStoreType.WHITELIST), tlsKnownServerFile, null);
+    } else {
+      return new TlsOptions(Optional.empty(), null, null);
+    }
   }
 
   @Override
@@ -130,6 +161,20 @@ public class HashicorpSubCommand extends SignerSubCommand {
 
   public Optional<Path> getTlsKnownServerFile() {
     return Optional.ofNullable(tlsKnownServerFile);
+  }
+
+  private String readTokenFromFile(final Path path) {
+    try (final Stream<String> stream = Files.lines(path)) {
+      return stream
+          .findFirst()
+          .orElseThrow(
+              () ->
+                  new TransactionSignerInitializationException(
+                      String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString())));
+    } catch (final IOException e) {
+      throw new TransactionSignerInitializationException(
+          String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString()));
+    }
   }
 
   @Override

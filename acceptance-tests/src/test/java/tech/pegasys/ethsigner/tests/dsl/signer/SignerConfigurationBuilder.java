@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.nio.file.Path;
@@ -31,7 +31,7 @@ public class SignerConfigurationBuilder {
   private int webSocketPort;
   private String keyVaultName;
   private Path multiKeySignerDirectory;
-  private HashicorpNode hashicorpNode;
+  private HashicorpSigningParams hashicorpNode;
   private TlsOptions serverTlsOptions;
   private ClientTlsOptions clientTlsOptions;
   private TlsCertificateDefinition overriddenCaTrustStore;
@@ -46,7 +46,8 @@ public class SignerConfigurationBuilder {
     return this;
   }
 
-  public SignerConfigurationBuilder withHashicorpSigner(final HashicorpNode hashicorpNode) {
+  public SignerConfigurationBuilder withHashicorpSigner(
+      final HashicorpSigningParams hashicorpNode) {
     this.hashicorpNode = hashicorpNode;
     return this;
   }

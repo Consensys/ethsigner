@@ -14,10 +14,12 @@ package tech.pegasys.ethsigner.signer.multikey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
+import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,16 +45,14 @@ public class HashicorpSigningMetadataTomlConfigLoaderTest {
 
   @Test
   void hashicorpConfigIsLoadedIfHashicorpMetadataFileInDirectory() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "/path/to/auth-file")
-            .withNonQuotedString("timeout", "50")
-            .build();
+    final String hashicorpSignerToml =
+        HashicorpConfigUtil.createTomlConfig(
+            "Host", 9999, "token", "/path/to/key", "key_name", 10000, true, null, null, null);
 
+    final TomlStringBuilder tomlBuilder = new TomlStringBuilder("signing");
+    tomlBuilder.withQuotedString("type", "hashicorp-signer");
+
+    final String toml = tomlBuilder.build() + hashicorpSignerToml;
     createTomlFile(toml);
 
     final Collection<SigningMetadataFile> metadataFiles =
@@ -63,182 +63,17 @@ public class HashicorpSigningMetadataTomlConfigLoaderTest {
     final HashicorpSigningMetadataFile metadataFile =
         (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
 
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-    assertThat(hashicorpConfig.isTlsEnabled()).isTrue();
-    assertThat(hashicorpConfig.getTlsKnownServerFile().isEmpty()).isTrue();
-  }
+    final HashicorpKeyConfig hashicorpConfig = metadataFile.getConfig();
 
-  @Test
-  void hashicorpConfigIsLoadedWithTlsDisabled() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "/path/to/auth-file")
-            .withNonQuotedString("timeout", "50")
-            .withNonQuotedString("tls-enabled", "false")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-    assertThat(hashicorpConfig.isTlsEnabled()).isFalse();
-    assertThat(hashicorpConfig.getTlsKnownServerFile().isPresent()).isFalse();
-  }
-
-  @Test
-  void hashicorpConfigIsLoadedWithTlsDisabledAndKnownServerFileSpecified() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "/path/to/auth-file")
-            .withNonQuotedString("timeout", "50")
-            .withNonQuotedString("tls-enabled", "false")
-            .withQuotedString("tls-known-server-file", "/path/to/known-server-file")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-    assertThat(hashicorpConfig.isTlsEnabled()).isFalse();
-    assertThat(hashicorpConfig.getTlsKnownServerFile().isPresent()).isFalse();
-  }
-
-  @Test
-  void hashicorpConfigIsLoadedWithTlsAndKnownServerFileSpecified() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "/path/to/auth-file")
-            .withNonQuotedString("timeout", "50")
-            .withNonQuotedString("tls-enabled", "true")
-            .withQuotedString("tls-known-server-file", "/path/to/known-server-file")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    final HashicorpConfig hashicorpConfig = metadataFile.getConfig();
-    assertThat(hashicorpConfig.getSigningKeyPath()).isEqualTo("/path/to/key");
-    assertThat(hashicorpConfig.getHost()).isEqualTo("Host");
-    assertThat(hashicorpConfig.getPort()).isEqualTo(9999);
-    assertThat(hashicorpConfig.getAuthFilePath().toString()).isEqualTo("/path/to/auth-file");
-    assertThat(hashicorpConfig.getTimeout()).isEqualTo(50);
-    assertThat(hashicorpConfig.isTlsEnabled()).isTrue();
-    assertThat(hashicorpConfig.getTlsKnownServerFile().isPresent()).isTrue();
-  }
-
-  @Test
-  void hashicorpConfigWithIllegalValueTypeFailsToLoad() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "/path/to/auth-file")
-            .withQuotedString("timeout", "timeout string")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isZero();
-  }
-
-  @Test
-  void hashicorpConfigWithMissingFieldFailsToLoad() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isZero();
-  }
-
-  @Test
-  void relativeHashicorpAuthFileIsRelativeToLibraryRoot() throws IOException {
-    final String toml =
-        new TomlStringBuilder("signing")
-            .withQuotedString("type", "hashicorp-signer")
-            .withQuotedString("signing-key-path", "/path/to/key")
-            .withQuotedString("host", "Host")
-            .withNonQuotedString("port", "9999")
-            .withQuotedString("auth-file", "./path/to/auth-file")
-            .withNonQuotedString("timeout", "50")
-            .withNonQuotedString("tls-enabled", "true")
-            .withQuotedString("tls-known-server-file", "./path/to/known-server-file")
-            .build();
-
-    createTomlFile(toml);
-
-    final Collection<SigningMetadataFile> metadataFiles =
-        loader.loadAvailableSigningMetadataTomlConfigs();
-
-    assertThat(metadataFiles.size()).isOne();
-    assertThat(metadataFiles.toArray()[0]).isInstanceOf(HashicorpSigningMetadataFile.class);
-    final HashicorpSigningMetadataFile metadataFile =
-        (HashicorpSigningMetadataFile) metadataFiles.toArray()[0];
-
-    assertThat(metadataFile.getConfig().getAuthFilePath())
-        .isEqualTo(configsDirectory.resolve("./path/to/auth-file"));
-    assertThat(metadataFile.getConfig().getTlsKnownServerFile().get())
-        .isEqualTo(configsDirectory.resolve("./path/to/known-server-file"));
+    final ConnectionParameters connectionParams = hashicorpConfig.getConnectionParams();
+    assertThat(connectionParams.getServerHost()).isEqualTo("Host");
+    assertThat(connectionParams.getServerPort().get()).isEqualTo(9999);
+    assertThat(connectionParams.getTimeoutMilliseconds().get()).isEqualTo(10000);
+    assertThat(connectionParams.getTlsOptions()).isNotEmpty();
+    assertThat(connectionParams.getTlsOptions().get().getTrustStoreType()).isEmpty();
+    assertThat(hashicorpConfig.getKeyDefinition().getKeyPath()).isEqualTo("/path/to/key");
+    assertThat(hashicorpConfig.getKeyDefinition().getKeyName().get()).isEqualTo("key_name");
+    assertThat(hashicorpConfig.getKeyDefinition().getToken()).isEqualTo("token");
   }
 
   private void createTomlFile(final String toml) throws IOException {

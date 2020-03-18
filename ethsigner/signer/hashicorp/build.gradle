@@ -29,6 +29,7 @@ dependencies {
   implementation project(':ethsigner:commandline')
   implementation project(':ethsigner:signing-api')
   implementation project(':ethsigner:signer:file-based')
+  implementation 'tech.pegasys.signers.internal:hashicorp'
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
@@ -47,6 +48,7 @@ dependencies {
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
   testImplementation project(path: ':ethsigner:commandline', configuration: 'testSupportArtifacts')
+  testImplementation(group: 'tech.pegasys.signers.internal', name: 'hashicorp', classifier: 'test-fixtures')
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 

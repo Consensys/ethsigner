@@ -17,7 +17,7 @@ import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpVaultSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
@@ -38,12 +38,15 @@ public class MultiKeyTransactionSignerProvider
 
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
+  private final HashicorpSignerFactory hashicorpSignerFactory;
 
   MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
-      final AzureKeyVaultTransactionSignerFactory azureFactory) {
+      final AzureKeyVaultTransactionSignerFactory azureFactory,
+      final HashicorpSignerFactory hashicorpSignerFactory) {
     this.signingMetadataTomlConfigLoader = signingMetadataTomlConfigLoader;
     this.azureFactory = azureFactory;
+    this.hashicorpSignerFactory = hashicorpSignerFactory;
   }
 
   @Override
@@ -84,7 +87,7 @@ public class MultiKeyTransactionSignerProvider
   public TransactionSigner createSigner(final HashicorpSigningMetadataFile metadataFile) {
     final TransactionSigner signer;
     try {
-      signer = HashicorpVaultSignerFactory.createSigner(metadataFile.getConfig());
+      signer = hashicorpSignerFactory.create(metadataFile.getConfig());
     } catch (final TransactionSignerInitializationException e) {
       LOG.error("Failed to construct Hashicorp signer from " + metadataFile.getBaseFilename());
       return null;
@@ -130,5 +133,10 @@ public class MultiKeyTransactionSignerProvider
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void shutdown() {
+    hashicorpSignerFactory.shutdown(); // required to clean up its Vertx instance.
   }
 }

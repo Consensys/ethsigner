@@ -12,14 +12,13 @@
  */
 package tech.pegasys.ethsigner.signer.multikey;
 
-import static tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand.DEFAULT_TLS_ENABLED;
-
 import tech.pegasys.ethsigner.signer.azure.AzureConfig.AzureConfigBuilder;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpConfig;
 import tech.pegasys.ethsigner.signer.multikey.metadata.AzureSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.config.loader.toml.TomlConfigLoader;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -102,7 +101,7 @@ class SigningMetadataTomlConfigLoader {
       } else if (SignerType.fromString(type).equals(SignerType.AZURE_SIGNER)) {
         return getAzureBasedSigningMetadataFromToml(file.getFileName().toString(), result);
       } else if (SignerType.fromString(type).equals(SignerType.HASHICORP_SIGNER)) {
-        return getHashicorpMetadataFromToml(file.getFileName().toString(), result);
+        return getHashicorpMetadataFromToml(file, result);
       } else {
         LOG.error("Unknown signing type in metadata: " + type);
         return Optional.empty();
@@ -152,28 +151,18 @@ class SigningMetadataTomlConfigLoader {
   }
 
   private Optional<SigningMetadataFile> getHashicorpMetadataFromToml(
-      final String filename, final TomlParseResult result) {
+      final Path inputFile, final TomlParseResult result) {
+
+    final String filename = inputFile.getFileName().toString();
 
     final Optional<TomlTableAdapter> signingTable = getSigningTableFrom(filename, result);
     if (signingTable.isEmpty()) {
       return Optional.empty();
     }
 
-    final HashicorpConfig.HashicorpConfigBuilder builder =
-        new HashicorpConfig.HashicorpConfigBuilder();
-    final TomlTableAdapter table = signingTable.get();
+    final HashicorpKeyConfig config = TomlConfigLoader.fromToml(inputFile, "signing");
 
-    builder
-        .withSigningKeyPath(table.getString("signing-key-path"))
-        .withHost(table.getString("host"))
-        .withPort(table.getLong("port").intValue())
-        .withAuthFilePath(makeRelativePathAbsolute(table.getString("auth-file")))
-        .withTimeout(table.getLong("timeout"))
-        .withTlsEnabled(table.getOptionalBoolean("tls-enabled").orElse(DEFAULT_TLS_ENABLED))
-        .withTlsKnownServerFile(
-            table.getOptionalString("tls-known-server-file").map(this::makeRelativePathAbsolute));
-
-    return Optional.of(new HashicorpSigningMetadataFile(filename, builder.build()));
+    return Optional.of(new HashicorpSigningMetadataFile(filename, config));
   }
 
   private Optional<TomlTableAdapter> getSigningTableFrom(

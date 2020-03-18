@@ -13,28 +13,32 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
 import tech.pegasys.ethsigner.tests.dsl.Accounts;
-import tech.pegasys.ethsigner.tests.dsl.hashicorp.HashicorpNode;
+import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
+import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import com.google.common.io.Resources;
 
 public class TransactionSignerParamsSupplier {
 
-  private final HashicorpNode hashicorpNode;
+  private final HashicorpSigningParams hashicorpNode;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
   public TransactionSignerParamsSupplier(
-      final HashicorpNode hashicorpNode,
+      final HashicorpSigningParams hashicorpNode,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {
     this.hashicorpNode = hashicorpNode;
@@ -52,16 +56,24 @@ public class TransactionSignerParamsSupplier {
       params.add(hashicorpNode.getHost());
       params.add("--port");
       params.add(String.valueOf(hashicorpNode.getPort()));
-      if (!hashicorpNode.isTlsEnabled()) {
+      params.add("--signing-key-path");
+      params.add(hashicorpNode.getSecretHttpPath());
+
+      if (hashicorpNode.getServerCertificate().isEmpty()) {
         params.add("--tls-enabled=false");
       } else {
-        hashicorpNode
-            .getKnownServerFilePath()
-            .ifPresent(
-                trustStoreConfig -> {
-                  params.add("--tls-known-server-file");
-                  params.add(trustStoreConfig.toString());
-                });
+        final SelfSignedCertificate tlsCert = hashicorpNode.getServerCertificate().get();
+        final Path trustStoreParentDir;
+        try {
+          trustStoreParentDir = Files.createTempDirectory("knownServerPath");
+          final Path trustStorePath =
+              createFingerprintFile(
+                  trustStoreParentDir, tlsCert, Optional.of(hashicorpNode.getPort()));
+          params.add("--tls-known-server-file");
+          params.add(trustStorePath.toString());
+        } catch (final IOException | CertificateEncodingException e) {
+          throw new RuntimeException("Failed to construct hashicorp trust store file.");
+        }
       }
 
     } else if (azureKeyVault != null) {

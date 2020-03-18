@@ -46,7 +46,7 @@ class MultiKeyTransactionSignerProviderTest {
   final AzureKeyVaultTransactionSignerFactory azureFactory =
       new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
   private MultiKeyTransactionSignerProvider signerFactory =
-      new MultiKeyTransactionSignerProvider(loader, azureFactory);
+      new MultiKeyTransactionSignerProvider(loader, azureFactory, null);
   private FileBasedSigningMetadataFile metadataFile;
   private final String KEY_FILENAME = "k.key";
   private final String PASSWORD_FILENAME = "p.password";

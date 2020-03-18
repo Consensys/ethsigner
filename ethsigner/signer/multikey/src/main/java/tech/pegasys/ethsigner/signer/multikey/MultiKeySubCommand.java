@@ -19,11 +19,13 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
 
 import java.nio.file.Path;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import io.vertx.core.Vertx;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -67,7 +69,10 @@ public class MultiKeySubCommand extends SignerSubCommand {
     final AzureKeyVaultTransactionSignerFactory azureFactory =
         new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
 
-    return new MultiKeyTransactionSignerProvider(signingMetadataTomlConfigLoader, azureFactory);
+    final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory(Vertx.vertx());
+
+    return new MultiKeyTransactionSignerProvider(
+        signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
   }
 
   @Override

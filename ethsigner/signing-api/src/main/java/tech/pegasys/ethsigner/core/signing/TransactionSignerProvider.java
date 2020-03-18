@@ -20,4 +20,6 @@ public interface TransactionSignerProvider {
   Optional<TransactionSigner> getSigner(String address);
 
   Set<String> availableAddresses();
+
+  default void shutdown() {}
 }
