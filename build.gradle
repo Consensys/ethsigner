@@ -406,7 +406,7 @@ startScripts {
 }
 
 dependencies {
-  implementation project(':ethsigner:app')
+  compile project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
 }
 
