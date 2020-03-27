@@ -12,14 +12,15 @@
  */
 package tech.pegasys.ethsigner.signer.filebased;
 
+import static tech.pegasys.ethsigner.util.PasswordFileUtil.readPasswordFromFile;
+
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.google.common.base.Charsets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.CipherException;
@@ -40,6 +41,9 @@ public class FileBasedSignerFactory {
     final String password;
     try {
       password = readPasswordFromFile(passwordFilePath);
+    } catch (final FileNotFoundException fnfe) {
+      LOG.error("File not found: " + passwordFilePath);
+      throw new TransactionSignerInitializationException("File not found: " + passwordFilePath);
     } catch (final IOException e) {
       final String message = READ_PWD_FILE_MESSAGE;
       LOG.error(message, e);
@@ -57,10 +61,5 @@ public class FileBasedSignerFactory {
       LOG.error(message, e);
       throw new TransactionSignerInitializationException(message, e);
     }
-  }
-
-  private static String readPasswordFromFile(final Path path) throws IOException {
-    final byte[] fileContent = Files.readAllBytes(path);
-    return new String(fileContent, Charsets.UTF_8);
   }
 }
