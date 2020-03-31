@@ -54,7 +54,8 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void validFileBasedTomlFileWithMultineLinePasswordFileProducesSignerWhichReportsMatchingAddress(
       @TempDir Path tomlDirectory) throws URISyntaxException, IOException {
     final Path passwordFile =
-        Files.writeString(tomlDirectory.resolve("password.txt"), "password\nsecond line\n");
+        Files.writeString(
+            tomlDirectory.resolve("password.txt"), String.format("password%nsecond line%n"));
     createFileBasedTomlFileAt(
         tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml").toAbsolutePath(),
         new File(
