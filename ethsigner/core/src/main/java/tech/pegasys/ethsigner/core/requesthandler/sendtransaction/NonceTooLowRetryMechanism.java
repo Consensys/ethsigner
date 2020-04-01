@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
+
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -34,7 +35,7 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
   public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
     if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
-      if (errorResponse.getError().equals(JsonRpcError.NONCE_TOO_LOW)) {
+      if (NONCE_TOO_LOW.equals(errorResponse.getError())) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
         return true;
       }
