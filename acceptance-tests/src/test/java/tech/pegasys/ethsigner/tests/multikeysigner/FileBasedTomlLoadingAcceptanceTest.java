@@ -15,7 +15,9 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.io.Resources;
@@ -42,6 +44,26 @@ class FileBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
                         "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.password")
                     .toURI())
             .getAbsolutePath());
+
+    setup(tomlDirectory);
+
+    assertThat(ethSigner.accounts().list()).containsOnly(FILE_ETHEREUM_ADDRESS);
+  }
+
+  @Test
+  void validFileBasedTomlFileWithMultineLinePasswordFileProducesSignerWhichReportsMatchingAddress(
+      @TempDir Path tomlDirectory) throws URISyntaxException, IOException {
+    final Path passwordFile =
+        Files.writeString(
+            tomlDirectory.resolve("password.txt"), String.format("password%nsecond line%n"));
+    createFileBasedTomlFileAt(
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml").toAbsolutePath(),
+        new File(
+                Resources.getResource(
+                        "UTC--2019-12-05T05-17-11.151993000Z--a01f618424b0113a9cebdc6cb66ca5b48e9120c5.key")
+                    .toURI())
+            .getAbsolutePath(),
+        passwordFile.toString());
 
     setup(tomlDirectory);
 

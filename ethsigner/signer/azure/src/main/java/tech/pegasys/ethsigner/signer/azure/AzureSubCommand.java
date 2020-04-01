@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.signer.azure;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.PasswordFileUtil.readPasswordFromFile;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
@@ -20,11 +21,10 @@ import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.google.common.base.Charsets;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -77,7 +77,9 @@ public class AzureSubCommand extends SignerSubCommand {
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final String clientSecret;
     try {
-      clientSecret = readSecretFromFile(clientSecretPath);
+      clientSecret = readPasswordFromFile(clientSecretPath);
+    } catch (final FileNotFoundException fnfe) {
+      throw new TransactionSignerInitializationException("File not found: " + clientSecretPath);
     } catch (final IOException e) {
       throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
@@ -100,10 +102,5 @@ public class AzureSubCommand extends SignerSubCommand {
   @Override
   public String getCommandName() {
     return COMMAND_NAME;
-  }
-
-  private static String readSecretFromFile(final Path path) throws IOException {
-    final byte[] fileContent = Files.readAllBytes(path);
-    return new String(fileContent, Charsets.UTF_8);
   }
 }
