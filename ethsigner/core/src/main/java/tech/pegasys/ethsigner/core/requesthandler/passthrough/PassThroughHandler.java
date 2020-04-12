@@ -51,7 +51,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   }
 
   @Override
-  public void handle(final RoutingContext context) {    
+  public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
     final String uri = httpRequestArgs.equals("/") ? httpServerRequest.uri() : httpRequestArgs;
     final HttpClientRequest proxyRequest =
