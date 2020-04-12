@@ -110,10 +110,11 @@ public class EthSignerBaseCommand implements Config {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-args"},
-      description = "Query String to append to the http request (e.g. infura)",
-      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      description =
+          "Query String to append to the http request (e.g. full infura url with project id)",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
-  private String downstreamHttpRequestArgs;
+  private String downstreamHttpRequestArgs = "/";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(

@@ -53,7 +53,6 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
-    LOG.debug(httpRequestArgs);
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
