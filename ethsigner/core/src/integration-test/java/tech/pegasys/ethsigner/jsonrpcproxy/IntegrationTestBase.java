@@ -121,6 +121,8 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(0);
     httpServerOptions.setHost("localhost");
 
+    final String downstreamHttpRequestArgs = "/";
+
     // Force TransactionDeserialisation to fail
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
@@ -136,6 +138,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
+            downstreamHttpRequestArgs,
             jsonDecoder,
             dataPath,
             vertx);
