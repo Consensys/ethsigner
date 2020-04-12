@@ -33,12 +33,15 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private final HttpClient ethNodeClient;
   private final VertxRequestTransmitter transmitter;
+  private final String httpRequestArgs;
 
   public PassThroughHandler(
       final HttpClient ethNodeClient,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory,
+      final String httpRequestArgs) {
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
+    this.httpRequestArgs = httpRequestArgs;
   }
 
   @Override
@@ -50,10 +53,11 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
+    LOG.debug(httpRequestArgs);
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
-            httpServerRequest.uri(),
+            httpRequestArgs,
             response -> transmitter.handleResponse(context, response));
 
     final Buffer body = context.getBody();

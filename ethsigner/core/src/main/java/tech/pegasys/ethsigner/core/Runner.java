@@ -59,6 +59,7 @@ public class Runner {
   private final TransactionSignerProvider transactionSignerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
+  private final String httpRequestArgs;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final JsonDecoder jsonDecoder;
   private final Path dataPath;
@@ -71,6 +72,7 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
+      final String httpRequestArgs,
       final JsonDecoder jsonDecoder,
       final Path dataPath,
       final Vertx vertx) {
@@ -78,6 +80,7 @@ public class Runner {
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
+    this.httpRequestArgs = httpRequestArgs;
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = vertx;
@@ -116,7 +119,7 @@ public class Runner {
         .handler(new UpcheckHandler());
 
     final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory);
+        new PassThroughHandler(downStreamConnection, transmitterFactory, httpRequestArgs);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
@@ -125,7 +128,7 @@ public class Runner {
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
     final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory);
+        new PassThroughHandler(downStreamConnection, transmitterFactory, httpRequestArgs);
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
@@ -138,6 +141,7 @@ public class Runner {
         new SendTransactionHandler(
             chainId,
             downStreamConnection,
+            httpRequestArgs,
             transactionSignerProvider,
             transactionFactory,
             transmitterFactory);

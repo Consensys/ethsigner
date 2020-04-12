@@ -107,6 +107,14 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--downstream-http-request-args"},
+      description = "Query String to append to the http request (e.g. infura)",
+      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      arity = "1")
+  private String downstreamHttpRequestArgs;
+
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-port",
@@ -141,6 +149,11 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Integer getDownstreamHttpPort() {
     return downstreamHttpPort;
+  }
+
+  @Override
+  public String getDownstreamHttpRequestArgs() {
+    return downstreamHttpRequestArgs;
   }
 
   @Override
@@ -185,6 +198,7 @@ public class EthSignerBaseCommand implements Config {
         .add("downstreamHttpHost", downstreamHttpHost)
         .add("downstreamHttpPort", downstreamHttpPort)
         .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
+        .add("downstreamHttpRequestArgs", downstreamHttpRequestArgs)
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
