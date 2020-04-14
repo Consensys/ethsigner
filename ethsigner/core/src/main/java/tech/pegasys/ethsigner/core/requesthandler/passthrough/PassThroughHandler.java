@@ -17,6 +17,8 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
+import java.net.URLEncoder;
+
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -35,13 +37,20 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   private final VertxRequestTransmitter transmitter;
   private final String httpRequestArgs;
 
+  private final String DEFAULT_URI = "/";
+
   public PassThroughHandler(
       final HttpClient ethNodeClient,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final String httpRequestArgs) {
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
-    this.httpRequestArgs = httpRequestArgs;
+
+    if (httpRequestArgs != null) {
+      this.httpRequestArgs = httpRequestArgs;
+    } else {
+      this.httpRequestArgs = DEFAULT_URI;
+    }
   }
 
   @Override
@@ -53,7 +62,10 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
-    final String uri = httpRequestArgs.equals("/") ? httpServerRequest.uri() : httpRequestArgs;
+    final String uri =
+        DEFAULT_URI.equals(httpRequestArgs)
+            ? httpServerRequest.uri()
+            : URLEncoder.encode(httpRequestArgs);
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
