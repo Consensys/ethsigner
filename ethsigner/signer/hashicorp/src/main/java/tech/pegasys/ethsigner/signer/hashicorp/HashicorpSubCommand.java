@@ -48,7 +48,7 @@ import picocli.CommandLine.Option;
 public class HashicorpSubCommand extends SignerSubCommand {
   static final String COMMAND_NAME = "hashicorp-signer";
   private static final String DEFAULT_HASHICORP_VAULT_HOST = "localhost";
-  private static final String DEFAULT_KEY_PATH = "/secret/data/ethsignerSigningKey";
+  private static final String DEFAULT_KEY_PATH = "/v1/secret/data/ethsignerSigningKey";
   private static final String DEFAULT_PORT_STRING = "8200";
   private static final Integer DEFAULT_PORT = Integer.valueOf(DEFAULT_PORT_STRING);
   private static final Long DEFAULT_TIMEOUT = Duration.ofSeconds(10).toMillis();
