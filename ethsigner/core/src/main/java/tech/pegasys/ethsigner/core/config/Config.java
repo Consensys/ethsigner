@@ -29,9 +29,11 @@ public interface Config {
 
   Integer getDownstreamHttpPort();
 
-  Duration getDownstreamHttpRequestTimeout();
+  String getDownstreamHttpPath();
 
-  String getDownstreamHttpRequestArgs();
+  boolean getDownstreamHttpReplacePath();
+
+  Duration getDownstreamHttpRequestTimeout();
 
   String getHttpListenHost();
 

@@ -14,20 +14,27 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
-class ProxyIntegrationTest extends DefaultTestBase {
+abstract class ProxyIntegrationTest extends DefaultProxyTestBase {
   private static final String LOGIN_BODY = "{\"username\":\"username1\",\"password\":\"pegasys\"}";
   private static final String LOGIN_RESPONSE = "{\"token\":\"eyJ0\"}";
   private static final Map<String, String> REQUEST_HEADERS = singletonMap("Accept", "*/*");
   private static final Map<String, String> RESPONSE_HEADERS =
       singletonMap("Content-Type", "Application/Json");
+
+  public ProxyIntegrationTest(String path, boolean replacePath)
+      throws IOException, CipherException {
+    super(path, replacePath);
+  }
 
   @Test
   void requestWithHeadersIsProxied() {
@@ -61,6 +68,14 @@ class ProxyIntegrationTest extends DefaultTestBase {
     verifyEthNodeReceived(ethProtocolVersionRequest);
   }
 
+  private String getPath(String path) {
+    if (isDownstreamHttpReplacePath()) {
+      return getDownstreamHttpPath();
+    } else {
+      return getDownstreamHttpPath() + path;
+    }
+  }
+
   @Test
   void postRequestToNonRootPathIsProxied() {
     setUpEthNodeResponse(
@@ -72,7 +87,7 @@ class ProxyIntegrationTest extends DefaultTestBase {
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, getPath("/login"));
   }
 
   @Test
@@ -88,7 +103,7 @@ class ProxyIntegrationTest extends DefaultTestBase {
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, getPath("/login"));
   }
 
   @Test
@@ -102,7 +117,7 @@ class ProxyIntegrationTest extends DefaultTestBase {
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, getPath("/login"));
   }
 
   @Test
@@ -116,6 +131,6 @@ class ProxyIntegrationTest extends DefaultTestBase {
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, "/login");
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, getPath("/login"));
   }
 }

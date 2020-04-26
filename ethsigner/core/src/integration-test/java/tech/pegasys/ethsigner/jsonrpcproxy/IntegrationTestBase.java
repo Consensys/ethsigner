@@ -83,6 +83,8 @@ public class IntegrationTestBase {
   private static final String LOCALHOST = "127.0.0.1";
   public static final long DEFAULT_CHAIN_ID = 9;
   public static final int DEFAULT_ID = 77;
+  public static final String DOWNSTREAM_PATH = "/v3/projectid";
+  public static final boolean DOWNSTREAM_REPLACE_PATH = true;
 
   static final String MALFORMED_JSON = "{Bad Json: {{{}";
 
@@ -104,6 +106,14 @@ public class IntegrationTestBase {
   @TempDir static Path dataPath;
 
   static void setupEthSigner(final long chainId) throws IOException, CipherException {
+    setupEthSigner(chainId, "", false);
+  }
+
+  static void setupEthSigner(
+      final long chainId,
+      final String downstreamHttpRequestPath,
+      final boolean downstreamHttpReplacePath)
+      throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();
@@ -121,8 +131,6 @@ public class IntegrationTestBase {
     httpServerOptions.setPort(0);
     httpServerOptions.setHost("localhost");
 
-    final String downstreamHttpRequestArgs = "/";
-
     // Force TransactionDeserialisation to fail
     final ObjectMapper jsonObjectMapper = new ObjectMapper();
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
@@ -138,7 +146,8 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
-            downstreamHttpRequestArgs,
+            downstreamHttpRequestPath,
+            downstreamHttpReplacePath,
             jsonDecoder,
             dataPath,
             vertx);

@@ -50,13 +50,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   public SendTransactionHandler(
       final long chainId,
       final HttpClient ethNodeClient,
-      final String httpRequestArgs,
+      final String httpPath,
       final TransactionSignerProvider transactionSignerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;
     this.ethNodeClient = ethNodeClient;
-    this.httpRequestArgs = httpRequestArgs;
+    this.httpRequestArgs = httpPath;
     this.transactionSignerProvider = transactionSignerProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;

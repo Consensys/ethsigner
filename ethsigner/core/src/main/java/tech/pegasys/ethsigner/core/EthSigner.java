@@ -79,7 +79,8 @@ public final class EthSigner {
               webClientOptionsFactory.createWebClientOptions(config),
               applyConfigTlsSettingsTo(serverOptions),
               downstreamHttpRequestTimeout,
-              config.getDownstreamHttpRequestArgs(),
+              config.getDownstreamHttpPath(),
+              config.getDownstreamHttpReplacePath(),
               jsonDecoder,
               config.getDataPath(),
               vertx);

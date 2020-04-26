@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ConsenSys AG.
+ * Copyright 2019 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,13 +10,15 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner;
+package tech.pegasys.ethsigner.jsonrpcproxy;
 
-public interface DefaultCommandValues {
-  String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
-  String MANDATORY_PATH_FORMAT_HELP = "<PATH>";
-  String MANDATORY_HOST_FORMAT_HELP = "<HOST>";
-  String MANDATORY_PORT_FORMAT_HELP = "<PORT>";
-  String MANDATORY_LONG_FORMAT_HELP = "<LONG>";
-  String MANDATORY_BOOLEAN_FORMAT_HELP = "<BOOL>";
+import java.io.IOException;
+
+import org.web3j.crypto.CipherException;
+
+class ProxyIntegrationWithPathTest extends ProxyIntegrationTest {
+
+  public ProxyIntegrationWithPathTest() throws IOException, CipherException {
+    super(DOWNSTREAM_PATH, false);
+  }
 }

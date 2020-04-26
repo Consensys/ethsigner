@@ -17,8 +17,6 @@ import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
-import java.net.URLEncoder;
-
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
@@ -35,22 +33,22 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private final HttpClient ethNodeClient;
   private final VertxRequestTransmitter transmitter;
-  private final String httpRequestArgs;
-
-  private final String DEFAULT_URI = "/";
+  private final String httpDownstreamPath;
+  private final boolean httpDownstreamReplacePath;
 
   public PassThroughHandler(
       final HttpClient ethNodeClient,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
-      final String httpRequestArgs) {
+      final String httpDownstreamPath,
+      final boolean httpDownstreamReplacePath) {
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
-
-    if (httpRequestArgs != null) {
-      this.httpRequestArgs = httpRequestArgs;
+    if (httpDownstreamPath == null) {
+      this.httpDownstreamPath = "";
     } else {
-      this.httpRequestArgs = DEFAULT_URI;
+      this.httpDownstreamPath = httpDownstreamPath;
     }
+    this.httpDownstreamReplacePath = httpDownstreamReplacePath;
   }
 
   @Override
@@ -63,9 +61,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
     final String uri =
-        DEFAULT_URI.equals(httpRequestArgs)
-            ? httpServerRequest.uri()
-            : URLEncoder.encode(httpRequestArgs);
+        httpDownstreamPath + (this.httpDownstreamReplacePath ? "" : httpServerRequest.uri());
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
@@ -87,7 +83,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private void logRequest(final HttpServerRequest httpRequest, final String body) {
     LOG.debug(
-        "Proxying method: {}, uri: {}, body: {}",
+        "Proxying method: {}, uri: {}, body: {} ",
         httpRequest::method,
         httpRequest::absoluteURI,
         () -> body);

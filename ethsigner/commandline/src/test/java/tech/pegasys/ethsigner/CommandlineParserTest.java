@@ -77,6 +77,8 @@ class CommandlineParserTest {
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getDownstreamHttpHost()).isEqualTo("8.8.8.8");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
+    assertThat(config.getDownstreamHttpPath()).isEqualTo("/v3/projectid");
+    assertThat(config.getDownstreamHttpReplacePath()).isTrue();
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
@@ -160,6 +162,18 @@ class CommandlineParserTest {
   void missingDownstreamPortDefaultsTo8545() {
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-port", config::getHttpListenPort, 8545);
+  }
+
+  @Test
+  void missingDownstreamPathDefaultsToEmptyString() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-path", config::getDownstreamHttpPath, "");
+  }
+
+  @Test
+  void missingDownstreamReplacePathIsFalse() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-replace-path", config::getDownstreamHttpReplacePath, false);
   }
 
   @Test

@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_BOOLEAN_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
@@ -107,15 +108,6 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
 
-  @SuppressWarnings("FieldMayBeFinal")
-  @Option(
-      names = {"--downstream-http-request-args"},
-      description =
-          "Query String to append to the http request (e.g. full infura url with project id)",
-      paramLabel = MANDATORY_HOST_FORMAT_HELP,
-      arity = "1")
-  private String downstreamHttpRequestArgs = "/";
-
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-port",
@@ -124,6 +116,23 @@ public class EthSignerBaseCommand implements Config {
       required = true,
       arity = "1")
   private Integer downstreamHttpPort;
+
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--downstream-http-path"},
+      description = "The path to which received requests are forwarded",
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      arity = "1")
+  private String downstreamHttpPath = "";
+
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--downstream-http-replace-path"},
+      description =
+          "Flag indicating if downstream-http-path should replace the uri request (default: ${DEFAULT-VALUE})",
+      paramLabel = MANDATORY_BOOLEAN_FORMAT_HELP,
+      arity = "0")
+  private boolean downstreamHttpReplacePath = false;
 
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
@@ -153,8 +162,13 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
-  public String getDownstreamHttpRequestArgs() {
-    return downstreamHttpRequestArgs;
+  public String getDownstreamHttpPath() {
+    return downstreamHttpPath;
+  }
+
+  @Override
+  public boolean getDownstreamHttpReplacePath() {
+    return downstreamHttpReplacePath;
   }
 
   @Override
@@ -198,8 +212,9 @@ public class EthSignerBaseCommand implements Config {
         .add("logLevel", logLevel)
         .add("downstreamHttpHost", downstreamHttpHost)
         .add("downstreamHttpPort", downstreamHttpPort)
+        .add("downstreamHttpPath", downstreamHttpPath)
+        .add("downstreamHttpReplacePath", downstreamHttpReplacePath)
         .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
-        .add("downstreamHttpRequestArgs", downstreamHttpRequestArgs)
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)
         .add("chainId", chainId)
