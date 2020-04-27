@@ -46,16 +46,23 @@ public class VertxNonceRequestTransmitter {
   private final JsonDecoder decoder;
   private final Duration requestTimeout;
   private static final AtomicInteger nextId = new AtomicInteger(0);
+  private final String httpPath;
 
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
       final HttpClient client,
       final JsonDecoder decoder,
-      final Duration requestTimeout) {
+      final Duration requestTimeout,
+      final String httpPath) {
     this.headers = headers;
     this.client = client;
     this.decoder = decoder;
     this.requestTimeout = requestTimeout;
+    if (httpPath == null || "".equals(httpPath.trim())) {
+      this.httpPath = "/"; // the default path is /
+    } else {
+      this.httpPath = httpPath;
+    }
   }
 
   public BigInteger requestNonce(final JsonRpcRequest request) {
@@ -80,7 +87,7 @@ public class VertxNonceRequestTransmitter {
     final HttpClientRequest request =
         client.request(
             HttpMethod.POST,
-            "/",
+            httpPath,
             response -> response.bodyHandler(responseBody -> handleResponse(responseBody, result)));
 
     request.setTimeout(requestTimeout.toMillis());

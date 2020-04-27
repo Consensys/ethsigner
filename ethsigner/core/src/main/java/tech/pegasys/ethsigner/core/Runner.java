@@ -143,7 +143,7 @@ public class Runner {
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout);
+            downStreamConnection, jsonDecoder, httpRequestTimeout, httpDownstreamPath);
 
     final TransactionFactory transactionFactory =
         new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);

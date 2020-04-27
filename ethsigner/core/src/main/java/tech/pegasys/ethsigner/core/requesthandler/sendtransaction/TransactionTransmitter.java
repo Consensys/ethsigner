@@ -63,7 +63,11 @@ public class TransactionTransmitter {
       final RoutingContext routingContext) {
     this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
-    this.httpPath = httpPath;
+    if (httpPath == null || "".equals(httpPath.trim())) {
+      this.httpPath = "/"; // default is /
+    } else {
+      this.httpPath = httpPath;
+    }
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
     this.routingContext = routingContext;

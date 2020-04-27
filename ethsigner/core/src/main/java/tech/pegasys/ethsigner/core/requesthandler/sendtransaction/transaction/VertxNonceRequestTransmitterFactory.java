@@ -24,15 +24,20 @@ public class VertxNonceRequestTransmitterFactory {
   private final HttpClient client;
   private final JsonDecoder decoder;
   private final Duration requestTimeout;
+  private final String httpPath;
 
   public VertxNonceRequestTransmitterFactory(
-      final HttpClient client, final JsonDecoder decoder, final Duration requestTimeout) {
+      final HttpClient client,
+      final JsonDecoder decoder,
+      final Duration requestTimeout,
+      final String httpPath) {
     this.client = client;
     this.decoder = decoder;
     this.requestTimeout = requestTimeout;
+    this.httpPath = httpPath;
   }
 
   public VertxNonceRequestTransmitter create(final MultiMap headers) {
-    return new VertxNonceRequestTransmitter(headers, client, decoder, requestTimeout);
+    return new VertxNonceRequestTransmitter(headers, client, decoder, requestTimeout, httpPath);
   }
 }

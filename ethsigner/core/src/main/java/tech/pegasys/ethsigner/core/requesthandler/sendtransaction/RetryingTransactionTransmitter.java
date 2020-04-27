@@ -32,7 +32,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
   public RetryingTransactionTransmitter(
       final HttpClient ethNodeClient,
-      final String httpRequestArgs,
+      final String httpPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
@@ -40,7 +40,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
       final RoutingContext routingContext) {
     super(
         ethNodeClient,
-        httpRequestArgs,
+        httpPath,
         transaction,
         transactionSerializer,
         vertxTransmitterFactory,
