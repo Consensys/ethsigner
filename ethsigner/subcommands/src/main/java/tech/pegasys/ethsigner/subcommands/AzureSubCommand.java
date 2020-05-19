@@ -10,11 +10,9 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.azure;
+package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
-import static tech.pegasys.ethsigner.util.PasswordFileUtil.readPasswordFromFile;
-
+import tech.pegasys.ethsigner.DefaultCommandValues;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
@@ -27,6 +25,10 @@ import java.nio.file.Path;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.ethsigner.util.PasswordFileUtil;
 
 @Command(
     name = AzureSubCommand.COMMAND_NAME,
@@ -67,7 +69,7 @@ public class AzureSubCommand extends SignerSubCommand {
       names = {"--client-secret-path"},
       description =
           "Path to a file containing the secret used to access the vault (along with client-id)",
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      paramLabel = DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP,
       required = true)
   private Path clientSecretPath;
 
@@ -77,7 +79,7 @@ public class AzureSubCommand extends SignerSubCommand {
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final String clientSecret;
     try {
-      clientSecret = readPasswordFromFile(clientSecretPath);
+      clientSecret = PasswordFileUtil.readPasswordFromFile(clientSecretPath);
     } catch (final FileNotFoundException fnfe) {
       throw new TransactionSignerInitializationException("File not found: " + clientSecretPath);
     } catch (final IOException e) {

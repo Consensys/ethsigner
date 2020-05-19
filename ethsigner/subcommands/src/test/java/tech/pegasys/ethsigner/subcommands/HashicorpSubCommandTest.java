@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.hashicorp;
+package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
+import tech.pegasys.ethsigner.CmdlineHelpers;
 
 public class HashicorpSubCommandTest {
 
@@ -121,14 +122,14 @@ public class HashicorpSubCommandTest {
 
   @Test
   public void nonIntegerInputForPortShowsError() {
-    final String cmdLine = modifyField(validCommandLine(), "port", "noInteger");
+    final String cmdLine = CmdlineHelpers.modifyField(validCommandLine(), "port", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
 
   @Test
   public void nonIntegerInputForTimeoutShowsError() {
-    final String cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
+    final String cmdLine = CmdlineHelpers.modifyField(validCommandLine(), "timeout", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -155,7 +156,8 @@ public class HashicorpSubCommandTest {
 
   @Test
   void cmdlineIsValidIftlsKnownServerFileIsMissing() {
-    final String cmdLine = removeFieldFrom(validCommandLine(), "tls-known-server-file");
+    final String cmdLine = CmdlineHelpers
+        .removeFieldFrom(validCommandLine(), "tls-known-server-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
@@ -163,7 +165,7 @@ public class HashicorpSubCommandTest {
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = CmdlineHelpers.removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -172,7 +174,7 @@ public class HashicorpSubCommandTest {
       final String paramToRemove,
       final Supplier<String> actualValueGetter,
       final String expectedValue) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
+    final String cmdLine = CmdlineHelpers.removeFieldFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).contains(expectedValue);

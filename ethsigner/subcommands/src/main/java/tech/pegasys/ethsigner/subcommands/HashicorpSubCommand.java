@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.hashicorp;
+package tech.pegasys.ethsigner.subcommands;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
@@ -22,11 +22,6 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.signers.hashicorp.TrustStoreType;
-import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
-import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
-import tech.pegasys.signers.hashicorp.config.KeyDefinition;
-import tech.pegasys.signers.hashicorp.config.TlsOptions;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +34,12 @@ import com.google.common.base.MoreObjects;
 import io.vertx.core.Vertx;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
+import tech.pegasys.signers.hashicorp.TrustStoreType;
+import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
+import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
+import tech.pegasys.signers.hashicorp.config.KeyDefinition;
+import tech.pegasys.signers.hashicorp.config.TlsOptions;
 
 /** Hashicorp vault related sub-command */
 @Command(

@@ -40,7 +40,7 @@ public class MultiKeyTransactionSignerProvider
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
   private final HashicorpSignerFactory hashicorpSignerFactory;
 
-  MultiKeyTransactionSignerProvider(
+  public MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory,
       final HashicorpSignerFactory hashicorpSignerFactory) {

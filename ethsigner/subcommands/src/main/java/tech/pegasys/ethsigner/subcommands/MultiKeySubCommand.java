@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multikey;
+package tech.pegasys.ethsigner.subcommands;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
@@ -30,6 +30,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
+import tech.pegasys.ethsigner.signer.multikey.MultiKeyTransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.multikey.SigningMetadataTomlConfigLoader;
 
 /**
  * Multi platform authentication related sub-command. Metadata config TOML files containing signing
