@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethsigner.signer.multikey;
 
+import io.vertx.core.Vertx;
+import java.nio.file.Path;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
@@ -39,6 +42,20 @@ public class MultiKeyTransactionSignerProvider
   private final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader;
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
   private final HashicorpSignerFactory hashicorpSignerFactory;
+
+  public static MultiKeyTransactionSignerProvider create(final Path rootDir) {
+    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
+        new SigningMetadataTomlConfigLoader(rootDir);
+
+    final AzureKeyVaultTransactionSignerFactory azureFactory =
+        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+
+    final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory(Vertx.vertx());
+
+    return new MultiKeyTransactionSignerProvider(
+        signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
+  }
+
 
   public MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,

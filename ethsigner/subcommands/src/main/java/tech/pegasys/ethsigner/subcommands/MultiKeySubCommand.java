@@ -48,7 +48,8 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "multikey-signer";
 
-  public MultiKeySubCommand() {}
+  public MultiKeySubCommand() {
+  }
 
   @SuppressWarnings("unused") // Picocli injects reference to command spec
   @Spec
@@ -65,16 +66,8 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
-        new SigningMetadataTomlConfigLoader(directoryPath);
 
-    final AzureKeyVaultTransactionSignerFactory azureFactory =
-        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-
-    final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory(Vertx.vertx());
-
-    return new MultiKeyTransactionSignerProvider(
-        signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
+    return MultiKeyTransactionSignerProvider.create(directoryPath);
   }
 
   @Override
