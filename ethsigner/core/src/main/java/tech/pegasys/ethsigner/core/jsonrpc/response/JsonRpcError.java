@@ -27,6 +27,12 @@ public enum JsonRpcError {
   INTERNAL_ERROR(-32603, "Internal error"),
   METHOD_NOT_ENABLED(-32604, "Method not enabled"),
 
+  // eth_sendTransaction specific error message
+  ETH_SEND_TX_NOT_AVAILABLE(
+      -32604,
+      "The method eth_sendTransaction is not supported. Use eth_sendRawTransaction to send a signed transaction to Besu."),
+  ETH_SEND_TX_ALREADY_KNOWN(-32000, "Known transaction"),
+  ETH_SEND_TX_REPLACEMENT_UNDERPRICED(-32000, "Replacement transaction underpriced"),
   // P2P related errors
   P2P_DISABLED(-32000, "P2P has been disabled. This functionality is not available"),
   P2P_NETWORK_NOT_RUNNING(-32000, "P2P network is not running"),
@@ -47,6 +53,8 @@ public enum JsonRpcError {
   TX_SENDER_NOT_AUTHORIZED(-32007, "Sender account not authorized to send transactions"),
   CHAIN_HEAD_WORLD_STATE_NOT_AVAILABLE(-32008, "Initial sync is still in progress"),
   GAS_PRICE_TOO_LOW(-32009, "Gas price below configured minimum gas price"),
+  WRONG_CHAIN_ID(-32000, "Wrong chainId"),
+  REPLAY_PROTECTED_SIGNATURES_NOT_SUPPORTED(-32000, "ChainId not supported"),
 
   // Miner failures
   COINBASE_NOT_SET(-32010, "Coinbase not set. Unable to start mining without a coinbase"),
@@ -54,6 +62,12 @@ public enum JsonRpcError {
 
   // Wallet errors
   COINBASE_NOT_SPECIFIED(-32000, "Coinbase must be explicitly specified"),
+
+  // Account errors
+  NO_ACCOUNT_FOUND(-32000, "Account not found"),
+
+  // Worldstate errors
+  WORLD_STATE_UNAVAILABLE(-32000, "World state unavailable"),
 
   // Debug failures
   PARENT_BLOCK_NOT_FOUND(-32000, "Parent block not found"),
@@ -93,15 +107,27 @@ public enum JsonRpcError {
 
   // Private transaction errors
   ENCLAVE_ERROR(-50100, "Error communicating with enclave"),
-  PRIVATE_NONCE_TOO_LOW(-50100, "Private transaction nonce too low"),
-  INCORRECT_PRIVATE_NONCE(-50100, "Private transaction nonce is incorrect"),
   UNIMPLEMENTED_PRIVATE_TRANSACTION_TYPE(-50100, "Unimplemented private transaction type"),
-  PRIVATE_TRANSACTION_RECEIPT_ERROR(-50100, "Error generating the private transaction receipt"),
-  PRIVACY_NOT_ENABLED(-50100, "Privacy is not enabled to get the precompiled address"),
+  PRIVACY_NOT_ENABLED(-50100, "Privacy is not enabled"),
   CREATE_PRIVACY_GROUP_ERROR(-50100, "Error creating privacy group"),
   DELETE_PRIVACY_GROUP_ERROR(-50100, "Error deleting privacy group"),
-  VALUE_NOT_ZERO(-50100, "We cannot transfer ether in private transaction yet."),
+  FIND_PRIVACY_GROUP_ERROR(-50100, "Error finding privacy group"),
+  FIND_ON_CHAIN_PRIVACY_GROUP_ERROR(-50100, "Error finding on-chain privacy group"),
+  VALUE_NOT_ZERO(-50100, "We cannot transfer ether in a private transaction yet."),
   DECODE_ERROR(-50100, "Unable to decode the private signed raw transaction"),
+  GET_PRIVATE_TRANSACTION_NONCE_ERROR(-50100, "Unable to determine nonce for account in group."),
+  OFFCHAIN_PRIVACY_GROUP_DOES_NOT_EXIST(-50100, "Offchain Privacy group does not exist."),
+  ONCCHAIN_PRIVACY_GROUP_DOES_NOT_EXIST(-50100, "Onchain Privacy group does not exist."),
+  ONCHAIN_PRIVACY_GROUP_NOT_ENABLED(-50100, "Onchain privacy groups not enabled."),
+  OFFCHAIN_PRIVACY_GROUP_NOT_ENABLED(
+      -50100, "Offchain privacy group can't be used with Onchain privacy groups enabled."),
+  ONCHAIN_PRIVACY_GROUP_ID_NOT_AVAILABLE(
+      -50100, "Private transactions to on-chain privacy groups must use privacyGroupId"),
+  PRIVATE_FROM_DOES_NOT_MATCH_ENCLAVE_PUBLIC_KEY(
+      -50100, "Private from does not match enclave public key"),
+  PMT_FAILED_INTRINSIC_GAS_EXCEEDS_LIMIT(
+      -50100,
+      "Private Marker Transaction failed due to intrinsic gas exeeding the limit. Gas limit used from the Private Transaction."),
 
   CANT_CONNECT_TO_LOCAL_PEER(-32100, "Cannot add local node as peer."),
 
@@ -126,6 +152,20 @@ public enum JsonRpcError {
   ENCLAVE_UNSUPPORTED_PRIVATE_KEY_TYPE(-50200, "EnclaveUnsupportedPrivateKeyType"),
   ENCLAVE_STORAGE_DECRYPT(-50200, "EnclaveStorageDecrypt"),
   ENCLAVE_PRIVACY_GROUP_CREATION(-50200, "EnclavePrivacyGroupIdCreation"),
+  ENCLAVE_PAYLOAD_NOT_FOUND(-50200, "EnclavePayloadNotFound"),
+  CREATE_GROUP_INCLUDE_SELF(-50200, "CreatePrivacyGroupShouldIncludeSelf"),
+
+  /** Storing privacy group issue */
+  ENCLAVE_UNABLE_STORE_PRIVACY_GROUP(-50200, "PrivacyGroupNotStored"),
+  ENCLAVE_UNABLE_DELETE_PRIVACY_GROUP(-50200, "PrivacyGroupNotDeleted"),
+  ENCLAVE_UNABLE_PUSH_DELETE_PRIVACY_GROUP(-50200, "PrivacyGroupNotPushed"),
+  ENCLAVE_PRIVACY_GROUP_MISSING(-50200, "PrivacyGroupNotFound"),
+  ENCLAVE_PRIVACY_QUERY_ERROR(-50200, "PrivacyGroupQueryError"),
+  ENCLAVE_KEYS_CANNOT_DECRYPT_PAYLOAD(-50200, "EnclaveKeysCannotDecryptPayload"),
+  METHOD_UNIMPLEMENTED(-50200, "MethodUnimplemented"),
+
+  /** Plugins error */
+  PLUGIN_NOT_FOUND(-60000, "Plugin not found"),
   ////////////////////////////////////
   // Eth Signer Specific Errors
 
