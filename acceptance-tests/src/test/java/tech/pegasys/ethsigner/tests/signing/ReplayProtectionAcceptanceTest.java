@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.signing;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.REPLAY_PROTECTED_SIGNATURES_NOT_SUPPORTED;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.WRONG_CHAIN_ID;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
