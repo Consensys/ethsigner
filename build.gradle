@@ -16,220 +16,222 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import java.text.SimpleDateFormat
 
 plugins {
-  id 'com.diffplug.gradle.spotless' version '3.27.1'
-  id 'com.jfrog.bintray' version '1.8.4'
-  id 'com.github.ben-manes.versions' version '0.27.0'
-  id 'com.github.hierynomus.license' version '0.15.0'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-  id 'me.champeau.gradle.jmh' version '0.5.0' apply false
-  id 'net.ltgt.errorprone' version '1.1.1'
-  id 'net.researchgate.release' version '2.8.1'
+    id 'com.diffplug.gradle.spotless' version '3.27.1'
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'me.champeau.gradle.jmh' version '0.5.0' apply false
+    id 'net.ltgt.errorprone' version '1.1.1'
+    id 'net.researchgate.release' version '2.8.1'
 }
 
+def repositoryName = "EthSigner"
+
 if (!JavaVersion.current().java11Compatible) {
-  throw new GradleException("Java 11 or later is required to build EthSigner.\n" +
-  "  Detected version ${JavaVersion.current()}")
+    throw new GradleException("Java 11 or later is required to build " + repositoryName + ".\n" +
+            "  Detected version ${JavaVersion.current()}")
 }
 
 def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
 def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
 def bintrayPackage = bintray.pkg {
-  repo = 'pegasys-repo'
-  name = 'ethsigner'
-  userOrg = 'consensys'
-  licenses = ['Apache-2.0']
-  websiteUrl = 'https://github.com/PegaSysEng/ethsigner'
-  issueTrackerUrl = 'https://github.com/PegaSysEng/ethsigner/issues'
-  vcsUrl = 'https://github.com/PegaSysEng/ethsigner.git'
+    repo = 'pegasys-repo'
+    name = repositoryName.toLowerCase()
+    userOrg = 'consensys'
+    licenses = ['Apache-2.0']
+    websiteUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase()
+    issueTrackerUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase() + '/issues'
+    vcsUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase() + '.git'
 
-  version {
-    name = project.version
-    released  = new Date()
-  }
+    version {
+        name = project.version
+        released = new Date()
+    }
 }
 
 
-group = 'tech.pegasys.ethsigner'
+group = 'tech.pegasys.' + repositoryName.toLowerCase()
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
 
 def buildAliases = ['dev': [
-    'spotlessApply',
-    'build',
-    'checkLicenses',
-    'javadoc'
-  ]]
+        'spotlessApply',
+        'build',
+        'checkLicenses',
+        'javadoc'
+]]
 
 def expandedTaskList = []
 gradle.startParameter.taskNames.each {
-  expandedTaskList << (buildAliases[it] ? buildAliases[it] : it)
+    expandedTaskList << (buildAliases[it] ? buildAliases[it] : it)
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
 
 // Gets a integer command argument, passed with -Pname=x, or the defaut if not provided.
 def _intCmdArg(name, defaultValue) {
-  return project.hasProperty(name) ? project.property(name) as int : defaultValue
+    return project.hasProperty(name) ? project.property(name) as int : defaultValue
 }
 
 def _intCmdArg(name) {
-  return _intCmdArg(name, null)
+    return _intCmdArg(name, null)
 }
 
 def _strListCmdArg(name, defaultValue) {
-  if (!project.hasProperty(name))
-    return defaultValue
+    if (!project.hasProperty(name))
+        return defaultValue
 
-  return ((String)project.property(name)).tokenize(',')
+    return ((String) project.property(name)).tokenize(',')
 }
 
 def _strListCmdArg(name) {
-  return _strListCmdArg(name, null)
+    return _strListCmdArg(name, null)
 }
 
 
 allprojects {
-  apply plugin: 'java-library'
-  apply plugin: 'io.spring.dependency-management'
-  apply plugin: 'jacoco'
-  apply plugin: 'net.ltgt.errorprone'
-  apply from: "${rootDir}/gradle/versions.gradle"
-  apply from: "${rootDir}/gradle/check-licenses.gradle"
+    apply plugin: 'java-library'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+    apply plugin: 'net.ltgt.errorprone'
+    apply from: "${rootDir}/gradle/versions.gradle"
+    apply from: "${rootDir}/gradle/check-licenses.gradle"
 
-  version = rootProject.version
+    version = rootProject.version
 
-  jacoco { toolVersion = '0.8.5' }
+    jacoco { toolVersion = '0.8.5' }
 
-  task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-  }
-
-  task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-  }
-
-  sourceCompatibility = 11
-  targetCompatibility = 11
-
-  repositories {
-    jcenter()
-    mavenCentral()
-    maven { url  "https://consensys.bintray.com/pegasys-repo" }
-  }
-
-  dependencies { errorprone("com.google.errorprone:error_prone_core") }
-
-  apply plugin: 'com.diffplug.gradle.spotless'
-  spotless {
-    java {
-      // This path needs to be relative to each project
-      target fileTree('.') {
-        include '**/*.java'
-        exclude '**/.gradle/**'
-      }
-      removeUnusedImports()
-      googleJavaFormat('1.7')
-      importOrder 'tech.pegasys', 'java', ''
-      trimTrailingWhitespace()
-      endWithNewline()
-      licenseHeaderFile "${rootDir}/gradle/spotless.java.license"
-    }
-    groovyGradle {
-      target '*.gradle'
-      greclipse().configFile(rootProject.file('gradle/formatter.properties'))
-      endWithNewline()
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
     }
 
-    // Below this line are currently only license header tasks
-    format 'groovy', {
-      target '**/*.groovy'
-      licenseHeaderFile "${rootDir}/gradle/spotless.java.license", 'import'
-    }
-  }
-
-  tasks.withType(JavaCompile) {
-    options.compilerArgs += [
-      '-Xlint:unchecked',
-      '-Xlint:cast',
-      '-Xlint:rawtypes',
-      '-Xlint:overloads',
-      '-Xlint:divzero',
-      '-Xlint:finally',
-      '-Xlint:static',
-      '-Werror',
-    ]
-
-    options.errorprone {
-      excludedPaths = '.*/(generated/*.*|.*ReferenceTest_.*)'
-
-      // Our equals need to be symmetric, this checker doesn't respect that.
-      check('EqualsGetClass', CheckSeverity.OFF)
-      // We like to use futures with no return values.
-      check('FutureReturnValueIgnored', CheckSeverity.OFF)
-      // We use the JSR-305 annotations instead of the Google annotations.
-      check('ImmutableEnumChecker', CheckSeverity.OFF)
-      // This is a style check instead of an error-prone pattern.
-      check('UnnecessaryParentheses', CheckSeverity.OFF)
-      // Lazy impl causes excess CPU usage O(n) of non-final fiield when it should be O(1).
-      check('FieldCanBeFinal', CheckSeverity.OFF)
-      // Incorrectly fires when there are no java.time.* alternatives
-      check('PreferJavaTimeOverload', CheckSeverity.OFF)
-
-      check('InsecureCryptoUsage', CheckSeverity.WARN)
-      check('WildcardImport', CheckSeverity.WARN)
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
     }
 
-    options.encoding = 'UTF-8'
-  }
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
-  /*
-   * Pass some system properties provided on the gradle command line to test executions for
-   * convenience.
-   *
-   * The properties passed are:
-   * - 'test.ethereum.include': allows to run a single Ethereum reference tests. For instance,
-   *   running a single general state test can be done with:
-   *    ./gradlew :ethereum:tech.pegasys.ethsigner.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
-   *   The meaning being that will be run only the tests for which the value passed as "include"
-   *   (which can be a java pattern) matches parts of the test name. Knowing that tests names for
-   *   reference tests are of the form:
-   *     <name>(-<milestone>([<variant>])?)?
-   *   where <name> is the test name as defined in the json file (usually the name of the json file
-   *   as well), <milestone> is the Ethereum milestone tested (not all test use it) and <variant>
-   *   is only use in some general state tests where for the same json file and same milestone,
-   *   multiple variant of that test are run. The variant is a simple number.
-   * - 'root.log.level' and 'evm.log.level': allow to control the log level used during the tests.
-   */
-  test {
-    jvmArgs = [
-      '-Xmx4g',
-      '-XX:-UseGCOverheadLimit',
-      // Mockito and jackson-databind do some strange reflection during tests.
-      // This suppresses an illegal access warning.
-      '--add-opens',
-      'java.base/java.util=ALL-UNNAMED',
-      '--add-opens',
-      'java.base/java.util.concurrent=ALL-UNNAMED'
-    ]
-    Set toImport = [
-      'root.log.level',
-      'evm.log.level'
-    ]
-    for (String name : toImport) {
-      if (System.getProperty(name) != null) {
-        systemProperty name, System.getProperty(name)
-      }
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url "https://consensys.bintray.com/pegasys-repo" }
     }
 
-    useJUnitPlatform()
-  }
+    dependencies { errorprone("com.google.errorprone:error_prone_core") }
 
-  javadoc {
-    options.addStringOption('Xdoclint:all', '-quiet')
-    options.addStringOption('Xwerror', '-html5')
-    options.encoding = 'UTF-8'
-  }
+    apply plugin: 'com.diffplug.gradle.spotless'
+    spotless {
+        java {
+            // This path needs to be relative to each project
+            target fileTree('.') {
+                include '**/*.java'
+                exclude '**/.gradle/**'
+            }
+            removeUnusedImports()
+            googleJavaFormat('1.7')
+            importOrder 'tech.pegasys', 'java', ''
+            trimTrailingWhitespace()
+            endWithNewline()
+            licenseHeaderFile "${rootDir}/gradle/spotless.java.license"
+        }
+        groovyGradle {
+            target '*.gradle'
+            greclipse().configFile(rootProject.file('gradle/formatter.properties'))
+            endWithNewline()
+        }
+
+        // Below this line are currently only license header tasks
+        format 'groovy', {
+            target '**/*.groovy'
+            licenseHeaderFile "${rootDir}/gradle/spotless.java.license", 'import'
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += [
+                '-Xlint:unchecked',
+                '-Xlint:cast',
+                '-Xlint:rawtypes',
+                '-Xlint:overloads',
+                '-Xlint:divzero',
+                '-Xlint:finally',
+                '-Xlint:static',
+                '-Werror',
+        ]
+
+        options.errorprone {
+            excludedPaths = '.*/(generated/*.*|.*ReferenceTest_.*)'
+
+            // Our equals need to be symmetric, this checker doesn't respect that.
+            check('EqualsGetClass', CheckSeverity.OFF)
+            // We like to use futures with no return values.
+            check('FutureReturnValueIgnored', CheckSeverity.OFF)
+            // We use the JSR-305 annotations instead of the Google annotations.
+            check('ImmutableEnumChecker', CheckSeverity.OFF)
+            // This is a style check instead of an error-prone pattern.
+            check('UnnecessaryParentheses', CheckSeverity.OFF)
+            // Lazy impl causes excess CPU usage O(n) of non-final fiield when it should be O(1).
+            check('FieldCanBeFinal', CheckSeverity.OFF)
+            // Incorrectly fires when there are no java.time.* alternatives
+            check('PreferJavaTimeOverload', CheckSeverity.OFF)
+
+            check('InsecureCryptoUsage', CheckSeverity.WARN)
+            check('WildcardImport', CheckSeverity.WARN)
+        }
+
+        options.encoding = 'UTF-8'
+    }
+
+    /*
+     * Pass some system properties provided on the gradle command line to test executions for
+     * convenience.
+     *
+     * The properties passed are:
+     * - 'test.ethereum.include': allows to run a single Ethereum reference tests. For instance,
+     *   running a single general state test can be done with:
+     *    ./gradlew :ethereum:tech.pegasys.ethsigner.ethereum.vm:test -Dtest.single=GeneralStateTest -Dtest.ethereum.include=callcodecallcallcode_101-Frontier
+     *   The meaning being that will be run only the tests for which the value passed as "include"
+     *   (which can be a java pattern) matches parts of the test name. Knowing that tests names for
+     *   reference tests are of the form:
+     *     <name>(-<milestone>([<variant>])?)?
+     *   where <name> is the test name as defined in the json file (usually the name of the json file
+     *   as well), <milestone> is the Ethereum milestone tested (not all test use it) and <variant>
+     *   is only use in some general state tests where for the same json file and same milestone,
+     *   multiple variant of that test are run. The variant is a simple number.
+     * - 'root.log.level' and 'evm.log.level': allow to control the log level used during the tests.
+     */
+    test {
+        jvmArgs = [
+                '-Xmx4g',
+                '-XX:-UseGCOverheadLimit',
+                // Mockito and jackson-databind do some strange reflection during tests.
+                // This suppresses an illegal access warning.
+                '--add-opens',
+                'java.base/java.util=ALL-UNNAMED',
+                '--add-opens',
+                'java.base/java.util.concurrent=ALL-UNNAMED'
+        ]
+        Set toImport = [
+                'root.log.level',
+                'evm.log.level'
+        ]
+        for (String name : toImport) {
+            if (System.getProperty(name) != null) {
+                systemProperty name, System.getProperty(name)
+            }
+        }
+
+        useJUnitPlatform()
+    }
+
+    javadoc {
+        options.addStringOption('Xdoclint:all', '-quiet')
+        options.addStringOption('Xwerror', '-html5')
+        options.encoding = 'UTF-8'
+    }
 
 }
 
@@ -238,134 +240,135 @@ task deploy() {}
 
 subprojects {
 
-  if (file('src/main/java').directory) {
-    apply plugin: 'com.jfrog.bintray'
-    apply plugin: 'maven-publish'
+    if (file('src/main/java').directory) {
+        apply plugin: 'com.jfrog.bintray'
+        apply plugin: 'maven-publish'
 
-    publishing {
-      publications {
-        mavenJava(MavenPublication) {
-          groupId "tech.pegasys.ethsigner.internal"
-          version "${project.version}"
-          from components.java
-          artifact sourcesJar
-          artifact javadocJar
-          versionMapping {
-            usage('java-api') { fromResolutionOf('runtimeClasspath') }
-            usage('java-runtime') { fromResolutionResult() }
-          }
-          pom {
-            name = "Ethsigner - ${project.name}"
-            url = 'http://github.com/PegaSysEng/ethsigner'
-            licenses {
-              license {
-                name = 'The Apache License, Version 2.0'
-                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-              }
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    groupId String.format("tech.pegasys.%s.internal", repositoryName.toLowerCase())
+                    version "${project.version}"
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocJar
+                    versionMapping {
+                        usage('java-api') { fromResolutionOf('runtimeClasspath') }
+                        usage('java-runtime') { fromResolutionResult() }
+                    }
+                    pom {
+                        name = repositoryName + " -  ${project.name}"
+                        url = 'http://github.com/PegaSysEng/' + repositoryName.toLowerCase()
+                        licenses {
+                            license {
+                                name = 'The Apache License, Version 2.0'
+                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+                        scm {
+                            def hostPath = 'github.com/PegasysEng/' + repositoryName.toLowerCase() + '.git'
+                            connection = 'scm:git:git://' + hostPath
+                            developerConnection = 'scm:git:ssh://' + hostPath
+                            url = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase()
+                        }
+                    }
+                }
             }
-            scm {
-              connection = 'scm:git:git://github.com/PegaSysEng/ethsigner.git'
-              developerConnection = 'scm:git:ssh://github.com/PegaSysEng/ethsigner.git'
-              url = 'https://github.com/PegaSysEng/ethsigner'
-            }
-          }
         }
-      }
+
+        bintray {
+            user = bintrayUser
+            key = bintrayKey
+
+            publications = ['mavenJava']
+            override = version.endsWith('SNAPSHOT')
+
+            publish = true
+
+            pkg = bintrayPackage
+        }
     }
 
-    bintray {
-      user = bintrayUser
-      key = bintrayKey
-
-      publications = ['mavenJava']
-      override = version.endsWith('SNAPSHOT')
-
-      publish = true
-
-      pkg = bintrayPackage
-    }
-  }
-
-  tasks.withType(Test) {
-    // If GRADLE_MAX_TEST_FORKS is not set, use half the available processors
-    maxParallelForks = (System.getenv('GRADLE_MAX_TEST_FORKS') ?: (Runtime.runtime.availableProcessors().intdiv(2) ?: 1)).toInteger()
-  }
-
-  tasks.withType(JavaCompile) {
-    options.fork = true
-    options.incremental = true
-  }
-
-  sourceSets {
-    // test-support can be consumed as a library by other projects in their tests
-    testSupport {
-      java {
-        compileClasspath += main.output
-        runtimeClasspath += main.output
-        srcDir file('src/test-support/java')
-      }
-      resources.srcDir file('src/test-support/resources')
-    }
-    integrationTest {
-      java {
-        compileClasspath += main.output
-        runtimeClasspath += main.output
-        srcDir file('src/integration-test/java')
-      }
-      resources.srcDir file('src/integration-test/resources')
-    }
-  }
-
-  configurations {
-    testSupportImplementation.extendsFrom implementation
-    integrationTestImplementation.extendsFrom implementation
-    testSupportArtifacts
-  }
-
-  task testSupportJar (type: Jar) {
-    archiveBaseName = "${project.name}-support-test"
-    from sourceSets.testSupport.output
-  }
-
-  dependencies {
-    testImplementation sourceSets.testSupport.output
-    integrationTestImplementation sourceSets.testSupport.output
-  }
-
-  task integrationTest(type: Test, dependsOn:["compileTestJava"]){
-    group = "verification"
-    description = "Runs the EthSigner integration tests"
-
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    outputs.upToDateWhen { false }
-
-    jvmArgs = ['-Xms512m', '-Xmx1g']
-
-    useJUnitPlatform()
-  }
-
-  if (file('src/jmh').directory) {
-    apply plugin: 'me.champeau.gradle.jmh'
-
-    jmh {
-      // Allows to control JMH execution directly from the command line. I typical execution may look
-      // like:
-      //    gradle jmh -Pf=2 -Pwi=3 -Pi=5 -Pinclude=MyBench
-      // which will run 2 forks with 3 warmup iterations and 5 normal ones for each, and will only
-      // run the benchmark matching 'MyBench' (a regexp).
-      warmupForks = _intCmdArg('wf')
-      warmupIterations = _intCmdArg('wi')
-      fork = _intCmdArg('f')
-      iterations = _intCmdArg('i')
-      benchmarkMode = _strListCmdArg('bm')
-      include = _strListCmdArg('include', [''])
-      humanOutputFile = project.file("${project.buildDir}/reports/jmh/results.txt")
-      resultFormat = 'JSON'
+    tasks.withType(Test) {
+        // If GRADLE_MAX_TEST_FORKS is not set, use half the available processors
+        maxParallelForks = (System.getenv('GRADLE_MAX_TEST_FORKS') ?: (Runtime.runtime.availableProcessors().intdiv(2) ?: 1)).toInteger()
     }
 
-    dependencies { jmh 'org.apache.logging.log4j:log4j-api' }
-  }
+    tasks.withType(JavaCompile) {
+        options.fork = true
+        options.incremental = true
+    }
+
+    sourceSets {
+        // test-support can be consumed as a library by other projects in their tests
+        testSupport {
+            java {
+                compileClasspath += main.output
+                runtimeClasspath += main.output
+                srcDir file('src/test-support/java')
+            }
+            resources.srcDir file('src/test-support/resources')
+        }
+        integrationTest {
+            java {
+                compileClasspath += main.output
+                runtimeClasspath += main.output
+                srcDir file('src/integration-test/java')
+            }
+            resources.srcDir file('src/integration-test/resources')
+        }
+    }
+
+    configurations {
+        testSupportImplementation.extendsFrom implementation
+        integrationTestImplementation.extendsFrom implementation
+        testSupportArtifacts
+    }
+
+    task testSupportJar(type: Jar) {
+        archiveBaseName = "${project.name}-support-test"
+        from sourceSets.testSupport.output
+    }
+
+    dependencies {
+        testImplementation sourceSets.testSupport.output
+        integrationTestImplementation sourceSets.testSupport.output
+    }
+
+    task integrationTest(type: Test, dependsOn: ["compileTestJava"]) {
+        group = "verification"
+        description = String.format("Runs the %s integration tests", repositoryName)
+
+        testClassesDirs = sourceSets.integrationTest.output.classesDirs
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        outputs.upToDateWhen { false }
+
+        jvmArgs = ['-Xms512m', '-Xmx1g']
+
+        useJUnitPlatform()
+    }
+
+    if (file('src/jmh').directory) {
+        apply plugin: 'me.champeau.gradle.jmh'
+
+        jmh {
+            // Allows to control JMH execution directly from the command line. I typical execution may look
+            // like:
+            //    gradle jmh -Pf=2 -Pwi=3 -Pi=5 -Pinclude=MyBench
+            // which will run 2 forks with 3 warmup iterations and 5 normal ones for each, and will only
+            // run the benchmark matching 'MyBench' (a regexp).
+            warmupForks = _intCmdArg('wf')
+            warmupIterations = _intCmdArg('wi')
+            fork = _intCmdArg('f')
+            iterations = _intCmdArg('i')
+            benchmarkMode = _strListCmdArg('bm')
+            include = _strListCmdArg('include', [''])
+            humanOutputFile = project.file("${project.buildDir}/reports/jmh/results.txt")
+            resultFormat = 'JSON'
+        }
+
+        dependencies { jmh 'org.apache.logging.log4j:log4j-api' }
+    }
 }
 
 jar { enabled = false }
@@ -373,166 +376,169 @@ jar { enabled = false }
 apply plugin: 'application'
 mainClassName = "tech.pegasys.ethsigner.EthSignerApp"
 applicationDefaultJvmArgs = [
-  "-Dvertx.disableFileCPResolving=true",
-  // We shutdown log4j ourselves, as otherwise his shutdown hook runs before our own and whatever
-  // happens during shutdown is not logged.
-  "-Dlog4j.shutdownHookEnabled=false",
-  // netty specific module warnings
-  "-Dio.netty.tryReflectionSetAccessible=true",
-  "--add-exports",
-  "java.base/jdk.internal.misc=ALL-UNNAMED",
-  "--add-opens",
-  "java.base/java.nio=ALL-UNNAMED"
+        "-Dvertx.disableFileCPResolving=true",
+        // We shutdown log4j ourselves, as otherwise his shutdown hook runs before our own and whatever
+        // happens during shutdown is not logged.
+        "-Dlog4j.shutdownHookEnabled=false",
+        // netty specific module warnings
+        "-Dio.netty.tryReflectionSetAccessible=true",
+        "--add-exports",
+        "java.base/jdk.internal.misc=ALL-UNNAMED",
+        "--add-opens",
+        "java.base/java.nio=ALL-UNNAMED"
 ]
 
 run {
-  args project.hasProperty("ethsigner.run.args") ? project.property("ethsigner.run.args").toString().split("\\s+") : []
-  doFirst {
-    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('ETHSIGNER_HOME', "$buildDir/ethsigner")}
-  }
+    args project.hasProperty(repositoryName.toLowerCase() + ".run.args") ? project.property(repositoryName.toLowerCase() + ".run.args").toString().split("\\s+") : []
+    doFirst {
+        applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect {
+            it.replace(repositoryName.toUpperCase() + "_HOME", "$buildDir/" + repositoryName.toUpperCase())
+        }
+    }
 }
 
 startScripts {
 
-  def shortenWindowsClasspath = { line ->
-    line = line.replaceAll(/^set CLASSPATH=.*$/, "set CLASSPATH=%APP_HOME%/lib/*")
-  }
+    def shortenWindowsClasspath = { line ->
+        line = line.replaceAll(/^set CLASSPATH=.*$/, "set CLASSPATH=%APP_HOME%/lib/*")
+    }
 
-  doLast {
-    unixScript.text = unixScript.text.replace('ETHSIGNER_HOME', '\$APP_HOME')
-    windowsScript.text = windowsScript.text.replace('ETHSIGNER_HOME', '%~dp0..')
+    doLast {
+        unixScript.text = unixScript.text.replace(repositoryName.toUpperCase() + "_HOME", '\$APP_HOME')
+        windowsScript.text = windowsScript.text.replace(repositoryName.toUpperCase() + "_HOME", '%~dp0..')
 
-    // Prevent the error originating from the 8191 chars limit on Windows
-    windowsScript.text =
-      windowsScript
-      .readLines()
-      .collect(shortenWindowsClasspath)
-      .join('\r\n')
-  }
+        // Prevent the error originating from the 8191 chars limit on Windows
+        windowsScript.text =
+                windowsScript
+                        .readLines()
+                        .collect(shortenWindowsClasspath)
+                        .join('\r\n')
+    }
 }
 
 dependencies {
-  compile project(':ethsigner:app')
-  errorprone 'com.google.errorprone:error_prone_core'
+    compile project(':ethsigner:app')
+    errorprone 'com.google.errorprone:error_prone_core'
 }
 
 distributions {
-  main {
-    contents {
-      from("./LICENSE") { into "." }
-      from("build/reports/license/license-dependency.html") { into "." }
-      from("./docs/GettingStartedBinaries.md") { into "." }
-      from("./docs/DocsArchive0.8.0.html") { into "." }
+    main {
+        contents {
+            from("./LICENSE") { into "." }
+            from("build/reports/license/license-dependency.html") { into "." }
+            from("./docs/GettingStartedBinaries.md") { into "." }
+            from("./docs/DocsArchive0.8.0.html") { into "." }
+        }
     }
-  }
 }
 
 installDist { dependsOn checkLicenses }
 
 distTar {
-  dependsOn checkLicenses
-  doFirst {
-    delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
-  }
-  compression = Compression.GZIP
-  archiveExtension = 'tar.gz'
+    dependsOn checkLicenses
+    doFirst {
+        delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
+    }
+    compression = Compression.GZIP
+    archiveExtension = 'tar.gz'
 }
 
 distZip {
-  dependsOn checkLicenses
-  doFirst {
-    delete fileTree(dir: 'build/distributions', include: '*.zip')
-  }
+    dependsOn checkLicenses
+    doFirst {
+        delete fileTree(dir: 'build/distributions', include: '*.zip')
+    }
 }
 
-// rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
+// rename the top level dir from <reponame>-<version> to <reponame> and this makes it really
 // simple for use in docker
 tasks.register("dockerDistUntar") {
-  dependsOn distTar
-  dependsOn distZip
-  def dockerBuildDir = "build/docker-ethsigner/"
-  def distTarFile = distTar.outputs.files.singleFile
-  def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
+    dependsOn distTar
+    dependsOn distZip
+    def dockerBuildDir = "build/docker-" + repositoryName.toLowerCase() + "/"
+    def distTarFile = distTar.outputs.files.singleFile
+    def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
 
-  doFirst {
-    new File(dockerBuildDir).mkdir()
-    copy {
-      from tarTree(distTarFile)
-      into(dockerBuildDir)
+    doFirst {
+        new File(dockerBuildDir).mkdir()
+        copy {
+            from tarTree(distTarFile)
+            into(dockerBuildDir)
+        }
+        file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/" + repositoryName.toLowerCase())
     }
-    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/ethsigner")
-  }
 }
 
 task distDocker(type: Exec) {
-  dependsOn dockerDistUntar
-  def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def imageName = "pegasyseng/ethsigner"
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def dockerBuildDir = "build/docker-ethsigner/"
-  workingDir "${dockerBuildDir}"
+    dependsOn dockerDistUntar
+    def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
+    def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+    def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+    def dockerBuildDir = "build/docker-" + repositoryName.toLowerCase() + "/"
+    workingDir "${dockerBuildDir}"
 
-  doFirst {
-    copy {
-      from file("${projectDir}/docker/Dockerfile")
-      into(workingDir)
+    doFirst {
+        copy {
+            from file("${projectDir}/docker/Dockerfile")
+            into(workingDir)
+        }
     }
-  }
 
-  executable "sh"
-  args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+    executable "sh"
+    args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
 }
 
 task testDocker(type: Exec) {
-  dependsOn distDocker
-  def dockerReportsDir = "docker/reports/"
-  def imageName = "pegasyseng/ethsigner"
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  workingDir "docker"
+    dependsOn distDocker
+    def dockerReportsDir = "docker/reports/"
+    def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+    def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+    workingDir "docker"
 
-  doFirst {
-    new File(dockerReportsDir).mkdir()
-  }
+    doFirst {
+        new File(dockerReportsDir).mkdir()
+    }
 
-  executable "sh"
-  args "-c", "bash test.sh ${image}"
+    executable "sh"
+    args "-c", "bash test.sh ${image}"
 }
 
 task dockerUpload(type: Exec) {
-  dependsOn distDocker
-  def imageName = "pegasyseng/ethsigner"
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def cmd = "docker push '${image}'"
-  def additionalTags = []
+    dependsOn distDocker
+    def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+    def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+    def cmd = "docker push '${image}'"
+    def additionalTags = []
 
-  if (project.hasProperty('branch') && project.property('branch') == 'master') {
-    additionalTags.add('develop')
-  }
+    if (project.hasProperty('branch') && project.property('branch') == 'master') {
+        additionalTags.add('develop')
+    }
 
-  if (!(version ==~ /.*-SNAPSHOT/)) {
-    additionalTags.add('latest')
-    additionalTags.add(version.split(/\./)[0..1].join('.'))
-  }
+    if (!(version ==~ /.*-SNAPSHOT/)) {
+        additionalTags.add('latest')
+        additionalTags.add(version.split(/\./)[0..1].join('.'))
+    }
 
-  additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
-  executable "sh"
-  args "-c", cmd
+    additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
+    executable "sh"
+    args "-c", cmd
 }
 
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
-  additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
-  sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
-  classDirectories.from files(subprojects.sourceSets.main.output)
-  executionData.from files(subprojects.jacocoTestReport.executionData) //how to exclude some package/classes com.test.**
-  reports {
-    xml.enabled true
-    csv.enabled true
-    html.destination file("build/reports/jacocoHtml")
-  }
-  onlyIf = { true }
-  doFirst {
-    executionData = files(executionData.findAll { it.exists() })
-  }
+    additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from files(subprojects.sourceSets.main.output)
+    executionData.from files(subprojects.jacocoTestReport.executionData)
+    //how to exclude some package/classes com.test.**
+    reports {
+        xml.enabled true
+        csv.enabled true
+        html.destination file("build/reports/jacocoHtml")
+    }
+    onlyIf = { true }
+    doFirst {
+        executionData = files(executionData.findAll { it.exists() })
+    }
 }
 
 configurations { annotationProcessor }
@@ -551,90 +557,90 @@ configurations { annotationProcessor }
 // http://label-schema.org/rc1/
 // using the RFC3339 format "2016-04-12T23:20:50.52Z"
 def buildTime() {
-  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-  df.setTimeZone(TimeZone.getTimeZone("UTC"))
-  return df.format(new Date())
+    def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
 }
 
 // Takes the version, and if -SNAPSHOT is part of it replaces SNAPSHOT
 // with the git commit version.
 def calculateVersion() {
-  String version = rootProject.version
-  if (version.endsWith("-SNAPSHOT")) {
-    version = version.replace("-SNAPSHOT", "-dev-" + getCheckedOutGitCommitHash())
-  }
-  return version
+    String version = rootProject.version
+    if (version.endsWith("-SNAPSHOT")) {
+        version = version.replace("-SNAPSHOT", "-dev-" + getCheckedOutGitCommitHash())
+    }
+    return version
 }
 
 def getCheckedOutGitCommitHash() {
-  def gitFolder = "$projectDir/.git/"
-  if (!file(gitFolder).isDirectory()) {
-    // We are in a submodule.  The file's contents are `gitdir: <gitFolder>\n`.
-    // Read the file, cut off the front, and trim the whitespace.
-    gitFolder = file(gitFolder).text.substring(8).trim() + "/"
-  }
-  def takeFromHash = 8
-  /*
-   * '.git/HEAD' contains either
-   *      in case of detached head: the currently checked out commit hash
-   *      otherwise: a reference to a file containing the current commit hash
-   */
-  def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
-  def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+    def gitFolder = "$projectDir/.git/"
+    if (!file(gitFolder).isDirectory()) {
+        // We are in a submodule.  The file's contents are `gitdir: <gitFolder>\n`.
+        // Read the file, cut off the front, and trim the whitespace.
+        gitFolder = file(gitFolder).text.substring(8).trim() + "/"
+    }
+    def takeFromHash = 8
+    /*
+     * '.git/HEAD' contains either
+     *      in case of detached head: the currently checked out commit hash
+     *      otherwise: a reference to a file containing the current commit hash
+     */
+    def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
+    def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
 
-  if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+    if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
 
-  def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-  refHead.text.trim().take takeFromHash
+    def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+    refHead.text.trim().take takeFromHash
 }
 
 apply plugin: 'net.researchgate.release'
 
-task releaseIntegrationTest(type: Test){
-  for(TaskContainer taskList : subprojects.tasks){
-    def subProjectIntegrationTask = taskList.findByName('integrationTest')
+task releaseIntegrationTest(type: Test) {
+    for (TaskContainer taskList : subprojects.tasks) {
+        def subProjectIntegrationTask = taskList.findByName('integrationTest')
 
-    if (subProjectIntegrationTask != null) {
-      dependsOn subProjectIntegrationTask
+        if (subProjectIntegrationTask != null) {
+            dependsOn subProjectIntegrationTask
+        }
     }
-  }
 }
 
-task releaseAcceptanceTest(type: Test, dependsOn : ':acceptance-tests:acceptanceTest') {}
+task releaseAcceptanceTest(type: Test, dependsOn: ':acceptance-tests:acceptanceTest') {}
 
 release {
-  preTagCommitMessage = '[Gradle Release Plugin] - pre tag commit: '
-  tagCommitMessage = '[Gradle Release Plugin] - creating tag: '
-  newVersionCommitMessage = '[Gradle Release Plugin] - new version commit: '
-  buildTasks = [
-    'build',
-    'releaseIntegrationTest',
-    'releaseAcceptanceTest',
-    'checkLicenses',
-    'javadoc'
-  ]
+    preTagCommitMessage = '[Gradle Release Plugin] - pre tag commit: '
+    tagCommitMessage = '[Gradle Release Plugin] - creating tag: '
+    newVersionCommitMessage = '[Gradle Release Plugin] - new version commit: '
+    buildTasks = [
+            'build',
+            'releaseIntegrationTest',
+            'releaseAcceptanceTest',
+            'checkLicenses',
+            'javadoc'
+    ]
 
-  git {
-    requireBranch = project.hasProperty('release.branch') ? project.property('release.branch') : 'master'
-  }
+    git {
+        requireBranch = project.hasProperty('release.branch') ? project.property('release.branch') : 'master'
+    }
 }
 
 apply plugin: 'com.jfrog.bintray'
 
 bintray {
-  user = bintrayUser
-  key = bintrayKey
+    user = bintrayUser
+    key = bintrayKey
 
-  filesSpec {
-    from distTar.destinationDirectory
-    from distZip.destinationDirectory
-    into '.'
-  }
+    filesSpec {
+        from distTar.destinationDirectory
+        from distZip.destinationDirectory
+        into '.'
+    }
 
-  publish = true
-  override = version.endsWith('SNAPSHOT')
+    publish = true
+    override = version.endsWith('SNAPSHOT')
 
-  pkg = bintrayPackage
+    pkg = bintrayPackage
 }
 
 afterReleaseBuild.dependsOn bintrayUpload
