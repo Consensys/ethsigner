@@ -27,6 +27,7 @@ jar {
 dependencies {
 
   implementation project(':ethsigner:commandline')
+  implementation project(':ethsigner:signer:common')
   implementation project(':ethsigner:signing-api')
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'

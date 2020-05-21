@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.signer.multikey;
 
-import io.vertx.core.Vertx;
-import java.nio.file.Path;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
@@ -26,11 +24,13 @@ import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataF
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,7 +55,6 @@ public class MultiKeyTransactionSignerProvider
     return new MultiKeyTransactionSignerProvider(
         signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
   }
-
 
   public MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,

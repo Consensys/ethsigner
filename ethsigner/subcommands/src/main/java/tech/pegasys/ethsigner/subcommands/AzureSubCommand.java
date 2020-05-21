@@ -18,6 +18,10 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.azure.AzureConfig;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.ethsigner.util.PasswordFileUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,10 +29,6 @@ import java.nio.file.Path;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import tech.pegasys.ethsigner.signer.azure.AzureConfig;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.util.PasswordFileUtil;
 
 @Command(
     name = AzureSubCommand.COMMAND_NAME,

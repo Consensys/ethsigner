@@ -37,7 +37,7 @@ import org.apache.tuweni.toml.TomlInvalidTypeException;
 import org.apache.tuweni.toml.TomlParseResult;
 import org.apache.tuweni.toml.TomlTable;
 
-public  class SigningMetadataTomlConfigLoader {
+public class SigningMetadataTomlConfigLoader {
 
   private static final Logger LOG = LogManager.getLogger();
 

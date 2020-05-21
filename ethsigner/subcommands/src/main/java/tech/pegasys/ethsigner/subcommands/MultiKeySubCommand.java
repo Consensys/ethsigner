@@ -17,21 +17,16 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
+import tech.pegasys.ethsigner.signer.multikey.MultiKeyTransactionSignerProvider;
 
 import java.nio.file.Path;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import io.vertx.core.Vertx;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
-import tech.pegasys.ethsigner.signer.multikey.MultiKeyTransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.multikey.SigningMetadataTomlConfigLoader;
 
 /**
  * Multi platform authentication related sub-command. Metadata config TOML files containing signing
@@ -48,8 +43,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "multikey-signer";
 
-  public MultiKeySubCommand() {
-  }
+  public MultiKeySubCommand() {}
 
   @SuppressWarnings("unused") // Picocli injects reference to command spec
   @Spec

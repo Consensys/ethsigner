@@ -13,8 +13,8 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
-import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
+
+import tech.pegasys.ethsigner.CmdlineHelpers;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
-import tech.pegasys.ethsigner.CmdlineHelpers;
 
 public class HashicorpSubCommandTest {
 
@@ -156,8 +155,8 @@ public class HashicorpSubCommandTest {
 
   @Test
   void cmdlineIsValidIftlsKnownServerFileIsMissing() {
-    final String cmdLine = CmdlineHelpers
-        .removeFieldFrom(validCommandLine(), "tls-known-server-file");
+    final String cmdLine =
+        CmdlineHelpers.removeFieldFrom(validCommandLine(), "tls-known-server-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();

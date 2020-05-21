@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 import java.nio.file.Path;
 
@@ -27,7 +28,6 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 
 /** File-based authentication related sub-command */
 @Command(
