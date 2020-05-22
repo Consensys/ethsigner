@@ -26,10 +26,13 @@ plugins {
   id 'net.researchgate.release' version '2.8.1'
 }
 
-def repositoryName = "EthSigner"
+String projectName = "EthSigner"
+String repositoryName = projectName.toLowerCase()
+String projectHome = projectName.toUpperCase() + "_HOME"
+
 
 if (!JavaVersion.current().java11Compatible) {
-  throw new GradleException("Java 11 or later is required to build " + repositoryName + ".\n" +
+  throw new GradleException("Java 11 or later is required to build " + projectName + ".\n" +
   "  Detected version ${JavaVersion.current()}")
 }
 
@@ -37,12 +40,12 @@ def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintray
 def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
 def bintrayPackage = bintray.pkg {
   repo = 'pegasys-repo'
-  name = repositoryName.toLowerCase()
+  name = repositoryName
   userOrg = 'consensys'
   licenses = ['Apache-2.0']
-  websiteUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase()
-  issueTrackerUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase() + '/issues'
-  vcsUrl = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase() + '.git'
+  websiteUrl = 'https://github.com/PegaSysEng/' + repositoryName
+  issueTrackerUrl = 'https://github.com/PegaSysEng/' + repositoryName + '/issues'
+  vcsUrl = 'https://github.com/PegaSysEng/' + repositoryName + '.git'
 
   version {
     name = project.version
@@ -51,7 +54,7 @@ def bintrayPackage = bintray.pkg {
 }
 
 
-group = 'tech.pegasys.' + repositoryName.toLowerCase()
+group = 'tech.pegasys.' + repositoryName
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
 
@@ -247,7 +250,7 @@ subprojects {
     publishing {
       publications {
         mavenJava(MavenPublication) {
-          groupId String.format("tech.pegasys.%s.internal", repositoryName.toLowerCase())
+          groupId String.format("tech.pegasys.%s.internal", repositoryName)
           version "${project.version}"
           from components.java
           artifact sourcesJar
@@ -257,8 +260,8 @@ subprojects {
             usage('java-runtime') { fromResolutionResult() }
           }
           pom {
-            name = repositoryName + " -  ${project.name}"
-            url = 'http://github.com/PegaSysEng/' + repositoryName.toLowerCase()
+            name = projectName + " -  ${project.name}"
+            url = 'http://github.com/PegaSysEng/' + repositoryName
             licenses {
               license {
                 name = 'The Apache License, Version 2.0'
@@ -266,10 +269,10 @@ subprojects {
               }
             }
             scm {
-              def hostPath = 'github.com/PegasysEng/' + repositoryName.toLowerCase() + '.git'
+              def hostPath = 'github.com/PegasysEng/' + repositoryName + '.git'
               connection = 'scm:git:git://' + hostPath
               developerConnection = 'scm:git:ssh://' + hostPath
-              url = 'https://github.com/PegaSysEng/' + repositoryName.toLowerCase()
+              url = 'https://github.com/PegaSysEng/' + repositoryName
             }
           }
         }
@@ -337,7 +340,7 @@ subprojects {
 
   task integrationTest(type: Test, dependsOn: ["compileTestJava"]) {
     group = "verification"
-    description = String.format("Runs the %s integration tests", repositoryName)
+    description = String.format("Runs the %s integration tests", projectName)
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -389,10 +392,10 @@ applicationDefaultJvmArgs = [
 ]
 
 run {
-  args project.hasProperty(repositoryName.toLowerCase() + ".run.args") ? project.property(repositoryName.toLowerCase() + ".run.args").toString().split("\\s+") : []
+  args project.hasProperty(repositoryName + ".run.args") ? project.property(repositoryName + ".run.args").toString().split("\\s+") : []
   doFirst {
     applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect {
-      it.replace(repositoryName.toUpperCase() + "_HOME", "$buildDir/" + repositoryName.toUpperCase())
+      it.replace(projectHome, "$buildDir/" + repositoryName)
     }
   }
 }
@@ -404,8 +407,8 @@ startScripts {
   }
 
   doLast {
-    unixScript.text = unixScript.text.replace(repositoryName.toUpperCase() + "_HOME", '\$APP_HOME')
-    windowsScript.text = windowsScript.text.replace(repositoryName.toUpperCase() + "_HOME", '%~dp0..')
+    unixScript.text = unixScript.text.replace(projectHome, '\$APP_HOME')
+    windowsScript.text = windowsScript.text.replace(projectHome, '%~dp0..')
 
     // Prevent the error originating from the 8191 chars limit on Windows
     windowsScript.text =
@@ -455,7 +458,7 @@ distZip {
 tasks.register("dockerDistUntar") {
   dependsOn distTar
   dependsOn distZip
-  def dockerBuildDir = "build/docker-" + repositoryName.toLowerCase() + "/"
+  def dockerBuildDir = "build/docker-" + repositoryName + "/"
   def distTarFile = distTar.outputs.files.singleFile
   def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
 
@@ -465,16 +468,16 @@ tasks.register("dockerDistUntar") {
       from tarTree(distTarFile)
       into(dockerBuildDir)
     }
-    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/" + repositoryName.toLowerCase())
+    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/" + repositoryName)
   }
 }
 
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def dockerBuildDir = "build/docker-" + repositoryName.toLowerCase() + "/"
+  def dockerBuildDir = "build/docker-" + repositoryName + "/"
   workingDir "${dockerBuildDir}"
 
   doFirst {
@@ -491,7 +494,7 @@ task distDocker(type: Exec) {
 task testDocker(type: Exec) {
   dependsOn distDocker
   def dockerReportsDir = "docker/reports/"
-  def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   workingDir "docker"
 
@@ -505,7 +508,7 @@ task testDocker(type: Exec) {
 
 task dockerUpload(type: Exec) {
   dependsOn distDocker
-  def imageName = "pegasyseng/" + repositoryName.toLowerCase()
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def cmd = "docker push '${image}'"
   def additionalTags = []

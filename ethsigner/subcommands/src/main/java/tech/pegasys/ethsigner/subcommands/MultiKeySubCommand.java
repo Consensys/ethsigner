@@ -60,7 +60,6 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-
     return MultiKeyTransactionSignerProvider.create(directoryPath);
   }
 

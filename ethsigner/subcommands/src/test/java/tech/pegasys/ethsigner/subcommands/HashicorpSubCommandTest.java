@@ -13,17 +13,16 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import tech.pegasys.ethsigner.CmdlineHelpers;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
-
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
+import tech.pegasys.ethsigner.CmdlineHelpers;
 
 public class HashicorpSubCommandTest {
 
@@ -121,14 +120,14 @@ public class HashicorpSubCommandTest {
 
   @Test
   public void nonIntegerInputForPortShowsError() {
-    final String cmdLine = CmdlineHelpers.modifyField(validCommandLine(), "port", "noInteger");
+    final String cmdLine = modifyField(validCommandLine(), "port", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
 
   @Test
   public void nonIntegerInputForTimeoutShowsError() {
-    final String cmdLine = CmdlineHelpers.modifyField(validCommandLine(), "timeout", "noInteger");
+    final String cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
