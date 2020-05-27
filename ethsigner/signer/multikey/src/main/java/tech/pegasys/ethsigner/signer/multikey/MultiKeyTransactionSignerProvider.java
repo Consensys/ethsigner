@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.signer.multikey;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
 import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
@@ -23,11 +24,13 @@ import tech.pegasys.ethsigner.signer.multikey.metadata.FileBasedSigningMetadataF
 import tech.pegasys.ethsigner.signer.multikey.metadata.HashicorpSigningMetadataFile;
 import tech.pegasys.ethsigner.signer.multikey.metadata.SigningMetadataFile;
 
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +43,20 @@ public class MultiKeyTransactionSignerProvider
   private final AzureKeyVaultTransactionSignerFactory azureFactory;
   private final HashicorpSignerFactory hashicorpSignerFactory;
 
-  MultiKeyTransactionSignerProvider(
+  public static MultiKeyTransactionSignerProvider create(final Path rootDir) {
+    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
+        new SigningMetadataTomlConfigLoader(rootDir);
+
+    final AzureKeyVaultTransactionSignerFactory azureFactory =
+        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+
+    final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory(Vertx.vertx());
+
+    return new MultiKeyTransactionSignerProvider(
+        signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
+  }
+
+  public MultiKeyTransactionSignerProvider(
       final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader,
       final AzureKeyVaultTransactionSignerFactory azureFactory,
       final HashicorpSignerFactory hashicorpSignerFactory) {

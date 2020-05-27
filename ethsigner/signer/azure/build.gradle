@@ -25,7 +25,7 @@ jar {
 
 dependencies {
 
-  implementation project(':ethsigner:commandline')
+  implementation project(':ethsigner:signer:common')
   implementation project(':ethsigner:signing-api')
 
   implementation 'com.google.guava:guava'

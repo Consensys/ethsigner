@@ -37,7 +37,7 @@ import org.apache.tuweni.toml.TomlInvalidTypeException;
 import org.apache.tuweni.toml.TomlParseResult;
 import org.apache.tuweni.toml.TomlTable;
 
-class SigningMetadataTomlConfigLoader {
+public class SigningMetadataTomlConfigLoader {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -46,7 +46,7 @@ class SigningMetadataTomlConfigLoader {
 
   private final Path tomlConfigsDirectory;
 
-  SigningMetadataTomlConfigLoader(final Path rootDirectory) {
+  public SigningMetadataTomlConfigLoader(final Path rootDirectory) {
     this.tomlConfigsDirectory = rootDirectory;
   }
 

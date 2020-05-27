@@ -14,11 +14,11 @@ package tech.pegasys.ethsigner;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import tech.pegasys.ethsigner.signer.azure.AzureSubCommand;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSubCommand;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSubCommand;
-import tech.pegasys.ethsigner.signer.multikey.MultiKeySubCommand;
-import tech.pegasys.ethsigner.signer.raw.RawSubCommand;
+import tech.pegasys.ethsigner.subcommands.AzureSubCommand;
+import tech.pegasys.ethsigner.subcommands.FileBasedSubCommand;
+import tech.pegasys.ethsigner.subcommands.HashicorpSubCommand;
+import tech.pegasys.ethsigner.subcommands.MultiKeySubCommand;
+import tech.pegasys.ethsigner.subcommands.RawSubCommand;
 
 import java.io.PrintWriter;
 

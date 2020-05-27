@@ -10,22 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.multikey;
+package tech.pegasys.ethsigner.subcommands;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
-import tech.pegasys.ethsigner.signer.hashicorp.HashicorpSignerFactory;
+import tech.pegasys.ethsigner.signer.multikey.MultiKeyTransactionSignerProvider;
 
 import java.nio.file.Path;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import io.vertx.core.Vertx;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -63,16 +60,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-    final SigningMetadataTomlConfigLoader signingMetadataTomlConfigLoader =
-        new SigningMetadataTomlConfigLoader(directoryPath);
-
-    final AzureKeyVaultTransactionSignerFactory azureFactory =
-        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
-
-    final HashicorpSignerFactory hashicorpSignerFactory = new HashicorpSignerFactory(Vertx.vertx());
-
-    return new MultiKeyTransactionSignerProvider(
-        signingMetadataTomlConfigLoader, azureFactory, hashicorpSignerFactory);
+    return MultiKeyTransactionSignerProvider.create(directoryPath);
   }
 
   @Override

@@ -26,8 +26,13 @@ plugins {
   id 'net.researchgate.release' version '2.8.1'
 }
 
+String projectName = "EthSigner"
+String repositoryName = projectName.toLowerCase()
+String projectHome = projectName.toUpperCase() + "_HOME"
+
+
 if (!JavaVersion.current().java11Compatible) {
-  throw new GradleException("Java 11 or later is required to build EthSigner.\n" +
+  throw new GradleException("Java 11 or later is required to build " + projectName + ".\n" +
   "  Detected version ${JavaVersion.current()}")
 }
 
@@ -35,21 +40,21 @@ def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintray
 def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
 def bintrayPackage = bintray.pkg {
   repo = 'pegasys-repo'
-  name = 'ethsigner'
+  name = repositoryName
   userOrg = 'consensys'
   licenses = ['Apache-2.0']
-  websiteUrl = 'https://github.com/PegaSysEng/ethsigner'
-  issueTrackerUrl = 'https://github.com/PegaSysEng/ethsigner/issues'
-  vcsUrl = 'https://github.com/PegaSysEng/ethsigner.git'
+  websiteUrl = 'https://github.com/PegaSysEng/' + repositoryName
+  issueTrackerUrl = 'https://github.com/PegaSysEng/' + repositoryName + '/issues'
+  vcsUrl = 'https://github.com/PegaSysEng/' + repositoryName + '.git'
 
   version {
     name = project.version
-    released  = new Date()
+    released = new Date()
   }
 }
 
 
-group = 'tech.pegasys.ethsigner'
+group = 'tech.pegasys.' + repositoryName
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
 
@@ -79,7 +84,7 @@ def _strListCmdArg(name, defaultValue) {
   if (!project.hasProperty(name))
     return defaultValue
 
-  return ((String)project.property(name)).tokenize(',')
+  return ((String) project.property(name)).tokenize(',')
 }
 
 def _strListCmdArg(name) {
@@ -115,7 +120,7 @@ allprojects {
   repositories {
     jcenter()
     mavenCentral()
-    maven { url  "https://consensys.bintray.com/pegasys-repo" }
+    maven { url "https://consensys.bintray.com/pegasys-repo" }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
@@ -245,7 +250,7 @@ subprojects {
     publishing {
       publications {
         mavenJava(MavenPublication) {
-          groupId "tech.pegasys.ethsigner.internal"
+          groupId String.format("tech.pegasys.%s.internal", repositoryName)
           version "${project.version}"
           from components.java
           artifact sourcesJar
@@ -255,8 +260,8 @@ subprojects {
             usage('java-runtime') { fromResolutionResult() }
           }
           pom {
-            name = "Ethsigner - ${project.name}"
-            url = 'http://github.com/PegaSysEng/ethsigner'
+            name = projectName + " -  ${project.name}"
+            url = 'http://github.com/PegaSysEng/' + repositoryName
             licenses {
               license {
                 name = 'The Apache License, Version 2.0'
@@ -264,9 +269,10 @@ subprojects {
               }
             }
             scm {
-              connection = 'scm:git:git://github.com/PegaSysEng/ethsigner.git'
-              developerConnection = 'scm:git:ssh://github.com/PegaSysEng/ethsigner.git'
-              url = 'https://github.com/PegaSysEng/ethsigner'
+              def hostPath = 'github.com/PegasysEng/' + repositoryName + '.git'
+              connection = 'scm:git:git://' + hostPath
+              developerConnection = 'scm:git:ssh://' + hostPath
+              url = 'https://github.com/PegaSysEng/' + repositoryName
             }
           }
         }
@@ -322,7 +328,7 @@ subprojects {
     testSupportArtifacts
   }
 
-  task testSupportJar (type: Jar) {
+  task testSupportJar(type: Jar) {
     archiveBaseName = "${project.name}-support-test"
     from sourceSets.testSupport.output
   }
@@ -332,9 +338,9 @@ subprojects {
     integrationTestImplementation sourceSets.testSupport.output
   }
 
-  task integrationTest(type: Test, dependsOn:["compileTestJava"]){
+  task integrationTest(type: Test, dependsOn: ["compileTestJava"]) {
     group = "verification"
-    description = "Runs the EthSigner integration tests"
+    description = String.format("Runs the %s integration tests", projectName)
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -386,9 +392,11 @@ applicationDefaultJvmArgs = [
 ]
 
 run {
-  args project.hasProperty("ethsigner.run.args") ? project.property("ethsigner.run.args").toString().split("\\s+") : []
+  args project.hasProperty(repositoryName + ".run.args") ? project.property(repositoryName + ".run.args").toString().split("\\s+") : []
   doFirst {
-    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect{it.replace('ETHSIGNER_HOME', "$buildDir/ethsigner")}
+    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect {
+      it.replace(projectHome, "$buildDir/" + repositoryName)
+    }
   }
 }
 
@@ -399,8 +407,8 @@ startScripts {
   }
 
   doLast {
-    unixScript.text = unixScript.text.replace('ETHSIGNER_HOME', '\$APP_HOME')
-    windowsScript.text = windowsScript.text.replace('ETHSIGNER_HOME', '%~dp0..')
+    unixScript.text = unixScript.text.replace(projectHome, '\$APP_HOME')
+    windowsScript.text = windowsScript.text.replace(projectHome, '%~dp0..')
 
     // Prevent the error originating from the 8191 chars limit on Windows
     windowsScript.text =
@@ -445,12 +453,12 @@ distZip {
   }
 }
 
-// rename the top level dir from ethsigner-<version> to ethsigner and this makes it really
+// rename the top level dir from <reponame>-<version> to <reponame> and this makes it really
 // simple for use in docker
 tasks.register("dockerDistUntar") {
   dependsOn distTar
   dependsOn distZip
-  def dockerBuildDir = "build/docker-ethsigner/"
+  def dockerBuildDir = "build/docker-" + repositoryName + "/"
   def distTarFile = distTar.outputs.files.singleFile
   def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
 
@@ -460,16 +468,16 @@ tasks.register("dockerDistUntar") {
       from tarTree(distTarFile)
       into(dockerBuildDir)
     }
-    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/ethsigner")
+    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/" + repositoryName)
   }
 }
 
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def imageName = "pegasyseng/ethsigner"
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def dockerBuildDir = "build/docker-ethsigner/"
+  def dockerBuildDir = "build/docker-" + repositoryName + "/"
   workingDir "${dockerBuildDir}"
 
   doFirst {
@@ -486,7 +494,7 @@ task distDocker(type: Exec) {
 task testDocker(type: Exec) {
   dependsOn distDocker
   def dockerReportsDir = "docker/reports/"
-  def imageName = "pegasyseng/ethsigner"
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   workingDir "docker"
 
@@ -500,7 +508,7 @@ task testDocker(type: Exec) {
 
 task dockerUpload(type: Exec) {
   dependsOn distDocker
-  def imageName = "pegasyseng/ethsigner"
+  def imageName = "pegasyseng/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def cmd = "docker push '${image}'"
   def additionalTags = []
@@ -523,7 +531,8 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
   additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
   sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
   classDirectories.from files(subprojects.sourceSets.main.output)
-  executionData.from files(subprojects.jacocoTestReport.executionData) //how to exclude some package/classes com.test.**
+  executionData.from files(subprojects.jacocoTestReport.executionData)
+  //how to exclude some package/classes com.test.**
   reports {
     xml.enabled true
     csv.enabled true
@@ -582,7 +591,7 @@ def getCheckedOutGitCommitHash() {
   def head = new File(gitFolder + "HEAD").text.split(":") // .git/HEAD
   def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
 
-  if(isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+  if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
 
   def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
   refHead.text.trim().take takeFromHash
@@ -590,8 +599,8 @@ def getCheckedOutGitCommitHash() {
 
 apply plugin: 'net.researchgate.release'
 
-task releaseIntegrationTest(type: Test){
-  for(TaskContainer taskList : subprojects.tasks){
+task releaseIntegrationTest(type: Test) {
+  for (TaskContainer taskList : subprojects.tasks) {
     def subProjectIntegrationTask = taskList.findByName('integrationTest')
 
     if (subProjectIntegrationTask != null) {
@@ -600,7 +609,7 @@ task releaseIntegrationTest(type: Test){
   }
 }
 
-task releaseAcceptanceTest(type: Test, dependsOn : ':acceptance-tests:acceptanceTest') {}
+task releaseAcceptanceTest(type: Test, dependsOn: ':acceptance-tests:acceptanceTest') {}
 
 release {
   preTagCommitMessage = '[Gradle Release Plugin] - pre tag commit: '

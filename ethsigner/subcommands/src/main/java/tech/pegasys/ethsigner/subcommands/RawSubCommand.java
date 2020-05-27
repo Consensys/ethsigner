@@ -10,58 +10,44 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.signer.filebased;
+package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.TransactionSignerInitializationException;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-
-import java.nio.file.Path;
+import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
 
 import com.google.common.base.MoreObjects;
-import picocli.CommandLine;
+import org.web3j.crypto.Credentials;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Spec;
 
-/** File-based authentication related sub-command */
+/** Raw sub-command - DO NOT USE IN PRODUCTION, Private Key is in plain text */
 @Command(
-    name = FileBasedSubCommand.COMMAND_NAME,
-    description = "Sign transactions with a key stored in an encrypted V3 Keystore file.",
-    mixinStandardHelpOptions = true)
-public class FileBasedSubCommand extends SignerSubCommand {
+    name = RawSubCommand.COMMAND_NAME,
+    description =
+        "Sign transactions with an unecrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
+    mixinStandardHelpOptions = true,
+    hidden = true)
+public class RawSubCommand extends SignerSubCommand {
 
-  public static final String COMMAND_NAME = "file-based-signer";
-
-  public FileBasedSubCommand() {}
-
-  @SuppressWarnings("unused") // Picocli injects reference to command spec
-  @Spec
-  private CommandLine.Model.CommandSpec spec;
-
-  @Option(
-      names = {"-p", "--password-file"},
-      description = "The path to a file containing the password used to decrypt the keyfile.",
-      required = true,
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      arity = "1")
-  private Path passwordFilePath;
+  static final String COMMAND_NAME = "raw-signer";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"-k", "--key-file"},
-      description = "The path to a file containing the key used to sign transactions.",
-      required = true,
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      names = {"--key"},
+      description = "The private key used to generate signatures.",
+      paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
-  private Path keyFilePath;
+  private String privateKey;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
+    final Credentials credentials = Credentials.create(privateKey);
+    return new CredentialTransactionSigner(credentials);
   }
 
   @Override
@@ -77,9 +63,6 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("passwordFilePath", passwordFilePath)
-        .add("keyFilePath", keyFilePath)
-        .toString();
+    return MoreObjects.toStringHelper(this).add("privateKey", privateKey).toString();
   }
 }
