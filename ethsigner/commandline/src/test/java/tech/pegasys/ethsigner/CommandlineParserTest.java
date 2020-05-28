@@ -34,6 +34,8 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import picocli.CommandLine;
 
 class CommandlineParserTest {
@@ -77,6 +79,7 @@ class CommandlineParserTest {
     assertThat(config.getLogLevel()).isEqualTo(Level.INFO);
     assertThat(config.getDownstreamHttpHost()).isEqualTo("8.8.8.8");
     assertThat(config.getDownstreamHttpPort()).isEqualTo(5000);
+    assertThat(config.getDownstreamHttpPath()).isEqualTo("/v3/projectid");
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
@@ -160,6 +163,12 @@ class CommandlineParserTest {
   void missingDownstreamPortDefaultsTo8545() {
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-port", config::getHttpListenPort, 8545);
+  }
+
+  @Test
+  void missingDownstreamPathDefaultsToRootPath() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-path", config::getDownstreamHttpPath, "/");
   }
 
   @Test
@@ -334,5 +343,16 @@ class CommandlineParserTest {
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions()).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"=", " ", "&", "?", "#"})
+  void illegalDownStreamPathThrowsException(final String illegalChar) {
+    String cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldFrom(cmdLine, "downstream-http-path");
+    cmdLine += " --downstream-http-path=path1/" + illegalChar + "path2";
+    final boolean result =
+        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    assertThat(result).isFalse();
   }
 }

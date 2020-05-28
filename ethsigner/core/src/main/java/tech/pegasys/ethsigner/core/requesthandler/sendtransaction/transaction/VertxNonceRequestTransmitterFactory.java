@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
 import java.time.Duration;
 
@@ -24,15 +25,21 @@ public class VertxNonceRequestTransmitterFactory {
   private final HttpClient client;
   private final JsonDecoder decoder;
   private final Duration requestTimeout;
+  private final DownstreamPathCalculator downstreamPathCalculator;
 
   public VertxNonceRequestTransmitterFactory(
-      final HttpClient client, final JsonDecoder decoder, final Duration requestTimeout) {
+      final HttpClient client,
+      final JsonDecoder decoder,
+      final Duration requestTimeout,
+      final DownstreamPathCalculator downstreamPathCalculator) {
     this.client = client;
     this.decoder = decoder;
     this.requestTimeout = requestTimeout;
+    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
   public VertxNonceRequestTransmitter create(final MultiMap headers) {
-    return new VertxNonceRequestTransmitter(headers, client, decoder, requestTimeout);
+    return new VertxNonceRequestTransmitter(
+        headers, client, decoder, requestTimeout, downstreamPathCalculator);
   }
 }

@@ -32,13 +32,19 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
   public RetryingTransactionTransmitter(
       final HttpClient ethNodeClient,
+      final String httpPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RetryMechanism retryMechanism,
       final RoutingContext routingContext) {
     super(
-        ethNodeClient, transaction, transactionSerializer, vertxTransmitterFactory, routingContext);
+        ethNodeClient,
+        httpPath,
+        transaction,
+        transactionSerializer,
+        vertxTransmitterFactory,
+        routingContext);
 
     this.retryMechanism = retryMechanism;
   }

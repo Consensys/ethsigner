@@ -51,8 +51,11 @@ dependencies {
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
+
+
   integrationTestImplementation project(':ethsigner:signer:file-based')
   integrationTestImplementation 'org.junit.jupiter:junit-jupiter-api'
+  integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params'
   integrationTestImplementation 'io.rest-assured:rest-assured'
   integrationTestImplementation 'org.assertj:assertj-core'
   integrationTestImplementation('org.mock-server:mockserver-netty') {

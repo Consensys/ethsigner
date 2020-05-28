@@ -52,15 +52,18 @@ public class TransactionTransmitter {
   private final Transaction transaction;
   private final VertxRequestTransmitter transmitter;
   private final RoutingContext routingContext;
+  private final String downstreamPath;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
+      final String downstreamPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RoutingContext routingContext) {
     this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
+    this.downstreamPath = downstreamPath;
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
     this.routingContext = routingContext;
@@ -131,7 +134,8 @@ public class TransactionTransmitter {
 
   private void sendTransaction(final Buffer bodyContent) {
     final HttpClientRequest request =
-        ethNodeClient.post("/", response -> transmitter.handleResponse(routingContext, response));
+        ethNodeClient.post(
+            downstreamPath, response -> transmitter.handleResponse(routingContext, response));
 
     transmitter.sendRequest(request, bodyContent, routingContext);
   }

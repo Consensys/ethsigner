@@ -26,6 +26,7 @@ import static org.web3j.utils.Async.defaultExecutorService;
 
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
 import tech.pegasys.ethsigner.core.signing.TransactionSigner;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
@@ -104,6 +105,11 @@ public class IntegrationTestBase {
   @TempDir static Path dataPath;
 
   static void setupEthSigner(final long chainId) throws IOException, CipherException {
+    setupEthSigner(chainId, "");
+  }
+
+  static void setupEthSigner(final long chainId, final String downstreamHttpRequestPath)
+      throws IOException, CipherException {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();
@@ -136,6 +142,7 @@ public class IntegrationTestBase {
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
+            new DownstreamPathCalculator(downstreamHttpRequestPath),
             jsonDecoder,
             dataPath,
             vertx);

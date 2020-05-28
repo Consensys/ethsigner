@@ -27,6 +27,8 @@ import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Optional;
@@ -36,7 +38,10 @@ import org.apache.logging.log4j.Level;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Spec;
 
 @SuppressWarnings("FieldCanBeLocal") // because Picocli injected fields report false positives
 @Command(
@@ -56,6 +61,8 @@ import picocli.CommandLine.Option;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
+
+  @Spec private CommandSpec spec; // injected by picocli
 
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
@@ -116,6 +123,29 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private Integer downstreamHttpPort;
 
+  private String downstreamHttpPath = "/";
+
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--downstream-http-path"},
+      description = "The path to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+      defaultValue = "/",
+      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      arity = "1")
+  public void setDownstreamHttpPath(final String path) {
+    try {
+      final URI uri = new URI(path);
+      if (!uri.getPath().equals(path)) {
+        throw new ParameterException(
+            spec.commandLine(), "Illegal characters detected in --downstream-http-path");
+      }
+    } catch (final URISyntaxException e) {
+      throw new ParameterException(
+          spec.commandLine(), "Illegal characters detected in --downstream-http-path");
+    }
+    this.downstreamHttpPath = path;
+  }
+
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
@@ -141,6 +171,11 @@ public class EthSignerBaseCommand implements Config {
   @Override
   public Integer getDownstreamHttpPort() {
     return downstreamHttpPort;
+  }
+
+  @Override
+  public String getDownstreamHttpPath() {
+    return downstreamHttpPath;
   }
 
   @Override
@@ -184,6 +219,7 @@ public class EthSignerBaseCommand implements Config {
         .add("logLevel", logLevel)
         .add("downstreamHttpHost", downstreamHttpHost)
         .add("downstreamHttpPort", downstreamHttpPort)
+        .add("downstreamHttpPath", downstreamHttpPath)
         .add("downstreamHttpRequestTimeout", downstreamHttpRequestTimeout)
         .add("httpListenHost", httpListenHost)
         .add("httpListenPort", httpListenPort)

@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
 import tech.pegasys.ethsigner.core.util.FileUtil;
 
@@ -79,6 +80,7 @@ public final class EthSigner {
               webClientOptionsFactory.createWebClientOptions(config),
               applyConfigTlsSettingsTo(serverOptions),
               downstreamHttpRequestTimeout,
+              new DownstreamPathCalculator(config.getDownstreamHttpPath()),
               jsonDecoder,
               config.getDataPath(),
               vertx);
