@@ -88,7 +88,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         response.ethSigner(RESPONSE_HEADERS, LOGIN_RESPONSE),
         "/login");
 
-    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, Path.of("/", ROOT_PATH, "login").toString());
+    verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, ROOT_PATH + "/login");
   }
 
   @Test
