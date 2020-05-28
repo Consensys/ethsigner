@@ -40,6 +40,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   private final long chainId;
   private final HttpClient ethNodeClient;
+  private final DownstreamPathCalculator downstreamPathCalculator;
   private final TransactionSignerProvider transactionSignerProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
@@ -49,11 +50,13 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   public SendTransactionHandler(
       final long chainId,
       final HttpClient ethNodeClient,
+      final DownstreamPathCalculator downstreamPathCalculator,
       final TransactionSignerProvider transactionSignerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;
     this.ethNodeClient = ethNodeClient;
+    this.downstreamPathCalculator = downstreamPathCalculator;
     this.transactionSignerProvider = transactionSignerProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;
@@ -110,6 +113,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.debug("Nonce not present in request {}", request.getId());
       return new RetryingTransactionTransmitter(
           ethNodeClient,
+          downstreamPathCalculator.calculateDownstreamPath(routingContext.request().uri()),
           transaction,
           transactionSerializer,
           vertxTransmitterFactory,
@@ -119,6 +123,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(
           ethNodeClient,
+          downstreamPathCalculator.calculateDownstreamPath(routingContext.request().uri()),
           transaction,
           transactionSerializer,
           vertxTransmitterFactory,

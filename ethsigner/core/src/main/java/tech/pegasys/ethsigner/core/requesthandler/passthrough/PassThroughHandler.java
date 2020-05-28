@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -33,12 +34,15 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private final HttpClient ethNodeClient;
   private final VertxRequestTransmitter transmitter;
+  final DownstreamPathCalculator downstreamPathCalculator;
 
   public PassThroughHandler(
       final HttpClient ethNodeClient,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+      final VertxRequestTransmitterFactory vertxTransmitterFactory,
+      final DownstreamPathCalculator downstreamPathCalculator) {
     transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
     this.ethNodeClient = ethNodeClient;
+    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
   @Override
@@ -50,10 +54,11 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     final HttpServerRequest httpServerRequest = context.request();
+
     final HttpClientRequest proxyRequest =
         ethNodeClient.request(
             httpServerRequest.method(),
-            httpServerRequest.uri(),
+            downstreamPathCalculator.calculateDownstreamPath(httpServerRequest.uri()),
             response -> transmitter.handleResponse(context, response));
 
     final Buffer body = context.getBody();

@@ -26,6 +26,7 @@ import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBo
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignBodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
@@ -60,6 +61,7 @@ public class Runner {
   private final TransactionSignerProvider transactionSignerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
+  private final DownstreamPathCalculator downstreamPathCalculator;
   private final HttpResponseFactory responseFactory = new HttpResponseFactory();
   private final JsonDecoder jsonDecoder;
   private final Path dataPath;
@@ -72,6 +74,7 @@ public class Runner {
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
+      final DownstreamPathCalculator downstreamPathCalculator,
       final JsonDecoder jsonDecoder,
       final Path dataPath,
       final Vertx vertx) {
@@ -79,6 +82,7 @@ public class Runner {
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
+    this.downstreamPathCalculator = downstreamPathCalculator;
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = vertx;
@@ -117,7 +121,7 @@ public class Runner {
         .handler(new UpcheckHandler());
 
     final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory);
+        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
@@ -126,11 +130,11 @@ public class Runner {
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
     final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory);
+        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout);
+            downStreamConnection, jsonDecoder, httpRequestTimeout, downstreamPathCalculator);
 
     final TransactionFactory transactionFactory =
         new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
@@ -139,6 +143,7 @@ public class Runner {
         new SendTransactionHandler(
             chainId,
             downStreamConnection,
+            downstreamPathCalculator,
             transactionSignerProvider,
             transactionFactory,
             transmitterFactory);

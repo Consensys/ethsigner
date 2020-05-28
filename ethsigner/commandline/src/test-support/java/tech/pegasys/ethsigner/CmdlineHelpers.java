@@ -17,6 +17,7 @@ public class CmdlineHelpers {
   public static String validBaseCommandOptions() {
     return "--downstream-http-host=8.8.8.8 "
         + "--downstream-http-port=5000 "
+        + "--downstream-http-path=/v3/projectid "
         + "--downstream-http-request-timeout=10000 "
         + "--http-listen-port=5001 "
         + "--http-listen-host=localhost "

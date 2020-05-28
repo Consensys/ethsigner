@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
 import java.math.BigInteger;
 import java.time.Duration;
@@ -46,16 +47,19 @@ public class VertxNonceRequestTransmitter {
   private final JsonDecoder decoder;
   private final Duration requestTimeout;
   private static final AtomicInteger nextId = new AtomicInteger(0);
+  private final DownstreamPathCalculator downstreamPathCalculator;
 
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
       final HttpClient client,
       final JsonDecoder decoder,
-      final Duration requestTimeout) {
+      final Duration requestTimeout,
+      final DownstreamPathCalculator downstreamPathCalculator) {
     this.headers = headers;
     this.client = client;
     this.decoder = decoder;
     this.requestTimeout = requestTimeout;
+    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
   public BigInteger requestNonce(final JsonRpcRequest request) {
@@ -80,7 +84,7 @@ public class VertxNonceRequestTransmitter {
     final HttpClientRequest request =
         client.request(
             HttpMethod.POST,
-            "/",
+            downstreamPathCalculator.calculateDownstreamPath("/"),
             response -> response.bodyHandler(responseBody -> handleResponse(responseBody, result)));
 
     request.setTimeout(requestTimeout.toMillis());
