@@ -139,7 +139,7 @@ public class EthSignerBaseCommand implements Config {
         throw new ParameterException(
             spec.commandLine(), "Illegal characters detected in --downstream-http-path");
       }
-    } catch (URISyntaxException e) {
+    } catch (final URISyntaxException e) {
       throw new ParameterException(
           spec.commandLine(), "Illegal characters detected in --downstream-http-path");
     }

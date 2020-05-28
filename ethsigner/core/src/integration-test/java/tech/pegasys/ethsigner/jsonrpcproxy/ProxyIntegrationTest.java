@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;

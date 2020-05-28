@@ -347,7 +347,7 @@ class CommandlineParserTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"=", " ", "&", "?", "#"})
-  void illegalDownStreamPathThrowsException(String illegalChar) {
+  void illegalDownStreamPathThrowsException(final String illegalChar) {
     String cmdLine = validBaseCommandOptions();
     cmdLine = removeFieldFrom(cmdLine, "downstream-http-path");
     cmdLine += " --downstream-http-path=path1/" + illegalChar + "path2";
