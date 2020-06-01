@@ -30,7 +30,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPath
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;

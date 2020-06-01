@@ -15,11 +15,11 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secpsigner.filebased.CredentialTransactionSigner;
-import tech.pegasys.signers.secpsigner.signerapi.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.filebased.CredentialTransactionSigner;
 
 import com.google.common.base.MoreObjects;
 import org.web3j.crypto.Credentials;

@@ -21,9 +21,9 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.util.ByteUtils;
-import tech.pegasys.signers.secpsigner.signerapi.Signature;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signature;
+import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

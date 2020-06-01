@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.util.FileUtil;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;

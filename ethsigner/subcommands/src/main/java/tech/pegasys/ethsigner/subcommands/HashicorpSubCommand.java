@@ -23,11 +23,11 @@ import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
 import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 import tech.pegasys.signers.hashicorp.config.KeyDefinition;
 import tech.pegasys.signers.hashicorp.config.TlsOptions;
-import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secpsigner.hashicorp.HashicorpSignerFactory;
-import tech.pegasys.signers.secpsigner.signerapi.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.hashicorp.HashicorpSignerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;

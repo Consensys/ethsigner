@@ -24,7 +24,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
-import tech.pegasys.signers.secpsigner.multikey.TomlStringBuilder;
+import tech.pegasys.signers.secp256k1.common.TomlStringBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;

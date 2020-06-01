@@ -15,9 +15,9 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secpsigner.multikey.MultiKeyTransactionSignerProvider;
-import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.multikey.MultiKeyTransactionSignerProvider;
 
 import java.nio.file.Path;
 
