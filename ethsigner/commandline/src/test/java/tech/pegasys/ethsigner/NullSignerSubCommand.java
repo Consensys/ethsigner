@@ -12,8 +12,9 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
 
 import java.util.Collections;
 import java.util.Optional;

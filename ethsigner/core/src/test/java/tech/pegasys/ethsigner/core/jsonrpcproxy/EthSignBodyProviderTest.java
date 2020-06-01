@@ -24,9 +24,9 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignBodyProvider;
-import tech.pegasys.ethsigner.core.signing.Signature;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.signers.secpsigner.signerapi.Signature;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
 
 import java.math.BigInteger;
 import java.util.Collections;

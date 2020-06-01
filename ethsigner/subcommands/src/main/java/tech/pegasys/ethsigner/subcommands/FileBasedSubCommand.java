@@ -15,11 +15,11 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.filebased.FileBasedSignerFactory;
+import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secpsigner.filebased.FileBasedSignerFactory;
+import tech.pegasys.signers.secpsigner.signerapi.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
 
 import java.nio.file.Path;
 

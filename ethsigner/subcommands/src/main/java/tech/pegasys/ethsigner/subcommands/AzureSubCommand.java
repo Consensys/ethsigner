@@ -15,14 +15,14 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
-import tech.pegasys.ethsigner.core.signing.SingleTransactionSignerProvider;
-import tech.pegasys.ethsigner.core.signing.TransactionSigner;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
-import tech.pegasys.ethsigner.signer.azure.AzureConfig;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultAuthenticator;
-import tech.pegasys.ethsigner.signer.azure.AzureKeyVaultTransactionSignerFactory;
 import tech.pegasys.ethsigner.util.PasswordFileUtil;
+import tech.pegasys.signers.secpsigner.azure.AzureConfig;
+import tech.pegasys.signers.secpsigner.azure.AzureKeyVaultAuthenticator;
+import tech.pegasys.signers.secpsigner.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secpsigner.signerapi.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSignerProvider;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

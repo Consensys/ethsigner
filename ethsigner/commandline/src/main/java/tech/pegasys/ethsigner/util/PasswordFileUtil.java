@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
 
 import java.io.IOException;
 import java.nio.file.Path;

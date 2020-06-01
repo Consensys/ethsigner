@@ -16,7 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import tech.pegasys.ethsigner.TransactionSignerInitializationException;
+import tech.pegasys.signers.secpsigner.common.TransactionSignerInitializationException;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -16,6 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import tech.pegasys.signers.secpsigner.signerapi.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secpsigner.signerapi.TransactionSigner;
+
 import java.util.Collection;
 import java.util.Optional;
 
