@@ -199,6 +199,22 @@ jobs:
       
 workflows:
   version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 1 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build
+      - acceptanceTests:
+          requires:
+            - build
+      - azureTests:
+          requires:
+            - build
   default:
     jobs:
       - build
