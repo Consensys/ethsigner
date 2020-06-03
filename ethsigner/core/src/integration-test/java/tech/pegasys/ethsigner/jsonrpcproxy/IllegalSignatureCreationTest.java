@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
-import tech.pegasys.ethsigner.core.signing.Signature;
-import tech.pegasys.ethsigner.signer.filebased.CredentialTransactionSigner;
+import tech.pegasys.signers.secp256k1.api.Signature;
+import tech.pegasys.signers.secp256k1.filebased.CredentialTransactionSigner;
 
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;

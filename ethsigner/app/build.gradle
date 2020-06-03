@@ -28,10 +28,10 @@ jar {
 dependencies {
 
   implementation project(':ethsigner:core')
-  implementation project(':ethsigner:signing-api')
   implementation project(':ethsigner:subcommands')
   implementation project(':ethsigner:commandline')
 
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
   implementation 'com.google.guava:guava'
   implementation 'org.apache.logging.log4j:log4j-api'
 

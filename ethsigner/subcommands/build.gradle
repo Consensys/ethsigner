@@ -14,15 +14,15 @@ jar {
 dependencies {
 
   implementation project(':ethsigner:commandline')
-  implementation project(':ethsigner:signing-api')
   implementation project(':ethsigner:core')
-  implementation project(':ethsigner:signer:common')
-  implementation project(':ethsigner:signer:hashicorp')
-  implementation project(':ethsigner:signer:file-based')
-  implementation project(':ethsigner:signer:multikey')
-  implementation project(':ethsigner:signer:azure')
 
-  implementation 'tech.pegasys.signers.internal:hashicorp'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-common'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-hashicorp'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-file-based'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-multikey'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-azure'
+  implementation 'tech.pegasys.signers.internal:keystorage-hashicorp'
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
