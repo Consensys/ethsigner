@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.io.PrintWriter;
 import java.util.List;

@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.core.signing;
 
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
+import tech.pegasys.signers.secp256k1.api.Signature;
+import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;

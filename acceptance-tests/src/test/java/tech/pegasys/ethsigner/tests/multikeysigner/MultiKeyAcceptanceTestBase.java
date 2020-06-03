@@ -22,9 +22,9 @@ import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
-import tech.pegasys.ethsigner.toml.util.TomlStringBuilder;
 import tech.pegasys.signers.hashicorp.dsl.certificates.SelfSignedCertificate;
 import tech.pegasys.signers.hashicorp.util.HashicorpConfigUtil;
+import tech.pegasys.signers.secp256k1.common.TomlStringBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;

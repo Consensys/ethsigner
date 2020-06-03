@@ -14,7 +14,8 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.EthSigner;
 import tech.pegasys.ethsigner.core.InitializationException;
-import tech.pegasys.ethsigner.core.signing.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
