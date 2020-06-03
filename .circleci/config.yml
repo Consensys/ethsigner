@@ -205,14 +205,6 @@ workflows:
       - acceptanceTests:
           requires:
             - build
-      - azureTests:
-          filters:
-            branches:
-              only:
-                - master
-                - /^release-.*/
-          requires:
-            - build
       - buildDocker:
           requires:
             - build
