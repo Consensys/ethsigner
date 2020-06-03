@@ -225,7 +225,6 @@ workflows:
           requires:
             - build
             - acceptanceTests
-            - azureTests
       - publishDocker:
           filters:
             branches:
@@ -235,5 +234,4 @@ workflows:
           requires:
             - build
             - acceptanceTests
-            - azureTests
             - buildDocker
