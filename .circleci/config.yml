@@ -2,7 +2,7 @@
 version: 2.1
 
 orbs:
-  slack: circleci/slack@3.4.1
+  slack: circleci/slack@3.4.2
 
 executors:
   executor_med:  # 2cpu, 4G ram
@@ -199,6 +199,19 @@ jobs:
       
 workflows:
   version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 1 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build
+      - acceptanceTests:
+          requires:
+            - build
   default:
     jobs:
       - build
