@@ -52,7 +52,7 @@ dependencies {
 
 
 
-  integrationTestImplementation 'tech.pegasys.signers.internal:signing-secp256k1-file-based'
+  integrationTestImplementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
   integrationTestImplementation 'org.junit.jupiter:junit-jupiter-api'
   integrationTestImplementation 'org.junit.jupiter:junit-jupiter-params'
   integrationTestImplementation 'io.rest-assured:rest-assured'
