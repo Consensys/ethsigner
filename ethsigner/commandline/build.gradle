@@ -15,7 +15,7 @@ dependencies {
 
   implementation project(':ethsigner:core')
   implementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
-  implementation 'tech.pegasys.signers.internal:signing-secp256k1-common'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'
   implementation 'org.apache.logging.log4j:log4j-api'
