@@ -21,9 +21,12 @@ import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
+import com.google.common.net.HttpHeaders;
+import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,10 +82,27 @@ public class VertxRequestTransmitter {
       final HttpClientRequest request, final Buffer bodyContent, final RoutingContext context) {
     request.setTimeout(httpRequestTimeout.toMillis());
     request.exceptionHandler(thrown -> handleException(context, thrown));
-    request.headers().setAll(context.request().headers());
-    request.headers().remove("Content-Length"); // created during 'end'.
+    final MultiMap requestHeaders = createHeaders(context.request().headers());
+    request.headers().setAll(requestHeaders);
     request.setChunked(false);
     request.end(bodyContent);
+  }
+
+  private MultiMap createHeaders(final MultiMap headers) {
+    final MultiMap requestHeaders = new VertxHttpHeaders();
+    requestHeaders.addAll(headers);
+    requestHeaders.remove(HttpHeaders.CONTENT_LENGTH);
+    renameHeader(requestHeaders, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
+    return requestHeaders;
+  }
+
+  private void renameHeader(
+      final MultiMap headers, final String oldHeader, final String newHeader) {
+    final String oldHeaderValue = headers.get(oldHeader);
+    headers.remove(oldHeader);
+    if (oldHeaderValue != null) {
+      headers.add(newHeader, oldHeaderValue);
+    }
   }
 
   private void logResponse(final HttpClientResponse response) {
