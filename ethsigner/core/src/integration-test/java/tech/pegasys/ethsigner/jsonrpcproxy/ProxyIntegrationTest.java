@@ -62,6 +62,46 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
+  void requestWithHostHeaderIsRenamedToXForwardedHost() {
+    final String netVersionRequest = Json.encode(jsonRpc().netVersion());
+
+    final Response<String> netVersion = new NetVersion();
+    netVersion.setResult("4");
+    final String netVersionResponse = Json.encode(netVersion);
+
+    setUpEthNodeResponse(
+        request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(Map.of("Accept", "*/*", "Host", "localhost"), netVersionRequest),
+        response.ethSigner(RESPONSE_HEADERS, netVersionResponse));
+
+    verifyEthNodeReceived(
+        Map.of("Accept", "*/*", "X-Forwarded-Host", "localhost"), netVersionRequest);
+  }
+
+  @Test
+  void requestWithHostHeaderOverwritesExistingXForwardedHost() {
+    final String netVersionRequest = Json.encode(jsonRpc().netVersion());
+
+    final Response<String> netVersion = new NetVersion();
+    netVersion.setResult("4");
+    final String netVersionResponse = Json.encode(netVersion);
+
+    setUpEthNodeResponse(
+        request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(
+            Map.of("Accept", "*/*", "Host", "localhost", "X-Forwarded-Host", "nowhere"),
+            netVersionRequest),
+        response.ethSigner(RESPONSE_HEADERS, netVersionResponse));
+
+    verifyEthNodeReceived(
+        Map.of("Accept", "*/*", "X-Forwarded-Host", "localhost"), netVersionRequest);
+  }
+
+  @Test
   void requestReturningErrorIsProxied() {
     final String ethProtocolVersionRequest = Json.encode(jsonRpc().ethProtocolVersion());
 
