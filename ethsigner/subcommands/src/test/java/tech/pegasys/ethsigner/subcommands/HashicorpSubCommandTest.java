@@ -15,6 +15,9 @@ package tech.pegasys.ethsigner.subcommands;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.StringJoiner;
 import tech.pegasys.ethsigner.CmdlineHelpers;
 
 import java.io.ByteArrayOutputStream;
@@ -44,46 +47,35 @@ public class HashicorpSubCommandTest {
     hashicorpSubCommand = new HashicorpSubCommand();
   }
 
-  private boolean parseCommand(final String cmdLine) {
+  private boolean parseCommand(final List<String> cmdLine) {
     final CommandLine commandLine = new CommandLine(hashicorpSubCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
     try {
-      commandLine.parseArgs(cmdLine.split(" "));
+      commandLine.parseArgs(cmdLine.toArray(String[]::new));
     } catch (final CommandLine.ParameterException e) {
       return false;
     }
     return true;
   }
 
-  private String validCommandLine() {
-    return "--auth-file="
-        + THIS_IS_THE_PATH_TO_THE_FILE
-        + " --host="
-        + HTTP_HOST_COM
-        + " --port="
-        + PORT
-        + " --signing-key-path="
-        + PATH_TO_SIGNING_KEY
-        + " --timeout="
-        + FIFTEEN
-        + " --tls-known-server-file="
-        + TLS_KNOWN_SERVER_FILE;
+  private List<String> validCommandLine() {
+    return Lists.newArrayList("--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
+        " --host=" + HTTP_HOST_COM,
+        " --port=" + PORT,
+        " --signing-key-path=" + PATH_TO_SIGNING_KEY,
+        " --timeout=" + FIFTEEN,
+        " --tls-known-server-file=" + TLS_KNOWN_SERVER_FILE);
   }
 
-  private String validWithTlsDisabledCommandLine() {
-    return "--auth-file="
-        + THIS_IS_THE_PATH_TO_THE_FILE
-        + " --host="
-        + HTTP_HOST_COM
-        + " --port="
-        + PORT
-        + " --signing-key-path="
-        + PATH_TO_SIGNING_KEY
-        + " --timeout="
-        + FIFTEEN
-        + " --tls-enabled=false";
+  private List<String> validWithTlsDisabledCommandLine() {
+    return Lists.newArrayList("--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
+        " --host=" + HTTP_HOST_COM,
+        " --port=" + PORT,
+        " --signing-key-path=" + PATH_TO_SIGNING_KEY,
+        " --timeout=" + FIFTEEN,
+        " --tls-enabled=false");
   }
 
   @Test
@@ -122,14 +114,14 @@ public class HashicorpSubCommandTest {
 
   @Test
   public void nonIntegerInputForPortShowsError() {
-    final String cmdLine = modifyField(validCommandLine(), "port", "noInteger");
+    final List<String> cmdLine = modifyField(validCommandLine(), "port", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
 
   @Test
   public void nonIntegerInputForTimeoutShowsError() {
-    final String cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
+    final List<String> cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -156,8 +148,8 @@ public class HashicorpSubCommandTest {
 
   @Test
   void cmdlineIsValidIftlsKnownServerFileIsMissing() {
-    final String cmdLine =
-        CmdlineHelpers.removeFieldFrom(validCommandLine(), "tls-known-server-file");
+    final List<String> cmdLine =
+        CmdlineHelpers.removeFieldsFrom(validCommandLine(), "tls-known-server-file");
     final boolean result = parseCommand(cmdLine);
 
     assertThat(result).isTrue();
@@ -165,7 +157,7 @@ public class HashicorpSubCommandTest {
   }
 
   private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = CmdlineHelpers.removeFieldFrom(validCommandLine(), paramToRemove);
+    final List<String> cmdLine = CmdlineHelpers.removeFieldsFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isFalse();
   }
@@ -174,7 +166,7 @@ public class HashicorpSubCommandTest {
       final String paramToRemove,
       final Supplier<String> actualValueGetter,
       final String expectedValue) {
-    final String cmdLine = CmdlineHelpers.removeFieldFrom(validCommandLine(), paramToRemove);
+    final List<String> cmdLine = CmdlineHelpers.removeFieldsFrom(validCommandLine(), paramToRemove);
     final boolean result = parseCommand(cmdLine);
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).contains(expectedValue);
