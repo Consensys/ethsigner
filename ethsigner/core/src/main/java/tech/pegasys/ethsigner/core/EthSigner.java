@@ -83,7 +83,8 @@ public final class EthSigner {
               new DownstreamPathCalculator(config.getDownstreamHttpPath()),
               jsonDecoder,
               config.getDataPath(),
-              vertx);
+              vertx,
+              config.getCorsAllowedOrigins());
 
       runner.start();
     } catch (final Throwable t) {
