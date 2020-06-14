@@ -25,6 +25,9 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.json.Json;
+import java.util.Map;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
@@ -35,7 +38,9 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
-/** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
+/**
+ * Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node.
+ */
 class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
   private SendTransaction sendTransaction;
@@ -508,5 +513,24 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
+  }
+
+  @Test
+  void ensureTranactionRespsonseContainsCorsHeader() {
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.request(Transaction.smartContract());
+    final String sendRawTransactionRequest = sendRawTransaction.request(sendTransactionRequest);
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    final String originDomain = "sample.com";
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(Map.of("Origin", originDomain), Json.encode(sendTransactionRequest)),
+        response.ethSigner(Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*"),
+            sendRawTransactionResponse));
   }
 }

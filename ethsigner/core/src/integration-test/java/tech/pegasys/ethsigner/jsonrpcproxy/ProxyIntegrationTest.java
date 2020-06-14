@@ -193,6 +193,5 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain), netVersionRequest),
         response.ethSigner(expectedResponseHeaders, netVersionResponse));
-
   }
 }

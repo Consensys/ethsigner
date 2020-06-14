@@ -144,7 +144,7 @@ public class TransactionTransmitter {
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
     final HttpServerRequest httpServerRequest = context.request();
     httpServerRequest.response().setStatusCode(response.statusCode());
-    httpServerRequest.response().headers().setAll(response.headers());
+    httpServerRequest.response().headers().addAll(response.headers());
     httpServerRequest.response().setChunked(false);
     httpServerRequest.response().end(body);
   }
