@@ -12,14 +12,16 @@
  */
 package tech.pegasys.ethsigner;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 
 public class CmdlineHelpers {
 
   public static List<String> validBaseCommandOptions() {
-    return Lists.newArrayList("--downstream-http-host=8.8.8.8",
+    return Lists.newArrayList(
+        "--downstream-http-host=8.8.8.8",
         "--downstream-http-port=5000",
         "--downstream-http-path=/v3/projectid",
         "--downstream-http-request-timeout=10000",
@@ -38,18 +40,19 @@ public class CmdlineHelpers {
         "--downstream-http-tls-known-servers-file=./test.txt");
   }
 
-  public static List<String> removeFieldsFrom(final List<String> cmdlineArgs,
-      final String... fieldNames) {
+  public static List<String> removeFieldsFrom(
+      final List<String> cmdlineArgs, final String... fieldNames) {
     final List<String> fieldsToRemove = Lists.newArrayList(fieldNames);
-    return cmdlineArgs.stream().filter(
-        arg -> fieldsToRemove.stream().noneMatch(arg::contains))
+    return cmdlineArgs.stream()
+        .filter(arg -> fieldsToRemove.stream().noneMatch(arg::contains))
         .collect(Collectors.toList());
   }
 
-  public static List<String> modifyField(List<String> cmdlineArgs, final String fieldName,
-      final String value) {
+  public static List<String> modifyField(
+      List<String> cmdlineArgs, final String fieldName, final String value) {
     final String replacement = "--" + fieldName + "=" + value;
-    return cmdlineArgs.stream().map(arg -> arg.contains(fieldName) ? replacement : arg)
+    return cmdlineArgs.stream()
+        .map(arg -> arg.contains(fieldName) ? replacement : arg)
         .collect(Collectors.toList());
   }
 }

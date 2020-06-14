@@ -15,15 +15,14 @@ package tech.pegasys.ethsigner.subcommands;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 
-import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.StringJoiner;
 import tech.pegasys.ethsigner.CmdlineHelpers;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Supplier;
 
+import com.google.common.collect.Lists;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,21 +60,23 @@ public class HashicorpSubCommandTest {
   }
 
   private List<String> validCommandLine() {
-    return Lists.newArrayList("--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-        " --host=" + HTTP_HOST_COM,
-        " --port=" + PORT,
-        " --signing-key-path=" + PATH_TO_SIGNING_KEY,
-        " --timeout=" + FIFTEEN,
-        " --tls-known-server-file=" + TLS_KNOWN_SERVER_FILE);
+    return Lists.newArrayList(
+        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
+        "--host=" + HTTP_HOST_COM,
+        "--port=" + PORT,
+        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
+        "--timeout=" + FIFTEEN,
+        "--tls-known-server-file=" + TLS_KNOWN_SERVER_FILE);
   }
 
   private List<String> validWithTlsDisabledCommandLine() {
-    return Lists.newArrayList("--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-        " --host=" + HTTP_HOST_COM,
-        " --port=" + PORT,
-        " --signing-key-path=" + PATH_TO_SIGNING_KEY,
-        " --timeout=" + FIFTEEN,
-        " --tls-enabled=false");
+    return Lists.newArrayList(
+        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
+        "--host=" + HTTP_HOST_COM,
+        "--port=" + PORT,
+        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
+        "--timeout=" + FIFTEEN,
+        "--tls-enabled=false");
   }
 
   @Test

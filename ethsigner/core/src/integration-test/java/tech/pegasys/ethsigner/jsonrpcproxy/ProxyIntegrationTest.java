@@ -14,12 +14,13 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonMap;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.json.Json;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.json.Json;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.CipherException;
@@ -191,7 +192,9 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
     expectedResponseHeaders.put(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*");
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain), netVersionRequest),
+        request.ethSigner(
+            Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain),
+            netVersionRequest),
         response.ethSigner(expectedResponseHeaders, netVersionResponse));
   }
 }

@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import com.google.common.collect.Sets;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -41,6 +40,7 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.StringJoiner;
 
+import com.google.common.collect.Sets;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;

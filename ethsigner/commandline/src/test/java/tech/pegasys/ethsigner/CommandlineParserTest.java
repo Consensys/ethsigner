@@ -69,7 +69,7 @@ class CommandlineParserTest {
   void fullyPopulatedCommandLineParsesIntoVariables() {
     List<String> cmdLine = validBaseCommandOptions();
     cmdLine.add(subCommand.getCommandName());
-    final boolean result =parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isTrue();
 
@@ -92,7 +92,6 @@ class CommandlineParserTest {
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
-
 
     final Optional<ClientTlsOptions> downstreamTlsOptionsOptional = config.getClientTlsOptions();
     assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
@@ -121,7 +120,8 @@ class CommandlineParserTest {
 
   @Test
   void missingSubCommandShowsErrorAndUsageText() {
-    final boolean result = parser.parseCommandLine(validBaseCommandOptions().toArray(String[]::new));
+    final boolean result =
+        parser.parseCommandLine(validBaseCommandOptions().toArray(String[]::new));
     assertThat(result).isFalse();
     assertThat(commandError.toString()).contains(MISSING_SUBCOMMAND_ERROR);
     assertThat(commandOutput.toString()).contains(defaultUsageText);
@@ -331,7 +331,9 @@ class CommandlineParserTest {
   @Test
   void ethSignerStartsValidlyIfNoTlsOptionsAreSet() {
     List<String> cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldsFrom(cmdLine,
+    cmdLine =
+        removeFieldsFrom(
+            cmdLine,
             "tls-keystore-file",
             "tls-keystore-password-file",
             "tls-known-clients-file",

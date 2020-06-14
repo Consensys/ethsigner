@@ -25,22 +25,21 @@ import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_VALUE_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder.TRANSACTION_COUNT_METHOD.ETH_GET_TRANSACTION_COUNT;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.vertx.core.json.Json;
-import java.util.Map;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendRawTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.util.Map;
+
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.json.Json;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
-/**
- * Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node.
- */
+/** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
   private SendTransaction sendTransaction;
@@ -530,7 +529,8 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(Map.of("Origin", originDomain), Json.encode(sendTransactionRequest)),
-        response.ethSigner(Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*"),
+        response.ethSigner(
+            Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*"),
             sendRawTransactionResponse));
   }
 }
