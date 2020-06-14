@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
+import com.google.common.collect.Sets;
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
@@ -113,8 +114,8 @@ public class Runner {
         .route()
         .handler(
             CorsHandler.create(buildCorsRegexFromConfig())
-                .allowedHeader("*")
-                .allowedHeader("content-type"));
+                .allowedHeaders(Sets.newHashSet("*", "content-type"))
+                .allowedMethods(Sets.newHashSet(HttpMethod.POST, HttpMethod.GET)));
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)

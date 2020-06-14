@@ -363,4 +363,14 @@ class CommandlineParserTest {
     assertThat(result).isTrue();
     assertThat(config.getCorsAllowedOrigins()).containsOnly("sample.com");
   }
+
+  @Test
+  void corsCanBeACommaSeparatedList() {
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--http-cors-origins=sample.com,mydomain.com");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertThat(result).isTrue();
+    assertThat(config.getCorsAllowedOrigins()).contains("sample.com", "mydomain.com");
+  }
 }

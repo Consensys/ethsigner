@@ -14,11 +14,12 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonMap;
 
-import java.io.IOException;
-import java.util.Map;
-
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.CipherException;
@@ -172,5 +173,26 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         "/login");
 
     verifyEthNodeReceived(REQUEST_HEADERS, LOGIN_BODY, ROOT_PATH + "/login");
+  }
+
+  @Test
+  void requestWithOriginHeaderProducesResponseWithCorsHeader() {
+    final String netVersionRequest = Json.encode(jsonRpc().netVersion());
+    final Response<String> netVersion = new NetVersion();
+    netVersion.setResult("4");
+    final String netVersionResponse = Json.encode(netVersion);
+
+    final String originDomain = "sample.com";
+
+    setUpEthNodeResponse(
+        request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
+
+    final Map<String, String> expectedResponseHeaders = new HashMap<>(RESPONSE_HEADERS);
+    expectedResponseHeaders.put(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*");
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain), netVersionRequest),
+        response.ethSigner(expectedResponseHeaders, netVersionResponse));
+
   }
 }
