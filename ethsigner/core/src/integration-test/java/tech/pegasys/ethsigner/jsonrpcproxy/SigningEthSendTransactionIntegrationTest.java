@@ -515,7 +515,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void ensureTranactionRespsonseContainsCorsHeader() {
+  void ensureTranactionResponseContainsCorsHeader() {
     final Request<?, EthSendTransaction> sendTransactionRequest =
         sendTransaction.request(Transaction.smartContract());
     final String sendRawTransactionRequest = sendRawTransaction.request(sendTransactionRequest);

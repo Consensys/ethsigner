@@ -67,7 +67,7 @@ class CommandlineParserTest {
 
   @Test
   void fullyPopulatedCommandLineParsesIntoVariables() {
-    List<String> cmdLine = validBaseCommandOptions();
+    final List<String> cmdLine = validBaseCommandOptions();
     cmdLine.add(subCommand.getCommandName());
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
@@ -358,7 +358,7 @@ class CommandlineParserTest {
 
   @Test
   void configContainsCorsValueSetOnCmdline() {
-    List<String> cmdLine = validBaseCommandOptions();
+    final List<String> cmdLine = validBaseCommandOptions();
     cmdLine.add("--http-cors-origins=sample.com");
     cmdLine.add(subCommand.getCommandName());
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
@@ -368,11 +368,21 @@ class CommandlineParserTest {
 
   @Test
   void corsCanBeACommaSeparatedList() {
-    List<String> cmdLine = validBaseCommandOptions();
+    final List<String> cmdLine = validBaseCommandOptions();
     cmdLine.add("--http-cors-origins=sample.com,mydomain.com");
     cmdLine.add(subCommand.getCommandName());
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).isTrue();
     assertThat(config.getCorsAllowedOrigins()).contains("sample.com", "mydomain.com");
+  }
+
+  @Test
+  void corsValueOfNoneLiteralProducesEmptyListInConfig() {
+    final List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--http-cors-origins=none");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertThat(result).isTrue();
+    assertThat(config.getCorsAllowedOrigins()).isEmpty();
   }
 }

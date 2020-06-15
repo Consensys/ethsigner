@@ -147,7 +147,7 @@ public class IntegrationTestBase {
             jsonDecoder,
             dataPath,
             vertx,
-            singletonList("*"));
+            singletonList("sample.com"));
     runner.start();
 
     final Path portsFile = dataPath.resolve(PORTS_FILENAME);

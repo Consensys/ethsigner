@@ -197,4 +197,18 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             netVersionRequest),
         response.ethSigner(expectedResponseHeaders, netVersionResponse));
   }
+
+  @Test
+  void requestWithMisMatchedDomainReceives403() {
+    final String netVersionRequest = Json.encode(jsonRpc().netVersion());
+    final Response<String> netVersion = new NetVersion();
+    netVersion.setResult("4");
+    final String originDomain = "notSample.com";
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(
+            Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain),
+            netVersionRequest),
+        response.ethSigner("", HttpResponseStatus.FORBIDDEN));
+  }
 }
