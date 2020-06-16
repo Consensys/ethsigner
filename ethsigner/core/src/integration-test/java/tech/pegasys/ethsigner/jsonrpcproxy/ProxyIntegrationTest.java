@@ -189,7 +189,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
 
     final Map<String, String> expectedResponseHeaders = new HashMap<>(RESPONSE_HEADERS);
-    expectedResponseHeaders.put(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*");
+    expectedResponseHeaders.put(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "sample.com");
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(

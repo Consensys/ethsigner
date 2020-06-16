@@ -530,7 +530,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(Map.of("Origin", originDomain), Json.encode(sendTransactionRequest)),
         response.ethSigner(
-            Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "*"),
+            Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "sample.com"),
             sendRawTransactionResponse));
   }
 }
