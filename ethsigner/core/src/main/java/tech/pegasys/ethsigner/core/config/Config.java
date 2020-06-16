@@ -17,6 +17,7 @@ import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.apache.logging.log4j.Level;
@@ -44,4 +45,6 @@ public interface Config {
   Optional<TlsOptions> getTlsOptions();
 
   Optional<ClientTlsOptions> getClientTlsOptions();
+
+  Collection<String> getCorsAllowedOrigins();
 }

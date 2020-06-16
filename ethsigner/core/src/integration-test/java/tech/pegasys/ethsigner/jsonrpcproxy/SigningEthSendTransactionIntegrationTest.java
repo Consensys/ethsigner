@@ -30,6 +30,10 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.util.Map;
+
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.json.Json;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
@@ -508,5 +512,25 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
+  }
+
+  @Test
+  void ensureTranactionResponseContainsCorsHeader() {
+    final Request<?, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.request(Transaction.smartContract());
+    final String sendRawTransactionRequest = sendRawTransaction.request(sendTransactionRequest);
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d0592102999999999");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    final String originDomain = "sample.com";
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(Map.of("Origin", originDomain), Json.encode(sendTransactionRequest)),
+        response.ethSigner(
+            Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "sample.com"),
+            sendRawTransactionResponse));
   }
 }

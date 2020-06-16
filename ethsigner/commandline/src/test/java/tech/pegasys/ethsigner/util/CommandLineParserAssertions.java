@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
 
 import tech.pegasys.ethsigner.CommandlineParser;
 
@@ -28,11 +28,11 @@ public final class CommandLineParserAssertions {
       final Writer outputWriter,
       final Writer errorWriter,
       final String defaultUsageText,
-      final String inputCmdLine,
+      final List<String> inputCmdLine,
       final List<String> paramsToRemove) {
-    final String cmdLine =
-        removeFieldFrom(inputCmdLine, paramsToRemove.stream().toArray(String[]::new));
-    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
+    final List<String> cmdLine =
+        removeFieldsFrom(inputCmdLine, paramsToRemove.stream().toArray(String[]::new));
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).as("Parse Results After Removing Params").isFalse();
 
     final String output = errorWriter.toString();

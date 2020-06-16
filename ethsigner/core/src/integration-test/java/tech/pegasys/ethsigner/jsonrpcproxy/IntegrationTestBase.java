@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -145,7 +146,8 @@ public class IntegrationTestBase {
             new DownstreamPathCalculator(downstreamHttpRequestPath),
             jsonDecoder,
             dataPath,
-            vertx);
+            vertx,
+            singletonList("sample.com"));
     runner.start();
 
     final Path portsFile = dataPath.resolve(PORTS_FILENAME);

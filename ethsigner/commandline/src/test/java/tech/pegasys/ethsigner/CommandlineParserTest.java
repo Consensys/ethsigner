@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
-import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldFrom;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
 import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
@@ -67,9 +67,9 @@ class CommandlineParserTest {
 
   @Test
   void fullyPopulatedCommandLineParsesIntoVariables() {
-    final boolean result =
-        parser.parseCommandLine(
-            (validBaseCommandOptions() + subCommand.getCommandName()).split(" "));
+    final List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isTrue();
 
@@ -83,6 +83,7 @@ class CommandlineParserTest {
     assertThat(config.getDownstreamHttpRequestTimeout()).isEqualTo(Duration.ofSeconds(10));
     assertThat(config.getHttpListenHost()).isEqualTo("localhost");
     assertThat(config.getHttpListenPort()).isEqualTo(5001);
+    assertThat(config.getCorsAllowedOrigins()).isEmpty();
     assertThat(config.getTlsOptions()).isNotEmpty();
     assertThat(config.getTlsOptions().get().getKeyStoreFile())
         .isEqualTo(new File("./keystore.pfx"));
@@ -119,7 +120,8 @@ class CommandlineParserTest {
 
   @Test
   void missingSubCommandShowsErrorAndUsageText() {
-    final boolean result = parser.parseCommandLine(validBaseCommandOptions().split(" "));
+    final boolean result =
+        parser.parseCommandLine(validBaseCommandOptions().toArray(String[]::new));
     assertThat(result).isFalse();
     assertThat(commandError.toString()).contains(MISSING_SUBCOMMAND_ERROR);
     assertThat(commandOutput.toString()).contains(defaultUsageText);
@@ -127,8 +129,8 @@ class CommandlineParserTest {
 
   @Test
   void nonIntegerInputForDownstreamPortShowsError() {
-    final String args = modifyField(validBaseCommandOptions(), "downstream-http-port", "abc");
-    final boolean result = parser.parseCommandLine(args.split(" "));
+    final List<String> args = modifyField(validBaseCommandOptions(), "downstream-http-port", "abc");
+    final boolean result = parser.parseCommandLine(args.toArray(String[]::new));
     assertThat(result).isFalse();
     assertThat(commandError.toString()).contains("--downstream-http-port", "'abc' is not an int");
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
@@ -211,10 +213,10 @@ class CommandlineParserTest {
   private <T> void missingOptionalParameterIsValidAndMeetsDefault(
       final String paramToRemove, final Supplier<T> actualValueGetter, final T expectedValue) {
 
-    String cmdLine = removeFieldFrom(validBaseCommandOptions(), paramToRemove);
-    cmdLine += subCommand.getCommandName();
+    List<String> cmdLine = removeFieldsFrom(validBaseCommandOptions(), paramToRemove);
+    cmdLine.add(subCommand.getCommandName());
 
-    final boolean result = parser.parseCommandLine(cmdLine.split(" "));
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).isTrue();
     assertThat(actualValueGetter.get()).isEqualTo(expectedValue);
     assertThat(commandOutput.toString()).isEmpty();
@@ -227,9 +229,9 @@ class CommandlineParserTest {
     parser = new CommandlineParser(config, outputWriter, errorWriter);
     parser.registerSigner(subCommand);
 
-    final boolean result =
-        parser.parseCommandLine(
-            (validBaseCommandOptions() + subCommand.getCommandName()).split(" "));
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isFalse();
     assertThat(commandError.toString())
@@ -243,22 +245,20 @@ class CommandlineParserTest {
 
   @Test
   void settingTlsKnownClientAndDisablingClientAuthenticationShowsError() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine += "--tls-allow-any-client ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
-
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--tls-allow-any-client");
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).isFalse();
     assertThat(commandError.toString()).contains("expected only one match but got");
   }
 
   @Test
   void tlsClientAuthenticationCanBeDisabledByRemovingKnownClientsAndSettingOption() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
-    cmdLine += "--tls-allow-any-client ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldsFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
+    cmdLine.add("--tls-allow-any-client");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions().get().getClientAuthConstraints()).isEmpty();
@@ -266,21 +266,21 @@ class CommandlineParserTest {
 
   @Test
   void notExplicitlySettingTlsClientAuthFailsParsing() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldsFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isFalse();
   }
 
   @Test
   void parsingShouldFailIfTlsDisableClientAuthenticationHasAValue() {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
-    cmdLine += "--tls-allow-any-client=false ";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldsFrom(cmdLine, "tls-known-clients-file", "tls-allow-ca-clients");
+    cmdLine.add("--tls-allow-any-client=false");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isFalse();
     assertThat(commandError.toString()).contains("--tls-allow-any-client");
@@ -330,16 +330,16 @@ class CommandlineParserTest {
 
   @Test
   void ethSignerStartsValidlyIfNoTlsOptionsAreSet() {
-    String cmdLine = validBaseCommandOptions();
+    List<String> cmdLine = validBaseCommandOptions();
     cmdLine =
-        removeFieldFrom(
+        removeFieldsFrom(
             cmdLine,
             "tls-keystore-file",
             "tls-keystore-password-file",
             "tls-known-clients-file",
             "tls-allow-ca-clients");
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
 
     assertThat(result).isTrue();
     assertThat(config.getTlsOptions()).isEmpty();
@@ -348,11 +348,41 @@ class CommandlineParserTest {
   @ParameterizedTest
   @ValueSource(strings = {"=", " ", "&", "?", "#"})
   void illegalDownStreamPathThrowsException(final String illegalChar) {
-    String cmdLine = validBaseCommandOptions();
-    cmdLine = removeFieldFrom(cmdLine, "downstream-http-path");
-    cmdLine += " --downstream-http-path=path1/" + illegalChar + "path2";
-    final boolean result =
-        parser.parseCommandLine((cmdLine + subCommand.getCommandName()).split(" "));
+    List<String> cmdLine = validBaseCommandOptions();
+    cmdLine = removeFieldsFrom(cmdLine, "downstream-http-path");
+    cmdLine.add("--downstream-http-path=path1/" + illegalChar + "path2 ");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).isFalse();
+  }
+
+  @Test
+  void configContainsCorsValueSetOnCmdline() {
+    final List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--http-cors-origins=sample.com");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertThat(result).isTrue();
+    assertThat(config.getCorsAllowedOrigins()).containsOnly("sample.com");
+  }
+
+  @Test
+  void corsCanBeACommaSeparatedList() {
+    final List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--http-cors-origins=sample.com,mydomain.com");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertThat(result).isTrue();
+    assertThat(config.getCorsAllowedOrigins()).contains("sample.com", "mydomain.com");
+  }
+
+  @Test
+  void corsValueOfNoneLiteralProducesEmptyListInConfig() {
+    final List<String> cmdLine = validBaseCommandOptions();
+    cmdLine.add("--http-cors-origins=none");
+    cmdLine.add(subCommand.getCommandName());
+    final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertThat(result).isTrue();
+    assertThat(config.getCorsAllowedOrigins()).isEmpty();
   }
 }

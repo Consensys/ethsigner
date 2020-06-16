@@ -20,6 +20,7 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
+import tech.pegasys.ethsigner.core.CorsAllowedOriginsProperty;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -31,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
@@ -146,6 +148,13 @@ public class EthSignerBaseCommand implements Config {
     this.downstreamHttpPath = path;
   }
 
+  // A list of origins URLs that are accepted by the JsonRpcHttpServer (CORS)
+  @Option(
+      names = {"--http-cors-origins"},
+      description = "Comma separated origin domain URLs for CORS validation (default: none)")
+  private final CorsAllowedOriginsProperty rpcHttpCorsAllowedOrigins =
+      new CorsAllowedOriginsProperty();
+
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
@@ -214,6 +223,11 @@ public class EthSignerBaseCommand implements Config {
   }
 
   @Override
+  public Collection<String> getCorsAllowedOrigins() {
+    return rpcHttpCorsAllowedOrigins;
+  }
+
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("logLevel", logLevel)
@@ -226,6 +240,7 @@ public class EthSignerBaseCommand implements Config {
         .add("chainId", chainId)
         .add("dataPath", dataPath)
         .add("clientTlsOptions", clientTlsOptions)
+        .add("corsAllowedOrigins", rpcHttpCorsAllowedOrigins)
         .toString();
   }
 

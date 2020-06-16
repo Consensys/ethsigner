@@ -36,8 +36,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.StringJoiner;
 
+import com.google.common.collect.Sets;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
@@ -47,6 +50,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,6 +71,7 @@ public class Runner {
   private final Path dataPath;
   private final Vertx vertx;
   private final HttpServerService httpServerService;
+  private final Collection<String> allowedCorsOrigins;
 
   public Runner(
       final long chainId,
@@ -77,7 +82,8 @@ public class Runner {
       final DownstreamPathCalculator downstreamPathCalculator,
       final JsonDecoder jsonDecoder,
       final Path dataPath,
-      final Vertx vertx) {
+      final Vertx vertx,
+      final Collection<String> allowedCorsOrigins) {
     this.chainId = chainId;
     this.transactionSignerProvider = transactionSignerProvider;
     this.clientOptions = clientOptions;
@@ -86,6 +92,7 @@ public class Runner {
     this.jsonDecoder = jsonDecoder;
     this.dataPath = dataPath;
     this.vertx = vertx;
+    this.allowedCorsOrigins = allowedCorsOrigins;
     this.httpServerService = new HttpServerService(router(), serverOptions);
   }
 
@@ -103,6 +110,11 @@ public class Runner {
     final Router router = Router.router(vertx);
 
     // Handler for JSON-RPC requests
+    router
+        .route()
+        .handler(
+            CorsHandler.create(buildCorsRegexFromConfig())
+                .allowedHeaders(Sets.newHashSet("*", "content-type")));
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
@@ -200,6 +212,19 @@ public class Runner {
           "This file contains the ports used by the running instance of Web3Provider. This file will be deleted after the node is shutdown.");
     } catch (final Exception e) {
       LOG.warn("Error writing ports file", e);
+    }
+  }
+
+  private String buildCorsRegexFromConfig() {
+    if (allowedCorsOrigins.isEmpty()) {
+      return "";
+    }
+    if (allowedCorsOrigins.contains("*")) {
+      return "*";
+    } else {
+      final StringJoiner stringJoiner = new StringJoiner("|");
+      allowedCorsOrigins.stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
+      return stringJoiner.toString();
     }
   }
 }
