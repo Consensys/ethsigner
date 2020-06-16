@@ -2,7 +2,7 @@
 
 ## 0.7.0
 
-## Features Added
+### Features Added
 - Added "eth_sign" JSON RPC
 - Added "--http-cors-origins" commandline option to allow browser based apps (remix/metamask) to connect to EthSigner
 - Added "--downstream-http-path" commandline option to allow Ethsigner to connect to a downstream web3 provider not on root path (eg web3 provider running in infura)
@@ -10,7 +10,7 @@
 - Code base split, crypto operations moved to "Signers" [repository](https://github.com/PegaSysEng/signers)
 - First line of Password file (stripping EOL) is treated as the password (rather than whole file content)
 
-## Bugs Fixed
+### Bugs Fixed
 - Create invalid signature when Signature field was treated as negative BigInteger [#247](https://github.com/PegaSysEng/ethsigner/issues/247)
 
 ## 0.6.0
