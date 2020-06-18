@@ -66,9 +66,7 @@ public class EthSignBodyProvider implements BodyProvider {
       }
       final TransactionSigner signer = transactionSigner.get();
       final String originalMessage = params.get(1);
-      final String message =
-          (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
-      final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
+      final Signature signature = signer.sign(originalMessage.getBytes(StandardCharsets.UTF_8));
 
       final Bytes outputSignature =
           Bytes.concatenate(
