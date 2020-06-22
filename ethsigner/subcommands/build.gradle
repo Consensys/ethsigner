@@ -19,6 +19,8 @@ dependencies {
   implementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
   implementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
   implementation 'tech.pegasys.signers.internal:keystorage-hashicorp'
+  implementation 'tech.pegasys.signers.internal:keystorage-hsm'
+  implementation 'tech.pegasys.signers.internal:keystorage-cavium'
 
   implementation 'info.picocli:picocli'
   implementation 'com.google.guava:guava'

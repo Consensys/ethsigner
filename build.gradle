@@ -119,6 +119,7 @@ allprojects {
 
   repositories {
     jcenter()
+    mavenLocal()
     mavenCentral()
     maven { url "https://consensys.bintray.com/pegasys-repo" }
   }
