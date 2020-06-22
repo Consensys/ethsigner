@@ -29,7 +29,6 @@ import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +44,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.web3j.crypto.ECDSASignature;
 import org.web3j.crypto.ECKeyPair;
-import org.web3j.crypto.Hash;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
@@ -139,11 +137,12 @@ public class EthSignBodyProviderTest {
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
     final int id = 1;
-    final String message =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tubulum"
-            + " fuisse, qua illum, cuius is condemnatus est rogatione, P. Eaedem res maneant alio modo.";
     request.setId(new JsonRpcRequestId(id));
-    request.setParams(List.of("address", message));
+    request.setParams(
+        List.of(
+            "address",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tubulum"
+                + " fuisse, qua illum, cuius is condemnatus est rogatione, P. Eaedem res maneant alio modo."));
 
     final JsonRpcBody body = bodyProvider.getBody(request);
     assertThat(body.hasError()).isFalse();
@@ -152,7 +151,9 @@ public class EthSignBodyProviderTest {
     final byte[] signature = Numeric.hexStringToByteArray(hexSignature);
 
     final ECDSASignature expectedSignature =
-        keyPair.sign(Hash.sha3(message.getBytes(Charset.defaultCharset())));
+        keyPair.sign(
+            Numeric.hexStringToByteArray(
+                "0xe63325d74baa84af003dfb6a974f41672be881b56aa2c12c093f8259321bd460"));
     assertThat(new BigInteger(1, signature, 0, 32)).isEqualTo(expectedSignature.r);
     assertThat(new BigInteger(1, signature, 32, 32)).isEqualTo(expectedSignature.s);
   }
