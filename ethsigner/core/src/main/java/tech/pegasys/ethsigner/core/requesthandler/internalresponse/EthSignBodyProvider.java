@@ -34,7 +34,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
 
 public class EthSignBodyProvider implements BodyProvider {
@@ -67,10 +66,10 @@ public class EthSignBodyProvider implements BodyProvider {
       }
       final TransactionSigner signer = transactionSigner.get();
       final String originalMessage = params.get(1);
-      final Signature signature = signer.sign(originalMessage.getBytes(StandardCharsets.UTF_8));
-      final byte[] hash = Hash.sha3(originalMessage.getBytes(StandardCharsets.UTF_8));
-      System.out.println(Numeric.toHexString(hash));
-      System.out.println(originalMessage);
+      final String message =
+          (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
+      final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
+
       final Bytes outputSignature =
           Bytes.concatenate(
               Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
