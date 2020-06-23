@@ -46,7 +46,8 @@ ext.acceptedLicenses = [
         'CC0 1.0 Universal License',
         'Common Development and Distribution License 1.0',
         'Unicode/ICU License',
-        'CC0'
+        'CC0',
+        'IAIK of Graz University of Technology License'
 ]*.toLowerCase()
 
 /**
@@ -69,6 +70,7 @@ downloadLicenses {
   ext.cddl = license('Common Development and Distribution License 1.0', 'http://opensource.org/licenses/CDDL-1.0')
   ext.cddl1_1 = license('Common Development and Distribution License 1.0', 'http://oss.oracle.com/licenses/CDDL-1.1')
   ext.epl_2 = license('Eclipse Public License 2.0', 'https://www.eclipse.org/legal/epl-2.0/')
+
   aliases = [
           (apache)    : [
                   'The Apache Software License, Version 2.0',
@@ -152,7 +154,8 @@ downloadLicenses {
           (group('org.glassfish.jersey.connectors')): apache,
           (group('com.github.jnr')): epl_2,
           (group('javax.mail')): cddl,
-          (group('net.jcip')): apache
+          (group('net.jcip')): apache,
+          (group('com.cavium')): apache,
   ]
 }
 
