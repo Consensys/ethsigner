@@ -28,7 +28,7 @@ public class StripCorsHeadersHandler implements Handler<RoutingContext> {
       Lists.newArrayList(ORIGIN, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_HEADERS);
 
   @Override
-  public void handle(RoutingContext context) {
+  public void handle(final RoutingContext context) {
     headersToRemove.forEach(headerName -> context.request().headers().remove(headerName));
     context.next();
   }

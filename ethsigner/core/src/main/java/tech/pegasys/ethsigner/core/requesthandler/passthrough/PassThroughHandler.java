@@ -68,11 +68,10 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private void handleResponseBody(
       final RoutingContext context, final HttpClientResponse response, final Buffer body) {
-    final HttpServerRequest httpServerRequest = context.request();
-    httpServerRequest.response().setStatusCode(response.statusCode());
-    httpServerRequest.response().headers().addAll(response.headers());
-    httpServerRequest.response().setChunked(false);
-    httpServerRequest.response().end(body);
+    context.request().response().setStatusCode(response.statusCode());
+    context.request().response().headers().addAll(response.headers());
+    context.request().response().setChunked(false);
+    context.request().response().end(body);
   }
 
   private void logRequest(final HttpServerRequest httpRequest, final String body) {
