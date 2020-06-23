@@ -12,77 +12,76 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
-
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secp256k1.multikey.MultiKeyTransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.hsm.HSMTransactionSignerFactory;
 
 import java.nio.file.Path;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-/**
- * Multi platform authentication related sub-command. Metadata config TOML files containing signing
- * information from one of several providers.
- */
+/** HSM-based authentication related sub-command */
 @Command(
-    name = MultiKeySubCommand.COMMAND_NAME,
-    description =
-        "Access multiple keys (of any supported type). Each key's "
-            + "parameters are defined in a separate TOML file contained within a given "
-            + "directory.",
+    name = HSMSubCommand.COMMAND_NAME,
+    description = "Sign transactions with a key stored in an HSM.",
     mixinStandardHelpOptions = true)
-public class MultiKeySubCommand extends SignerSubCommand {
+public class HSMSubCommand extends SignerSubCommand {
 
-  public static final String COMMAND_NAME = "multikey-signer";
+  // private static final String READ_PIN_FILE_ERROR = "Error when reading the pin from file.";
+  public static final String COMMAND_NAME = "hsm-signer";
 
-  public MultiKeySubCommand() {}
+  public HSMSubCommand() {}
 
   @SuppressWarnings("unused") // Picocli injects reference to command spec
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
   @Option(
-      names = {"-d", "--directory"},
-      description = "The path to a directory containing signing metadata TOML files",
-      required = true,
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
-      arity = "1")
-  private Path directoryPath;
-
-  @Option(
       names = {"-l", "--library"},
       description = "The HSM PKCS11 library used to sign transactions.",
       paramLabel = "<LIBRARY_PATH>",
-      required = false)
+      required = true)
   private Path libraryPath;
 
   @Option(
       names = {"-s", "--slot-label"},
       description = "The HSM slot used to sign transactions.",
       paramLabel = "<SLOT_LABEL>",
-      required = false)
+      required = true)
   private String slotLabel;
 
   @Option(
       names = {"-p", "--slot-pin"},
       description = "The crypto user pin of the HSM slot used to sign transactions.",
       paramLabel = "<SLOT_PIN>",
-      required = false)
+      required = true)
   private String slotPin;
+
+  @Option(
+      names = {"-a", "--eth-address"},
+      description = "Ethereum address of account to sign with.",
+      paramLabel = "<ETH_ADDRESS>",
+      required = true)
+  private String ethAddress;
+
+  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+    HSMTransactionSignerFactory factory =
+        new HSMTransactionSignerFactory(
+            libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+    return factory.createSigner(ethAddress);
+  }
 
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
-    return MultiKeyTransactionSignerProvider.create(
-        directoryPath, libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+    return new SingleTransactionSignerProvider(createSigner());
   }
 
   @Override
@@ -90,13 +89,12 @@ public class MultiKeySubCommand extends SignerSubCommand {
     return COMMAND_NAME;
   }
 
-  @VisibleForTesting
-  Path getDirectoryPath() {
-    return directoryPath;
-  }
-
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("directoryPath", directoryPath).toString();
+    return MoreObjects.toStringHelper(this)
+        .add("library", libraryPath)
+        .add("slot", slotLabel)
+        .add("address", ethAddress)
+        .toString();
   }
 }

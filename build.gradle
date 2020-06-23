@@ -119,6 +119,7 @@ allprojects {
 
   repositories {
     jcenter()
+    mavenLocal()
     mavenCentral()
     maven { url "https://consensys.bintray.com/pegasys-repo" }
   }
@@ -210,6 +211,7 @@ allprojects {
     jvmArgs = [
       '-Xmx4g',
       '-XX:-UseGCOverheadLimit',
+      "-Djava.library.path=/opt/cloudhsm/lib",
       // Mockito and jackson-databind do some strange reflection during tests.
       // This suppresses an illegal access warning.
       '--add-opens',
@@ -385,6 +387,7 @@ applicationDefaultJvmArgs = [
   "-Dlog4j.shutdownHookEnabled=false",
   // netty specific module warnings
   "-Dio.netty.tryReflectionSetAccessible=true",
+  "-Djava.library.path=/opt/cloudhsm/lib",
   "--add-exports",
   "java.base/jdk.internal.misc=ALL-UNNAMED",
   "--add-opens",
