@@ -13,6 +13,8 @@
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockserver.model.HttpRequest.request;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockserver.model.Header;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
@@ -197,6 +200,9 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
             Map.of("Accept", "*/*", "Host", "localhost", "Origin", originDomain),
             netVersionRequest),
         response.ethSigner(expectedResponseHeaders, netVersionResponse));
+
+    assertThat(clientAndServer.retrieveRecordedRequests(request().withHeader(new Header("origin"))))
+        .isEmpty();
   }
 
   @Test
