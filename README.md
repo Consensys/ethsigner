@@ -4,7 +4,7 @@ A transaction signing application to be used with a web3 provider. All questions
 
 ## Issues
 
-EthSigner issues are tracked in [Jira] not GitHub.
+EthSigner issues are tracked in [GitHub issues].
 
 See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching and creating issues.
 
@@ -19,4 +19,4 @@ See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching 
 * [Release Notes](CHANGELOG.md)
 
 [Gitter]: https://gitter.im/PegaSysEng/EthSigner
-[Jira]: https://pegasys1.atlassian.net/secure/Dashboard.jspa?selectPageId=10121
+[Github issues]: https://github.com/PegaSysEng/ethsigner/issues
