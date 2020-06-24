@@ -92,6 +92,7 @@ public class VertxRequestTransmitter {
     final MultiMap requestHeaders = new VertxHttpHeaders();
     requestHeaders.addAll(headers);
     requestHeaders.remove(HttpHeaders.CONTENT_LENGTH);
+    requestHeaders.remove(HttpHeaders.ORIGIN);
     renameHeader(requestHeaders, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
     return requestHeaders;
   }

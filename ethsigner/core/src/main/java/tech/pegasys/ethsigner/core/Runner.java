@@ -18,7 +18,6 @@ import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
 import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
 import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
-import tech.pegasys.ethsigner.core.http.StripCorsHeadersHandler;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
@@ -115,8 +114,7 @@ public class Runner {
         .route()
         .handler(
             CorsHandler.create(buildCorsRegexFromConfig())
-                .allowedHeaders(Sets.newHashSet("*", "content-type")))
-        .handler(new StripCorsHeadersHandler());
+                .allowedHeaders(Sets.newHashSet("*", "content-type")));
 
     router
         .route(HttpMethod.POST, "/")
