@@ -4,7 +4,7 @@ A transaction signing application to be used with a web3 provider. All questions
 
 ## Issues
 
-Eth2Signer issues are tracked in [GitHub issues].
+EthSigner issues are tracked in [GitHub issues].
 
 See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching and creating issues.
 
