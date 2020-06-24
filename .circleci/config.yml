@@ -37,12 +37,6 @@ commands:
     description: "Prepare"
     steps:
       - checkout
-      - run:
-          name: Install Packages - LibSodium
-          command: |
-            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 78BD65473CB3BD13 5DC22404A6F9F1CA
-            sudo apt-get update
-            sudo apt-get install -y libsodium18 libsodium-dev apt-transport-https
       - restore_cache:
           name: Restore cached gradle dependencies
           keys:
