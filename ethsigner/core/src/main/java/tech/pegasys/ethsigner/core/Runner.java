@@ -115,6 +115,7 @@ public class Runner {
         .handler(
             CorsHandler.create(buildCorsRegexFromConfig())
                 .allowedHeaders(Sets.newHashSet("*", "content-type")));
+
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
