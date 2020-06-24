@@ -48,27 +48,31 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-    final Optional<JsonRpcRequest> jsonRpcRequest = jsonRpcRequest(context);
-    final JsonRpcErrorResponse errorResponse = errorResponse(context, jsonRpcRequest);
-    final int statusCode =
-        context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
-    LOG.debug(
-        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
-        context.request()::method,
-        context.request()::absoluteURI,
-        () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
-        () -> Json.encode(errorResponse),
-        () -> context.failure());
-    httpResponseFactory.create(context.request(), statusCode, errorResponse);
+    if (context.statusCode() != -1 && (context.failure() == null)) {
+      context.response().setStatusCode(context.statusCode());
+      context.response().end();
+      return;
+    }
+
+    if (context.getBody() != null) {
+      final JsonRpcErrorResponse errorResponse = constructJsonRpcErrorResponse(context);
+      final int statusCode =
+          context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
+
+      httpResponseFactory.create(context.request(), statusCode, errorResponse);
+    }
   }
 
-  private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {
+  private JsonRpcErrorResponse constructJsonRpcErrorResponse(final RoutingContext context) {
+    Optional<JsonRpcRequest> decodedRequest;
     try {
-      return Optional.of(jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class));
+      decodedRequest =
+          Optional.of(jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class));
     } catch (final DecodeException e) {
       LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), e);
-      return Optional.empty();
+      decodedRequest = Optional.empty();
     }
+    return errorResponse(context, decodedRequest);
   }
 
   private JsonRpcErrorResponse errorResponse(
@@ -76,6 +80,14 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
     final JsonRpcRequestId rpcRequestId =
         jsonRpcRequest.map(JsonRpcRequest::getId).orElse(new JsonRpcRequestId(null));
     final JsonRpcError jsonRpcError = jsonRpcError(context);
+
+    LOG.debug(
+        "Failed to correctly handle request. method: {}, uri: {}, body: {}, Error body: {}",
+        context.request()::method,
+        context.request()::absoluteURI,
+        () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
+        () -> Json.encode(jsonRpcError));
+
     return new JsonRpcErrorResponse(rpcRequestId, jsonRpcError);
   }
 
