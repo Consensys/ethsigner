@@ -15,6 +15,10 @@ package tech.pegasys.ethsigner.core.requesthandler;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.net.ConnectException;
 import java.time.Duration;
@@ -45,7 +49,11 @@ public class VertxRequestTransmitter {
 
   private void handleException(final RoutingContext context, final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
-      context.fail(GATEWAY_TIMEOUT.code(), thrown);
+      context.fail(
+          GATEWAY_TIMEOUT.code(),
+          new JsonRpcException(
+              new JsonRpcErrorResponse(
+                  context.get("JsonRpcId"), CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT)));
     } else if (thrown instanceof SSLHandshakeException) {
       context.fail(BAD_GATEWAY.code(), thrown);
     } else {

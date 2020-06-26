@@ -18,6 +18,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
@@ -70,11 +71,15 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       transaction = transactionFactory.createTransaction(context, request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      context.fail(
+          BAD_REQUEST.code(),
+          new JsonRpcException(new JsonRpcErrorResponse(request.getId(), INVALID_PARAMS)));
       return;
     } catch (final IllegalArgumentException | DecodeException e) {
       LOG.debug("JSON Deserialization failed for request: {}", request.getParams(), e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      context.fail(
+          BAD_REQUEST.code(),
+          new JsonRpcException(new JsonRpcErrorResponse(request.getId(), INVALID_PARAMS)));
       return;
     }
 
@@ -84,7 +89,9 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     if (transactionSigner.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       context.fail(
-          BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
+          BAD_REQUEST.code(),
+          new JsonRpcException(
+              new JsonRpcErrorResponse(request.getId(), SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT)));
       return;
     }
 

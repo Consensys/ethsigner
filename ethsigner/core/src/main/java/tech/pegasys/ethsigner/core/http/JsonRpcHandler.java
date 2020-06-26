@@ -44,29 +44,11 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-
-    context
-        .vertx()
-        .executeBlocking(
-            future -> {
-              process(context);
-              future.complete();
-            },
-            false,
-            res -> {
-              if (res.failed()) {
-                LOG.error(
-                    "An unhandled error occurred while processing " + context.getBodyAsString(),
-                    res.cause());
-              }
-            });
-  }
-
-  private void process(final RoutingContext context) {
     try {
       LOG.trace("Request body = {}", context.getBodyAsString());
       final JsonRpcRequest request =
           jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class);
+      context.put("JsonRpcId", request.getId());
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context, request);

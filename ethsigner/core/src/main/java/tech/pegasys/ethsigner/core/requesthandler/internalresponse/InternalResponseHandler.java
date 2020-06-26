@@ -13,12 +13,9 @@
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -32,28 +29,18 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private final HttpResponseFactory responder;
   private final BodyProvider responseBodyProvider;
-  private JsonDecoder jsonDecoder;
 
   public InternalResponseHandler(
-      final HttpResponseFactory responder,
-      final BodyProvider responseBodyProvider,
-      final JsonDecoder jsonDecoder) {
+      final HttpResponseFactory responder, final BodyProvider responseBodyProvider) {
     this.responder = responder;
     this.responseBodyProvider = responseBodyProvider;
-    this.jsonDecoder = jsonDecoder;
   }
 
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest rpcRequest) {
     LOG.debug("Internally responding to {}, id={}", rpcRequest.getMethod(), rpcRequest.getId());
-    final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
 
-    if (providedBody.hasError()) {
-      context.fail(new JsonRpcException(providedBody.error()));
-    } else {
-      final JsonRpcSuccessResponse result =
-          jsonDecoder.decodeValue(providedBody.body(), JsonRpcSuccessResponse.class);
-      responder.create(context.request(), HttpResponseStatus.OK.code(), result);
-    }
+    final JsonRpcSuccessResponse result = responseBodyProvider.getBody(rpcRequest);
+    responder.create(context.request(), HttpResponseStatus.OK.code(), result);
   }
 }

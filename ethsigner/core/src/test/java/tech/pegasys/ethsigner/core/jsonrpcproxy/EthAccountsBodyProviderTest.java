@@ -15,18 +15,21 @@ package tech.pegasys.ethsigner.core.jsonrpcproxy;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import com.google.common.collect.Sets;
-import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 public class EthAccountsBodyProviderTest {
@@ -41,13 +44,11 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
     request.setParams(emptyList());
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject jsonObj = new JsonObject(body.body());
+    final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
-    assertThat(body.hasError()).isFalse();
-    assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(jsonObj.getInteger("id")).isEqualTo(id);
-    assertThat(jsonObj.getJsonArray("result")).containsExactly(address);
+    assertThat(response.getVersion()).isEqualTo("2.0");
+    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getResult()).isEqualTo(List.of(address));
   }
 
   @Test
@@ -60,9 +61,13 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
     request.setParams(singletonList(5));
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    assertThat(body.hasError()).isTrue();
-    assertThat(body.error()).isEqualTo(INVALID_PARAMS);
+    final Throwable thrown = catchThrowable(() -> bodyProvider.getBody(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
+    final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
+    assertThat(error.getVersion()).isEqualTo("2.0");
+    assertThat(error.getId()).isEqualTo(id);
+    assertThat(error.getError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
@@ -75,9 +80,13 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
     request.setParams(5);
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    assertThat(body.hasError()).isTrue();
-    assertThat(body.error()).isEqualTo(INVALID_PARAMS);
+    final Throwable thrown = catchThrowable(() -> bodyProvider.getBody(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
+    final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
+    assertThat(error.getVersion()).isEqualTo("2.0");
+    assertThat(error.getId()).isEqualTo(id);
+    assertThat(error.getError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
@@ -89,13 +98,11 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject jsonObj = new JsonObject(body.body());
+    final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
-    assertThat(body.hasError()).isFalse();
-    assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(jsonObj.getInteger("id")).isEqualTo(id);
-    assertThat(jsonObj.getJsonArray("result")).containsExactly(address);
+    assertThat(response.getVersion()).isEqualTo("2.0");
+    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getResult()).isEqualTo(List.of(address));
   }
 
   @Test
@@ -108,14 +115,11 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(id));
     request.setParams(emptyList());
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject jsonObj = new JsonObject(body.body());
+    final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
-    assertThat(body.hasError()).isFalse();
-    assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(jsonObj.getInteger("id")).isEqualTo(id);
-    assertThat(jsonObj.getJsonArray("result")).hasSize(3);
-    assertThat(jsonObj.getJsonArray("result")).containsAll(addresses);
+    assertThat(response.getVersion()).isEqualTo("2.0");
+    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getResult()).isEqualTo(List.of(addresses));
   }
 
   @Test
@@ -129,15 +133,13 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(1));
     request.setParams(emptyList());
 
-    JsonRpcBody body = bodyProvider.getBody(request);
-    JsonObject jsonObj = new JsonObject(body.body());
-    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
+    JsonRpcSuccessResponse response = bodyProvider.getBody(request);
+    assertThat(response.getResult()).isEqualTo(List.of("a", "b", "c"));
 
     addresses.remove("a");
 
-    body = bodyProvider.getBody(request);
-    jsonObj = new JsonObject(body.body());
-    assertThat(jsonObj.getJsonArray("result")).containsExactly("b", "c");
+    response = bodyProvider.getBody(request);
+    assertThat(response.getResult()).isEqualTo(List.of("b", "c"));
   }
 
   @Test
@@ -149,8 +151,7 @@ public class EthAccountsBodyProviderTest {
     request.setId(new JsonRpcRequestId(1));
     request.setParams(emptyList());
 
-    JsonRpcBody body = bodyProvider.getBody(request);
-    JsonObject jsonObj = new JsonObject(body.body());
-    assertThat(jsonObj.getJsonArray("result")).containsExactly("a", "b", "c");
+    final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
+    assertThat(response.getResult()).isEqualTo(List.of("a", "b", "c"));
   }
 }

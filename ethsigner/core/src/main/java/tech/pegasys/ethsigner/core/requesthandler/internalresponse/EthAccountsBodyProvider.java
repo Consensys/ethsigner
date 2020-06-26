@@ -12,11 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,13 +26,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import io.vertx.core.json.Json;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class EthAccountsBodyProvider implements BodyProvider {
-
-  private static final Logger LOG = LogManager.getLogger();
 
   private final Supplier<Set<String>> addressesSupplier;
 
@@ -39,18 +35,16 @@ public class EthAccountsBodyProvider implements BodyProvider {
   }
 
   @Override
-  public JsonRpcBody getBody(final JsonRpcRequest request) {
+  public JsonRpcSuccessResponse getBody(final JsonRpcRequest request) {
     final Object params = request.getParams();
 
     if (isPopulated(params) && isNotEmptyArray(params)) {
-      LOG.info("eth_accounts should have no parameters, but has {}", request.getParams());
-      return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
+      throw new JsonRpcException(new JsonRpcErrorResponse(request.getId(), INVALID_PARAMS));
     }
 
     final List<String> addresses =
         addressesSupplier.get().stream().sorted().collect(Collectors.toList());
-    final JsonRpcSuccessResponse response = new JsonRpcSuccessResponse(request.getId(), addresses);
-    return new JsonRpcBody(Json.encodeToBuffer(response));
+    return new JsonRpcSuccessResponse(request.getId(), addresses);
   }
 
   private boolean isPopulated(final Object params) {

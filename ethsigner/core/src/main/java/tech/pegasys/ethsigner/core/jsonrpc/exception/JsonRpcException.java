@@ -12,16 +12,16 @@
  */
 package tech.pegasys.ethsigner.core.jsonrpc.exception;
 
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 public class JsonRpcException extends RuntimeException {
-  private final JsonRpcError jsonRpcError;
+  private final JsonRpcErrorResponse jsonRpcErrorResponse;
 
-  public JsonRpcException(final JsonRpcError jsonRpcError) {
-    this.jsonRpcError = jsonRpcError;
+  public JsonRpcException(final JsonRpcErrorResponse jsonRpcErrorResponse) {
+    this.jsonRpcErrorResponse = jsonRpcErrorResponse;
   }
 
-  public JsonRpcError getJsonRpcError() {
-    return jsonRpcError;
+  public JsonRpcErrorResponse getJsonRpcErrorResponse() {
+    return jsonRpcErrorResponse;
   }
 }

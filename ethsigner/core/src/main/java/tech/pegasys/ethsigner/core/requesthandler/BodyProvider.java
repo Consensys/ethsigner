@@ -13,9 +13,10 @@
 package tech.pegasys.ethsigner.core.requesthandler;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 @FunctionalInterface
 public interface BodyProvider {
 
-  JsonRpcBody getBody(JsonRpcRequest request);
+  JsonRpcSuccessResponse getBody(JsonRpcRequest request);
 }

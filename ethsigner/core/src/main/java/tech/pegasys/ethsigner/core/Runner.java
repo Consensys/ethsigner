@@ -119,10 +119,14 @@ public class Runner {
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(BodyHandler.create())
+        //        .handler(
+        //            context -> {
+        //              throw new RuntimeException("OH NOES, THIS IS BAD");
+        //            })
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
+        .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -168,12 +172,11 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
-            jsonDecoder));
+            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses)));
     requestMapper.addHandler(
         "eth_sign",
         new InternalResponseHandler(
-            responseFactory, new EthSignBodyProvider(transactionSignerProvider), jsonDecoder));
+            responseFactory, new EthSignBodyProvider(transactionSignerProvider)));
 
     return requestMapper;
   }

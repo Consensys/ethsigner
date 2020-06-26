@@ -16,6 +16,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
@@ -58,7 +59,10 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
         retryMechanism.incrementRetries();
         send();
       } else {
-        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+        context.fail(
+            BAD_REQUEST.code(),
+            new JsonRpcException(
+                new JsonRpcErrorResponse(context.get("JsonRpcId"), INTERNAL_ERROR)));
       }
       return;
     }
