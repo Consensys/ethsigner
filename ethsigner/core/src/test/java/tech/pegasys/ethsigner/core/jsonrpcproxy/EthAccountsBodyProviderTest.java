@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import com.google.common.collect.Sets;
+import io.vertx.core.json.Json;
 import org.junit.jupiter.api.Test;
 
 public class EthAccountsBodyProviderTest {
@@ -47,7 +48,7 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
     assertThat(response.getVersion()).isEqualTo("2.0");
-    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getId()).isEqualTo(request.getId());
     assertThat(response.getResult()).isEqualTo(List.of(address));
   }
 
@@ -66,7 +67,7 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
     final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
     assertThat(error.getVersion()).isEqualTo("2.0");
-    assertThat(error.getId()).isEqualTo(id);
+    assertThat(error.getId()).isEqualTo(request.getId());
     assertThat(error.getError()).isEqualTo(INVALID_PARAMS);
   }
 
@@ -85,7 +86,7 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
     final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
     assertThat(error.getVersion()).isEqualTo("2.0");
-    assertThat(error.getId()).isEqualTo(id);
+    assertThat(error.getId()).isEqualTo(request.getId());
     assertThat(error.getError()).isEqualTo(INVALID_PARAMS);
   }
 
@@ -101,7 +102,7 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
     assertThat(response.getVersion()).isEqualTo("2.0");
-    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getId()).isEqualTo(request.getId());
     assertThat(response.getResult()).isEqualTo(List.of(address));
   }
 
@@ -118,8 +119,11 @@ public class EthAccountsBodyProviderTest {
     final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
     assertThat(response.getVersion()).isEqualTo("2.0");
-    assertThat(response.getId()).isEqualTo(id);
-    assertThat(response.getResult()).isEqualTo(List.of(addresses));
+    assertThat(response.getId()).isEqualTo(request.getId());
+
+    final String jsonString = Json.encode(response.getResult());
+    final String[] resultContent = Json.decodeValue(jsonString, String[].class);
+    assertThat(resultContent).containsExactlyInAnyOrderElementsOf(addresses);
   }
 
   @Test

@@ -67,7 +67,7 @@ public class EthSignBodyProviderTest {
     final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
     final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
 
-    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS.getCode());
+    assertThat(error.getError()).isEqualTo(JsonRpcError.INVALID_PARAMS);
     assertThat(error.getId()).isEqualTo(request.getId());
     assertThat(error.getVersion()).isEqualTo("2.0");
   }
@@ -86,8 +86,7 @@ public class EthSignBodyProviderTest {
     final JsonRpcException jsonRpcException = (JsonRpcException) thrown;
     final JsonRpcErrorResponse error = jsonRpcException.getJsonRpcErrorResponse();
 
-    assertThat(error.getError())
-        .isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT.getCode());
+    assertThat(error.getError()).isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     assertThat(error.getId()).isEqualTo(request.getId());
     assertThat(error.getVersion()).isEqualTo("2.0");
   }
@@ -111,7 +110,7 @@ public class EthSignBodyProviderTest {
     final JsonRpcSuccessResponse response = bodyProvider.getBody(request);
 
     assertThat(response.getVersion()).isEqualTo("2.0");
-    assertThat(response.getId()).isEqualTo(id);
+    assertThat(response.getId()).isEqualTo(request.getId());
     final String hexSignature = (String) response.getResult();
     assertThat(hexSignature).hasSize(132);
 
