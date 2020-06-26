@@ -121,10 +121,6 @@ public class Runner {
         .produces(JSON)
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(BodyHandler.create())
-        //        .handler(
-        //            context -> {
-        //              throw new RuntimeException("OH NOES, THIS IS BAD");
-        //            })
         .handler(ResponseContentTypeHandler.create())
         .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
