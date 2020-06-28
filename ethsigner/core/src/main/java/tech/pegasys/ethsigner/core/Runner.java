@@ -119,9 +119,9 @@ public class Runner {
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint

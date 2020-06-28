@@ -20,6 +20,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
@@ -54,6 +55,7 @@ public class TransactionTransmitter {
   private final VertxRequestTransmitter transmitter;
   private final RoutingContext routingContext;
   private final String downstreamPath;
+  private final JsonRpcRequestId requestId;
 
   public TransactionTransmitter(
       final HttpClient ethNodeClient,
@@ -68,6 +70,7 @@ public class TransactionTransmitter {
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
     this.routingContext = routingContext;
+    this.requestId = routingContext.get("JsonRpcId");
   }
 
   public void send() {
@@ -84,7 +87,7 @@ public class TransactionTransmitter {
       routingContext.fail(
           BAD_REQUEST.code(),
           new JsonRpcException(
-              new JsonRpcErrorResponse(routingContext.get("JsonRpcId"), INTERNAL_ERROR)));
+              new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
     }
   }
 
@@ -96,7 +99,6 @@ public class TransactionTransmitter {
       }
     }
 
-    final Object requestId = routingContext.get("JsonRpcId");
     final String signedTransactionHexString;
     try {
       signedTransactionHexString = transactionSerializer.serialize(transaction);
@@ -131,21 +133,21 @@ public class TransactionTransmitter {
             GATEWAY_TIMEOUT.code(),
             new JsonRpcException(
                 new JsonRpcErrorResponse(
-                    routingContext.get("JsonRpcId"), CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT)));
+                    requestId, CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT)));
       } else if (cause instanceof SSLHandshakeException) {
         routingContext.fail(BAD_GATEWAY.code(), cause);
       } else {
         routingContext.fail(
             GATEWAY_TIMEOUT.code(),
             new JsonRpcException(
-                new JsonRpcErrorResponse(routingContext.get("JsonRpcId"), INTERNAL_ERROR)));
+                new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
       }
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       routingContext.fail(
           BAD_REQUEST.code(),
           new JsonRpcException(
-              new JsonRpcErrorResponse(routingContext.get("JsonRpcId"), INTERNAL_ERROR)));
+              new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
     }
     return false;
   }
