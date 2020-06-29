@@ -86,8 +86,7 @@ public class TransactionTransmitter {
       LOG.debug("JSON Serialization failed for: {}", request, e);
       routingContext.fail(
           BAD_REQUEST.code(),
-          new JsonRpcException(
-              new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
+          new JsonRpcException(new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
     }
   }
 
@@ -132,22 +131,19 @@ public class TransactionTransmitter {
         routingContext.fail(
             GATEWAY_TIMEOUT.code(),
             new JsonRpcException(
-                new JsonRpcErrorResponse(
-                    requestId, CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT)));
+                new JsonRpcErrorResponse(requestId, CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT)));
       } else if (cause instanceof SSLHandshakeException) {
         routingContext.fail(BAD_GATEWAY.code(), cause);
       } else {
         routingContext.fail(
             GATEWAY_TIMEOUT.code(),
-            new JsonRpcException(
-                new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
+            new JsonRpcException(new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
       }
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       routingContext.fail(
           BAD_REQUEST.code(),
-          new JsonRpcException(
-              new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
+          new JsonRpcException(new JsonRpcErrorResponse(requestId, INTERNAL_ERROR)));
     }
     return false;
   }
