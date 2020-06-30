@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
@@ -63,6 +62,7 @@ public class EthSignerProcessRunner extends EthSignerBaseRunner {
     return "build/install/ethsigner/bin/ethsigner";
   }
 
+  @Override
   public void launchEthSigner(final List<String> params, final String processName) {
     final String[] paramsAsArray = params.toArray(new String[0]);
     final List<String> paramsWithCmd = Lists.asList(executableLocation(), paramsAsArray);
@@ -76,7 +76,8 @@ public class EthSignerProcessRunner extends EthSignerBaseRunner {
     final StringJoiner javaOpts = new StringJoiner(" ");
 
     if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
-      final TlsCertificateDefinition overriddenCaTrustStore = signerConfig.getOverriddenCaTrustStore().get();
+      final TlsCertificateDefinition overriddenCaTrustStore =
+          signerConfig.getOverriddenCaTrustStore().get();
       final Path overriddenCaTrustStorePath = createJksTrustStore(dataPath, overriddenCaTrustStore);
       javaOpts.add(
           "-Djavax.net.ssl.trustStore=" + overriddenCaTrustStorePath.toAbsolutePath().toString());
@@ -111,6 +112,7 @@ public class EthSignerProcessRunner extends EthSignerBaseRunner {
     }
   }
 
+  @Override
   @SuppressWarnings("UnstableApiUsage")
   public synchronized void shutdown() {
     killProcess();
@@ -133,6 +135,7 @@ public class EthSignerProcessRunner extends EthSignerBaseRunner {
     }
   }
 
+  @Override
   public boolean isRunning() {
     return (process.isPresent() && process.get().isAlive());
   }

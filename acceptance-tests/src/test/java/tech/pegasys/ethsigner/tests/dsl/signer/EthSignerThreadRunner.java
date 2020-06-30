@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,30 +9,34 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
+import jdk.jshell.SourceCodeAnalysis.Completeness;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tech.pegasys.ethsigner.EthSignerApp;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class EthSignerThreadRunner extends EthSignerBaseRunner {
 
+  private static final Logger LOG = LogManager.getLogger();
+
   private ExecutorService executor = Executors.newSingleThreadExecutor();
+  private CompletableFuture<Boolean> isExited = new CompletableFuture<>();
 
   public EthSignerThreadRunner(
-      SignerConfiguration signerConfig,
-      NodeConfiguration nodeConfig,
-      NodePorts nodePorts) {
+      SignerConfiguration signerConfig, NodeConfiguration nodeConfig, NodePorts nodePorts) {
     super(signerConfig, nodeConfig, nodePorts);
   }
 
@@ -40,7 +44,8 @@ public class EthSignerThreadRunner extends EthSignerBaseRunner {
   public void launchEthSigner(final List<String> params, final String processName) {
 
     if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
-      final TlsCertificateDefinition tlsCertificateDefinition = signerConfig.getOverriddenCaTrustStore().get();
+      final TlsCertificateDefinition tlsCertificateDefinition =
+          signerConfig.getOverriddenCaTrustStore().get();
       final Path overriddenCaTrustStorePath =
           createJksTrustStore(dataPath, tlsCertificateDefinition);
       System.setProperty(
@@ -50,11 +55,23 @@ public class EthSignerThreadRunner extends EthSignerBaseRunner {
     }
 
     final String[] paramsAsArray = params.toArray(new String[0]);
-    executor.submit(() -> EthSignerApp.main(paramsAsArray));
+    executor.submit(() -> {
+      try {
+        EthSignerApp.main(paramsAsArray);
+      } finally {
+        LOG.info("Main thread has exited");
+        isExited.complete(true);
+      }
+    });
   }
 
   @Override
   public boolean isRunning() {
-    return !executor.isTerminated();
+    return !isExited.isDone();
+  }
+
+  @Override
+  public void shutdown() {
+    executor.shutdown();
   }
 }

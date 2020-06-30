@@ -74,7 +74,7 @@ public class Signer {
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts,
       final ClientTlsConfig clientTlsConfig) {
-    this.runner =  EthSignerBaseRunner.createRunner(signerConfig, nodeConfig, nodePorts);
+    this.runner = EthSignerBaseRunner.createRunner(signerConfig, nodeConfig, nodePorts);
     this.pollingInterval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";

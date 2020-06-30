@@ -19,6 +19,7 @@ dependencies {
   testRuntimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
   testImplementation project(':ethsigner:core')
+  testImplementation project(':ethsigner:app')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'signing-secp256k1-impl', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hashicorp', classifier: 'test-fixtures')
 

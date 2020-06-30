@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,14 +9,17 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
  */
 package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.Lists;
+import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
+import tech.pegasys.ethsigner.core.config.TlsOptions;
+import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
+import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,22 +28,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import com.google.common.collect.Lists;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
-import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
-import tech.pegasys.ethsigner.core.config.TlsOptions;
-import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
-import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 public abstract class EthSignerBaseRunner {
 
@@ -61,7 +58,8 @@ public abstract class EthSignerBaseRunner {
   protected final boolean useDynamicPortAllocation;
   protected final SignerConfiguration signerConfig;
 
-  public static EthSignerBaseRunner createRunner(final SignerConfiguration signerConfig,
+  public static EthSignerBaseRunner createRunner(
+      final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
     if (Boolean.getBoolean("acctests.runEthSignerAsProcess")) {
@@ -196,8 +194,6 @@ public abstract class EthSignerBaseRunner {
     return Collections.unmodifiableCollection(params);
   }
 
-
-
   public int httpJsonRpcPort() {
     if (useDynamicPortAllocation) {
       final String value = portsProperties.getProperty(HTTP_JSON_RPC_KEY);
@@ -242,5 +238,5 @@ public abstract class EthSignerBaseRunner {
 
   public abstract boolean isRunning();
 
-  public void shutdown() {  }
+  public void shutdown() {}
 }
