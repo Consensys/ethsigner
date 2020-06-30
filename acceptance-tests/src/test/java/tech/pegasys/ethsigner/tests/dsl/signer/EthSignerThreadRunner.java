@@ -14,10 +14,6 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
-import java.util.concurrent.CompletableFuture;
-import jdk.jshell.SourceCodeAnalysis.Completeness;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.ethsigner.EthSignerApp;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
@@ -25,8 +21,12 @@ import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class EthSignerThreadRunner extends EthSignerBaseRunner {
 
@@ -55,14 +55,15 @@ public class EthSignerThreadRunner extends EthSignerBaseRunner {
     }
 
     final String[] paramsAsArray = params.toArray(new String[0]);
-    executor.submit(() -> {
-      try {
-        EthSignerApp.main(paramsAsArray);
-      } finally {
-        LOG.info("Main thread has exited");
-        isExited.complete(true);
-      }
-    });
+    executor.submit(
+        () -> {
+          try {
+            EthSignerApp.main(paramsAsArray);
+          } finally {
+            LOG.info("Main thread has exited");
+            isExited.complete(true);
+          }
+        });
   }
 
   @Override
