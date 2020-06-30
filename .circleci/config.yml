@@ -169,7 +169,16 @@ jobs:
           command: |
             mkdir -p docker/reports
             ./gradlew --no-daemon testDocker
-      - notify            
+      - run:
+          name: build image - cloudhsm
+          command: |
+            ./gradlew --no-daemon distDocker -Pdockerfile=cloudhsm
+      - run:
+          name: test image - cloudhsm
+          command: |
+            mkdir -p docker/reports
+            ./gradlew --no-daemon testDocker -Pdockerfile=cloudhsm
+      - notify
 
   publish:
     executor: executor_med
@@ -195,6 +204,11 @@ jobs:
           command: |
             docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
+      - run:
+          name: Publish Docker - cloudhsm
+          command: |
+            docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
+            ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload -Pdockerfile=cloudhsm
       - notify
       
 workflows:

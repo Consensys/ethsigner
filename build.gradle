@@ -486,29 +486,36 @@ tasks.register("dockerDistUntar") {
 }
 
 task distDocker(type: Exec) {
+  def tagSuffix = project.hasProperty("dockerfile")? "-" + dockerfile : ""
+  def dockerfile = project.hasProperty("dockerfile")? dockerfile + ".Dockerfile" : "Dockerfile"
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
   def imageName = dockerRepo + "/" + repositoryName
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion')  + "${tagSuffix}": "${imageName}:${project.version}${tagSuffix}"
   def dockerBuildDir = "build/docker-" + repositoryName + "/"
   workingDir "${dockerBuildDir}"
 
   doFirst {
     copy {
-      from file("${projectDir}/docker/Dockerfile")
+      from file("${projectDir}/docker/" + dockerfile)
+      into(workingDir)
+    }
+    copy {
+      from file("${projectDir}/docker/cloudhsm-entrypoint.sh")
       into(workingDir)
     }
   }
 
   executable "sh"
-  args "-c", "docker build --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
+  args "-c", "docker build -f ${dockerfile} --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${getCheckedOutGitCommitHash()} -t ${image} ."
 }
 
 task testDocker(type: Exec) {
   dependsOn distDocker
+  def tagSuffix = project.hasProperty("dockerfile")? "-" + dockerfile : ""
   def dockerReportsDir = "docker/reports/"
   def imageName = dockerRepo + "/" + repositoryName
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion')  + "${tagSuffix}": "${imageName}:${project.version}${tagSuffix}"
   workingDir "docker"
 
   doFirst {
@@ -521,18 +528,19 @@ task testDocker(type: Exec) {
 
 task dockerUpload(type: Exec) {
   dependsOn distDocker
+  def tagSuffix = project.hasProperty("dockerfile")? "-" + dockerfile : ""
   def imageName = dockerRepo + "/" + repositoryName
-  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
+  def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion')  + "${tagSuffix}": "${imageName}:${project.version}${tagSuffix}"
   def cmd = "docker push '${image}'"
   def additionalTags = []
 
   if (project.hasProperty('branch') && project.property('branch') == 'master') {
-    additionalTags.add('develop')
+    additionalTags.add("develop${tagSuffix}")
   }
 
   if (!(version ==~ /.*-SNAPSHOT/)) {
-    additionalTags.add('latest')
-    additionalTags.add(version.split(/\./)[0..1].join('.'))
+    additionalTags.add("latest${tagSuffix}")
+    additionalTags.add(version.split(/\./)[0..1].join('.') + "${tagSuffix}")
   }
 
   additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
