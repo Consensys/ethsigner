@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
 import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
 import tech.pegasys.ethsigner.core.http.LogErrorHandler;
@@ -39,15 +38,19 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.StringJoiner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.google.common.collect.Sets;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -70,8 +73,8 @@ public class Runner {
   private final JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
-  private final HttpServerService httpServerService;
   private final Collection<String> allowedCorsOrigins;
+  private final HttpServerOptions serverOptions;
 
   public Runner(
       final long chainId,
@@ -93,11 +96,15 @@ public class Runner {
     this.dataPath = dataPath;
     this.vertx = vertx;
     this.allowedCorsOrigins = allowedCorsOrigins;
-    this.httpServerService = new HttpServerService(router(), serverOptions);
+    this.serverOptions = serverOptions;
   }
 
-  public void start() {
-    vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
+  public void start() throws ExecutionException, InterruptedException {
+    final HttpServer httpServer = createServerAndWait(vertx, router());
+    LOG.info("Server is up, and listening on {}", httpServer.actualPort());
+    if (dataPath != null) {
+      writePortsToFile(httpServer);
+    }
   }
 
   private Router router() {
@@ -178,30 +185,12 @@ public class Runner {
     return requestMapper;
   }
 
-  private void httpServerServiceDeployment(final AsyncResult<String> result) {
-    if (result.succeeded()) {
-      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
-
-      if (dataPath != null) {
-        writePortsToFile(httpServerService);
-      }
-    } else {
-      deploymentFailed(result.cause());
-    }
-  }
-
-  private void deploymentFailed(final Throwable cause) {
-    LOG.error("Vertx deployment failed", cause);
-    vertx.close();
-    System.exit(1);
-  }
-
-  private void writePortsToFile(final HttpServerService httpService) {
+  private void writePortsToFile(final HttpServer server) {
     final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
     final Properties properties = new Properties();
-    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
+    properties.setProperty("http-jsonrpc", String.valueOf(server.actualPort()));
 
     LOG.info(
         "Writing ethsigner.ports file: {}, with contents: {}",
@@ -227,5 +216,30 @@ public class Runner {
       allowedCorsOrigins.stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
       return stringJoiner.toString();
     }
+  }
+
+  private HttpServer createServerAndWait(
+      final Vertx vertx, final Handler<HttpServerRequest> requestHandler)
+      throws ExecutionException, InterruptedException {
+
+    final HttpServer httpServer = vertx.createHttpServer(serverOptions);
+    final CompletableFuture<Void> serverRunningFuture = new CompletableFuture<>();
+    httpServer
+        .requestHandler(requestHandler)
+        .listen(
+            result -> {
+              if (result.succeeded()) {
+                serverRunningFuture.complete(null);
+              } else {
+                LOG.error(
+                    "Failed to create HTTP Server on {}:{}",
+                    serverOptions.getHost(),
+                    serverOptions.getPort());
+                serverRunningFuture.completeExceptionally(result.cause());
+              }
+            });
+    serverRunningFuture.get();
+
+    return httpServer;
   }
 }

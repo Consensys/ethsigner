@@ -49,6 +49,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -105,12 +106,12 @@ public class IntegrationTestBase {
 
   @TempDir static Path dataPath;
 
-  static void setupEthSigner(final long chainId) throws IOException, CipherException {
+  static void setupEthSigner(final long chainId) throws Exception {
     setupEthSigner(chainId, "");
   }
 
   static void setupEthSigner(final long chainId, final String downstreamHttpRequestPath)
-      throws IOException, CipherException {
+      throws IOException, CipherException, ExecutionException, InterruptedException {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();
