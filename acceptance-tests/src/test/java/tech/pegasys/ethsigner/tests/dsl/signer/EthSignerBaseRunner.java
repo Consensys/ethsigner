@@ -75,7 +75,6 @@ public abstract class EthSignerBaseRunner {
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
-    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
 
     this.nodeHostname = nodeConfig.getHostname();
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
@@ -238,5 +237,5 @@ public abstract class EthSignerBaseRunner {
 
   public abstract boolean isRunning();
 
-  public void shutdown() {}
+  public abstract void shutdown();
 }

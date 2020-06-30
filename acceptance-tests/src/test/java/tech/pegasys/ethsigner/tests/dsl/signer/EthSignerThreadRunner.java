@@ -38,6 +38,7 @@ public class EthSignerThreadRunner extends EthSignerBaseRunner {
   public EthSignerThreadRunner(
       SignerConfiguration signerConfig, NodeConfiguration nodeConfig, NodePorts nodePorts) {
     super(signerConfig, nodeConfig, nodePorts);
+    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
   @Override
