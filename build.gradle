@@ -36,6 +36,8 @@ if (!JavaVersion.current().java11Compatible) {
   "  Detected version ${JavaVersion.current()}")
 }
 
+def dockerRepo = "adharaprojects"
+
 def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
 def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
 def bintrayPackage = bintray.pkg {
@@ -121,7 +123,14 @@ allprojects {
     jcenter()
     mavenLocal()
     mavenCentral()
-    maven { url "https://consensys.bintray.com/pegasys-repo" }
+    //maven { url "https://consensys.bintray.com/pegasys-repo" }
+    maven {
+      url "https://adhara.jfrog.io/artifactory/maven"
+      credentials {
+        username = System.getenv('ARTIFACTORY_USER')
+        password = System.getenv('ARTIFACTORY_PASSWORD')
+      }
+    }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
@@ -478,7 +487,7 @@ tasks.register("dockerDistUntar") {
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def imageName = "pegasyseng/" + repositoryName
+  def imageName = dockerRepo + "/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def dockerBuildDir = "build/docker-" + repositoryName + "/"
   workingDir "${dockerBuildDir}"
@@ -497,7 +506,7 @@ task distDocker(type: Exec) {
 task testDocker(type: Exec) {
   dependsOn distDocker
   def dockerReportsDir = "docker/reports/"
-  def imageName = "pegasyseng/" + repositoryName
+  def imageName = dockerRepo + "/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   workingDir "docker"
 
@@ -511,7 +520,7 @@ task testDocker(type: Exec) {
 
 task dockerUpload(type: Exec) {
   dependsOn distDocker
-  def imageName = "pegasyseng/" + repositoryName
+  def imageName = dockerRepo + "/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def cmd = "docker push '${image}'"
   def additionalTags = []
