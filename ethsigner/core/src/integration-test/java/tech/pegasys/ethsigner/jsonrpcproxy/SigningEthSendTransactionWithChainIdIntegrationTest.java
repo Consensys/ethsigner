@@ -21,6 +21,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +37,8 @@ class SigningEthSendTransactionWithChainIdIntegrationTest extends IntegrationTes
 
   @SuppressWarnings("unused")
   @BeforeAll
-  private static void setupEthSigner() throws IOException, CipherException {
+  private static void setupEthSigner()
+      throws IOException, CipherException, ExecutionException, InterruptedException {
     setupEthSigner(4123123123L);
   }
 

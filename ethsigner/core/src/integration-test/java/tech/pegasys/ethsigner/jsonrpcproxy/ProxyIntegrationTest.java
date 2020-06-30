@@ -19,6 +19,7 @@ import static org.mockserver.model.HttpRequest.request;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -43,7 +44,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   public static void localSetup() {
     try {
       setupEthSigner(DEFAULT_CHAIN_ID, ROOT_PATH);
-    } catch (final CipherException | IOException e) {
+    } catch (final CipherException | IOException | InterruptedException | ExecutionException e) {
       throw new RuntimeException("Failed to setup ethsigner");
     }
   }

@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.web3j.crypto.CipherException;
@@ -20,7 +21,8 @@ import org.web3j.crypto.CipherException;
 public class DefaultTestBase extends IntegrationTestBase {
   @SuppressWarnings("unused")
   @BeforeAll
-  private static void setupEthSigner() throws IOException, CipherException {
+  private static void setupEthSigner()
+      throws IOException, CipherException, ExecutionException, InterruptedException {
     setupEthSigner(DEFAULT_CHAIN_ID);
   }
 }
