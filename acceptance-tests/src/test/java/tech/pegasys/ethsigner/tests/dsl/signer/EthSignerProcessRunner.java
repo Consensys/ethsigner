@@ -33,13 +33,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
-import com.google.common.io.MoreFiles;
-import com.google.common.io.RecursiveDeleteOption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
 
-public class EthSignerProcessRunner extends EthSignerBaseRunner {
+public class EthSignerProcessRunner extends EthSignerRunner {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
@@ -124,14 +122,6 @@ public class EthSignerProcessRunner extends EthSignerBaseRunner {
     } catch (final InterruptedException e) {
       LOG.error("Interrupted while already shutting down", e);
       Thread.currentThread().interrupt();
-    } finally {
-      if (useDynamicPortAllocation) {
-        try {
-          MoreFiles.deleteRecursively(dataPath, RecursiveDeleteOption.ALLOW_INSECURE);
-        } catch (final IOException e) {
-          LOG.info("Failed to clean up temporary file: {}", dataPath, e);
-        }
-      }
     }
   }
 

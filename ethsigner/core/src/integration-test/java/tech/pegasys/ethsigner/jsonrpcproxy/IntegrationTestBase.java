@@ -49,7 +49,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -70,7 +69,6 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
@@ -111,7 +109,7 @@ public class IntegrationTestBase {
   }
 
   static void setupEthSigner(final long chainId, final String downstreamHttpRequestPath)
-      throws IOException, CipherException, ExecutionException, InterruptedException {
+      throws Exception {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();

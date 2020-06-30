@@ -48,7 +48,7 @@ public class Signer {
   private static final Logger LOG = LogManager.getLogger();
   private static final String PROCESS_NAME = "EthSigner";
 
-  private final EthSignerBaseRunner runner;
+  private final EthSignerRunner runner;
   private final Duration pollingInterval;
   private final String hostname;
 
@@ -74,7 +74,7 @@ public class Signer {
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts,
       final ClientTlsConfig clientTlsConfig) {
-    this.runner = EthSignerBaseRunner.createRunner(signerConfig, nodeConfig, nodePorts);
+    this.runner = EthSignerRunner.createRunner(signerConfig, nodeConfig, nodePorts);
     this.pollingInterval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";

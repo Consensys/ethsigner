@@ -35,11 +35,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
 
-public abstract class EthSignerBaseRunner {
+public abstract class EthSignerRunner {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -58,7 +59,7 @@ public abstract class EthSignerBaseRunner {
   protected final boolean useDynamicPortAllocation;
   protected final SignerConfiguration signerConfig;
 
-  public static EthSignerBaseRunner createRunner(
+  public static EthSignerRunner createRunner(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
@@ -71,7 +72,7 @@ public abstract class EthSignerBaseRunner {
     }
   }
 
-  public EthSignerBaseRunner(
+  public EthSignerRunner(
       final SignerConfiguration signerConfig,
       final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
@@ -89,7 +90,8 @@ public abstract class EthSignerBaseRunner {
 
     if (useDynamicPortAllocation) {
       try {
-        this.dataPath = Files.createTempDirectory("acceptance-test");
+        dataPath = Files.createTempDirectory("acceptance-test");
+        FileUtils.forceDeleteOnExit(dataPath.toFile());
       } catch (final IOException e) {
         throw new RuntimeException(
             "Failed to create the temporary directory to store the ethsigner.ports file");

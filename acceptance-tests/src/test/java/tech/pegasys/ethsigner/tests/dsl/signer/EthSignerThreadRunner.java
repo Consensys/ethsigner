@@ -28,12 +28,12 @@ import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EthSignerThreadRunner extends EthSignerBaseRunner {
+public class EthSignerThreadRunner extends EthSignerRunner {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private ExecutorService executor = Executors.newSingleThreadExecutor();
-  private CompletableFuture<Boolean> isExited = new CompletableFuture<>();
+  private final ExecutorService executor = Executors.newSingleThreadExecutor();
+  private final CompletableFuture<Boolean> isExited = new CompletableFuture<>();
 
   public EthSignerThreadRunner(
       SignerConfiguration signerConfig, NodeConfiguration nodeConfig, NodePorts nodePorts) {
@@ -43,7 +43,6 @@ public class EthSignerThreadRunner extends EthSignerBaseRunner {
 
   @Override
   public void launchEthSigner(final List<String> params, final String processName) {
-
     if (signerConfig.getOverriddenCaTrustStore().isPresent()) {
       final TlsCertificateDefinition tlsCertificateDefinition =
           signerConfig.getOverriddenCaTrustStore().get();
