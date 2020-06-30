@@ -231,6 +231,10 @@ public class Runner {
               if (result.succeeded()) {
                 serverRunningFuture.complete(null);
               } else {
+                LOG.error(
+                    "Failed to create HTTP Server on {}:{}",
+                    serverOptions.getHost(),
+                    serverOptions.getPort());
                 serverRunningFuture.completeExceptionally(result.cause());
               }
             });

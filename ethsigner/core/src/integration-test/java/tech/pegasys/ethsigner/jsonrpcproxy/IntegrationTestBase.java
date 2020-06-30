@@ -106,8 +106,7 @@ public class IntegrationTestBase {
 
   @TempDir static Path dataPath;
 
-  static void setupEthSigner(final long chainId)
-      throws IOException, CipherException, ExecutionException, InterruptedException {
+  static void setupEthSigner(final long chainId) throws Exception {
     setupEthSigner(chainId, "");
   }
 
