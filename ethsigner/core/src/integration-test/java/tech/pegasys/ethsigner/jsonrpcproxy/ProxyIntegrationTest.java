@@ -16,7 +16,6 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.model.HttpRequest.request;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import io.vertx.core.json.Json;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockserver.model.Header;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
@@ -43,7 +41,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
   public static void localSetup() {
     try {
       setupEthSigner(DEFAULT_CHAIN_ID, ROOT_PATH);
-    } catch (final CipherException | IOException e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to setup ethsigner");
     }
   }
