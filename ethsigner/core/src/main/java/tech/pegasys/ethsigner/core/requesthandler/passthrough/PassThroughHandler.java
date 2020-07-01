@@ -14,15 +14,10 @@ package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.SpecificRequestHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -32,46 +27,22 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final HttpClient ethNodeClient;
-  private final VertxRequestTransmitter transmitter;
-  final DownstreamPathCalculator downstreamPathCalculator;
+  private final VertxRequestTransmitterFactory transmitterFactory;
 
-  public PassThroughHandler(
-      final HttpClient ethNodeClient,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory,
-      final DownstreamPathCalculator downstreamPathCalculator) {
-    transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
-    this.ethNodeClient = ethNodeClient;
-    this.downstreamPathCalculator = downstreamPathCalculator;
+  public PassThroughHandler(final VertxRequestTransmitterFactory vertxTransmitterFactory) {
+    this.transmitterFactory = vertxTransmitterFactory;
   }
 
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest request) {
-    LOG.debug("Passing through request {}, {}", request.getId(), request.getMethod());
     handle(context);
   }
 
   @Override
   public void handle(final RoutingContext context) {
-    final HttpServerRequest httpServerRequest = context.request();
-
-    final HttpClientRequest proxyRequest =
-        ethNodeClient.request(
-            httpServerRequest.method(),
-            downstreamPathCalculator.calculateDownstreamPath(httpServerRequest.uri()),
-            response -> transmitter.handleResponse(context, response));
-
-    final Buffer body = context.getBody();
-    transmitter.sendRequest(proxyRequest, body, context);
-    logRequest(httpServerRequest, body.toString());
-  }
-
-  private void handleResponseBody(
-      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
-    context.request().response().setStatusCode(response.statusCode());
-    context.request().response().headers().addAll(response.headers());
-    context.request().response().setChunked(false);
-    context.request().response().end(body);
+    logRequest(context.request(), context.getBodyAsString());
+    final SpecificRequestHandler handler = new SpecificRequestHandler(context, transmitterFactory);
+    handler.execute();
   }
 
   private void logRequest(final HttpServerRequest httpRequest, final String body) {

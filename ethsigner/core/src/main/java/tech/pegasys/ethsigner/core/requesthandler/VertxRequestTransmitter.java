@@ -16,18 +16,22 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
+
 import java.net.ConnectException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
 import com.google.common.net.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.impl.headers.VertxHttpHeaders;
-import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,53 +40,47 @@ public class VertxRequestTransmitter {
   private static final Logger LOG = LogManager.getLogger();
   private final Duration httpRequestTimeout;
   private final ResponseBodyHandler bodyHandler;
+  private final HttpClient downStreamConnection;
+  private final DownstreamPathCalculator downstreamPathCalculator;
 
   public VertxRequestTransmitter(
-      final Duration httpRequestTimeout, final ResponseBodyHandler bodyHandler) {
+      final HttpClient downStreamConnection,
+      final Duration httpRequestTimeout,
+      final DownstreamPathCalculator downstreamPathCalculator,
+      final ResponseBodyHandler bodyHandler) {
     this.httpRequestTimeout = httpRequestTimeout;
     this.bodyHandler = bodyHandler;
+    this.downStreamConnection = downStreamConnection;
+    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
-  private void handleException(final RoutingContext context, final Throwable thrown) {
+  private void handleException(final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
-      context.fail(GATEWAY_TIMEOUT.code(), thrown);
+      bodyHandler.handleTransmissionFailure(GATEWAY_TIMEOUT, thrown);
     } else if (thrown instanceof SSLHandshakeException) {
-      context.fail(BAD_GATEWAY.code(), thrown);
+      bodyHandler.handleTransmissionFailure(BAD_GATEWAY, thrown);
     } else {
-      context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
+      bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, thrown);
     }
   }
 
-  public void handleResponse(final RoutingContext context, final HttpClientResponse response) {
+  public void handleResponse(final HttpClientResponse response) {
     logResponse(response);
-
-    response.bodyHandler(
-        body ->
-            context
-                .vertx()
-                .executeBlocking(
-                    future -> {
-                      logResponseBody(body);
-                      bodyHandler.handleResponseBody(context, response, body);
-                      future.complete();
-                    },
-                    false,
-                    res -> {
-                      if (res.failed()) {
-                        LOG.error(
-                            "An unhandled error occurred while processing "
-                                + context.getBodyAsString(),
-                            res.cause());
-                        context.fail(res.cause());
-                      }
-                    }));
+    response.bodyHandler(body -> bodyHandler.handleResponseBody(response, body));
   }
 
   public void sendRequest(
-      final HttpClientRequest request, final Buffer bodyContent, final RoutingContext context) {
+      final Buffer bodyContent,
+      final String path,
+      final HttpMethod method,
+      final MultiMap headers) {
+    final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
+    final HttpClientRequest request =
+        downStreamConnection.request(method, fullPath, this::handleResponse);
+
     request.setTimeout(httpRequestTimeout.toMillis());
-    request.exceptionHandler(thrown -> handleException(context, thrown));
-    final MultiMap requestHeaders = createHeaders(context.request().headers());
+    request.exceptionHandler(this::handleException);
+    final MultiMap requestHeaders = createHeaders(headers);
     request.headers().setAll(requestHeaders);
     request.setChunked(false);
     request.end(bodyContent);
@@ -110,14 +108,10 @@ public class VertxRequestTransmitter {
     LOG.debug("Response status: {}", response.statusCode());
   }
 
-  private void logResponseBody(final Buffer body) {
-    LOG.debug("Response body: {}", body);
-  }
-
-  @FunctionalInterface
   public interface ResponseBodyHandler {
 
-    void handleResponseBody(
-        final RoutingContext context, final HttpClientResponse response, final Buffer body);
+    void handleResponseBody(final HttpClientResponse response, final Buffer body);
+
+    void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t);
   }
 }

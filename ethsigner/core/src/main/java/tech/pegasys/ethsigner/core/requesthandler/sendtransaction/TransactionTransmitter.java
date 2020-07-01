@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter.ResponseBodyHandler;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
@@ -32,9 +33,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.EncodeException;
@@ -43,27 +43,22 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TransactionTransmitter {
+public class TransactionTransmitter implements ResponseBodyHandler {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final HttpClient ethNodeClient;
   private final TransactionSerializer transactionSerializer;
   private final Transaction transaction;
   private final VertxRequestTransmitter transmitter;
-  private final RoutingContext routingContext;
-  private final String downstreamPath;
+
+  protected final RoutingContext routingContext;
 
   public TransactionTransmitter(
-      final HttpClient ethNodeClient,
-      final String downstreamPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RoutingContext routingContext) {
-    this.transmitter = vertxTransmitterFactory.create(this::handleResponseBody);
-    this.ethNodeClient = ethNodeClient;
-    this.downstreamPath = downstreamPath;
+    this.transmitter = vertxTransmitterFactory.create(this);
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
     this.routingContext = routingContext;
@@ -133,19 +128,21 @@ public class TransactionTransmitter {
   }
 
   private void sendTransaction(final Buffer bodyContent) {
-    final HttpClientRequest request =
-        ethNodeClient.post(
-            downstreamPath, response -> transmitter.handleResponse(routingContext, response));
-
-    transmitter.sendRequest(request, bodyContent, routingContext);
+    final HttpServerRequest request = routingContext.request();
+    transmitter.sendRequest(bodyContent, request.path(), request.method(), request.headers());
   }
 
-  protected void handleResponseBody(
-      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
-    final HttpServerRequest httpServerRequest = context.request();
+  @Override
+  public void handleResponseBody(final HttpClientResponse response, final Buffer body) {
+    final HttpServerRequest httpServerRequest = routingContext.request();
     httpServerRequest.response().setStatusCode(response.statusCode());
     httpServerRequest.response().headers().addAll(response.headers());
     httpServerRequest.response().setChunked(false);
     httpServerRequest.response().end(body);
+  }
+
+  @Override
+  public void handleTransmissionFailure(HttpResponseStatus status, Throwable t) {
+    routingContext.fail(status.code(), t);
   }
 }

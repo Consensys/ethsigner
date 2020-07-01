@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.web.RoutingContext;
 
@@ -31,38 +30,43 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
   private final RetryMechanism retryMechanism;
 
   public RetryingTransactionTransmitter(
-      final HttpClient ethNodeClient,
-      final String httpPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
       final VertxRequestTransmitterFactory vertxTransmitterFactory,
       final RetryMechanism retryMechanism,
       final RoutingContext routingContext) {
-    super(
-        ethNodeClient,
-        httpPath,
-        transaction,
-        transactionSerializer,
-        vertxTransmitterFactory,
-        routingContext);
+    super(transaction, transactionSerializer, vertxTransmitterFactory, routingContext);
 
     this.retryMechanism = retryMechanism;
   }
 
   @Override
-  protected void handleResponseBody(
-      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
+  public void handleResponseBody(final HttpClientResponse response, final Buffer body) {
+    // Doing a retry could be expensive, so throw it off to a thread
     if (response.statusCode() != HttpResponseStatus.OK.code()
         && retryMechanism.responseRequiresRetry(response, body)) {
       if (retryMechanism.retriesAvailable()) {
-        retryMechanism.incrementRetries();
-        send();
+        routingContext
+            .vertx()
+            .executeBlocking(
+                pr -> {
+                  retryMechanism.incrementRetries();
+                  send();
+                },
+                rs -> {
+                  // This is actually kinda important I think... but not sure what gets here ....
+                });
       } else {
-        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+        routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       }
       return;
     }
 
-    super.handleResponseBody(context, response, body);
+    super.handleResponseBody(response, body);
+  }
+
+  @Override
+  public void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t) {
+    routingContext.fail(status.code(), t);
   }
 }
