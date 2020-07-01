@@ -36,7 +36,8 @@ public class EthSignerThreadRunner extends EthSignerRunner {
   private final CompletableFuture<Boolean> isExited = new CompletableFuture<>();
 
   public EthSignerThreadRunner(
-      final SignerConfiguration signerConfig, final NodeConfiguration nodeConfig,
+      final SignerConfiguration signerConfig,
+      final NodeConfiguration nodeConfig,
       final NodePorts nodePorts) {
     super(signerConfig, nodeConfig, nodePorts);
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
