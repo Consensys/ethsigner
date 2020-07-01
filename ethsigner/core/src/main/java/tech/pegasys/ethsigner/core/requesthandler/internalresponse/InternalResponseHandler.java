@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
@@ -31,15 +30,11 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
 
   private final HttpResponseFactory responder;
   private final ResultProvider responseResultProvider;
-  private JsonDecoder jsonDecoder;
 
   public InternalResponseHandler(
-      final HttpResponseFactory responder,
-      final ResultProvider responseResultProvider,
-      final JsonDecoder jsonDecoder) {
+      final HttpResponseFactory responder, final ResultProvider responseResultProvider) {
     this.responder = responder;
     this.responseResultProvider = responseResultProvider;
-    this.jsonDecoder = jsonDecoder;
   }
 
   @Override

@@ -110,12 +110,7 @@ public class Runner {
   private Router router() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
     final VertxRequestTransmitterFactory transmitterFactory =
-        responseBodyHandler ->
-            new VertxRequestTransmitter(
-                downStreamConnection,
-                httpRequestTimeout,
-                downstreamPathCalculator,
-                responseBodyHandler);
+        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
     final RequestMapper requestMapper =
         createRequestMapper(downStreamConnection, transmitterFactory);
 
@@ -145,7 +140,8 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    final PassThroughHandler passThroughHandler = new PassThroughHandler(transmitterFactory);
+    final PassThroughHandler passThroughHandler =
+        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
@@ -153,7 +149,8 @@ public class Runner {
   private RequestMapper createRequestMapper(
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
-    final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
+    final PassThroughHandler defaultHandler =
+        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
@@ -164,7 +161,12 @@ public class Runner {
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            chainId, transactionSignerProvider, transactionFactory, transmitterFactory);
+            chainId,
+            downStreamConnection,
+            downstreamPathCalculator,
+            transactionSignerProvider,
+            transactionFactory,
+            transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
@@ -173,12 +175,11 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsResultProvider(transactionSignerProvider::availableAddresses),
-            jsonDecoder));
+            new EthAccountsResultProvider(transactionSignerProvider::availableAddresses)));
     requestMapper.addHandler(
         "eth_sign",
         new InternalResponseHandler(
-            responseFactory, new EthSignResultProvider(transactionSignerProvider), jsonDecoder));
+            responseFactory, new EthSignResultProvider(transactionSignerProvider)));
 
     return requestMapper;
   }

@@ -12,7 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.http.HttpServerRequest;
@@ -30,6 +34,30 @@ public class HttpResponseFactory {
     response.putHeader("Content", JSON);
     response.setStatusCode(statusCode);
     response.setChunked(false);
+    response.end(Json.encodeToBuffer(body));
+  }
+
+  public void successResponse(
+      final HttpServerResponse response, final JsonRpcRequestId id, final Object result) {
+    response.putHeader("Content", JSON);
+    response.setStatusCode(200);
+    response.setChunked(false);
+
+    final JsonRpcSuccessResponse body = new JsonRpcSuccessResponse(id, result);
+    response.end(Json.encodeToBuffer(body));
+  }
+
+  public void failureResponse(
+      final HttpServerResponse response,
+      final JsonRpcRequestId id,
+      final int statusCode,
+      final JsonRpcError error) {
+
+    response.putHeader("Content", JSON);
+    response.setStatusCode(statusCode);
+    response.setChunked(false);
+
+    final JsonRpcErrorResponse body = new JsonRpcErrorResponse(id, error);
     response.end(Json.encodeToBuffer(body));
   }
 }
