@@ -17,7 +17,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
-import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
@@ -31,22 +31,22 @@ public class InternalResponseHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final HttpResponseFactory responder;
-  private final BodyProvider responseBodyProvider;
+  private final ResultProvider responseResultProvider;
   private JsonDecoder jsonDecoder;
 
   public InternalResponseHandler(
       final HttpResponseFactory responder,
-      final BodyProvider responseBodyProvider,
+      final ResultProvider responseResultProvider,
       final JsonDecoder jsonDecoder) {
     this.responder = responder;
-    this.responseBodyProvider = responseBodyProvider;
+    this.responseResultProvider = responseResultProvider;
     this.jsonDecoder = jsonDecoder;
   }
 
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest rpcRequest) {
     LOG.debug("Internally responding to {}, id={}", rpcRequest.getMethod(), rpcRequest.getId());
-    final JsonRpcBody providedBody = responseBodyProvider.getBody(rpcRequest);
+    final JsonRpcBody providedBody = responseResultProvider.getBody(rpcRequest);
 
     if (providedBody.hasError()) {
       context.fail(new JsonRpcException(providedBody.error()));

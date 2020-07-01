@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
-import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 
 import java.util.Collection;
@@ -28,13 +28,13 @@ import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EthAccountsBodyProvider implements BodyProvider {
+public class EthAccountsResultProvider implements ResultProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final Supplier<Set<String>> addressesSupplier;
 
-  public EthAccountsBodyProvider(final Supplier<Set<String>> addressesSupplier) {
+  public EthAccountsResultProvider(final Supplier<Set<String>> addressesSupplier) {
     this.addressesSupplier = addressesSupplier;
   }
 

@@ -21,8 +21,8 @@ import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignBodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
@@ -175,12 +175,12 @@ public class Runner {
         "eth_accounts",
         new InternalResponseHandler(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
+            new EthAccountsResultProvider(transactionSignerProvider::availableAddresses),
             jsonDecoder));
     requestMapper.addHandler(
         "eth_sign",
         new InternalResponseHandler(
-            responseFactory, new EthSignBodyProvider(transactionSignerProvider), jsonDecoder));
+            responseFactory, new EthSignResultProvider(transactionSignerProvider), jsonDecoder));
 
     return requestMapper;
   }

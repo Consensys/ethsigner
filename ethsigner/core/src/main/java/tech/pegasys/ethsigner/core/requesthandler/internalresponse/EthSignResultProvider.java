@@ -18,7 +18,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
-import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
@@ -36,13 +36,13 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.web3j.utils.Numeric;
 
-public class EthSignBodyProvider implements BodyProvider {
+public class EthSignResultProvider implements ResultProvider {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final TransactionSignerProvider transactionSignerProvider;
 
-  public EthSignBodyProvider(final TransactionSignerProvider transactionSignerProvider) {
+  public EthSignResultProvider(final TransactionSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 
