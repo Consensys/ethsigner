@@ -9,6 +9,7 @@ RUN yum install -y https://s3.amazonaws.com/cloudhsmv2-software/CloudHsmClient/E
 
 # Install Java, Maven, wget, unzip and ncurses-compat-libs
 RUN yum install -y java wget unzip ncurses-compat-libs
+RUN yum install -y which
 
 COPY cloudhsm-entrypoint.sh /opt/ethsigner/bin/cloudhsm-entrypoint.sh
 RUN chmod +x /opt/ethsigner/bin/cloudhsm-entrypoint.sh
