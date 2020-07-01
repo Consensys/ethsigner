@@ -35,7 +35,8 @@ public class EthAccountsResultProviderTest {
   public void valueFromBodyProviderInsertedToResult() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsResultProvider bodyProvider = new EthAccountsResultProvider(() -> Set.of(address));
+    final EthAccountsResultProvider bodyProvider =
+        new EthAccountsResultProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -54,7 +55,8 @@ public class EthAccountsResultProviderTest {
   public void ifParamsContainsANonEmptyArrayErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsResultProvider bodyProvider = new EthAccountsResultProvider(() -> Set.of(address));
+    final EthAccountsResultProvider bodyProvider =
+        new EthAccountsResultProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -69,7 +71,8 @@ public class EthAccountsResultProviderTest {
   public void ifParamIsAnObjectErrorIsReturned() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsResultProvider bodyProvider = new EthAccountsResultProvider(() -> Set.of(address));
+    final EthAccountsResultProvider bodyProvider =
+        new EthAccountsResultProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -84,7 +87,8 @@ public class EthAccountsResultProviderTest {
   public void missingParametersIsOk() {
     final String address = "MyAddress";
     final int id = 1;
-    final EthAccountsResultProvider bodyProvider = new EthAccountsResultProvider(() -> Set.of(address));
+    final EthAccountsResultProvider bodyProvider =
+        new EthAccountsResultProvider(() -> Set.of(address));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));

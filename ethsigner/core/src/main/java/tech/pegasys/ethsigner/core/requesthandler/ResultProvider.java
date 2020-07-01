@@ -17,5 +17,5 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 @FunctionalInterface
 public interface ResultProvider {
 
-  JsonRpcBody getBody(JsonRpcRequest request);
+  Object createResponseResult(JsonRpcRequest request);
 }

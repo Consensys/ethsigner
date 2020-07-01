@@ -12,14 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
 import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
@@ -29,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -47,7 +44,7 @@ public class EthSignResultProvider implements ResultProvider {
   }
 
   @Override
-  public JsonRpcBody getBody(final JsonRpcRequest request) {
+  public String createResponseResult(final JsonRpcRequest request) {
     try {
       @SuppressWarnings("unchecked")
       final List<String> params = (List<String>) request.getParams();
@@ -55,14 +52,14 @@ public class EthSignResultProvider implements ResultProvider {
         LOG.info(
             "eth_sign should have a list of 2 parameters, but has {}",
             params == null ? "null" : params.size());
-        return new JsonRpcBody(INVALID_PARAMS);
+        throw new JsonRpcException(INVALID_PARAMS);
       }
       final String address = params.get(0);
       final Optional<TransactionSigner> transactionSigner =
           transactionSignerProvider.getSigner(address);
       if (transactionSigner.isEmpty()) {
         LOG.info("Address ({}) does not match any available account", address);
-        return new JsonRpcBody(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
+        throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
       }
       final TransactionSigner signer = transactionSigner.get();
       final String originalMessage = params.get(1);
@@ -75,18 +72,12 @@ public class EthSignResultProvider implements ResultProvider {
               Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
               Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getS()))),
               Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getV())));
-      final JsonRpcSuccessResponse response =
-          new JsonRpcSuccessResponse(
-              request.getId(), Numeric.toHexString(outputSignature.toArray()));
-      return new JsonRpcBody(Json.encodeToBuffer(response));
+      return Numeric.toHexString(outputSignature.toArray());
     } catch (final ClassCastException e) {
       LOG.info(
           "eth_sign should have a list of 2 parameters, but received an object: {}",
           request.getParams());
-      return new JsonRpcBody(INVALID_PARAMS);
-    } catch (final Exception e) {
-      LOG.info("Unexpected error", e);
-      return new JsonRpcBody(INTERNAL_ERROR);
+      throw new JsonRpcException(INVALID_PARAMS);
     }
   }
 }

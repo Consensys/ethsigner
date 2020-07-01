@@ -110,7 +110,12 @@ public class Runner {
   private Router router() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
     final VertxRequestTransmitterFactory transmitterFactory =
-        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
+        responseBodyHandler ->
+            new VertxRequestTransmitter(
+                downStreamConnection,
+                httpRequestTimeout,
+                downstreamPathCalculator,
+                responseBodyHandler);
     final RequestMapper requestMapper =
         createRequestMapper(downStreamConnection, transmitterFactory);
 
@@ -140,8 +145,7 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
+    final PassThroughHandler passThroughHandler = new PassThroughHandler(transmitterFactory);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
@@ -149,8 +153,7 @@ public class Runner {
   private RequestMapper createRequestMapper(
       final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
-    final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
+    final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
 
     final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
         new VertxNonceRequestTransmitterFactory(
@@ -161,12 +164,7 @@ public class Runner {
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            chainId,
-            downStreamConnection,
-            downstreamPathCalculator,
-            transactionSignerProvider,
-            transactionFactory,
-            transmitterFactory);
+            chainId, transactionSignerProvider, transactionFactory, transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
