@@ -434,12 +434,12 @@ startScripts {
 dependencies {
   compile project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
+  runtime fileTree(dir: 'libs', include: '*.jar')
 }
 
 distributions {
   main {
     contents {
-      from("./libs") { into "lib" }
       from("./LICENSE") { into "." }
       from("build/reports/license/license-dependency.html") { into "." }
       from("./docs/GettingStartedBinaries.md") { into "." }
