@@ -155,7 +155,6 @@ downloadLicenses {
           (group('com.github.jnr')): epl_2,
           (group('javax.mail')): cddl,
           (group('net.jcip')): apache,
-          (group('com.cavium')): apache,
   ]
 }
 

@@ -434,6 +434,7 @@ startScripts {
 dependencies {
   compile project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
+  runtime fileTree(dir: 'libs', include: '*.jar')
 }
 
 distributions {
