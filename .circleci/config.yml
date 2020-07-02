@@ -230,15 +230,16 @@ workflows:
       - buildDocker:
           requires:
             - build
-      - publish:
-          filters:
-            branches:
-              only:
-                - master
-                - /^release-.*/
-          requires:
-            - build
-            #- acceptanceTests
+      # TODO:  <02-07-20, fllaca> # Adhara doesn't need to publish mvn packages for now
+      #- publish:
+          #filters:
+            #branches:
+              #only:
+                #- master
+                #- /^release-.*/
+          #requires:
+            #- build
+            ##- acceptanceTests
       - publishDocker:
           filters:
             branches:
