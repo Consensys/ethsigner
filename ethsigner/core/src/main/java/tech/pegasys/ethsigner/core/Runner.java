@@ -112,6 +112,7 @@ public class Runner {
     final VertxRequestTransmitterFactory transmitterFactory =
         responseBodyHandler ->
             new VertxRequestTransmitter(
+                vertx,
                 downStreamConnection,
                 httpRequestTimeout,
                 downstreamPathCalculator,

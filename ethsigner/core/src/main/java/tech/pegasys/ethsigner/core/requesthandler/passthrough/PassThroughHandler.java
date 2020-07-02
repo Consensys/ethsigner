@@ -42,7 +42,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   public void handle(final RoutingContext context) {
     logRequest(context.request(), context.getBodyAsString());
     final SpecificRequestHandler handler = new SpecificRequestHandler(context, transmitterFactory);
-    handler.execute();
+    handler.send();
   }
 
   private void logRequest(final HttpServerRequest httpRequest, final String body) {

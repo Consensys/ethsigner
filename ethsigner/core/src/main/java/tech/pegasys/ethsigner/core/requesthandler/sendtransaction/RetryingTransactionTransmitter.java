@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
+import java.util.Map;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
@@ -41,32 +42,18 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
   }
 
   @Override
-  public void handleResponseBody(final HttpClientResponse response, final Buffer body) {
-    // Doing a retry could be expensive, so throw it off to a thread
-    if (response.statusCode() != HttpResponseStatus.OK.code()
-        && retryMechanism.responseRequiresRetry(response, body)) {
+  public void handleResponseBody(final Map<String, String> headers, final int statusCode, final String body) {
+    if (statusCode != HttpResponseStatus.OK.code()
+        && retryMechanism.responseRequiresRetry(statusCode, body)) {
       if (retryMechanism.retriesAvailable()) {
-        routingContext
-            .vertx()
-            .executeBlocking(
-                pr -> {
-                  retryMechanism.incrementRetries();
-                  send();
-                },
-                rs -> {
-                  // This is actually kinda important I think... but not sure what gets here ....
-                });
+        retryMechanism.incrementRetries();
+        send();
       } else {
-        routingContext.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+        context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       }
       return;
     }
 
-    super.handleResponseBody(response, body);
-  }
-
-  @Override
-  public void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t) {
-    routingContext.fail(status.code(), t);
+    super.handleResponseBody(headers, statusCode, body);
   }
 }

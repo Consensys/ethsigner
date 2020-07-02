@@ -12,41 +12,24 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter.ResponseBodyHandler;
-
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
+import java.util.Map;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RequestForwarder;
 
-public class SpecificRequestHandler implements ResponseBodyHandler {
+public class SpecificRequestHandler extends RequestForwarder {
 
-  private final RoutingContext context;
-  private final VertxRequestTransmitterFactory transmitterFactory;
+  private final VertxRequestTransmitter transmitter;
 
   public SpecificRequestHandler(
       final RoutingContext context, final VertxRequestTransmitterFactory transmitterFactory) {
-    this.context = context;
-    this.transmitterFactory = transmitterFactory;
+    super(context);
+    transmitter = transmitterFactory.create(this);
   }
 
-  public void execute() {
-    VertxRequestTransmitter transmitter = transmitterFactory.create(this);
-    final HttpServerRequest request = context.request();
-    transmitter.sendRequest(context.getBody(), request.path(), request.method(), request.headers());
-  }
-
-  @Override
-  public void handleResponseBody(final HttpClientResponse response, final Buffer body) {
-    context.request().response().setStatusCode(response.statusCode());
-    context.request().response().headers().addAll(response.headers());
-    context.request().response().setChunked(false);
-    context.request().response().end(body);
-  }
-
-  @Override
-  public void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t) {
-    context.fail(status.code(), t);
+  public void send() {
+    final HttpServerRequest request = context().request();
+    final Map<String, String> headersToSend = createHeaders(request.headers());
+    transmitter.postRequest(headersToSend, request.path(), context().getBodyAsString());
   }
 }

@@ -14,6 +14,10 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-public class RequestTransmitter {
+import java.util.Map;
+
+public interface RequestTransmitter {
+
+  void postRequest(Map<String, String> headers, String path, String body);
 
 }
