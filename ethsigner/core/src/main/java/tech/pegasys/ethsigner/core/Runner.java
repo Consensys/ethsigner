@@ -173,12 +173,12 @@ public class Runner {
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler(
         "eth_accounts",
-        new InternalResponseHandler(
+        new InternalResponseHandler<>(
             responseFactory,
             new EthAccountsResultProvider(transactionSignerProvider::availableAddresses)));
     requestMapper.addHandler(
         "eth_sign",
-        new InternalResponseHandler(
+        new InternalResponseHandler<>(
             responseFactory, new EthSignResultProvider(transactionSignerProvider)));
 
     return requestMapper;

@@ -18,6 +18,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EthAccountsResultProvider implements ResultProvider {
+public class EthAccountsResultProvider implements ResultProvider<List<String>> {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -36,7 +37,7 @@ public class EthAccountsResultProvider implements ResultProvider {
   }
 
   @Override
-  public Object createResponseResult(final JsonRpcRequest request) {
+  public List<String> createResponseResult(final JsonRpcRequest request) {
     final Object params = request.getParams();
 
     if (isPopulated(params) && isNotEmptyArray(params)) {
