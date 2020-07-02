@@ -113,7 +113,7 @@ jobs:
           no_output_timeout: 20m
           command: |
             ./gradlew --no-daemon --parallel integrationTest --info
-      - notify      
+      #- notify      
       - capture_test_results
       - capture_test_reports
       - save_cache:
@@ -169,7 +169,11 @@ jobs:
           command: |
             mkdir -p docker/reports
             ./gradlew --no-daemon testDocker
-      - notify            
+      - run:
+          name: build image - cloudhsm
+          command: |
+            ./gradlew --no-daemon distDocker -Pdockerfile=cloudhsm
+      #- notify
 
   publish:
     executor: executor_med
@@ -181,7 +185,7 @@ jobs:
           name: Publish
           command: |
             ./gradlew --no-daemon --parallel bintrayUpload
-      - notify
+      #- notify
       
   publishDocker:
     executor: executor_med
@@ -195,7 +199,12 @@ jobs:
           command: |
             docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
-      - notify
+      - run:
+          name: Publish Docker - cloudhsm
+          command: |
+            docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
+            ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload -Pdockerfile=cloudhsm
+      #- notify
       
 workflows:
   version: 2
