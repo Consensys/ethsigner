@@ -173,11 +173,6 @@ jobs:
           name: build image - cloudhsm
           command: |
             ./gradlew --no-daemon distDocker -Pdockerfile=cloudhsm
-      - run:
-          name: test image - cloudhsm
-          command: |
-            mkdir -p docker/reports
-            ./gradlew --no-daemon testDocker -Pdockerfile=cloudhsm
       #- notify
 
   publish:
