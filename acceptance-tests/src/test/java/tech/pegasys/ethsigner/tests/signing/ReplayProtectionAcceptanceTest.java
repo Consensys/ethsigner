@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.WRONG_CH
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
+import org.apache.commons.lang.time.StopWatch;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -57,11 +58,14 @@ public class ReplayProtectionAcceptanceTest {
 
   @BeforeEach
   public void setUp() {
-    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
+    // Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
   }
 
   @AfterEach
   public synchronized void tearDown() {
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+    System.out.println("Starting TearDown");
     if (ethNode != null) {
       ethNode.shutdown();
       ethNode = null;
@@ -71,6 +75,9 @@ public class ReplayProtectionAcceptanceTest {
       ethSigner.shutdown();
       ethSigner = null;
     }
+
+    stopWatch.stop();
+    System.out.println("Ending Starting TearDown: " + stopWatch);
   }
 
   private void setUp(final String genesis) {

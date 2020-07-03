@@ -138,6 +138,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
+            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true acceptanceTest --tests tech.pegasys.ethsigner.tests.signing.ReplayProtectionAcceptanceTest
             ./gradlew --no-daemon --profile --parallel acceptanceTest
       - notify            
       - capture_test_results
