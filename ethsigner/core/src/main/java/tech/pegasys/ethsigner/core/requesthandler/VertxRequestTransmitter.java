@@ -59,6 +59,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
 
   @Override
   public void postRequest(final Map<String, String> headers, final String path, final String body) {
+    LOG.info("Posting a request");
     final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
     final HttpClientRequest request =
         downStreamConnection.request(HttpMethod.POST, fullPath, this::handleResponse);
@@ -70,15 +71,15 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   }
 
   private void handleException(final Throwable thrown) {
+    LOG.error("Transmission failed -->", thrown);
     vertx.executeBlocking(
         future -> {
-          LOG.error("Transmission failed", thrown);
           if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
             bodyHandler.handleTransmissionFailure(GATEWAY_TIMEOUT, thrown);
           } else if (thrown instanceof SSLHandshakeException) {
             bodyHandler.handleTransmissionFailure(BAD_GATEWAY, thrown);
           } else {
-            bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, thrown);
+            bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, new RuntimeException(thrown));
           }
         },
         false,
