@@ -138,7 +138,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon --parallel acceptanceTest
+            ./gradlew --no-daemon --profile --parallel acceptanceTest
       - notify            
       - capture_test_results
       - capture_test_reports
