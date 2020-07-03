@@ -81,17 +81,28 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   private void setUp(final String genesis) {
+    StopWatch stopWatch = new StopWatch();
+    stopWatch.start();
+
     final NodeConfiguration nodeConfig =
         new NodeConfigurationBuilder().withGenesis(genesis).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
-
     ethNode = new BesuNode(DOCKER, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
+    stopWatch.split();
+
     ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
+
+    System.out.println("Besu Node Time Taken: " + stopWatch.toSplitString());
+    stopWatch.split();
+    System.out.println("EthSigner Time Taken: " + stopWatch.toSplitString());
+
+    stopWatch.stop();
+    System.out.println("Total Time taken: " + stopWatch.toString());
   }
 
   @Test
