@@ -15,15 +15,14 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
-import java.util.Map;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
+import java.util.Map;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.web.RoutingContext;
 
 public class RetryingTransactionTransmitter extends TransactionTransmitter {
@@ -42,7 +41,8 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
   }
 
   @Override
-  public void handleResponseBody(final Map<String, String> headers, final int statusCode, final String body) {
+  public void handleResponseBody(
+      final Map<String, String> headers, final int statusCode, final String body) {
     if (statusCode != HttpResponseStatus.OK.code()
         && retryMechanism.responseRequiresRetry(statusCode, body)) {
       if (retryMechanism.retriesAvailable()) {

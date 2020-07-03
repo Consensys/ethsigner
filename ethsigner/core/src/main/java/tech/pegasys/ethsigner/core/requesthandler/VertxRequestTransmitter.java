@@ -16,12 +16,8 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
+
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -29,9 +25,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
+
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
 public class VertxRequestTransmitter implements RequestTransmitter {
 
@@ -93,26 +94,27 @@ public class VertxRequestTransmitter implements RequestTransmitter {
         future -> {
           logResponse(response);
           final Map<String, String> responseHeaders = new HashMap<>();
-          response.headers().forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+          response
+              .headers()
+              .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
           response.bodyHandler(
-              body -> bodyHandler
-                  .handleResponseBody(responseHeaders, response.statusCode(), body.toString(
-                      StandardCharsets.UTF_8)));
+              body ->
+                  bodyHandler.handleResponseBody(
+                      responseHeaders,
+                      response.statusCode(),
+                      body.toString(StandardCharsets.UTF_8)));
         },
         false,
         res -> {
-          if(res.failed()) {
+          if (res.failed()) {
             LOG.error("An unhandled error occurred while processing a response", res.cause());
-            //need to actually fail it
+            // need to actually fail it
             bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, res.cause());
           }
-        }
-    );
+        });
   }
 
   private void logResponse(final HttpClientResponse response) {
     LOG.debug("Response status: {}", response.statusCode());
   }
-
-
 }

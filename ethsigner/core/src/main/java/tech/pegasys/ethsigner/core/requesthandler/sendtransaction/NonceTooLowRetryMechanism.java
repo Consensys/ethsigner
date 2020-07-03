@@ -17,8 +17,6 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TO
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -18,18 +18,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.EncodeException;
-import io.vertx.core.json.Json;
-import io.vertx.ext.web.RoutingContext;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLHandshakeException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
@@ -37,6 +25,20 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
+
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLHandshakeException;
+
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.EncodeException;
+import io.vertx.core.json.Json;
+import io.vertx.ext.web.RoutingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TransactionTransmitter extends RequestForwarder {
 
@@ -107,8 +109,10 @@ public class TransactionTransmitter extends RequestForwarder {
       if (cause instanceof SocketException
           || cause instanceof SocketTimeoutException
           || cause instanceof TimeoutException) {
-        context().fail(
-            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+        context()
+            .fail(
+                GATEWAY_TIMEOUT.code(),
+                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else if (cause instanceof SSLHandshakeException) {
         context().fail(BAD_GATEWAY.code(), cause);
       } else {

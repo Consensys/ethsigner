@@ -12,10 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RequestForwarder;
+
+import java.util.Map;
+
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
-import java.util.Map;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.RequestForwarder;
 
 public class SpecificRequestHandler extends RequestForwarder {
 
@@ -27,6 +29,7 @@ public class SpecificRequestHandler extends RequestForwarder {
     transmitter = transmitterFactory.create(this);
   }
 
+  @Override
   public void send() {
     final HttpServerRequest request = context().request();
     final Map<String, String> headersToSend = createHeaders(request.headers());
