@@ -19,7 +19,6 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.WRONG_CH
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import org.apache.commons.lang.time.StopWatch;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
@@ -35,6 +34,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 import java.math.BigInteger;
 
 import com.github.dockerjava.api.DockerClient;
+import org.apache.commons.lang.time.StopWatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
