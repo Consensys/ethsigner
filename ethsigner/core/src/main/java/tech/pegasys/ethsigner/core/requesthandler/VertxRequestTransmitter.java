@@ -90,28 +90,29 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   }
 
   private void handleResponse(final HttpClientResponse response) {
-    vertx.executeBlocking(
-        future -> {
-          logResponse(response);
-          final Map<String, String> responseHeaders = new HashMap<>();
-          response
-              .headers()
-              .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
-          response.bodyHandler(
-              body ->
+    logResponse(response);
+    response.bodyHandler(
+        body ->
+            vertx.executeBlocking(
+                future -> {
+                  final Map<String, String> responseHeaders = new HashMap<>();
+                  response
+                      .headers()
+                      .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
                   bodyHandler.handleResponseBody(
                       responseHeaders,
                       response.statusCode(),
-                      body.toString(StandardCharsets.UTF_8)));
-        },
-        false,
-        res -> {
-          if (res.failed()) {
-            LOG.error("An unhandled error occurred while processing a response", res.cause());
-            // need to actually fail it
-            bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, res.cause());
-          }
-        });
+                      body.toString(StandardCharsets.UTF_8));
+                },
+                false,
+                res -> {
+                  if (res.failed()) {
+                    LOG.error(
+                        "An unhandled error occurred while processing a response", res.cause());
+                    // need to actually fail it
+                    bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, res.cause());
+                  }
+                }));
   }
 
   private void logResponse(final HttpClientResponse response) {
