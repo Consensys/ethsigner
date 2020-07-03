@@ -38,6 +38,8 @@ dependencies {
 test.enabled = false
 
 task acceptanceTest(type: Test) {
+  inputs.property "integration.date", LocalTime.now() // so it runs at every invocation
+
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs EthSigner acceptance tests.'
   group = 'verification'
