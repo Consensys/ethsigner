@@ -13,10 +13,9 @@
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
-import tech.pegasys.ethsigner.core.requesthandler.BodyProvider;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
+import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,33 +23,29 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class EthAccountsBodyProvider implements BodyProvider {
+public class EthAccountsResultProvider implements ResultProvider<List<String>> {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final Supplier<Set<String>> addressesSupplier;
 
-  public EthAccountsBodyProvider(final Supplier<Set<String>> addressesSupplier) {
+  public EthAccountsResultProvider(final Supplier<Set<String>> addressesSupplier) {
     this.addressesSupplier = addressesSupplier;
   }
 
   @Override
-  public JsonRpcBody getBody(final JsonRpcRequest request) {
+  public List<String> createResponseResult(final JsonRpcRequest request) {
     final Object params = request.getParams();
 
     if (isPopulated(params) && isNotEmptyArray(params)) {
       LOG.info("eth_accounts should have no parameters, but has {}", request.getParams());
-      return new JsonRpcBody(JsonRpcError.INVALID_PARAMS);
+      throw new JsonRpcException(JsonRpcError.INVALID_PARAMS);
     }
 
-    final List<String> addresses =
-        addressesSupplier.get().stream().sorted().collect(Collectors.toList());
-    final JsonRpcSuccessResponse response = new JsonRpcSuccessResponse(request.getId(), addresses);
-    return new JsonRpcBody(Json.encodeToBuffer(response));
+    return addressesSupplier.get().stream().sorted().collect(Collectors.toList());
   }
 
   private boolean isPopulated(final Object params) {
