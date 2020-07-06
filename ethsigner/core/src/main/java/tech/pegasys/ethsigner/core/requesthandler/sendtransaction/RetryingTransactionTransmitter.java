@@ -28,7 +28,6 @@ import io.vertx.ext.web.RoutingContext;
 public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
   private final RetryMechanism retryMechanism;
-  private final RoutingContext context;
 
   public RetryingTransactionTransmitter(
       final Transaction transaction,
@@ -37,7 +36,6 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
       final RetryMechanism retryMechanism,
       final RoutingContext routingContext) {
     super(transaction, transactionSerializer, transmitterFactory, routingContext);
-    this.context = routingContext;
     this.retryMechanism = retryMechanism;
   }
 
@@ -50,7 +48,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
         retryMechanism.incrementRetries();
         send();
       } else {
-        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+        context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       }
       return;
     }

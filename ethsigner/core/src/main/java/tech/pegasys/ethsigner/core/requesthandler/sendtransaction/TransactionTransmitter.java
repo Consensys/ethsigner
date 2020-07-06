@@ -48,7 +48,6 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
   private final TransactionSerializer transactionSerializer;
   private final Transaction transaction;
   private final VertxRequestTransmitterFactory transmitterFactory;
-  private final RoutingContext context;
 
   public TransactionTransmitter(
       final Transaction transaction,
@@ -56,7 +55,6 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       final VertxRequestTransmitterFactory transmitterFactory,
       final RoutingContext context) {
     super(context);
-    this.context = context;
     this.transmitterFactory = transmitterFactory;
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
@@ -73,7 +71,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       sendTransaction(Json.encode(request.get()));
     } catch (final IllegalArgumentException | EncodeException e) {
       LOG.debug("JSON Serialization failed for: {}", request, e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
@@ -90,11 +88,11 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       signedTransactionHexString = transactionSerializer.serialize(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", transaction, e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
+      context().fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return Optional.empty();
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode transaction: {}", transaction, thrown);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       return Optional.empty();
     }
 
@@ -111,22 +109,22 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       if (cause instanceof SocketException
           || cause instanceof SocketTimeoutException
           || cause instanceof TimeoutException) {
-        context.fail(
+        context().fail(
             GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else if (cause instanceof SSLHandshakeException) {
-        context.fail(BAD_GATEWAY.code(), cause);
+        context().fail(BAD_GATEWAY.code(), cause);
       } else {
-        context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
+        context().fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
     return false;
   }
 
   protected void sendTransaction(final String bodyContent) {
-    final HttpServerRequest request = context.request();
+    final HttpServerRequest request = context().request();
     final Map<String, String> headersToSend = HeaderHelpers.createHeaders(request.headers());
     final VertxRequestTransmitter transmitter = transmitterFactory.create(this);
     transmitter.sendRequest(request.method(), headersToSend, request.path(), bodyContent);

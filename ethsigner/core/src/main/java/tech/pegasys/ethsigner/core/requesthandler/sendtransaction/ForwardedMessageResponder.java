@@ -52,4 +52,8 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
       context.fail(INTERNAL_SERVER_ERROR.code(), new RuntimeException(thrown));
     }
   }
+
+  protected RoutingContext context() {
+    return context;
+  }
 }
