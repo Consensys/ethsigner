@@ -13,17 +13,19 @@
 package tech.pegasys.ethsigner.core.jsonrpcproxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.requesthandler.JsonRpcBody;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignBodyProvider;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignResultProvider;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -34,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,37 +48,37 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
-public class EthSignBodyProviderTest {
+public class EthSignResultProviderTest {
 
   @ParameterizedTest
   @ArgumentsSource(InvalidParamsProvider.class)
   @NullSource
-  public void ifParamIsInvalidErrorIsReturned(final Object params) {
+  public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
     final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    final EthSignBodyProvider bodyProvider = new EthSignBodyProvider(mockSignerProvider);
+    final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
     request.setId(new JsonRpcRequestId(1));
     request.setParams(params);
-    final JsonRpcBody body = bodyProvider.getBody(request);
 
-    assertThat(body.hasError()).isTrue();
-    assertThat(body.error().getCode()).isEqualTo(JsonRpcError.INVALID_PARAMS.getCode());
+    final Throwable thrown = catchThrowable(() -> resultProvider.createResponseResult(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException rpcException = (JsonRpcException) thrown;
+    assertThat(rpcException.getJsonRpcError()).isEqualTo(INVALID_PARAMS);
   }
 
   @Test
-  public void ifAddressIsNotUnlockedErrorIsReturned() {
+  public void ifAddressIsNotUnlockedExceptionIsThrownWithSigningNotUnlocked() {
     final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    final EthSignBodyProvider bodyProvider = new EthSignBodyProvider(mockSignerProvider);
+    final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
     request.setId(new JsonRpcRequestId(1));
     request.setParams(List.of("address", "message"));
-    final JsonRpcBody body = bodyProvider.getBody(request);
-
-    assertThat(body.hasError()).isTrue();
-    assertThat(body.error().getCode())
-        .isEqualTo(JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT.getCode());
+    final Throwable thrown = catchThrowable(() -> resultProvider.createResponseResult(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException rpcException = (JsonRpcException) thrown;
+    assertThat(rpcException.getJsonRpcError()).isEqualTo(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
   }
 
   @Test
@@ -89,20 +90,16 @@ public class EthSignBodyProviderTest {
     doReturn(new Signature(v, r, s)).when(mockTransactionSigner).sign(any(byte[].class));
     final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
     doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
-    final EthSignBodyProvider bodyProvider = new EthSignBodyProvider(mockSignerProvider);
+    final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
     final int id = 1;
     request.setId(new JsonRpcRequestId(id));
     request.setParams(List.of("address", "message"));
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    final JsonObject jsonObj = new JsonObject(body.body());
-
-    assertThat(body.hasError()).isFalse();
-    assertThat(jsonObj.getString("jsonrpc")).isEqualTo("2.0");
-    assertThat(jsonObj.getInteger("id")).isEqualTo(id);
-    final String hexSignature = jsonObj.getString("result");
+    final Object result = resultProvider.createResponseResult(request);
+    assertThat(result).isInstanceOf(String.class);
+    final String hexSignature = (String) result;
     assertThat(hexSignature).hasSize(132);
 
     final byte[] signature = Numeric.hexStringToByteArray(hexSignature);
@@ -133,7 +130,7 @@ public class EthSignBodyProviderTest {
 
     final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
     doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
-    final EthSignBodyProvider bodyProvider = new EthSignBodyProvider(mockSignerProvider);
+    final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
     final int id = 1;
@@ -144,10 +141,9 @@ public class EthSignBodyProviderTest {
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Tubulum"
                 + " fuisse, qua illum, cuius is condemnatus est rogatione, P. Eaedem res maneant alio modo."));
 
-    final JsonRpcBody body = bodyProvider.getBody(request);
-    assertThat(body.hasError()).isFalse();
-    final JsonObject jsonObj = new JsonObject(body.body());
-    final String hexSignature = jsonObj.getString("result");
+    final Object result = resultProvider.createResponseResult(request);
+    assertThat(result).isInstanceOf(String.class);
+    final String hexSignature = (String) result;
     final byte[] signature = Numeric.hexStringToByteArray(hexSignature);
 
     final ECDSASignature expectedSignature =
