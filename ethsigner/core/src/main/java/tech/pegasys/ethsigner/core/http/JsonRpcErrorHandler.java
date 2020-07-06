@@ -59,7 +59,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
         () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
         () -> Json.encode(errorResponse),
         () -> context.failure());
-    httpResponseFactory.create(context.request(), statusCode, errorResponse);
+    httpResponseFactory.response(context.response(), statusCode, errorResponse);
   }
 
   private Optional<JsonRpcRequest> jsonRpcRequest(final RoutingContext context) {

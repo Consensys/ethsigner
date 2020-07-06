@@ -12,10 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcResponse;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 
@@ -23,13 +26,24 @@ public class HttpResponseFactory {
 
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
-  public void create(
-      final HttpServerRequest httpRequest, final int statusCode, final JsonRpcResponse body) {
-    final HttpServerResponse response = httpRequest.response();
-
+  public void response(
+      final HttpServerResponse response, final int statusCode, final JsonRpcResponse body) {
     response.putHeader("Content", JSON);
     response.setStatusCode(statusCode);
     response.setChunked(false);
     response.end(Json.encodeToBuffer(body));
+  }
+
+  public void successResponse(
+      final HttpServerResponse response, final JsonRpcRequestId id, final Object result) {
+    response(response, 200, new JsonRpcSuccessResponse(id, result));
+  }
+
+  public void failureResponse(
+      final HttpServerResponse response,
+      final JsonRpcRequestId id,
+      final int statusCode,
+      final JsonRpcError error) {
+    response(response, statusCode, new JsonRpcErrorResponse(id, error));
   }
 }
