@@ -12,12 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.net.HttpHeaders;
 import io.vertx.core.MultiMap;
+import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 
 public class HeaderHelpers {
 
