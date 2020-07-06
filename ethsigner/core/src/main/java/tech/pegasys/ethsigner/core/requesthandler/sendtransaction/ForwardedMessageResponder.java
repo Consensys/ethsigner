@@ -19,24 +19,19 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 
 import java.net.ConnectException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
-import com.google.common.net.HttpHeaders;
-import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
-public abstract class RequestForwarder implements DownstreamResponseHandler {
+public class ForwardedMessageResponder implements DownstreamResponseHandler {
 
   private final RoutingContext context;
 
-  public RequestForwarder(final RoutingContext context) {
+  public ForwardedMessageResponder(final RoutingContext context) {
     this.context = context;
   }
-
-  public abstract void send();
 
   @Override
   public void handleResponseBody(
@@ -56,27 +51,5 @@ public abstract class RequestForwarder implements DownstreamResponseHandler {
     } else {
       context.fail(INTERNAL_SERVER_ERROR.code(), new RuntimeException(thrown));
     }
-  }
-
-  protected Map<String, String> createHeaders(final MultiMap headers) {
-    final Map<String, String> headersToSend = new HashMap<>();
-    headers.forEach(entry -> headersToSend.put(entry.getKey(), entry.getValue()));
-    headersToSend.remove(HttpHeaders.CONTENT_LENGTH);
-    headersToSend.remove(HttpHeaders.ORIGIN);
-    renameHeader(headersToSend, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
-    return headersToSend;
-  }
-
-  private void renameHeader(
-      final Map<String, String> headers, final String oldHeader, final String newHeader) {
-    final String oldHeaderValue = headers.get(oldHeader);
-    headers.remove(oldHeader);
-    if (oldHeaderValue != null) {
-      headers.put(newHeader, oldHeaderValue);
-    }
-  }
-
-  protected RoutingContext context() {
-    return context;
   }
 }

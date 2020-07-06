@@ -51,11 +51,15 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   }
 
   @Override
-  public void postRequest(final Map<String, String> headers, final String path, final String body) {
-    LOG.info("Posting a request");
+  public void sendRequest(
+      final HttpMethod method,
+      final Map<String, String> headers,
+      final String path,
+      final String body) {
+    LOG.info("Sending a request");
     final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
     final HttpClientRequest request =
-        downStreamConnection.request(HttpMethod.POST, fullPath, this::handleResponse);
+        downStreamConnection.request(method, fullPath, this::handleResponse);
     request.setTimeout(httpRequestTimeout.toMillis());
     request.exceptionHandler(this::handleException);
     request.headers().setAll(headers);

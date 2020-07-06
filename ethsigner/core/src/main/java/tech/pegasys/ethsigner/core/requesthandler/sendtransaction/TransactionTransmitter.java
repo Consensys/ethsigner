@@ -18,6 +18,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
+import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
@@ -40,26 +41,27 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TransactionTransmitter extends RequestForwarder {
+public class TransactionTransmitter extends ForwardedMessageResponder {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final TransactionSerializer transactionSerializer;
   private final Transaction transaction;
-  private final VertxRequestTransmitter transmitter;
+  private final VertxRequestTransmitterFactory transmitterFactory;
+  private final RoutingContext context;
 
   public TransactionTransmitter(
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory,
+      final VertxRequestTransmitterFactory transmitterFactory,
       final RoutingContext context) {
     super(context);
-    this.transmitter = vertxTransmitterFactory.create(this);
+    this.context = context;
+    this.transmitterFactory = transmitterFactory;
     this.transaction = transaction;
     this.transactionSerializer = transactionSerializer;
   }
 
-  @Override
   public void send() {
     final Optional<JsonRpcRequest> request = createSignedTransactionBody();
 
@@ -71,7 +73,7 @@ public class TransactionTransmitter extends RequestForwarder {
       sendTransaction(Json.encode(request.get()));
     } catch (final IllegalArgumentException | EncodeException e) {
       LOG.debug("JSON Serialization failed for: {}", request, e);
-      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
   }
 
@@ -88,11 +90,11 @@ public class TransactionTransmitter extends RequestForwarder {
       signedTransactionHexString = transactionSerializer.serialize(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", transaction, e);
-      context().fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
       return Optional.empty();
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode transaction: {}", transaction, thrown);
-      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       return Optional.empty();
     }
 
@@ -109,25 +111,24 @@ public class TransactionTransmitter extends RequestForwarder {
       if (cause instanceof SocketException
           || cause instanceof SocketTimeoutException
           || cause instanceof TimeoutException) {
-        context()
-            .fail(
-                GATEWAY_TIMEOUT.code(),
-                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+        context.fail(
+            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else if (cause instanceof SSLHandshakeException) {
-        context().fail(BAD_GATEWAY.code(), cause);
+        context.fail(BAD_GATEWAY.code(), cause);
       } else {
-        context().fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
+        context.fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
       }
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
-      context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+      context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
     }
     return false;
   }
 
-  private void sendTransaction(final String bodyContent) {
-    final HttpServerRequest request = context().request();
-    final Map<String, String> headersToSend = createHeaders(request.headers());
-    transmitter.postRequest(headersToSend, request.path(), bodyContent);
+  protected void sendTransaction(final String bodyContent) {
+    final HttpServerRequest request = context.request();
+    final Map<String, String> headersToSend = HeaderHelpers.createHeaders(request.headers());
+    final VertxRequestTransmitter transmitter = transmitterFactory.create(this);
+    transmitter.sendRequest(request.method(), headersToSend, request.path(), bodyContent);
   }
 }

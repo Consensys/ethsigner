@@ -14,7 +14,9 @@ package tech.pegasys.ethsigner.core.requesthandler;
 
 import java.util.Map;
 
+import io.vertx.core.http.HttpMethod;
+
 public interface RequestTransmitter {
 
-  void postRequest(Map<String, String> headers, String path, String body);
+  void sendRequest(HttpMethod method, Map<String, String> headers, String path, String body);
 }

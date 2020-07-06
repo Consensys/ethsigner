@@ -12,10 +12,14 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.passthrough;
 
+import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
-import tech.pegasys.ethsigner.core.requesthandler.SpecificRequestHandler;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.ForwardedMessageResponder;
+
+import java.util.Map;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -41,9 +45,13 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     logRequest(context.request(), context.getBodyAsString());
-    final SpecificRequestHandler handler =
-        new SpecificRequestHandler(context, transmitterFactory);
-    handler.send();
+    final VertxRequestTransmitter transmitter =
+        transmitterFactory.create(new ForwardedMessageResponder(context));
+
+    final HttpServerRequest request = context.request();
+    final Map<String, String> headersToSend = HeaderHelpers.createHeaders(request.headers());
+    transmitter.sendRequest(
+        request.method(), headersToSend, request.path(), context.getBodyAsString());
   }
 
   private void logRequest(final HttpServerRequest httpRequest, final String body) {
