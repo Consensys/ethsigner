@@ -109,8 +109,10 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       if (cause instanceof SocketException
           || cause instanceof SocketTimeoutException
           || cause instanceof TimeoutException) {
-        context().fail(
-            GATEWAY_TIMEOUT.code(), new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+        context()
+            .fail(
+                GATEWAY_TIMEOUT.code(),
+                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
       } else if (cause instanceof SSLHandshakeException) {
         context().fail(BAD_GATEWAY.code(), cause);
       } else {
