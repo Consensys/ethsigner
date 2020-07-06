@@ -41,7 +41,8 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
   @Override
   public void handle(final RoutingContext context) {
     logRequest(context.request(), context.getBodyAsString());
-    final SpecificRequestHandler handler = new SpecificRequestHandler(context, transmitterFactory);
+    final SpecificRequestHandler handler =
+        new SpecificRequestHandler(context, transmitterFactory);
     handler.send();
   }
 

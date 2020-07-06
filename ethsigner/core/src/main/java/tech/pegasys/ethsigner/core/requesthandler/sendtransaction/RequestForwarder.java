@@ -12,17 +12,23 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import tech.pegasys.ethsigner.core.requesthandler.ResponseBodyHandler;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
+import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
+import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
+
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLHandshakeException;
 
 import com.google.common.net.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
-public abstract class RequestForwarder implements ResponseBodyHandler {
+public abstract class RequestForwarder implements DownstreamResponseHandler {
 
   private final RoutingContext context;
 
@@ -42,8 +48,14 @@ public abstract class RequestForwarder implements ResponseBodyHandler {
   }
 
   @Override
-  public void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t) {
-    context.fail(status.code(), t);
+  public void handleTransmissionFailure(final Throwable thrown) {
+    if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
+      context.fail(GATEWAY_TIMEOUT.code(), thrown);
+    } else if (thrown instanceof SSLHandshakeException) {
+      context.fail(BAD_GATEWAY.code(), thrown);
+    } else {
+      context.fail(INTERNAL_SERVER_ERROR.code(), new RuntimeException(thrown));
+    }
   }
 
   protected Map<String, String> createHeaders(final MultiMap headers) {

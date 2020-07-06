@@ -14,12 +14,10 @@ package tech.pegasys.ethsigner.core.requesthandler;
 
 import java.util.Map;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-
-public interface ResponseBodyHandler {
+public interface DownstreamResponseHandler {
 
   void handleResponseBody(
       final Map<String, String> headers, final int statusCode, final String body);
 
-  void handleTransmissionFailure(final HttpResponseStatus status, final Throwable t);
+  void handleTransmissionFailure(final Throwable t);
 }

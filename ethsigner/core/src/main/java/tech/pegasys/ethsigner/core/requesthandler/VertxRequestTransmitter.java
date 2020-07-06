@@ -12,19 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
-
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
-import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLHandshakeException;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -40,7 +33,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
 
   private final Vertx vertx;
   private final Duration httpRequestTimeout;
-  private final ResponseBodyHandler bodyHandler;
+  private final DownstreamResponseHandler bodyHandler;
   private final HttpClient downStreamConnection;
   private final DownstreamPathCalculator downstreamPathCalculator;
 
@@ -49,7 +42,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
       final HttpClient downStreamConnection,
       final Duration httpRequestTimeout,
       final DownstreamPathCalculator downstreamPathCalculator,
-      final ResponseBodyHandler bodyHandler) {
+      final DownstreamResponseHandler bodyHandler) {
     this.vertx = vertx;
     this.httpRequestTimeout = httpRequestTimeout;
     this.bodyHandler = bodyHandler;
@@ -73,16 +66,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   private void handleException(final Throwable thrown) {
     LOG.error("Transmission failed -->", thrown);
     vertx.executeBlocking(
-        future -> {
-          if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
-            bodyHandler.handleTransmissionFailure(GATEWAY_TIMEOUT, thrown);
-          } else if (thrown instanceof SSLHandshakeException) {
-            bodyHandler.handleTransmissionFailure(BAD_GATEWAY, thrown);
-          } else {
-            bodyHandler.handleTransmissionFailure(
-                INTERNAL_SERVER_ERROR, new RuntimeException(thrown));
-          }
-        },
+        future -> bodyHandler.handleTransmissionFailure(thrown),
         false,
         res -> {
           if (res.failed()) {
@@ -109,10 +93,9 @@ public class VertxRequestTransmitter implements RequestTransmitter {
                 false,
                 res -> {
                   if (res.failed()) {
-                    LOG.error(
-                        "An unhandled error occurred while processing a response", res.cause());
-                    // need to actually fail it
-                    bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, res.cause());
+                    final Throwable t = res.cause();
+                    LOG.error("An unhandled error occurred while processing a response", t);
+                    bodyHandler.handleTransmissionFailure(t);
                   }
                 }));
   }

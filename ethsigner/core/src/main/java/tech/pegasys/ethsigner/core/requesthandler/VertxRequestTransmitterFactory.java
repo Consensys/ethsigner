@@ -15,5 +15,5 @@ package tech.pegasys.ethsigner.core.requesthandler;
 @FunctionalInterface
 public interface VertxRequestTransmitterFactory {
 
-  VertxRequestTransmitter create(final ResponseBodyHandler responseBodyHandler);
+  VertxRequestTransmitter create(final DownstreamResponseHandler downstreamResponseHandler);
 }
