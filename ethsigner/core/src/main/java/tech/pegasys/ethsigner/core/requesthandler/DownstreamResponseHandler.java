@@ -16,8 +16,8 @@ import java.util.Map;
 
 public interface DownstreamResponseHandler {
 
-  void handleResponseBody(
+  void handleResponse(
       final Map<String, String> headers, final int statusCode, final String body);
 
-  void handleTransmissionFailure(final Throwable t);
+  void handleFailure(final Throwable t);
 }

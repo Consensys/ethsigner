@@ -56,7 +56,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
       final Map<String, String> headers,
       final String path,
       final String body) {
-    LOG.info("Sending a request");
+    LOG.debug("Sending request {} to {}", body, path);
     final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
     final HttpClientRequest request =
         downStreamConnection.request(method, fullPath, this::handleResponse);
@@ -68,13 +68,13 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   }
 
   private void handleException(final Throwable thrown) {
-    LOG.error("Transmission failed -->", thrown);
+    LOG.error("Transmission failed", thrown);
     vertx.executeBlocking(
-        future -> bodyHandler.handleTransmissionFailure(thrown),
+        future -> bodyHandler.handleFailure(thrown),
         false,
         res -> {
           if (res.failed()) {
-            LOG.error("Reporting failure failed", res.cause());
+            LOG.error("Reporting failure, failed", res.cause());
           }
         });
   }
@@ -89,7 +89,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
                   response
                       .headers()
                       .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
-                  bodyHandler.handleResponseBody(
+                  bodyHandler.handleResponse(
                       responseHeaders,
                       response.statusCode(),
                       body.toString(StandardCharsets.UTF_8));
@@ -99,7 +99,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
                   if (res.failed()) {
                     final Throwable t = res.cause();
                     LOG.error("An unhandled error occurred while processing a response", t);
-                    bodyHandler.handleTransmissionFailure(t);
+                    bodyHandler.handleFailure(t);
                   }
                 }));
   }

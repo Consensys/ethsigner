@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.http;
 
+import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,20 +22,24 @@ import io.vertx.core.MultiMap;
 public class HeaderHelpers {
 
   public static Map<String, String> createHeaders(final MultiMap headers) {
+    final MultiMap subset = new VertxHttpHeaders();
+    headers.forEach(entry -> subset.add(entry.getKey(), entry.getValue()));
+
+    subset.remove(HttpHeaders.CONTENT_LENGTH);
+    subset.remove(HttpHeaders.ORIGIN);
+    renameHeader(subset, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
+
     final Map<String, String> headersToSend = new HashMap<>();
-    headers.forEach(entry -> headersToSend.put(entry.getKey(), entry.getValue()));
-    headersToSend.remove(HttpHeaders.CONTENT_LENGTH);
-    headersToSend.remove(HttpHeaders.ORIGIN);
-    renameHeader(headersToSend, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
+    subset.forEach(entry -> headersToSend.put(entry.getKey(), entry.getValue()));
     return headersToSend;
   }
 
-  public static void renameHeader(
-      final Map<String, String> headers, final String oldHeader, final String newHeader) {
+  private static void renameHeader(
+      final MultiMap headers, final String oldHeader, final String newHeader) {
     final String oldHeaderValue = headers.get(oldHeader);
     headers.remove(oldHeader);
     if (oldHeaderValue != null) {
-      headers.put(newHeader, oldHeaderValue);
+      headers.add(newHeader, oldHeaderValue);
     }
   }
 }

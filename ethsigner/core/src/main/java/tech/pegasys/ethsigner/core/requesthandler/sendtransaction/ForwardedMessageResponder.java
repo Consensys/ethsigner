@@ -34,7 +34,7 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
   }
 
   @Override
-  public void handleResponseBody(
+  public void handleResponse(
       final Map<String, String> headers, final int statusCode, final String body) {
     context.response().setStatusCode(statusCode);
     context.response().headers().addAll(headers);
@@ -43,7 +43,7 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
   }
 
   @Override
-  public void handleTransmissionFailure(final Throwable thrown) {
+  public void handleFailure(final Throwable thrown) {
     if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
       context.fail(GATEWAY_TIMEOUT.code(), thrown);
     } else if (thrown instanceof SSLHandshakeException) {

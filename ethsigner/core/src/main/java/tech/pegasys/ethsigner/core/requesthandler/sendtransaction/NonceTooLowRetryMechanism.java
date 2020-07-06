@@ -41,8 +41,8 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
     return false;
   }
 
-  private JsonRpcErrorResponse specialiseResponse(final String body) {
-    final JsonObject jsonBody = new JsonObject(body);
+  private JsonRpcErrorResponse specialiseResponse(final String errorResposneBody) {
+    final JsonObject jsonBody = new JsonObject(errorResposneBody);
     return jsonBody.mapTo(JsonRpcErrorResponse.class);
   }
 }

@@ -40,7 +40,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
   }
 
   @Override
-  public void handleResponseBody(
+  public void handleResponse(
       final Map<String, String> headers, final int statusCode, final String body) {
     if (statusCode != HttpResponseStatus.OK.code()
         && retryMechanism.responseRequiresRetry(statusCode, body)) {
@@ -53,6 +53,6 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
       return;
     }
 
-    super.handleResponseBody(headers, statusCode, body);
+    super.handleResponse(headers, statusCode, body);
   }
 }
