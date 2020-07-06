@@ -59,8 +59,8 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
     LOG.info("Dropping request from {}", context.request().remoteAddress());
     LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-    responseFactory.create(
-        context.request(),
+    responseFactory.response(
+        context.response(),
         HttpResponseStatus.BAD_REQUEST.code(),
         new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR));
   }

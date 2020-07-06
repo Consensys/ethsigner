@@ -45,34 +45,39 @@ public class EthSignResultProvider implements ResultProvider<String> {
 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
+    final List<String> params = getParams(request);
+    if (params == null || params.size() != 2) {
+      LOG.info(
+          "eth_sign should have a list of 2 parameters, but has {}",
+          params == null ? "null" : params.size());
+      throw new JsonRpcException(INVALID_PARAMS);
+    }
+    final String address = params.get(0);
+    final Optional<TransactionSigner> transactionSigner =
+        transactionSignerProvider.getSigner(address);
+    if (transactionSigner.isEmpty()) {
+      LOG.info("Address ({}) does not match any available account", address);
+      throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
+    }
+    final TransactionSigner signer = transactionSigner.get();
+    final String originalMessage = params.get(1);
+    final String message =
+        (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
+    final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
+
+    final Bytes outputSignature =
+        Bytes.concatenate(
+            Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
+            Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getS()))),
+            Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getV())));
+    return Numeric.toHexString(outputSignature.toArray());
+  }
+
+  private List<String> getParams(final JsonRpcRequest request) {
     try {
       @SuppressWarnings("unchecked")
       final List<String> params = (List<String>) request.getParams();
-      if (params == null || params.size() != 2) {
-        LOG.info(
-            "eth_sign should have a list of 2 parameters, but has {}",
-            params == null ? "null" : params.size());
-        throw new JsonRpcException(INVALID_PARAMS);
-      }
-      final String address = params.get(0);
-      final Optional<TransactionSigner> transactionSigner =
-          transactionSignerProvider.getSigner(address);
-      if (transactionSigner.isEmpty()) {
-        LOG.info("Address ({}) does not match any available account", address);
-        throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
-      }
-      final TransactionSigner signer = transactionSigner.get();
-      final String originalMessage = params.get(1);
-      final String message =
-          (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
-      final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
-
-      final Bytes outputSignature =
-          Bytes.concatenate(
-              Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
-              Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getS()))),
-              Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getV())));
-      return Numeric.toHexString(outputSignature.toArray());
+      return params;
     } catch (final ClassCastException e) {
       LOG.info(
           "eth_sign should have a list of 2 parameters, but received an object: {}",

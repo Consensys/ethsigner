@@ -19,7 +19,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 
@@ -27,10 +26,8 @@ public class HttpResponseFactory {
 
   private static final String JSON = HttpHeaderValues.APPLICATION_JSON.toString();
 
-  public void create(
-      final HttpServerRequest httpRequest, final int statusCode, final JsonRpcResponse body) {
-    final HttpServerResponse response = httpRequest.response();
-
+  public void response(
+      final HttpServerResponse response, final int statusCode, final JsonRpcResponse body) {
     response.putHeader("Content", JSON);
     response.setStatusCode(statusCode);
     response.setChunked(false);
@@ -39,12 +36,7 @@ public class HttpResponseFactory {
 
   public void successResponse(
       final HttpServerResponse response, final JsonRpcRequestId id, final Object result) {
-    response.putHeader("Content", JSON);
-    response.setStatusCode(200);
-    response.setChunked(false);
-
-    final JsonRpcSuccessResponse body = new JsonRpcSuccessResponse(id, result);
-    response.end(Json.encodeToBuffer(body));
+    response(response, 200, new JsonRpcSuccessResponse(id, result));
   }
 
   public void failureResponse(
@@ -52,12 +44,6 @@ public class HttpResponseFactory {
       final JsonRpcRequestId id,
       final int statusCode,
       final JsonRpcError error) {
-
-    response.putHeader("Content", JSON);
-    response.setStatusCode(statusCode);
-    response.setChunked(false);
-
-    final JsonRpcErrorResponse body = new JsonRpcErrorResponse(id, error);
-    response.end(Json.encodeToBuffer(body));
+    response(response, statusCode, new JsonRpcErrorResponse(id, error));
   }
 }
