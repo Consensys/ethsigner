@@ -79,7 +79,8 @@ public class VertxRequestTransmitter implements RequestTransmitter {
           } else if (thrown instanceof SSLHandshakeException) {
             bodyHandler.handleTransmissionFailure(BAD_GATEWAY, thrown);
           } else {
-            bodyHandler.handleTransmissionFailure(INTERNAL_SERVER_ERROR, new RuntimeException(thrown));
+            bodyHandler.handleTransmissionFailure(
+                INTERNAL_SERVER_ERROR, new RuntimeException(thrown));
           }
         },
         false,
