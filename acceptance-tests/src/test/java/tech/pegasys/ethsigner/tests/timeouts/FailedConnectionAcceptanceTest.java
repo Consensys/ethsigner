@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.tests.timeouts;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -37,7 +37,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class ConnectionTimeoutAcceptanceTest {
+public class FailedConnectionAcceptanceTest {
 
   private Signer ethSigner;
 
@@ -81,8 +81,7 @@ public class ConnectionTimeoutAcceptanceTest {
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
-    assertThat(signerResponse.jsonRpc().getError())
-        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
   }
 
   @Test
@@ -101,7 +100,15 @@ public class ConnectionTimeoutAcceptanceTest {
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
-    assertThat(signerResponse.jsonRpc().getError())
-        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
+  }
+
+  @Test
+  public void passThroughRequestsReturnAGatewayTimeoutError() {
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner.rawJsonRpcRequests().exceptionalRequest("eth_blocknumber");
+
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
   }
 }

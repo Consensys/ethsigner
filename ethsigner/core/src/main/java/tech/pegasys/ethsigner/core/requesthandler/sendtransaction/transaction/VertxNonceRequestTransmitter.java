@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
@@ -115,10 +116,17 @@ public class VertxNonceRequestTransmitter {
       }
       result.completeExceptionally(new RuntimeException("Web3 did not provide a string response."));
     } catch (final DecodeException e) {
-      result.completeExceptionally(
-          new RuntimeException(
-              "Web3 Provider did not respond with a valid success message: "
-                  + bodyBuffer.toString(UTF_8)));
+      result.completeExceptionally(new JsonRpcException(determineErrorCode(bodyBuffer)));
+    }
+  }
+
+  private JsonRpcError determineErrorCode(final Buffer bodyBuffer) {
+    try {
+      final JsonRpcErrorResponse response =
+          decoder.decodeValue(bodyBuffer, JsonRpcErrorResponse.class);
+      return response.getError();
+    } catch (final DecodeException e) {
+      return JsonRpcError.INTERNAL_ERROR;
     }
   }
 }

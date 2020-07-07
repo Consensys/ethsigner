@@ -49,7 +49,7 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
     } else if (thrown instanceof SSLHandshakeException) {
       context.fail(BAD_GATEWAY.code(), thrown);
     } else {
-      context.fail(INTERNAL_SERVER_ERROR.code(), new RuntimeException(thrown));
+      context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
     }
   }
 

@@ -29,6 +29,8 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  public static final String ID_ELEMENT_NAME = "JsonRpcId";
+
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
   private final JsonDecoder jsonDecoder;
@@ -48,6 +50,7 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
       LOG.trace("Request body = {}", context.getBodyAsString());
       final JsonRpcRequest request =
           jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class);
+      context.put(ID_ELEMENT_NAME, request.getId());
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context, request);

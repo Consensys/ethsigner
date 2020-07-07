@@ -12,10 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
@@ -27,11 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLHandshakeException;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
@@ -104,20 +97,10 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       transaction.updateNonce();
       return true;
     } catch (final RuntimeException e) {
+      // It is currently recognised that the underlying nonce provider will wrap a transmission
+      // exception in a Runtime exception.
       LOG.warn("Unable to get nonce from web3j provider.", e);
-      final Throwable cause = e.getCause();
-      if (cause instanceof SocketException
-          || cause instanceof SocketTimeoutException
-          || cause instanceof TimeoutException) {
-        context()
-            .fail(
-                GATEWAY_TIMEOUT.code(),
-                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
-      } else if (cause instanceof SSLHandshakeException) {
-        context().fail(BAD_GATEWAY.code(), cause);
-      } else {
-        context().fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
-      }
+      this.handleFailure(e.getCause());
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));

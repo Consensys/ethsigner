@@ -87,7 +87,7 @@ public class TlsEnabledHttpServerFactory {
           .produces(HttpHeaderValues.APPLICATION_JSON.toString())
           .handler(BodyHandler.create())
           .handler(ResponseContentTypeHandler.create())
-          .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
+          .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
           .handler(new JsonRpcHandler(null, requestMapper, jsonDecoder));
 
       final HttpServer web3ProviderHttpServer = vertx.createHttpServer(web3HttpServerOptions);
