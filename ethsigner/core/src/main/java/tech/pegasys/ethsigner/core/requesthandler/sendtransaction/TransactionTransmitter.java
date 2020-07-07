@@ -29,11 +29,11 @@ import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.EncodeException;
 import io.vertx.core.json.Json;
@@ -127,7 +127,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
 
   protected void sendTransaction(final String bodyContent) {
     final HttpServerRequest request = context().request();
-    final Map<String, String> headersToSend = HeaderHelpers.createHeaders(request.headers());
+    final MultiMap headersToSend = HeaderHelpers.createHeaders(request.headers());
     final VertxRequestTransmitter transmitter = transmitterFactory.create(this);
     transmitter.sendRequest(request.method(), headersToSend, request.path(), bodyContent);
   }

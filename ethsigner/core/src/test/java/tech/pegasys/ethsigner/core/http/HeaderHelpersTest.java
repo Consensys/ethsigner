@@ -14,8 +14,9 @@ package tech.pegasys.ethsigner.core.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
+import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.impl.headers.VertxHttpHeaders;
@@ -30,9 +31,9 @@ class HeaderHelpersTest {
   void originHeaderIsRemoved(String headerToRemove) {
     final MultiMap input = new VertxHttpHeaders();
     input.add(headerToRemove, "arbitrary");
-    final Map<String, String> output = HeaderHelpers.createHeaders(input);
+    final MultiMap output = HeaderHelpers.createHeaders(input);
 
-    assertThat(output.keySet()).doesNotContain(headerToRemove);
+    assertThat(output.get(headerToRemove)).isNull();
   }
 
   @ParameterizedTest
@@ -40,9 +41,9 @@ class HeaderHelpersTest {
   void contentLengthHeaderIsRemoved(String headerToRemove) {
     final MultiMap input = new VertxHttpHeaders();
     input.add(headerToRemove, "arbitrary");
-    final Map<String, String> output = HeaderHelpers.createHeaders(input);
+    final MultiMap output = HeaderHelpers.createHeaders(input);
 
-    assertThat(output.keySet()).doesNotContain(headerToRemove);
+    assertThat(output.get(headerToRemove)).isNull();
   }
 
   @Test
@@ -50,9 +51,21 @@ class HeaderHelpersTest {
     final MultiMap input = new VertxHttpHeaders();
     input.add(HttpHeaders.HOST, "arbitrary");
 
-    final Map<String, String> output = HeaderHelpers.createHeaders(input);
+    final MultiMap output = HeaderHelpers.createHeaders(input);
 
-    assertThat(output.keySet()).doesNotContain(HttpHeaders.HOST);
+    assertThat(output.get(HttpHeaders.HOST)).isNull();
     assertThat(output.get(HttpHeaders.X_FORWARDED_HOST)).isEqualTo("arbitrary");
+  }
+
+  @Test
+  void ensureMultiEntryHeadersAreCopiedCorrectly() {
+    final MultiMap input = new VertxHttpHeaders();
+    final List<String> headerValues = Lists.newArrayList("arbitrary", "secondArbitrary");
+    input.add(HttpHeaders.HOST, headerValues);
+
+    final MultiMap output = HeaderHelpers.createHeaders(input);
+
+    assertThat(output.getAll(HttpHeaders.X_FORWARDED_HOST))
+        .containsExactlyInAnyOrder("arbitrary", "secondArbitrary");
   }
 }

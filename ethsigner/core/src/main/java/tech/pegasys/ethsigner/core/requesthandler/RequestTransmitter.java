@@ -12,11 +12,12 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-import java.util.Map;
+import java.util.Map.Entry;
 
 import io.vertx.core.http.HttpMethod;
 
 public interface RequestTransmitter {
 
-  void sendRequest(HttpMethod method, Map<String, String> headers, String path, String body);
+  void sendRequest(
+      HttpMethod method, Iterable<Entry<String, String>> headers, String path, String body);
 }

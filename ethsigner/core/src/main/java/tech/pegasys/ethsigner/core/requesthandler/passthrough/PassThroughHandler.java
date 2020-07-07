@@ -19,9 +19,8 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.ForwardedMessageResponder;
 
-import java.util.Map;
-
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +48,7 @@ public class PassThroughHandler implements JsonRpcRequestHandler, Handler<Routin
         transmitterFactory.create(new ForwardedMessageResponder(context));
 
     final HttpServerRequest request = context.request();
-    final Map<String, String> headersToSend = HeaderHelpers.createHeaders(request.headers());
+    final MultiMap headersToSend = HeaderHelpers.createHeaders(request.headers());
     transmitter.sendRequest(
         request.method(), headersToSend, request.path(), context.getBodyAsString());
   }

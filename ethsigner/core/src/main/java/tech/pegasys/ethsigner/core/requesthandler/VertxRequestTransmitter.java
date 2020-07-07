@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -53,7 +54,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   @Override
   public void sendRequest(
       final HttpMethod method,
-      final Map<String, String> headers,
+      final Iterable<Entry<String, String>> headers,
       final String path,
       final String body) {
     LOG.debug("Sending request {} to {}", body, path);
@@ -62,7 +63,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
         downStreamConnection.request(method, fullPath, this::handleResponse);
     request.setTimeout(httpRequestTimeout.toMillis());
     request.exceptionHandler(this::handleException);
-    request.headers().setAll(headers);
+    headers.forEach(entry -> request.headers().add(entry.getKey(), entry.getValue()));
     request.setChunked(false);
     request.end(body);
   }
