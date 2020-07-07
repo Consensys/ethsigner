@@ -46,7 +46,6 @@ public class VertxNonceRequestTransmitter {
 
   private final MultiMap headers;
   private final JsonDecoder decoder;
-
   private final VertxRequestTransmitterFactory transmitterFactory;
 
   private static final AtomicInteger nextId = new AtomicInteger(0);
