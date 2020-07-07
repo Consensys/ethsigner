@@ -21,14 +21,14 @@ import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 public class HeaderHelpers {
 
   public static MultiMap createHeaders(final MultiMap headers) {
-    final MultiMap mutated = new VertxHttpHeaders();
-    headers.forEach(entry -> mutated.add(entry.getKey(), entry.getValue()));
+    final MultiMap headersToReturn = new VertxHttpHeaders();
+    headers.forEach(entry -> headersToReturn.add(entry.getKey(), entry.getValue()));
 
-    mutated.remove(HttpHeaders.CONTENT_LENGTH);
-    mutated.remove(HttpHeaders.ORIGIN);
-    renameHeader(mutated, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
+    headersToReturn.remove(HttpHeaders.CONTENT_LENGTH);
+    headersToReturn.remove(HttpHeaders.ORIGIN);
+    renameHeader(headersToReturn, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
 
-    return mutated;
+    return headersToReturn;
   }
 
   private static void renameHeader(
