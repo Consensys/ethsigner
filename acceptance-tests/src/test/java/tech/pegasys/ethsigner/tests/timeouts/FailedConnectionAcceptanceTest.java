@@ -37,7 +37,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class ConnectionTimeoutAcceptanceTest {
+public class FailedConnectionAcceptanceTest {
 
   private Signer ethSigner;
 
@@ -99,6 +99,15 @@ public class ConnectionTimeoutAcceptanceTest {
             transferAmountWei);
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
+    assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
+  }
+
+  @Test
+  public void passThroughRequestsReturnAGatewayTimeoutError() {
+    final SignerResponse<JsonRpcErrorResponse> signerResponse =
+        ethSigner.rawJsonRpcRequests().exceptionalRequest("eth_blocknumber");
+
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
     assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
   }

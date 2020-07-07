@@ -35,7 +35,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-    final JsonRpcRequestId requestId = context.get("JsonRpcId");
+    final JsonRpcRequestId requestId = context.get(JsonRpcHandler.ID_ELEMENT_NAME);
     final int statusCode =
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
 

@@ -20,7 +20,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.jupiter.api.Test;
 
-class FailedConnectionTest extends DefaultTestBase {
+class FailedConnectionIntegrationTest extends DefaultTestBase {
 
   @Test
   void failsToConnectToDownStreamRaisesTimeout() {
