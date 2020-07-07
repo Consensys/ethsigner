@@ -57,8 +57,8 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
         context.request()::method,
         context.request()::absoluteURI,
         () -> jsonRpcRequest.map(Json::encodePrettily).orElse(context.getBodyAsString()),
-        () -> Json.encode(errorResponse),
-        () -> context.failure());
+        () -> Json.encode(errorResponse));
+    LOG.error("Exception = ", context.failure());
     httpResponseFactory.response(context.response(), statusCode, errorResponse);
   }
 
