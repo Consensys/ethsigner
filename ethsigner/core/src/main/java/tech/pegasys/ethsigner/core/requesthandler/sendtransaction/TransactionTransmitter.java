@@ -104,20 +104,10 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       transaction.updateNonce();
       return true;
     } catch (final RuntimeException e) {
+      // It is currently recognised that the underlying nonce provider will wrap a transmission
+      // exception in a Runtime exception.
       LOG.warn("Unable to get nonce from web3j provider.", e);
-      final Throwable cause = e.getCause();
-      if (cause instanceof SocketException
-          || cause instanceof SocketTimeoutException
-          || cause instanceof TimeoutException) {
-        context()
-            .fail(
-                GATEWAY_TIMEOUT.code(),
-                new JsonRpcException(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
-      } else if (cause instanceof SSLHandshakeException) {
-        context().fail(BAD_GATEWAY.code(), cause);
-      } else {
-        context().fail(GATEWAY_TIMEOUT.code(), new JsonRpcException(INTERNAL_ERROR));
-      }
+      this.handleFailure(e.getCause());
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
       context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));

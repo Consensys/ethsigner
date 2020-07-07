@@ -134,7 +134,7 @@ public class Runner {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint

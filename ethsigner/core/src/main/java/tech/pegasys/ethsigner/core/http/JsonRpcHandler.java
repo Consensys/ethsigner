@@ -48,6 +48,7 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
       LOG.trace("Request body = {}", context.getBodyAsString());
       final JsonRpcRequest request =
           jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class);
+      context.put("JsonRpcId", request.getId());
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context, request);
