@@ -12,10 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
@@ -27,11 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLHandshakeException;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;

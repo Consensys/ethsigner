@@ -100,7 +100,6 @@ public class ConnectionTimeoutAcceptanceTest {
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner.transactions().submitExceptional(transaction);
     assertThat(signerResponse.status()).isEqualTo(GATEWAY_TIMEOUT);
-    assertThat(signerResponse.jsonRpc().getError())
-        .isEqualTo(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
   }
 }

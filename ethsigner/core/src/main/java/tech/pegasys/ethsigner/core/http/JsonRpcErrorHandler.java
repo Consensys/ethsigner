@@ -61,5 +61,4 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
       context.response().end();
     }
   }
-
 }
