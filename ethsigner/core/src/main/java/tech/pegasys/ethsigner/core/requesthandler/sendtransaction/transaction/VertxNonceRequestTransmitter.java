@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import java.util.Map.Entry;
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -59,7 +60,7 @@ public class VertxNonceRequestTransmitter {
 
     @Override
     public void handleResponse(
-        final Map<String, String> headers, final int statusCode, String body) {
+        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
       VertxNonceRequestTransmitter.this.handleResponse(body, result);
     }
 

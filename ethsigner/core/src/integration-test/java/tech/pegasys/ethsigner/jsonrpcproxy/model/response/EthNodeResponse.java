@@ -12,18 +12,17 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 
-import java.util.Map;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.util.Map.Entry;
 
 public class EthNodeResponse {
 
   private final String body;
-  private final Map<String, String> headers;
+  private final Iterable<Entry<String,String>> headers;
   private final HttpResponseStatus status;
 
   public EthNodeResponse(
-      final Map<String, String> headers, final String body, final HttpResponseStatus status) {
+      final Iterable<Entry<String,String>> headers, final String body, final HttpResponseStatus status) {
     this.body = body;
     this.headers = headers;
     this.status = status;
@@ -33,7 +32,7 @@ public class EthNodeResponse {
     return body;
   }
 
-  public Map<String, String> getHeaders() {
+  public Iterable<Entry<String,String>> getHeaders() {
     return headers;
   }
 

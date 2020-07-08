@@ -16,8 +16,6 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPath
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import io.vertx.core.Vertx;
@@ -85,16 +83,11 @@ public class VertxRequestTransmitter implements RequestTransmitter {
     response.bodyHandler(
         body ->
             vertx.executeBlocking(
-                future -> {
-                  final Map<String, String> responseHeaders = new HashMap<>();
-                  response
-                      .headers()
-                      .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
-                  bodyHandler.handleResponse(
-                      responseHeaders,
-                      response.statusCode(),
-                      body.toString(StandardCharsets.UTF_8));
-                },
+                future ->
+                    bodyHandler.handleResponse(
+                        response.headers(),
+                        response.statusCode(),
+                        body.toString(StandardCharsets.UTF_8)),
                 false,
                 res -> {
                   if (res.failed()) {

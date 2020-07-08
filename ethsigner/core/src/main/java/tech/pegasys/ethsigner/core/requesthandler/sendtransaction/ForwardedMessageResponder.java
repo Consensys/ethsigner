@@ -16,10 +16,12 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
+import io.vertx.core.MultiMap;
+import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 
 import java.net.ConnectException;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
@@ -35,9 +37,9 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
 
   @Override
   public void handleResponse(
-      final Map<String, String> headers, final int statusCode, final String body) {
+      final Iterable<Entry<String, String>> headers, final int statusCode, final String body) {
     context.response().setStatusCode(statusCode);
-    context.response().headers().addAll(headers);
+    headers.forEach(entry -> context.response().headers().add(entry.getKey(), entry.getValue()));
     context.response().setChunked(false);
     context.response().end(body);
   }
