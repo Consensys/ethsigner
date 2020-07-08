@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.util.List;
@@ -29,20 +30,19 @@ public class TransactionFactory {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory;
+  private final VertxRequestTransmitterFactory transmitterFactory;
   private final JsonDecoder decoder;
 
   public TransactionFactory(
-      final JsonDecoder decoder,
-      final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory) {
-    this.nonceRequestTransmitterFactory = nonceRequestTransmitterFactory;
+      final JsonDecoder decoder, final VertxRequestTransmitterFactory transmitterFactory) {
+    this.transmitterFactory = transmitterFactory;
     this.decoder = decoder;
   }
 
   public Transaction createTransaction(final RoutingContext context, final JsonRpcRequest request) {
     final String method = request.getMethod().toLowerCase();
     final VertxNonceRequestTransmitter nonceRequestTransmitter =
-        nonceRequestTransmitterFactory.create(context.request().headers());
+        new VertxNonceRequestTransmitter(context.request().headers(), decoder, transmitterFactory);
 
     switch (method) {
       case "eth_sendtransaction":
