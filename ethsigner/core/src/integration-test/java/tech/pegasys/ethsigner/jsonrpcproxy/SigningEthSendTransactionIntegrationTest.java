@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.math.BigInteger.ONE;
+import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
@@ -30,10 +31,9 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
-import java.util.Map;
-
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.core.json.Json;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
@@ -528,9 +528,13 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     final String originDomain = "sample.com";
 
     sendPostRequestAndVerifyResponse(
-        request.ethSigner(Map.of("Origin", originDomain), Json.encode(sendTransactionRequest)),
+        request.ethSigner(
+            singletonList(ImmutablePair.of("Origin", originDomain)),
+            Json.encode(sendTransactionRequest)),
         response.ethSigner(
-            Map.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "sample.com"),
+            singletonList(
+                ImmutablePair.of(
+                    HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), "sample.com")),
             sendRawTransactionResponse));
   }
 }

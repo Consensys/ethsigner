@@ -24,43 +24,6 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
-import io.restassured.RestAssured;
-import io.restassured.http.Headers;
-import io.restassured.response.ValidatableResponse;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServerOptions;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Header;
-import org.mockserver.model.JsonBody;
-import org.mockserver.model.RegexBody;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.web3j.protocol.eea.Eea;
-import org.web3j.protocol.eea.JsonRpc2_0Eea;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
@@ -76,6 +39,43 @@ import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
+import io.restassured.RestAssured;
+import io.restassured.http.Headers;
+import io.restassured.response.ValidatableResponse;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.JsonBody;
+import org.mockserver.model.RegexBody;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.JsonRpc2_0Web3j;
+import org.web3j.protocol.eea.Eea;
+import org.web3j.protocol.eea.JsonRpc2_0Eea;
 
 public class IntegrationTestBase {
 
@@ -103,8 +103,7 @@ public class IntegrationTestBase {
 
   private static final Duration downstreamTimeout = Duration.ofSeconds(1);
 
-  @TempDir
-  static Path dataPath;
+  @TempDir static Path dataPath;
 
   static void setupEthSigner(final long chainId) throws Exception {
     setupEthSigner(chainId, "");
@@ -191,25 +190,23 @@ public class IntegrationTestBase {
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
-    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(json(request.getBody())), exactly(1))
         .respond(
             response()
                 .withBody(response.getBody())
-                .withHeaders(headers)
+                .withHeaders(MockServer.headers(response.getHeaders()))
                 .withStatusCode(response.getStatusCode()));
   }
 
   void setupEthNodeResponse(
       final String bodyRegex, final EthNodeResponse response, final int count) {
-    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(new RegexBody(bodyRegex)), exactly(count))
         .respond(
             response()
                 .withBody(response.getBody())
-                .withHeaders(headers)
+                .withHeaders(MockServer.headers(response.getHeaders()))
                 .withStatusCode(response.getStatusCode()));
   }
 
@@ -238,58 +235,74 @@ public class IntegrationTestBase {
 
   void sendPostRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(request.getHeaders())
-        .post(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+    final ValidatableResponse validatableResponse =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .post(path)
+            .then()
+            .statusCode(expectResponse.getStatusCode())
+            .body(equalTo(expectResponse.getBody()));
+
+    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
+    responseHeaders
+        .asList()
+        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
   }
 
   void sendPutRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(new io.restassured.http.Headers(
-            MockServer.headers(request.getHeaders())))
-        .put(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+    final ValidatableResponse validatableResponse =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .put(path)
+            .then()
+            .statusCode(expectResponse.getStatusCode())
+            .body(equalTo(expectResponse.getBody()));
+
+    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
+    responseHeaders
+        .asList()
+        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
   }
 
   void sendGetRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(RestAssuredConverter.headers(request.getHeaders()))
-        .get(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    final ValidatableResponse validatableResponse =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .get(path)
+            .then()
+            .statusCode(expectResponse.getStatusCode())
+            .body(equalTo(expectResponse.getBody()));
+
+    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
+    responseHeaders
+        .asList()
+        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
   }
 
   void sendDeleteRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
-    ValidatableResponse validatableResponse = given()
-        .when()
-        .body(request.getBody())
-        .headers(RestAssuredConverter.headers(request.getHeaders()))
-        .delete(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()));
+    final ValidatableResponse validatableResponse =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .delete(path)
+            .then()
+            .statusCode(expectResponse.getStatusCode())
+            .body(equalTo(expectResponse.getBody()));
 
-    for()
-        .headers();
+    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
+    responseHeaders
+        .asList()
+        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
   }
 
   void verifyEthNodeReceived(final String proxyBodyRequest) {
@@ -299,16 +312,15 @@ public class IntegrationTestBase {
             .withHeaders(MockServer.headers(emptyList())));
   }
 
-  void verifyEthNodeReceived(final Iterable<Entry<String, String>> headers,
-      final String proxyBodyRequest) {
+  void verifyEthNodeReceived(
+      final Iterable<Entry<String, String>> headers, final String proxyBodyRequest) {
     clientAndServer.verify(
-        request()
-            .withBody(proxyBodyRequest)
-            .withHeaders(MockServer.headers(headers)));
+        request().withBody(proxyBodyRequest).withHeaders(MockServer.headers(headers)));
   }
 
   void verifyEthNodeReceived(
-      final Iterable<Entry<String, String>> headers, final String proxyBodyRequest,
+      final Iterable<Entry<String, String>> headers,
+      final String proxyBodyRequest,
       final String path) {
     clientAndServer.verify(
         request()

@@ -16,8 +16,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
-import io.vertx.core.MultiMap;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 
 import java.net.ConnectException;

@@ -12,15 +12,15 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 
-
 import static java.util.Collections.emptyList;
+
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+
+import java.util.Map.Entry;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
-import java.util.Map;
-import java.util.Map.Entry;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 public class EthResponseFactory {
 
@@ -41,8 +41,8 @@ public class EthResponseFactory {
     return new EthSignerResponse(NO_HEADERS, new JsonRpcErrorResponse(DEFAULT_ID, error), code);
   }
 
-  public EthSignerResponse ethSigner(final Iterable<Entry<String, String>> headers,
-      final String body) {
+  public EthSignerResponse ethSigner(
+      final Iterable<Entry<String, String>> headers, final String body) {
     return new EthSignerResponse(headers, body, HttpResponseStatus.OK);
   }
 
@@ -58,7 +58,9 @@ public class EthResponseFactory {
     return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
   }
 
-  public EthNodeResponse ethNode(final Iterable<Entry<String, String>> headers, final String body,
+  public EthNodeResponse ethNode(
+      final Iterable<Entry<String, String>> headers,
+      final String body,
       final HttpResponseStatus statusCode) {
     return new EthNodeResponse(headers, body, statusCode);
   }
