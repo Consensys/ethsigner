@@ -122,6 +122,7 @@ jobs:
             - ./
 
   acceptanceTests:
+    parallelism: 2
     executor: executor_machine
     steps:
       - prepare
@@ -138,7 +139,15 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon --parallel acceptanceTest
+            CLASSNAMES=$(circleci tests glob "**/acceptance-tests/src/test/java/**/*.java" \
+              | sed 's@.*/acceptance-tests/src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | circleci tests split --split-by=timings --timings-type=classname)
+            # Format the arguments to "./gradlew test"
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            echo "Prepared arguments for Gradle: $GRADLE_ARGS"
+            ./gradlew --no-daemon --parallel acceptanceTest $GRADLE_ARGS
       - notify            
       - capture_test_results
       - capture_test_reports
