@@ -20,7 +20,7 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
-import java.util.Map.Entry;
+import java.util.Map;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
@@ -41,7 +41,7 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
   @Override
   public void handleResponse(
-      final Iterable<Entry<String, String>> headers, final int statusCode, final String body) {
+      final Map<String, String> headers, final int statusCode, final String body) {
     if (statusCode != HttpResponseStatus.OK.code()
         && retryMechanism.responseRequiresRetry(statusCode, body)) {
       if (retryMechanism.retriesAvailable()) {

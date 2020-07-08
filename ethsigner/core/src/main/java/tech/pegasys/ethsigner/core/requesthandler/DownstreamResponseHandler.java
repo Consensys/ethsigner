@@ -12,12 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-import java.util.Map.Entry;
+import java.util.Map;
 
 public interface DownstreamResponseHandler {
 
-  void handleResponse(
-      final Iterable<Entry<String, String>> headers, final int statusCode, final String body);
+  void handleResponse(final Map<String, String> headers, final int statusCode, final String body);
 
   void handleFailure(final Throwable t);
 }
