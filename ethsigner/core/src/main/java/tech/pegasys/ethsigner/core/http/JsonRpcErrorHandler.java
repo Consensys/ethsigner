@@ -57,8 +57,8 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
           statusCode,
           JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
     } else {
-      context.response().setStatusCode(statusCode);
-      context.response().end();
+      httpResponseFactory.failureResponse(
+          context.response(), requestId, statusCode, JsonRpcError.INTERNAL_ERROR);
     }
   }
 }
