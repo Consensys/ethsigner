@@ -219,7 +219,7 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(requestHeaders, netVersionRequest),
-        response.ethSigner(RESPONSE_HEADERS, netVersionResponse));
+        response.ethSigner(expectedResponseHeaders, netVersionResponse));
 
     // Cors headers should not be forwarded to the downstream web3 provider (CORS is handled
     // entirely within Ethsigner.
