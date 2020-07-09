@@ -47,7 +47,7 @@ public class FailedConnectionAcceptanceTest {
     final NodePorts nodePorts = new NodePorts(7007, 7008);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
+    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), nodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

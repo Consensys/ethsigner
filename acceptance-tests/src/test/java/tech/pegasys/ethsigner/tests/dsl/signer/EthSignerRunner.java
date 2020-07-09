@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
 import java.io.File;
@@ -60,24 +59,20 @@ public abstract class EthSignerRunner {
   protected final SignerConfiguration signerConfig;
 
   public static EthSignerRunner createRunner(
-      final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts) {
+      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
     if (Boolean.getBoolean("acctests.runEthSignerAsProcess")) {
       LOG.info("EthSigner running as a process.");
-      return new EthSignerProcessRunner(signerConfig, nodeConfig, nodePorts);
+      return new EthSignerProcessRunner(signerConfig, hostName, nodePorts);
     } else {
       LOG.info("EthSigner running in a thread.");
-      return new EthSignerThreadRunner(signerConfig, nodeConfig, nodePorts);
+      return new EthSignerThreadRunner(signerConfig, hostName, nodePorts);
     }
   }
 
   public EthSignerRunner(
-      final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts) {
+      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
 
-    this.nodeHostname = nodeConfig.getHostname();
+    this.nodeHostname = hostName;
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
     this.timeoutMilliseconds = String.valueOf(signerConfig.timeout().toMillis());
     this.signerHostname = signerConfig.hostname();

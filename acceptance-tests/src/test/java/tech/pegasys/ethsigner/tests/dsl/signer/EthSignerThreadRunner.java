@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
 import tech.pegasys.ethsigner.EthSignerApp;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
@@ -36,10 +35,8 @@ public class EthSignerThreadRunner extends EthSignerRunner {
   private final CompletableFuture<Boolean> isExited = new CompletableFuture<>();
 
   public EthSignerThreadRunner(
-      final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts) {
-    super(signerConfig, nodeConfig, nodePorts);
+      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
+    super(signerConfig, hostName, nodePorts);
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 

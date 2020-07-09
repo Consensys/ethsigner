@@ -45,7 +45,7 @@ public class UpCheckAcceptanceTest {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
+    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), new NodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

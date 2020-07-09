@@ -136,7 +136,11 @@ class ServerSideTlsAcceptanceTest {
       }
 
       final Signer ethSigner =
-          new Signer(configBuilder.build(), nodeConfig, new NodePorts(1, 2), clientTlsConfig);
+          new Signer(
+              configBuilder.build(),
+              nodeConfig.getHostname(),
+              new NodePorts(1, 2),
+              clientTlsConfig);
 
       return ethSigner;
     } catch (final Exception e) {
@@ -222,7 +226,9 @@ class ServerSideTlsAcceptanceTest {
 
     ethSigner =
         new Signer(
-            configBuilder.build(), new NodeConfigurationBuilder().build(), new NodePorts(1, 2));
+            configBuilder.build(),
+            new NodeConfigurationBuilder().build().getHostname(),
+            new NodePorts(1, 2));
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }

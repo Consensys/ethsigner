@@ -16,7 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
+import tech.pegasys.ethsigner.tests.dsl.node.BesuDockerNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -73,11 +73,11 @@ public class AcceptanceTestBase {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = new BesuNode(docker, nodeConfig);
+    ethNode = new BesuDockerNode(docker, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

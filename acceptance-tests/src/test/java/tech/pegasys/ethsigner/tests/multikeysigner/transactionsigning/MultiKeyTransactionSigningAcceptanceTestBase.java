@@ -18,7 +18,7 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
+import tech.pegasys.ethsigner.tests.dsl.node.BesuDockerNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
@@ -53,14 +53,14 @@ public class MultiKeyTransactionSigningAcceptanceTestBase extends MultiKeyAccept
     final DockerClient docker = new DockerClientFactory().create();
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-    ethNode = new BesuNode(docker, nodeConfig);
+    ethNode = new BesuDockerNode(docker, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withMultiKeySignerDirectory(tomlDirectory).build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

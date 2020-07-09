@@ -59,7 +59,7 @@ import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
-public class BesuNode implements Node {
+public class BesuDockerNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -84,7 +84,7 @@ public class BesuNode implements Node {
   private PublicContracts publicContracts;
   private PrivateContracts privateContracts;
 
-  public BesuNode(final DockerClient docker, final NodeConfiguration config) {
+  public BesuDockerNode(final DockerClient docker, final NodeConfiguration config) {
     this.docker = docker;
     pullBesuImage();
     this.besuContainerId = createBesuContainer(config);
@@ -287,7 +287,7 @@ public class BesuNode implements Node {
   }
 
   private String genesisFilePath(final String filename) {
-    final URL resource = BesuNode.class.getResource(filename);
+    final URL resource = BesuDockerNode.class.getResource(filename);
     return resourceFileName(resource);
   }
 

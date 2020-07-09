@@ -119,7 +119,7 @@ class ClientSideTlsAcceptanceTest {
     final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
 
-    signer = new Signer(builder.build(), nodeConfig, nodePorts);
+    signer = new Signer(builder.build(), nodeConfig.getHostname(), nodePorts);
 
     return signer;
   }

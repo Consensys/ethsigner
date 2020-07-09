@@ -60,7 +60,7 @@ public class ReadTimeoutAcceptanceTest {
         new NodePorts(unresponsiveSocketA.getLocalPort(), unresponsiveSocketB.getLocalPort());
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
+    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), nodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

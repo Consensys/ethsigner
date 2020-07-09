@@ -21,11 +21,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuDockerNode;
-import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNode;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -33,7 +32,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
 
-import com.github.dockerjava.api.DockerClient;
 import org.apache.commons.lang.time.StopWatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,14 +40,13 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
-public class ReplayProtectionAcceptanceTest {
+public class ReplayProtectionBesuLocalAcceptanceTest {
 
-  private static final DockerClient DOCKER = new DockerClientFactory().create();
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final BigInteger TRANSFER_AMOUNT_WEI =
       Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
 
-  private Node ethNode;
+  private BesuLocalNode ethNode;
   private Signer ethSigner;
 
   private Account richBenefactor() {
@@ -84,16 +81,22 @@ public class ReplayProtectionAcceptanceTest {
     StopWatch stopWatch = new StopWatch();
     stopWatch.start();
 
-    final NodeConfiguration nodeConfig =
-        new NodeConfigurationBuilder().withGenesis(genesis).build();
+    //    final NodeConfiguration nodeConfig =
+    //        new NodeConfigurationBuilder().withGenesis(genesis).build();
+    final BesuNodeConfig besuNodeConfig =
+        BesuNodeConfigBuilder.aBesuNodeConfig().withName("test").withGenesisFile(genesis).build();
+
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
-    ethNode = new BesuDockerNode(DOCKER, nodeConfig);
+
+    ethNode = new BesuLocalNodeFactory().create(besuNodeConfig);
+
+    // ethNode = new BesuDockerNode(DOCKER, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
     stopWatch.split();
 
-    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), ethNode.ports());
+    ethSigner = new Signer(signerConfig, "127.0.0.1", ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

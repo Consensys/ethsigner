@@ -73,7 +73,7 @@ public class ServerSideTlsCaClientAcceptanceTest {
 
     return new Signer(
         configBuilder.build(),
-        new NodeConfigurationBuilder().build(),
+        new NodeConfigurationBuilder().build().getHostname(),
         new NodePorts(1, 2),
         clientTlsConfig);
   }
