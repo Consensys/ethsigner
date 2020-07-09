@@ -40,7 +40,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
 
     final Throwable failure = context.failure();
-    if(failure != null) {
+    if (failure != null) {
       if (failure instanceof JsonRpcException) {
         final JsonRpcException ex = (JsonRpcException) context.failure();
         httpResponseFactory.failureResponse(
