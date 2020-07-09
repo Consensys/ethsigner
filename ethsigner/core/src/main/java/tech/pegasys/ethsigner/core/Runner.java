@@ -28,7 +28,6 @@ import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.File;
@@ -117,8 +116,7 @@ public class Runner {
                 httpRequestTimeout,
                 downstreamPathCalculator,
                 responseBodyHandler);
-    final RequestMapper requestMapper =
-        createRequestMapper(downStreamConnection, transmitterFactory);
+    final RequestMapper requestMapper = createRequestMapper(transmitterFactory);
 
     final Router router = Router.router(vertx);
 
@@ -152,16 +150,10 @@ public class Runner {
   }
 
   private RequestMapper createRequestMapper(
-      final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
     final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
-
-    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
-        new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout, downstreamPathCalculator);
-
     final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
+        new TransactionFactory(jsonDecoder, transmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
