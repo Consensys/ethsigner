@@ -56,7 +56,10 @@ task downloadBesu(type: Download) {
   onlyIfModified true
 }
 
-task downloadAndExtractBesu(dependsOn: ['cleanBesuInstall', 'downloadBesu'], type: Copy) {
+task downloadAndExtractBesu(dependsOn: [
+  'cleanBesuInstall',
+  'downloadBesu'
+], type: Copy) {
   from(tarTree(downloadBesu.dest)) {
     include "besu-${besuVersion}/**"
     eachFile { fcd ->
