@@ -20,7 +20,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.junit.jupiter.api.Test;
 
-class FailedConnectionTest extends DefaultTestBase {
+class FailedConnectionIntegrationTest extends DefaultTestBase {
 
   @Test
   void failsToConnectToDownStreamRaisesTimeout() {
@@ -30,7 +30,7 @@ class FailedConnectionTest extends DefaultTestBase {
     final String expectedResponse =
         Json.encode(
             new JsonRpcErrorResponse(
-                request.getId(), JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT));
+                request.getId(), JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE));
 
     sendPostRequestAndVerifyResponse(
         this.request.ethSigner(request.getEncodedRequestBody()),

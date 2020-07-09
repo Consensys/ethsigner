@@ -28,7 +28,6 @@ import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.File;
@@ -110,9 +109,14 @@ public class Runner {
   private Router router() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
     final VertxRequestTransmitterFactory transmitterFactory =
-        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
-    final RequestMapper requestMapper =
-        createRequestMapper(downStreamConnection, transmitterFactory);
+        responseBodyHandler ->
+            new VertxRequestTransmitter(
+                vertx,
+                downStreamConnection,
+                httpRequestTimeout,
+                downstreamPathCalculator,
+                responseBodyHandler);
+    final RequestMapper requestMapper = createRequestMapper(transmitterFactory);
 
     final Router router = Router.router(vertx);
 
@@ -128,7 +132,7 @@ public class Runner {
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
@@ -140,33 +144,20 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
+    final PassThroughHandler passThroughHandler = new PassThroughHandler(transmitterFactory);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
 
   private RequestMapper createRequestMapper(
-      final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
-    final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
-
-    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
-        new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout, downstreamPathCalculator);
-
+    final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
     final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
+        new TransactionFactory(jsonDecoder, transmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            chainId,
-            downStreamConnection,
-            downstreamPathCalculator,
-            transactionSignerProvider,
-            transactionFactory,
-            transmitterFactory);
+            chainId, transactionSignerProvider, transactionFactory, transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,24 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
+package tech.pegasys.ethsigner.core.requesthandler;
 
-public abstract class RetryMechanism {
+import java.util.Map.Entry;
 
-  private final int maxRetries;
-  private int retriesPerformed = 0;
+import io.vertx.core.http.HttpMethod;
 
-  public RetryMechanism(final int maxRetries) {
-    this.maxRetries = maxRetries;
-  }
+public interface RequestTransmitter {
 
-  public abstract boolean responseRequiresRetry(final int httpStatusCode, final String body);
-
-  public boolean retriesAvailable() {
-    return retriesPerformed < maxRetries;
-  }
-
-  public void incrementRetries() {
-    retriesPerformed++;
-  }
+  void sendRequest(
+      HttpMethod method, Iterable<Entry<String, String>> headers, String path, String body);
 }

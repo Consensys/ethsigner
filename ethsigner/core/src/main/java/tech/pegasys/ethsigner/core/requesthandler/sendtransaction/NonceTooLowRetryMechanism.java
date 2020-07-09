@@ -17,8 +17,6 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TO
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,8 +30,8 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
   }
 
   @Override
-  public boolean responseRequiresRetry(final HttpClientResponse response, final Buffer body) {
-    if ((response.statusCode() == HttpResponseStatus.BAD_REQUEST.code())) {
+  public boolean responseRequiresRetry(final int httpStatusCode, final String body) {
+    if ((httpStatusCode == HttpResponseStatus.BAD_REQUEST.code())) {
       final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
       if (NONCE_TOO_LOW.equals(errorResponse.getError())) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
@@ -43,8 +41,8 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
     return false;
   }
 
-  private JsonRpcErrorResponse specialiseResponse(final Buffer body) {
-    final JsonObject jsonBody = new JsonObject(body);
+  private JsonRpcErrorResponse specialiseResponse(final String errorResposneBody) {
+    final JsonObject jsonBody = new JsonObject(errorResposneBody);
     return jsonBody.mapTo(JsonRpcErrorResponse.class);
   }
 }
