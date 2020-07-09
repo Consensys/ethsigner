@@ -79,7 +79,7 @@ task acceptanceTest(type: Test) {
 
   systemProperty 'acctests.runEthSignerAsProcess', 'true'
   systemProperty 'java.security.properties', "${buildDir}/resources/test/acceptanceTesting.security"
-  systemProperty 'besuInstallDir', "${buildDir}/besu-${besuVersion}"
+  systemProperty 'besuInstallDir', "${buildDir}/besu"
 
   useJUnitPlatform()
   // toggle to show standard out and standard error of the test JVM(s) on the console

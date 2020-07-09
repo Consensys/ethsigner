@@ -62,16 +62,18 @@ public class Signer {
   private final Optional<ClientTlsConfig> clientTlsConfig;
 
   public Signer(
-      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
-    this(signerConfig, hostName, nodePorts, null);
+      final SignerConfiguration signerConfig,
+      final String nodeHostName,
+      final NodePorts nodePorts) {
+    this(signerConfig, nodeHostName, nodePorts, null);
   }
 
   public Signer(
       final SignerConfiguration signerConfig,
-      final String hostName,
+      final String nodeHostName,
       final NodePorts nodePorts,
       final ClientTlsConfig clientTlsConfig) {
-    this.runner = EthSignerRunner.createRunner(signerConfig, hostName, nodePorts);
+    this.runner = EthSignerRunner.createRunner(signerConfig, nodeHostName, nodePorts);
     this.pollingInterval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";

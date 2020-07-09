@@ -59,20 +59,24 @@ public abstract class EthSignerRunner {
   protected final SignerConfiguration signerConfig;
 
   public static EthSignerRunner createRunner(
-      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
+      final SignerConfiguration signerConfig,
+      final String nodeHostname,
+      final NodePorts nodePorts) {
     if (Boolean.getBoolean("acctests.runEthSignerAsProcess")) {
       LOG.info("EthSigner running as a process.");
-      return new EthSignerProcessRunner(signerConfig, hostName, nodePorts);
+      return new EthSignerProcessRunner(signerConfig, nodeHostname, nodePorts);
     } else {
       LOG.info("EthSigner running in a thread.");
-      return new EthSignerThreadRunner(signerConfig, hostName, nodePorts);
+      return new EthSignerThreadRunner(signerConfig, nodeHostname, nodePorts);
     }
   }
 
   public EthSignerRunner(
-      final SignerConfiguration signerConfig, final String hostName, final NodePorts nodePorts) {
+      final SignerConfiguration signerConfig,
+      final String nodeHostname,
+      final NodePorts nodePorts) {
 
-    this.nodeHostname = hostName;
+    this.nodeHostname = nodeHostname;
     this.nodeHttpRpcPort = String.valueOf(nodePorts.getHttpRpc());
     this.timeoutMilliseconds = String.valueOf(signerConfig.timeout().toMillis());
     this.signerHostname = signerConfig.hostname();
