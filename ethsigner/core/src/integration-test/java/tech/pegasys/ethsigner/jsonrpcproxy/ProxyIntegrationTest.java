@@ -243,4 +243,25 @@ public class ProxyIntegrationTest extends IntegrationTestBase {
         request.ethSigner(requestHeaders, netVersionRequest),
         response.ethSigner("", HttpResponseStatus.FORBIDDEN));
   }
+
+  @Test
+  void multiValueHeadersFromDownstreamArePassedBackToCallingApplication() {
+
+    final List<Entry<String, String>> multiValueResponseHeader =
+        Lists.newArrayList(RESPONSE_HEADERS);
+    multiValueResponseHeader.add(ImmutablePair.of("Random", "firstValue"));
+    multiValueResponseHeader.add(ImmutablePair.of("Random", "secondValue"));
+
+    final Iterable<Entry<String, String>> requestHeaders =
+        List.of(ImmutablePair.of("Accept", "*/*"), ImmutablePair.of("Host", "localhost"));
+
+    setUpEthNodeResponse(
+        request.ethNode(LOGIN_BODY),
+        response.ethNode(multiValueResponseHeader, LOGIN_RESPONSE, HttpResponseStatus.OK));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(requestHeaders, LOGIN_BODY),
+        response.ethSigner(multiValueResponseHeader, LOGIN_RESPONSE),
+        "/login");
+  }
 }

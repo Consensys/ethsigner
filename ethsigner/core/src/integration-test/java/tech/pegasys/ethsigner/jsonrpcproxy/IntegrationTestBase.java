@@ -16,7 +16,7 @@ import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.model.HttpRequest.request;
@@ -56,8 +56,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
-import io.restassured.http.Headers;
-import io.restassured.response.ValidatableResponse;
+import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
@@ -235,74 +234,59 @@ public class IntegrationTestBase {
 
   void sendPostRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    final ValidatableResponse validatableResponse =
+
+    final Response response =
         given()
             .when()
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
-            .post(path)
-            .then()
-            .statusCode(expectResponse.getStatusCode())
-            .body(equalTo(expectResponse.getBody()));
+            .post(path);
 
-    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
-    responseHeaders
-        .asList()
-        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
+    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    assertThat(response.headers())
+        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
   }
 
   void sendPutRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    final ValidatableResponse validatableResponse =
+    final Response response =
         given()
             .when()
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
-            .put(path)
-            .then()
-            .statusCode(expectResponse.getStatusCode())
-            .body(equalTo(expectResponse.getBody()));
+            .put(path);
 
-    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
-    responseHeaders
-        .asList()
-        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
+    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    assertThat(response.headers())
+        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
   }
 
   void sendGetRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    final ValidatableResponse validatableResponse =
+    final Response response =
         given()
             .when()
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
-            .get(path)
-            .then()
-            .statusCode(expectResponse.getStatusCode())
-            .body(equalTo(expectResponse.getBody()));
+            .get(path);
 
-    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
-    responseHeaders
-        .asList()
-        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
+    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    assertThat(response.headers())
+        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
   }
 
   void sendDeleteRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    final ValidatableResponse validatableResponse =
+    final Response response =
         given()
             .when()
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
-            .delete(path)
-            .then()
-            .statusCode(expectResponse.getStatusCode())
-            .body(equalTo(expectResponse.getBody()));
+            .delete(path);
 
-    final Headers responseHeaders = RestAssuredConverter.headers(expectResponse.getHeaders());
-    responseHeaders
-        .asList()
-        .forEach(header -> validatableResponse.header(header.getName(), header.getValue()));
+    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    assertThat(response.headers())
+        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
   }
 
   void verifyEthNodeReceived(final String proxyBodyRequest) {
