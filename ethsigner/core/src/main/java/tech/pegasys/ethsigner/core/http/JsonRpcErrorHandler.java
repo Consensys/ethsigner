@@ -40,25 +40,30 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
         context.statusCode() == -1 ? INTERNAL_SERVER_ERROR.code() : context.statusCode();
 
     final Throwable failure = context.failure();
-    if (failure instanceof JsonRpcException) {
-      final JsonRpcException ex = (JsonRpcException) context.failure();
-      httpResponseFactory.failureResponse(
-          context.response(), requestId, statusCode, ex.getJsonRpcError());
-    } else if (failure instanceof ConnectException || failure instanceof SSLException) {
-      httpResponseFactory.failureResponse(
-          context.response(),
-          requestId,
-          statusCode,
-          JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
-    } else if (failure instanceof TimeoutException) {
-      httpResponseFactory.failureResponse(
-          context.response(),
-          requestId,
-          statusCode,
-          JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+    if (failure != null) {
+      if (failure instanceof JsonRpcException) {
+        final JsonRpcException ex = (JsonRpcException) context.failure();
+        httpResponseFactory.failureResponse(
+            context.response(), requestId, statusCode, ex.getJsonRpcError());
+      } else if (failure instanceof ConnectException || failure instanceof SSLException) {
+        httpResponseFactory.failureResponse(
+            context.response(),
+            requestId,
+            statusCode,
+            JsonRpcError.FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE);
+      } else if (failure instanceof TimeoutException) {
+        httpResponseFactory.failureResponse(
+            context.response(),
+            requestId,
+            statusCode,
+            JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+      } else {
+        httpResponseFactory.failureResponse(
+            context.response(), requestId, statusCode, JsonRpcError.INTERNAL_ERROR);
+      }
     } else {
-      httpResponseFactory.failureResponse(
-          context.response(), requestId, statusCode, JsonRpcError.INTERNAL_ERROR);
+      context.response().setStatusCode(statusCode);
+      context.response().end();
     }
   }
 }
