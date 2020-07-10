@@ -12,18 +12,19 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.request;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyList;
 
-import java.util.Map;
+import java.util.Map.Entry;
 
 import io.vertx.core.json.Json;
 import org.web3j.protocol.core.Request;
 
 public class EthRequestFactory {
 
-  private static final Map<String, String> NO_HEADERS = emptyMap();
+  private static final Iterable<Entry<String, String>> NO_HEADERS = emptyList();
 
-  public EthSignerRequest ethSigner(final Map<String, String> headers, final String body) {
+  public EthSignerRequest ethSigner(
+      final Iterable<Entry<String, String>> headers, final String body) {
     return new EthSignerRequest(headers, body);
   }
 

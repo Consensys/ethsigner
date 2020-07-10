@@ -12,14 +12,14 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy.model.request;
 
-import java.util.Map;
+import java.util.Map.Entry;
 
 public class EthSignerRequest {
 
   private final String body;
-  private final Map<String, String> headers;
+  private final Iterable<Entry<String, String>> headers;
 
-  public EthSignerRequest(final Map<String, String> headers, final String body) {
+  public EthSignerRequest(final Iterable<Entry<String, String>> headers, final String body) {
     this.body = body;
     this.headers = headers;
   }
@@ -28,7 +28,7 @@ public class EthSignerRequest {
     return body;
   }
 
-  public Map<String, String> getHeaders() {
+  public Iterable<Entry<String, String>> getHeaders() {
     return headers;
   }
 }

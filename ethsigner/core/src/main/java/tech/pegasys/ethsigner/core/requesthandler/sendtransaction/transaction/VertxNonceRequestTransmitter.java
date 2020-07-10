@@ -25,7 +25,7 @@ import tech.pegasys.ethsigner.core.requesthandler.RequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
 import java.math.BigInteger;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +59,7 @@ public class VertxNonceRequestTransmitter {
 
     @Override
     public void handleResponse(
-        final Map<String, String> headers, final int statusCode, String body) {
+        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
       VertxNonceRequestTransmitter.this.handleResponse(body, result);
     }
 

@@ -13,14 +13,14 @@
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 
-import java.util.Map;
+import java.util.Map.Entry;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.json.Json;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.Request;
 import org.web3j.protocol.core.methods.response.EthAccounts;
@@ -31,8 +31,8 @@ class EthAccountsIntegrationTest extends DefaultTestBase {
   void ethAccountsRequestFromWeb3jRespondsWithNodesAddress() {
 
     final Request<?, EthAccounts> requestBody = jsonRpc().ethAccounts();
-    final Map<String, String> expectedHeaders =
-        singletonMap("Content", HttpHeaderValues.APPLICATION_JSON.toString());
+    final Iterable<Entry<String, String>> expectedHeaders =
+        singletonList(ImmutablePair.of("Content", HttpHeaderValues.APPLICATION_JSON.toString()));
 
     final JsonRpcSuccessResponse responseBody =
         new JsonRpcSuccessResponse(requestBody.getId(), singletonList(unlockedAccount));
