@@ -242,7 +242,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .post(path);
 
-    verifyResonseMatchesExpected(response, expectResponse);
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendPutRequestAndVerifyResponse(
@@ -254,7 +254,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .put(path);
 
-    verifyResonseMatchesExpected(response, expectResponse);
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendGetRequestAndVerifyResponse(
@@ -266,7 +266,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .get(path);
 
-    verifyResonseMatchesExpected(response, expectResponse);
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendDeleteRequestAndVerifyResponse(
@@ -277,10 +277,10 @@ public class IntegrationTestBase {
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .delete(path);
-    verifyResonseMatchesExpected(response, expectResponse);
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
-  private void verifyResonseMatchesExpected(
+  private void verifyResponseMatchesExpected(
       final Response response, final EthSignerResponse expectResponse) {
     assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
     assertThat(response.headers())
