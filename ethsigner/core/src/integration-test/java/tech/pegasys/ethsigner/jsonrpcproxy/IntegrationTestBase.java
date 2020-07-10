@@ -242,9 +242,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .post(path);
 
-    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
-    assertThat(response.headers())
-        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    verifyResonseMatchesExpected(response, expectResponse);
   }
 
   void sendPutRequestAndVerifyResponse(
@@ -256,9 +254,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .put(path);
 
-    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
-    assertThat(response.headers())
-        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    verifyResonseMatchesExpected(response, expectResponse);
   }
 
   void sendGetRequestAndVerifyResponse(
@@ -270,9 +266,7 @@ public class IntegrationTestBase {
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .get(path);
 
-    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
-    assertThat(response.headers())
-        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    verifyResonseMatchesExpected(response, expectResponse);
   }
 
   void sendDeleteRequestAndVerifyResponse(
@@ -283,10 +277,15 @@ public class IntegrationTestBase {
             .body(request.getBody())
             .headers(RestAssuredConverter.headers(request.getHeaders()))
             .delete(path);
+    verifyResonseMatchesExpected(response, expectResponse);
+  }
 
+  private void verifyResonseMatchesExpected(
+      final Response response, final EthSignerResponse expectResponse) {
     assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
     assertThat(response.headers())
         .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    assertThat(response.body().print()).isEqualTo(expectResponse.getBody());
   }
 
   void verifyEthNodeReceived(final String proxyBodyRequest) {
