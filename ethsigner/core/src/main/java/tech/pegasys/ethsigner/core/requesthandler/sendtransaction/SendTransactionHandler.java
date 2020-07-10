@@ -85,9 +85,11 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     final HexStringComparator comparator = new HexStringComparator();
-    if(comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
-      LOG.info("Ethereum address derived from identifier ({}) is incorrect value ({})",
-          transaction.sender(), transactionSigner.get().getAddress());
+    if (comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
+      LOG.info(
+          "Ethereum address derived from identifier ({}) is incorrect value ({})",
+          transaction.sender(),
+          transactionSigner.get().getAddress());
       context.fail(INTERNAL_SERVER_ERROR.code(), new JsonRpcException(TX_SENDER_NOT_AUTHORIZED));
       return;
     }
