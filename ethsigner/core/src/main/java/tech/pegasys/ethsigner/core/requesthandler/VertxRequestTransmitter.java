@@ -16,9 +16,8 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPath
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -37,6 +36,7 @@ public class VertxRequestTransmitter implements RequestTransmitter {
   private final DownstreamResponseHandler bodyHandler;
   private final HttpClient downStreamConnection;
   private final DownstreamPathCalculator downstreamPathCalculator;
+  private final AtomicBoolean responseHandled = new AtomicBoolean(false);
 
   public VertxRequestTransmitter(
       final Vertx vertx,
@@ -70,31 +70,29 @@ public class VertxRequestTransmitter implements RequestTransmitter {
 
   private void handleException(final Throwable thrown) {
     LOG.error("Transmission failed", thrown);
-    vertx.executeBlocking(
-        future -> bodyHandler.handleFailure(thrown),
-        false,
-        res -> {
-          if (res.failed()) {
-            LOG.error("Reporting failure, failed", res.cause());
-          }
-        });
+    if (!responseHandled.getAndSet(true)) {
+      vertx.executeBlocking(
+          future -> bodyHandler.handleFailure(thrown),
+          false,
+          res -> {
+            if (res.failed()) {
+              LOG.error("Reporting failure, failed", res.cause());
+            }
+          });
+    }
   }
 
   private void handleResponse(final HttpClientResponse response) {
+    responseHandled.set(true);
     logResponse(response);
     response.bodyHandler(
         body ->
             vertx.executeBlocking(
-                future -> {
-                  final Map<String, String> responseHeaders = new HashMap<>();
-                  response
-                      .headers()
-                      .forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
-                  bodyHandler.handleResponse(
-                      responseHeaders,
-                      response.statusCode(),
-                      body.toString(StandardCharsets.UTF_8));
-                },
+                future ->
+                    bodyHandler.handleResponse(
+                        response.headers(),
+                        response.statusCode(),
+                        body.toString(StandardCharsets.UTF_8)),
                 false,
                 res -> {
                   if (res.failed()) {

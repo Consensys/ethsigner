@@ -32,7 +32,7 @@ dependencyManagement {
 
     dependency 'info.picocli:picocli:4.2.0'
 
-    dependency 'io.rest-assured:rest-assured:4.2.0'
+    dependency 'io.rest-assured:rest-assured:4.3.1'
 
     dependencySet(group: 'io.vertx', version: '3.9.1') {
        entry 'vertx-codegen'

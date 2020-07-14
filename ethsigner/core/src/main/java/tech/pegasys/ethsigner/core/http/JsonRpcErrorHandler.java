@@ -24,8 +24,12 @@ import javax.net.ssl.SSLException;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class JsonRpcErrorHandler implements Handler<RoutingContext> {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   private final HttpResponseFactory httpResponseFactory;
 
@@ -58,6 +62,7 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
             statusCode,
             JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
       } else {
+        LOG.error("Unhandled exception handling request", failure);
         httpResponseFactory.failureResponse(
             context.response(), requestId, statusCode, JsonRpcError.INTERNAL_ERROR);
       }
