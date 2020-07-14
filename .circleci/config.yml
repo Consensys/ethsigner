@@ -121,7 +121,7 @@ jobs:
           paths:
             - ./
 
-  acceptanceTestsNonDocker:
+  acceptanceTests:
     executor: executor_large
     steps:
       - prepare
@@ -129,12 +129,12 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true -DexcludeHashicorp=true acceptanceTest
+            ./gradlew --no-daemon --parallel -Dtestlogger.showStandardStreams=true -PexcludeHashicorp=true acceptanceTest
       - notify
       - capture_test_results
       - capture_test_reports
 
-  acceptanceTests:
+  acceptanceTestsHashicorp:
     executor: executor_machine
     steps:
       - prepare
@@ -151,7 +151,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon --parallel acceptanceTest --tests "tech.pegasys.ethsigner.tests.signing.hashicorp.*"
+            ./gradlew --no-daemon --parallel -Dtestlogger.showStandardStreams=true -PonlyHashicorp=true acceptanceTest
       - notify            
       - capture_test_results
       - capture_test_reports
@@ -222,10 +222,10 @@ workflows:
   default:
     jobs:
       - build
-      - acceptanceTestsNonDocker:
+      - acceptanceTests:
           requires:
             - build
-      - acceptanceTests:
+      - acceptanceTestsHashicorp:
           requires:
             - build
       - buildDocker:

@@ -84,6 +84,16 @@ task acceptanceTest(type: Test) {
   // CircleCI - Hashicorp tests are run in a docker_machine environment separately
   if (project.hasProperty("excludeHashicorp")) {
     exclude 'tech/pegasys/ethsigner/tests/signing/hashicorp/**'
+    exclude 'tech/pegasys/ethsigner/tests/multikeysigner/HashicorpBasedTomlLoadingAcceptanceTest.class'
+    exclude 'tech/pegasys/ethsigner/tests/multikeysigner/HashicorpTlsBasedTomlLoadingAcceptanceTest.class'
+    exclude 'tech/pegasys/ethsigner/tests/multikeysigner/transactionsigning/MultiKeyHashicorpTransactionSignerAcceptanceTest.class'
+  }
+
+  if (project.hasProperty("onlyHashicorp")) {
+    include 'tech/pegasys/ethsigner/tests/signing/hashicorp/**'
+    include 'tech/pegasys/ethsigner/tests/multikeysigner/HashicorpBasedTomlLoadingAcceptanceTest.class'
+    include 'tech/pegasys/ethsigner/tests/multikeysigner/HashicorpTlsBasedTomlLoadingAcceptanceTest.class'
+    include 'tech/pegasys/ethsigner/tests/multikeysigner/transactionsigning/MultiKeyHashicorpTransactionSignerAcceptanceTest.class'
   }
 
   useJUnitPlatform()
