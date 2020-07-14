@@ -97,8 +97,9 @@ task acceptanceTest(dependsOn: [
   group = 'verification'
 
   systemProperty 'acctests.runEthSignerAsProcess', 'true'
-  systemProperty 'java.security.properties', "${buildDir}/resources/test/acceptanceTesting.security"
+
   systemProperty 'besuInstallDir', "${buildDir}/besu"
+  systemProperty 'vaultInstallDir', "${buildDir}"
 
   // TODO: remove once hashicorp signers are updated for local hashicorp support
   // CircleCI - Hashicorp tests are run in a docker_machine environment separately
