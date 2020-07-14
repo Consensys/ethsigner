@@ -15,6 +15,7 @@ import groovy.text.SimpleTemplateEngine
 
 plugins {
   id "de.undercouch.download" version "4.1.0"
+  id "com.google.osdetector" version "1.6.2"
 }
 
 dependencies {
@@ -56,7 +57,7 @@ task downloadBesu(type: Download) {
   onlyIfModified true
 }
 
-task downloadAndExtractBesu(dependsOn: [
+task extractBesu(dependsOn: [
   'cleanBesuInstall',
   'downloadBesu'
 ], type: Copy) {
@@ -70,7 +71,25 @@ task downloadAndExtractBesu(dependsOn: [
   into "$buildDir/besu"
 }
 
-task acceptanceTest(type: Test) {
+task downloadHashicorpVault(type: Download) {
+  src {
+    // see gradle.properties for Hashicorp Vault URL
+    return project.property("hashicorpVaultUrl.${osdetector.os}")
+  }
+  dest new File(buildDir, "hashicorp.zip")
+  onlyIfModified true
+}
+
+task extractHashicorpVault(dependsOn: downloadHashicorpVault, type: Copy) {
+  from zipTree(downloadHashicorpVault.dest)
+  into buildDir
+}
+
+task acceptanceTest(dependsOn: [
+  rootProject.installDist,
+  extractBesu,
+  extractHashicorpVault
+], type: Test) {
   inputs.property "integration.date", LocalTime.now() // so it runs at every invocation
 
   mustRunAfter rootProject.subprojects*.test
@@ -81,6 +100,7 @@ task acceptanceTest(type: Test) {
   systemProperty 'java.security.properties', "${buildDir}/resources/test/acceptanceTesting.security"
   systemProperty 'besuInstallDir', "${buildDir}/besu"
 
+  // TODO: remove once hashicorp signers are updated for local hashicorp support
   // CircleCI - Hashicorp tests are run in a docker_machine environment separately
   if (project.hasProperty("excludeHashicorp")) {
     exclude 'tech/pegasys/ethsigner/tests/signing/hashicorp/**'
@@ -100,4 +120,3 @@ task acceptanceTest(type: Test) {
   // toggle to show standard out and standard error of the test JVM(s) on the console
   testLogging.showStandardStreams = false
 }
-acceptanceTest.dependsOn(rootProject.installDist, downloadAndExtractBesu)
