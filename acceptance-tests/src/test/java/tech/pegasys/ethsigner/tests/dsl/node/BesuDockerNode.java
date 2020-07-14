@@ -59,6 +59,7 @@ import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Async;
 
+@Deprecated
 public class BesuDockerNode implements Node {
 
   private static final Logger LOG = LogManager.getLogger();
@@ -186,6 +187,11 @@ public class BesuDockerNode implements Node {
   @Override
   public Transactions transactions() {
     return transactions;
+  }
+
+  @Override
+  public String hostName() {
+    return hostname;
   }
 
   private String url(final int port) {

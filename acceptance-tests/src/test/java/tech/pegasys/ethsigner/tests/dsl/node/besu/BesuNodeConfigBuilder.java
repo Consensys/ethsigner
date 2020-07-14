@@ -19,11 +19,12 @@ import java.util.List;
 import java.util.Optional;
 
 public final class BesuNodeConfigBuilder {
+  private static final String DEFAULT_GENESIS_FILE = "eth_hash_2018.json";
   private Path dataPath;
-  private String name;
+  private String name = "node1";
   private List<String> additionalCommandLineArgs = emptyList();
   private List<String> envVarsToRemove = emptyList();
-  private String genesisFile;
+  private String genesisFile = DEFAULT_GENESIS_FILE;
   private String cors;
 
   private BesuNodeConfigBuilder() {}

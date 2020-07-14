@@ -25,6 +25,8 @@ public interface Node {
 
   void awaitStartupCompletion();
 
+  String hostName();
+
   NodePorts ports();
 
   Accounts accounts();

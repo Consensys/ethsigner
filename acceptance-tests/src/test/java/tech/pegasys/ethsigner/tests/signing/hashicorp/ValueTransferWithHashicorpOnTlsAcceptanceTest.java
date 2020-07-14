@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.signing;
+package tech.pegasys.ethsigner.tests.signing.hashicorp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
@@ -19,11 +19,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuDockerNode;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -36,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
-public class ValueTransferWithHashicorpAcceptanceTest {
+public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
 
@@ -48,21 +47,20 @@ public class ValueTransferWithHashicorpAcceptanceTest {
   public static void setUpBase() {
 
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
+        .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
 
     final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, false);
+    // TODO: Point to local Hashicorp instance instead of docker (specially for CI)
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, true);
 
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
-    ethNode = new BesuDockerNode(docker, nodeConfig);
+    ethNode = new BesuLocalNodeFactory().create(BesuNodeConfigBuilder.aBesuNodeConfig().build());
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHashicorpSigner(hashicorpNode).build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), ethNode.ports());
+    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

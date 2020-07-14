@@ -17,18 +17,15 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuDockerNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import java.math.BigInteger;
 
-import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -63,8 +60,8 @@ public class DataPathFeatureFlagAcceptanceTest {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(DataPathFeatureFlagAcceptanceTest::tearDownBase));
 
-    final DockerClient docker = new DockerClientFactory().create();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    // final DockerClient docker = new DockerClientFactory().create();
+    // final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
     /*
      * Dynamic port allocation for either the RPC or WS ports triggers use of the data path.
@@ -74,11 +71,11 @@ public class DataPathFeatureFlagAcceptanceTest {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 
-    ethNode = new BesuDockerNode(docker, nodeConfig);
+    ethNode = new BesuLocalNodeFactory().create(BesuNodeConfigBuilder.aBesuNodeConfig().build());
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, nodeConfig.getHostname(), ethNode.ports());
+    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

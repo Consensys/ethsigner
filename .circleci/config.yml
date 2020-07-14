@@ -129,7 +129,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true acceptanceTest --tests tech.pegasys.ethsigner.tests.signing.ReplayProtectionBesuLocalAcceptanceTest
+            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true -DexcludeHashicorp=true acceptanceTest
       - notify
       - capture_test_results
       - capture_test_reports
@@ -151,9 +151,7 @@ jobs:
           name: Acceptance Test
           no_output_timeout: 20m
           command: |
-            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true acceptanceTest --tests tech.pegasys.ethsigner.tests.signing.ReplayProtectionBesuLocalAcceptanceTest
-            ./gradlew --no-daemon -Dtestlogger.showStandardStreams=true acceptanceTest --tests tech.pegasys.ethsigner.tests.signing.ReplayProtectionAcceptanceTest
-            ./gradlew --no-daemon --parallel acceptanceTest
+            ./gradlew --no-daemon --parallel acceptanceTest --tests "tech.pegasys.ethsigner.tests.signing.hashicorp.*"
       - notify            
       - capture_test_results
       - capture_test_reports

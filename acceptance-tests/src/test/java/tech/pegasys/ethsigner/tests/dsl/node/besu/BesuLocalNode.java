@@ -59,6 +59,8 @@ public class BesuLocalNode implements Node {
 
   public static final String PROCESS_LOG_FILENAME = "subprocess.log";
 
+  private static final String DEFAULT_HOSTNAME = "127.0.0.1";
+
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
       LogManager.getLogger("org.hyperledger.besu.SubProcessLog");
@@ -318,5 +320,10 @@ public class BesuLocalNode implements Node {
   @Override
   public Transactions transactions() {
     return transactions;
+  }
+
+  @Override
+  public String hostName() {
+    return DEFAULT_HOSTNAME;
   }
 }
