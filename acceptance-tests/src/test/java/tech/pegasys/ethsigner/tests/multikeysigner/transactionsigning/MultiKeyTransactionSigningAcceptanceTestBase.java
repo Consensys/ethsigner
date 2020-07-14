@@ -47,9 +47,6 @@ public class MultiKeyTransactionSigningAcceptanceTestBase extends MultiKeyAccept
     Runtime.getRuntime()
         .addShutdownHook(new Thread(MultiKeyTransactionSigningAcceptanceTestBase::tearDownBase));
 
-    // final DockerClient docker = new DockerClientFactory().create();
-    // final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
     ethNode = new BesuLocalNodeFactory().create(BesuNodeConfigBuilder.aBesuNodeConfig().build());
     ethNode.start();
     ethNode.awaitStartupCompletion();

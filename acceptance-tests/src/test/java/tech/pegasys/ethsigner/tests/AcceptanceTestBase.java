@@ -67,18 +67,14 @@ public class AcceptanceTestBase {
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
-    // final DockerClient docker = new DockerClientFactory().create();
-    // final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final BesuNodeConfig besuNodeConfig =
-        BesuNodeConfigBuilder.aBesuNodeConfig().withName("node1").build();
+    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    // ethNode = new BesuDockerNode(docker, nodeConfig);
     ethNode = new BesuLocalNodeFactory().create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, "127.0.0.1", ethNode.ports());
+    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

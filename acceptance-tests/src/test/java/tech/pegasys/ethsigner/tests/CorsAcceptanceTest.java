@@ -42,10 +42,7 @@ public class CorsAcceptanceTest {
   @BeforeEach
   public void setUp() {
     final BesuNodeConfig besuNodeConfig =
-        BesuNodeConfigBuilder.aBesuNodeConfig()
-            .withName("node1")
-            .withCors(AUTHORISED_DOMAIN)
-            .build();
+        BesuNodeConfigBuilder.aBesuNodeConfig().withCors(AUTHORISED_DOMAIN).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethNode = new BesuLocalNodeFactory().create(besuNodeConfig);

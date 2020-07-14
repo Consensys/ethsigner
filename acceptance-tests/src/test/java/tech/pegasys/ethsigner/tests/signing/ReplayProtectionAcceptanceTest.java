@@ -32,9 +32,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
 
-import org.apache.commons.lang.time.StopWatch;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
@@ -53,16 +51,8 @@ public class ReplayProtectionAcceptanceTest {
     return ethSigner.accounts().richBenefactor();
   }
 
-  @BeforeEach
-  public void setUp() {
-    // Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
-  }
-
   @AfterEach
   public synchronized void tearDown() {
-    StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
-    System.out.println("Starting TearDown");
     if (ethNode != null) {
       ethNode.shutdown();
       ethNode = null;
@@ -72,40 +62,21 @@ public class ReplayProtectionAcceptanceTest {
       ethSigner.shutdown();
       ethSigner = null;
     }
-
-    stopWatch.stop();
-    System.out.println("Ending Starting TearDown: " + stopWatch);
   }
 
   private void setUp(final String genesis) {
-    StopWatch stopWatch = new StopWatch();
-    stopWatch.start();
-
-    //    final NodeConfiguration nodeConfig =
-    //        new NodeConfigurationBuilder().withGenesis(genesis).build();
     final BesuNodeConfig besuNodeConfig =
-        BesuNodeConfigBuilder.aBesuNodeConfig().withName("test").withGenesisFile(genesis).build();
+        BesuNodeConfigBuilder.aBesuNodeConfig().withGenesisFile(genesis).build();
 
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethNode = new BesuLocalNodeFactory().create(besuNodeConfig);
-
-    // ethNode = new BesuDockerNode(DOCKER, nodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    stopWatch.split();
-
-    ethSigner = new Signer(signerConfig, "127.0.0.1", ethNode.ports());
+    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
-
-    System.out.println("Besu Node Time Taken: " + stopWatch.toSplitString());
-    stopWatch.split();
-    System.out.println("EthSigner Time Taken: " + stopWatch.toSplitString());
-
-    stopWatch.stop();
-    System.out.println("Total Time taken: " + stopWatch.toString());
   }
 
   @Test

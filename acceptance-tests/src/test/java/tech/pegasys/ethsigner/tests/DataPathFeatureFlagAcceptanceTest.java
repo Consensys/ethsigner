@@ -60,9 +60,6 @@ public class DataPathFeatureFlagAcceptanceTest {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(DataPathFeatureFlagAcceptanceTest::tearDownBase));
 
-    // final DockerClient docker = new DockerClientFactory().create();
-    // final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
     /*
      * Dynamic port allocation for either the RPC or WS ports triggers use of the data path.
      * use_data_path = (httpRpcPort == 0 || webSocketPort == 0)
