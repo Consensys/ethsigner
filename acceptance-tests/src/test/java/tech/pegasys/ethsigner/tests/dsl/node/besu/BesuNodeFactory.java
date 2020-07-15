@@ -55,7 +55,7 @@ public class BesuNodeFactory {
     params.add("--rpc-http-host=" + config.getHostName());
     params.add("--rpc-ws-enabled=true");
     params.add("--rpc-ws-port=0");
-    params.add("--rpc-http-host=" + config.getHostName());
+    params.add("--rpc-ws-host=" + config.getHostName());
     params.add("--rpc-http-apis");
     params.add("ETH,NET,WEB3,EEA");
     params.add("--privacy-enabled");
