@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.tests.dsl.node.besu;
 
 import static java.util.Collections.emptyList;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ public final class BesuNodeConfigBuilder {
   private static final String DEFAULT_GENESIS_FILE = "eth_hash_2018.json";
   private Path dataPath;
   private String name = "node1";
+  private String hostName = "127.0.0.1";
   private List<String> additionalCommandLineArgs = emptyList();
   private List<String> envVarsToRemove = emptyList();
   private String genesisFile = DEFAULT_GENESIS_FILE;
@@ -40,6 +43,11 @@ public final class BesuNodeConfigBuilder {
 
   public BesuNodeConfigBuilder withName(String name) {
     this.name = name;
+    return this;
+  }
+
+  public BesuNodeConfigBuilder withHostName(String hostName) {
+    this.hostName = hostName;
     return this;
   }
 
@@ -69,9 +77,18 @@ public final class BesuNodeConfigBuilder {
       throw new IllegalArgumentException("name is required");
     }
 
+    if (dataPath == null) {
+      try {
+        dataPath = Files.createTempDirectory("");
+      } catch (final IOException e) {
+        throw new RuntimeException("Failed to create a data directory for the node");
+      }
+    }
+
     return new BesuNodeConfig(
         name,
-        Optional.ofNullable(dataPath),
+        hostName,
+        dataPath,
         Optional.ofNullable(genesisFile),
         additionalCommandLineArgs,
         envVarsToRemove,

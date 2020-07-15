@@ -25,7 +25,6 @@ import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,16 +58,13 @@ public class BesuLocalNode implements Node {
 
   public static final String PROCESS_LOG_FILENAME = "subprocess.log";
 
-  private static final String DEFAULT_HOSTNAME = "127.0.0.1";
-
   private static final Logger LOG = LogManager.getLogger();
   private static final Logger PROCESS_LOG =
       LogManager.getLogger("org.hyperledger.besu.SubProcessLog");
   /** Besu's dev.json has the hard fork at block 0 */
   private static final BigInteger SPURIOUS_DRAGON_HARD_FORK_BLOCK = BigInteger.valueOf(1);
 
-  private final String name;
-  private final Path dataPath;
+  private final BesuNodeConfig besuNodeConfig;
   private final ProcessBuilder processBuilder;
   private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
   private final Properties portsProperties = new Properties();
@@ -82,15 +78,9 @@ public class BesuLocalNode implements Node {
   private PublicContracts publicContracts;
   private PrivateContracts privateContracts;
 
-  public BesuLocalNode(
-      final String name, final ProcessBuilder processBuilder, final Path dataPath) {
-    this.name = name;
+  BesuLocalNode(final BesuNodeConfig besuNodeConfig, final ProcessBuilder processBuilder) {
+    this.besuNodeConfig = besuNodeConfig;
     this.processBuilder = processBuilder;
-    this.dataPath = dataPath;
-  }
-
-  public Path getDataPath() {
-    return dataPath;
   }
 
   public String getP2pPort() {
@@ -125,7 +115,7 @@ public class BesuLocalNode implements Node {
   }
 
   public Path getLogPath() {
-    return dataPath.resolve(PROCESS_LOG_FILENAME);
+    return besuNodeConfig.getDataPath().resolve(PROCESS_LOG_FILENAME);
   }
 
   public void ensureHasTerminated() {
@@ -140,9 +130,9 @@ public class BesuLocalNode implements Node {
 
   private void loadPortsFile() {
     try (final FileInputStream fis =
-        new FileInputStream(new File(dataPath.toFile(), "besu.ports"))) {
+        new FileInputStream(new File(besuNodeConfig.getDataPath().toFile(), "besu.ports"))) {
       portsProperties.load(fis);
-      LOG.info("Ports for node {}: {}", name, portsProperties);
+      LOG.info("Ports for node {}: {}", besuNodeConfig.getName(), portsProperties);
     } catch (final IOException e) {
       throw new RuntimeException("Error reading Besu ports file", e);
     }
@@ -169,7 +159,7 @@ public class BesuLocalNode implements Node {
     try {
       return jsonRpc.netPeerCount().send().getQuantity();
     } catch (final Exception e) {
-      LOG.error(name + ": Failed to determine peer count of besu.", e);
+      LOG.error("{}: Failed to determine peer count of besu.", besuNodeConfig.getName(), e);
       throw new RuntimeException(e);
     }
   }
@@ -193,7 +183,7 @@ public class BesuLocalNode implements Node {
   public void start() {
     try {
       process = processBuilder.start();
-      logStream = createLogStream(dataPath);
+      logStream = createLogStream(besuNodeConfig.getDataPath());
       outputProcessorExecutor.execute(this::printOutput);
     } catch (IOException e) {
       LOG.error("Unable to start Besu process.", e);
@@ -214,7 +204,7 @@ public class BesuLocalNode implements Node {
         new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
       String line = in.readLine();
       while (line != null) {
-        PROCESS_LOG.info("{}: {}", name, line);
+        PROCESS_LOG.info("{}: {}", besuNodeConfig.getName(), line);
         logStream.write(String.format("%s%n", line).getBytes(UTF_8));
         logStream.flush();
         try {
@@ -254,7 +244,7 @@ public class BesuLocalNode implements Node {
   public void awaitStartupCompletion() {
     final int secondsToWait = Boolean.getBoolean("debugSubProcess") ? 3600 : 60;
 
-    final File file = new File(dataPath.toFile(), "besu.ports");
+    final File file = new File(besuNodeConfig.getDataPath().toFile(), "besu.ports");
     Awaitility.waitAtMost(secondsToWait, TimeUnit.SECONDS)
         .until(
             () -> {
@@ -298,8 +288,8 @@ public class BesuLocalNode implements Node {
   }
 
   @Override
-  public NodePorts ports() {
-    return new NodePorts(Integer.parseInt(getJsonRpcPort()), Integer.parseInt(getWSPort()));
+  public BesuNodePorts ports() {
+    return new BesuNodePorts(Integer.parseInt(getJsonRpcPort()), Integer.parseInt(getWSPort()));
   }
 
   @Override
@@ -320,10 +310,5 @@ public class BesuLocalNode implements Node {
   @Override
   public Transactions transactions() {
     return transactions;
-  }
-
-  @Override
-  public String hostName() {
-    return DEFAULT_HOSTNAME;
   }
 }

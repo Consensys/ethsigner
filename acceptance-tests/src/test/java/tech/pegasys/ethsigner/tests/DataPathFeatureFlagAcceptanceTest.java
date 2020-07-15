@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
@@ -68,11 +69,12 @@ public class DataPathFeatureFlagAcceptanceTest {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHttpRpcPort(7009).withWebSocketPort(7010).build();
 
-    ethNode = new BesuLocalNodeFactory().create(BesuNodeConfigBuilder.aBesuNodeConfig().build());
+    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
+    ethNode = BesuLocalNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
+    ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

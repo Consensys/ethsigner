@@ -22,6 +22,7 @@ import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
@@ -53,14 +54,15 @@ public class ValueTransferWithHashicorpAcceptanceTest {
     // TODO: Point to local Hashicorp instance instead of docker (specially for CI)
     hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, false);
 
-    ethNode = new BesuLocalNodeFactory().create(BesuNodeConfigBuilder.aBesuNodeConfig().build());
+    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
+    ethNode = BesuLocalNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHashicorpSigner(hashicorpNode).build();
 
-    ethSigner = new Signer(signerConfig, ethNode.hostName(), ethNode.ports());
+    ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

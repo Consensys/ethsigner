@@ -17,17 +17,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class BesuNodeConfig {
+  public static String DEFAULT_HOST = "127.0.0.1";
 
-  private final Optional<Path> dataPath;
+  private final Path dataPath;
   private final String name;
+  private final String hostName;
   private final List<String> additionalCommandLineArgs;
   private final List<String> envVarsToRemove;
   private final Optional<String> genesisFile;
   private final Optional<String> cors;
 
-  public BesuNodeConfig(
+  BesuNodeConfig(
       final String name,
-      final Optional<Path> dataPath,
+      final String hostName,
+      final Path dataPath,
       final Optional<String> genesisFile,
       final List<String> additionalCommandLineArgs,
       final List<String> envVarsToRemove,
@@ -35,17 +38,22 @@ public class BesuNodeConfig {
     this.dataPath = dataPath;
     this.genesisFile = genesisFile;
     this.name = name;
+    this.hostName = hostName;
     this.additionalCommandLineArgs = additionalCommandLineArgs;
     this.envVarsToRemove = envVarsToRemove;
     this.cors = cors;
   }
 
-  public Optional<Path> getDataPath() {
+  public Path getDataPath() {
     return dataPath;
   }
 
   public String getName() {
     return name;
+  }
+
+  public String getHostName() {
+    return hostName;
   }
 
   public Optional<String> getGenesisFile() {

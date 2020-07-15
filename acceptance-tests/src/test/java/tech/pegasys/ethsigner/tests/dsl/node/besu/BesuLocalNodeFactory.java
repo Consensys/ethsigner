@@ -12,10 +12,8 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node.besu;
 
-import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -31,21 +29,8 @@ public class BesuLocalNodeFactory {
       Path.of(System.getProperty("besuInstallDir", runDirectory.resolve("build/besu").toString()));
   private static final Path executablePath = besuInstallDir.resolve("bin/besu");
 
-  public BesuLocalNodeFactory() {
-    LOG.info("Run Dir: {}", runDirectory);
-    LOG.info("Besu Install Dir: {}", besuInstallDir);
-    LOG.info("Executable Path: {}", executablePath);
-    LOG.info("Exists? " + executablePath.toFile().exists());
-
-    if (!executablePath.toFile().exists()) {
-      LOG.error(
-          "Besu binary doesn't exist. Either run 'gradle downloadAndExtractBesu' or set system property 'besuInstallDir'");
-      throw new IllegalStateException("Besu binary doesn't exist " + executablePath);
-    }
-  }
-
-  public BesuLocalNode create(final BesuNodeConfig config) {
-    final Path dataPath = determineDataPath(config);
+  public static BesuLocalNode create(final BesuNodeConfig config) {
+    checkBesuInstallation();
 
     final List<String> params = Lists.newArrayList();
     params.add(executablePath.toString());
@@ -57,7 +42,7 @@ public class BesuLocalNodeFactory {
       params.add(Resources.getResource(config.getGenesisFile().get()).getPath());
     }
     params.add("--data-path");
-    params.add(dataPath.toString());
+    params.add(config.getDataPath().toString());
     params.add("--logging=DEBUG");
     params.add("--miner-enabled");
     params.add("--miner-coinbase");
@@ -67,8 +52,10 @@ public class BesuLocalNodeFactory {
     params.add("--p2p-port=0");
     params.add("--rpc-http-enabled=true");
     params.add("--rpc-http-port=0");
+    params.add("--rpc-http-host=" + config.getHostName());
     params.add("--rpc-ws-enabled=true");
     params.add("--rpc-ws-port=0");
+    params.add("--rpc-http-host=" + config.getHostName());
     params.add("--rpc-http-apis");
     params.add("ETH,NET,WEB3,EEA");
     params.add("--privacy-enabled");
@@ -81,22 +68,23 @@ public class BesuLocalNodeFactory {
 
     final ProcessBuilder processBuilder = createBesuProcessBuilder(params, config);
 
-    return new BesuLocalNode(config.getName(), processBuilder, dataPath);
+    return new BesuLocalNode(config, processBuilder);
   }
 
-  private Path determineDataPath(final BesuNodeConfig config) {
-    if (config.getDataPath().isEmpty()) {
-      try {
-        return Files.createTempDirectory("");
-      } catch (final IOException e) {
-        throw new RuntimeException("Failed to create a data directory for the node");
-      }
-    } else {
-      return config.getDataPath().get();
+  private static void checkBesuInstallation() {
+    LOG.info("Run Dir: {}", runDirectory);
+    LOG.info("Besu Install Dir: {}", besuInstallDir);
+    LOG.info("Executable Path: {}", executablePath);
+    LOG.info("Exists? {}", executablePath.toFile().exists());
+
+    if (!executablePath.toFile().exists()) {
+      LOG.error(
+              "Besu binary doesn't exist. Either run 'gradle extractBesu' or set system property 'besuInstallDir'");
+      throw new IllegalStateException("Besu binary doesn't exist " + executablePath);
     }
   }
 
-  private ProcessBuilder createBesuProcessBuilder(
+  private static ProcessBuilder createBesuProcessBuilder(
       final List<String> commandLine, final BesuNodeConfig config) {
 
     final ProcessBuilder processBuilder =
@@ -121,7 +109,7 @@ public class BesuLocalNodeFactory {
     return processBuilder;
   }
 
-  private String privacyPublicKeyFilePath() {
+  private static String privacyPublicKeyFilePath() {
     final URL resource = Resources.getResource("enclave_key.pub");
     return resource.getPath();
   }

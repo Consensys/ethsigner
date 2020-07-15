@@ -10,14 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl.node;
+package tech.pegasys.ethsigner.tests.dsl.node.besu;
 
-public class NodePorts {
+public class BesuNodePorts {
 
   private final int httpRpc;
   private final int webSocketRpc;
 
-  public NodePorts(final int httpRpc, final int webSocketRpc) {
+  public BesuNodePorts(final int httpRpc, final int webSocketRpc) {
     this.httpRpc = httpRpc;
     this.webSocketRpc = webSocketRpc;
   }
