@@ -34,8 +34,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -62,7 +60,6 @@ public class BesuNode implements Node {
   private final BesuNodeConfig besuNodeConfig;
   private final String[] args;
   private final Map<String, String> environment;
-  private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
   private final Properties portsProperties = new Properties();
 
   private Future<ProcessResult> besuProcess;
