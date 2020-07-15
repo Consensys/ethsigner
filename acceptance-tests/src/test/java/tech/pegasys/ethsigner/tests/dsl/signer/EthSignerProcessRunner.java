@@ -47,7 +47,9 @@ public class EthSignerProcessRunner extends EthSignerRunner {
   private Optional<Process> process = Optional.empty();
 
   public EthSignerProcessRunner(
-      final SignerConfiguration signerConfig, final String hostName, final BesuNodePorts besuNodePorts) {
+      final SignerConfiguration signerConfig,
+      final String hostName,
+      final BesuNodePorts besuNodePorts) {
     super(signerConfig, hostName, besuNodePorts);
 
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));

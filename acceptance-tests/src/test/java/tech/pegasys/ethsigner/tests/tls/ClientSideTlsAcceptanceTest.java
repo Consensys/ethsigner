@@ -22,8 +22,8 @@ import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.popula
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;

@@ -21,10 +21,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNode;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -44,7 +44,7 @@ public class ReplayProtectionAcceptanceTest {
   private static final BigInteger TRANSFER_AMOUNT_WEI =
       Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
 
-  private BesuLocalNode ethNode;
+  private BesuNode ethNode;
   private Signer ethSigner;
 
   private Account richBenefactor() {
@@ -70,7 +70,7 @@ public class ReplayProtectionAcceptanceTest {
 
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = BesuLocalNodeFactory.create(besuNodeConfig);
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 

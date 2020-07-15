@@ -22,8 +22,8 @@ import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.popula
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
@@ -221,7 +221,8 @@ class ServerSideTlsAcceptanceTest {
     final SignerConfigurationBuilder configBuilder =
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).withHttpRpcPort(9000);
 
-    ethSigner = new Signer(configBuilder.build(), BesuNodeConfig.DEFAULT_HOST, new BesuNodePorts(1, 2));
+    ethSigner =
+        new Signer(configBuilder.build(), BesuNodeConfig.DEFAULT_HOST, new BesuNodePorts(1, 2));
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }

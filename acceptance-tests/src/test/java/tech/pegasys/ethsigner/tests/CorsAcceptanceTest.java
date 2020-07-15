@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuLocalNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -45,7 +45,7 @@ public class CorsAcceptanceTest {
         BesuNodeConfigBuilder.aBesuNodeConfig().withCors(AUTHORISED_DOMAIN).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = BesuLocalNodeFactory.create(besuNodeConfig);
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 

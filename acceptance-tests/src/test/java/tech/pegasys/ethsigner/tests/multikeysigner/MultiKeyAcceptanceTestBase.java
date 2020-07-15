@@ -16,8 +16,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
-import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;

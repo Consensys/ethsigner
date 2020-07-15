@@ -54,7 +54,7 @@ import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 
-public class BesuLocalNode implements Node {
+public class BesuNode implements Node {
 
   public static final String PROCESS_LOG_FILENAME = "subprocess.log";
 
@@ -78,7 +78,7 @@ public class BesuLocalNode implements Node {
   private PublicContracts publicContracts;
   private PrivateContracts privateContracts;
 
-  BesuLocalNode(final BesuNodeConfig besuNodeConfig, final ProcessBuilder processBuilder) {
+  BesuNode(final BesuNodeConfig besuNodeConfig, final ProcessBuilder processBuilder) {
     this.besuNodeConfig = besuNodeConfig;
     this.processBuilder = processBuilder;
   }

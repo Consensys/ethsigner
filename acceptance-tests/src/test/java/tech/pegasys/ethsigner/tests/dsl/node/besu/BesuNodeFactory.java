@@ -22,14 +22,14 @@ import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BesuLocalNodeFactory {
+public class BesuNodeFactory {
   private static final Logger LOG = LogManager.getLogger();
   private static final Path runDirectory = Path.of(System.getProperty("user.dir"));
   private static final Path besuInstallDir =
       Path.of(System.getProperty("besuInstallDir", runDirectory.resolve("build/besu").toString()));
   private static final Path executablePath = besuInstallDir.resolve("bin/besu");
 
-  public static BesuLocalNode create(final BesuNodeConfig config) {
+  public static BesuNode create(final BesuNodeConfig config) {
     checkBesuInstallation();
 
     final List<String> params = Lists.newArrayList();
@@ -68,7 +68,7 @@ public class BesuLocalNodeFactory {
 
     final ProcessBuilder processBuilder = createBesuProcessBuilder(params, config);
 
-    return new BesuLocalNode(config, processBuilder);
+    return new BesuNode(config, processBuilder);
   }
 
   private static void checkBesuInstallation() {
@@ -79,7 +79,7 @@ public class BesuLocalNodeFactory {
 
     if (!executablePath.toFile().exists()) {
       LOG.error(
-              "Besu binary doesn't exist. Either run 'gradle extractBesu' or set system property 'besuInstallDir'");
+          "Besu binary doesn't exist. Either run 'gradle extractBesu' or set system property 'besuInstallDir'");
       throw new IllegalStateException("Besu binary doesn't exist " + executablePath);
     }
   }
