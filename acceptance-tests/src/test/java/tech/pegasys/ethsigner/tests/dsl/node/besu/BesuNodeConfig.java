@@ -23,7 +23,6 @@ public class BesuNodeConfig {
   private final String name;
   private final String hostName;
   private final List<String> additionalCommandLineArgs;
-  private final List<String> envVarsToRemove;
   private final Optional<String> genesisFile;
   private final Optional<String> cors;
 
@@ -33,14 +32,12 @@ public class BesuNodeConfig {
       final Path dataPath,
       final Optional<String> genesisFile,
       final List<String> additionalCommandLineArgs,
-      final List<String> envVarsToRemove,
       final Optional<String> cors) {
     this.dataPath = dataPath;
     this.genesisFile = genesisFile;
     this.name = name;
     this.hostName = hostName;
     this.additionalCommandLineArgs = additionalCommandLineArgs;
-    this.envVarsToRemove = envVarsToRemove;
     this.cors = cors;
   }
 
@@ -62,10 +59,6 @@ public class BesuNodeConfig {
 
   public List<String> getAdditionalCommandLineArgs() {
     return additionalCommandLineArgs;
-  }
-
-  public List<String> getEnvironmentVariablesToRemove() {
-    return envVarsToRemove;
   }
 
   public Optional<String> getCors() {

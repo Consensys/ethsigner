@@ -12,12 +12,13 @@
  */
 package tech.pegasys.ethsigner.tests.dsl.node.besu;
 
-import java.lang.ProcessBuilder.Redirect;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,8 +33,9 @@ public class BesuNodeFactory {
   public static BesuNode create(final BesuNodeConfig config) {
     checkBesuInstallation();
 
-    final List<String> params = Lists.newArrayList();
+    final List<String> params = new ArrayList<>();
     params.add(executablePath.toString());
+
     if (config.getGenesisFile().isEmpty()) {
       params.add("--network");
       params.add("DEV");
@@ -43,19 +45,25 @@ public class BesuNodeFactory {
     }
     params.add("--data-path");
     params.add(config.getDataPath().toString());
-    params.add("--logging=DEBUG");
+    params.add("--logging");
+    params.add("DEBUG");
     params.add("--miner-enabled");
     params.add("--miner-coinbase");
     params.add("1b23ba34ca45bb56aa67bc78be89ac00ca00da00");
     params.add("--host-whitelist");
     params.add("*");
-    params.add("--p2p-port=0");
+    params.add("--p2p-port");
+    params.add("0");
     params.add("--rpc-http-enabled=true");
-    params.add("--rpc-http-port=0");
-    params.add("--rpc-http-host=" + config.getHostName());
+    params.add("--rpc-http-port");
+    params.add("0");
+    params.add("--rpc-http-host");
+    params.add(config.getHostName());
     params.add("--rpc-ws-enabled=true");
-    params.add("--rpc-ws-port=0");
-    params.add("--rpc-ws-host=" + config.getHostName());
+    params.add("--rpc-ws-port");
+    params.add("0");
+    params.add("--rpc-ws-host");
+    params.add(config.getHostName());
     params.add("--rpc-http-apis");
     params.add("ETH,NET,WEB3,EEA");
     params.add("--privacy-enabled");
@@ -66,9 +74,16 @@ public class BesuNodeFactory {
 
     params.addAll(config.getAdditionalCommandLineArgs());
 
-    final ProcessBuilder processBuilder = createBesuProcessBuilder(params, config);
+    return new BesuNode(config, params.toArray(String[]::new), environment());
+  }
 
-    return new BesuNode(config, processBuilder);
+  private static Map<String, String> environment() {
+    if (Boolean.getBoolean("debugSubProcess")) {
+      return Map.of(
+          "JAVA_OPTS",
+          "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 ");
+    }
+    return Collections.emptyMap();
   }
 
   private static void checkBesuInstallation() {
@@ -82,31 +97,6 @@ public class BesuNodeFactory {
           "Besu binary doesn't exist. Either run 'gradle extractBesu' or set system property 'besuInstallDir'");
       throw new IllegalStateException("Besu binary doesn't exist " + executablePath);
     }
-  }
-
-  private static ProcessBuilder createBesuProcessBuilder(
-      final List<String> commandLine, final BesuNodeConfig config) {
-
-    final ProcessBuilder processBuilder =
-        new ProcessBuilder(commandLine)
-            .directory(runDirectory.toFile())
-            .redirectErrorStream(true)
-            .redirectInput(Redirect.INHERIT);
-
-    for (final String envVarToRemove : config.getEnvironmentVariablesToRemove()) {
-      processBuilder.environment().remove(envVarToRemove);
-    }
-
-    final StringBuilder javaOptions = new StringBuilder();
-
-    if (Boolean.getBoolean("debugSubProcess")) {
-      javaOptions.append(
-          "-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
-      javaOptions.append(" ");
-      processBuilder.environment().put("JAVA_OPTS", javaOptions.toString());
-    }
-
-    return processBuilder;
   }
 
   private static String privacyPublicKeyFilePath() {

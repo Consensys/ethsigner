@@ -76,5 +76,7 @@ dependencyManagement {
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
     }
+
+    dependency 'org.zeroturnaround:zt-exec:1.11'
   }
 }

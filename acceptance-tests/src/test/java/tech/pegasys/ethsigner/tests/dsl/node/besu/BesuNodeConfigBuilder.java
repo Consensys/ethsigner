@@ -26,7 +26,6 @@ public final class BesuNodeConfigBuilder {
   private String name = "node1";
   private String hostName = "127.0.0.1";
   private List<String> additionalCommandLineArgs = emptyList();
-  private List<String> envVarsToRemove = emptyList();
   private String genesisFile = DEFAULT_GENESIS_FILE;
   private String cors;
 
@@ -54,11 +53,6 @@ public final class BesuNodeConfigBuilder {
   public BesuNodeConfigBuilder withAdditionalCommandLineArgs(
       List<String> additionalCommandLineArgs) {
     this.additionalCommandLineArgs = additionalCommandLineArgs;
-    return this;
-  }
-
-  public BesuNodeConfigBuilder withEnvVarsToRemove(List<String> envVarsToRemove) {
-    this.envVarsToRemove = envVarsToRemove;
     return this;
   }
 
@@ -91,7 +85,6 @@ public final class BesuNodeConfigBuilder {
         dataPath,
         Optional.ofNullable(genesisFile),
         additionalCommandLineArgs,
-        envVarsToRemove,
         Optional.ofNullable(cors));
   }
 }
