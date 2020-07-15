@@ -79,13 +79,14 @@ public class BesuNode implements Node {
 
   @Override
   public void start() {
+    LOG.info("Starting Besu process ...");
     try {
       besuProcess =
           new ProcessExecutor()
               .command(args)
               .environment(environment)
               .readOutput(true)
-              .redirectOutput(Slf4jStream.of(getClass()).asInfo())
+              .redirectOutput(Slf4jStream.of(getClass(), besuNodeConfig.getName()).asInfo())
               .destroyOnExit()
               .start()
               .getFuture();
@@ -98,8 +99,11 @@ public class BesuNode implements Node {
   @Override
   public void shutdown() {
     if (besuProcess != null) {
+      LOG.info("Shutting down Besu Process");
       besuProcess.cancel(true);
       besuProcess = null;
+    } else {
+      LOG.info("Besu process is not running");
     }
   }
 
