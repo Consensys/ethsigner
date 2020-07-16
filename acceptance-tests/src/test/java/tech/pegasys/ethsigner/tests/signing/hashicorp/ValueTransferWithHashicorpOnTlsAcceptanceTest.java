@@ -17,7 +17,6 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
@@ -30,7 +29,6 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import java.math.BigInteger;
 
-import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -50,9 +48,7 @@ public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
     Runtime.getRuntime()
         .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
 
-    final DockerClient docker = new DockerClientFactory().create();
-    // TODO: Point to local Hashicorp instance instead of docker (specially for CI)
-    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, true);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(true);
 
     final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
     ethNode = BesuNodeFactory.create(besuNodeConfig);
