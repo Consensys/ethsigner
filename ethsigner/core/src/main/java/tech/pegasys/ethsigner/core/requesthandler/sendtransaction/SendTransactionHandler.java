@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.TX_SENDER_NOT_AUTHORIZED;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -23,6 +25,7 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
+import tech.pegasys.ethsigner.core.util.HexStringComparator;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
@@ -78,6 +81,16 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       context.fail(
           BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
+      return;
+    }
+
+    final HexStringComparator comparator = new HexStringComparator();
+    if (comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
+      LOG.info(
+          "Ethereum address derived from identifier ({}) is incorrect value ({})",
+          transaction.sender(),
+          transactionSigner.get().getAddress());
+      context.fail(INTERNAL_SERVER_ERROR.code(), new JsonRpcException(TX_SENDER_NOT_AUTHORIZED));
       return;
     }
 
