@@ -19,7 +19,7 @@ import org.apache.tuweni.bytes.Bytes;
 public class HexStringComparator implements Comparator<String> {
 
   @Override
-  public int compare(String l, String r) {
+  public int compare(final String l, final String r) {
     final Bytes leftBytes = Bytes.fromHexString(l);
     final Bytes rightBytes = Bytes.fromHexString(r);
     return leftBytes.compareTo(rightBytes);

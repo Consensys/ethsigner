@@ -101,7 +101,7 @@ public abstract class EthSignerRunner {
   }
 
   public void start(final String processName) {
-    final String loggingLevel = "TRACE";
+    final String loggingLevel = "DEBUG";
 
     final List<String> params = new ArrayList<>();
     params.add("--logging");
