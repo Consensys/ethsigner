@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
@@ -32,8 +31,7 @@ public class MultiKeyHashicorpTransactionSignerAcceptanceTest
 
   @BeforeAll
   static void preSetup() {
-    hashicorpNode =
-        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(false);
   }
 
   @Test

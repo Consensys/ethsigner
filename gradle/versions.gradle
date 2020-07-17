@@ -13,8 +13,6 @@
 
 dependencyManagement {
   dependencies {
-    dependency 'com.github.docker-java:docker-java:3.2.1'
-
     dependency 'com.google.errorprone:error_prone_annotation:2.3.4'
     dependency 'com.google.errorprone:error_prone_check_api:2.3.4'
     dependency 'com.google.errorprone:error_prone_core:2.3.4'
@@ -29,6 +27,7 @@ dependencyManagement {
     dependency 'com.squareup.okhttp3:okhttp:4.3.1'
 
     dependency 'commons-cli:commons-cli:1.4'
+    dependency 'commons-io:commons-io:2.6'
 
     dependency 'info.picocli:picocli:4.2.0'
 
@@ -71,10 +70,12 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.2-SNAPSHOT') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.2') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
     }
+
+    dependency 'org.zeroturnaround:zt-exec:1.11'
   }
 }

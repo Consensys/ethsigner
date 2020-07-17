@@ -20,9 +20,8 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -43,11 +42,10 @@ public class FailedConnectionAcceptanceTest {
 
   @BeforeEach
   public void setUp() {
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(7007, 7008);
+    final BesuNodePorts besuNodePorts = new BesuNodePorts(7007, 7008);
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, nodePorts);
+    ethSigner = new Signer(signerConfig, BesuNodeConfig.DEFAULT_HOST, besuNodePorts);
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
 

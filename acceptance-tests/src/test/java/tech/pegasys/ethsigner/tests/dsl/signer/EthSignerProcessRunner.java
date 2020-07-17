@@ -15,8 +15,7 @@ package tech.pegasys.ethsigner.tests.dsl.signer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.createJksTrustStore;
 
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 
 import java.io.BufferedReader;
@@ -49,9 +48,9 @@ public class EthSignerProcessRunner extends EthSignerRunner {
 
   public EthSignerProcessRunner(
       final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts) {
-    super(signerConfig, nodeConfig, nodePorts);
+      final String hostName,
+      final BesuNodePorts besuNodePorts) {
+    super(signerConfig, hostName, besuNodePorts);
 
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }

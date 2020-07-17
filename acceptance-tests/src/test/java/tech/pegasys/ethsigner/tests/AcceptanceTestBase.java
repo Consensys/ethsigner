@@ -15,11 +15,10 @@ package tech.pegasys.ethsigner.tests;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -27,14 +26,13 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import java.io.IOException;
 import java.net.URL;
 
-import com.github.dockerjava.api.DockerClient;
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 public class AcceptanceTestBase {
 
-  private static String ENCLAVE_PUBLIC_KEY_FILENAME = "enclave_key.pub";
+  private static final String ENCLAVE_PUBLIC_KEY_FILENAME = "enclave_key.pub";
 
   private static Node ethNode;
   private static Signer ethSigner;
@@ -69,15 +67,14 @@ public class AcceptanceTestBase {
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
-    final DockerClient docker = new DockerClientFactory().create();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
+    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = new BesuNode(docker, nodeConfig);
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

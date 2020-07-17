@@ -22,9 +22,8 @@ import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.popula
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
@@ -126,8 +125,6 @@ class ServerSideTlsAcceptanceTest {
               Optional.ofNullable(clientAuthConstraints));
       configBuilder.withServerTlsOptions(serverOptions);
 
-      final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
       final ClientTlsConfig clientTlsConfig;
       if (clientExpectedCert != null) {
         clientTlsConfig = new ClientTlsConfig(clientExpectedCert, clientToPresent);
@@ -136,7 +133,11 @@ class ServerSideTlsAcceptanceTest {
       }
 
       final Signer ethSigner =
-          new Signer(configBuilder.build(), nodeConfig, new NodePorts(1, 2), clientTlsConfig);
+          new Signer(
+              configBuilder.build(),
+              BesuNodeConfig.DEFAULT_HOST,
+              new BesuNodePorts(1, 2),
+              clientTlsConfig);
 
       return ethSigner;
     } catch (final Exception e) {
@@ -221,8 +222,7 @@ class ServerSideTlsAcceptanceTest {
         new SignerConfigurationBuilder().withServerTlsOptions(serverOptions).withHttpRpcPort(9000);
 
     ethSigner =
-        new Signer(
-            configBuilder.build(), new NodeConfigurationBuilder().build(), new NodePorts(1, 2));
+        new Signer(configBuilder.build(), BesuNodeConfig.DEFAULT_HOST, new BesuNodePorts(1, 2));
     ethSigner.start();
     waitFor(() -> assertThat(ethSigner.isRunning()).isFalse());
   }

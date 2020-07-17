@@ -25,8 +25,7 @@ import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequestFactory;
 import tech.pegasys.ethsigner.tests.dsl.RawJsonRpcRequests;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.tls.ClientTlsConfig;
 import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 
@@ -64,17 +63,17 @@ public class Signer {
 
   public Signer(
       final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts) {
-    this(signerConfig, nodeConfig, nodePorts, null);
+      final String nodeHostName,
+      final BesuNodePorts besuNodePorts) {
+    this(signerConfig, nodeHostName, besuNodePorts, null);
   }
 
   public Signer(
       final SignerConfiguration signerConfig,
-      final NodeConfiguration nodeConfig,
-      final NodePorts nodePorts,
+      final String nodeHostName,
+      final BesuNodePorts besuNodePorts,
       final ClientTlsConfig clientTlsConfig) {
-    this.runner = EthSignerRunner.createRunner(signerConfig, nodeConfig, nodePorts);
+    this.runner = EthSignerRunner.createRunner(signerConfig, nodeHostName, besuNodePorts);
     this.pollingInterval = signerConfig.pollingInterval();
     this.hostname = signerConfig.hostname();
     urlFormatting = signerConfig.serverTlsOptions().isPresent() ? "https://%s:%s" : "http://%s:%s";

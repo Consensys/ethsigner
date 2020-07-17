@@ -22,9 +22,8 @@ import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.popula
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
@@ -116,10 +115,9 @@ class ClientSideTlsAcceptanceTest {
 
     builder.withHttpRpcPort(listenPort);
 
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-    final NodePorts nodePorts = new NodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
+    final BesuNodePorts besuNodePorts = new BesuNodePorts(downstreamWeb3Port, UNUSED_WS_PORT);
 
-    signer = new Signer(builder.build(), nodeConfig, nodePorts);
+    signer = new Signer(builder.build(), BesuNodeConfig.DEFAULT_HOST, besuNodePorts);
 
     return signer;
   }

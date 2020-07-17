@@ -16,9 +16,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -48,9 +47,8 @@ public class MultiKeyAcceptanceTestBase {
   void setup(final Path tomlDirectory) {
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withMultiKeySignerDirectory(tomlDirectory).build();
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
+    ethSigner = new Signer(signerConfig, BesuNodeConfig.DEFAULT_HOST, new BesuNodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }
