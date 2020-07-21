@@ -90,7 +90,7 @@ commands:
           
 jobs:
   build:
-    executor: executor_med
+    executor: executor_large
     steps:
       - prepare
       - run:
@@ -107,7 +107,7 @@ jobs:
           no_output_timeout: 20m
           command: |
             ./gradlew --no-daemon --parallel integrationTest --info
-      #- notify
+      - notify
       - capture_test_results
       - capture_test_reports
       - save_cache:
@@ -121,18 +121,18 @@ jobs:
           paths:
             - ./
 
-#  acceptanceTests:
-#    executor: executor_large
-#    steps:
-#      - prepare
-#      - run:
-#          name: Acceptance Test
-#          no_output_timeout: 20m
-#          command: |
-#            ./gradlew --no-daemon --parallel acceptanceTest
-#      - notify
-#      - capture_test_results
-#      - capture_test_reports
+  acceptanceTests:
+    executor: executor_large
+    steps:
+      - prepare
+      - run:
+          name: Acceptance Test
+          no_output_timeout: 20m
+          command: |
+            ./gradlew --no-daemon --parallel acceptanceTest
+      - notify
+      - capture_test_results
+      - capture_test_reports
 
   buildDocker:
     executor: executor_med
@@ -154,11 +154,7 @@ jobs:
           command: |
             mkdir -p docker/reports
             ./gradlew --no-daemon testDocker
-      - run:
-          name: build image - cloudhsm
-          command: |
-            ./gradlew --no-daemon distDocker -Pdockerfile=cloudhsm
-      #- notify
+      - notify
 
   publish:
     executor: executor_med
@@ -170,7 +166,7 @@ jobs:
           name: Publish
           command: |
             ./gradlew --no-daemon --parallel bintrayUpload
-      #- notify
+      - notify
       
   publishDocker:
     executor: executor_med
@@ -184,47 +180,41 @@ jobs:
           command: |
             docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
-      - run:
-          name: Publish Docker - cloudhsm
-          command: |
-            docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
-            ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload -Pdockerfile=cloudhsm
-      #- notify
+      - notify
       
 workflows:
   version: 2
-  #nightly:
-    #triggers:
-      #- schedule:
-          #cron: "0 11 * * *"
-          #filters:
-            #branches:
-              #only:
-                #- master
-    #jobs:
-      #- build
-      #- acceptanceTests:
-          #requires:
-            #- build
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 11 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build
+      - acceptanceTests:
+          requires:
+            - build
   default:
     jobs:
       - build
-      #- acceptanceTests:
-      #   requires:
-      #     - build
+      - acceptanceTests:
+          requires:
+            - build
       - buildDocker:
           requires:
             - build
-      # TODO:  <02-07-20, fllaca> # Adhara doesn't need to publish mvn packages for now
-      #- publish:
-          #filters:
-            #branches:
-              #only:
-                #- master
-                #- /^release-.*/
-          #requires:
-            #- build
-            ##- acceptanceTests
+      - publish:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+          requires:
+            - build
+            - acceptanceTests
       - publishDocker:
           filters:
             branches:
@@ -233,5 +223,5 @@ workflows:
                 - /^release-.*/
           requires:
             - build
-            #- acceptanceTests
+            - acceptanceTests
             - buildDocker
