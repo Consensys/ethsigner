@@ -17,7 +17,6 @@ import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingA
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
@@ -41,8 +40,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   @BeforeAll
   static void preSetup() {
     preChecks();
-    hashicorpNode =
-        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(false);
   }
 
   static void preChecks() {

@@ -1,3 +1,5 @@
+import groovy.text.SimpleTemplateEngine
+
 /*
  * Copyright 2019 ConsenSys AG.
  *
@@ -11,6 +13,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
+plugins {
+  id "de.undercouch.download" version "4.1.0"
+  id "com.google.osdetector" version "1.6.2"
+}
+
 dependencies {
 
   testRuntimeOnly 'javax.activation:activation'
@@ -19,12 +26,12 @@ dependencies {
   testRuntimeOnly 'org.bouncycastle:bcpkix-jdk15on'
 
   testImplementation project(':ethsigner:core')
+  testImplementation project(':ethsigner:app')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'signing-secp256k1-impl', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hashicorp', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hsm', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-cavium', classifier: 'test-fixtures')
 
-  testImplementation 'com.github.docker-java:docker-java'
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-core'
   testImplementation 'io.vertx:vertx-web'
@@ -34,17 +41,94 @@ dependencies {
   testImplementation 'org.apache.logging.log4j:log4j-api'
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.awaitility:awaitility'
+  testImplementation 'commons-io:commons-io'
+  testImplementation 'org.zeroturnaround:zt-exec'
 }
 
 test.enabled = false
 
-task acceptanceTest(type: Test) {
+task cleanBesuInstall(type: Delete) {
+  delete "$buildDir/besu"
+}
+
+task downloadBesu(type: Download) {
+  src {
+    // see gradle.properties for Besu URL
+    return new SimpleTemplateEngine().createTemplate(besuDistroUrl).make(["besuVersion":"$besuVersion"]).toString()
+  }
+  dest new File(buildDir, "besu-${besuVersion}.tar.gz")
+  onlyIfModified true
+  retries 3
+}
+
+task extractBesu(dependsOn: [
+  'cleanBesuInstall',
+  'downloadBesu'
+], type: Copy) {
+  from(tarTree(downloadBesu.dest)) {
+    include "besu-${besuVersion}/**"
+    eachFile { fcd ->
+      fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+    }
+    includeEmptyDirs = false
+  }
+  into "$buildDir/besu"
+}
+
+def vaultBinary () {
+  switch (osdetector.os) {
+    case "windows":
+      return new File(buildDir, "vault.exe").toString()
+    default:
+      return new File(buildDir, "vault").toString()
+  }
+}
+
+def vaultDownloadUrl() {
+  // see gradle.properties for Hashicorp Vault URL
+  switch (osdetector.os) {
+    case "windows":
+      return "${hashicorpVaultUrl}/${hashicorpVaultVersion}/vault_${hashicorpVaultVersion}_windows_amd64.zip"
+      break
+    case "linux":
+      return "${hashicorpVaultUrl}/${hashicorpVaultVersion}/vault_${hashicorpVaultVersion}_linux_amd64.zip"
+      break
+    case "osx":
+      return "${hashicorpVaultUrl}/${hashicorpVaultVersion}/vault_${hashicorpVaultVersion}_darwin_amd64.zip"
+      break
+  }
+}
+
+task downloadVault(type: Download) {
+  src {
+    return vaultDownloadUrl()
+  }
+  dest new File(buildDir, "hashicorp.zip")
+  onlyIfModified true
+}
+
+task extractVault(dependsOn: downloadVault, type: Copy) {
+  from zipTree(downloadVault.dest)
+  into buildDir
+}
+
+task acceptanceTest(dependsOn: [
+  rootProject.installDist,
+  extractBesu,
+  extractVault
+], type: Test) {
+  inputs.property "integration.date", LocalTime.now() // so it runs at every invocation
+
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs EthSigner acceptance tests.'
   group = 'verification'
+
+  systemProperty 'acctests.runEthSignerAsProcess', 'true'
+
+  systemProperty 'besuInstallDir', "${buildDir}/besu"
+  systemProperty 'vaultBinary', vaultBinary()
 
   useJUnitPlatform()
   // toggle to show standard out and standard error of the test JVM(s) on the console
   testLogging.showStandardStreams = false
 }
-acceptanceTest.dependsOn(rootProject.installDist)

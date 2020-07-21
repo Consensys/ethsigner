@@ -29,6 +29,8 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  public static final String ID_ELEMENT_NAME = "JsonRpcId";
+
   private final RequestMapper requestHandlerMapper;
   private final HttpResponseFactory responseFactory;
   private final JsonDecoder jsonDecoder;
@@ -44,29 +46,11 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
 
   @Override
   public void handle(final RoutingContext context) {
-
-    context
-        .vertx()
-        .executeBlocking(
-            future -> {
-              process(context);
-              future.complete();
-            },
-            false,
-            res -> {
-              if (res.failed()) {
-                LOG.error(
-                    "An unhandled error occurred while processing " + context.getBodyAsString(),
-                    res.cause());
-              }
-            });
-  }
-
-  private void process(final RoutingContext context) {
     try {
       LOG.trace("Request body = {}", context.getBodyAsString());
       final JsonRpcRequest request =
           jsonDecoder.decodeValue(context.getBody(), JsonRpcRequest.class);
+      context.put(ID_ELEMENT_NAME, request.getId());
       final JsonRpcRequestHandler handler =
           requestHandlerMapper.getMatchingHandler(request.getMethod());
       handler.handle(context, request);
@@ -78,8 +62,8 @@ public class JsonRpcHandler implements Handler<RoutingContext> {
   private void sendParseErrorResponse(final RoutingContext context, final Throwable error) {
     LOG.info("Dropping request from {}", context.request().remoteAddress());
     LOG.debug("Parsing body as JSON failed for: {}", context.getBodyAsString(), error);
-    responseFactory.create(
-        context.request(),
+    responseFactory.response(
+        context.response(),
         HttpResponseStatus.BAD_REQUEST.code(),
         new JsonRpcErrorResponse(JsonRpcError.PARSE_ERROR));
   }

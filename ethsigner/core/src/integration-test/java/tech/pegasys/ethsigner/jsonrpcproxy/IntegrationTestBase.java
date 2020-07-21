@@ -14,10 +14,9 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.model.HttpRequest.request;
@@ -34,6 +33,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthSignerRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthNodeResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.MockServer;
+import tech.pegasys.ethsigner.jsonrpcproxy.support.RestAssuredConverter;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -46,8 +47,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
@@ -66,10 +67,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Header;
 import org.mockserver.model.JsonBody;
 import org.mockserver.model.RegexBody;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
@@ -105,12 +104,12 @@ public class IntegrationTestBase {
 
   @TempDir static Path dataPath;
 
-  static void setupEthSigner(final long chainId) throws IOException, CipherException {
+  static void setupEthSigner(final long chainId) throws Exception {
     setupEthSigner(chainId, "");
   }
 
   static void setupEthSigner(final long chainId, final String downstreamHttpRequestPath)
-      throws IOException, CipherException {
+      throws Exception {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();
@@ -190,25 +189,23 @@ public class IntegrationTestBase {
   }
 
   void setUpEthNodeResponse(final EthNodeRequest request, final EthNodeResponse response) {
-    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(json(request.getBody())), exactly(1))
         .respond(
             response()
                 .withBody(response.getBody())
-                .withHeaders(headers)
+                .withHeaders(MockServer.headers(response.getHeaders()))
                 .withStatusCode(response.getStatusCode()));
   }
 
   void setupEthNodeResponse(
       final String bodyRegex, final EthNodeResponse response, final int count) {
-    final List<Header> headers = convertHeadersToMockServerHeaders(response.getHeaders());
     clientAndServer
         .when(request().withBody(new RegexBody(bodyRegex)), exactly(count))
         .respond(
             response()
                 .withBody(response.getBody())
-                .withHeaders(headers)
+                .withHeaders(MockServer.headers(response.getHeaders()))
                 .withStatusCode(response.getStatusCode()));
   }
 
@@ -237,83 +234,82 @@ public class IntegrationTestBase {
 
   void sendPostRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(request.getHeaders())
-        .post(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+
+    final Response response =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .post(path);
+
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendPutRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(request.getHeaders())
-        .put(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+    final Response response =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .put(path);
+
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendGetRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(request.getHeaders())
-        .get(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+    final Response response =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .get(path);
+
+    verifyResponseMatchesExpected(response, expectResponse);
   }
 
   void sendDeleteRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
-    given()
-        .when()
-        .body(request.getBody())
-        .headers(request.getHeaders())
-        .delete(path)
-        .then()
-        .statusCode(expectResponse.getStatusCode())
-        .body(equalTo(expectResponse.getBody()))
-        .headers(expectResponse.getHeaders());
+    final Response response =
+        given()
+            .when()
+            .body(request.getBody())
+            .headers(RestAssuredConverter.headers(request.getHeaders()))
+            .delete(path);
+    verifyResponseMatchesExpected(response, expectResponse);
+  }
+
+  private void verifyResponseMatchesExpected(
+      final Response response, final EthSignerResponse expectResponse) {
+    assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    assertThat(response.headers())
+        .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
+    assertThat(response.body().print()).isEqualTo(expectResponse.getBody());
   }
 
   void verifyEthNodeReceived(final String proxyBodyRequest) {
     clientAndServer.verify(
         request()
             .withBody(JsonBody.json(proxyBodyRequest))
-            .withHeaders(convertHeadersToMockServerHeaders(emptyMap())));
-  }
-
-  void verifyEthNodeReceived(final Map<String, String> headers, final String proxyBodyRequest) {
-    clientAndServer.verify(
-        request()
-            .withBody(proxyBodyRequest)
-            .withHeaders(convertHeadersToMockServerHeaders(headers)));
+            .withHeaders(MockServer.headers(emptyList())));
   }
 
   void verifyEthNodeReceived(
-      final Map<String, String> headers, final String proxyBodyRequest, final String path) {
+      final Iterable<Entry<String, String>> headers, final String proxyBodyRequest) {
+    clientAndServer.verify(
+        request().withBody(proxyBodyRequest).withHeaders(MockServer.headers(headers)));
+  }
+
+  void verifyEthNodeReceived(
+      final Iterable<Entry<String, String>> headers,
+      final String proxyBodyRequest,
+      final String path) {
     clientAndServer.verify(
         request()
             .withPath(path)
             .withBody(JsonBody.json(proxyBodyRequest))
-            .withHeaders(convertHeadersToMockServerHeaders(headers)));
-  }
-
-  private List<Header> convertHeadersToMockServerHeaders(final Map<String, String> headers) {
-    return headers.entrySet().stream()
-        .map((Map.Entry<String, String> e) -> new Header(e.getKey(), e.getValue()))
-        .collect(toList());
+            .withHeaders(MockServer.headers(headers)));
   }
 
   private static TransactionSigner transactionSigner(final File keyFile, final File passwordFile) {

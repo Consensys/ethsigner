@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
-import tech.pegasys.ethsigner.core.http.HttpServerService;
 import tech.pegasys.ethsigner.core.http.JsonRpcErrorHandler;
 import tech.pegasys.ethsigner.core.http.JsonRpcHandler;
 import tech.pegasys.ethsigner.core.http.LogErrorHandler;
@@ -22,14 +21,13 @@ import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsBodyProvider;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignBodyProvider;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
+import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.VertxNonceRequestTransmitterFactory;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.File;
@@ -39,15 +37,19 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.StringJoiner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.google.common.collect.Sets;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -70,8 +72,8 @@ public class Runner {
   private final JsonDecoder jsonDecoder;
   private final Path dataPath;
   private final Vertx vertx;
-  private final HttpServerService httpServerService;
   private final Collection<String> allowedCorsOrigins;
+  private final HttpServerOptions serverOptions;
 
   public Runner(
       final long chainId,
@@ -93,19 +95,28 @@ public class Runner {
     this.dataPath = dataPath;
     this.vertx = vertx;
     this.allowedCorsOrigins = allowedCorsOrigins;
-    this.httpServerService = new HttpServerService(router(), serverOptions);
+    this.serverOptions = serverOptions;
   }
 
-  public void start() {
-    vertx.deployVerticle(httpServerService, this::httpServerServiceDeployment);
+  public void start() throws ExecutionException, InterruptedException {
+    final HttpServer httpServer = createServerAndWait(vertx, router());
+    LOG.info("Server is up, and listening on {}", httpServer.actualPort());
+    if (dataPath != null) {
+      writePortsToFile(httpServer);
+    }
   }
 
   private Router router() {
     final HttpClient downStreamConnection = vertx.createHttpClient(clientOptions);
     final VertxRequestTransmitterFactory transmitterFactory =
-        responseBodyHandler -> new VertxRequestTransmitter(httpRequestTimeout, responseBodyHandler);
-    final RequestMapper requestMapper =
-        createRequestMapper(downStreamConnection, transmitterFactory);
+        responseBodyHandler ->
+            new VertxRequestTransmitter(
+                vertx,
+                downStreamConnection,
+                httpRequestTimeout,
+                downstreamPathCalculator,
+                responseBodyHandler);
+    final RequestMapper requestMapper = createRequestMapper(transmitterFactory);
 
     final Router router = Router.router(vertx);
 
@@ -115,13 +126,14 @@ public class Runner {
         .handler(
             CorsHandler.create(buildCorsRegexFromConfig())
                 .allowedHeaders(Sets.newHashSet("*", "content-type")));
+
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
         .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
-        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory(), jsonDecoder))
-        .handler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
+        .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
+        .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder));
 
     // Handler for UpCheck endpoint
     router
@@ -132,75 +144,43 @@ public class Runner {
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
-    final PassThroughHandler passThroughHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
+    final PassThroughHandler passThroughHandler = new PassThroughHandler(transmitterFactory);
     router.route().handler(BodyHandler.create()).handler(passThroughHandler);
     return router;
   }
 
   private RequestMapper createRequestMapper(
-      final HttpClient downStreamConnection,
       final VertxRequestTransmitterFactory transmitterFactory) {
-    final PassThroughHandler defaultHandler =
-        new PassThroughHandler(downStreamConnection, transmitterFactory, downstreamPathCalculator);
-
-    final VertxNonceRequestTransmitterFactory nonceRequestTransmitterFactory =
-        new VertxNonceRequestTransmitterFactory(
-            downStreamConnection, jsonDecoder, httpRequestTimeout, downstreamPathCalculator);
-
+    final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
     final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, nonceRequestTransmitterFactory);
+        new TransactionFactory(jsonDecoder, transmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(
-            chainId,
-            downStreamConnection,
-            downstreamPathCalculator,
-            transactionSignerProvider,
-            transactionFactory,
-            transmitterFactory);
+            chainId, transactionSignerProvider, transactionFactory, transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler(
         "eth_accounts",
-        new InternalResponseHandler(
+        new InternalResponseHandler<>(
             responseFactory,
-            new EthAccountsBodyProvider(transactionSignerProvider::availableAddresses),
-            jsonDecoder));
+            new EthAccountsResultProvider(transactionSignerProvider::availableAddresses)));
     requestMapper.addHandler(
         "eth_sign",
-        new InternalResponseHandler(
-            responseFactory, new EthSignBodyProvider(transactionSignerProvider), jsonDecoder));
+        new InternalResponseHandler<>(
+            responseFactory, new EthSignResultProvider(transactionSignerProvider)));
 
     return requestMapper;
   }
 
-  private void httpServerServiceDeployment(final AsyncResult<String> result) {
-    if (result.succeeded()) {
-      LOG.info("JsonRpcHttpService Vertx deployment id is: {}", result.result());
-
-      if (dataPath != null) {
-        writePortsToFile(httpServerService);
-      }
-    } else {
-      deploymentFailed(result.cause());
-    }
-  }
-
-  private void deploymentFailed(final Throwable cause) {
-    LOG.error("Vertx deployment failed", cause);
-    vertx.close();
-    System.exit(1);
-  }
-
-  private void writePortsToFile(final HttpServerService httpService) {
+  private void writePortsToFile(final HttpServer server) {
     final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
     final Properties properties = new Properties();
-    properties.setProperty("http-jsonrpc", String.valueOf(httpService.actualPort()));
+    properties.setProperty("http-jsonrpc", String.valueOf(server.actualPort()));
 
     LOG.info(
         "Writing ethsigner.ports file: {}, with contents: {}",
@@ -226,5 +206,30 @@ public class Runner {
       allowedCorsOrigins.stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
       return stringJoiner.toString();
     }
+  }
+
+  private HttpServer createServerAndWait(
+      final Vertx vertx, final Handler<HttpServerRequest> requestHandler)
+      throws ExecutionException, InterruptedException {
+
+    final HttpServer httpServer = vertx.createHttpServer(serverOptions);
+    final CompletableFuture<Void> serverRunningFuture = new CompletableFuture<>();
+    httpServer
+        .requestHandler(requestHandler)
+        .listen(
+            result -> {
+              if (result.succeeded()) {
+                serverRunningFuture.complete(null);
+              } else {
+                LOG.error(
+                    "Failed to create HTTP Server on {}:{}",
+                    serverOptions.getHost(),
+                    serverOptions.getPort());
+                serverRunningFuture.completeExceptionally(result.cause());
+              }
+            });
+    serverRunningFuture.get();
+
+    return httpServer;
   }
 }

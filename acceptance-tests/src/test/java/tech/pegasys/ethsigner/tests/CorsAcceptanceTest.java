@@ -16,17 +16,15 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
-import com.github.dockerjava.api.DockerClient;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -35,7 +33,6 @@ import org.junit.jupiter.api.Test;
 
 public class CorsAcceptanceTest {
 
-  private static final DockerClient DOCKER = new DockerClientFactory().create();
   private Node ethNode;
   private Signer ethSigner;
 
@@ -44,15 +41,15 @@ public class CorsAcceptanceTest {
 
   @BeforeEach
   public void setUp() {
-    final NodeConfiguration nodeConfig =
-        new NodeConfigurationBuilder().cors(AUTHORISED_DOMAIN).build();
+    final BesuNodeConfig besuNodeConfig =
+        BesuNodeConfigBuilder.aBesuNodeConfig().withCors(AUTHORISED_DOMAIN).build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = new BesuNode(DOCKER, nodeConfig);
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, "127.0.0.1", ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

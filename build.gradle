@@ -24,6 +24,7 @@ plugins {
   id 'me.champeau.gradle.jmh' version '0.5.0' apply false
   id 'net.ltgt.errorprone' version '1.1.1'
   id 'net.researchgate.release' version '2.8.1'
+  id 'com.adarshr.test-logger' version '2.1.0'
 }
 
 String projectName = "EthSigner"
@@ -99,6 +100,7 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
   apply plugin: 'net.ltgt.errorprone'
+  apply plugin: 'com.adarshr.test-logger'
   apply from: "${rootDir}/gradle/versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
 
@@ -239,6 +241,10 @@ allprojects {
     }
 
     useJUnitPlatform()
+
+    testlogger {
+      theme 'plain-parallel' // task level
+    }
   }
 
   javadoc {

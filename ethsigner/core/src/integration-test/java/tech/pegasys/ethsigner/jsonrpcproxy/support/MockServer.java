@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,12 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.core.requesthandler;
+package tech.pegasys.ethsigner.jsonrpcproxy.support;
 
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import java.util.List;
+import java.util.Map.Entry;
 
-@FunctionalInterface
-public interface BodyProvider {
+import com.google.common.collect.Lists;
+import org.mockserver.model.Header;
+import org.mockserver.model.Headers;
 
-  JsonRpcBody getBody(JsonRpcRequest request);
+public class MockServer {
+
+  public static Headers headers(final Iterable<Entry<String, String>> headers) {
+    final List<Header> result = Lists.newArrayList();
+    headers.forEach(entry -> result.add(new Header(entry.getKey(), entry.getValue())));
+    return new Headers(result);
+  }
 }

@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.tests.signing;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ENCLAVE_ERROR;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.GET_PRIVATE_TRANSACTION_NONCE_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_LIMIT;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_PRICE;
@@ -94,6 +94,6 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().privateContracts().submitExceptional(transaction);
-    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(INTERNAL_ERROR);
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(GET_PRIVATE_TRANSACTION_NONCE_ERROR);
   }
 }

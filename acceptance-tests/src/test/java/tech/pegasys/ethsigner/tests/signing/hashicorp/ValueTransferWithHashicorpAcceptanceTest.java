@@ -10,33 +10,31 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.signing;
+package tech.pegasys.ethsigner.tests.signing.hashicorp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import java.math.BigInteger;
 
-import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
-public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
+public class ValueTransferWithHashicorpAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
 
@@ -48,21 +46,19 @@ public class ValueTransferWithHashicorpOnTlsAcceptanceTest {
   public static void setUpBase() {
 
     Runtime.getRuntime()
-        .addShutdownHook(new Thread(ValueTransferWithHashicorpOnTlsAcceptanceTest::tearDownBase));
+        .addShutdownHook(new Thread(ValueTransferWithHashicorpAcceptanceTest::tearDownBase));
 
-    final DockerClient docker = new DockerClientFactory().create();
-    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(docker, true);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(false);
 
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
-
-    ethNode = new BesuNode(docker, nodeConfig);
+    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
         new SignerConfigurationBuilder().withHashicorpSigner(hashicorpNode).build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

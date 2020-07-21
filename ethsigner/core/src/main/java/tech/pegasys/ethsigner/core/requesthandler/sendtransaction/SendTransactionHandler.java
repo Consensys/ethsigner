@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.TX_SENDER_NOT_AUTHORIZED;
 
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -23,12 +25,12 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
+import tech.pegasys.ethsigner.core.util.HexStringComparator;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.util.Optional;
 
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.DecodeException;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +41,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final HttpClient ethNodeClient;
-  private final DownstreamPathCalculator downstreamPathCalculator;
   private final TransactionSignerProvider transactionSignerProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
@@ -49,14 +49,10 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   public SendTransactionHandler(
       final long chainId,
-      final HttpClient ethNodeClient,
-      final DownstreamPathCalculator downstreamPathCalculator,
       final TransactionSignerProvider transactionSignerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;
-    this.ethNodeClient = ethNodeClient;
-    this.downstreamPathCalculator = downstreamPathCalculator;
     this.transactionSignerProvider = transactionSignerProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;
@@ -88,6 +84,16 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
+    final HexStringComparator comparator = new HexStringComparator();
+    if (comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
+      LOG.info(
+          "Ethereum address derived from identifier ({}) is incorrect value ({})",
+          transaction.sender(),
+          transactionSigner.get().getAddress());
+      context.fail(INTERNAL_SERVER_ERROR.code(), new JsonRpcException(TX_SENDER_NOT_AUTHORIZED));
+      return;
+    }
+
     final TransactionSerializer transactionSerializer =
         new TransactionSerializer(transactionSigner.get(), chainId);
     sendTransaction(transaction, transactionSerializer, context, request);
@@ -112,8 +118,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     if (!transaction.isNonceUserSpecified()) {
       LOG.debug("Nonce not present in request {}", request.getId());
       return new RetryingTransactionTransmitter(
-          ethNodeClient,
-          downstreamPathCalculator.calculateDownstreamPath(routingContext.request().uri()),
           transaction,
           transactionSerializer,
           vertxTransmitterFactory,
@@ -122,12 +126,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     } else {
       LOG.debug("Nonce supplied by client, forwarding request");
       return new TransactionTransmitter(
-          ethNodeClient,
-          downstreamPathCalculator.calculateDownstreamPath(routingContext.request().uri()),
-          transaction,
-          transactionSerializer,
-          vertxTransmitterFactory,
-          routingContext);
+          transaction, transactionSerializer, vertxTransmitterFactory, routingContext);
     }
   }
 }

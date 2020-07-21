@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
 import tech.pegasys.ethsigner.tests.dsl.HashicorpHelpers;
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
 
@@ -34,8 +33,7 @@ class HashicorpBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase
 
   @BeforeAll
   static void setUpBase() {
-    hashicorpNode =
-        HashicorpHelpers.createLoadedHashicorpVault(new DockerClientFactory().create(), false);
+    hashicorpNode = HashicorpHelpers.createLoadedHashicorpVault(false);
   }
 
   @Test

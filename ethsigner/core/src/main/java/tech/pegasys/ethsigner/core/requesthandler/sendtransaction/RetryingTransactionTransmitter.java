@@ -20,10 +20,9 @@ import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 
+import java.util.Map.Entry;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.ext.web.RoutingContext;
 
 public class RetryingTransactionTransmitter extends TransactionTransmitter {
@@ -31,38 +30,29 @@ public class RetryingTransactionTransmitter extends TransactionTransmitter {
   private final RetryMechanism retryMechanism;
 
   public RetryingTransactionTransmitter(
-      final HttpClient ethNodeClient,
-      final String httpPath,
       final Transaction transaction,
       final TransactionSerializer transactionSerializer,
-      final VertxRequestTransmitterFactory vertxTransmitterFactory,
+      final VertxRequestTransmitterFactory transmitterFactory,
       final RetryMechanism retryMechanism,
       final RoutingContext routingContext) {
-    super(
-        ethNodeClient,
-        httpPath,
-        transaction,
-        transactionSerializer,
-        vertxTransmitterFactory,
-        routingContext);
-
+    super(transaction, transactionSerializer, transmitterFactory, routingContext);
     this.retryMechanism = retryMechanism;
   }
 
   @Override
-  protected void handleResponseBody(
-      final RoutingContext context, final HttpClientResponse response, final Buffer body) {
-    if (response.statusCode() != HttpResponseStatus.OK.code()
-        && retryMechanism.responseRequiresRetry(response, body)) {
+  public void handleResponse(
+      final Iterable<Entry<String, String>> headers, final int statusCode, final String body) {
+    if (statusCode != HttpResponseStatus.OK.code()
+        && retryMechanism.responseRequiresRetry(statusCode, body)) {
       if (retryMechanism.retriesAvailable()) {
         retryMechanism.incrementRetries();
         send();
       } else {
-        context.fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
+        context().fail(BAD_REQUEST.code(), new JsonRpcException(INTERNAL_ERROR));
       }
       return;
     }
 
-    super.handleResponseBody(context, response, body);
+    super.handleResponse(headers, statusCode, body);
   }
 }

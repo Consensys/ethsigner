@@ -12,111 +12,98 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
-import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
-import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 
-import java.net.ConnectException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLHandshakeException;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.net.HttpHeaders;
-import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
-import io.vertx.ext.web.RoutingContext;
+import io.vertx.core.http.HttpMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class VertxRequestTransmitter {
+public class VertxRequestTransmitter implements RequestTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
+
+  private final Vertx vertx;
   private final Duration httpRequestTimeout;
-  private final ResponseBodyHandler bodyHandler;
+  private final DownstreamResponseHandler bodyHandler;
+  private final HttpClient downStreamConnection;
+  private final DownstreamPathCalculator downstreamPathCalculator;
+  private final AtomicBoolean responseHandled = new AtomicBoolean(false);
 
   public VertxRequestTransmitter(
-      final Duration httpRequestTimeout, final ResponseBodyHandler bodyHandler) {
+      final Vertx vertx,
+      final HttpClient downStreamConnection,
+      final Duration httpRequestTimeout,
+      final DownstreamPathCalculator downstreamPathCalculator,
+      final DownstreamResponseHandler bodyHandler) {
+    this.vertx = vertx;
     this.httpRequestTimeout = httpRequestTimeout;
     this.bodyHandler = bodyHandler;
+    this.downStreamConnection = downStreamConnection;
+    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
-  private void handleException(final RoutingContext context, final Throwable thrown) {
-    if (thrown instanceof TimeoutException || thrown instanceof ConnectException) {
-      context.fail(GATEWAY_TIMEOUT.code(), thrown);
-    } else if (thrown instanceof SSLHandshakeException) {
-      context.fail(BAD_GATEWAY.code(), thrown);
-    } else {
-      context.fail(INTERNAL_SERVER_ERROR.code(), thrown);
+  @Override
+  public void sendRequest(
+      final HttpMethod method,
+      final Iterable<Entry<String, String>> headers,
+      final String path,
+      final String body) {
+    LOG.debug("Sending request {} to {}", body, path);
+    final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
+    final HttpClientRequest request =
+        downStreamConnection.request(method, fullPath, this::handleResponse);
+    request.setTimeout(httpRequestTimeout.toMillis());
+    request.exceptionHandler(this::handleException);
+    headers.forEach(entry -> request.headers().add(entry.getKey(), entry.getValue()));
+    request.setChunked(false);
+    request.end(body);
+  }
+
+  private void handleException(final Throwable thrown) {
+    LOG.error("Transmission failed", thrown);
+    if (!responseHandled.getAndSet(true)) {
+      vertx.executeBlocking(
+          future -> bodyHandler.handleFailure(thrown),
+          false,
+          res -> {
+            if (res.failed()) {
+              LOG.error("Reporting failure, failed", res.cause());
+            }
+          });
     }
   }
 
-  public void handleResponse(final RoutingContext context, final HttpClientResponse response) {
+  private void handleResponse(final HttpClientResponse response) {
+    responseHandled.set(true);
     logResponse(response);
-
     response.bodyHandler(
         body ->
-            context
-                .vertx()
-                .executeBlocking(
-                    future -> {
-                      logResponseBody(body);
-                      bodyHandler.handleResponseBody(context, response, body);
-                      future.complete();
-                    },
-                    false,
-                    res -> {
-                      if (res.failed()) {
-                        LOG.error(
-                            "An unhandled error occurred while processing "
-                                + context.getBodyAsString(),
-                            res.cause());
-                        context.fail(res.cause());
-                      }
-                    }));
-  }
-
-  public void sendRequest(
-      final HttpClientRequest request, final Buffer bodyContent, final RoutingContext context) {
-    request.setTimeout(httpRequestTimeout.toMillis());
-    request.exceptionHandler(thrown -> handleException(context, thrown));
-    final MultiMap requestHeaders = createHeaders(context.request().headers());
-    request.headers().setAll(requestHeaders);
-    request.setChunked(false);
-    request.end(bodyContent);
-  }
-
-  private MultiMap createHeaders(final MultiMap headers) {
-    final MultiMap requestHeaders = new VertxHttpHeaders();
-    requestHeaders.addAll(headers);
-    requestHeaders.remove(HttpHeaders.CONTENT_LENGTH);
-    renameHeader(requestHeaders, HttpHeaders.HOST, HttpHeaders.X_FORWARDED_HOST);
-    return requestHeaders;
-  }
-
-  private void renameHeader(
-      final MultiMap headers, final String oldHeader, final String newHeader) {
-    final String oldHeaderValue = headers.get(oldHeader);
-    headers.remove(oldHeader);
-    if (oldHeaderValue != null) {
-      headers.add(newHeader, oldHeaderValue);
-    }
+            vertx.executeBlocking(
+                future ->
+                    bodyHandler.handleResponse(
+                        response.headers(),
+                        response.statusCode(),
+                        body.toString(StandardCharsets.UTF_8)),
+                false,
+                res -> {
+                  if (res.failed()) {
+                    final Throwable t = res.cause();
+                    LOG.error("An unhandled error occurred while processing a response", t);
+                    bodyHandler.handleFailure(t);
+                  }
+                }));
   }
 
   private void logResponse(final HttpClientResponse response) {
     LOG.debug("Response status: {}", response.statusCode());
-  }
-
-  private void logResponseBody(final Buffer body) {
-    LOG.debug("Response body: {}", body);
-  }
-
-  @FunctionalInterface
-  public interface ResponseBodyHandler {
-
-    void handleResponseBody(
-        final RoutingContext context, final HttpClientResponse response, final Buffer body);
   }
 }

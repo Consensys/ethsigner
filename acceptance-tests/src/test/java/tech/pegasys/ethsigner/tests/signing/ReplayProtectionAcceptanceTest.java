@@ -21,11 +21,10 @@ import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.dsl.Account;
-import tech.pegasys.ethsigner.tests.dsl.DockerClientFactory;
-import tech.pegasys.ethsigner.tests.dsl.node.BesuNode;
-import tech.pegasys.ethsigner.tests.dsl.node.Node;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNode;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeFactory;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -33,9 +32,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
 
 import java.math.BigInteger;
 
-import com.github.dockerjava.api.DockerClient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
@@ -43,21 +40,15 @@ import org.web3j.utils.Convert.Unit;
 
 public class ReplayProtectionAcceptanceTest {
 
-  private static final DockerClient DOCKER = new DockerClientFactory().create();
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final BigInteger TRANSFER_AMOUNT_WEI =
       Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
 
-  private Node ethNode;
+  private BesuNode ethNode;
   private Signer ethSigner;
 
   private Account richBenefactor() {
     return ethSigner.accounts().richBenefactor();
-  }
-
-  @BeforeEach
-  public void setUp() {
-    Runtime.getRuntime().addShutdownHook(new Thread((this::tearDown)));
   }
 
   @AfterEach
@@ -74,15 +65,16 @@ public class ReplayProtectionAcceptanceTest {
   }
 
   private void setUp(final String genesis) {
-    final NodeConfiguration nodeConfig =
-        new NodeConfigurationBuilder().withGenesis(genesis).build();
+    final BesuNodeConfig besuNodeConfig =
+        BesuNodeConfigBuilder.aBesuNodeConfig().withGenesisFile(genesis).build();
+
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethNode = new BesuNode(DOCKER, nodeConfig);
+    ethNode = BesuNodeFactory.create(besuNodeConfig);
     ethNode.start();
     ethNode.awaitStartupCompletion();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, ethNode.ports());
+    ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

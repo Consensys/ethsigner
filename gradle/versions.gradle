@@ -29,16 +29,19 @@ dependencyManagement {
     dependency 'com.squareup.okhttp3:okhttp:4.3.1'
 
     dependency 'commons-cli:commons-cli:1.4'
+    dependency 'commons-io:commons-io:2.6'
 
     dependency 'info.picocli:picocli:4.2.0'
 
-    dependency 'io.rest-assured:rest-assured:4.2.0'
+    dependency 'io.rest-assured:rest-assured:4.3.1'
 
-    dependency 'io.vertx:vertx-codegen:3.8.2'
-    dependency 'io.vertx:vertx-core:3.8.2'
-    dependency 'io.vertx:vertx-unit:3.8.2'
-    dependency 'io.vertx:vertx-web-client:3.8.2'
-    dependency 'io.vertx:vertx-web:3.8.2'
+    dependencySet(group: 'io.vertx', version: '3.9.1') {
+       entry 'vertx-codegen'
+       entry 'vertx-core'
+       entry 'vertx-unit'
+       entry 'vertx-web-client'
+       entry 'vertx-web'
+    }
 
     dependency 'javax.activation:activation:1.1.1'
 
@@ -69,12 +72,14 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.2-ADHARA-SNAPSHOT') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.3-ADHARA-SNAPSHOT') {
       entry 'keystorage-hashicorp'
       entry 'keystorage-hsm'
       entry 'keystorage-cavium'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
     }
+
+    dependency 'org.zeroturnaround:zt-exec:1.11'
   }
 }

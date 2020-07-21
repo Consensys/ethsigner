@@ -48,7 +48,8 @@ public class NonceTooLowRetryMechanismTest {
         new JsonRpcErrorResponse(JsonRpcError.INVALID_PARAMS);
 
     assertThat(
-            retryMechanism.responseRequiresRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
+            retryMechanism.responseRequiresRetry(
+                httpResponse.statusCode(), Json.encode(errorResponse)))
         .isFalse();
   }
 
@@ -65,7 +66,8 @@ public class NonceTooLowRetryMechanismTest {
     errorResponse.put("error", new JsonObject());
 
     assertThat(
-            retryMechanism.responseRequiresRetry(httpResponse, Json.encodeToBuffer(errorResponse)))
+            retryMechanism.responseRequiresRetry(
+                httpResponse.statusCode(), Json.encode(errorResponse)))
         .isFalse();
   }
 

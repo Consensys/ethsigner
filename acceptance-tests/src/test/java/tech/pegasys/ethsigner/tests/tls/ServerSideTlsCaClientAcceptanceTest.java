@@ -18,8 +18,8 @@ import static org.assertj.core.api.ThrowableAssert.catchThrowable;
 
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.tests.dsl.http.HttpRequest;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 import tech.pegasys.ethsigner.tests.dsl.tls.BasicTlsOptions;
@@ -73,8 +73,8 @@ public class ServerSideTlsCaClientAcceptanceTest {
 
     return new Signer(
         configBuilder.build(),
-        new NodeConfigurationBuilder().build(),
-        new NodePorts(1, 2),
+        BesuNodeConfig.DEFAULT_HOST,
+        new BesuNodePorts(1, 2),
         clientTlsConfig);
   }
 

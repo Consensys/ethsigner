@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,23 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.tests.dsl.node;
+package tech.pegasys.ethsigner.core.requesthandler;
 
-public class NodePorts {
+import java.util.Map.Entry;
 
-  private final int httpRpc;
-  private final int webSocketRpc;
+import io.vertx.core.http.HttpMethod;
 
-  public NodePorts(final int httpRpc, final int webSocketRpc) {
-    this.httpRpc = httpRpc;
-    this.webSocketRpc = webSocketRpc;
-  }
+public interface RequestTransmitter {
 
-  public int getHttpRpc() {
-    return httpRpc;
-  }
-
-  public int getWebSocketRpc() {
-    return webSocketRpc;
-  }
+  void sendRequest(
+      HttpMethod method, Iterable<Entry<String, String>> headers, String path, String body);
 }

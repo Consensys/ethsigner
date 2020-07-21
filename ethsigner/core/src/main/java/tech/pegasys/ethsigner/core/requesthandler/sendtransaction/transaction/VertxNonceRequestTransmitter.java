@@ -12,24 +12,26 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
-import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
+import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
+import tech.pegasys.ethsigner.core.requesthandler.RequestTransmitter;
+import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
 import java.math.BigInteger;
-import java.time.Duration;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
@@ -43,23 +45,37 @@ public class VertxNonceRequestTransmitter {
   private static final Logger LOG = LogManager.getLogger();
 
   private final MultiMap headers;
-  private final HttpClient client;
   private final JsonDecoder decoder;
-  private final Duration requestTimeout;
+  private final VertxRequestTransmitterFactory transmitterFactory;
+
   private static final AtomicInteger nextId = new AtomicInteger(0);
-  private final DownstreamPathCalculator downstreamPathCalculator;
+
+  private class ResponseCallback implements DownstreamResponseHandler {
+    private final CompletableFuture<BigInteger> result;
+
+    private ResponseCallback(final CompletableFuture<BigInteger> result) {
+      this.result = result;
+    }
+
+    @Override
+    public void handleResponse(
+        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
+      VertxNonceRequestTransmitter.this.handleResponse(body, result);
+    }
+
+    @Override
+    public void handleFailure(Throwable t) {
+      result.completeExceptionally(t);
+    }
+  }
 
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
-      final HttpClient client,
       final JsonDecoder decoder,
-      final Duration requestTimeout,
-      final DownstreamPathCalculator downstreamPathCalculator) {
+      final VertxRequestTransmitterFactory transmitterFactory) {
     this.headers = headers;
-    this.client = client;
+    this.transmitterFactory = transmitterFactory;
     this.decoder = decoder;
-    this.requestTimeout = requestTimeout;
-    this.downstreamPathCalculator = downstreamPathCalculator;
   }
 
   public BigInteger requestNonce(final JsonRpcRequest request) {
@@ -77,32 +93,24 @@ public class VertxNonceRequestTransmitter {
   private CompletableFuture<BigInteger> getNonceFromWeb3Provider(
       final JsonRpcRequest requestBody, final MultiMap headers) {
 
-    requestBody.setId(new JsonRpcRequestId(nextId.getAndIncrement()));
-
     final CompletableFuture<BigInteger> result = new CompletableFuture<>();
 
-    final HttpClientRequest request =
-        client.request(
-            HttpMethod.POST,
-            downstreamPathCalculator.calculateDownstreamPath("/"),
-            response -> response.bodyHandler(responseBody -> handleResponse(responseBody, result)));
+    final RequestTransmitter transmitter = transmitterFactory.create(new ResponseCallback(result));
 
-    request.setTimeout(requestTimeout.toMillis());
-    request.headers().setAll(headers);
-    request.exceptionHandler(result::completeExceptionally);
-    request.headers().remove("Content-Length"); // created during 'end'.
-    request.setChunked(false);
-    request.end(Json.encode(requestBody));
+    final MultiMap headersToSend = HeaderHelpers.createHeaders(headers);
+    requestBody.setId(new JsonRpcRequestId(nextId.getAndIncrement()));
+    transmitter.sendRequest(HttpMethod.POST, headersToSend, "/", Json.encode(requestBody));
+
     LOG.info("Transmitted {}", Json.encode(requestBody));
 
     return result;
   }
 
-  private void handleResponse(final Buffer bodyBuffer, final CompletableFuture<BigInteger> result) {
+  private void handleResponse(final String body, final CompletableFuture<BigInteger> result) {
     try {
 
       final JsonRpcSuccessResponse response =
-          decoder.decodeValue(bodyBuffer, JsonRpcSuccessResponse.class);
+          decoder.decodeValue(Buffer.buffer(body), JsonRpcSuccessResponse.class);
       final Object suppliedNonce = response.getResult();
       if (suppliedNonce instanceof String) {
         try {
@@ -115,10 +123,17 @@ public class VertxNonceRequestTransmitter {
       }
       result.completeExceptionally(new RuntimeException("Web3 did not provide a string response."));
     } catch (final DecodeException e) {
-      result.completeExceptionally(
-          new RuntimeException(
-              "Web3 Provider did not respond with a valid success message: "
-                  + bodyBuffer.toString(UTF_8)));
+      result.completeExceptionally(new JsonRpcException(determineErrorCode(body)));
+    }
+  }
+
+  private JsonRpcError determineErrorCode(final String body) {
+    try {
+      final JsonRpcErrorResponse response =
+          decoder.decodeValue(Buffer.buffer(body), JsonRpcErrorResponse.class);
+      return response.getError();
+    } catch (final DecodeException e) {
+      return JsonRpcError.INTERNAL_ERROR;
     }
   }
 }

@@ -14,7 +14,6 @@ package tech.pegasys.ethsigner.tests.tls.support;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
 
 import io.vertx.ext.web.RoutingContext;
@@ -26,9 +25,7 @@ public class MockBalanceReporter implements JsonRpcRequestHandler {
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest rpcRequest) {
     final HttpResponseFactory responseFactory = new HttpResponseFactory();
-    responseFactory.create(
-        context.request(),
-        200,
-        new JsonRpcSuccessResponse(rpcRequest.getId(), String.format("0x%X", REPORTED_BALANCE)));
+    responseFactory.successResponse(
+        context.response(), rpcRequest.getId(), String.format("0x%X", REPORTED_BALANCE));
   }
 }

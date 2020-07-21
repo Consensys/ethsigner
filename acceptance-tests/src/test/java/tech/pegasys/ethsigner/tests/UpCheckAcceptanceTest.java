@@ -15,9 +15,8 @@ package tech.pegasys.ethsigner.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import tech.pegasys.ethsigner.tests.dsl.http.HttpResponse;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfiguration;
-import tech.pegasys.ethsigner.tests.dsl.node.NodeConfigurationBuilder;
-import tech.pegasys.ethsigner.tests.dsl.node.NodePorts;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 import tech.pegasys.ethsigner.tests.dsl.signer.Signer;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfiguration;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
@@ -42,10 +41,9 @@ public class UpCheckAcceptanceTest {
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(UpCheckAcceptanceTest::tearDownBase));
 
-    final NodeConfiguration nodeConfig = new NodeConfigurationBuilder().build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
-    ethSigner = new Signer(signerConfig, nodeConfig, new NodePorts(1, 2));
+    ethSigner = new Signer(signerConfig, BesuNodeConfig.DEFAULT_HOST, new BesuNodePorts(1, 2));
     ethSigner.start();
     ethSigner.awaitStartupCompletion();
   }

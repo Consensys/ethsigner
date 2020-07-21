@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.tests.dsl.Accounts;
 import tech.pegasys.ethsigner.tests.dsl.PrivateContracts;
 import tech.pegasys.ethsigner.tests.dsl.PublicContracts;
 import tech.pegasys.ethsigner.tests.dsl.Transactions;
+import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodePorts;
 
 public interface Node {
 
@@ -25,7 +26,7 @@ public interface Node {
 
   void awaitStartupCompletion();
 
-  NodePorts ports();
+  BesuNodePorts ports();
 
   Accounts accounts();
 
