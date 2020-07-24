@@ -47,6 +47,7 @@ dependencies {
   testImplementation 'org.assertj:assertj-core'
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-junit-jupiter'
+  testImplementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 

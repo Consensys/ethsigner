@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -93,7 +93,7 @@ public class CommandlineParser {
     if (!parseResult.hasSubcommand()) {
       errorWriter.println(MISSING_SUBCOMMAND_ERROR);
     } else {
-      if (ex instanceof TransactionSignerInitializationException) {
+      if (ex instanceof SignerInitializationException) {
         errorWriter.println(SIGNER_CREATION_ERROR);
         errorWriter.println("Cause: " + ex.getMessage());
       } else if (ex instanceof InitializationException) {

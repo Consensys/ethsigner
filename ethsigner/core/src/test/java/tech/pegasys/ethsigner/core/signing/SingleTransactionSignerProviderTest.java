@@ -16,8 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.ethsigner.support.StubbedPublicKey;
+import tech.pegasys.signers.secp256k1.api.PublicKey;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -28,51 +30,50 @@ import org.junit.jupiter.api.Test;
 
 class SingleTransactionSignerProviderTest {
 
-  private TransactionSigner transactionSigner;
-  private SingleTransactionSignerProvider signerFactory;
+  private Signer transactionSigner;
+  private SingleSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
-    transactionSigner = mock(TransactionSigner.class);
-    signerFactory = new SingleTransactionSignerProvider(transactionSigner);
+    transactionSigner = mock(Signer.class);
+    signerFactory = new SingleSignerProvider(transactionSigner);
   }
 
   @Test
   void whenSignerIsNullFactoryCreationFails() {
-    Assertions.assertThrows(
-        IllegalArgumentException.class, () -> new SingleTransactionSignerProvider(null));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> new SingleSignerProvider(null));
   }
 
   @Test
-  void whenSignerAddressIsNullFactoryAvailableAddressesShouldReturnEmptySet() {
-    when(transactionSigner.getAddress()).thenReturn(null);
+  void whenSignerPublicKeyIsNullFactoryAvailablePublicKeysShouldReturnEmptySet() {
+    when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Collection<String> addresses = signerFactory.availableAddresses();
-    assertThat(addresses).isEmpty();
+    final Collection<PublicKey> publicKeys = signerFactory.availablePublicKeys();
+    assertThat(publicKeys).isEmpty();
   }
 
   @Test
-  void whenSignerAddressIsNullFactoryGetSignerShouldReturnEmpty() {
-    when(transactionSigner.getAddress()).thenReturn(null);
+  void whenSignerPublicKeyIsNullFactoryGetSignerShouldReturnEmpty() {
+    when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner(new StubbedPublicKey("0x00"));
     assertThat(signer).isEmpty();
   }
 
   @Test
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+    when(transactionSigner.getPublicKey()).thenReturn(new StubbedPublicKey("0x00"));
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner(new StubbedPublicKey("0x00"));
     assertThat(signer).isNotEmpty();
   }
 
   @Test
-  void getSignerAddressIsCaseInsensitive() {
-    when(transactionSigner.getAddress()).thenReturn("0xa");
+  void getSignerPublicKeyIsCaseInsensitive() {
+    when(transactionSigner.getPublicKey()).thenReturn(new StubbedPublicKey("0xAA"));
 
-    assertThat(signerFactory.getSigner("0xa")).isNotEmpty();
-    assertThat(signerFactory.getSigner("0xA")).isNotEmpty();
+    assertThat(signerFactory.getSigner(new StubbedPublicKey("0xaa"))).isNotEmpty();
+    assertThat(signerFactory.getSigner(new StubbedPublicKey("0xAA"))).isNotEmpty();
   }
 
   @Test
@@ -82,17 +83,17 @@ class SingleTransactionSignerProviderTest {
 
   @Test
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+    when(transactionSigner.getPublicKey()).thenReturn(new StubbedPublicKey("0x00"));
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
+    final Optional<Signer> signer = signerFactory.getSigner(new StubbedPublicKey("0x01"));
     assertThat(signer).isEmpty();
   }
 
   @Test
-  void whenGetAvailableAddressesShouldReturnSignerAddress() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+  void whenGetAvailablePublicKeyShouldReturnSignerAddress() {
+    when(transactionSigner.getPublicKey()).thenReturn(new StubbedPublicKey("0x00"));
 
-    final Collection<String> addresses = signerFactory.availableAddresses();
-    assertThat(addresses).containsExactly("0x0");
+    final Collection<PublicKey> addresses = signerFactory.availablePublicKeys();
+    assertThat(addresses).containsExactly(new StubbedPublicKey("0x00"));
   }
 }

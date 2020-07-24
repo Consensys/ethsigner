@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
+import tech.pegasys.signers.secp256k1.api.PublicKey;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,15 +26,17 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
+import org.web3j.crypto.Keys;
 
 public class EthAccountsResultProvider implements ResultProvider<List<String>> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Supplier<Set<String>> addressesSupplier;
+  private final Supplier<Set<PublicKey>> publicKeySupplier;
 
-  public EthAccountsResultProvider(final Supplier<Set<String>> addressesSupplier) {
-    this.addressesSupplier = addressesSupplier;
+  public EthAccountsResultProvider(final Supplier<Set<PublicKey>> publicKeySupplier) {
+    this.publicKeySupplier = publicKeySupplier;
   }
 
   @Override
@@ -45,7 +48,10 @@ public class EthAccountsResultProvider implements ResultProvider<List<String>> {
       throw new JsonRpcException(JsonRpcError.INVALID_PARAMS);
     }
 
-    return addressesSupplier.get().stream().sorted().collect(Collectors.toList());
+    return publicKeySupplier.get().stream()
+        .map(pk -> Bytes.wrap(Keys.getAddress(pk.getValue())).toHexString())
+        .sorted()
+        .collect(Collectors.toList());
   }
 
   private boolean isPopulated(final Object params) {
