@@ -52,12 +52,14 @@ public class EthSignResultProvider implements ResultProvider<String> {
           params == null ? "null" : params.size());
       throw new JsonRpcException(INVALID_PARAMS);
     }
+
     final String address = params.get(0);
     final Optional<Signer> transactionSigner = transactionSignerProvider.getSigner(address);
     if (transactionSigner.isEmpty()) {
       LOG.info("Address ({}) does not match any available account", address);
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
+
     final Signer signer = transactionSigner.get();
     final String originalMessage = params.get(1);
     final String message =

@@ -84,18 +84,6 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
-    // TODO(tmm): WONDERING if this should be removed - i.e. is the signers repo safe alreayd?
-    final HexStringComparator comparator = new HexStringComparator();
-    final String signerAddress = Keys.getAddress(signer.get().getPublicKey().toString());
-    if (comparator.compare(signerAddress, transaction.sender()) != 0) {
-      LOG.info(
-          "Ethereum address derived from identifier ({}) is incorrect value ({})",
-          transaction.sender(),
-          signerAddress);
-      context.fail(INTERNAL_SERVER_ERROR.code(), new JsonRpcException(TX_SENDER_NOT_AUTHORIZED));
-      return;
-    }
-
     final TransactionSerializer transactionSerializer =
         new TransactionSerializer(signer.get(), chainId);
     sendTransaction(transaction, transactionSerializer, context, request);
