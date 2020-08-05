@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.EthSignerBaseCommand;
+
 import java.nio.file.Paths;
 
 import org.apache.logging.log4j.Level;
@@ -25,12 +27,13 @@ public class FileBasedSubCommandTest {
   private static final String PASSWORD_FILE =
       Paths.get("/this/is/the/path/to/the/password/file").toString();
   private static final String KEY_FILE = Paths.get("/this/is/the/path/to/the/key/file").toString();
+  private static final EthSignerBaseCommand CONFIG = new EthSignerBaseCommand();
 
-  private FileBasedSubCommand config;
+  private FileBasedSubCommand fileBasedSubCommand;
 
   private boolean parseCommand(final String cmdLine) {
-    config = new FileBasedSubCommand();
-    final CommandLine commandLine = new CommandLine(config);
+    fileBasedSubCommand = new FileBasedSubCommand(CONFIG);
+    final CommandLine commandLine = new CommandLine(fileBasedSubCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
 
@@ -55,8 +58,8 @@ public class FileBasedSubCommandTest {
     final boolean result = parseCommand(validCommandLine());
 
     assertThat(result).isTrue();
-    assertThat(config.toString()).contains(PASSWORD_FILE);
-    assertThat(config.toString()).contains(KEY_FILE);
+    assertThat(fileBasedSubCommand.toString()).contains(PASSWORD_FILE);
+    assertThat(fileBasedSubCommand.toString()).contains(KEY_FILE);
   }
 
   @Test

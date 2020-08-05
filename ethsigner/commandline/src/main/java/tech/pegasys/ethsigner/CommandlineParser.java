@@ -21,6 +21,7 @@ import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationExce
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +44,6 @@ public class CommandlineParser {
   private final PrintWriter errorWriter;
   private final Map<String, String> environment;
 
-  public static final String MISSING_SUBCOMMAND_ERROR = "Signer subcommand must be defined.";
   public static final String SIGNER_CREATION_ERROR =
       "Failed to construct a signer from supplied arguments.";
 
@@ -58,8 +58,8 @@ public class CommandlineParser {
     this.environment = environment;
   }
 
-  public void registerSigner(final SignerSubCommand signerSubCommand) {
-    signers.add(signerSubCommand);
+  public void registerSigner(final SignerSubCommand... signerSubCommands) {
+    signers.addAll(Arrays.asList(signerSubCommands));
   }
 
   public boolean parseCommandLine(final String... args) {
@@ -97,12 +97,18 @@ public class CommandlineParser {
 
   private int executeCommandVersion() {
     final CommandLine baseCommandLine = new CommandLine(baseCommand);
+    for (final SignerSubCommand subcommand : signers) {
+      baseCommandLine.addSubcommand(subcommand.getCommandName(), subcommand);
+    }
     baseCommandLine.printVersionHelp(outputWriter);
     return baseCommandLine.getCommandSpec().exitCodeOnVersionHelp();
   }
 
   private int executeCommandUsageHelp() {
     final CommandLine baseCommandLine = new CommandLine(baseCommand);
+    for (final SignerSubCommand subcommand : signers) {
+      baseCommandLine.addSubcommand(subcommand.getCommandName(), subcommand);
+    }
     baseCommandLine.usage(outputWriter);
     return baseCommandLine.getCommandSpec().exitCodeOnUsageHelp();
   }
@@ -115,7 +121,7 @@ public class CommandlineParser {
 
     return new CascadingDefaultProvider(
         new EnvironmentVariableDefaultProvider(environment),
-        new TomlConfigFileDefaultProvider(commandLine, configFile.get()));
+        new TomlConfigFileDefaultProvider(commandLine, configFile.get().toPath()));
   }
 
   private int handleParseException(final ParameterException ex, final String[] args) {
@@ -137,21 +143,18 @@ public class CommandlineParser {
       final Exception ex,
       final CommandLine commandLine,
       final CommandLine.ParseResult parseResult) {
-    if (!parseResult.hasSubcommand()) {
-      errorWriter.println(MISSING_SUBCOMMAND_ERROR);
+
+    if (ex instanceof TransactionSignerInitializationException) {
+      errorWriter.println(SIGNER_CREATION_ERROR);
+      errorWriter.println("Cause: " + ex.getMessage());
+    } else if (ex instanceof InitializationException) {
+      errorWriter.println("Failed to initialize EthSigner");
+      errorWriter.println("Cause: " + ex.getMessage());
+    } else if (ex instanceof InvalidCommandLineOptionsException) {
+      errorWriter.println(ex.getMessage());
     } else {
-      if (ex instanceof TransactionSignerInitializationException) {
-        errorWriter.println(SIGNER_CREATION_ERROR);
-        errorWriter.println("Cause: " + ex.getMessage());
-      } else if (ex instanceof InitializationException) {
-        errorWriter.println("Failed to initialize EthSigner");
-        errorWriter.println("Cause: " + ex.getMessage());
-      } else if (ex instanceof InvalidCommandLineOptionsException) {
-        errorWriter.println(ex.getMessage());
-      } else {
-        LOG.error("EthSigner has suffered an unrecoverable failure", ex);
-        errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
-      }
+      LOG.error("EthSigner has suffered an unrecoverable failure", ex);
+      errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
     }
 
     commandLine.usage(outputWriter);

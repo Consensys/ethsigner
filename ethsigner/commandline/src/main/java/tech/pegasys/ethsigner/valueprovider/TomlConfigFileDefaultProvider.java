@@ -12,20 +12,22 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import static java.util.function.Predicate.not;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.toml.Toml;
+import org.apache.tuweni.toml.TomlArray;
+import org.apache.tuweni.toml.TomlParseError;
+import org.apache.tuweni.toml.TomlParseResult;
 import picocli.CommandLine;
 import picocli.CommandLine.IDefaultValueProvider;
 import picocli.CommandLine.Model.ArgSpec;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Model.OptionSpec;
 import picocli.CommandLine.ParameterException;
 
@@ -33,11 +35,11 @@ import picocli.CommandLine.ParameterException;
 public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
 
   private final CommandLine commandLine;
-  private final File configFile;
+  private final Path configFile;
   // this will be initialized on fist call of defaultValue by PicoCLI parseArgs
-  private Map<String, Object> result;
+  private TomlParseResult result;
 
-  public TomlConfigFileDefaultProvider(final CommandLine commandLine, final File configFile) {
+  public TomlConfigFileDefaultProvider(final CommandLine commandLine, final Path configFile) {
     this.commandLine = commandLine;
     this.configFile = configFile;
   }
@@ -45,9 +47,9 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
   @Override
   public String defaultValue(final ArgSpec argSpec) {
     if (result == null) {
-      result = loadConfigurationFromFile();
-      checkConfigurationValidity(result == null || result.isEmpty());
-      checkUnknownOptions(result);
+      result = loadConfigurationFromFile(configFile, commandLine);
+      checkEmptyFile(result, configFile, commandLine);
+      checkUnknownOptions();
     }
 
     // only options can be used in config because a name is needed for the key
@@ -55,26 +57,57 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
     return argSpec.isOption() ? getConfigurationValue(((OptionSpec) argSpec)) : null;
   }
 
-  private Map<String, Object> loadConfigurationFromFile() {
-    return Collections.emptyMap(); // unreachable
+  private static TomlParseResult loadConfigurationFromFile(
+      final Path configFile, final CommandLine commandLine) {
+    try {
+      final TomlParseResult result = Toml.parse(configFile);
+      if (result.hasErrors()) {
+        final String errors =
+            result.errors().stream()
+                .map(TomlParseError::toString)
+                .collect(Collectors.joining("%n"));
+
+        throw new ParameterException(
+            commandLine, String.format("Invalid TOML configuration: %s", errors));
+      }
+
+      return result;
+    } catch (final FileNotFoundException e) {
+      throw new ParameterException(commandLine, "TOML configuration file not found: " + configFile);
+    } catch (final IOException e) {
+      throw new ParameterException(
+          commandLine,
+          "Unexpected IO error while reading TOML configuration file. " + e.getMessage());
+    }
   }
 
-  /*
-  @SuppressWarnings("AnnotateFormatMethod")
-  private void throwParameterException(
-          final Throwable cause, final String message, Object... messageArgs) {
-    throw new ParameterException(
-        commandLine,
-        ArrayUtils.isEmpty(messageArgs) ? message : String.format(message, messageArgs),
-        cause);
-  }*/
+  private void checkUnknownOptions() {
+    final Set<String> picoCliOptionsKeys = new TreeSet<>();
 
-  private void checkUnknownOptions(final Map<String, Object> result) {
-    final CommandSpec commandSpec = commandLine.getCommandSpec();
+    // parent command options
+    commandLine
+        .getCommandSpec()
+        .options()
+        .forEach(optionSpec -> picoCliOptionsKeys.add(stripPrefix(optionSpec.longestName())));
+    // subcommands options
+    commandLine
+        .getSubcommands()
+        .values()
+        .forEach(
+            subCommandLine ->
+                subCommandLine
+                    .getCommandSpec()
+                    .options()
+                    .forEach(
+                        optionSpec ->
+                            picoCliOptionsKeys.add(
+                                 subCommandLine.getCommandName()
+                                    + "."
+                                    + stripPrefix(optionSpec.longestName()))));
 
     final Set<String> unknownOptionsList =
-        result.keySet().stream()
-            .filter(option -> !commandSpec.optionsMap().containsKey("--" + option))
+        result.dottedKeySet().stream()
+            .filter(not(picoCliOptionsKeys::contains))
             .collect(Collectors.toCollection(TreeSet::new));
 
     if (!unknownOptionsList.isEmpty()) {
@@ -82,39 +115,49 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
       final String csvUnknownOptions = String.join(", ", unknownOptionsList);
       throw new ParameterException(
           commandLine,
-          String.format("Unknown %s in toml configuration file: %s", options, csvUnknownOptions));
+          String.format("Unknown %s in TOML configuration file: %s", options, csvUnknownOptions));
     }
   }
 
-  private void checkConfigurationValidity(boolean isEmpty) {
-    if (isEmpty) {
+  private static void checkEmptyFile(
+      final TomlParseResult result, final Path configFile, final CommandLine commandLine) {
+    if (result == null || result.isEmpty()) {
       throw new ParameterException(
-          commandLine, String.format("Empty toml configuration file: %s", configFile));
+          commandLine, String.format("Empty TOML configuration file: %s", configFile));
     }
   }
 
   private String getConfigurationValue(final OptionSpec optionSpec) {
-    final Optional<Object> optionalValue = getKeyName(optionSpec).map(result::get);
-    if (optionalValue.isEmpty()) {
+    final String keyName;
+    if (!commandLine.getCommandName().equals(optionSpec.command().name())) {
+      // subcommand option
+      keyName = optionSpec.command().name() + "." + stripPrefix(optionSpec.longestName());
+    } else {
+      keyName = stripPrefix(optionSpec.longestName());
+    }
+
+    final Object value = result.get(keyName);
+
+    if (value == null) {
       return null;
     }
 
-    final Object value = optionalValue.get();
-
-    if (optionSpec.isMultiValue() && value instanceof Collection) {
-      return ((Collection<?>) value).stream().map(String::valueOf).collect(Collectors.joining(","));
+    // handle array
+    if (optionSpec.isMultiValue() && result.isArray(keyName)) {
+      return ((TomlArray) value)
+          .toList().stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
+    // convert all other values to string
     return String.valueOf(value);
   }
 
-  private Optional<String> getKeyName(final OptionSpec spec) {
-    // If any of the names of the option are used as key in the toml results
-    // then returns the value of first one.
-    return Arrays.stream(spec.names())
-        // remove leading dashes on option name as we can have "--" or "-" options
-        .map(name -> name.replaceFirst("^-+", ""))
-        .filter(result::containsKey)
-        .findFirst();
+  private static String stripPrefix(String prefixed) {
+    for (int i = 0; i < prefixed.length(); i++) {
+      if (Character.isJavaIdentifierPart(prefixed.charAt(i))) {
+        return prefixed.substring(i);
+      }
+    }
+    return prefixed;
   }
 }

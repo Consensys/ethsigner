@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -36,6 +37,10 @@ import picocli.CommandLine.Option;
     description = "Sign transactions using the Azure signing service.",
     mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
+
+  public AzureSubCommand(final Config config) {
+    super(config);
+  }
 
   @Option(
       names = {"--keyvault-name", "--key-vault-name"},

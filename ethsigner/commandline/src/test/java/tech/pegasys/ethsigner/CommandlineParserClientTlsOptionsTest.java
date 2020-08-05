@@ -47,8 +47,8 @@ class CommandlineParserClientTlsOptionsTest {
 
   @BeforeEach
   void setup() {
-    subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
+    subCommand = new NullSignerSubCommand(config);
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 

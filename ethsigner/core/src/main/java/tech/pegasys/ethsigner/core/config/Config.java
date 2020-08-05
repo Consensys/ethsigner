@@ -47,4 +47,6 @@ public interface Config {
   Optional<ClientTlsOptions> getClientTlsOptions();
 
   Collection<String> getCorsAllowedOrigins();
+
+  void validateArgs();
 }

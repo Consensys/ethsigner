@@ -12,18 +12,16 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.IDefaultValueProvider;
 import picocli.CommandLine.Model.ArgSpec;
 import picocli.CommandLine.Model.OptionSpec;
 
 public class EnvironmentVariableDefaultProvider implements IDefaultValueProvider {
-  private static final String ENV_VAR_PREFIX = "ETHSIGNER_";
+  private static final Logger LOG = LogManager.getLogger();
 
   private final Map<String, String> environment;
 
@@ -33,25 +31,25 @@ public class EnvironmentVariableDefaultProvider implements IDefaultValueProvider
 
   @Override
   public String defaultValue(final ArgSpec argSpec) {
+
     if (argSpec.isOption()) {
-      return envVarNames((OptionSpec) argSpec)
-          .map(environment::get)
-          .filter(Objects::nonNull)
-          .findFirst()
-          .orElse(null);
+      final OptionSpec optionSpec = (OptionSpec) argSpec;
+      final String prefix = optionSpec.command().qualifiedName("_").toUpperCase() + "_";
+      final String key =
+          prefix + stripPrefix(optionSpec.longestName()).replace("-", "_").toUpperCase();
+      LOG.info("Env Key {}", key);
+      return environment.get(key);
     }
 
     return null; // currently not supporting positional parameters
   }
 
-  private Stream<String> envVarNames(final OptionSpec spec) {
-    // TODO Determine subcommands options names
-    return Arrays.stream(spec.names())
-        .filter(name -> name.startsWith("--")) // Only long options are allowed
-        .map(name -> ENV_VAR_PREFIX + nameToEnvVarSuffix(name));
-  }
-
-  private String nameToEnvVarSuffix(final String name) {
-    return name.substring("--".length()).replace('-', '_').toUpperCase(Locale.US);
+  private static String stripPrefix(String prefixed) {
+    for (int i = 0; i < prefixed.length(); i++) {
+      if (Character.isJavaIdentifierPart(prefixed.charAt(i))) {
+        return prefixed.substring(i);
+      }
+    }
+    return prefixed;
   }
 }

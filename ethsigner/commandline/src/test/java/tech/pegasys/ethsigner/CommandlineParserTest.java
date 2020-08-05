@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
-import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
@@ -54,8 +53,8 @@ class CommandlineParserTest {
 
   @BeforeEach
   void setup() {
-    subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
+    subCommand = new NullSignerSubCommand(config);
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 
@@ -124,7 +123,7 @@ class CommandlineParserTest {
     final boolean result =
         parser.parseCommandLine(validBaseCommandOptions().toArray(String[]::new));
     assertThat(result).isFalse();
-    assertThat(commandError.toString()).contains(MISSING_SUBCOMMAND_ERROR);
+    assertThat(commandError.toString()).contains("Missing required subcommand");
     assertThat(commandOutput.toString()).contains(defaultUsageText);
   }
 
@@ -225,8 +224,8 @@ class CommandlineParserTest {
 
   @Test
   void creatingSignerDisplaysFailureToCreateSignerText() {
-    subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
+    subCommand = new NullSignerSubCommand(config, true);
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 

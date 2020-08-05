@@ -13,36 +13,32 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.core.EthSigner;
-import tech.pegasys.ethsigner.core.InitializationException;
+import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
-import picocli.CommandLine;
 
 public abstract class SignerSubCommand implements Runnable {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  @CommandLine.ParentCommand private EthSignerBaseCommand config;
+  private final Config config;
+
+  public SignerSubCommand(final Config config) {
+    this.config = config;
+  }
 
   public abstract TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException;
 
   public abstract String getCommandName();
 
-  protected void validateArgs() throws InitializationException {
-    if (config != null) {
-      config.validateArgs();
-    }
-  }
-
   @Override
   public void run() throws TransactionSignerInitializationException {
-
-    validateArgs();
+    config.validateArgs();
 
     // set log level per CLI flags
     System.out.println("Setting logging level to " + config.getLogLevel().name());

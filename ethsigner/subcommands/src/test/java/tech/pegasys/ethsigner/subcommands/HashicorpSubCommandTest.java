@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 
 import tech.pegasys.ethsigner.CmdlineHelpers;
+import tech.pegasys.ethsigner.EthSignerBaseCommand;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
@@ -39,11 +40,12 @@ public class HashicorpSubCommandTest {
   private static final String FIFTEEN = "15";
   private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
 
+  private static final EthSignerBaseCommand CONFIG = new EthSignerBaseCommand();
   private HashicorpSubCommand hashicorpSubCommand;
 
   @BeforeEach
   void init() {
-    hashicorpSubCommand = new HashicorpSubCommand();
+    hashicorpSubCommand = new HashicorpSubCommand(CONFIG);
   }
 
   private boolean parseCommand(final List<String> cmdLine) {
@@ -136,13 +138,13 @@ public class HashicorpSubCommandTest {
   public void missingOptionalParametersAreSetToDefault() {
     // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
     // object.
-    HashicorpSubCommand hcConfig = new HashicorpSubCommand();
+    HashicorpSubCommand hcConfig = new HashicorpSubCommand(CONFIG);
     missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "localhost");
 
-    hcConfig = new HashicorpSubCommand();
+    hcConfig = new HashicorpSubCommand(CONFIG);
     missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "8200");
 
-    hcConfig = new HashicorpSubCommand();
+    hcConfig = new HashicorpSubCommand(CONFIG);
     missingOptionalParameterIsValidAndMeetsDefault(
         "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
   }

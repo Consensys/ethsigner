@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
@@ -70,7 +69,7 @@ public class EthSignerBaseCommand implements Config {
   @Spec private CommandSpec spec; // injected by picocli
 
   @SuppressWarnings("UnusedVariable")
-  @CommandLine.Option(
+  @Option(
       names = {CONFIG_FILE_OPTION_NAME},
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       description = "Config file in toml format (default: none)")
@@ -254,7 +253,8 @@ public class EthSignerBaseCommand implements Config {
         .toString();
   }
 
-  void validateArgs() {
+  @Override
+  public void validateArgs() {
     if (getClientTlsOptions().isPresent()) {
       final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
       final Optional<Path> optionsKnownServerFile =
