@@ -95,22 +95,20 @@ public class CommandlineParser {
     return resultCode == CommandLine.ExitCode.OK;
   }
 
-  private int executeCommandVersion() {
+  private void executeCommandVersion() {
     final CommandLine baseCommandLine = new CommandLine(baseCommand);
     for (final SignerSubCommand subcommand : signers) {
       baseCommandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
     baseCommandLine.printVersionHelp(outputWriter);
-    return baseCommandLine.getCommandSpec().exitCodeOnVersionHelp();
   }
 
-  private int executeCommandUsageHelp() {
+  private void executeCommandUsageHelp() {
     final CommandLine baseCommandLine = new CommandLine(baseCommand);
     for (final SignerSubCommand subcommand : signers) {
       baseCommandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
     baseCommandLine.usage(outputWriter);
-    return baseCommandLine.getCommandSpec().exitCodeOnUsageHelp();
   }
 
   private CommandLine.IDefaultValueProvider defaultValueProvider(
