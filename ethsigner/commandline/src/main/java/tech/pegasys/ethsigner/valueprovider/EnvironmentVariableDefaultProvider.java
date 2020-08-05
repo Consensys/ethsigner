@@ -14,14 +14,11 @@ package tech.pegasys.ethsigner.valueprovider;
 
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.IDefaultValueProvider;
 import picocli.CommandLine.Model.ArgSpec;
 import picocli.CommandLine.Model.OptionSpec;
 
 public class EnvironmentVariableDefaultProvider implements IDefaultValueProvider {
-  private static final Logger LOG = LogManager.getLogger();
 
   private final Map<String, String> environment;
 
