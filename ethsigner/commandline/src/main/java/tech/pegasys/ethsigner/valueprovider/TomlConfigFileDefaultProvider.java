@@ -88,7 +88,7 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
     // parent command options
     final Set<String> mainCommandOptions =
         commandLine.getCommandSpec().options().stream()
-            .map(optionSpec -> stripPrefix(optionSpec.longestName()))
+            .map(TomlConfigFileDefaultProvider::buildOptionName)
             .collect(Collectors.toSet());
 
     // subcommands options
@@ -120,7 +120,7 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
   }
 
   private static String buildQualifiedOptionName(final OptionSpec optionSpec) {
-    return optionSpec.command().name() + "." + stripPrefix(optionSpec.longestName());
+    return optionSpec.command().name() + "." + buildOptionName(optionSpec);
   }
 
   private static void checkEmptyFile(
@@ -133,11 +133,11 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
 
   private String getConfigurationValue(final OptionSpec optionSpec) {
     final String keyName;
-    if (!commandLine.getCommandName().equals(optionSpec.command().name())) {
+    if (commandLine.getCommandName().equals(optionSpec.command().name())) {
+      keyName = buildOptionName(optionSpec);
+    } else {
       // subcommand option
       keyName = buildQualifiedOptionName(optionSpec);
-    } else {
-      keyName = stripPrefix(optionSpec.longestName());
     }
 
     final Object value = result.get(keyName);
@@ -154,6 +154,10 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
 
     // convert all other values to string
     return String.valueOf(value);
+  }
+
+  private static String buildOptionName(final OptionSpec optionSpec) {
+    return stripPrefix(optionSpec.longestName());
   }
 
   private static String stripPrefix(String prefixed) {

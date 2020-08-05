@@ -37,7 +37,6 @@ public class EnvironmentVariableDefaultProvider implements IDefaultValueProvider
       final String prefix = optionSpec.command().qualifiedName("_").toUpperCase() + "_";
       final String key =
           prefix + stripPrefix(optionSpec.longestName()).replace("-", "_").toUpperCase();
-      LOG.info("Env Key {}", key);
       return environment.get(key);
     }
 
