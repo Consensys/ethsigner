@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.tuweni.toml.Toml;
 import org.apache.tuweni.toml.TomlArray;
@@ -85,25 +86,20 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
     final Set<String> picoCliOptionsKeys = new TreeSet<>();
 
     // parent command options
-    commandLine
-        .getCommandSpec()
-        .options()
-        .forEach(optionSpec -> picoCliOptionsKeys.add(stripPrefix(optionSpec.longestName())));
+    final Set<String> mainCommandOptions =
+        commandLine.getCommandSpec().options().stream()
+            .map(optionSpec -> stripPrefix(optionSpec.longestName()))
+            .collect(Collectors.toSet());
+
     // subcommands options
-    commandLine
-        .getSubcommands()
-        .values()
-        .forEach(
-            subCommandLine ->
-                subCommandLine
-                    .getCommandSpec()
-                    .options()
-                    .forEach(
-                        optionSpec ->
-                            picoCliOptionsKeys.add(
-                                 subCommandLine.getCommandName()
-                                    + "."
-                                    + stripPrefix(optionSpec.longestName()))));
+    final Set<String> subCommandsOptions =
+        commandLine.getSubcommands().values().stream()
+            .flatMap(TomlConfigFileDefaultProvider::subCommandOptions)
+            .map(TomlConfigFileDefaultProvider::buildQualifiedOptionName)
+            .collect(Collectors.toSet());
+
+    picoCliOptionsKeys.addAll(mainCommandOptions);
+    picoCliOptionsKeys.addAll(subCommandsOptions);
 
     final Set<String> unknownOptionsList =
         result.dottedKeySet().stream()
@@ -119,6 +115,14 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
     }
   }
 
+  private static Stream<OptionSpec> subCommandOptions(final CommandLine subcommand) {
+    return subcommand.getCommandSpec().options().stream();
+  }
+
+  private static String buildQualifiedOptionName(final OptionSpec optionSpec) {
+    return optionSpec.command().name() + "." + stripPrefix(optionSpec.longestName());
+  }
+
   private static void checkEmptyFile(
       final TomlParseResult result, final Path configFile, final CommandLine commandLine) {
     if (result == null || result.isEmpty()) {
@@ -131,7 +135,7 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
     final String keyName;
     if (!commandLine.getCommandName().equals(optionSpec.command().name())) {
       // subcommand option
-      keyName = optionSpec.command().name() + "." + stripPrefix(optionSpec.longestName());
+      keyName = buildQualifiedOptionName(optionSpec);
     } else {
       keyName = stripPrefix(optionSpec.longestName());
     }
