@@ -19,7 +19,6 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
-import picocli.CommandLine;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
@@ -37,11 +36,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
@@ -72,9 +71,9 @@ public class EthSignerBaseCommand implements Config {
 
   @SuppressWarnings("UnusedVariable")
   @CommandLine.Option(
-          names = {CONFIG_FILE_OPTION_NAME},
-          paramLabel = MANDATORY_FILE_FORMAT_HELP,
-          description = "Config file in toml format (default: none)")
+      names = {CONFIG_FILE_OPTION_NAME},
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      description = "Config file in toml format (default: none)")
   private final File configFile = null;
 
   @SuppressWarnings("FieldMayBeFinal")

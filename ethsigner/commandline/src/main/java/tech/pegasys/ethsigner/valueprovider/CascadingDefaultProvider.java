@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
-import picocli.CommandLine.IDefaultValueProvider;
-import picocli.CommandLine.Model.ArgSpec;
-
 import java.util.Arrays;
 import java.util.List;
+
+import picocli.CommandLine.IDefaultValueProvider;
+import picocli.CommandLine.Model.ArgSpec;
 
 public class CascadingDefaultProvider implements IDefaultValueProvider {
   private final List<IDefaultValueProvider> defaultValueProviders;

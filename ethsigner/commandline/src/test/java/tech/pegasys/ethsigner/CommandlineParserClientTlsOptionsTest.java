@@ -25,7 +25,6 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 

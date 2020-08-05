@@ -12,13 +12,6 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
-import picocli.CommandLine;
-import picocli.CommandLine.IDefaultValueProvider;
-import picocli.CommandLine.Model.ArgSpec;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Model.OptionSpec;
-import picocli.CommandLine.ParameterException;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import picocli.CommandLine;
+import picocli.CommandLine.IDefaultValueProvider;
+import picocli.CommandLine.Model.ArgSpec;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Model.OptionSpec;
+import picocli.CommandLine.ParameterException;
 
 /** Toml Configuration which is specifically written for EthSigner and sub-commands. */
 public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {

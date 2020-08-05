@@ -72,8 +72,8 @@ public class CommandlineParser {
       executeCommandUsageHelp();
       return true;
     } else if (configFileCommandLine.isVersionHelpRequested()) {
-       executeCommandVersion();
-       return true;
+      executeCommandVersion();
+      return true;
     }
     final Optional<File> configFile = Optional.ofNullable(configFileCommand.configPath);
 
@@ -108,14 +108,14 @@ public class CommandlineParser {
   }
 
   private CommandLine.IDefaultValueProvider defaultValueProvider(
-          final CommandLine commandLine, final Optional<File> configFile) {
+      final CommandLine commandLine, final Optional<File> configFile) {
     if (configFile.isEmpty()) {
       return new EnvironmentVariableDefaultProvider(environment);
     }
 
     return new CascadingDefaultProvider(
-            new EnvironmentVariableDefaultProvider(environment),
-            new TomlConfigFileDefaultProvider(commandLine, configFile.get()));
+        new EnvironmentVariableDefaultProvider(environment),
+        new TomlConfigFileDefaultProvider(commandLine, configFile.get()));
   }
 
   private int handleParseException(final ParameterException ex, final String[] args) {
