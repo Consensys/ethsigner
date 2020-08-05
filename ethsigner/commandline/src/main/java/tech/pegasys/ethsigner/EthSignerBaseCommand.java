@@ -72,7 +72,9 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {CONFIG_FILE_OPTION_NAME},
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      description = "Config file in toml format (default: none)")
+      description = "Config file in toml format (default: none)",
+      hidden = true // TODO: Unhide after acceptance tests PR
+      )
   private final File configFile = null;
 
   @SuppressWarnings("FieldMayBeFinal")
