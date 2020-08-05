@@ -14,10 +14,16 @@ package tech.pegasys.ethsigner;
 
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
+import tech.pegasys.ethsigner.valueprovider.CascadingDefaultProvider;
+import tech.pegasys.ethsigner.valueprovider.EnvironmentVariableDefaultProvider;
+import tech.pegasys.ethsigner.valueprovider.TomlConfigFileDefaultProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.collect.Lists;
 import org.apache.logging.log4j.Level;
@@ -35,6 +41,7 @@ public class CommandlineParser {
   private final EthSignerBaseCommand baseCommand;
   private final PrintWriter outputWriter;
   private final PrintWriter errorWriter;
+  private final Map<String, String> environment;
 
   public static final String MISSING_SUBCOMMAND_ERROR = "Signer subcommand must be defined.";
   public static final String SIGNER_CREATION_ERROR =
@@ -43,10 +50,12 @@ public class CommandlineParser {
   public CommandlineParser(
       final EthSignerBaseCommand baseCommand,
       final PrintWriter outputWriter,
-      final PrintWriter errorWriter) {
+      final PrintWriter errorWriter,
+      final Map<String, String> environment) {
     this.baseCommand = baseCommand;
     this.outputWriter = outputWriter;
     this.errorWriter = errorWriter;
+    this.environment = environment;
   }
 
   public void registerSigner(final SignerSubCommand signerSubCommand) {
@@ -54,7 +63,21 @@ public class CommandlineParser {
   }
 
   public boolean parseCommandLine(final String... args) {
+    // PicoCli 2 pass approach to obtain the config file
+    // first pass to obtain config file if specified
+    final ConfigFileCommand configFileCommand = new ConfigFileCommand();
+    final CommandLine configFileCommandLine = new CommandLine(configFileCommand);
+    configFileCommandLine.parseArgs(args);
+    if (configFileCommandLine.isUsageHelpRequested()) {
+      executeCommandUsageHelp();
+      return true;
+    } else if (configFileCommandLine.isVersionHelpRequested()) {
+       executeCommandVersion();
+       return true;
+    }
+    final Optional<File> configFile = Optional.ofNullable(configFileCommand.configPath);
 
+    // final pass
     final CommandLine commandLine = new CommandLine(baseCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);
     commandLine.registerConverter(Level.class, Level::valueOf);
@@ -67,8 +90,32 @@ public class CommandlineParser {
       commandLine.addSubcommand(subcommand.getCommandName(), subcommand);
     }
 
+    commandLine.setDefaultValueProvider(defaultValueProvider(commandLine, configFile));
     final int resultCode = commandLine.execute(args);
     return resultCode == CommandLine.ExitCode.OK;
+  }
+
+  private int executeCommandVersion() {
+    final CommandLine baseCommandLine = new CommandLine(baseCommand);
+    baseCommandLine.printVersionHelp(outputWriter);
+    return baseCommandLine.getCommandSpec().exitCodeOnVersionHelp();
+  }
+
+  private int executeCommandUsageHelp() {
+    final CommandLine baseCommandLine = new CommandLine(baseCommand);
+    baseCommandLine.usage(outputWriter);
+    return baseCommandLine.getCommandSpec().exitCodeOnUsageHelp();
+  }
+
+  private CommandLine.IDefaultValueProvider defaultValueProvider(
+          final CommandLine commandLine, final Optional<File> configFile) {
+    if (configFile.isEmpty()) {
+      return new EnvironmentVariableDefaultProvider(environment);
+    }
+
+    return new CascadingDefaultProvider(
+            new EnvironmentVariableDefaultProvider(environment),
+            new TomlConfigFileDefaultProvider(commandLine, configFile.get()));
   }
 
   private int handleParseException(final ParameterException ex, final String[] args) {

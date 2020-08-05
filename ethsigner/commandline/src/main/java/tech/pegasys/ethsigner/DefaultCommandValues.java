@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 public interface DefaultCommandValues {
+  String CONFIG_FILE_OPTION_NAME = "--config-file";
   String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
   String MANDATORY_PATH_FORMAT_HELP = "<PATH>";
   String MANDATORY_HOST_FORMAT_HELP = "<HOST>";

@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
@@ -55,7 +56,7 @@ class CommandlineParserTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outputWriter, errorWriter);
+    parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
@@ -226,7 +227,7 @@ class CommandlineParserTest {
   void creatingSignerDisplaysFailureToCreateSignerText() {
     subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outputWriter, errorWriter);
+    parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 
     List<String> cmdLine = validBaseCommandOptions();

@@ -12,11 +12,14 @@
  */
 package tech.pegasys.ethsigner;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.CONFIG_FILE_OPTION_NAME;
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
+import picocli.CommandLine;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
@@ -27,12 +30,14 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
@@ -63,8 +68,14 @@ import picocli.CommandLine.Spec;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
-
   @Spec private CommandSpec spec; // injected by picocli
+
+  @SuppressWarnings("UnusedVariable")
+  @CommandLine.Option(
+          names = {CONFIG_FILE_OPTION_NAME},
+          paramLabel = MANDATORY_FILE_FORMAT_HELP,
+          description = "Config file in toml format (default: none)")
+  private final File configFile = null;
 
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
