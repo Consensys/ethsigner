@@ -26,6 +26,9 @@ public class DemoCommand {
   @Option(names = "--x", description = "x")
   int x;
 
+  @Option(names = "-y", description = "y")
+  int y;
+
   @Option(names = "--name", description = "Name")
   String name;
 

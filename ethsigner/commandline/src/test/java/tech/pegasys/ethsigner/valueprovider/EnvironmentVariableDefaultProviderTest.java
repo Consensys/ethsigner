@@ -46,6 +46,7 @@ class EnvironmentVariableDefaultProviderTest {
 
     // assertions
     assertThat(demoCommand.x).isEqualTo(10);
+    assertThat(demoCommand.y).isEqualTo(20);
     assertThat(demoCommand.name).isEqualTo("test name");
     assertThat(subCommand.countryCodes).containsExactlyInAnyOrder("AU", "US");
   }
@@ -61,6 +62,7 @@ class EnvironmentVariableDefaultProviderTest {
 
     // assertions
     assertThat(demoCommand.x).isEqualTo(10);
+    assertThat(demoCommand.y).isEqualTo(20);
     assertThat(demoCommand.name).isEqualTo("test name2");
     assertThat(subCommand.countryCodes).containsExactlyInAnyOrder("AU", "US");
   }
@@ -76,11 +78,13 @@ class EnvironmentVariableDefaultProviderTest {
 
     // assertions
     assertThat(demoCommand.x).isEqualTo(0);
+    assertThat(demoCommand.y).isEqualTo(0);
     assertThat(demoCommand.name).isNull();
     assertThat(subCommand.countryCodes).isNullOrEmpty();
   }
 
   private Map<String, String> validEnvMap() {
-    return Map.of("DEMO_X", "10", "DEMO_NAME", "test name", "DEMO_COUNTRY_CODES", "AU,US");
+    return Map.of(
+        "DEMO_X", "10", "DEMO_Y", "20", "DEMO_NAME", "test name", "DEMO_COUNTRY_CODES", "AU,US");
   }
 }

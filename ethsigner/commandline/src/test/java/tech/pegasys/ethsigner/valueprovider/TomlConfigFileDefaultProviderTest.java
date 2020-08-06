@@ -43,14 +43,32 @@ class TomlConfigFileDefaultProviderTest {
   void validTomlFileIsUsedAsDefaultValueProvider(@TempDir Path tempDir) throws IOException {
     final Path configFile = Files.writeString(tempDir.resolve("test.toml"), validToml());
 
-    final TomlConfigFileDefaultProvider tomlConfigFileDefaultProvider =
+    final TomlConfigFileDefaultProvider defaultProvider =
         new TomlConfigFileDefaultProvider(commandLine, configFile);
-    commandLine.setDefaultValueProvider(tomlConfigFileDefaultProvider);
+    commandLine.setDefaultValueProvider(defaultProvider);
     commandLine.parseArgs("country");
 
     // assertions
     assertThat(demoCommand.x).isEqualTo(10);
+    assertThat(demoCommand.y).isEqualTo(20);
     assertThat(demoCommand.name).isEqualTo("test name");
+    assertThat(subCommand.countryCodes).containsExactlyInAnyOrder("AU", "US");
+  }
+
+  @Test
+  void validTomlFileAndCliOptionsMixed(@TempDir Path tempDir) throws IOException {
+    final Path configFile = Files.writeString(tempDir.resolve("test.toml"), validToml());
+
+    final TomlConfigFileDefaultProvider defaultProvider =
+        new TomlConfigFileDefaultProvider(commandLine, configFile);
+
+    commandLine.setDefaultValueProvider(defaultProvider);
+    commandLine.parseArgs("--name", "test name2", "country");
+
+    // assertions
+    assertThat(demoCommand.x).isEqualTo(10);
+    assertThat(demoCommand.y).isEqualTo(20);
+    assertThat(demoCommand.name).isEqualTo("test name2");
     assertThat(subCommand.countryCodes).containsExactlyInAnyOrder("AU", "US");
   }
 
@@ -59,10 +77,10 @@ class TomlConfigFileDefaultProviderTest {
     final Path configFile =
         Files.writeString(tempDir.resolve("test.toml"), validToml() + "invalidOption=10");
 
-    final TomlConfigFileDefaultProvider tomlConfigFileDefaultProvider =
+    final TomlConfigFileDefaultProvider defaultProvider =
         new TomlConfigFileDefaultProvider(commandLine, configFile);
 
-    commandLine.setDefaultValueProvider(tomlConfigFileDefaultProvider);
+    commandLine.setDefaultValueProvider(defaultProvider);
 
     assertThatExceptionOfType(CommandLine.ParameterException.class)
         .isThrownBy(() -> commandLine.parseArgs())
@@ -75,10 +93,10 @@ class TomlConfigFileDefaultProviderTest {
         Files.writeString(
             tempDir.resolve("test.toml"), validToml() + "invalidOption=10\ncountry.name=\"\"\n");
 
-    final TomlConfigFileDefaultProvider tomlConfigFileDefaultProvider =
+    final TomlConfigFileDefaultProvider defaultProvider =
         new TomlConfigFileDefaultProvider(commandLine, configFile);
 
-    commandLine.setDefaultValueProvider(tomlConfigFileDefaultProvider);
+    commandLine.setDefaultValueProvider(defaultProvider);
 
     assertThatExceptionOfType(CommandLine.ParameterException.class)
         .isThrownBy(() -> commandLine.parseArgs())
@@ -89,10 +107,10 @@ class TomlConfigFileDefaultProviderTest {
   void emptyTomlFileThrowsException(@TempDir Path tempDir) throws IOException {
     final Path configFile = Files.writeString(tempDir.resolve("test.toml"), "");
 
-    final TomlConfigFileDefaultProvider tomlConfigFileDefaultProvider =
+    final TomlConfigFileDefaultProvider defaultProvider =
         new TomlConfigFileDefaultProvider(commandLine, configFile);
 
-    commandLine.setDefaultValueProvider(tomlConfigFileDefaultProvider);
+    commandLine.setDefaultValueProvider(defaultProvider);
 
     assertThatExceptionOfType(CommandLine.ParameterException.class)
         .isThrownBy(() -> commandLine.parseArgs())
@@ -100,10 +118,6 @@ class TomlConfigFileDefaultProviderTest {
   }
 
   private String validToml() {
-    final StringBuilder toml = new StringBuilder();
-    toml.append("x=10\n");
-    toml.append("name=\"test name\"\n");
-    toml.append("country.codes=[\"AU\", \"US\"]\n");
-    return toml.toString();
+    return "x=10\n" + "y=20\n" + "name=\"test name\"\n" + "country.codes=[\"AU\", \"US\"]\n";
   }
 }
