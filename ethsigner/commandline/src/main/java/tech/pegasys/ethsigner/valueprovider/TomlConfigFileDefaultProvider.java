@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.valueprovider;
 
 import static java.util.function.Predicate.not;
+import static tech.pegasys.ethsigner.valueprovider.PrefixUtil.stripPrefix;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -158,14 +159,5 @@ public class TomlConfigFileDefaultProvider implements IDefaultValueProvider {
 
   private static String buildOptionName(final OptionSpec optionSpec) {
     return stripPrefix(optionSpec.longestName());
-  }
-
-  private static String stripPrefix(String prefixed) {
-    for (int i = 0; i < prefixed.length(); i++) {
-      if (Character.isJavaIdentifierPart(prefixed.charAt(i))) {
-        return prefixed.substring(i);
-      }
-    }
-    return prefixed;
   }
 }

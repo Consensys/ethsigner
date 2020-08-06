@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
+import static tech.pegasys.ethsigner.valueprovider.PrefixUtil.stripPrefix;
+
 import java.util.Map;
 
 import picocli.CommandLine.IDefaultValueProvider;
@@ -31,21 +33,12 @@ public class EnvironmentVariableDefaultProvider implements IDefaultValueProvider
 
     if (argSpec.isOption()) {
       final OptionSpec optionSpec = (OptionSpec) argSpec;
-      final String prefix = optionSpec.command().qualifiedName("_").toUpperCase() + "_";
-      final String key =
-          prefix + stripPrefix(optionSpec.longestName()).replace("-", "_").toUpperCase();
-      return environment.get(key);
+      final String qualifiedPrefix = optionSpec.command().qualifiedName("_").toUpperCase();
+      final String key = stripPrefix(optionSpec.longestName()).replace("-", "_").toUpperCase();
+      final String qualifiedKey = qualifiedPrefix + "_" + key;
+      return environment.get(qualifiedKey);
     }
 
     return null; // currently not supporting positional parameters
-  }
-
-  private static String stripPrefix(String prefixed) {
-    for (int i = 0; i < prefixed.length(); i++) {
-      if (Character.isJavaIdentifierPart(prefixed.charAt(i))) {
-        return prefixed.substring(i);
-      }
-    }
-    return prefixed;
   }
 }
