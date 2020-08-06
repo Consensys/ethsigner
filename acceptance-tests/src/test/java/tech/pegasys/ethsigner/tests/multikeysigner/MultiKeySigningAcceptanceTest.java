@@ -47,7 +47,7 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
     Assumptions.assumeTrue(
         AzureBasedTomlLoadingAcceptanceTest.clientId != null
             && AzureBasedTomlLoadingAcceptanceTest.clientSecret != null
-        && AzureBasedTomlLoadingAcceptanceTest.tenantId != null,
+            && AzureBasedTomlLoadingAcceptanceTest.tenantId != null,
         "Ensure Azure client id, client secret and tenant_id env variables are set");
   }
 

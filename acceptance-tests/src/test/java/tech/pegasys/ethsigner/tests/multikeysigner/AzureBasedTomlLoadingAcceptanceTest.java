@@ -39,7 +39,9 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   @Test
   void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"), clientId, clientSecret,
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"),
+        clientId,
+        clientSecret,
         tenantId);
 
     setup(tomlDirectory);

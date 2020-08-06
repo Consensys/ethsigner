@@ -37,7 +37,10 @@ public class MultiKeyAzureTransactionSignerAcceptanceTest
   @Test
   public void azureLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"), clientId, clientSecret, tenantId);
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"),
+        clientId,
+        clientSecret,
+        tenantId);
 
     setup(tomlDirectory);
 

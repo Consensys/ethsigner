@@ -54,7 +54,10 @@ public class MultiKeyAcceptanceTestBase {
   }
 
   public void createAzureTomlFileAt(
-      final Path tomlPath, final String clientId, final String clientSecret, final String tenantId) {
+      final Path tomlPath,
+      final String clientId,
+      final String clientSecret,
+      final String tenantId) {
     final String toml =
         new TomlStringBuilder("signing")
             .withQuotedString("type", "azure-signer")
