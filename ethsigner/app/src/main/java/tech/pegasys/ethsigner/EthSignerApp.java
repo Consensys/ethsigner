@@ -32,11 +32,11 @@ public class EthSignerApp {
     final CommandlineParser cmdLineParser =
         new CommandlineParser(baseCommand, outputWriter, errorWriter, System.getenv());
     cmdLineParser.registerSigner(
-        new HashicorpSubCommand(baseCommand),
-        new FileBasedSubCommand(baseCommand),
-        new AzureSubCommand(baseCommand),
-        new MultiKeySubCommand(baseCommand),
-        new RawSubCommand(baseCommand));
+        new HashicorpSubCommand(),
+        new FileBasedSubCommand(),
+        new AzureSubCommand(),
+        new MultiKeySubCommand(),
+        new RawSubCommand());
 
     cmdLineParser.parseCommandLine(args);
   }

@@ -53,8 +53,8 @@ class CommandlineParserTest {
 
   @BeforeEach
   void setup() {
+    subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    subCommand = new NullSignerSubCommand(config);
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 
@@ -224,8 +224,8 @@ class CommandlineParserTest {
 
   @Test
   void creatingSignerDisplaysFailureToCreateSignerText() {
+    subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
-    subCommand = new NullSignerSubCommand(config, true);
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
     parser.registerSigner(subCommand);
 

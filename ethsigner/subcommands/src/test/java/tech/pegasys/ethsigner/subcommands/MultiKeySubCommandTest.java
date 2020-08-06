@@ -15,8 +15,6 @@ package tech.pegasys.ethsigner.subcommands;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import tech.pegasys.ethsigner.EthSignerBaseCommand;
-
 import java.nio.file.Path;
 
 import org.apache.logging.log4j.Level;
@@ -26,14 +24,13 @@ import picocli.CommandLine;
 import picocli.CommandLine.ParseResult;
 
 class MultiKeySubCommandTest {
-  private static final EthSignerBaseCommand CONFIG = new EthSignerBaseCommand();
 
   private MultiKeySubCommand multiKeySubCommand;
   private CommandLine commandLine;
 
   @BeforeEach
   void beforeEach() {
-    multiKeySubCommand = new MultiKeySubCommand(CONFIG);
+    multiKeySubCommand = new MultiKeySubCommand();
 
     commandLine = new CommandLine(multiKeySubCommand);
     commandLine.setCaseInsensitiveEnumValuesAllowed(true);

@@ -18,7 +18,6 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.hashicorp.TrustStoreType;
 import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
 import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
@@ -113,10 +112,6 @@ public class HashicorpSubCommand extends SignerSubCommand {
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
   private Path tlsKnownServerFile = null;
-
-  public HashicorpSubCommand(final Config config) {
-    super(config);
-  }
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
 

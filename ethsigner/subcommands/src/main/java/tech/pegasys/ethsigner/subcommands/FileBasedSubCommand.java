@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -39,9 +38,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "file-based-signer";
 
-  public FileBasedSubCommand(final Config config) {
-    super(config);
-  }
+  public FileBasedSubCommand() {}
 
   @SuppressWarnings("unused") // Picocli injects reference to command spec
   @Spec

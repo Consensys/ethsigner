@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -45,10 +44,6 @@ public class RawSubCommand extends SignerSubCommand {
       paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
   private String privateKey;
-
-  public RawSubCommand(final Config config) {
-    super(config);
-  }
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     final Credentials credentials = Credentials.create(privateKey);

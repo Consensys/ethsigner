@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
@@ -32,7 +31,6 @@ import picocli.CommandLine.Option;
 public class NullSignerSubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "NullSigner";
-  private final Config config;
 
   @SuppressWarnings("unused")
   @Option(names = "--the-data", description = "Some data required for this subcommand", arity = "1")
@@ -41,14 +39,10 @@ public class NullSignerSubCommand extends SignerSubCommand {
   private boolean shouldThrow = false;
   public static final String ERROR_MSG = "Null Signer Failed";
 
-  public NullSignerSubCommand(final Config config) {
-    this(config, false);
-  }
+  public NullSignerSubCommand() {}
 
-  public NullSignerSubCommand(final Config config, final boolean shouldThrow) {
-    super(config);
+  public NullSignerSubCommand(boolean shouldThrow) {
     this.shouldThrow = shouldThrow;
-    this.config = config;
   }
 
   @Override
@@ -65,7 +59,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
   @Override
   public void run() {
     // this is required to do any non-PicoCLI validation of args prior to setup
-    config.validateArgs();
+    super.validateArgs();
     if (shouldThrow) {
       throw new TransactionSignerInitializationException(ERROR_MSG);
     }

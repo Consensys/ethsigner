@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 import tech.pegasys.signers.secp256k1.multikey.MultiKeyTransactionSignerProvider;
@@ -44,9 +43,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   public static final String COMMAND_NAME = "multikey-signer";
 
-  public MultiKeySubCommand(final Config config) {
-    super(config);
-  }
+  public MultiKeySubCommand() {}
 
   @SuppressWarnings("unused") // Picocli injects reference to command spec
   @Spec

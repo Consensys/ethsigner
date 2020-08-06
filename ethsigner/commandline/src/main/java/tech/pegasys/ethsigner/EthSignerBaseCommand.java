@@ -66,6 +66,7 @@ import picocli.CommandLine.Spec;
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
 public class EthSignerBaseCommand implements Config {
+
   @Spec private CommandSpec spec; // injected by picocli
 
   @SuppressWarnings("UnusedVariable")
@@ -255,8 +256,7 @@ public class EthSignerBaseCommand implements Config {
         .toString();
   }
 
-  @Override
-  public void validateArgs() {
+  void validateArgs() {
     if (getClientTlsOptions().isPresent()) {
       final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
       final Optional<Path> optionsKnownServerFile =
