@@ -19,7 +19,6 @@ import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.azure.AzureConfig;
-import tech.pegasys.signers.secp256k1.azure.AzureKeyVaultAuthenticator;
 import tech.pegasys.signers.secp256k1.azure.AzureKeyVaultSignerFactory;
 import tech.pegasys.signers.secp256k1.common.PasswordFileUtil;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
@@ -54,10 +53,9 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"--key-version"},
-      description = "The version of the requested key to use",
-      paramLabel = "<KEY_VERSION>",
-      required = true)
-  private String keyVersion;
+      description = "The version of the requested key to use; defaults to latest if unset",
+      paramLabel = "<KEY_VERSION>")
+  private String keyVersion = "";
 
   @Option(
       names = {"--client-id"},
@@ -65,6 +63,13 @@ public class AzureSubCommand extends SignerSubCommand {
       paramLabel = "<CLIENT_ID>",
       required = true)
   private String clientId;
+
+  @Option(
+      names = {"--tenant-id"},
+      description = "The unique identifier of the Azure Portal instance being used",
+      paramLabel = "<TENANT_ID>",
+      required = true)
+  private String tenantId;
 
   @Option(
       names = {"--client-secret-path"},
@@ -88,10 +93,9 @@ public class AzureSubCommand extends SignerSubCommand {
     }
 
     final AzureConfig config =
-        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
+        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret, tenantId);
 
-    final AzureKeyVaultSignerFactory factory =
-        new AzureKeyVaultSignerFactory(new AzureKeyVaultAuthenticator());
+    final AzureKeyVaultSignerFactory factory = new AzureKeyVaultSignerFactory();
 
     return factory.createSigner(config);
   }
