@@ -50,7 +50,7 @@ class CommandlineParserClientTlsOptionsTest {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
     parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
-    parser.registerSigner(subCommand);
+    parser.registerSigners(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
     commandLine.addSubcommand(subCommand.getCommandName(), subCommand);

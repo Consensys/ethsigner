@@ -58,7 +58,7 @@ public class CommandlineParser {
     this.environment = environment;
   }
 
-  public void registerSigner(final SignerSubCommand... signerSubCommands) {
+  public void registerSigners(final SignerSubCommand... signerSubCommands) {
     signers.addAll(Arrays.asList(signerSubCommands));
   }
 
