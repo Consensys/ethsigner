@@ -12,23 +12,18 @@
  */
 package tech.pegasys.ethsigner;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.CONFIG_FILE_OPTION_NAME;
+import tech.pegasys.ethsigner.config.ConfigFileOption;
 
-import java.io.File;
 import java.util.List;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Unmatched;
 
 // Allows to obtain config file by PicoCLI using two pass approach.
 @Command(mixinStandardHelpOptions = true)
 class ConfigFileCommand {
-  @Option(
-      names = CONFIG_FILE_OPTION_NAME,
-      description = "...",
-      defaultValue = "${env:ETHSIGNER_CONFIG_FILE}")
-  File configPath = null;
+  @Mixin ConfigFileOption configFileOption;
 
   @SuppressWarnings("UnusedVariable")
   @Unmatched

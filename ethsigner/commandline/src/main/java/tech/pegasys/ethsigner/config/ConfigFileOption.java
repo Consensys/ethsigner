@@ -10,12 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner;
+package tech.pegasys.ethsigner.config;
 
-public interface DefaultCommandValues {
-  String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
-  String MANDATORY_PATH_FORMAT_HELP = "<PATH>";
-  String MANDATORY_HOST_FORMAT_HELP = "<HOST>";
-  String MANDATORY_PORT_FORMAT_HELP = "<PORT>";
-  String MANDATORY_LONG_FORMAT_HELP = "<LONG>";
+import java.io.File;
+
+import picocli.CommandLine.Option;
+
+public class ConfigFileOption {
+  @Option(
+      names = "--config-file",
+      description = "Config file in toml format (default: none)",
+      defaultValue = "${env:ETHSIGNER_CONFIG_FILE}",
+      hidden = true // TODO: Unhide in acceptance test PR
+      )
+  private File configFile = null;
+
+  public File getConfigFile() {
+    return configFile;
+  }
 }

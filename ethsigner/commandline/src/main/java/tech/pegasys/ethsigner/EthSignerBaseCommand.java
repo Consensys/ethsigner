@@ -12,13 +12,12 @@
  */
 package tech.pegasys.ethsigner;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.CONFIG_FILE_OPTION_NAME;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
+import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
@@ -29,7 +28,6 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,6 +41,7 @@ import org.apache.logging.log4j.Level;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
@@ -70,13 +69,8 @@ public class EthSignerBaseCommand implements Config {
   @Spec private CommandSpec spec; // injected by picocli
 
   @SuppressWarnings("UnusedVariable")
-  @Option(
-      names = {CONFIG_FILE_OPTION_NAME},
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      description = "Config file in toml format (default: none)",
-      hidden = true // TODO: Unhide after acceptance tests PR
-      )
-  private final File configFile = null;
+  @Mixin
+  private ConfigFileOption configFileOption;
 
   @SuppressWarnings("FieldMayBeFinal")
   @Option(

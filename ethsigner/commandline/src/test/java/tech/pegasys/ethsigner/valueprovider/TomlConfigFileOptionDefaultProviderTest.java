@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
 
-class TomlConfigFileDefaultProviderTest {
+class TomlConfigFileOptionDefaultProviderTest {
 
   private DemoCommand demoCommand;
   private DemoCommand.SubCommand subCommand;

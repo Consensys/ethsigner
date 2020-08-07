@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner;
 
+import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.ethsigner.valueprovider.CascadingDefaultProvider;
@@ -75,7 +76,9 @@ public class CommandlineParser {
       executeCommandVersion();
       return true;
     }
-    final Optional<File> configFile = Optional.ofNullable(configFileCommand.configPath);
+    final Optional<File> configFile =
+        Optional.ofNullable(configFileCommand.configFileOption)
+            .map(ConfigFileOption::getConfigFile);
 
     // final pass
     final CommandLine commandLine = new CommandLine(baseCommand);
