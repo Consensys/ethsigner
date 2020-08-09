@@ -30,12 +30,13 @@ public class EthSignerApp {
     final PrintWriter outputWriter = new PrintWriter(System.out, true, UTF_8);
     final PrintWriter errorWriter = new PrintWriter(System.err, true, UTF_8);
     final CommandlineParser cmdLineParser =
-        new CommandlineParser(baseCommand, outputWriter, errorWriter);
-    cmdLineParser.registerSigner(new HashicorpSubCommand());
-    cmdLineParser.registerSigner(new FileBasedSubCommand());
-    cmdLineParser.registerSigner(new AzureSubCommand());
-    cmdLineParser.registerSigner(new MultiKeySubCommand());
-    cmdLineParser.registerSigner(new RawSubCommand());
+        new CommandlineParser(baseCommand, outputWriter, errorWriter, System.getenv());
+    cmdLineParser.registerSigners(
+        new HashicorpSubCommand(),
+        new FileBasedSubCommand(),
+        new AzureSubCommand(),
+        new MultiKeySubCommand(),
+        new RawSubCommand());
 
     cmdLineParser.parseCommandLine(args);
   }

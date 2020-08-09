@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
 import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
 import static tech.pegasys.ethsigner.CmdlineHelpers.validBaseCommandOptions;
-import static tech.pegasys.ethsigner.CommandlineParser.MISSING_SUBCOMMAND_ERROR;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.parseCommandLineWithMissingParamsShowsError;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
@@ -55,8 +55,8 @@ class CommandlineParserTest {
   void setup() {
     subCommand = new NullSignerSubCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outputWriter, errorWriter);
-    parser.registerSigner(subCommand);
+    parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
+    parser.registerSigners(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());
     commandLine.addSubcommand(subCommand.getCommandName(), subCommand);
@@ -123,7 +123,7 @@ class CommandlineParserTest {
     final boolean result =
         parser.parseCommandLine(validBaseCommandOptions().toArray(String[]::new));
     assertThat(result).isFalse();
-    assertThat(commandError.toString()).contains(MISSING_SUBCOMMAND_ERROR);
+    assertThat(commandError.toString()).contains("Missing required subcommand");
     assertThat(commandOutput.toString()).contains(defaultUsageText);
   }
 
@@ -226,8 +226,8 @@ class CommandlineParserTest {
   void creatingSignerDisplaysFailureToCreateSignerText() {
     subCommand = new NullSignerSubCommand(true);
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outputWriter, errorWriter);
-    parser.registerSigner(subCommand);
+    parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
+    parser.registerSigners(subCommand);
 
     List<String> cmdLine = validBaseCommandOptions();
     cmdLine.add(subCommand.getCommandName());
