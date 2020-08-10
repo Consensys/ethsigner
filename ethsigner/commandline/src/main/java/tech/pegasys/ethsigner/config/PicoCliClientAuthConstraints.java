@@ -33,7 +33,8 @@ public class PicoCliClientAuthConstraints implements ClientAuthConstraints {
   @Option(
       names = "--tls-allow-ca-clients",
       description = "If defined, allows clients authorized by the CA to connect to EthSigner.",
-      arity = "0")
+      defaultValue = "false",
+      arity = "0..1")
   private Boolean tlsAllowCaClients = false;
 
   @Override

@@ -55,4 +55,24 @@ public class CmdlineHelpers {
         .map(arg -> arg.contains(fieldName) ? replacement : arg)
         .collect(Collectors.toList());
   }
+
+  public static String validTomlConfiguration() {
+    return "downstream-http-host=\"8.8.8.8\"\n"
+        + "downstream-http-port=5000\n"
+        + "downstream-http-path=\"/v3/projectid\"\n"
+        + "downstream-http-request-timeout=10000\n"
+        + "http-listen-port=5001\n"
+        + "http-listen-host=\"localhost\"\n"
+        + "chain-id=6\n"
+        + "logging=\"INFO\"\n"
+        + "tls-keystore-file=\"./keystore.pfx\"\n"
+        + "tls-keystore-password-file=\"./keystore.passwd\"\n"
+        + "tls-known-clients-file=\"./known_clients\"\n"
+        + "tls-allow-ca-clients=\"true\"\n"
+        + "downstream-http-tls-enabled=\"true\"\n"
+        + "downstream-http-tls-keystore-file=\"./test.ks\"\n"
+        + "downstream-http-tls-keystore-password-file=\"./test.pass\"\n"
+        + "downstream-http-tls-ca-auth-enabled=\"false\"\n"
+        + "downstream-http-tls-known-servers-file=\"./test.txt\"\n";
+  }
 }

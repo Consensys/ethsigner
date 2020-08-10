@@ -33,12 +33,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
-import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Mixin;
@@ -57,6 +58,7 @@ import picocli.CommandLine.Spec;
     sortOptions = false,
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider.class,
+    synopsisSubcommandLabel = "COMMAND",
     header = "Usage:",
     synopsisHeading = "%n",
     descriptionHeading = "%nDescription:%n%n",
@@ -64,7 +66,7 @@ import picocli.CommandLine.Spec;
     footerHeading = "%n",
     subcommands = {HelpCommand.class},
     footer = "EthSigner is licensed under the Apache License 2.0")
-public class EthSignerBaseCommand implements Config {
+public class EthSignerBaseCommand implements Config, Runnable {
 
   @Spec private CommandSpec spec; // injected by picocli
 
@@ -76,10 +78,9 @@ public class EthSignerBaseCommand implements Config {
   @Option(
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
-      required = true,
       paramLabel = MANDATORY_LONG_FORMAT_HELP,
       arity = "1")
-  private long chainId;
+  private Long chainId; // required, see validateArgs
 
   @Option(
       names = {"--data-path"},
@@ -110,8 +111,7 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private final Integer httpListenPort = 8545;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliTlsServerOptions picoCliTlsServerOptions;
+  @Mixin private PicoCliTlsServerOptions picoCliTlsServerOptions;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -127,9 +127,8 @@ public class EthSignerBaseCommand implements Config {
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
       paramLabel = MANDATORY_PORT_FORMAT_HELP,
-      required = true,
       arity = "1")
-  private Integer downstreamHttpPort;
+  private Integer downstreamHttpPort; // required, see validateArgs
 
   private String downstreamHttpPath = "/";
 
@@ -170,8 +169,7 @@ public class EthSignerBaseCommand implements Config {
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 
-  @ArgGroup(exclusive = false)
-  private PicoCliClientTlsOptions clientTlsOptions;
+  @Mixin private PicoCliClientTlsOptions clientTlsOptions;
 
   @Override
   public Level getLogLevel() {
@@ -220,17 +218,28 @@ public class EthSignerBaseCommand implements Config {
 
   @Override
   public Optional<TlsOptions> getTlsOptions() {
-    return Optional.ofNullable(picoCliTlsServerOptions);
+    return picoCliTlsServerOptions.isTlsEnabled()
+        ? Optional.of(picoCliTlsServerOptions)
+        : Optional.empty();
   }
 
   @Override
   public Optional<ClientTlsOptions> getClientTlsOptions() {
-    return Optional.ofNullable(clientTlsOptions);
+    return clientTlsOptions.isTlsEnabled() ? Optional.of(clientTlsOptions) : Optional.empty();
   }
 
   @Override
   public Collection<String> getCorsAllowedOrigins() {
     return rpcHttpCorsAllowedOrigins;
+  }
+
+  @Override
+  public void run() {
+    // validation is performed to simulate similar behavior as with ArgGroups.
+    // ArgGroups are removed because of config-file and environment based default options
+    validateArgs();
+
+    throw new ParameterException(spec.commandLine(), "Missing required subcommand");
   }
 
   @Override
@@ -251,14 +260,41 @@ public class EthSignerBaseCommand implements Config {
   }
 
   void validateArgs() {
+    final List<String> missingOptions = new ArrayList<>();
+
+    // required options validation
+    if (chainId == null) {
+      missingOptions.add("'--chain-id=<LONG>'");
+    }
+
+    if (downstreamHttpPort == null) {
+      missingOptions.add("'--downstream-http-port=<PORT>'");
+    }
+
+    final StringBuilder errorMessage = new StringBuilder();
+    if (!missingOptions.isEmpty()) {
+      errorMessage
+          .append("Missing required option(s): ")
+          .append(String.join(",", missingOptions))
+          .append("\n");
+    }
+
+    // TLS Options validation
+    if (picoCliTlsServerOptions.isTlsEnabled()) {
+      errorMessage.append(picoCliTlsServerOptions.validationMessage());
+    }
+
+    // downstream TLS validation
     if (getClientTlsOptions().isPresent()) {
-      final boolean caAuth = getClientTlsOptions().get().isCaAuthEnabled();
-      final Optional<Path> optionsKnownServerFile =
-          getClientTlsOptions().get().getKnownServersFile();
-      if (optionsKnownServerFile.isEmpty() && !caAuth) {
-        throw new InvalidCommandLineOptionsException(
-            "Missing required argument(s): --downstream-http-tls-known-servers-file must be specified if --downstream-http-tls-ca-auth-enabled=false");
+      errorMessage.append(clientTlsOptions.validationMessage());
+    }
+
+    if (errorMessage.length() > 0) {
+      if (errorMessage.charAt(errorMessage.length() - 1) == '\n') {
+        errorMessage.deleteCharAt(errorMessage.length() - 1);
       }
+
+      throw new InvalidCommandLineOptionsException(errorMessage.toString());
     }
   }
 }

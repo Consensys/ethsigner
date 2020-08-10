@@ -12,6 +12,8 @@
  */
 package tech.pegasys.ethsigner.config;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+
 import java.io.File;
 
 import picocli.CommandLine.Option;
@@ -20,9 +22,8 @@ public class ConfigFileOption {
   @Option(
       names = "--config-file",
       description = "Config file in toml format (default: none)",
-      defaultValue = "${env:ETHSIGNER_CONFIG_FILE}",
-      hidden = true // TODO: Unhide in acceptance test PR
-      )
+      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      defaultValue = "${env:ETHSIGNER_CONFIG_FILE}")
   private File configFile = null;
 
   public File getConfigFile() {

@@ -12,11 +12,4 @@
  */
 package tech.pegasys.ethsigner;
 
-public interface DefaultCommandValues {
-  String BOOLEAN_FORMAT_HELP = "<BOOL>";
-  String MANDATORY_FILE_FORMAT_HELP = "<FILE>";
-  String MANDATORY_PATH_FORMAT_HELP = "<PATH>";
-  String MANDATORY_HOST_FORMAT_HELP = "<HOST>";
-  String MANDATORY_PORT_FORMAT_HELP = "<PORT>";
-  String MANDATORY_LONG_FORMAT_HELP = "<LONG>";
-}
+public class CliOptionNames {}

@@ -228,6 +228,11 @@ allprojects {
     }
 
     useJUnitPlatform()
+
+    testLogging {
+      outputs.upToDateWhen {false}
+      showStandardStreams = true //true for std output of tests
+    }
   }
 
   javadoc {

@@ -12,15 +12,18 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
+import static tech.pegasys.ethsigner.DefaultCommandValues.BOOLEAN_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 public class PicoCliClientTlsOptions implements ClientTlsOptions {
@@ -28,12 +31,13 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @Option(
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
-      arity = "0",
+      paramLabel = BOOLEAN_FORMAT_HELP,
+      arity = "0..1",
+      defaultValue = "false",
       required = true)
   private boolean tlsEnabled = false;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliKeyStoreOptions keyStoreOptions;
+  @Mixin private PicoCliKeyStoreOptions keyStoreOptions;
 
   @Option(
       names = "--downstream-http-tls-known-servers-file",
@@ -52,7 +56,10 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
 
   @Override
   public Optional<KeyStoreOptions> getKeyStoreOptions() {
-    return Optional.ofNullable(keyStoreOptions);
+    if (keyStoreOptions.getKeyStoreFile() == null && keyStoreOptions.getPasswordFile() == null) {
+      return Optional.empty();
+    }
+    return Optional.of(keyStoreOptions);
   }
 
   @Override
@@ -63,5 +70,42 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @Override
   public Optional<Path> getKnownServersFile() {
     return Optional.ofNullable(knownServersFile);
+  }
+
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
+  }
+
+  public String validationMessage() {
+    if (!tlsEnabled) {
+      return "";
+    }
+
+    final List<String> missingOptions = new ArrayList<>();
+
+    // ArgGroup custom validation
+    if (keyStoreOptions.getKeyStoreFile() == null && keyStoreOptions.getPasswordFile() != null) {
+      missingOptions.add(
+          "'--downstream-http-tls-keystore-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
+    } else if (keyStoreOptions.getKeyStoreFile() != null
+        && keyStoreOptions.getPasswordFile() == null) {
+      missingOptions.add(
+          "'--downstream-http-tls-keystore-password-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
+    }
+
+    final StringBuilder errorMessage = new StringBuilder();
+    if (!missingOptions.isEmpty()) {
+      errorMessage
+          .append("Missing required arguments(s): ")
+          .append(String.join(",", missingOptions))
+          .append(" must be specified together\n");
+    }
+
+    if (knownServersFile == null && !caAuthEnabled) {
+      errorMessage.append(
+          "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'\n");
+    }
+
+    return errorMessage.toString();
   }
 }
