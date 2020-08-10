@@ -12,17 +12,18 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 import tech.pegasys.signers.secp256k1.api.FileSelector;
-import tech.pegasys.signers.secp256k1.api.PublicKey;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
+import java.security.interfaces.ECPublicKey;
 
 import com.google.common.io.Files;
 import org.web3j.crypto.Keys;
 
-public class EthSignerFileSelector implements FileSelector<PublicKey> {
+public class EthSignerFileSelector implements FileSelector<ECPublicKey> {
 
   final String fileExtension = "toml";
 
@@ -36,12 +37,13 @@ public class EthSignerFileSelector implements FileSelector<PublicKey> {
   }
 
   @Override
-  public Filter<Path> getSpecificConfigFileFilter(final PublicKey publicKey) {
+  public Filter<Path> getSpecificConfigFileFilter(final ECPublicKey publicKey) {
     return entry -> matchesPublicKey(publicKey, entry);
   }
 
-  public boolean matchesPublicKey(final PublicKey publicKey, final Path entry) throws IOException {
-    String addressToMatch = Keys.getAddress(publicKey.toString());
+  public boolean matchesPublicKey(final ECPublicKey publicKey, final Path entry)
+      throws IOException {
+    String addressToMatch = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKey));
 
     return Files.getNameWithoutExtension(entry.getFileName().toString()).endsWith(addressToMatch)
         && hasExpectedFileExtension(entry);

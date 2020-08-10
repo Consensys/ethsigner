@@ -88,6 +88,8 @@ public class TransactionSignerParamsSupplier {
       params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
+      params.add("--tenant-id");
+      params.add(System.getenv("ETHSIGNER_AZURE_TENANT_ID"));
     } else if (multiKeySignerDirectory != null) {
       params.add("multikey-signer");
       params.add("--directory");

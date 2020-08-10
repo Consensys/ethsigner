@@ -28,6 +28,7 @@ jar {
 
 dependencies {
   implementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
+  implementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
   implementation 'com.google.guava:guava'
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.web3j:crypto'

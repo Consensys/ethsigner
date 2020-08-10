@@ -12,10 +12,11 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.signers.secp256k1.api.PublicKey;
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,23 +32,26 @@ public class AddressIndexedSignerProvider {
 
   // String is an 0x prefixed hex string of the ethereum address corresponding to the public
   // key.
-  private final Map<String, PublicKey> addressToPublicKeyMap;
+  private final Map<String, ECPublicKey> addressToPublicKeyMap;
 
   public AddressIndexedSignerProvider(
-      final SignerProvider signerProvider, final Map<String, PublicKey> addressToPublicKeyMap) {
+      final SignerProvider signerProvider, final Map<String, ECPublicKey> addressToPublicKeyMap) {
     this.signerProvider = signerProvider;
     this.addressToPublicKeyMap = addressToPublicKeyMap;
   }
 
   public static AddressIndexedSignerProvider create(final SignerProvider signerProvider) {
-    final Map<String, PublicKey> addrToPubKeyMap = new HashMap<>();
+    final Map<String, ECPublicKey> addrToPubKeyMap = new HashMap<>();
 
     signerProvider
         .availablePublicKeys()
         .forEach(
             pubKey -> {
               final String address =
-                  "0x" + Keys.getAddress(Bytes.wrap(pubKey.getValue()).toHexString()).toLowerCase();
+                  "0x"
+                      + Keys.getAddress(
+                              Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
+                          .toLowerCase();
               addrToPubKeyMap.put(address, pubKey);
             });
 
@@ -56,7 +60,7 @@ public class AddressIndexedSignerProvider {
 
   /* Gets a signer from its address, NOTE address MUST have 0x hex prefix */
   public Optional<Signer> getSigner(final String address) {
-    final PublicKey publicKey = addressToPublicKeyMap.get(address.toLowerCase());
+    final ECPublicKey publicKey = addressToPublicKeyMap.get(address.toLowerCase());
     if (publicKey == null) {
       return Optional.empty();
     }
@@ -67,7 +71,7 @@ public class AddressIndexedSignerProvider {
     return addressToPublicKeyMap.keySet();
   }
 
-  public Set<PublicKey> availablePublicKeys() {
+  public Set<ECPublicKey> availablePublicKeys() {
     return signerProvider.availablePublicKeys();
   }
 }

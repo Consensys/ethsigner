@@ -22,28 +22,33 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
-import tech.pegasys.ethsigner.support.StubbedPublicKey;
-import tech.pegasys.signers.secp256k1.api.PublicKey;
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
+import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Keys;
 
 @SuppressWarnings("unchecked")
 public class EthAccountsResultProviderTest {
 
-  final PublicKey publicKeyA = new StubbedPublicKey("A".repeat(128));
-  final PublicKey publicKeyB = new StubbedPublicKey("B".repeat(128));
-  final PublicKey publicKeyC = new StubbedPublicKey("C".repeat(128));
+  final ECPublicKey publicKeyA = createKeyFrom("A".repeat(128));
+  final ECPublicKey publicKeyB = createKeyFrom("B".repeat(128));
+  final ECPublicKey publicKeyC = createKeyFrom("C".repeat(128));
 
-  final String addressA = Keys.getAddress(publicKeyA.toString());
-  final String addressB = Keys.getAddress(publicKeyB.toString());
-  final String addressC = Keys.getAddress(publicKeyC.toString());
+  final String addressA = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyA));
+  final String addressB = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyB));
+  final String addressC = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyC));
+
+  final ECPublicKey createKeyFrom(final String hexString) {
+    return EthPublicKeyUtils.createPublicKey(Bytes.fromHexString(hexString));
+  }
 
   @Test
   public void valueFromBodyProviderInsertedToResult() {
@@ -108,7 +113,7 @@ public class EthAccountsResultProviderTest {
 
   @Test
   public void multipleValueFromBodyProviderInsertedToResult() {
-    final Set<PublicKey> availableAddresses = Set.of(publicKeyA, publicKeyB, publicKeyC);
+    final Set<ECPublicKey> availableAddresses = Set.of(publicKeyA, publicKeyB, publicKeyC);
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
         new EthAccountsResultProvider(() -> availableAddresses);
@@ -127,9 +132,9 @@ public class EthAccountsResultProviderTest {
 
   @Test
   public void accountsReturnedAreDynamicallyFetchedFromProvider() {
-    final Set<PublicKey> addresses = Sets.newHashSet(publicKeyA, publicKeyB, publicKeyC);
+    final Set<ECPublicKey> addresses = Sets.newHashSet(publicKeyA, publicKeyB, publicKeyC);
 
-    final Supplier<Set<PublicKey>> supplier = () -> addresses;
+    final Supplier<Set<ECPublicKey>> supplier = () -> addresses;
     final EthAccountsResultProvider resultProvider = new EthAccountsResultProvider(supplier);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
@@ -159,7 +164,7 @@ public class EthAccountsResultProviderTest {
 
   @Test
   public void accountsReturnedAreSortedAlphabetically() {
-    final Supplier<Set<PublicKey>> supplier = () -> Set.of(publicKeyA, publicKeyB, publicKeyC);
+    final Supplier<Set<ECPublicKey>> supplier = () -> Set.of(publicKeyA, publicKeyB, publicKeyC);
     final EthAccountsResultProvider resultProvider = new EthAccountsResultProvider(supplier);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");

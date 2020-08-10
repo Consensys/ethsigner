@@ -16,8 +16,9 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
-import tech.pegasys.signers.secp256k1.api.PublicKey;
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -33,9 +34,9 @@ public class EthAccountsResultProvider implements ResultProvider<List<String>> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final Supplier<Set<PublicKey>> publicKeySupplier;
+  private final Supplier<Set<ECPublicKey>> publicKeySupplier;
 
-  public EthAccountsResultProvider(final Supplier<Set<PublicKey>> publicKeySupplier) {
+  public EthAccountsResultProvider(final Supplier<Set<ECPublicKey>> publicKeySupplier) {
     this.publicKeySupplier = publicKeySupplier;
   }
 
@@ -49,7 +50,7 @@ public class EthAccountsResultProvider implements ResultProvider<List<String>> {
     }
 
     return publicKeySupplier.get().stream()
-        .map(pk -> Bytes.wrap(Keys.getAddress(pk.getValue())).toHexString())
+        .map(pk -> Bytes.wrap(Keys.getAddress(EthPublicKeyUtils.toByteArray(pk))).toHexString())
         .sorted()
         .collect(Collectors.toList());
   }
