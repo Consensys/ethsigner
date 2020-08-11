@@ -78,9 +78,29 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
 
   public String validationMessage() {
     if (!tlsEnabled) {
-      return "";
+      return dependentOptionSpecifiedMessage();
     }
 
+    return keyStoreConfigurationValidationMessage() + knownServerFileAndCaValidationMessage();
+  }
+
+  private String dependentOptionSpecifiedMessage() {
+    if (knownServersFile != null
+        || keyStoreOptions.getKeyStoreFile() != null
+        || keyStoreOptions.getPasswordFile() != null) {
+      return "Missing required argument(s): '--downstream-http-tls-enabled=true'\n";
+    }
+    return "";
+  }
+
+  private String knownServerFileAndCaValidationMessage() {
+    if (knownServersFile == null && !caAuthEnabled) {
+      return "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'\n";
+    }
+    return "";
+  }
+
+  private String keyStoreConfigurationValidationMessage() {
     final List<String> missingOptions = new ArrayList<>();
 
     // ArgGroup custom validation
@@ -93,19 +113,9 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
           "'--downstream-http-tls-keystore-password-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
     }
 
-    final StringBuilder errorMessage = new StringBuilder();
     if (!missingOptions.isEmpty()) {
-      errorMessage
-          .append("Missing required arguments(s): ")
-          .append(String.join(",", missingOptions))
-          .append(" must be specified together\n");
+      return "Missing required arguments(s): " + String.join(",", missingOptions) + "\n";
     }
-
-    if (knownServersFile == null && !caAuthEnabled) {
-      errorMessage.append(
-          "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'\n");
-    }
-
-    return errorMessage.toString();
+    return "";
   }
 }

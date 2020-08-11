@@ -260,6 +260,27 @@ public class EthSignerBaseCommand implements Config, Runnable {
   }
 
   void validateArgs() {
+    final StringBuilder errorMessage = new StringBuilder();
+
+    // required option validation
+    errorMessage.append(validateRequiredOptions());
+
+    // TLS Options validation
+    errorMessage.append(picoCliTlsServerOptions.validationMessage());
+
+    // downstream TLS validation
+    errorMessage.append(clientTlsOptions.validationMessage());
+
+    if (errorMessage.length() > 0) {
+      if (errorMessage.charAt(errorMessage.length() - 1) == '\n') {
+        errorMessage.deleteCharAt(errorMessage.length() - 1);
+      }
+
+      throw new InvalidCommandLineOptionsException(errorMessage.toString());
+    }
+  }
+
+  private String validateRequiredOptions() {
     final List<String> missingOptions = new ArrayList<>();
 
     // required options validation
@@ -271,30 +292,9 @@ public class EthSignerBaseCommand implements Config, Runnable {
       missingOptions.add("'--downstream-http-port=<PORT>'");
     }
 
-    final StringBuilder errorMessage = new StringBuilder();
     if (!missingOptions.isEmpty()) {
-      errorMessage
-          .append("Missing required option(s): ")
-          .append(String.join(",", missingOptions))
-          .append("\n");
+      return "Missing required option(s): " + String.join(",", missingOptions) + "\n";
     }
-
-    // TLS Options validation
-    if (picoCliTlsServerOptions.isTlsEnabled()) {
-      errorMessage.append(picoCliTlsServerOptions.validationMessage());
-    }
-
-    // downstream TLS validation
-    if (getClientTlsOptions().isPresent()) {
-      errorMessage.append(clientTlsOptions.validationMessage());
-    }
-
-    if (errorMessage.length() > 0) {
-      if (errorMessage.charAt(errorMessage.length() - 1) == '\n') {
-        errorMessage.deleteCharAt(errorMessage.length() - 1);
-      }
-
-      throw new InvalidCommandLineOptionsException(errorMessage.toString());
-    }
+    return "";
   }
 }

@@ -18,8 +18,6 @@ import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import picocli.CommandLine.Mixin;
@@ -56,7 +54,7 @@ public class PicoCliTlsServerOptions implements TlsOptions {
   @Mixin private PicoCliClientAuthConstraints clientAuthConstraints;
 
   public boolean isTlsEnabled() {
-    return keyStoreFile != null || keyStorePasswordFile != null;
+    return keyStoreFile != null;
   }
 
   @Override
@@ -76,36 +74,32 @@ public class PicoCliTlsServerOptions implements TlsOptions {
 
   public String validationMessage() {
     if (!isTlsEnabled()) {
-      return "";
+      return validateOtherTlsOptionsAreSpecified();
     }
 
-    final List<String> missingOptions = new ArrayList<>();
+    return validateMissingPasswordFile() + validateClientAuthOptions();
+  }
 
-    // required options validation
-    if (keyStoreFileOptionIsMissing()) {
-      missingOptions.add("'--tls-keystore-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
-    }
-
-    if (keystorePasswordFileOptionIsMissing()) {
-      missingOptions.add("'--tls-keystore-password-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
-    }
-
-    final StringBuilder errorMessage = new StringBuilder();
-    if (!missingOptions.isEmpty()) {
-      errorMessage
-          .append("Missing required arguments(s): ")
-          .append(String.join(",", missingOptions))
-          .append("\n");
-    }
-
-    // ArgGroup custom validation
+  private String validateClientAuthOptions() {
     if (allowAnyClientEnabledAndAuthConstraintsAreDefined()
         || allowAnyClientDisabledAndClientAuthOptionNotDefined()) {
-      errorMessage.append(
-          "Expecting either --tls-allow-any-client or --tls-known-clients-file=<FILE>, --tls-allow-ca-clients\n");
+      return "Missing required argument(s): expecting either --tls-allow-any-client or one of --tls-known-clients-file=<FILE>, --tls-allow-ca-clients\n";
     }
+    return "";
+  }
 
-    return errorMessage.toString();
+  private String validateMissingPasswordFile() {
+    if (keyStorePasswordFile == null) {
+      return "Missing required argument(s): '--tls-keystore-password-file=<FILE>'";
+    }
+    return "";
+  }
+
+  private String validateOtherTlsOptionsAreSpecified() {
+    if (keyStorePasswordFile != null || clientAuthConstraints.getKnownClientsFile().isPresent()) {
+      return "Missing required argument(s): '--tls-keystore-file=<FILE>'";
+    }
+    return "";
   }
 
   private boolean allowAnyClientEnabledAndAuthConstraintsAreDefined() {
@@ -118,13 +112,5 @@ public class PicoCliTlsServerOptions implements TlsOptions {
     return !tlsAllowAnyClient
         && clientAuthConstraints.getKnownClientsFile().isEmpty()
         && !clientAuthConstraints.isCaAuthorizedClientAllowed();
-  }
-
-  private boolean keystorePasswordFileOptionIsMissing() {
-    return keyStoreFile != null && keyStorePasswordFile == null;
-  }
-
-  private boolean keyStoreFileOptionIsMissing() {
-    return keyStoreFile == null && keyStorePasswordFile != null;
   }
 }

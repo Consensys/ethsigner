@@ -264,7 +264,7 @@ class CommandlineParserTest {
     assertThat(result).isFalse();
     assertThat(commandError.toString())
         .contains(
-            "Expecting either --tls-allow-any-client or --tls-known-clients-file=<FILE>, --tls-allow-ca-clients");
+            "Missing required argument(s): expecting either --tls-allow-any-client or one of --tls-known-clients-file=<FILE>, --tls-allow-ca-clients");
   }
 
   @Test
@@ -335,7 +335,6 @@ class CommandlineParserTest {
 
   // TODO: Fix validateArg behavior
   @Test
-  @Disabled(value = "Removal of ArgGroups results the error not thrown")
   void specifyingOnlyTheTlsClientWhiteListShowsError() {
     parseCommandLineWithMissingParamsShowsError(
         parser,
