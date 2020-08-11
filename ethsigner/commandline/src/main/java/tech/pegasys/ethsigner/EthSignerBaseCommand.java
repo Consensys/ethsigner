@@ -28,7 +28,6 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -99,14 +98,14 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = {"--http-listen-host"},
-      description = "Host for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      description = "Host for JSON-RPC HTTP to listen on (default: 127.0.0.1)",
       paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
-  private String httpListenHost = InetAddress.getLoopbackAddress().getHostAddress();
+  private String httpListenHost = "127.0.0.1";
 
   @Option(
       names = {"--http-listen-port"},
-      description = "Port for JSON-RPC HTTP to listen on (default: ${DEFAULT-VALUE})",
+      description = "Port for JSON-RPC HTTP to listen on (default: 8545)",
       paramLabel = MANDATORY_PORT_FORMAT_HELP,
       arity = "1")
   private final Integer httpListenPort = 8545;
@@ -116,11 +115,10 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
       names = "--downstream-http-host",
-      description =
-          "The endpoint to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+      description = "The endpoint to which received requests are forwarded (default: 127.0.0.1)",
       paramLabel = MANDATORY_HOST_FORMAT_HELP,
       arity = "1")
-  private String downstreamHttpHost = InetAddress.getLoopbackAddress().getHostAddress();
+  private String downstreamHttpHost = "127.0.0.1";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
@@ -135,7 +133,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-path"},
-      description = "The path to which received requests are forwarded (default: ${DEFAULT-VALUE})",
+      description = "The path to which received requests are forwarded (default: /)",
       defaultValue = "/",
       paramLabel = MANDATORY_PATH_FORMAT_HELP,
       arity = "1")
@@ -163,8 +161,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @SuppressWarnings("FieldMayBeFinal")
   @Option(
       names = {"--downstream-http-request-timeout"},
-      description =
-          "Timeout in milliseconds to wait for downstream request (default: ${DEFAULT-VALUE})",
+      description = "Timeout in milliseconds to wait for downstream request (default: 5000)",
       paramLabel = MANDATORY_LONG_FORMAT_HELP,
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();

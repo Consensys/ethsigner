@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -22,6 +23,8 @@ import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationExce
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import picocli.CommandLine;
@@ -47,7 +50,6 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Option(
       names = {"-p", "--password-file"},
       description = "The path to a file containing the password used to decrypt the keyfile.",
-      required = true,
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
   private Path passwordFilePath;
@@ -56,13 +58,30 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Option(
       names = {"-k", "--key-file"},
       description = "The path to a file containing the key used to sign transactions.",
-      required = true,
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
   private Path keyFilePath;
 
   private TransactionSigner createSigner() throws TransactionSignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
+  }
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    super.validateArgs();
+
+    final List<String> missingOption = new ArrayList<>();
+    if (passwordFilePath == null) {
+      missingOption.add("--password-file");
+    }
+    if (keyFilePath == null) {
+      missingOption.add("--key-file");
+    }
+
+    if (!missingOption.isEmpty()) {
+      throw new InitializationException(
+          "Missing required option(s): " + String.join(",", missingOption));
+    }
   }
 
   @Override

@@ -13,12 +13,17 @@
 package tech.pegasys.ethsigner.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.CmdlineHelpers.removeFieldsFrom;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeOptions;
+import static tech.pegasys.ethsigner.CmdlineHelpers.toConfigFileOptionsList;
+import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
 
 import tech.pegasys.ethsigner.CommandlineParser;
 
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,10 +33,15 @@ public final class CommandLineParserAssertions {
       final Writer outputWriter,
       final Writer errorWriter,
       final String defaultUsageText,
-      final List<String> inputCmdLine,
-      final List<String> paramsToRemove) {
+      final List<String> paramsToRemove,
+      final Optional<Path> tempConfigDir) {
+    final Map<String, Object> options = removeOptions(paramsToRemove.toArray(String[]::new));
+
     final List<String> cmdLine =
-        removeFieldsFrom(inputCmdLine, paramsToRemove.stream().toArray(String[]::new));
+        tempConfigDir.isPresent()
+            ? toConfigFileOptionsList(tempConfigDir.get(), options)
+            : toOptionsList(options);
+
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertThat(result).as("Parse Results After Removing Params").isFalse();
 

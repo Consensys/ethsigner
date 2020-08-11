@@ -12,67 +12,90 @@
  */
 package tech.pegasys.ethsigner;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
 
 public class CmdlineHelpers {
+  private static String TOML_STRING_PATTERN = "%s=\"%s\"%n";
+  private static String TOML_NUMBER_PATTERN = "%s=%d%n";
+  private static String TOML_BOOLEAN_PATTERN = "%s=%b%n";
 
-  public static List<String> validBaseCommandOptions() {
-    return Lists.newArrayList(
-        "--downstream-http-host=8.8.8.8",
-        "--downstream-http-port=5000",
-        "--downstream-http-path=/v3/projectid",
-        "--downstream-http-request-timeout=10000",
-        "--http-listen-port=5001",
-        "--http-listen-host=localhost",
-        "--chain-id=6",
-        "--logging=INFO",
-        "--tls-keystore-file=./keystore.pfx",
-        "--tls-keystore-password-file=./keystore.passwd",
-        "--tls-known-clients-file=./known_clients",
-        "--tls-allow-ca-clients",
-        "--downstream-http-tls-enabled",
-        "--downstream-http-tls-keystore-file=./test.ks",
-        "--downstream-http-tls-keystore-password-file=./test.pass",
-        "--downstream-http-tls-ca-auth-enabled=false",
-        "--downstream-http-tls-known-servers-file=./test.txt");
+  public static Map<String, Object> baseCommandOptions() {
+    final Map<String, Object> optionsMap = new LinkedHashMap<>();
+    optionsMap.put("downstream-http-host", "8.8.8.8");
+    optionsMap.put("downstream-http-port", Integer.valueOf(5000));
+    optionsMap.put("downstream-http-path", "/v3/projectid");
+    optionsMap.put("downstream-http-request-timeout", Integer.valueOf(10_000));
+    optionsMap.put("http-listen-port", Integer.valueOf(5001));
+    optionsMap.put("http-listen-host", "localhost");
+    optionsMap.put("chain-id", Integer.valueOf(6));
+    optionsMap.put("logging", "INFO");
+    optionsMap.put("tls-keystore-file", "./keystore.pfx");
+    optionsMap.put("tls-keystore-password-file", "./keystore.passwd");
+    optionsMap.put("tls-known-clients-file", "./known_clients");
+    optionsMap.put("tls-allow-ca-clients", Boolean.TRUE);
+    optionsMap.put("downstream-http-tls-enabled", Boolean.TRUE);
+    optionsMap.put("downstream-http-tls-keystore-file", "./test.ks");
+    optionsMap.put("downstream-http-tls-keystore-password-file", "./test.pass");
+    optionsMap.put("downstream-http-tls-ca-auth-enabled", Boolean.FALSE);
+    optionsMap.put("downstream-http-tls-known-servers-file", "./test.txt");
+
+    return optionsMap;
   }
 
-  public static List<String> removeFieldsFrom(
-      final List<String> cmdlineArgs, final String... fieldNames) {
-    final List<String> fieldsToRemove = Lists.newArrayList(fieldNames);
-    return cmdlineArgs.stream()
-        .filter(arg -> fieldsToRemove.stream().noneMatch(arg::contains))
-        .collect(Collectors.toList());
+  public static Map<String, Object> removeOptions(final String... optionName) {
+    final Map<String, Object> options = baseCommandOptions();
+    Arrays.asList(optionName).forEach(options::remove);
+    return options;
   }
 
-  public static List<String> modifyField(
-      List<String> cmdlineArgs, final String fieldName, final String value) {
-    final String replacement = "--" + fieldName + "=" + value;
-    return cmdlineArgs.stream()
-        .map(arg -> arg.contains(fieldName) ? replacement : arg)
-        .collect(Collectors.toList());
+  public static Map<String, Object> modifyOptionValue(final String optionName, final Object value) {
+    final Map<String, Object> options = baseCommandOptions();
+    if (options.containsKey(optionName)) {
+      options.replace(optionName, value);
+    }
+    return options;
   }
 
-  public static String validTomlConfiguration() {
-    return "downstream-http-host=\"8.8.8.8\"\n"
-        + "downstream-http-port=5000\n"
-        + "downstream-http-path=\"/v3/projectid\"\n"
-        + "downstream-http-request-timeout=10000\n"
-        + "http-listen-port=5001\n"
-        + "http-listen-host=\"localhost\"\n"
-        + "chain-id=6\n"
-        + "logging=\"INFO\"\n"
-        + "tls-keystore-file=\"./keystore.pfx\"\n"
-        + "tls-keystore-password-file=\"./keystore.passwd\"\n"
-        + "tls-known-clients-file=\"./known_clients\"\n"
-        + "tls-allow-ca-clients=\"true\"\n"
-        + "downstream-http-tls-enabled=\"true\"\n"
-        + "downstream-http-tls-keystore-file=\"./test.ks\"\n"
-        + "downstream-http-tls-keystore-password-file=\"./test.pass\"\n"
-        + "downstream-http-tls-ca-auth-enabled=\"false\"\n"
-        + "downstream-http-tls-known-servers-file=\"./test.txt\"\n";
+  public static List<String> toOptionsList(final Map<String, Object> options) {
+    final List<String> cmdLine = new ArrayList<>();
+    options.forEach((option, value) -> cmdLine.add("--" + option + "=" + value));
+
+    return cmdLine;
+  }
+
+  public static List toConfigFileOptionsList(
+      final Path tempDir, final Map<String, Object> options) {
+    try {
+      final Path tomlFile = Files.createTempFile(tempDir, "test", ".toml");
+      Files.writeString(tomlFile, toToml(options));
+      return Lists.newArrayList("--config-file=" + tomlFile.toString());
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  static final String toToml(final Map<String, Object> options) {
+    final StringBuilder tomlBuilder = new StringBuilder();
+    options.forEach(
+        (option, value) -> {
+          if (value instanceof Number) {
+            tomlBuilder.append(String.format(TOML_NUMBER_PATTERN, option, value));
+          } else if (value instanceof Boolean) {
+            tomlBuilder.append(String.format(TOML_BOOLEAN_PATTERN, option, value));
+          } else {
+            tomlBuilder.append(String.format(TOML_STRING_PATTERN, option, value));
+          }
+        });
+    return tomlBuilder.toString();
   }
 }
