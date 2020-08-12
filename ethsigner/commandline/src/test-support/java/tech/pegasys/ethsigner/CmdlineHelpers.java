@@ -81,7 +81,7 @@ public class CmdlineHelpers {
     return cmdLine;
   }
 
-  public static List toConfigFileOptionsList(
+  public static List<String> toConfigFileOptionsList(
       final Path tempDir, final Map<String, Object> options) {
     try {
       final Path tomlFile = Files.createTempFile(tempDir, "test", ".toml");
@@ -92,7 +92,7 @@ public class CmdlineHelpers {
     }
   }
 
-  static final String toToml(final Map<String, Object> options) {
+  public static String toToml(final Map<String, Object> options) {
     final StringBuilder tomlBuilder = new StringBuilder();
     options.forEach(
         (option, value) -> {

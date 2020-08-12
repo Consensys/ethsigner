@@ -38,9 +38,9 @@ public class CommandLineParserAssertions {
     final Map<String, Object> options = removeOptions(paramsToRemove.toArray(String[]::new));
 
     final List<String> cmdLine =
-        tempConfigDir.isPresent()
-            ? toConfigFileOptionsList(tempConfigDir.get(), options)
-            : toOptionsList(options);
+        tempConfigDir
+            .map(path -> toConfigFileOptionsList(path, options))
+            .orElseGet(() -> toOptionsList(options));
 
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
     assertMissingOptionsAreReported(
