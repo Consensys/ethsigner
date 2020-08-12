@@ -18,6 +18,7 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.hashicorp.TrustStoreType;
 import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
 import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
@@ -84,7 +85,6 @@ public class HashicorpSubCommand extends SignerSubCommand {
   @Option(
       names = {"--auth-file"},
       description = "Path to a File containing authentication data for Hashicorp vault",
-      required = true,
       paramLabel = MANDATORY_FILE_FORMAT_HELP,
       arity = "1")
   private final Path authFilePath = null;
@@ -142,6 +142,15 @@ public class HashicorpSubCommand extends SignerSubCommand {
       return new TlsOptions(Optional.of(TrustStoreType.WHITELIST), tlsKnownServerFile, null);
     } else {
       return new TlsOptions(Optional.empty(), null, null);
+    }
+  }
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    super.validateArgs();
+
+    if (authFilePath == null) {
+      throw new InitializationException("Missing required option(s): --auth-file");
     }
   }
 

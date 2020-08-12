@@ -13,60 +13,63 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static tech.pegasys.ethsigner.CmdlineHelpers.baseCommandOptions;
+import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
+import static tech.pegasys.ethsigner.subcommands.MultiKeySubCommand.COMMAND_NAME;
+import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.assertMissingOptionsAreReported;
+
+import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.logging.log4j.Level;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import picocli.CommandLine;
-import picocli.CommandLine.ParseResult;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-class MultiKeySubCommandTest {
+class MultiKeySubCommandTest extends SubCommandBase {
 
-  private MultiKeySubCommand multiKeySubCommand;
-  private CommandLine commandLine;
-
-  @BeforeEach
-  void beforeEach() {
-    multiKeySubCommand = new MultiKeySubCommand();
-
-    commandLine = new CommandLine(multiKeySubCommand);
-    commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    commandLine.registerConverter(Level.class, Level::valueOf);
+  @Override
+  protected SignerSubCommand subCommand() {
+    return new MultiKeySubCommand() {
+      @Override
+      public void run() throws TransactionSignerInitializationException {
+        // we only want to perform validation in these unit test cases
+        validateArgs();
+      }
+    };
   }
 
-  @Test
-  void parseCommandSuccessfullySetDirectory() {
+  @ParameterizedTest
+  @ValueSource(strings = {"--directory", "-d"})
+  void parseCommandSuccessfullySetDirectory(final String subCommandOption) {
     final Path expectedPath = Path.of("/keys/directory/path");
+    final List<String> subCommandOptions = List.of(subCommandOption, expectedPath.toString());
 
-    commandLine.parse("--directory", expectedPath.toString());
+    final List<String> options = getOptions(subCommandOptions);
 
-    final ParseResult parseResult = commandLine.getParseResult();
-    assertThat(parseResult.errors()).isEmpty();
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
-    final Path path = multiKeySubCommand.getDirectoryPath();
-    assertThat(path).isEqualTo(expectedPath);
+    assertThat(result).isTrue();
+    assertThat(((MultiKeySubCommand) subCommand).getDirectoryPath()).isEqualTo(expectedPath);
   }
 
-  @Test
-  void parseCommandSuccessfullyUsingShortcutSetDirectory() {
-    final Path expectedPath = Path.of("/keys/directory/path");
-
-    commandLine.parse("-d", "/keys/directory/path");
-
-    final ParseResult parseResult = commandLine.getParseResult();
-    assertThat(parseResult.errors()).isEmpty();
-
-    final Path path = multiKeySubCommand.getDirectoryPath();
-    assertThat(path).isEqualTo(expectedPath);
+  private List<String> getOptions(final List<String> subCommandOptions) {
+    final List<String> options = toOptionsList(baseCommandOptions());
+    options.add(COMMAND_NAME);
+    options.addAll(subCommandOptions);
+    return options;
   }
 
   @Test
   void directoryParameterIsRequired() {
-    assertThrows(
-        CommandLine.MissingParameterException.class,
-        () -> commandLine.parse("--foo", "/keys/directory/path"));
+    final List<String> options = getOptions(Collections.emptyList());
+
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
+
+    assertMissingOptionsAreReported(
+        commandOutput, commandError, subCommandUsageText, List.of("directory"), result);
   }
 }

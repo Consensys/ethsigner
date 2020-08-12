@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 import tech.pegasys.signers.secp256k1.multikey.MultiKeyTransactionSignerProvider;
@@ -52,10 +53,18 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Option(
       names = {"-d", "--directory"},
       description = "The path to a directory containing signing metadata TOML files",
-      required = true,
       paramLabel = MANDATORY_PATH_FORMAT_HELP,
       arity = "1")
   private Path directoryPath;
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    super.validateArgs();
+
+    if (directoryPath == null) {
+      throw new InitializationException("Missing required option(s): --directory");
+    }
+  }
 
   @Override
   public TransactionSignerProvider createSignerFactory()

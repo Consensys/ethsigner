@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class CommandLineParserAssertions {
+public class CommandLineParserAssertions {
   public static void parseCommandLineWithMissingParamsShowsError(
       final CommandlineParser parser,
       final Writer outputWriter,
@@ -43,12 +43,22 @@ public final class CommandLineParserAssertions {
             : toOptionsList(options);
 
     final boolean result = parser.parseCommandLine(cmdLine.toArray(String[]::new));
+    assertMissingOptionsAreReported(
+        outputWriter, errorWriter, defaultUsageText, paramsToRemove, result);
+  }
+
+  public static void assertMissingOptionsAreReported(
+      final Writer outputWriter,
+      final Writer errorWriter,
+      final String defaultUsageText,
+      final List<String> missingParams,
+      final boolean result) {
     assertThat(result).as("Parse Results After Removing Params").isFalse();
 
     final String output = errorWriter.toString();
     final String patternStart = "(.*)Missing required (argument|option)(.*)(";
     final String patternMiddle =
-        paramsToRemove.stream().map(s -> "(.*)--" + s + "(.*)").collect(Collectors.joining("|"));
+        missingParams.stream().map(s -> "(.*)--" + s + "(.*)").collect(Collectors.joining("|"));
     final String patternEnd = ")(.*)\\s";
 
     boolean isMatched =

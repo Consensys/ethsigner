@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
@@ -27,6 +28,8 @@ import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationExce
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -40,7 +43,6 @@ public class AzureSubCommand extends SignerSubCommand {
   @Option(
       names = {"--keyvault-name", "--key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
-      required = true,
       paramLabel = "<KEY_VAULT_NAME>",
       arity = "1")
   private String keyVaultName;
@@ -48,30 +50,26 @@ public class AzureSubCommand extends SignerSubCommand {
   @Option(
       names = {"--key-name"},
       description = "The name of the key which is to be used",
-      paramLabel = "<KEY_NAME>",
-      required = true)
+      paramLabel = "<KEY_NAME>")
   private String keyName;
 
   @Option(
       names = {"--key-version"},
       description = "The version of the requested key to use",
-      paramLabel = "<KEY_VERSION>",
-      required = true)
+      paramLabel = "<KEY_VERSION>")
   private String keyVersion;
 
   @Option(
       names = {"--client-id"},
       description = "The ID used to authenticate with Azure key vault",
-      paramLabel = "<CLIENT_ID>",
-      required = true)
+      paramLabel = "<CLIENT_ID>")
   private String clientId;
 
   @Option(
       names = {"--client-secret-path"},
       description =
           "Path to a file containing the secret used to access the vault (along with client-id)",
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
-      required = true)
+      paramLabel = MANDATORY_PATH_FORMAT_HELP)
   private Path clientSecretPath;
 
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
@@ -94,6 +92,33 @@ public class AzureSubCommand extends SignerSubCommand {
         new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
 
     return factory.createSigner(config);
+  }
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    super.validateArgs();
+
+    final List<String> missingOption = new ArrayList<>();
+    if (keyVaultName == null) {
+      missingOption.add("--key-vault-name");
+    }
+    if (keyName == null) {
+      missingOption.add("--key-name");
+    }
+    if (keyVersion == null) {
+      missingOption.add("--key-version");
+    }
+    if (clientId == null) {
+      missingOption.add("--client-id");
+    }
+    if (clientSecretPath == null) {
+      missingOption.add("--client-secret-path");
+    }
+
+    if (!missingOption.isEmpty()) {
+      throw new InitializationException(
+          "Missing required option(s): " + String.join(",", missingOption));
+    }
   }
 
   @Override

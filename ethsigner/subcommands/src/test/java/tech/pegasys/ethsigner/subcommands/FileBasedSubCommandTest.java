@@ -13,61 +13,68 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
+import static tech.pegasys.ethsigner.subcommands.FileBasedSubCommand.COMMAND_NAME;
+
+import tech.pegasys.ethsigner.CmdlineHelpers;
+import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
-import picocli.CommandLine;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-public class FileBasedSubCommandTest {
+public class FileBasedSubCommandTest extends SubCommandBase {
 
   private static final String PASSWORD_FILE =
       Paths.get("/this/is/the/path/to/the/password/file").toString();
   private static final String KEY_FILE = Paths.get("/this/is/the/path/to/the/key/file").toString();
 
-  private FileBasedSubCommand config;
-
-  private boolean parseCommand(final String cmdLine) {
-    config = new FileBasedSubCommand();
-    final CommandLine commandLine = new CommandLine(config);
-    commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    commandLine.registerConverter(Level.class, Level::valueOf);
-
-    try {
-      commandLine.parse(cmdLine.split(" "));
-    } catch (final CommandLine.ParameterException e) {
-      return false;
-    }
-    return true;
+  @Override
+  protected SignerSubCommand subCommand() {
+    return new FileBasedSubCommand() {
+      @Override
+      public void run() throws TransactionSignerInitializationException {
+        // we only want to perform validation in these unit test cases
+        validateArgs();
+      }
+    };
   }
 
-  private String validCommandLine() {
-    return "--password-file=" + PASSWORD_FILE + " --key-file=" + KEY_FILE;
-  }
-
-  private String removeFieldFrom(final String input, final String fieldname) {
-    return input.replaceAll("--" + fieldname + "=.*?(\\s|$)", "");
+  private Map<String, Object> subCommandCliOptions() {
+    return Map.of("password-file", PASSWORD_FILE, "key-file", KEY_FILE);
   }
 
   @Test
   public void fullyPopulatedCommandLineParsesIntoVariables() {
-    final boolean result = parseCommand(validCommandLine());
+    final List<String> options = toOptionsList(CmdlineHelpers.baseCommandOptions());
+    options.add(COMMAND_NAME);
+    options.addAll(toOptionsList(subCommandCliOptions()));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
     assertThat(result).isTrue();
-    assertThat(config.toString()).contains(PASSWORD_FILE);
-    assertThat(config.toString()).contains(KEY_FILE);
+    assertThat(subCommand.toString()).contains(PASSWORD_FILE);
+    assertThat(subCommand.toString()).contains(KEY_FILE);
   }
 
-  @Test
-  public void missingRequiredParamShowsAppropriateError() {
-    missingParameterShowsError("password-file");
-    missingParameterShowsError("key-file");
+  @ParameterizedTest
+  @ValueSource(strings = {"password-file", "key-file"})
+  public void missingRequiredParamShowsAppropriateError(final String optionToRemove) {
+    final Map<String, Object> subCommandOptions = new LinkedHashMap<>(subCommandCliOptions());
+    subCommandOptions.remove(optionToRemove);
+    missingParameterShowsError(toOptionsList(subCommandOptions));
   }
 
-  private void missingParameterShowsError(final String paramToRemove) {
-    final String cmdLine = removeFieldFrom(validCommandLine(), paramToRemove);
-    final boolean result = parseCommand(cmdLine);
+  private void missingParameterShowsError(final List<String> subCommandOptions) {
+    final List<String> options = toOptionsList(CmdlineHelpers.baseCommandOptions());
+    options.add(COMMAND_NAME);
+    options.addAll(subCommandOptions);
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
     assertThat(result).isFalse();
   }
 }

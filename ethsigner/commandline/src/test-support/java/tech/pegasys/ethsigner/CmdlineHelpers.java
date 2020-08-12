@@ -53,13 +53,21 @@ public class CmdlineHelpers {
   }
 
   public static Map<String, Object> removeOptions(final String... optionName) {
-    final Map<String, Object> options = baseCommandOptions();
+    return removeOptions(baseCommandOptions(), optionName);
+  }
+
+  public static Map<String, Object> removeOptions(
+      final Map<String, Object> options, final String... optionName) {
     Arrays.asList(optionName).forEach(options::remove);
     return options;
   }
 
   public static Map<String, Object> modifyOptionValue(final String optionName, final Object value) {
-    final Map<String, Object> options = baseCommandOptions();
+    return modifyOptionValue(baseCommandOptions(), optionName, value);
+  }
+
+  public static Map<String, Object> modifyOptionValue(
+      final Map<String, Object> options, final String optionName, final Object value) {
     if (options.containsKey(optionName)) {
       options.replace(optionName, value);
     }
