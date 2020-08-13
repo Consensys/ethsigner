@@ -231,7 +231,7 @@ allprojects {
 
     testLogging {
       outputs.upToDateWhen {false}
-      showStandardStreams = true //true for std output of tests
+      showStandardStreams = false //true for std output of tests
     }
   }
 
