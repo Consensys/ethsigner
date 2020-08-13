@@ -97,8 +97,8 @@ public class CmdlineHelpers {
     final StringBuilder tomlBuilder = new StringBuilder();
     options.forEach(
         (option, value) -> {
-          if (value instanceof Number) {
-            tomlBuilder.append(String.format(TOML_NUMBER_PATTERN, option, value));
+          if (value instanceof Integer) {
+            tomlBuilder.append(String.format(TOML_NUMBER_PATTERN, option, (Integer) value));
           } else if (value instanceof Boolean) {
             tomlBuilder.append(String.format(TOML_BOOLEAN_PATTERN, option, value));
           } else {
