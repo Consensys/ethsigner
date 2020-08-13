@@ -14,18 +14,19 @@ package tech.pegasys.ethsigner.core.signing;
 
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.signers.secp256k1.api.Signer;
 
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
 public class TransactionSerializer {
 
-  private final TransactionSigner signer;
+  private final Signer signer;
   private final long chainId;
 
-  public TransactionSerializer(final TransactionSigner signer, final long chainId) {
+  public TransactionSerializer(final Signer signer, final long chainId) {
     this.signer = signer;
     this.chainId = chainId;
   }
@@ -49,6 +50,6 @@ public class TransactionSerializer {
   }
 
   public String getAddress() {
-    return signer.getAddress();
+    return Keys.getAddress(signer.getPublicKey().toString());
   }
 }

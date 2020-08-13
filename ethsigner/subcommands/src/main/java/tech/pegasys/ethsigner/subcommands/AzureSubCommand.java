@@ -15,14 +15,13 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.azure.AzureConfig;
-import tech.pegasys.signers.secp256k1.azure.AzureKeyVaultAuthenticator;
-import tech.pegasys.signers.secp256k1.azure.AzureKeyVaultTransactionSignerFactory;
+import tech.pegasys.signers.secp256k1.azure.AzureKeyVaultSignerFactory;
 import tech.pegasys.signers.secp256k1.common.PasswordFileUtil;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,10 +53,9 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Option(
       names = {"--key-version"},
-      description = "The version of the requested key to use",
-      paramLabel = "<KEY_VERSION>",
-      required = true)
-  private String keyVersion;
+      description = "The version of the requested key to use; defaults to latest if unset",
+      paramLabel = "<KEY_VERSION>")
+  private String keyVersion = "";
 
   @Option(
       names = {"--client-id"},
@@ -65,6 +63,13 @@ public class AzureSubCommand extends SignerSubCommand {
       paramLabel = "<CLIENT_ID>",
       required = true)
   private String clientId;
+
+  @Option(
+      names = {"--tenant-id"},
+      description = "The unique identifier of the Azure Portal instance being used",
+      paramLabel = "<TENANT_ID>",
+      required = true)
+  private String tenantId;
 
   @Option(
       names = {"--client-secret-path"},
@@ -77,29 +82,27 @@ public class AzureSubCommand extends SignerSubCommand {
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";
   public static final String COMMAND_NAME = "azure-signer";
 
-  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private Signer createSigner() throws SignerInitializationException {
     final String clientSecret;
     try {
       clientSecret = PasswordFileUtil.readPasswordFromFile(clientSecretPath);
     } catch (final FileNotFoundException fnfe) {
-      throw new TransactionSignerInitializationException("File not found: " + clientSecretPath);
+      throw new SignerInitializationException("File not found: " + clientSecretPath);
     } catch (final IOException e) {
-      throw new TransactionSignerInitializationException(READ_SECRET_FILE_ERROR, e);
+      throw new SignerInitializationException(READ_SECRET_FILE_ERROR, e);
     }
 
     final AzureConfig config =
-        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret);
+        new AzureConfig(keyVaultName, keyName, keyVersion, clientId, clientSecret, tenantId);
 
-    final AzureKeyVaultTransactionSignerFactory factory =
-        new AzureKeyVaultTransactionSignerFactory(new AzureKeyVaultAuthenticator());
+    final AzureKeyVaultSignerFactory factory = new AzureKeyVaultSignerFactory();
 
     return factory.createSigner(config);
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerProvider(createSigner());
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new SingleSignerProvider(createSigner());
   }
 
   @Override

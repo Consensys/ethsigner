@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.util.FileUtil;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -40,12 +40,12 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final AddressIndexedSignerProvider signerProvider;
   private final WebClientOptionsFactory webClientOptionsFactory = new WebClientOptionsFactory();
 
-  public EthSigner(final Config config, final TransactionSignerProvider transactionSignerProvider) {
+  public EthSigner(final Config config, final SignerProvider signerProvider) {
     this.config = config;
-    this.transactionSignerProvider = transactionSignerProvider;
+    this.signerProvider = AddressIndexedSignerProvider.create(signerProvider);
   }
 
   public void run() {
@@ -76,7 +76,7 @@ public final class EthSigner {
       final Runner runner =
           new Runner(
               config.getChainId().id(),
-              transactionSignerProvider,
+              signerProvider,
               webClientOptionsFactory.createWebClientOptions(config),
               applyConfigTlsSettingsTo(serverOptions),
               downstreamHttpRequestTimeout,

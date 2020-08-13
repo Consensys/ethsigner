@@ -46,8 +46,9 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   static void preChecks() {
     Assumptions.assumeTrue(
         AzureBasedTomlLoadingAcceptanceTest.clientId != null
-            && AzureBasedTomlLoadingAcceptanceTest.clientSecret != null,
-        "Ensure Azure client id and client secret env variables are set");
+            && AzureBasedTomlLoadingAcceptanceTest.clientSecret != null
+            && AzureBasedTomlLoadingAcceptanceTest.tenantId != null,
+        "Ensure Azure client id, client secret and tenant_id env variables are set");
   }
 
   @Test
@@ -56,7 +57,8 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
     createAzureTomlFileAt(
         tempDir.resolve(AzureBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         AzureBasedTomlLoadingAcceptanceTest.clientId,
-        AzureBasedTomlLoadingAcceptanceTest.clientSecret);
+        AzureBasedTomlLoadingAcceptanceTest.clientSecret,
+        AzureBasedTomlLoadingAcceptanceTest.tenantId);
     createFileBasedTomlFileAt(
         tempDir.resolve(FileBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         new File(

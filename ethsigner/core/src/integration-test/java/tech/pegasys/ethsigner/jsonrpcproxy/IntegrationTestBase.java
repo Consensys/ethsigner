@@ -24,6 +24,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
+import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
@@ -35,9 +36,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.MockServer;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.RestAssuredConverter;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
 
 import java.io.File;
@@ -116,8 +116,9 @@ public class IntegrationTestBase {
     final File passwordFile = createFile("password");
     credentials = WalletUtils.loadCredentials("password", keyFile);
 
-    final TransactionSignerProvider transactionSignerProvider =
-        new SingleTransactionSignerProvider(transactionSigner(keyFile, passwordFile));
+    final AddressIndexedSignerProvider transactionSignerProvider =
+        AddressIndexedSignerProvider.create(
+            new SingleSignerProvider(signer(keyFile, passwordFile)));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -312,7 +313,7 @@ public class IntegrationTestBase {
             .withHeaders(MockServer.headers(headers)));
   }
 
-  private static TransactionSigner transactionSigner(final File keyFile, final File passwordFile) {
+  private static Signer signer(final File keyFile, final File passwordFile) {
     return FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
   }
 

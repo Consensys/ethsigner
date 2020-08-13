@@ -15,10 +15,10 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
 
 import java.nio.file.Path;
@@ -61,14 +61,13 @@ public class FileBasedSubCommand extends SignerSubCommand {
       arity = "1")
   private Path keyFilePath;
 
-  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private Signer createSigner() throws SignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerProvider(createSigner());
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new SingleSignerProvider(createSigner());
   }
 
   @Override

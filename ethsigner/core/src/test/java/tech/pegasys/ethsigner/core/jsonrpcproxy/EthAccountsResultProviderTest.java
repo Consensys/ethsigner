@@ -22,41 +22,53 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
+import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.Keys;
 
 @SuppressWarnings("unchecked")
 public class EthAccountsResultProviderTest {
 
+  final ECPublicKey publicKeyA = createKeyFrom("A".repeat(128));
+  final ECPublicKey publicKeyB = createKeyFrom("B".repeat(128));
+  final ECPublicKey publicKeyC = createKeyFrom("C".repeat(128));
+
+  final String addressA = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyA));
+  final String addressB = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyB));
+  final String addressC = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKeyC));
+
+  final ECPublicKey createKeyFrom(final String hexString) {
+    return EthPublicKeyUtils.createPublicKey(Bytes.fromHexString(hexString));
+  }
+
   @Test
   public void valueFromBodyProviderInsertedToResult() {
-    final String address = "MyAddress";
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
-        new EthAccountsResultProvider(() -> Set.of(address));
+        new EthAccountsResultProvider(() -> Set.of(publicKeyA));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
     request.setParams(emptyList());
 
-    final Object body = resultProvider.createResponseResult(request);
-
-    assertThat(body).isInstanceOf(List.class);
-    final List<String> addressses = (List<String>) body;
-    assertThat(addressses).containsExactly(address);
+    final List<String> addresses = resultProvider.createResponseResult(request);
+    assertThat(addresses).containsExactly("0x" + addressA);
   }
 
   @Test
   public void ifParamsContainsANonEmptyArrayExceptionIsThrownWithInvalidParams() {
-    final String address = "MyAddress";
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
-        new EthAccountsResultProvider(() -> Set.of(address));
+        new EthAccountsResultProvider(() -> Set.of(publicKeyA));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -70,10 +82,9 @@ public class EthAccountsResultProviderTest {
 
   @Test
   public void ifParamIsAnObjectExceptionIsThrownWithInvalidParams() {
-    final String address = "MyAddress";
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
-        new EthAccountsResultProvider(() -> Set.of(address));
+        new EthAccountsResultProvider(() -> Set.of(publicKeyA));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -87,10 +98,9 @@ public class EthAccountsResultProviderTest {
 
   @Test
   public void missingParametersIsOk() {
-    final String address = "MyAddress";
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
-        new EthAccountsResultProvider(() -> Set.of(address));
+        new EthAccountsResultProvider(() -> Set.of(publicKeyA));
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
     request.setId(new JsonRpcRequestId(id));
@@ -98,12 +108,12 @@ public class EthAccountsResultProviderTest {
     final Object body = resultProvider.createResponseResult(request);
     assertThat(body).isInstanceOf(List.class);
     final List<String> addressses = (List<String>) body;
-    assertThat(addressses).containsExactly(address);
+    assertThat(addressses).containsExactly("0x" + addressA);
   }
 
   @Test
   public void multipleValueFromBodyProviderInsertedToResult() {
-    final Set<String> availableAddresses = Set.of("a", "b", "c");
+    final Set<ECPublicKey> availableAddresses = Set.of(publicKeyA, publicKeyB, publicKeyC);
     final int id = 1;
     final EthAccountsResultProvider resultProvider =
         new EthAccountsResultProvider(() -> availableAddresses);
@@ -116,14 +126,15 @@ public class EthAccountsResultProviderTest {
 
     assertThat(body).isInstanceOf(List.class);
     final List<String> reportedAddresses = (List<String>) body;
-    assertThat(reportedAddresses).containsExactlyInAnyOrderElementsOf(availableAddresses);
+    assertThat(reportedAddresses)
+        .containsExactlyInAnyOrder("0x" + addressA, "0x" + addressB, "0x" + addressC);
   }
 
   @Test
   public void accountsReturnedAreDynamicallyFetchedFromProvider() {
-    final Set<String> addresses = Sets.newHashSet("a", "b", "c");
+    final Set<ECPublicKey> addresses = Sets.newHashSet(publicKeyA, publicKeyB, publicKeyC);
 
-    final Supplier<Set<String>> supplier = () -> addresses;
+    final Supplier<Set<ECPublicKey>> supplier = () -> addresses;
     final EthAccountsResultProvider resultProvider = new EthAccountsResultProvider(supplier);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
@@ -133,19 +144,27 @@ public class EthAccountsResultProviderTest {
     Object body = resultProvider.createResponseResult(request);
     assertThat(body).isInstanceOf(List.class);
     List<String> reportedAddresses = (List<String>) body;
-    assertThat(reportedAddresses).containsExactly("a", "b", "c");
+    assertThat(reportedAddresses)
+        .containsExactlyElementsOf(
+            List.of("0x" + addressA, "0x" + addressB, "0x" + addressC).stream()
+                .sorted()
+                .collect(Collectors.toList()));
 
-    addresses.remove("a");
+    addresses.remove(publicKeyA);
 
     body = resultProvider.createResponseResult(request);
     assertThat(body).isInstanceOf(List.class);
     reportedAddresses = (List<String>) body;
-    assertThat(reportedAddresses).containsExactly("b", "c");
+    assertThat(reportedAddresses)
+        .containsExactlyElementsOf(
+            List.of("0x" + addressB, "0x" + addressC).stream()
+                .sorted()
+                .collect(Collectors.toList()));
   }
 
   @Test
   public void accountsReturnedAreSortedAlphabetically() {
-    final Supplier<Set<String>> supplier = () -> Sets.newHashSet("c", "b", "a");
+    final Supplier<Set<ECPublicKey>> supplier = () -> Set.of(publicKeyA, publicKeyB, publicKeyC);
     final EthAccountsResultProvider resultProvider = new EthAccountsResultProvider(supplier);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_accounts");
@@ -155,6 +174,10 @@ public class EthAccountsResultProviderTest {
     final Object body = resultProvider.createResponseResult(request);
     assertThat(body).isInstanceOf(List.class);
     List<String> reportedAddresses = (List<String>) body;
-    assertThat(reportedAddresses).containsExactly("a", "b", "c");
+    assertThat(reportedAddresses)
+        .containsExactlyElementsOf(
+            List.of("0x" + addressA, "0x" + addressB, "0x" + addressC).stream()
+                .sorted()
+                .collect(Collectors.toList()));
   }
 }

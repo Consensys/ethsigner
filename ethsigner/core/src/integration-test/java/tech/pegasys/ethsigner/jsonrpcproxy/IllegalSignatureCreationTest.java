@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.filebased.CredentialTransactionSigner;
+import tech.pegasys.signers.secp256k1.filebased.CredentialSigner;
 
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
@@ -44,8 +44,8 @@ class IllegalSignatureCreationTest {
     final EthTransaction txn = new EthTransaction(txnParams, null, null);
     final byte[] serialisedBytes = txn.rlpEncode(chainId);
 
-    final CredentialTransactionSigner signer =
-        new CredentialTransactionSigner(
+    final CredentialSigner signer =
+        new CredentialSigner(
             Credentials.create("ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"));
 
     final Signature signature = signer.sign(serialisedBytes);
