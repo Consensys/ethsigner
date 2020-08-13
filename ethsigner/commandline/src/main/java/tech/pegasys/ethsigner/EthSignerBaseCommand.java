@@ -17,6 +17,7 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
 
+import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
@@ -40,6 +41,7 @@ import org.apache.logging.log4j.Level;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
@@ -65,6 +67,10 @@ import picocli.CommandLine.Spec;
 public class EthSignerBaseCommand implements Config {
 
   @Spec private CommandSpec spec; // injected by picocli
+
+  @SuppressWarnings("UnusedVariable")
+  @Mixin
+  private ConfigFileOption configFileOption;
 
   @SuppressWarnings("FieldMayBeFinal")
   @Option(

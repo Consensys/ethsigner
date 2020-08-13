@@ -15,10 +15,14 @@ package tech.pegasys.ethsigner;
 import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.core.InitializationException;
+<<<<<<< HEAD
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
+=======
 import tech.pegasys.ethsigner.valueprovider.CascadingDefaultProvider;
 import tech.pegasys.ethsigner.valueprovider.EnvironmentVariableDefaultProvider;
 import tech.pegasys.ethsigner.valueprovider.TomlConfigFileDefaultProvider;
-import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
+import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+>>>>>>> upstream/master
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -145,7 +149,7 @@ public class CommandlineParser {
       final CommandLine commandLine,
       final CommandLine.ParseResult parseResult) {
 
-    if (ex instanceof SignerInitializationException) {
+    if (ex instanceof TransactionSignerInitializationException) {
       errorWriter.println(SIGNER_CREATION_ERROR);
       errorWriter.println("Cause: " + ex.getMessage());
     } else if (ex instanceof InitializationException) {
@@ -154,8 +158,23 @@ public class CommandlineParser {
     } else if (ex instanceof InvalidCommandLineOptionsException) {
       errorWriter.println(ex.getMessage());
     } else {
+<<<<<<< HEAD
+      if (ex instanceof SignerInitializationException) {
+        errorWriter.println(SIGNER_CREATION_ERROR);
+        errorWriter.println("Cause: " + ex.getMessage());
+      } else if (ex instanceof InitializationException) {
+        errorWriter.println("Failed to initialize EthSigner");
+        errorWriter.println("Cause: " + ex.getMessage());
+      } else if (ex instanceof InvalidCommandLineOptionsException) {
+        errorWriter.println(ex.getMessage());
+      } else {
+        LOG.error("EthSigner has suffered an unrecoverable failure", ex);
+        errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
+      }
+=======
       LOG.error("EthSigner has suffered an unrecoverable failure", ex);
       errorWriter.println("EthSigner has suffered an unrecoverable failure " + ex.toString());
+>>>>>>> upstream/master
     }
 
     commandLine.usage(outputWriter);
