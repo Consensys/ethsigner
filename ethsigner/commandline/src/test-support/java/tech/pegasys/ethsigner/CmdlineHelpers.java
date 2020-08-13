@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,19 +26,19 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 
 public class CmdlineHelpers {
-  private static String TOML_STRING_PATTERN = "%s=\"%s\"%n";
-  private static String TOML_NUMBER_PATTERN = "%s=%d%n";
-  private static String TOML_BOOLEAN_PATTERN = "%s=%b%n";
+  private static final String TOML_STRING_PATTERN = "%s=\"%s\"%n";
+  private static final String TOML_NUMBER_PATTERN = "%s=%d%n";
+  private static final String TOML_BOOLEAN_PATTERN = "%s=%b%n";
 
   public static Map<String, Object> baseCommandOptions() {
     final Map<String, Object> optionsMap = new LinkedHashMap<>();
     optionsMap.put("downstream-http-host", "8.8.8.8");
-    optionsMap.put("downstream-http-port", Integer.valueOf(5000));
+    optionsMap.put("downstream-http-port", 5000);
     optionsMap.put("downstream-http-path", "/v3/projectid");
-    optionsMap.put("downstream-http-request-timeout", Integer.valueOf(10_000));
-    optionsMap.put("http-listen-port", Integer.valueOf(5001));
+    optionsMap.put("downstream-http-request-timeout", 10_000);
+    optionsMap.put("http-listen-port", 5001);
     optionsMap.put("http-listen-host", "localhost");
-    optionsMap.put("chain-id", Integer.valueOf(6));
+    optionsMap.put("chain-id", 6);
     optionsMap.put("logging", "INFO");
     optionsMap.put("tls-keystore-file", "./keystore.pfx");
     optionsMap.put("tls-keystore-password-file", "./keystore.passwd");
@@ -105,5 +106,36 @@ public class CmdlineHelpers {
           }
         });
     return tomlBuilder.toString();
+  }
+
+  public static Map<String, String> toEnvironmentMap(
+      final String mainCommand, final String subCommand, final Map<String, Object> options) {
+    final Map<String, String> envMap = new HashMap<>();
+    options.forEach(
+        (option, value) -> {
+          envMap.put(
+              envVarFriendly(mainCommand)
+                  + "_"
+                  + envVarFriendly(subCommand)
+                  + "_"
+                  + envVarFriendly(option),
+              String.valueOf(value));
+        });
+    return envMap;
+  }
+
+  public static Map<String, String> toEnvironmentMap(
+      final String mainCommand, final Map<String, Object> options) {
+    final Map<String, String> envMap = new HashMap<>();
+    options.forEach(
+        (option, value) -> {
+          envMap.put(
+              envVarFriendly(mainCommand) + "_" + envVarFriendly(option), String.valueOf(value));
+        });
+    return envMap;
+  }
+
+  private static String envVarFriendly(final String val) {
+    return val.replace("-", "_").toUpperCase();
   }
 }

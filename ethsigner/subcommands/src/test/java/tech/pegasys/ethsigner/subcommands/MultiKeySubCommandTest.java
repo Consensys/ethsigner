@@ -18,12 +18,14 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
 import static tech.pegasys.ethsigner.subcommands.MultiKeySubCommand.COMMAND_NAME;
 import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.assertMissingOptionsAreReported;
 
+import tech.pegasys.ethsigner.CmdlineHelpers;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,6 +51,22 @@ class MultiKeySubCommandTest extends SubCommandBase {
     final List<String> subCommandOptions = List.of(subCommandOption, expectedPath.toString());
 
     final List<String> options = getOptions(subCommandOptions);
+
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
+
+    assertThat(result).isTrue();
+    assertThat(((MultiKeySubCommand) subCommand).getDirectoryPath()).isEqualTo(expectedPath);
+  }
+
+  @Test
+  void configFileSuccessfullyParsedAndValidates() {
+    final Path expectedPath = Path.of("/keys/directory/path");
+
+    final Map<String, Object> optionsMap = baseCommandOptions();
+    optionsMap.put("multikey-signer.directory", expectedPath.toString());
+
+    final List<String> options = CmdlineHelpers.toConfigFileOptionsList(tempDir, optionsMap);
+    options.add(COMMAND_NAME);
 
     final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 

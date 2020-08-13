@@ -12,8 +12,6 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static java.util.Collections.emptyMap;
-
 import tech.pegasys.ethsigner.CommandlineParser;
 import tech.pegasys.ethsigner.EthSignerBaseCommand;
 import tech.pegasys.ethsigner.SignerSubCommand;
@@ -21,6 +19,8 @@ import tech.pegasys.ethsigner.SignerSubCommand;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
@@ -39,12 +39,13 @@ public abstract class SubCommandBase {
   protected SignerSubCommand subCommand;
   protected String defaultUsageText;
   protected String subCommandUsageText;
+  protected Map<String, String> environmentVariablesMap = new HashMap<>();
 
   @BeforeEach
   void setup() {
     subCommand = subCommand();
     config = new EthSignerBaseCommand();
-    parser = new CommandlineParser(config, outputWriter, errorWriter, emptyMap());
+    parser = new CommandlineParser(config, outputWriter, errorWriter, environmentVariablesMap);
     parser.registerSigners(subCommand);
 
     final CommandLine commandLine = new CommandLine(new EthSignerBaseCommand());

@@ -38,9 +38,6 @@ public class HashicorpSubCommandTest extends SubCommandBase {
   private static final Integer PORT = 23000;
   private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
   private static final Integer TIMEOUT = 15;
-  // private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
-
-  // private HashicorpSubCommand hashicorpSubCommand;
 
   @Override
   protected SignerSubCommand subCommand() {
@@ -52,29 +49,6 @@ public class HashicorpSubCommandTest extends SubCommandBase {
       }
     };
   }
-
-  //  private boolean parseCommand(final List<String> cmdLine) {
-  //    final CommandLine commandLine = new CommandLine(hashicorpSubCommand);
-  //    commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-  //    commandLine.registerConverter(Level.class, Level::valueOf);
-  //
-  //    try {
-  //      commandLine.parseArgs(cmdLine.toArray(String[]::new));
-  //    } catch (final CommandLine.ParameterException e) {
-  //      return false;
-  //    }
-  //    return true;
-  //  }
-
-  //  private List<String> validCommandLine() {
-  //    return Lists.newArrayList(
-  //        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-  //        "--host=" + HTTP_HOST_COM,
-  //        "--port=" + PORT,
-  //        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
-  //        "--timeout=" + TIMEOUT,
-  //        "--tls-known-server-file=" + TLS_KNOWN_SERVER_FILE);
-  //  }
 
   private Map<String, Object> validSubCommandOptions() {
     final Map<String, Object> subCommandOptions = new LinkedHashMap<>();
@@ -97,16 +71,6 @@ public class HashicorpSubCommandTest extends SubCommandBase {
     subCommandOptions.put("tls-enabled", Boolean.FALSE);
     return subCommandOptions;
   }
-
-  //  private List<String> validWithTlsDisabledCommandLine() {
-  //    return Lists.newArrayList(
-  //        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-  //        "--host=" + HTTP_HOST_COM,
-  //        "--port=" + PORT,
-  //        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
-  //        "--timeout=" + TIMEOUT,
-  //        "--tls-enabled=false");
-  //  }
 
   private List<String> getOptions(final List<String> subCommandOptions) {
     final List<String> options = toOptionsList(baseCommandOptions());
