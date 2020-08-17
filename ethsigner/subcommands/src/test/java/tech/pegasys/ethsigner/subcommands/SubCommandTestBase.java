@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
 
-public abstract class SubCommandBase {
+public abstract class SubCommandTestBase {
   @TempDir protected static Path tempDir;
 
   protected final StringWriter commandOutput = new StringWriter();

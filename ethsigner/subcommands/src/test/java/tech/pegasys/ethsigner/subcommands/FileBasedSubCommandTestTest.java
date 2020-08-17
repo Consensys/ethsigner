@@ -21,7 +21,6 @@ import static tech.pegasys.ethsigner.subcommands.FileBasedSubCommand.COMMAND_NAM
 
 import tech.pegasys.ethsigner.CmdlineHelpers;
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
@@ -32,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class FileBasedSubCommandTest extends SubCommandBase {
+public class FileBasedSubCommandTestTest extends SubCommandTestBase {
 
   private static final String PASSWORD_FILE =
       Paths.get("/this/is/the/path/to/the/password/file").toString();
@@ -42,7 +41,7 @@ public class FileBasedSubCommandTest extends SubCommandBase {
   protected SignerSubCommand subCommand() {
     return new FileBasedSubCommand() {
       @Override
-      public void run() throws TransactionSignerInitializationException {
+      public void run() {
         // we only want to perform validation in these unit test cases
         validateArgs();
       }

@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.util.CommandLineParserAssertions.assertMiss
 
 import tech.pegasys.ethsigner.CmdlineHelpers;
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -31,13 +30,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class MultiKeySubCommandTest extends SubCommandBase {
+class MultiKeySubCommandTestTest extends SubCommandTestBase {
 
   @Override
   protected SignerSubCommand subCommand() {
     return new MultiKeySubCommand() {
       @Override
-      public void run() throws TransactionSignerInitializationException {
+      public void run() {
         // we only want to perform validation in these unit test cases
         validateArgs();
       }

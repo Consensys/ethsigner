@@ -20,7 +20,6 @@ import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
 import static tech.pegasys.ethsigner.subcommands.HashicorpSubCommand.COMMAND_NAME;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
 
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
@@ -29,7 +28,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class HashicorpSubCommandTest extends SubCommandBase {
+public class HashicorpSubCommandTestTest extends SubCommandTestBase {
 
   public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
@@ -43,7 +42,7 @@ public class HashicorpSubCommandTest extends SubCommandBase {
   protected SignerSubCommand subCommand() {
     return new HashicorpSubCommand() {
       @Override
-      public void run() throws TransactionSignerInitializationException {
+      public void run() {
         // we only want to perform validation in these unit test cases
         validateArgs();
       }
