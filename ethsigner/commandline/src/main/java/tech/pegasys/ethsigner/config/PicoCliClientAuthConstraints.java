@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 
@@ -26,7 +26,7 @@ public class PicoCliClientAuthConstraints implements ClientAuthConstraints {
   @Option(
       names = "--tls-known-clients-file",
       description = "Path to a file containing the fingerprints of authorized clients.",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private File tlsKnownClientsFile = null;
 

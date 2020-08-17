@@ -12,9 +12,10 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
@@ -74,7 +75,7 @@ public class AzureSubCommand extends SignerSubCommand {
       names = {"--client-secret-path"},
       description =
           "Path to a file containing the secret used to access the vault (along with client-id)",
-      paramLabel = MANDATORY_PATH_FORMAT_HELP)
+      paramLabel = PATH_FORMAT_HELP)
   private Path clientSecretPath;
 
   private static final String READ_SECRET_FILE_ERROR = "Error when reading the secret from file.";

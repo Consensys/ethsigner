@@ -12,9 +12,10 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
@@ -49,7 +50,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Option(
       names = {"-p", "--password-file"},
       description = "The path to a file containing the password used to decrypt the keyfile.",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path passwordFilePath;
 
@@ -57,7 +58,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Option(
       names = {"-k", "--key-file"},
       description = "The path to a file containing the key used to sign transactions.",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path keyFilePath;
 

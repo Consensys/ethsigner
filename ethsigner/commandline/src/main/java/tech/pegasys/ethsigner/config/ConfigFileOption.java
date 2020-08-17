@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import java.io.File;
 
@@ -22,7 +22,7 @@ public class ConfigFileOption {
   @Option(
       names = "--config-file",
       description = "Config file in toml format (default: none)",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       defaultValue = "${env:ETHSIGNER_CONFIG_FILE}")
   private File configFile = null;
 

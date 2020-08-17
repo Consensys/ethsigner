@@ -12,10 +12,10 @@
  */
 package tech.pegasys.ethsigner;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PORT_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
@@ -77,14 +77,14 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Option(
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
-      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      paramLabel = LONG_FORMAT_HELP,
       arity = "1")
   private Long chainId; // required, see validateArgs
 
   @Option(
       names = {"--data-path"},
       description = "The path to a directory to store temporary files",
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      paramLabel = PATH_FORMAT_HELP,
       arity = "1")
   private Path dataPath;
 
@@ -99,14 +99,14 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Option(
       names = {"--http-listen-host"},
       description = "Host for JSON-RPC HTTP to listen on (default: 127.0.0.1)",
-      paramLabel = MANDATORY_HOST_FORMAT_HELP,
+      paramLabel = HOST_FORMAT_HELP,
       arity = "1")
   private String httpListenHost = "127.0.0.1";
 
   @Option(
       names = {"--http-listen-port"},
       description = "Port for JSON-RPC HTTP to listen on (default: 8545)",
-      paramLabel = MANDATORY_PORT_FORMAT_HELP,
+      paramLabel = PORT_FORMAT_HELP,
       arity = "1")
   private final Integer httpListenPort = 8545;
 
@@ -116,7 +116,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Option(
       names = "--downstream-http-host",
       description = "The endpoint to which received requests are forwarded (default: 127.0.0.1)",
-      paramLabel = MANDATORY_HOST_FORMAT_HELP,
+      paramLabel = HOST_FORMAT_HELP,
       arity = "1")
   private String downstreamHttpHost = "127.0.0.1";
 
@@ -124,7 +124,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
-      paramLabel = MANDATORY_PORT_FORMAT_HELP,
+      paramLabel = PORT_FORMAT_HELP,
       arity = "1")
   private Integer downstreamHttpPort; // required, see validateArgs
 
@@ -135,7 +135,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
       names = {"--downstream-http-path"},
       description = "The path to which received requests are forwarded (default: /)",
       defaultValue = "/",
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      paramLabel = PATH_FORMAT_HELP,
       arity = "1")
   public void setDownstreamHttpPath(final String path) {
     try {
@@ -162,7 +162,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Option(
       names = {"--downstream-http-request-timeout"},
       description = "Timeout in milliseconds to wait for downstream request (default: 5000)",
-      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      paramLabel = LONG_FORMAT_HELP,
       arity = "1")
   private long downstreamHttpRequestTimeout = Duration.ofSeconds(5).toMillis();
 

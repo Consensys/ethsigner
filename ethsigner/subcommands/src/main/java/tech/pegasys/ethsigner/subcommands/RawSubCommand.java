@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.signers.secp256k1.api.Signer;
@@ -41,7 +41,7 @@ public class RawSubCommand extends SignerSubCommand {
   @Option(
       names = {"--key"},
       description = "The private key used to generate signatures.",
-      paramLabel = MANDATORY_HOST_FORMAT_HELP,
+      paramLabel = HOST_FORMAT_HELP,
       arity = "1")
   private String privateKey;
 

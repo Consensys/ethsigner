@@ -13,7 +13,7 @@
 package tech.pegasys.ethsigner.config.tls.client;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.BOOLEAN_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -43,7 +43,7 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
       names = "--downstream-http-tls-known-servers-file",
       description =
           "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust. Must be specified if CA auth is disabled.",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path knownServersFile;
 
@@ -105,12 +105,10 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
 
     // ArgGroup custom validation
     if (keyStoreOptions.getKeyStoreFile() == null && keyStoreOptions.getPasswordFile() != null) {
-      missingOptions.add(
-          "'--downstream-http-tls-keystore-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
+      missingOptions.add("'--downstream-http-tls-keystore-file=" + FILE_FORMAT_HELP + "'");
     } else if (keyStoreOptions.getKeyStoreFile() != null
         && keyStoreOptions.getPasswordFile() == null) {
-      missingOptions.add(
-          "'--downstream-http-tls-keystore-password-file=" + MANDATORY_FILE_FORMAT_HELP + "'");
+      missingOptions.add("'--downstream-http-tls-keystore-password-file=" + FILE_FORMAT_HELP + "'");
     }
 
     if (!missingOptions.isEmpty()) {

@@ -12,10 +12,10 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_HOST_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_LONG_FORMAT_HELP;
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PORT_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.LONG_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PORT_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.core.InitializationException;
@@ -63,14 +63,14 @@ public class HashicorpSubCommand extends SignerSubCommand {
   @Option(
       names = {"--host"},
       description = "Host of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      paramLabel = MANDATORY_HOST_FORMAT_HELP,
+      paramLabel = HOST_FORMAT_HELP,
       arity = "1")
   private String serverHost = DEFAULT_HASHICORP_VAULT_HOST;
 
   @Option(
       names = {"--port"},
       description = "Port of the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      paramLabel = MANDATORY_PORT_FORMAT_HELP,
+      paramLabel = PORT_FORMAT_HELP,
       arity = "1")
   private final Integer serverPort = DEFAULT_PORT;
 
@@ -78,14 +78,14 @@ public class HashicorpSubCommand extends SignerSubCommand {
       names = {"--timeout"},
       description =
           "Timeout in milliseconds for requests to the Hashicorp vault server (default: ${DEFAULT-VALUE})",
-      paramLabel = MANDATORY_LONG_FORMAT_HELP,
+      paramLabel = LONG_FORMAT_HELP,
       arity = "1")
   private final Long timeout = DEFAULT_TIMEOUT;
 
   @Option(
       names = {"--auth-file"},
       description = "Path to a File containing authentication data for Hashicorp vault",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private final Path authFilePath = null;
 
@@ -109,7 +109,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
       names = "--tls-known-server-file",
       description =
           "Path to the file containing Hashicorp Vault's host, port and self-signed certificate fingerprint",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path tlsKnownServerFile = null;
 
