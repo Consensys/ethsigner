@@ -12,10 +12,11 @@
  */
 package tech.pegasys.ethsigner;
 
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -46,9 +47,8 @@ public class NullSignerSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new EmptyTransactionSignerProvider();
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new EmptySignerProvider();
   }
 
   @Override
@@ -61,19 +61,19 @@ public class NullSignerSubCommand extends SignerSubCommand {
     // this is required to do any non-PicoCLI validation of args prior to setup
     super.validateArgs();
     if (shouldThrow) {
-      throw new TransactionSignerInitializationException(ERROR_MSG);
+      throw new SignerInitializationException(ERROR_MSG);
     }
   }
 
-  public static class EmptyTransactionSignerProvider implements TransactionSignerProvider {
+  public static class EmptySignerProvider implements SignerProvider {
 
     @Override
-    public Optional<TransactionSigner> getSigner(final String address) {
+    public Optional<Signer> getSigner(final ECPublicKey pubKey) {
       return Optional.empty();
     }
 
     @Override
-    public Set<String> availableAddresses() {
+    public Set<ECPublicKey> availablePublicKeys() {
       return Collections.emptySet();
     }
   }

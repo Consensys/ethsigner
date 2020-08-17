@@ -30,21 +30,26 @@
 ext.acceptedLicenses = [
         'BSD License',
         'BSD 3-Clause',
-        'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0',
+        'The BSD 3-Clause license',
         'Eclipse Public License - v 1.0',
         'Eclipse Public License - v 2.0',
         'Eclipse Public License 2.0',
         'Eclipse Public License 1.0',
+        'Eclipse Distribution License - v 1.0',
+        'EDL 1.0',
         'MIT License',
         'The MIT License (MIT)',
         'Apache License, Version 2.0',
+        'Apache License v2.0',
         'Bouncy Castle Licence',
         'Public Domain',
         'Mozilla Public License 1.0',
         'Mozilla Public License Version 1.1',
         'Mozilla Public License Version 2.0',
         'CC0 1.0 Universal License',
+        'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0',
         'Common Development and Distribution License 1.0',
+        'CDDL',
         'Unicode/ICU License',
         'CC0'
 ]*.toLowerCase()
@@ -127,7 +132,7 @@ downloadLicenses {
           (epl_2): [
                   'Eclipse Public License 2.0',
                   'Eclipse Public License - v 2.0'
-          ]
+          ],
 
   ]
 
@@ -152,7 +157,9 @@ downloadLicenses {
           (group('org.glassfish.jersey.connectors')): apache,
           (group('com.github.jnr')): epl_2,
           (group('javax.mail')): cddl,
-          (group('net.jcip')): apache
+          (group('net.jcip')): apache,
+          (group('net.java.dev.jna')): apache,
+          (group('com.sun.mail')): cddl
   ]
 }
 

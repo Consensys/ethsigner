@@ -15,13 +15,13 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
+import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -37,9 +37,9 @@ public class EthSignResultProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final AddressIndexedSignerProvider transactionSignerProvider;
 
-  public EthSignResultProvider(final TransactionSignerProvider transactionSignerProvider) {
+  public EthSignResultProvider(final AddressIndexedSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 
@@ -52,14 +52,15 @@ public class EthSignResultProvider implements ResultProvider<String> {
           params == null ? "null" : params.size());
       throw new JsonRpcException(INVALID_PARAMS);
     }
+
     final String address = params.get(0);
-    final Optional<TransactionSigner> transactionSigner =
-        transactionSignerProvider.getSigner(address);
+    final Optional<Signer> transactionSigner = transactionSignerProvider.getSigner(address);
     if (transactionSigner.isEmpty()) {
       LOG.info("Address ({}) does not match any available account", address);
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
-    final TransactionSigner signer = transactionSigner.get();
+
+    final Signer signer = transactionSigner.get();
     final String originalMessage = params.get(1);
     final String message =
         (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;

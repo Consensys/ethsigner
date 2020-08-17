@@ -24,10 +24,10 @@ import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
 import tech.pegasys.signers.hashicorp.config.HashicorpKeyConfig;
 import tech.pegasys.signers.hashicorp.config.KeyDefinition;
 import tech.pegasys.signers.hashicorp.config.TlsOptions;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.hashicorp.HashicorpSignerFactory;
 
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private Path tlsKnownServerFile = null;
 
-  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private Signer createSigner() throws SignerInitializationException {
 
     final HashicorpKeyConfig keyConfig =
         new HashicorpKeyConfig(
@@ -155,9 +155,8 @@ public class HashicorpSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerProvider(createSigner());
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new SingleSignerProvider((createSigner()));
   }
 
   @Override
@@ -179,10 +178,10 @@ public class HashicorpSubCommand extends SignerSubCommand {
           .findFirst()
           .orElseThrow(
               () ->
-                  new TransactionSignerInitializationException(
+                  new SignerInitializationException(
                       String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString())));
     } catch (final IOException e) {
-      throw new TransactionSignerInitializationException(
+      throw new SignerInitializationException(
           String.format(AUTH_FILE_ERROR_MSG_FMT, path.toString()));
     }
   }

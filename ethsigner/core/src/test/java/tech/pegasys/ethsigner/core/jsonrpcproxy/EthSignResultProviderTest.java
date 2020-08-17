@@ -22,13 +22,13 @@ import static org.mockito.Mockito.mock;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
+import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignResultProvider;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -54,7 +54,8 @@ public class EthSignResultProviderTest {
   @ArgumentsSource(InvalidParamsProvider.class)
   @NullSource
   public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
     final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
@@ -69,7 +70,8 @@ public class EthSignResultProviderTest {
 
   @Test
   public void ifAddressIsNotUnlockedExceptionIsThrownWithSigningNotUnlocked() {
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
     final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
@@ -83,13 +85,14 @@ public class EthSignResultProviderTest {
 
   @Test
   public void signatureHasTheExpectedFormat() {
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
+    final Signer mockSigner = mock(Signer.class);
     final BigInteger v = BigInteger.ONE;
     final BigInteger r = BigInteger.TWO;
     final BigInteger s = BigInteger.TEN;
-    doReturn(new Signature(v, r, s)).when(mockTransactionSigner).sign(any(byte[].class));
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    doReturn(new Signature(v, r, s)).when(mockSigner).sign(any(byte[].class));
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");
@@ -115,7 +118,7 @@ public class EthSignResultProviderTest {
         ECKeyPair.create(
             Numeric.hexStringToByteArray(
                 "0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41"));
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
+    final Signer mockSigner = mock(Signer.class);
     doAnswer(
             answer -> {
               byte[] data = answer.getArgument(0, byte[].class);
@@ -125,11 +128,12 @@ public class EthSignResultProviderTest {
                   new BigInteger(1, signature.getR()),
                   new BigInteger(1, signature.getS()));
             })
-        .when(mockTransactionSigner)
+        .when(mockSigner)
         .sign(any(byte[].class));
 
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignResultProvider resultProvider = new EthSignResultProvider(mockSignerProvider);
 
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_sign");

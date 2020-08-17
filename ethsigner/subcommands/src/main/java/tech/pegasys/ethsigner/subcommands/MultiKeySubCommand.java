@@ -15,10 +15,9 @@ package tech.pegasys.ethsigner.subcommands;
 import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.ethsigner.core.InitializationException;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secp256k1.multikey.MultiKeyTransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
+import tech.pegasys.signers.secp256k1.multikey.MultiKeySignerProvider;
 
 import java.nio.file.Path;
 
@@ -67,9 +66,8 @@ public class MultiKeySubCommand extends SignerSubCommand {
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return MultiKeyTransactionSignerProvider.create(directoryPath);
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return MultiKeySignerProvider.create(directoryPath, new EthSignerFileSelector());
   }
 
   @Override

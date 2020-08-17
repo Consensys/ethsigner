@@ -28,7 +28,6 @@ import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,7 +63,7 @@ public class Runner {
   private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
   private final long chainId;
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final AddressIndexedSignerProvider signerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
   private final DownstreamPathCalculator downstreamPathCalculator;
@@ -77,7 +76,7 @@ public class Runner {
 
   public Runner(
       final long chainId,
-      final TransactionSignerProvider transactionSignerProvider,
+      final AddressIndexedSignerProvider signerProvider,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
@@ -87,7 +86,7 @@ public class Runner {
       final Vertx vertx,
       final Collection<String> allowedCorsOrigins) {
     this.chainId = chainId;
-    this.transactionSignerProvider = transactionSignerProvider;
+    this.signerProvider = signerProvider;
     this.clientOptions = clientOptions;
     this.httpRequestTimeout = httpRequestTimeout;
     this.downstreamPathCalculator = downstreamPathCalculator;
@@ -156,8 +155,7 @@ public class Runner {
         new TransactionFactory(jsonDecoder, transmitterFactory);
 
     final SendTransactionHandler sendTransactionHandler =
-        new SendTransactionHandler(
-            chainId, transactionSignerProvider, transactionFactory, transmitterFactory);
+        new SendTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
@@ -165,12 +163,10 @@ public class Runner {
     requestMapper.addHandler(
         "eth_accounts",
         new InternalResponseHandler<>(
-            responseFactory,
-            new EthAccountsResultProvider(transactionSignerProvider::availableAddresses)));
+            responseFactory, new EthAccountsResultProvider(signerProvider::availablePublicKeys)));
     requestMapper.addHandler(
         "eth_sign",
-        new InternalResponseHandler<>(
-            responseFactory, new EthSignResultProvider(transactionSignerProvider)));
+        new InternalResponseHandler<>(responseFactory, new EthSignResultProvider(signerProvider)));
 
     return requestMapper;
   }
