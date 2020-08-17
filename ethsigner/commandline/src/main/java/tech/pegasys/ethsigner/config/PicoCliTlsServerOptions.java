@@ -40,8 +40,6 @@ public class PicoCliTlsServerOptions implements TlsOptions {
       paramLabel = FILE_FORMAT_HELP)
   private File keyStorePasswordFile;
 
-  public PicoCliTlsServerOptions() {}
-
   @Option(
       names = "--tls-allow-any-client",
       description =
