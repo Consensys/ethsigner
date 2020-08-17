@@ -38,7 +38,7 @@ public class RequiredOptionsUtil {
           final Object value;
           try {
             value = field.get(object);
-          } catch (IllegalAccessException e) {
+          } catch (final IllegalAccessException e) {
             throw new InitializationException("Error parsing options: " + e.getMessage(), e);
           }
           if (value == null) {

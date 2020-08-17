@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
+import static java.lang.System.lineSeparator;
 import static tech.pegasys.ethsigner.DefaultCommandValues.BOOLEAN_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
@@ -86,14 +87,15 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
     if (knownServersFile != null
         || keyStoreOptions.getKeyStoreFile() != null
         || keyStoreOptions.getPasswordFile() != null) {
-      return "Missing required argument(s): '--downstream-http-tls-enabled=true'\n";
+      return "Missing required argument(s): '--downstream-http-tls-enabled=true'" + lineSeparator();
     }
     return "";
   }
 
   private String knownServerFileAndCaValidationMessage() {
     if (knownServersFile == null && !caAuthEnabled) {
-      return "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'\n";
+      return "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'"
+          + lineSeparator();
     }
     return "";
   }
@@ -110,7 +112,9 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
     }
 
     if (!missingOptions.isEmpty()) {
-      return "Missing required arguments(s): " + String.join(",", missingOptions) + "\n";
+      return "Missing required arguments(s): "
+          + String.join(", ", missingOptions)
+          + lineSeparator();
     }
     return "";
   }

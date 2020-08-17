@@ -271,11 +271,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
     errorMessage.append(clientTlsOptions.validationMessage());
 
     if (errorMessage.length() > 0) {
-      if (errorMessage.charAt(errorMessage.length() - 1) == '\n') {
-        errorMessage.deleteCharAt(errorMessage.length() - 1);
-      }
-
-      throw new InvalidCommandLineOptionsException(errorMessage.toString());
+      throw new InvalidCommandLineOptionsException(errorMessage.toString().trim());
     }
   }
 }

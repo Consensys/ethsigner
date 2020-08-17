@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
+import static java.lang.System.lineSeparator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -91,7 +92,8 @@ class TomlConfigFileOptionDefaultProviderTest {
   void invalidOptionsInTomlFileThrowsException(@TempDir Path tempDir) throws IOException {
     final Path configFile =
         Files.writeString(
-            tempDir.resolve("test.toml"), validToml() + "invalidOption=10\ncountry.name=\"\"\n");
+            tempDir.resolve("test.toml"),
+            validToml() + "invalidOption=10\ncountry.name=\"\"" + lineSeparator());
 
     final TomlConfigFileDefaultProvider defaultProvider =
         new TomlConfigFileDefaultProvider(commandLine, configFile);
@@ -118,6 +120,13 @@ class TomlConfigFileOptionDefaultProviderTest {
   }
 
   private String validToml() {
-    return "x=10\n" + "y=20\n" + "name=\"test name\"\n" + "country.codes=[\"AU\", \"US\"]\n";
+    return "x=10"
+        + lineSeparator()
+        + "y=20"
+        + lineSeparator()
+        + "name=\"test name\""
+        + lineSeparator()
+        + "country.codes=[\"AU\", \"US\"]"
+        + lineSeparator();
   }
 }
