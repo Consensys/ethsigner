@@ -47,7 +47,7 @@ issues and PRs assigned to them.
     - Filing or commenting on issues on GitHub
     - Contributing to community discussions (e.g. meetings, Slack, email discussion forums, Stack Overflow)
 - Subscribed to [ethsigner-dev@pegasys.tech]
-- Joined [EthSigner Gitter]
+- Joined [EthSigner Discord]
 - Have read the [contributor guide]
 - Signed ICLA, as described in [CLA.md]
 
@@ -169,5 +169,5 @@ This document is adapted from the following sources:
 [New contributors]: /CONTRIBUTING.md
 [two-factor authentication]: https://help.github.com/articles/about-two-factor-authentication
 [ethsigner-dev@pegasys.tech]: mailto:ethsigner-dev@pegasys.tech
-[EthSigner Gitter]: https://gitter.im/PegaSysEng/ethsigner
+[EthSigner Discord]: https://discord.gg/5U9Jwp7
 [EthSigner Documentation]: /docs

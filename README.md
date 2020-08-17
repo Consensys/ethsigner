@@ -1,6 +1,6 @@
 # EthSigner
 
-A transaction signing application to be used with a web3 provider. All questions, queries and other discussion can be found on [Gitter]. 
+A transaction signing application to be used with a web3 provider. All questions, queries and other discussion can be found on [Discord]. 
 
 ## Issues
 
@@ -18,5 +18,5 @@ See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching 
 ## Release Notes
 * [Release Notes](CHANGELOG.md)
 
-[Gitter]: https://gitter.im/PegaSysEng/EthSigner
+[Discord]: https://discord.gg/5U9Jwp7
 [Github issues]: https://github.com/PegaSysEng/ethsigner/issues
