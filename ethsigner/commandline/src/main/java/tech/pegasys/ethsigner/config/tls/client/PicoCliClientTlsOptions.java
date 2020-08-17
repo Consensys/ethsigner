@@ -32,8 +32,7 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
       paramLabel = BOOLEAN_FORMAT_HELP,
-      arity = "0..1",
-      required = true)
+      arity = "0..1")
   private boolean tlsEnabled = false;
 
   @Mixin private PicoCliKeyStoreOptions keyStoreOptions;
