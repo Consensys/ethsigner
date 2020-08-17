@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
@@ -27,8 +29,6 @@ import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -39,6 +39,7 @@ import picocli.CommandLine.Option;
     mixinStandardHelpOptions = true)
 public class AzureSubCommand extends SignerSubCommand {
 
+  @RequiredOption
   @Option(
       names = {"--keyvault-name", "--key-vault-name"},
       description = "Name of the vault to access - used as the sub-domain to vault.azure.net",
@@ -46,6 +47,7 @@ public class AzureSubCommand extends SignerSubCommand {
       arity = "1")
   private String keyVaultName;
 
+  @RequiredOption
   @Option(
       names = {"--key-name"},
       description = "The name of the key which is to be used",
@@ -58,19 +60,21 @@ public class AzureSubCommand extends SignerSubCommand {
       paramLabel = "<KEY_VERSION>")
   private String keyVersion = "";
 
+  @RequiredOption
   @Option(
       names = {"--client-id"},
       description = "The ID used to authenticate with Azure key vault",
       paramLabel = "<CLIENT_ID>")
   private String clientId;
 
+  @RequiredOption
   @Option(
       names = {"--tenant-id"},
       description = "The unique identifier of the Azure Portal instance being used",
-      paramLabel = "<TENANT_ID>",
-      required = true)
+      paramLabel = "<TENANT_ID>")
   private String tenantId;
 
+  @RequiredOption
   @Option(
       names = {"--client-secret-path"},
       description =
@@ -101,29 +105,8 @@ public class AzureSubCommand extends SignerSubCommand {
 
   @Override
   protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
     super.validateArgs();
-
-    final List<String> missingOption = new ArrayList<>();
-    if (keyVaultName == null) {
-      missingOption.add("--key-vault-name");
-    }
-    if (keyName == null) {
-      missingOption.add("--key-name");
-    }
-    if (keyVersion == null) {
-      missingOption.add("--key-version");
-    }
-    if (clientId == null) {
-      missingOption.add("--client-id");
-    }
-    if (clientSecretPath == null) {
-      missingOption.add("--client-secret-path");
-    }
-
-    if (!missingOption.isEmpty()) {
-      throw new InitializationException(
-          "Missing required option(s): " + String.join(",", missingOption));
-    }
   }
 
   @Override

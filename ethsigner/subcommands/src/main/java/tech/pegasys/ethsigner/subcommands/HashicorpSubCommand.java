@@ -16,8 +16,10 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.PORT_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.hashicorp.TrustStoreType;
 import tech.pegasys.signers.hashicorp.config.ConnectionParameters;
@@ -82,6 +84,7 @@ public class HashicorpSubCommand extends SignerSubCommand {
       arity = "1")
   private final Long timeout = DEFAULT_TIMEOUT;
 
+  @RequiredOption
   @Option(
       names = {"--auth-file"},
       description = "Path to a File containing authentication data for Hashicorp vault",
@@ -147,11 +150,8 @@ public class HashicorpSubCommand extends SignerSubCommand {
 
   @Override
   protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
     super.validateArgs();
-
-    if (authFilePath == null) {
-      throw new InitializationException("Missing required option(s): --auth-file");
-    }
   }
 
   @Override

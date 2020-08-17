@@ -16,7 +16,9 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.PORT_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
@@ -32,9 +34,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.MoreObjects;
@@ -74,12 +74,13 @@ public class EthSignerBaseCommand implements Config, Runnable {
   private ConfigFileOption configFileOption;
 
   @SuppressWarnings("FieldMayBeFinal")
+  @RequiredOption
   @Option(
       names = {"--chain-id"},
       description = "The Chain Id that will be the intended recipient for signed transactions",
       paramLabel = LONG_FORMAT_HELP,
       arity = "1")
-  private Long chainId; // required, see validateArgs
+  private Long chainId;
 
   @Option(
       names = {"--data-path"},
@@ -121,12 +122,13 @@ public class EthSignerBaseCommand implements Config, Runnable {
   private String downstreamHttpHost = "127.0.0.1";
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @RequiredOption
   @Option(
       names = "--downstream-http-port",
       description = "The endpoint to which received requests are forwarded",
       paramLabel = PORT_FORMAT_HELP,
       arity = "1")
-  private Integer downstreamHttpPort; // required, see validateArgs
+  private Integer downstreamHttpPort;
 
   private String downstreamHttpPath = "/";
 
@@ -257,10 +259,10 @@ public class EthSignerBaseCommand implements Config, Runnable {
   }
 
   void validateArgs() {
-    final StringBuilder errorMessage = new StringBuilder();
+    checkIfRequiredOptionsAreInitialized(this);
 
-    // required option validation
-    errorMessage.append(validateRequiredOptions());
+    // simulate ArgGroup dependency validation
+    final StringBuilder errorMessage = new StringBuilder();
 
     // TLS Options validation
     errorMessage.append(picoCliTlsServerOptions.validationMessage());
@@ -275,23 +277,5 @@ public class EthSignerBaseCommand implements Config, Runnable {
 
       throw new InvalidCommandLineOptionsException(errorMessage.toString());
     }
-  }
-
-  private String validateRequiredOptions() {
-    final List<String> missingOptions = new ArrayList<>();
-
-    // required options validation
-    if (chainId == null) {
-      missingOptions.add("'--chain-id=<LONG>'");
-    }
-
-    if (downstreamHttpPort == null) {
-      missingOptions.add("'--downstream-http-port=<PORT>'");
-    }
-
-    if (!missingOptions.isEmpty()) {
-      return "Missing required option(s): " + String.join(",", missingOptions) + "\n";
-    }
-    return "";
   }
 }

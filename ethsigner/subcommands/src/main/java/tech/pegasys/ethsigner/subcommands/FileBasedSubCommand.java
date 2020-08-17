@@ -13,8 +13,10 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
@@ -23,8 +25,6 @@ import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import picocli.CommandLine;
@@ -47,6 +47,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-p", "--password-file"},
       description = "The path to a file containing the password used to decrypt the keyfile.",
@@ -55,6 +56,7 @@ public class FileBasedSubCommand extends SignerSubCommand {
   private Path passwordFilePath;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @RequiredOption
   @Option(
       names = {"-k", "--key-file"},
       description = "The path to a file containing the key used to sign transactions.",
@@ -68,20 +70,8 @@ public class FileBasedSubCommand extends SignerSubCommand {
 
   @Override
   protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
     super.validateArgs();
-
-    final List<String> missingOption = new ArrayList<>();
-    if (passwordFilePath == null) {
-      missingOption.add("--password-file");
-    }
-    if (keyFilePath == null) {
-      missingOption.add("--key-file");
-    }
-
-    if (!missingOption.isEmpty()) {
-      throw new InitializationException(
-          "Missing required option(s): " + String.join(",", missingOption));
-    }
   }
 
   @Override
