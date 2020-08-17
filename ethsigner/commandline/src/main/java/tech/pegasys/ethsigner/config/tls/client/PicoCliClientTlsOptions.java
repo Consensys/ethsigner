@@ -33,7 +33,6 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
       paramLabel = BOOLEAN_FORMAT_HELP,
       arity = "0..1",
-      defaultValue = "false",
       required = true)
   private boolean tlsEnabled = false;
 

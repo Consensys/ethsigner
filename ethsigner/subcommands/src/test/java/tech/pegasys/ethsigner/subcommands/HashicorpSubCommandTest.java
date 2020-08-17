@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-public class HashicorpSubCommandTestTest extends SubCommandTestBase {
+public class HashicorpSubCommandTest extends SubCommandTestBase {
 
   public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class FileBasedSubCommandTestTest extends SubCommandTestBase {
+public class FileBasedSubCommandTest extends SubCommandTestBase {
 
   private static final String PASSWORD_FILE =
       Paths.get("/this/is/the/path/to/the/password/file").toString();
