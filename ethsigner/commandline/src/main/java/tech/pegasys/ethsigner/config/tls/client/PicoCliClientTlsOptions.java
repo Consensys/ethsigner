@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
-import static java.lang.System.lineSeparator;
 import static tech.pegasys.ethsigner.DefaultCommandValues.BOOLEAN_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
@@ -20,8 +19,6 @@ import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import picocli.CommandLine.Mixin;
@@ -73,49 +70,5 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
 
   public boolean isTlsEnabled() {
     return tlsEnabled;
-  }
-
-  public String validationMessage() {
-    if (!tlsEnabled) {
-      return dependentOptionSpecifiedMessage();
-    }
-
-    return keyStoreConfigurationValidationMessage() + knownServerFileAndCaValidationMessage();
-  }
-
-  private String dependentOptionSpecifiedMessage() {
-    if (knownServersFile != null
-        || keyStoreOptions.getKeyStoreFile() != null
-        || keyStoreOptions.getPasswordFile() != null) {
-      return "Missing required argument(s): '--downstream-http-tls-enabled=true'" + lineSeparator();
-    }
-    return "";
-  }
-
-  private String knownServerFileAndCaValidationMessage() {
-    if (knownServersFile == null && !caAuthEnabled) {
-      return "Missing required argument(s): '--downstream-http-tls-known-servers-file' must be specified if '--downstream-http-tls-ca-auth-enabled=false'"
-          + lineSeparator();
-    }
-    return "";
-  }
-
-  private String keyStoreConfigurationValidationMessage() {
-    final List<String> missingOptions = new ArrayList<>();
-
-    // ArgGroup custom validation
-    if (keyStoreOptions.getKeyStoreFile() == null && keyStoreOptions.getPasswordFile() != null) {
-      missingOptions.add("'--downstream-http-tls-keystore-file=" + FILE_FORMAT_HELP + "'");
-    } else if (keyStoreOptions.getKeyStoreFile() != null
-        && keyStoreOptions.getPasswordFile() == null) {
-      missingOptions.add("'--downstream-http-tls-keystore-password-file=" + FILE_FORMAT_HELP + "'");
-    }
-
-    if (!missingOptions.isEmpty()) {
-      return "Missing required arguments(s): "
-          + String.join(", ", missingOptions)
-          + lineSeparator();
-    }
-    return "";
   }
 }

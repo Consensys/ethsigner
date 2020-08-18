@@ -29,6 +29,8 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
+import tech.pegasys.ethsigner.util.PicoCliClientTlsOptionValidator;
+import tech.pegasys.ethsigner.util.PicoCliTlsServerOptionsValidator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -261,17 +263,23 @@ public class EthSignerBaseCommand implements Config, Runnable {
   void validateArgs() {
     checkIfRequiredOptionsAreInitialized(this);
 
-    // simulate ArgGroup dependency validation
-    final StringBuilder errorMessage = new StringBuilder();
+    // Simulate ArgGroup validation (they are not used because of Config/Env default value provider)
+    // TLS Options Validation
+    final PicoCliTlsServerOptionsValidator picoCliTlsServerOptionsValidator =
+        new PicoCliTlsServerOptionsValidator(picoCliTlsServerOptions);
+    // downstream tls validation
+    final PicoCliClientTlsOptionValidator picoCliClientTlsOptionValidator =
+        new PicoCliClientTlsOptionValidator(clientTlsOptions);
 
-    // TLS Options validation
-    errorMessage.append(picoCliTlsServerOptions.validationMessage());
+    final String serverTlsOptionsValidationMessage =
+        picoCliTlsServerOptionsValidator.validateCliOptions();
+    final String downstreamTlsOptionsValidationMessage =
+        picoCliClientTlsOptionValidator.validateCliOptions();
 
-    // downstream TLS validation
-    errorMessage.append(clientTlsOptions.validationMessage());
-
-    if (errorMessage.length() > 0) {
-      throw new InvalidCommandLineOptionsException(errorMessage.toString().trim());
+    final String errorMessage =
+        serverTlsOptionsValidationMessage + downstreamTlsOptionsValidationMessage;
+    if (errorMessage.trim().length() > 0) {
+      throw new InvalidCommandLineOptionsException(errorMessage.trim());
     }
   }
 }

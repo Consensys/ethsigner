@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import static java.lang.System.lineSeparator;
 import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
@@ -70,47 +69,11 @@ public class PicoCliTlsServerOptions implements TlsOptions {
     return tlsAllowAnyClient ? Optional.empty() : Optional.of(clientAuthConstraints);
   }
 
-  public String validationMessage() {
-    if (!isTlsEnabled()) {
-      return validateOtherTlsOptionsAreSpecified();
-    }
-
-    return validateMissingPasswordFile() + validateClientAuthOptions();
+  public ClientAuthConstraints getClientAuthConstraintsReference() {
+    return clientAuthConstraints;
   }
 
-  private String validateClientAuthOptions() {
-    if (allowAnyClientEnabledAndAuthConstraintsAreDefined()
-        || allowAnyClientDisabledAndClientAuthOptionNotDefined()) {
-      return "Missing required argument(s): expecting either --tls-allow-any-client or one of --tls-known-clients-file=<FILE>, --tls-allow-ca-clients"
-          + lineSeparator();
-    }
-    return "";
-  }
-
-  private String validateMissingPasswordFile() {
-    if (keyStorePasswordFile == null) {
-      return "Missing required argument(s): '--tls-keystore-password-file=<FILE>'"
-          + lineSeparator();
-    }
-    return "";
-  }
-
-  private String validateOtherTlsOptionsAreSpecified() {
-    if (keyStorePasswordFile != null || clientAuthConstraints.getKnownClientsFile().isPresent()) {
-      return "Missing required argument(s): '--tls-keystore-file=<FILE>'" + lineSeparator();
-    }
-    return "";
-  }
-
-  private boolean allowAnyClientEnabledAndAuthConstraintsAreDefined() {
-    return tlsAllowAnyClient
-        && (clientAuthConstraints.getKnownClientsFile().isPresent()
-            || clientAuthConstraints.isCaAuthorizedClientAllowed());
-  }
-
-  private boolean allowAnyClientDisabledAndClientAuthOptionNotDefined() {
-    return !tlsAllowAnyClient
-        && clientAuthConstraints.getKnownClientsFile().isEmpty()
-        && !clientAuthConstraints.isCaAuthorizedClientAllowed();
+  public boolean tlsAllowAnyClient() {
+    return tlsAllowAnyClient;
   }
 }
