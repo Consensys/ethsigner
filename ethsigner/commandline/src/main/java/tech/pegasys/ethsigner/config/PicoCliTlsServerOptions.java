@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.config;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.ClientAuthConstraints;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
@@ -20,45 +20,39 @@ import tech.pegasys.ethsigner.core.config.TlsOptions;
 import java.io.File;
 import java.util.Optional;
 
-import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 public class PicoCliTlsServerOptions implements TlsOptions {
-
-  static class TlsClientAuthentication {
-
-    @SuppressWarnings("UnusedVariable")
-    @ArgGroup(exclusive = false)
-    private PicoCliClientAuthConstraints clientAuthConstraints;
-
-    @Option(
-        names = "--tls-allow-any-client",
-        description =
-            "If defined, any client may connect, regardless of presented certificate. This cannot "
-                + "be set if either a whitelist or CA clients have been enabled.",
-        arity = "0")
-    private Boolean tlsAllowAnyClient = false;
-  }
 
   @Option(
       names = "--tls-keystore-file",
       description =
           "Path to a PKCS#12 formatted keystore; used to enable TLS on inbound connections.",
       arity = "1",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      required = true)
+      paramLabel = FILE_FORMAT_HELP)
   private File keyStoreFile;
 
   @Option(
       names = "--tls-keystore-password-file",
       description = "Path to a file containing the password used to decrypt the keystore.",
       arity = "1",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      required = true)
+      paramLabel = FILE_FORMAT_HELP)
   private File keyStorePasswordFile;
 
-  @ArgGroup(multiplicity = "1")
-  private TlsClientAuthentication tlsClientAuthentication;
+  @Option(
+      names = "--tls-allow-any-client",
+      description =
+          "If defined, any client may connect, regardless of presented certificate. This cannot "
+              + "be set if either a whitelist or CA clients have been enabled.",
+      arity = "0..1")
+  private Boolean tlsAllowAnyClient = false;
+
+  @Mixin private PicoCliClientAuthConstraints clientAuthConstraints;
+
+  public boolean isTlsEnabled() {
+    return keyStoreFile != null;
+  }
 
   @Override
   public File getKeyStoreFile() {
@@ -72,8 +66,14 @@ public class PicoCliTlsServerOptions implements TlsOptions {
 
   @Override
   public Optional<ClientAuthConstraints> getClientAuthConstraints() {
-    return tlsClientAuthentication.tlsAllowAnyClient
-        ? Optional.empty()
-        : Optional.of(tlsClientAuthentication.clientAuthConstraints);
+    return tlsAllowAnyClient ? Optional.empty() : Optional.of(clientAuthConstraints);
+  }
+
+  public ClientAuthConstraints getClientAuthConstraintsReference() {
+    return clientAuthConstraints;
+  }
+
+  public boolean tlsAllowAnyClient() {
+    return tlsAllowAnyClient;
   }
 }

@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
@@ -44,25 +47,31 @@ public class FileBasedSubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-p", "--password-file"},
       description = "The path to a file containing the password used to decrypt the keyfile.",
-      required = true,
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path passwordFilePath;
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @RequiredOption
   @Option(
       names = {"-k", "--key-file"},
       description = "The path to a file containing the key used to sign transactions.",
-      required = true,
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path keyFilePath;
 
   private Signer createSigner() throws SignerInitializationException {
     return FileBasedSignerFactory.createSigner(keyFilePath, passwordFilePath);
+  }
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
+    super.validateArgs();
   }
 
   @Override

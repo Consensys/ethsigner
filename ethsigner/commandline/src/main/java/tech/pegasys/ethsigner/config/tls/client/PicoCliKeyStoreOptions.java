@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 
@@ -28,16 +28,14 @@ class PicoCliKeyStoreOptions implements KeyStoreOptions {
           "Path to a PKCS#12 formatted keystore containing the key and certificate "
               + "to present to a TLS-enabled web3 provider that requires client authentication.",
       arity = "1",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      required = true)
+      paramLabel = FILE_FORMAT_HELP)
   private Path keyStoreFile;
 
   @Option(
       names = "--downstream-http-tls-keystore-password-file",
       description = "Path to a file containing the password used to decrypt the keystore.",
       arity = "1",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
-      required = true)
+      paramLabel = FILE_FORMAT_HELP)
   private Path passwordFile;
 
   @Override

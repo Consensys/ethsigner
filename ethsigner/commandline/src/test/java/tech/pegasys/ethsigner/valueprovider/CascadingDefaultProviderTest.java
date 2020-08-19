@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.valueprovider;
 
+import static java.lang.System.lineSeparator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -100,10 +101,20 @@ class CascadingDefaultProviderTest {
   }
 
   private String validToml() {
-    return "x=30\n" + "y=40\n" + "name=\"toml test name\"\n" + "country.codes=[\"CA\", \"UK\"]\n";
+    return "x=30"
+        + lineSeparator()
+        + "y=40"
+        + lineSeparator()
+        + "name=\"toml test name\""
+        + lineSeparator()
+        + "country.codes=[\"CA\", \"UK\"]"
+        + lineSeparator();
   }
 
   private String validPartialToml() {
-    return "name=\"toml test name\"\n" + "country.codes=[\"CA\", \"UK\"]\n";
+    return "name=\"toml test name\""
+        + lineSeparator()
+        + "country.codes=[\"CA\", \"UK\"]"
+        + lineSeparator();
   }
 }

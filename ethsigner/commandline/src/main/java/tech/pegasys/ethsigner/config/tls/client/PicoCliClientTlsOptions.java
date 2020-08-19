@@ -12,7 +12,8 @@
  */
 package tech.pegasys.ethsigner.config.tls.client;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_FILE_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.BOOLEAN_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
 
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
@@ -20,7 +21,7 @@ import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 
 public class PicoCliClientTlsOptions implements ClientTlsOptions {
@@ -28,18 +29,17 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @Option(
       names = "--downstream-http-tls-enabled",
       description = "Flag to enable TLS connection to web3 provider. Defaults to disabled.",
-      arity = "0",
-      required = true)
+      paramLabel = BOOLEAN_FORMAT_HELP,
+      arity = "0..1")
   private boolean tlsEnabled = false;
 
-  @ArgGroup(exclusive = false)
-  private PicoCliKeyStoreOptions keyStoreOptions;
+  @Mixin private PicoCliKeyStoreOptions keyStoreOptions;
 
   @Option(
       names = "--downstream-http-tls-known-servers-file",
       description =
           "Path to a file containing the hostname, port and certificate fingerprints of web3 providers to trust. Must be specified if CA auth is disabled.",
-      paramLabel = MANDATORY_FILE_FORMAT_HELP,
+      paramLabel = FILE_FORMAT_HELP,
       arity = "1")
   private Path knownServersFile;
 
@@ -52,7 +52,10 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
 
   @Override
   public Optional<KeyStoreOptions> getKeyStoreOptions() {
-    return Optional.ofNullable(keyStoreOptions);
+    if (keyStoreOptions.getKeyStoreFile() == null && keyStoreOptions.getPasswordFile() == null) {
+      return Optional.empty();
+    }
+    return Optional.of(keyStoreOptions);
   }
 
   @Override
@@ -63,5 +66,9 @@ public class PicoCliClientTlsOptions implements ClientTlsOptions {
   @Override
   public Optional<Path> getKnownServersFile() {
     return Optional.ofNullable(knownServersFile);
+  }
+
+  public boolean isTlsEnabled() {
+    return tlsEnabled;
   }
 }

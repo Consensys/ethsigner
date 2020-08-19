@@ -10,23 +10,33 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package tech.pegasys.ethsigner.config;
+package tech.pegasys.ethsigner.util;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.FILE_FORMAT_HELP;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 
-import java.io.File;
-
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-public class ConfigFileOption {
+@Command(
+    name = "demo",
+    mixinStandardHelpOptions = true,
+    version = "1.0.0",
+    description = "demo command")
+public class DemoCommand {
+  @RequiredOption
   @Option(
-      names = "--config-file",
-      description = "Config file in toml format (default: none)",
-      paramLabel = FILE_FORMAT_HELP,
-      defaultValue = "${env:ETHSIGNER_CONFIG_FILE}")
-  private File configFile = null;
+      names = {"--x", "-x"},
+      description = "x")
+  Integer x = null;
 
-  public File getConfigFile() {
-    return configFile;
-  }
+  @RequiredOption
+  @Option(
+      names = {"-y", "--y"},
+      description = "y")
+  Integer y = null;
+
+  @Option(
+      names = {"-z", "--z"},
+      description = "z")
+  Integer z = null;
 }

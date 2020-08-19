@@ -13,84 +13,85 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static tech.pegasys.ethsigner.CmdlineHelpers.modifyField;
+import static tech.pegasys.ethsigner.CmdlineHelpers.baseCommandOptions;
+import static tech.pegasys.ethsigner.CmdlineHelpers.modifyOptionValue;
+import static tech.pegasys.ethsigner.CmdlineHelpers.removeOptions;
+import static tech.pegasys.ethsigner.CmdlineHelpers.toOptionsList;
+import static tech.pegasys.ethsigner.subcommands.HashicorpSubCommand.COMMAND_NAME;
 
-import tech.pegasys.ethsigner.CmdlineHelpers;
+import tech.pegasys.ethsigner.SignerSubCommand;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
-import org.apache.logging.log4j.Level;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import picocli.CommandLine;
 
-public class HashicorpSubCommandTest {
+public class HashicorpSubCommandTest extends SubCommandTestBase {
 
   public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
       Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
-  private static final String PORT = "23000";
+  private static final Integer PORT = 23000;
   private static final String PATH_TO_SIGNING_KEY = Paths.get("/path/to/signing/key").toString();
-  private static final String FIFTEEN = "15";
-  private final ByteArrayOutputStream commandOutput = new ByteArrayOutputStream();
+  private static final Integer TIMEOUT = 15;
 
-  private HashicorpSubCommand hashicorpSubCommand;
-
-  @BeforeEach
-  void init() {
-    hashicorpSubCommand = new HashicorpSubCommand();
+  @Override
+  protected SignerSubCommand subCommand() {
+    return new HashicorpSubCommand() {
+      @Override
+      public void run() {
+        // we only want to perform validation in these unit test cases
+        validateArgs();
+      }
+    };
   }
 
-  private boolean parseCommand(final List<String> cmdLine) {
-    final CommandLine commandLine = new CommandLine(hashicorpSubCommand);
-    commandLine.setCaseInsensitiveEnumValuesAllowed(true);
-    commandLine.registerConverter(Level.class, Level::valueOf);
-
-    try {
-      commandLine.parseArgs(cmdLine.toArray(String[]::new));
-    } catch (final CommandLine.ParameterException e) {
-      return false;
-    }
-    return true;
+  private Map<String, Object> validSubCommandOptions() {
+    final Map<String, Object> subCommandOptions = new LinkedHashMap<>();
+    subCommandOptions.put("auth-file", THIS_IS_THE_PATH_TO_THE_FILE);
+    subCommandOptions.put("host", HTTP_HOST_COM);
+    subCommandOptions.put("port", PORT);
+    subCommandOptions.put("signing-key-path", PATH_TO_SIGNING_KEY);
+    subCommandOptions.put("timeout", TIMEOUT);
+    subCommandOptions.put("tls-known-server-file", TLS_KNOWN_SERVER_FILE);
+    return subCommandOptions;
   }
 
-  private List<String> validCommandLine() {
-    return Lists.newArrayList(
-        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-        "--host=" + HTTP_HOST_COM,
-        "--port=" + PORT,
-        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
-        "--timeout=" + FIFTEEN,
-        "--tls-known-server-file=" + TLS_KNOWN_SERVER_FILE);
+  private Map<String, Object> validSubCommandOptionsWithTlsDisabled() {
+    final Map<String, Object> subCommandOptions = new LinkedHashMap<>();
+    subCommandOptions.put("auth-file", THIS_IS_THE_PATH_TO_THE_FILE);
+    subCommandOptions.put("host", HTTP_HOST_COM);
+    subCommandOptions.put("port", PORT);
+    subCommandOptions.put("signing-key-path", PATH_TO_SIGNING_KEY);
+    subCommandOptions.put("timeout", TIMEOUT);
+    subCommandOptions.put("tls-enabled", Boolean.FALSE);
+    return subCommandOptions;
   }
 
-  private List<String> validWithTlsDisabledCommandLine() {
-    return Lists.newArrayList(
-        "--auth-file=" + THIS_IS_THE_PATH_TO_THE_FILE,
-        "--host=" + HTTP_HOST_COM,
-        "--port=" + PORT,
-        "--signing-key-path=" + PATH_TO_SIGNING_KEY,
-        "--timeout=" + FIFTEEN,
-        "--tls-enabled=false");
+  private List<String> getOptions(final List<String> subCommandOptions) {
+    final List<String> options = toOptionsList(baseCommandOptions());
+    options.add(COMMAND_NAME);
+    options.addAll(subCommandOptions);
+    return options;
   }
 
   @Test
   public void fullyPopulatedCommandLineParsesIntoVariables() {
-    final boolean result = parseCommand(validCommandLine());
+    final List<String> options = getOptions(toOptionsList(validSubCommandOptions()));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
     assertThat(result).isTrue();
-    final String string = hashicorpSubCommand.toString();
+    final String string = subCommand.toString();
     assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
     assertThat(string).contains(HTTP_HOST_COM);
-    assertThat(string).contains(PORT);
+    assertThat(string).contains(String.valueOf(PORT));
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
-    assertThat(string).contains(FIFTEEN);
+    assertThat(string).contains(String.valueOf(TIMEOUT));
 
+    final HashicorpSubCommand hashicorpSubCommand = (HashicorpSubCommand) subCommand;
     assertThat(hashicorpSubCommand.isTlsEnabled()).isTrue();
     assertThat(hashicorpSubCommand.getTlsKnownServerFile().isPresent()).isTrue();
     assertThat(hashicorpSubCommand.getTlsKnownServerFile().get().toString())
@@ -99,78 +100,82 @@ public class HashicorpSubCommandTest {
 
   @Test
   public void commandLineWithTlsDisabledParsesIntoVariables() {
-    final boolean result = parseCommand(validWithTlsDisabledCommandLine());
+    final List<String> options = getOptions(toOptionsList(validSubCommandOptionsWithTlsDisabled()));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
     assertThat(result).isTrue();
-    final String string = hashicorpSubCommand.toString();
+    final String string = subCommand.toString();
     assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
     assertThat(string).contains(HTTP_HOST_COM);
-    assertThat(string).contains(PORT);
+    assertThat(string).contains(String.valueOf(PORT));
     assertThat(string).contains(PATH_TO_SIGNING_KEY);
-    assertThat(string).contains(FIFTEEN);
+    assertThat(string).contains(String.valueOf(TIMEOUT));
 
+    final HashicorpSubCommand hashicorpSubCommand = (HashicorpSubCommand) subCommand;
     assertThat(hashicorpSubCommand.isTlsEnabled()).isFalse();
     assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
   }
 
   @Test
   public void nonIntegerInputForPortShowsError() {
-    final List<String> cmdLine = modifyField(validCommandLine(), "port", "noInteger");
-    final boolean result = parseCommand(cmdLine);
+    final Map<String, Object> subCommandOptions =
+        modifyOptionValue(validSubCommandOptions(), "port", "NotInteger");
+    final List<String> options = getOptions(toOptionsList(subCommandOptions));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
     assertThat(result).isFalse();
   }
 
   @Test
   public void nonIntegerInputForTimeoutShowsError() {
-    final List<String> cmdLine = modifyField(validCommandLine(), "timeout", "noInteger");
-    final boolean result = parseCommand(cmdLine);
+    final Map<String, Object> subCommandOptions =
+        modifyOptionValue(validSubCommandOptions(), "timeout", "NotInteger");
+    final List<String> options = getOptions(toOptionsList(subCommandOptions));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
     assertThat(result).isFalse();
   }
 
   @Test
   public void missingRequiredParamShowsAppropriateError() {
-    missingParameterShowsError("auth-file");
+    final Map<String, Object> subCommandOptions =
+        removeOptions(validSubCommandOptions(), "auth-file");
+    final List<String> options = getOptions(toOptionsList(subCommandOptions));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
+    assertThat(result).isFalse();
   }
 
   @Test
   public void missingOptionalParametersAreSetToDefault() {
-    // Must recreate commandLineConfig before executions, to prevent stale data remaining in the
-    // object.
-    HashicorpSubCommand hcConfig = new HashicorpSubCommand();
-    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "localhost");
+    final Map<String, Object> subCommandOptions =
+        removeOptions(validSubCommandOptions(), "host", "port", "signing-key-path");
+    final List<String> options = getOptions(toOptionsList(subCommandOptions));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
-    hcConfig = new HashicorpSubCommand();
-    missingOptionalParameterIsValidAndMeetsDefault("host", hcConfig::toString, "8200");
-
-    hcConfig = new HashicorpSubCommand();
-    missingOptionalParameterIsValidAndMeetsDefault(
-        "host", hcConfig::toString, "/secret/data/ethsignerSigningKey");
+    assertThat(result).isTrue();
+    final String string = subCommand.toString();
+    assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(string).contains("localhost");
+    assertThat(string).contains(String.valueOf(8200));
+    assertThat(string).contains("/v1/secret/data/ethsignerSigningKey");
+    assertThat(string).contains(String.valueOf(TIMEOUT));
   }
 
   @Test
   void cmdlineIsValidIftlsKnownServerFileIsMissing() {
-    final List<String> cmdLine =
-        CmdlineHelpers.removeFieldsFrom(validCommandLine(), "tls-known-server-file");
-    final boolean result = parseCommand(cmdLine);
+    final Map<String, Object> subCommandOptions =
+        removeOptions(validSubCommandOptions(), "tls-known-server-file");
+    final List<String> options = getOptions(toOptionsList(subCommandOptions));
+    final boolean result = parser.parseCommandLine(options.toArray(String[]::new));
 
     assertThat(result).isTrue();
-    assertThat(hashicorpSubCommand.getTlsKnownServerFile().isEmpty()).isTrue();
-  }
+    final String string = subCommand.toString();
+    assertThat(string).contains(THIS_IS_THE_PATH_TO_THE_FILE);
+    assertThat(string).contains(HTTP_HOST_COM);
+    assertThat(string).contains(String.valueOf(PORT));
+    assertThat(string).contains(PATH_TO_SIGNING_KEY);
+    assertThat(string).contains(String.valueOf(TIMEOUT));
 
-  private void missingParameterShowsError(final String paramToRemove) {
-    final List<String> cmdLine = CmdlineHelpers.removeFieldsFrom(validCommandLine(), paramToRemove);
-    final boolean result = parseCommand(cmdLine);
-    assertThat(result).isFalse();
-  }
-
-  private <T> void missingOptionalParameterIsValidAndMeetsDefault(
-      final String paramToRemove,
-      final Supplier<String> actualValueGetter,
-      final String expectedValue) {
-    final List<String> cmdLine = CmdlineHelpers.removeFieldsFrom(validCommandLine(), paramToRemove);
-    final boolean result = parseCommand(cmdLine);
-    assertThat(result).isTrue();
-    assertThat(actualValueGetter.get()).contains(expectedValue);
-    assertThat(commandOutput.toString()).isEmpty();
+    final HashicorpSubCommand hashicorpSubCommand = (HashicorpSubCommand) subCommand;
+    assertThat(hashicorpSubCommand.isTlsEnabled()).isTrue();
+    assertThat(hashicorpSubCommand.getTlsKnownServerFile()).isEmpty();
   }
 }

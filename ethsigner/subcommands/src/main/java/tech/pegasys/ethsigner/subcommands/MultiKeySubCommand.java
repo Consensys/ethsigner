@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.multikey.MultiKeySignerProvider;
@@ -49,13 +52,19 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-d", "--directory"},
       description = "The path to a directory containing signing metadata TOML files",
-      required = true,
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      paramLabel = PATH_FORMAT_HELP,
       arity = "1")
   private Path directoryPath;
+
+  @Override
+  protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
+    super.validateArgs();
+  }
 
   @Override
   public SignerProvider createSignerFactory() throws SignerInitializationException {
