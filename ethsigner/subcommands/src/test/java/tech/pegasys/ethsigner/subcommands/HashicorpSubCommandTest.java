@@ -21,6 +21,7 @@ import static tech.pegasys.ethsigner.subcommands.HashicorpSubCommand.COMMAND_NAM
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 public class HashicorpSubCommandTest extends SubCommandTestBase {
 
-  public static final String TLS_KNOWN_SERVER_FILE = "./knownServerFiles.txt";
+  public static final String TLS_KNOWN_SERVER_FILE = "." + File.separator + "knownServerFiles.txt";
   private static final String THIS_IS_THE_PATH_TO_THE_FILE =
       Paths.get("/this/is/the/path/to/the/file").toString();
   private static final String HTTP_HOST_COM = "http://host.com";
