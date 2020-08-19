@@ -15,7 +15,7 @@ and say so in a reply to the PR. Only the primary approver of a change should
 actually do the merge, except in rare cases (e.g. they are unavailable in a
 reasonable timeframe).
 
-If a PR has gone 2 work days without an approver emerging, please ask on [EthSigner Gitter]
+If a PR has gone 2 work days without an approver emerging, please ask on [EthSigner Discord]
 
 ## Attribution
 
@@ -23,4 +23,4 @@ This Document was adapted by the following:
 - Kubernetes collab.md, available at [kub collab]  
 
 [kub collab]: https://raw.githubusercontent.com/kubernetes/community/master/contributors/devel/collab.md
-[EthSigner Gitter]: https://gitter.im/PegaSysEng/EthSigner
+[EthSigner Discord]: https://discord.gg/5U9Jwp7
