@@ -32,11 +32,15 @@ public class TransactionFactory {
 
   private final VertxRequestTransmitterFactory transmitterFactory;
   private final JsonDecoder decoder;
+  private final boolean convertEthPrivateTransactionsToEea;
 
   public TransactionFactory(
-      final JsonDecoder decoder, final VertxRequestTransmitterFactory transmitterFactory) {
+      final JsonDecoder decoder,
+      final VertxRequestTransmitterFactory transmitterFactory,
+      final boolean convertEthPrivateTransactionsToEea) {
     this.transmitterFactory = transmitterFactory;
     this.decoder = decoder;
+    this.convertEthPrivateTransactionsToEea = convertEthPrivateTransactionsToEea;
   }
 
   public Transaction createTransaction(final RoutingContext context, final JsonRpcRequest request) {
@@ -58,6 +62,10 @@ public class TransactionFactory {
       final JsonRpcRequest request, final VertxNonceRequestTransmitter requestTransmitter) {
     final EthSendTransactionJsonParameters params =
         fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+
+    if (convertEthPrivateTransactionsToEea && params.isPrivate()) {
+      return createEeaTransaction(request, requestTransmitter);
+    }
 
     final NonceProvider ethNonceProvider =
         new EthNonceProvider(params.sender(), requestTransmitter);

@@ -155,6 +155,15 @@ public class EthSignerBaseCommand implements Config, Runnable {
     this.downstreamHttpPath = path;
   }
 
+  @SuppressWarnings("FieldMayBeFinal")
+  @Option(
+      names = {"--convert-eth-private-transactions-to-eea"},
+      description =
+          "If enabled, RPC calls to eth_sendTransaction will "
+              + "be forwarded as eea_sendRawTransaction if privacy "
+              + "arguments are enabled.")
+  private Boolean convertEthPrivateTransactionsToEea = false;
+
   // A list of origins URLs that are accepted by the JsonRpcHttpServer (CORS)
   @Option(
       names = {"--http-cors-origins"},
@@ -232,6 +241,11 @@ public class EthSignerBaseCommand implements Config, Runnable {
   @Override
   public Collection<String> getCorsAllowedOrigins() {
     return rpcHttpCorsAllowedOrigins;
+  }
+
+  @Override
+  public Boolean getConvertEthPrivateTransactionsToEea() {
+    return convertEthPrivateTransactionsToEea;
   }
 
   @Override

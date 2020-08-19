@@ -31,7 +31,7 @@ public class EthSendTransactionJsonParametersTest {
   @BeforeEach
   public void setup() {
     // NOTE: the factory has been configured as per its use in the application.
-    factory = new TransactionFactory(EthSigner.createJsonDecoder(), null);
+    factory = new TransactionFactory(EthSigner.createJsonDecoder(), null, false);
   }
 
   private Optional<BigInteger> getStringAsOptionalBigInteger(

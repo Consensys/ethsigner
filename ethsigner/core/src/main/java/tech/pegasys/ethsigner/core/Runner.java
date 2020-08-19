@@ -73,6 +73,7 @@ public class Runner {
   private final Vertx vertx;
   private final Collection<String> allowedCorsOrigins;
   private final HttpServerOptions serverOptions;
+  private final boolean convertEthPrivateTransactionsToEea;
 
   public Runner(
       final long chainId,
@@ -84,7 +85,8 @@ public class Runner {
       final JsonDecoder jsonDecoder,
       final Path dataPath,
       final Vertx vertx,
-      final Collection<String> allowedCorsOrigins) {
+      final Collection<String> allowedCorsOrigins,
+      final boolean convertEthPrivateTransactionsToEea) {
     this.chainId = chainId;
     this.signerProvider = signerProvider;
     this.clientOptions = clientOptions;
@@ -95,6 +97,7 @@ public class Runner {
     this.vertx = vertx;
     this.allowedCorsOrigins = allowedCorsOrigins;
     this.serverOptions = serverOptions;
+    this.convertEthPrivateTransactionsToEea = convertEthPrivateTransactionsToEea;
   }
 
   public void start() throws ExecutionException, InterruptedException {
@@ -152,7 +155,7 @@ public class Runner {
       final VertxRequestTransmitterFactory transmitterFactory) {
     final PassThroughHandler defaultHandler = new PassThroughHandler(transmitterFactory);
     final TransactionFactory transactionFactory =
-        new TransactionFactory(jsonDecoder, transmitterFactory);
+        new TransactionFactory(jsonDecoder, transmitterFactory, convertEthPrivateTransactionsToEea);
 
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);

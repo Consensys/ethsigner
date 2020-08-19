@@ -84,7 +84,8 @@ public final class EthSigner {
               jsonDecoder,
               config.getDataPath(),
               vertx,
-              config.getCorsAllowedOrigins());
+              config.getCorsAllowedOrigins(),
+              config.getConvertEthPrivateTransactionsToEea());
 
       runner.start();
     } catch (final Throwable t) {
