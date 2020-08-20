@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.1
+
+### Features Added
+- Support for `--config-file` and environment variables
+- Updated signers library to the latest version
+- Azure credentials requires tenant id
+- Communication details moved to discord
+
+### Bugs Fixed
+- Prevent multiple transmission exceptions propagation upwards [#312](https://github.com/PegaSysEng/ethsigner/pull/312)
+- Resolve failures in the application of CORS headers [#286](https://github.com/PegaSysEng/ethsigner/pull/286)
+
 ## 0.7.0
 
 ### Features Added
