@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.1
+
+### Features Added
+- Support for using config file and environment variables as default values for cli options
+- Updated signers library to the latest version
+- Accessing Azure signing service requires tenant id as part of Azure configuration
+- Communication details moved to Discord
+
+### Bugs Fixed
+- Prevent multiple transmission exceptions propagation upwards [#312](https://github.com/PegaSysEng/ethsigner/pull/312)
+- Resolve failures in the application of CORS headers [#286](https://github.com/PegaSysEng/ethsigner/pull/286)
+
 ## 0.7.0
 
 ### Features Added

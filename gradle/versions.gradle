@@ -20,10 +20,6 @@ dependencyManagement {
 
     dependency 'com.google.guava:guava:28.2-jre'
 
-    dependency 'com.microsoft.aad:adal4j:0.0.2'
-
-    dependency 'com.microsoft.azure:azure-keyvault:1.2.2'
-
     dependency 'com.squareup.okhttp3:okhttp:4.3.1'
 
     dependency 'commons-cli:commons-cli:1.4'
@@ -72,7 +68,7 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.3') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.4') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
