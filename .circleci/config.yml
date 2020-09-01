@@ -107,7 +107,7 @@ jobs:
           no_output_timeout: 20m
           command: |
             ./gradlew --no-daemon --parallel integrationTest --info
-      - notify      
+      - notify
       - capture_test_results
       - capture_test_reports
       - save_cache:
@@ -154,7 +154,7 @@ jobs:
           command: |
             mkdir -p docker/reports
             ./gradlew --no-daemon testDocker
-      - notify            
+      - notify
 
   publish:
     executor: executor_med

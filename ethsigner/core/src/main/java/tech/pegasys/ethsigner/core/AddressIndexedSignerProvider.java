@@ -74,4 +74,8 @@ public class AddressIndexedSignerProvider {
   public Set<ECPublicKey> availablePublicKeys() {
     return signerProvider.availablePublicKeys();
   }
+
+  public void shutdown() {
+    signerProvider.shutdown();
+  }
 }
