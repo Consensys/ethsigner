@@ -27,7 +27,7 @@ and feel free to propose changes to this document in a pull request.
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the [EthSigner Code of Conduct](CODE-OF-CONDUCT.md).
-By participating, you are expected to uphold this code. Please report unacceptable behavior to [private@pegasys.tech].
+By participating, you are expected to uphold this code. Please report unacceptable behavior to [private-quorum@consensys.net].
 
 ## I just have a quick question
 
@@ -242,7 +242,7 @@ These are not strictly enforced during the build, but should be adhered to and c
 | [`requires-changes`][search-label-requires-changes]                     | Pull requests which need to be updated based on review comments and then reviewed again.   |
 | [`needs engineering approval`][search-label-needs-engineering-approval] | Pull requests which need to be approved from a technical person, mainly documentation PRs. |
 
-[private@pegasys.tech]: mailto:private@pegasys.tech
+[private-quorum@consensys.net]: mailto:private-quorum@consensys.net
 [Discord]: https://discord.gg/5U9Jwp7
 [Github issues]: https://github.com/PegaSysEng/ethsigner/issues
 [EthSigner documentation]: https://docs.ethsigner.pegasys.tech/
