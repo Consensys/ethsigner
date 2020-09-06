@@ -1,5 +1,5 @@
 
-FROM openjdk:11.0.2-jre-slim-stretch
+FROM openjdk:11.0.8-jre-slim-buster
 
 COPY ethsigner /opt/ethsigner/
 WORKDIR /opt/ethsigner
