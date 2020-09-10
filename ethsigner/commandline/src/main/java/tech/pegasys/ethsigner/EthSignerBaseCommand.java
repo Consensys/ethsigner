@@ -16,31 +16,40 @@ import static tech.pegasys.ethsigner.DefaultCommandValues.HOST_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.LONG_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
 import static tech.pegasys.ethsigner.DefaultCommandValues.PORT_FORMAT_HELP;
+import static tech.pegasys.ethsigner.core.metrics.EthSignerMetricCategory.DEFAULT_METRIC_CATEGORIES;
 import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.annotations.RequiredOption;
+import tech.pegasys.ethsigner.config.AllowListHostsProperty;
 import tech.pegasys.ethsigner.config.ConfigFileOption;
 import tech.pegasys.ethsigner.config.InvalidCommandLineOptionsException;
 import tech.pegasys.ethsigner.config.PicoCliTlsServerOptions;
 import tech.pegasys.ethsigner.config.tls.client.PicoCliClientTlsOptions;
+import tech.pegasys.ethsigner.convertor.MetricCategoryConverter;
 import tech.pegasys.ethsigner.core.CorsAllowedOriginsProperty;
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.TlsOptions;
 import tech.pegasys.ethsigner.core.config.tls.client.ClientTlsOptions;
+import tech.pegasys.ethsigner.core.metrics.EthSignerMetricCategory;
 import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import tech.pegasys.ethsigner.core.signing.ConfigurationChainId;
 import tech.pegasys.ethsigner.util.PicoCliClientTlsOptionValidator;
 import tech.pegasys.ethsigner.util.PicoCliTlsServerOptionsValidator;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Level;
+import org.hyperledger.besu.metrics.StandardMetricCategory;
+import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.Mixin;
@@ -172,6 +181,44 @@ public class EthSignerBaseCommand implements Config, Runnable {
 
   @Mixin private PicoCliClientTlsOptions clientTlsOptions;
 
+  @Option(
+      names = {"--metrics-enabled"},
+      description = "Set to start the metrics exporter (default: ${DEFAULT-VALUE})")
+  private final Boolean metricsEnabled = false;
+
+  @SuppressWarnings({"FieldCanBeFinal", "FieldMayBeFinal"}) // PicoCLI requires non-final Strings.
+  @Option(
+      names = {"--metrics-host"},
+      paramLabel = HOST_FORMAT_HELP,
+      description = "Host for the metrics exporter to listen on (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private String metricsHost = InetAddress.getLoopbackAddress().getHostAddress();
+
+  @Option(
+      names = {"--metrics-port"},
+      paramLabel = PORT_FORMAT_HELP,
+      description = "Port for the metrics exporter to listen on (default: ${DEFAULT-VALUE})",
+      arity = "1")
+  private final Integer metricsPort = 8546;
+
+  @Option(
+      names = {"--metrics-category", "--metrics-categories"},
+      paramLabel = "<category name>",
+      split = ",",
+      arity = "1..*",
+      description =
+          "Comma separated list of categories to track metrics for (default: ${DEFAULT-VALUE}),",
+      converter = Web3signerMetricCategoryConverter.class)
+  private final Set<MetricCategory> metricCategories = DEFAULT_METRIC_CATEGORIES;
+
+  @Option(
+      names = {"--metrics-host-allowlist"},
+      paramLabel = "<hostname>[,<hostname>...]... or * or all",
+      description =
+          "Comma separated list of hostnames to allow for metrics access, or * to accept any host (default: ${DEFAULT-VALUE})",
+      defaultValue = "localhost,127.0.0.1")
+  private final AllowListHostsProperty metricsHostAllowList = new AllowListHostsProperty();
+
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -235,6 +282,31 @@ public class EthSignerBaseCommand implements Config, Runnable {
   }
 
   @Override
+  public Boolean isMetricsEnabled() {
+    return metricsEnabled;
+  }
+
+  @Override
+  public Integer getMetricsPort() {
+    return metricsPort;
+  }
+
+  @Override
+  public String getMetricsHost() {
+    return metricsHost;
+  }
+
+  @Override
+  public Set<MetricCategory> getMetricCategories() {
+    return metricCategories;
+  }
+
+  @Override
+  public List<String> getMetricsHostAllowList() {
+    return metricsHostAllowList;
+  }
+
+  @Override
   public void run() {
     // validation is performed to simulate similar behavior as with ArgGroups.
     // ArgGroups are removed because of config-file and environment based default options
@@ -280,6 +352,14 @@ public class EthSignerBaseCommand implements Config, Runnable {
         serverTlsOptionsValidationMessage + downstreamTlsOptionsValidationMessage;
     if (errorMessage.trim().length() > 0) {
       throw new InvalidCommandLineOptionsException(errorMessage.trim());
+    }
+  }
+
+  public static class Web3signerMetricCategoryConverter extends MetricCategoryConverter {
+
+    public Web3signerMetricCategoryConverter() {
+      addCategories(EthSignerMetricCategory.class);
+      addCategories(StandardMetricCategory.class);
     }
   }
 }

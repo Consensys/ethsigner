@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.metrics.MetricsEndpoint;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
@@ -73,6 +74,7 @@ public class Runner {
   private final Vertx vertx;
   private final Collection<String> allowedCorsOrigins;
   private final HttpServerOptions serverOptions;
+  private MetricsEndpoint metricsEndpoint;
 
   public Runner(
       final long chainId,
@@ -84,7 +86,8 @@ public class Runner {
       final JsonDecoder jsonDecoder,
       final Path dataPath,
       final Vertx vertx,
-      final Collection<String> allowedCorsOrigins) {
+      final Collection<String> allowedCorsOrigins,
+      final MetricsEndpoint metricsEndpoint) {
     this.chainId = chainId;
     this.signerProvider = signerProvider;
     this.clientOptions = clientOptions;
@@ -95,9 +98,11 @@ public class Runner {
     this.vertx = vertx;
     this.allowedCorsOrigins = allowedCorsOrigins;
     this.serverOptions = serverOptions;
+    this.metricsEndpoint = metricsEndpoint;
   }
 
   public void start() throws ExecutionException, InterruptedException {
+    metricsEndpoint.start(vertx);
     final HttpServer httpServer = createServerAndWait(vertx, router());
     LOG.info("Server is up, and listening on {}", httpServer.actualPort());
     if (dataPath != null) {
