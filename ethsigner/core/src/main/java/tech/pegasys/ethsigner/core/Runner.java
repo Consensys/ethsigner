@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +75,7 @@ public class Runner {
   private final Vertx vertx;
   private final Collection<String> allowedCorsOrigins;
   private final HttpServerOptions serverOptions;
-  private MetricsEndpoint metricsEndpoint;
+  private final MetricsEndpoint metricsEndpoint;
 
   public Runner(
       final long chainId,
@@ -106,7 +107,7 @@ public class Runner {
     final HttpServer httpServer = createServerAndWait(vertx, router());
     LOG.info("Server is up, and listening on {}", httpServer.actualPort());
     if (dataPath != null) {
-      writePortsToFile(httpServer);
+      writePortsToFile(httpServer, metricsEndpoint.getPort());
     }
   }
 
@@ -176,12 +177,13 @@ public class Runner {
     return requestMapper;
   }
 
-  private void writePortsToFile(final HttpServer server) {
+  private void writePortsToFile(final HttpServer server, final Optional<Integer> metricsPort) {
     final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
     final Properties properties = new Properties();
     properties.setProperty("http-jsonrpc", String.valueOf(server.actualPort()));
+    metricsPort.ifPresent(port -> properties.setProperty("metrics-port", String.valueOf(port)));
 
     LOG.info(
         "Writing ethsigner.ports file: {}, with contents: {}",
