@@ -19,6 +19,7 @@ import tech.pegasys.ethsigner.core.http.LogErrorHandler;
 import tech.pegasys.ethsigner.core.http.RequestMapper;
 import tech.pegasys.ethsigner.core.http.UpcheckHandler;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.metrics.MetricsEndpoint;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
@@ -34,6 +35,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
@@ -73,6 +75,7 @@ public class Runner {
   private final Vertx vertx;
   private final Collection<String> allowedCorsOrigins;
   private final HttpServerOptions serverOptions;
+  private final MetricsEndpoint metricsEndpoint;
 
   public Runner(
       final long chainId,
@@ -84,7 +87,8 @@ public class Runner {
       final JsonDecoder jsonDecoder,
       final Path dataPath,
       final Vertx vertx,
-      final Collection<String> allowedCorsOrigins) {
+      final Collection<String> allowedCorsOrigins,
+      final MetricsEndpoint metricsEndpoint) {
     this.chainId = chainId;
     this.signerProvider = signerProvider;
     this.clientOptions = clientOptions;
@@ -95,13 +99,15 @@ public class Runner {
     this.vertx = vertx;
     this.allowedCorsOrigins = allowedCorsOrigins;
     this.serverOptions = serverOptions;
+    this.metricsEndpoint = metricsEndpoint;
   }
 
   public void start() throws ExecutionException, InterruptedException {
+    metricsEndpoint.start(vertx);
     final HttpServer httpServer = createServerAndWait(vertx, router());
     LOG.info("Server is up, and listening on {}", httpServer.actualPort());
     if (dataPath != null) {
-      writePortsToFile(httpServer);
+      writePortsToFile(httpServer, metricsEndpoint.getPort());
     }
   }
 
@@ -171,12 +177,13 @@ public class Runner {
     return requestMapper;
   }
 
-  private void writePortsToFile(final HttpServer server) {
+  private void writePortsToFile(final HttpServer server, final Optional<Integer> metricsPort) {
     final File portsFile = new File(dataPath.toFile(), "ethsigner.ports");
     portsFile.deleteOnExit();
 
     final Properties properties = new Properties();
     properties.setProperty("http-jsonrpc", String.valueOf(server.actualPort()));
+    metricsPort.ifPresent(port -> properties.setProperty("metrics-port", String.valueOf(port)));
 
     LOG.info(
         "Writing ethsigner.ports file: {}, with contents: {}",

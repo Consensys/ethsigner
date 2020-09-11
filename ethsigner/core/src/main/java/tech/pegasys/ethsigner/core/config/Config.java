@@ -18,9 +18,12 @@ import tech.pegasys.ethsigner.core.signing.ChainIdProvider;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.Level;
+import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
 
 public interface Config {
 
@@ -47,4 +50,14 @@ public interface Config {
   Optional<ClientTlsOptions> getClientTlsOptions();
 
   Collection<String> getCorsAllowedOrigins();
+
+  Boolean isMetricsEnabled();
+
+  Integer getMetricsPort();
+
+  String getMetricsHost();
+
+  Set<MetricCategory> getMetricCategories();
+
+  List<String> getMetricsHostAllowList();
 }

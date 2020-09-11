@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy;
 import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -27,6 +28,7 @@ import static org.web3j.utils.Async.defaultExecutorService;
 import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
+import tech.pegasys.ethsigner.core.metrics.MetricsEndpoint;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthNodeRequest;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.request.EthRequestFactory;
@@ -147,7 +149,8 @@ public class IntegrationTestBase {
             jsonDecoder,
             dataPath,
             vertx,
-            singletonList("sample.com"));
+            singletonList("sample.com"),
+            new MetricsEndpoint(false, 0, "", emptySet(), emptyList()));
     runner.start();
 
     final Path portsFile = dataPath.resolve(PORTS_FILENAME);
