@@ -23,7 +23,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
-import tech.pegasys.signers.secp256k1.api.Signature;
+import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.util.List;
@@ -33,9 +33,6 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Sign;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.utils.Numeric;
 
 public class EthSignTransactionResultProvider implements ResultProvider<String> {
 
@@ -56,8 +53,6 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
-    // Signs a transaction that can be submitted to the network at a later time using with
-    // eth_sendRawTransaction.
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {
@@ -71,23 +66,21 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
       throw new JsonRpcException(INVALID_PARAMS);
     }
 
+    if (!transaction.isNonceUserSpecified()) {
+      LOG.debug("Nonce not present in request {}", request.getId());
+      throw new JsonRpcException(INVALID_PARAMS);
+    }
+
+    LOG.debug("Obtaining signer for {}", transaction.sender());
     final Optional<Signer> Signer = signerProvider.getSigner(transaction.sender());
     if (Signer.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
 
-    final byte[] bytesToSign = transaction.rlpEncode(chainId);
-    final Signature signature = Signer.get().sign(bytesToSign);
-    final Sign.SignatureData web3jSignature =
-        new Sign.SignatureData(
-            signature.getV().toByteArray(),
-            signature.getR().toByteArray(),
-            signature.getS().toByteArray());
-    final Sign.SignatureData eip155Signature =
-        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-    final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
-    return Numeric.toHexString(serializedBytes);
+    final TransactionSerializer transactionSerializer =
+        new TransactionSerializer(Signer.get(), chainId);
+    return transactionSerializer.serialize(transaction);
   }
 
   private Transaction createTransaction(final JsonRpcRequest request) {

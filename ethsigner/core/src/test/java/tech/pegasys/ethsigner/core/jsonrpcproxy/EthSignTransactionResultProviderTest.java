@@ -72,7 +72,6 @@ public class EthSignTransactionResultProviderTest {
   @ArgumentsSource(InvalidParamsProvider.class)
   @NullSource
   public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
-
     final AddressIndexedSignerProvider mockSignerProvider =
         mock(AddressIndexedSignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
@@ -106,7 +105,7 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void signatureHasTheExpectedFormat() {
-    Credentials cs =
+    final Credentials cs =
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
     final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
 
@@ -134,8 +133,27 @@ public class EthSignTransactionResultProviderTest {
   }
 
   @Test
+  public void nonceNotProvidedExceptionIsThrownWithInvalidParams() {
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    final EthSignTransactionResultProvider resultProvider =
+        new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
+
+    final JsonObject params = getTxParameters();
+    params.remove("nonce");
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_signTransaction");
+    final int id = 1;
+    request.setId(new JsonRpcRequestId(id));
+    request.setParams(params);
+    final Throwable thrown = catchThrowable(() -> resultProvider.createResponseResult(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException rpcException = (JsonRpcException) thrown;
+    assertThat(rpcException.getJsonRpcError()).isEqualTo(INVALID_PARAMS);
+  }
+
+  @Test
   public void returnsExpectedSignature() {
-    Credentials cs =
+    final Credentials cs =
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
     final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
     final String addr = Keys.getAddress(EthPublicKeyUtils.toHexString(key));
@@ -146,7 +164,8 @@ public class EthSignTransactionResultProviderTest {
     doAnswer(
             answer -> {
               byte[] data = answer.getArgument(0, byte[].class);
-              final Sign.SignatureData signature = Sign.signMessage(data, cs.getEcKeyPair(), true);
+              final Sign.SignatureData signature =
+                  Sign.signPrefixedMessage(data, cs.getEcKeyPair());
               return new Signature(
                   new BigInteger(signature.getV()),
                   new BigInteger(1, signature.getR()),
@@ -160,7 +179,7 @@ public class EthSignTransactionResultProviderTest {
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
-    JsonObject params = getTxParameters();
+    final JsonObject params = getTxParameters();
     params.put("from", addr);
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_signTransaction");
     final int id = 1;
@@ -172,7 +191,7 @@ public class EthSignTransactionResultProviderTest {
     final String encodedTransaction = (String) result;
     assertThat(encodedTransaction)
         .isEqualTo(
-            "0xf862468082760094627306090abab3a6e1400e9345bc60c78a8bef57010083015e7ba0e64903ef4a056472835efa2163467e572ad3bd5cccdbb4787a8a7f5c71031445a079b44e8932ff1f5814e4b5835915e97ed12540b2fb50bf3ea407b7fa10fb94e6");
+            "0xf862468082760094627306090abab3a6e1400e9345bc60c78a8bef57010083015e7ca0c1de8a14a6bb3882fd97d5ebc3ed6db2f15cbdf9cbd9e89027973276c9d5f6d6a068214ca6ca701eaa8e74e819f838478865c267869e362c02018a11a150422efe");
   }
 
   private static JsonObject getTxParameters() {
