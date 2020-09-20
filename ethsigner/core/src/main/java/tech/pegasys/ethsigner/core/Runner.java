@@ -203,7 +203,7 @@ public class Runner {
       return "";
     }
     if (allowedCorsOrigins.contains("*")) {
-      return "*";
+      return ".*.";
     } else {
       final StringJoiner stringJoiner = new StringJoiner("|");
       allowedCorsOrigins.stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
