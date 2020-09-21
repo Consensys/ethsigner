@@ -16,15 +16,14 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.vertx.core.MultiMap;
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 
 import java.net.ConnectException;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
 public class ForwardedMessageResponder implements DownstreamResponseHandler {
@@ -36,11 +35,11 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
   }
 
   @Override
-  public void handleResponse(
-      final MultiMap headers, final int statusCode, final String body) {
+  public void handleResponse(final MultiMap headers, final int statusCode, final String body) {
     context.response().setStatusCode(statusCode);
-    headers.forEach(entry -> {
-      if(!entry.getKey().equals(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
+    headers.forEach(
+        entry -> {
+          if (!entry.getKey().equals(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
             context.response().headers().add(entry.getKey(), entry.getValue());
           }
         });
