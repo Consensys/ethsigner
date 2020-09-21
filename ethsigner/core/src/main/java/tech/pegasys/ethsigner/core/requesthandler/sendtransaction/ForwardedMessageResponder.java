@@ -19,11 +19,11 @@ import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERR
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 
 import java.net.ConnectException;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.vertx.core.MultiMap;
 import io.vertx.ext.web.RoutingContext;
 
 public class ForwardedMessageResponder implements DownstreamResponseHandler {
@@ -35,7 +35,8 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
   }
 
   @Override
-  public void handleResponse(final MultiMap headers, final int statusCode, final String body) {
+  public void handleResponse(
+      final Iterable<Entry<String, String>> headers, final int statusCode, final String body) {
     context.response().setStatusCode(statusCode);
     headers.forEach(
         entry -> {
