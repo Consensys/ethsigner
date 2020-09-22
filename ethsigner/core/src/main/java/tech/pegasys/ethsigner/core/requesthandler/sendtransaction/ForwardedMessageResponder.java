@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLHandshakeException;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.vertx.ext.web.RoutingContext;
 
 public class ForwardedMessageResponder implements DownstreamResponseHandler {
@@ -37,7 +38,12 @@ public class ForwardedMessageResponder implements DownstreamResponseHandler {
   public void handleResponse(
       final Iterable<Entry<String, String>> headers, final int statusCode, final String body) {
     context.response().setStatusCode(statusCode);
-    headers.forEach(entry -> context.response().headers().add(entry.getKey(), entry.getValue()));
+    headers.forEach(
+        entry -> {
+          if (!entry.getKey().equals(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
+            context.response().headers().add(entry.getKey(), entry.getValue());
+          }
+        });
     context.response().setChunked(false);
     context.response().end(body);
   }
