@@ -191,7 +191,7 @@ public class EthSignTransactionResultProviderTest {
     final String encodedTransaction = (String) result;
     assertThat(encodedTransaction)
         .isEqualTo(
-            "0xf862468082760094627306090abab3a6e1400e9345bc60c78a8bef57010083015e7ca0c1de8a14a6bb3882fd97d5ebc3ed6db2f15cbdf9cbd9e89027973276c9d5f6d6a068214ca6ca701eaa8e74e819f838478865c267869e362c02018a11a150422efe");
+            "0xf862468082760094627306090abab3a6e1400e9345bc60c78a8bef57020083015e7ba0e2b345c1c5af05f518e7fd716459fd41d4af3e355b4afb48d8fddc21eae98c13a043975efec1fcfd03f7af77c4a402510981a088765b180bc84163ecba8f01f46d");
   }
 
   private static JsonObject getTxParameters() {
@@ -201,7 +201,7 @@ public class EthSignTransactionResultProviderTest {
     jsonObject.put("gasPrice", "0x0");
     jsonObject.put("gas", "0x7600");
     jsonObject.put("nonce", "0x46");
-    jsonObject.put("value", "0x1");
+    jsonObject.put("value", "0x2");
     jsonObject.put("data", "0x0");
     return jsonObject;
   }
