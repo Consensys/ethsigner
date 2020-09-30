@@ -68,8 +68,10 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.4') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.10') {
       entry 'keystorage-hashicorp'
+      entry 'keystorage-hsm'
+      entry 'keystorage-cavium'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
     }

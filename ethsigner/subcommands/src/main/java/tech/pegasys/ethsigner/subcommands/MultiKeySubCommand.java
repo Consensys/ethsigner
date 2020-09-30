@@ -60,6 +60,14 @@ public class MultiKeySubCommand extends SignerSubCommand {
       arity = "1")
   private Path directoryPath;
 
+  @Option(
+      names = {"-c", "--config"},
+      description = "The path to a config file to initialize signer providers",
+      paramLabel = PATH_FORMAT_HELP,
+      arity = "1",
+      required = false)
+  private Path configPath;
+
   @Override
   protected void validateArgs() throws InitializationException {
     checkIfRequiredOptionsAreInitialized(this);
@@ -68,7 +76,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
 
   @Override
   public SignerProvider createSignerFactory() throws SignerInitializationException {
-    return MultiKeySignerProvider.create(directoryPath, new EthSignerFileSelector());
+    return MultiKeySignerProvider.create(directoryPath, configPath, new EthSignerFileSelector());
   }
 
   @Override

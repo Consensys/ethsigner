@@ -101,6 +101,15 @@ public final class EthSigner {
       vertx.close();
       throw new InitializationException("Failed to create http service.", t);
     }
+    Runtime.getRuntime().addShutdownHook(new Shutdown());
+  }
+
+  class Shutdown extends Thread {
+    @Override
+    public void run() {
+      signerProvider.shutdown();
+      System.out.println("Shutting down EthSigner");
+    }
   }
 
   private HttpServerOptions applyConfigTlsSettingsTo(final HttpServerOptions input) {

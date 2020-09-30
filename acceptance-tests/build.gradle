@@ -29,6 +29,8 @@ dependencies {
   testImplementation project(':ethsigner:app')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'signing-secp256k1-impl', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hashicorp', classifier: 'test-fixtures')
+  testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hsm', classifier: 'test-fixtures')
+  testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-cavium', classifier: 'test-fixtures')
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'io.vertx:vertx-core'

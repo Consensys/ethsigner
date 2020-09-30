@@ -210,6 +210,7 @@ allprojects {
     jvmArgs = [
       '-Xmx4g',
       '-XX:-UseGCOverheadLimit',
+      "-Djava.library.path=/opt/cloudhsm/lib",
       // Mockito and jackson-databind do some strange reflection during tests.
       // This suppresses an illegal access warning.
       '--add-opens',
@@ -341,6 +342,7 @@ subprojects {
   dependencies {
     testImplementation sourceSets.testSupport.output
     integrationTestImplementation sourceSets.testSupport.output
+    compile fileTree(dir: "${rootDir}/libs", include: "*.jar")
   }
 
   task integrationTest(type: Test, dependsOn: ["compileTestJava"]) {
@@ -390,6 +392,7 @@ applicationDefaultJvmArgs = [
   "-Dlog4j.shutdownHookEnabled=false",
   // netty specific module warnings
   "-Dio.netty.tryReflectionSetAccessible=true",
+  "-Djava.library.path=/opt/cloudhsm/lib",
   "--add-exports",
   "java.base/jdk.internal.misc=ALL-UNNAMED",
   "--add-opens",
@@ -425,6 +428,7 @@ startScripts {
 }
 
 dependencies {
+  compile fileTree(dir: "${rootDir}/libs", include: "*.jar")
   compile project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
 }

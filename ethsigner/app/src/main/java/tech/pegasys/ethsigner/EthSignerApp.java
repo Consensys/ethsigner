@@ -15,7 +15,9 @@ package tech.pegasys.ethsigner;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import tech.pegasys.ethsigner.subcommands.AzureSubCommand;
+import tech.pegasys.ethsigner.subcommands.CaviumSubCommand;
 import tech.pegasys.ethsigner.subcommands.FileBasedSubCommand;
+import tech.pegasys.ethsigner.subcommands.HSMSubCommand;
 import tech.pegasys.ethsigner.subcommands.HashicorpSubCommand;
 import tech.pegasys.ethsigner.subcommands.MultiKeySubCommand;
 import tech.pegasys.ethsigner.subcommands.RawSubCommand;
@@ -35,6 +37,8 @@ public class EthSignerApp {
         new HashicorpSubCommand(),
         new FileBasedSubCommand(),
         new AzureSubCommand(),
+        new HSMSubCommand(),
+        new CaviumSubCommand(),
         new MultiKeySubCommand(),
         new RawSubCommand());
 

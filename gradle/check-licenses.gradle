@@ -51,7 +51,8 @@ ext.acceptedLicenses = [
         'Common Development and Distribution License 1.0',
         'CDDL',
         'Unicode/ICU License',
-        'CC0'
+        'CC0',
+        'IAIK of Graz University of Technology License'
 ]*.toLowerCase()
 
 /**
@@ -159,7 +160,8 @@ downloadLicenses {
           (group('javax.mail')): cddl,
           (group('net.jcip')): apache,
           (group('net.java.dev.jna')): apache,
-          (group('com.sun.mail')): cddl
+          (group('com.sun.mail')): cddl,
+          ('cloudhsm-3.0.1.jar'): apache
   ]
 }
 
