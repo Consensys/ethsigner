@@ -71,6 +71,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
+    LOG.debug("Obtaining signer for {}", transaction.sender());
     final Optional<Signer> signer = signerProvider.getSigner(transaction.sender());
 
     if (signer.isEmpty()) {

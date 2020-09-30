@@ -68,7 +68,7 @@ dependencyManagement {
     dependency 'org.web3j:core:4.5.14'
     dependency 'org.web3j:crypto:4.5.14'
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.4') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.10') {
       entry 'keystorage-hashicorp'
       entry 'keystorage-hsm'
       entry 'keystorage-cavium'
@@ -77,5 +77,8 @@ dependencyManagement {
     }
 
     dependency 'org.zeroturnaround:zt-exec:1.11'
+
+    dependency 'org.hyperledger.besu:plugin-api:1.4.0'
+    dependency 'org.hyperledger.besu.internal:metrics-core:1.4.0'
   }
 }
