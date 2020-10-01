@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased 
+
+### Features Added
+- Added "eth_signTransaction" JSON RPC
+
 ## 0.7.1
 
 ### Features Added
