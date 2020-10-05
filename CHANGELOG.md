@@ -3,6 +3,7 @@
 ## Unreleased 
 
 ### Features Added
+- Added "eth_signTransaction" JSON RPC
 - Added AWS CloudHSM signer
 - Added Generic PKCS11 signer
 

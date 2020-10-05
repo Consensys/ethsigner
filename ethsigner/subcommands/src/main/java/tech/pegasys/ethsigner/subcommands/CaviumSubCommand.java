@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.signers.cavium.CaviumConfig;
 import tech.pegasys.signers.cavium.CaviumKeyStoreProvider;
 import tech.pegasys.signers.secp256k1.api.Signer;
@@ -36,7 +37,6 @@ import picocli.CommandLine.Spec;
     mixinStandardHelpOptions = true)
 public class CaviumSubCommand extends SignerSubCommand {
 
-  // private static final String READ_PIN_FILE_ERROR = "Error when reading the pin from file.";
   public static final String COMMAND_NAME = "cavium-signer";
 
   public CaviumSubCommand() {}
@@ -45,31 +45,33 @@ public class CaviumSubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-l", "--library"},
       description = "The HSM PKCS11 library used to sign transactions.",
       paramLabel = "<LIBRARY_PATH>",
-      required = true)
+      arity = "1")
   private Path libraryPath;
 
+  @RequiredOption
   @Option(
       names = {"-p", "--slot-pin"},
       description = "The crypto user pin of the HSM slot used to sign transactions.",
       paramLabel = "<SLOT_PIN>",
-      required = true)
+      arity = "1")
   private String slotPin;
 
+  @RequiredOption
   @Option(
       names = {"-a", "--eth-address"},
       description = "Ethereum address of account to sign with.",
       paramLabel = "<ETH_ADDRESS>",
-      required = true)
+      arity = "1")
   private String ethAddress;
 
   private Signer createSigner() throws SignerInitializationException {
     final CaviumKeyStoreProvider provider =
-        new CaviumKeyStoreProvider(
-            new CaviumConfig(libraryPath != null ? libraryPath.toString() : null, slotPin));
+        new CaviumKeyStoreProvider(new CaviumConfig(libraryPath.toString(), slotPin));
     final CaviumKeyStoreSignerFactory factory = new CaviumKeyStoreSignerFactory(provider);
     return factory.createSigner(ethAddress);
   }

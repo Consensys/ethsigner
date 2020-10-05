@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.signers.hsm.HSMConfig;
 import tech.pegasys.signers.hsm.HSMWalletProvider;
 import tech.pegasys.signers.secp256k1.api.Signer;
@@ -45,37 +46,40 @@ public class HSMSubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-l", "--library"},
       description = "The HSM PKCS11 library used to sign transactions.",
       paramLabel = "<LIBRARY_PATH>",
-      required = true)
+      arity = "1")
   private Path libraryPath;
 
+  @RequiredOption
   @Option(
       names = {"-s", "--slot-label"},
       description = "The HSM slot used to sign transactions.",
       paramLabel = "<SLOT_LABEL>",
-      required = true)
+      arity = "1")
   private String slotLabel;
 
+  @RequiredOption
   @Option(
       names = {"-p", "--slot-pin"},
       description = "The crypto user pin of the HSM slot used to sign transactions.",
       paramLabel = "<SLOT_PIN>",
-      required = true)
+      arity = "1")
   private String slotPin;
 
+  @RequiredOption
   @Option(
       names = {"-a", "--eth-address"},
       description = "Ethereum address of account to sign with.",
       paramLabel = "<ETH_ADDRESS>",
-      required = true)
+      arity = "1")
   private String ethAddress;
 
   private Signer createSigner() throws SignerInitializationException {
-    final HSMConfig config =
-        new HSMConfig(libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+    final HSMConfig config = new HSMConfig(libraryPath.toString(), slotLabel, slotPin);
     final HSMWalletProvider provider = new HSMWalletProvider(config);
     final HSMSignerFactory factory = new HSMSignerFactory(provider);
     return factory.createSigner(ethAddress);
