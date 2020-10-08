@@ -7,7 +7,10 @@ orbs:
 executors:
   executor_med:  # 2cpu, 4G ram
     docker:
-      - image: circleci/openjdk:11.0.4-jdk-stretch
+      - image: circleci/openjdk:11.0.8-jdk-buster
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD            
     resource_class: medium
     working_directory: ~/project
     environment:
@@ -16,7 +19,10 @@ executors:
 
   executor_large: # 4cpu, 8G ram
     docker:
-      - image: circleci/openjdk:11.0.4-jdk-stretch
+      - image: circleci/openjdk:11.0.8-jdk-buster
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD      
     resource_class: large
     working_directory: ~/project
     environment:
@@ -25,7 +31,7 @@ executors:
 
   executor_machine: # 2cpu , 8G ram
     machine:
-      image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-2004:202008-01 #Ubuntu 20.04, docker 19.03, docker-compose 1.27.4
       docker_layer_caching: true
     working_directory: ~/project
     environment:
