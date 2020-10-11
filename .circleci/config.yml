@@ -9,8 +9,8 @@ executors:
     docker:
       - image: circleci/openjdk:11.0.8-jdk-buster
         auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD            
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO             
     resource_class: medium
     working_directory: ~/project
     environment:
@@ -21,8 +21,8 @@ executors:
     docker:
       - image: circleci/openjdk:11.0.8-jdk-buster
         auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD      
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO     
     resource_class: large
     working_directory: ~/project
     environment:
@@ -184,7 +184,7 @@ jobs:
       - run:
           name: Publish Docker
           command: |
-            docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
+            docker login --username "${DOCKER_USER_RW}" --password "${DOCKER_PASSWORD_RW}"
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
       - notify
       
@@ -199,19 +199,29 @@ workflows:
               only:
                 - master
     jobs:
-      - build
+      - build:
+          context:
+            - dockerhub-quorumengineering-ro              
       - acceptanceTests:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
   default:
     jobs:
-      - build
+      - build:
+          context:
+            - dockerhub-quorumengineering-ro              
       - acceptanceTests:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
       - buildDocker:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
       - publish:
           filters:
             branches:
@@ -221,6 +231,9 @@ workflows:
           requires:
             - build
             - acceptanceTests
+          context:
+            - dockerhub-quorumengineering-ro   
+            - quorum-gradle                 
       - publishDocker:
           filters:
             branches:
@@ -231,3 +244,5 @@ workflows:
             - build
             - acceptanceTests
             - buildDocker
+          context:
+            - dockerhub-quorumengineering-rw        
