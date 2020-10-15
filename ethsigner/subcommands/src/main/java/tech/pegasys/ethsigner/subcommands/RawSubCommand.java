@@ -30,7 +30,7 @@ import picocli.CommandLine.Option;
 @Command(
     name = RawSubCommand.COMMAND_NAME,
     description =
-        "Sign transactions with an unecrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
+        "Sign transactions with an unencrypted key specified on cmdline. NOT SUITABLE FOR PRODUCTION.",
     mixinStandardHelpOptions = true,
     hidden = true)
 public class RawSubCommand extends SignerSubCommand {
