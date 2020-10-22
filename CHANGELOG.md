@@ -6,6 +6,9 @@
 - Added "eth_signTransaction" JSON RPC
 - Docker namespace updated to reflect "consensys/quorum-ethsigner"
 
+### Bugs Fixed
+- Transactions were not being handled in parallel, triggering poor performance under load
+
 ## 0.7.1
 
 ### Features Added
