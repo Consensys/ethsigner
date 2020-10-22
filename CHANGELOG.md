@@ -4,7 +4,7 @@
 
 ### Features Added
 - Added "eth_signTransaction" JSON RPC
-- Docker namespace updated to reflect "quorumengineering"
+- Docker namespace updated to reflect "consensys/quorum-ethsigner"
 
 ## 0.7.1
 
