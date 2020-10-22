@@ -1,9 +1,15 @@
 # Changelog
 
-## Unreleased 
+## 20.10.0
 
 ### Features Added
 - Added "eth_signTransaction" JSON RPC
+- Docker namespace updated to reflect "consensys/quorum-ethsigner"
+- Strip ACCESS_CONTROL_ALLOW_ORIGIN header from responses received from the web3provider
+- Added a Prometheus metrics endpoint, reporting basic application metrics
+
+### Bugs Fixed
+- Transactions were not being handled in parallel, triggering poor performance under load
 
 ## 0.7.1
 
