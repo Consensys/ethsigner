@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased 
+## 20.10.0
 
 ### Features Added
 - Added "eth_signTransaction" JSON RPC
+- Docker namespace updated to reflect "quorumengineering"
 
 ## 0.7.1
 
