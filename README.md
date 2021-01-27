@@ -22,4 +22,4 @@ See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching 
 * [Release Notes](CHANGELOG.md)
 
 [Discord]: https://discord.gg/5U9Jwp7
-[Github issues]: https://github.com/PegaSysEng/ethsigner/issues
+[GitHub issues]: https://github.com/ConsenSys/ethsigner/issues
