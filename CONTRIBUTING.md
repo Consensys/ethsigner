@@ -244,8 +244,8 @@ These are not strictly enforced during the build, but should be adhered to and c
 
 [private-quorum@consensys.net]: mailto:private-quorum@consensys.net
 [Discord]: https://discord.gg/5U9Jwp7
-[Github issues]: https://github.com/PegaSysEng/ethsigner/issues
-[EthSigner documentation]: https://docs.ethsigner.pegasys.tech/
+[GitHub issues]: https://github.com/ConsenSys/ethsigner/issues
+[EthSigner documentation]: https://docs.ethsigner.consensys.net/
 [CLA.md]: /CLA.md
 [Code Reviews]: /community/code-reviews.md
 [MkDocs]: https://www.mkdocs.org/
