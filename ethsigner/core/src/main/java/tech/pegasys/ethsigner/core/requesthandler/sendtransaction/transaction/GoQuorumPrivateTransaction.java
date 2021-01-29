@@ -12,25 +12,16 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import com.fasterxml.jackson.databind.ser.Serializers.Base;
-import com.google.common.base.MoreObjects;
-import java.math.BigInteger;
-import java.util.List;
-import org.jetbrains.annotations.NotNull;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
-import org.web3j.utils.Base64String;
-import org.web3j.utils.Restriction;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
+
+import java.util.List;
+
+import com.google.common.base.MoreObjects;
+import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
+import org.web3j.utils.Base64String;
+import org.web3j.utils.Restriction;
 
 public class GoQuorumPrivateTransaction extends PrivateTransaction {
 

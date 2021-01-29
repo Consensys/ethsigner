@@ -12,9 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import org.jetbrains.annotations.NotNull;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
@@ -23,6 +21,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;

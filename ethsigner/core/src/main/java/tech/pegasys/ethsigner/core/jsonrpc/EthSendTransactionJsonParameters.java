@@ -19,12 +19,12 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import java.util.stream.Collectors;
 import org.web3j.utils.Base64String;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -113,6 +113,7 @@ public class EthSendTransactionJsonParameters {
   public String sender() {
     return sender;
   }
+
   public Optional<Base64String> privateFrom() {
     return Optional.ofNullable(privateFrom);
   }

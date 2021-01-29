@@ -146,20 +146,59 @@ public class EeaSendTransactionJsonParameters {
   public static EeaSendTransactionJsonParameters from(final JsonRpcRequest request) {
     return fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
   }
-  public EeaSendTransactionJsonParameters (final EthSendTransactionJsonParameters ethSendParams) {
-    this(ethSendParams.sender(), ethSendParams.privateFrom().get().toString(),
+
+  public EeaSendTransactionJsonParameters(final EthSendTransactionJsonParameters ethSendParams) {
+    this(
+        ethSendParams.sender(),
+        ethSendParams.privateFrom().get().toString(),
         Restriction.RESTRICTED.name());
     if (ethSendParams.privateFor().isEmpty()) {
-      throw new IllegalArgumentException("privateFor must be specified for private transactions sent via eth_sendTransaction");
+      throw new IllegalArgumentException(
+          "privateFor must be specified for private transactions sent via eth_sendTransaction");
     }
-    ethSendParams.privateFor().ifPresent(d -> {this.privateFor = d;});
+    ethSendParams
+        .privateFor()
+        .ifPresent(
+            d -> {
+              this.privateFor = d;
+            });
 
-    ethSendParams.data().ifPresent(d -> {this.data = d;});
-    ethSendParams.gas().ifPresent(d -> {this.gas = d;});
-    ethSendParams.gasPrice().ifPresent(d -> {this.gasPrice = d;});
-    ethSendParams.value().ifPresent(d -> {this.value = d;});
-    ethSendParams.nonce().ifPresent(d -> {this.nonce = d;});
-    ethSendParams.receiver().ifPresent(d -> {this.receiver = d;});
+    ethSendParams
+        .data()
+        .ifPresent(
+            d -> {
+              this.data = d;
+            });
+    ethSendParams
+        .gas()
+        .ifPresent(
+            d -> {
+              this.gas = d;
+            });
+    ethSendParams
+        .gasPrice()
+        .ifPresent(
+            d -> {
+              this.gasPrice = d;
+            });
+    ethSendParams
+        .value()
+        .ifPresent(
+            d -> {
+              this.value = d;
+            });
+    ethSendParams
+        .nonce()
+        .ifPresent(
+            d -> {
+              this.nonce = d;
+            });
+    ethSendParams
+        .receiver()
+        .ifPresent(
+            d -> {
+              this.receiver = d;
+            });
   }
 
   private void validateValue(final String value) {

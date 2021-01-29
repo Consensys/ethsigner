@@ -16,22 +16,22 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.web3j.utils.Bytes.trimLeadingZeroes;
 
+import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+
 import java.math.BigInteger;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.SignedRawTransaction;
-import org.web3j.crypto.TransactionDecoder;
 import org.web3j.protocol.eea.crypto.PrivateTransactionDecoder;
 import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
 import org.web3j.utils.Restriction;
-import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
-import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 
 public class GoQuorumEthTransactionTest {
 
@@ -40,8 +40,7 @@ public class GoQuorumEthTransactionTest {
 
   @BeforeEach
   public void setup() {
-    params =
-        new EthSendTransactionJsonParameters("0x7577919ae5df4941180eac211965f275cdce314d");
+    params = new EthSendTransactionJsonParameters("0x7577919ae5df4941180eac211965f275cdce314d");
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
@@ -53,7 +52,11 @@ public class GoQuorumEthTransactionTest {
     params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
 
-    ethTransaction = GoQuorumPrivateTransaction.from(new EeaSendTransactionJsonParameters(params), () -> BigInteger.ZERO, new JsonRpcRequestId(1));
+    ethTransaction =
+        GoQuorumPrivateTransaction.from(
+            new EeaSendTransactionJsonParameters(params),
+            () -> BigInteger.ZERO,
+            new JsonRpcRequestId(1));
   }
 
   @Test
