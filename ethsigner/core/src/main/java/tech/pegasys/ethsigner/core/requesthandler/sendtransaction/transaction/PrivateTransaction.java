@@ -12,7 +12,9 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import org.jetbrains.annotations.NotNull;
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
@@ -73,7 +75,12 @@ public abstract class PrivateTransaction implements Transaction {
   @Override
   public JsonRpcRequest jsonRpcRequest(
       final String signedTransactionHexString, final JsonRpcRequestId id) {
-    return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
+    return Transaction.jsonRpcRequest(signedTransactionHexString, id, getJsonRpcMethodName());
+  }
+
+  @NotNull
+  public String getJsonRpcMethodName() {
+    return JSON_RPC_METHOD;
   }
 
   @Override
