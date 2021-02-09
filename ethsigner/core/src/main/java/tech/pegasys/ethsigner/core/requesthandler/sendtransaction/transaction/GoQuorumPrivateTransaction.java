@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
 import java.util.List;
@@ -26,36 +27,43 @@ import org.web3j.utils.Restriction;
 public class GoQuorumPrivateTransaction extends PrivateTransaction {
 
   private final List<Base64String> privateFor;
+  private final EnclaveLookupIdProvider enclaveLookupIdProvider;
+  private String lookupId;
 
   public static GoQuorumPrivateTransaction from(
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
+      final EnclaveLookupIdProvider enclaveLookupIdProvider,
       final JsonRpcRequestId id) {
+
     if (transactionJsonParameters.privateFor().isEmpty()) {
       throw new IllegalArgumentException("Transaction does not contain a valid privateFor list.");
     }
 
     return new GoQuorumPrivateTransaction(
-        transactionJsonParameters, nonceProvider, id, transactionJsonParameters.privateFor().get());
+        transactionJsonParameters, nonceProvider, enclaveLookupIdProvider, id, transactionJsonParameters.privateFor().get());
   }
 
   private GoQuorumPrivateTransaction(
       final EeaSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
+      final EnclaveLookupIdProvider enclaveLookupIdProvider,
       final JsonRpcRequestId id,
       final List<Base64String> privateFor) {
     super(transactionJsonParameters, nonceProvider, id);
     this.privateFor = privateFor;
+    this.enclaveLookupIdProvider = enclaveLookupIdProvider;
   }
 
   @Override
   public String getJsonRpcMethodName() {
-    return "eth_sendRawPrivateTransaction";
+    return "goquorum_storeRaw";
   }
 
   @Override
   public void updateNonce() {
     this.nonce = nonceProvider.getNonce();
+    this.lookupId = enclaveLookupIdProvider.getLookupId();
   }
 
   @Override
@@ -65,6 +73,8 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
         .add("nonceProvider", nonceProvider)
         .add("id", id)
         .add("nonce", nonce)
+        .add("enclaveLookupIdProvider", enclaveLookupIdProvider)
+        .add("lookupId", lookupId)
         .toString();
   }
 

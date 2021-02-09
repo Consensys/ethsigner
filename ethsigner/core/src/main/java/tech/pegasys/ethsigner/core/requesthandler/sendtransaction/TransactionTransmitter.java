@@ -54,13 +54,14 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
   }
 
   public void send() {
-    final Optional<JsonRpcRequest> request = createSignedTransactionBody();
+    final Optional<JsonRpcRequest> request = createSignedTransactionPayload();
 
     if (request.isEmpty()) {
       return;
     }
 
     try {
+      // TODO-storeraw should sendTransaction be called something different?
       sendTransaction(Json.encode(request.get()));
     } catch (final IllegalArgumentException | EncodeException e) {
       LOG.debug("JSON Serialization failed for: {}", request, e);
@@ -68,7 +69,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
     }
   }
 
-  private Optional<JsonRpcRequest> createSignedTransactionBody() {
+  private Optional<JsonRpcRequest> createSignedTransactionPayload() {
 
     if (!transaction.isNonceUserSpecified()) {
       if (!populateNonce()) {
@@ -89,6 +90,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       return Optional.empty();
     }
 
+    // TODO-storeraw - this is the bit that puts the RPC method into the request
     return Optional.of(transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId()));
   }
 
@@ -99,6 +101,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
     } catch (final RuntimeException e) {
       // It is currently recognised that the underlying nonce provider will wrap a transmission
       // exception in a Runtime exception.
+      // TODO-storeraw this msg may not be right if nonce is provided AND method now also gets enclaveLookupId from besu/tessera
       LOG.warn("Unable to get nonce from web3j provider.", e);
       this.handleFailure(e.getCause());
     } catch (final Throwable thrown) {

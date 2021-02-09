@@ -28,6 +28,7 @@ import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignTransa
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.passthrough.PassThroughHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.DownstreamPathCalculator;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendGoQuorumPrivateTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.SendTransactionHandler;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 
@@ -164,8 +165,13 @@ public class Runner {
     final SendTransactionHandler sendTransactionHandler =
         new SendTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);
 
+    final SendGoQuorumPrivateTransactionHandler sendGoQuorumPrivateTransactionHandler =
+        new SendGoQuorumPrivateTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);
+
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);
+    // TODO-storeraw sendXTransaction is not a real method
+    requestMapper.addHandler("eth_sendXTransaction", sendGoQuorumPrivateTransactionHandler);
     requestMapper.addHandler("eea_sendTransaction", sendTransactionHandler);
     requestMapper.addHandler(
         "eth_accounts",

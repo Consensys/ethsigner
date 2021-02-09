@@ -149,6 +149,7 @@ public class EeaSendTransactionJsonParameters {
 
   public EeaSendTransactionJsonParameters(final EthSendTransactionJsonParameters ethSendParams) {
     this(
+        // TODO-storeraw privateFrom is optional
         ethSendParams.sender(),
         ethSendParams.privateFrom().get().toString(),
         Restriction.RESTRICTED.name());

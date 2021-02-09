@@ -43,25 +43,40 @@ public class TransactionFactory {
     final String method = request.getMethod().toLowerCase();
     final VertxNonceRequestTransmitter nonceRequestTransmitter =
         new VertxNonceRequestTransmitter(context.request().headers(), decoder, transmitterFactory);
+    // TODO-storeraw does it make sense to create this somewhere else
+    final VertxStoreRawRequestTransmitter storeRawRequestTransmitter =
+        new VertxStoreRawRequestTransmitter(context.request().headers(), decoder, transmitterFactory);
 
     switch (method) {
       case "eth_sendtransaction":
-        return createEthTransaction(request, nonceRequestTransmitter);
+        return createEthTransaction(request, nonceRequestTransmitter, storeRawRequestTransmitter);
       case "eea_sendtransaction":
         return createEeaTransaction(request, nonceRequestTransmitter);
+      case "eth_sendxtransaction":
+        // TODO-storeraw this is not a real RPC method - combine with eth_sendTransaction
+        return createEthTransaction(request, nonceRequestTransmitter, storeRawRequestTransmitter);
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
   }
 
   private Transaction createEthTransaction(
-      final JsonRpcRequest request, final VertxNonceRequestTransmitter requestTransmitter) {
+      final JsonRpcRequest request, final VertxNonceRequestTransmitter nonceRequestTransmitter,
+      final VertxStoreRawRequestTransmitter storeRawRequestTransmitter) {
     final EthSendTransactionJsonParameters params =
         fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     final NonceProvider ethNonceProvider =
-        new EthNonceProvider(params.sender(), requestTransmitter);
-    return new EthTransaction(params, ethNonceProvider, request.getId());
+        new EthNonceProvider(params.sender(), nonceRequestTransmitter);
+    // TODO-storeraw this payload has to come from EthSigner - ie encode the tx
+    String payload = "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
+    final StoreRawEnclaveLookupIdProvider lookupIdProvider = new StoreRawEnclaveLookupIdProvider(payload, storeRawRequestTransmitter);
+
+    if (params.privateFor().isPresent()) {
+      return GoQuorumPrivateTransaction.from(new EeaSendTransactionJsonParameters(params), ethNonceProvider, lookupIdProvider, request.getId());
+    } else {
+      return new EthTransaction(params, ethNonceProvider, request.getId());
+    }
   }
 
   private Transaction createEeaTransaction(

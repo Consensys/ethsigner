@@ -32,6 +32,7 @@ import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
 import org.web3j.utils.Restriction;
+import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
 
 public class GoQuorumEthTransactionTest {
 
@@ -52,10 +53,12 @@ public class GoQuorumEthTransactionTest {
     params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
 
+    EnclaveLookupIdProvider provider = () -> "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
     ethTransaction =
         GoQuorumPrivateTransaction.from(
             new EeaSendTransactionJsonParameters(params),
             () -> BigInteger.ZERO,
+            provider,
             new JsonRpcRequestId(1));
   }
 
