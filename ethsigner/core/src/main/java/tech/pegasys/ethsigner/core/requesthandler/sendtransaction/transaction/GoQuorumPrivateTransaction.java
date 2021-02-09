@@ -41,7 +41,11 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
     }
 
     return new GoQuorumPrivateTransaction(
-        transactionJsonParameters, nonceProvider, enclaveLookupIdProvider, id, transactionJsonParameters.privateFor().get());
+        transactionJsonParameters,
+        nonceProvider,
+        enclaveLookupIdProvider,
+        id,
+        transactionJsonParameters.privateFor().get());
   }
 
   private GoQuorumPrivateTransaction(

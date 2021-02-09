@@ -166,7 +166,8 @@ public class Runner {
         new SendTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);
 
     final SendGoQuorumPrivateTransactionHandler sendGoQuorumPrivateTransactionHandler =
-        new SendGoQuorumPrivateTransactionHandler(chainId, signerProvider, transactionFactory, transmitterFactory);
+        new SendGoQuorumPrivateTransactionHandler(
+            chainId, signerProvider, transactionFactory, transmitterFactory);
 
     final RequestMapper requestMapper = new RequestMapper(defaultHandler);
     requestMapper.addHandler("eth_sendTransaction", sendTransactionHandler);

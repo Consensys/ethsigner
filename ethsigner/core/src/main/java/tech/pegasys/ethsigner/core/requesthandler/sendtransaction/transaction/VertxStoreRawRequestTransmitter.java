@@ -12,20 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.Json;
-import java.math.BigInteger;
-import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.web3j.exceptions.MessageDecodingException;
-import org.web3j.utils.Numeric;
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -37,6 +23,20 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.RequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
+
+import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.web3j.exceptions.MessageDecodingException;
 
 public class VertxStoreRawRequestTransmitter {
 
@@ -84,7 +84,8 @@ public class VertxStoreRawRequestTransmitter {
       LOG.debug("storeRaw response of {}", lookupId);
       return lookupId;
     } catch (final InterruptedException | ExecutionException e) {
-      throw new RuntimeException("Failed to retrieve storeRaw result (enclave lookup id):" + e.getMessage(), e.getCause());
+      throw new RuntimeException(
+          "Failed to retrieve storeRaw result (enclave lookup id):" + e.getMessage(), e.getCause());
     }
   }
 

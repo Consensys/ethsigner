@@ -21,8 +21,7 @@ public class StoreRawEnclaveLookupIdProvider implements EnclaveLookupIdProvider 
   private final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter;
 
   public StoreRawEnclaveLookupIdProvider(
-      final String payload,
-      final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter) {
+      final String payload, final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter) {
     this.payload = payload;
     this.vertxStoreRawRequestTransmitter = vertxStoreRawRequestTransmitter;
   }

@@ -16,11 +16,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
-import io.vertx.core.json.DecodeException;
-import io.vertx.ext.web.RoutingContext;
-import java.util.Optional;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
@@ -30,6 +25,13 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.signers.secp256k1.api.Signer;
+
+import java.util.Optional;
+
+import io.vertx.core.json.DecodeException;
+import io.vertx.ext.web.RoutingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SendGoQuorumPrivateTransactionHandler implements JsonRpcRequestHandler {
 
@@ -55,7 +57,8 @@ public class SendGoQuorumPrivateTransactionHandler implements JsonRpcRequestHand
 
   @Override
   public void handle(final RoutingContext context, final JsonRpcRequest request) {
-    LOG.debug("Transforming GoQuorumPrivateTx request {}, {}", request.getId(), request.getMethod());
+    LOG.debug(
+        "Transforming GoQuorumPrivateTx request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {
       transaction = transactionFactory.createTransaction(context, request);
