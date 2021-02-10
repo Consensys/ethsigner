@@ -15,5 +15,5 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 @FunctionalInterface
 public interface EnclaveLookupIdProvider {
 
-  String getLookupId();
+  String getLookupId(final String payload);
 }

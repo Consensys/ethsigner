@@ -17,22 +17,20 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupI
 
 public class StoreRawEnclaveLookupIdProvider implements EnclaveLookupIdProvider {
 
-  private final String payload;
   private final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter;
 
   public StoreRawEnclaveLookupIdProvider(
-      final String payload, final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter) {
-    this.payload = payload;
+      final VertxStoreRawRequestTransmitter vertxStoreRawRequestTransmitter) {
     this.vertxStoreRawRequestTransmitter = vertxStoreRawRequestTransmitter;
   }
 
   @Override
-  public String getLookupId() {
-    final JsonRpcRequest request = generateRequest();
+  public String getLookupId(final String payload) {
+    final JsonRpcRequest request = generateRequest(payload);
     return vertxStoreRawRequestTransmitter.storeRaw(request);
   }
 
-  protected JsonRpcRequest generateRequest() {
+  protected JsonRpcRequest generateRequest(final String payload) {
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "goquorum_storeRaw");
     request.setParams(new Object[] {payload});
 

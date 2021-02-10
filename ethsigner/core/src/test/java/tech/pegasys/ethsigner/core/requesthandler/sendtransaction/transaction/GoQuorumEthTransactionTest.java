@@ -12,7 +12,6 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.web3j.utils.Bytes.trimLeadingZeroes;
 
@@ -25,6 +24,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupI
 import java.math.BigInteger;
 import java.util.List;
 
+import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
@@ -54,7 +54,7 @@ public class GoQuorumEthTransactionTest {
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
 
     EnclaveLookupIdProvider provider =
-        () ->
+        (x) ->
             "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
     ethTransaction =
         GoQuorumPrivateTransaction.from(
@@ -119,10 +119,23 @@ public class GoQuorumEthTransactionTest {
         "0xf90114a0e04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f28609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f0724456704a9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567536a0fe72a92aede764ce41d06b163d28700b58e5ee8bb1af91d9d54979ea3bdb3e7ea046ae10c94c322fa44ddceb86677c2cd6cc17dfbd766924f41d10a244c512996dac5a6c617045736c3971444c50792f6538382b2f36797643554556497648383379304e3441367748754b58493dedac4756386d30565a41636359474141594d42755951744b456a3058747058656177324150636f426d744132773d8a72657374726963746564";
     final JsonRpcRequest jsonRpcRequest = ethTransaction.jsonRpcRequest(transactionString, id);
 
-    assertThat(jsonRpcRequest.getMethod()).isEqualTo("goquorum_storeRaw");
+    assertThat(jsonRpcRequest.getMethod()).isEqualTo("eth_sendRawPrivateTransaction");
     assertThat(jsonRpcRequest.getVersion()).isEqualTo("2.0");
     assertThat(jsonRpcRequest.getId()).isEqualTo(id);
-    final List<String> params = (List<String>) jsonRpcRequest.getParams();
-    assertThat(params).isEqualTo(singletonList(transactionString));
+    final Object[] paramsArray = (Object[]) jsonRpcRequest.getParams();
+    assertThat(paramsArray[0]).isEqualTo(transactionString);
+
+    assertThat(paramsArray[1])
+        .isEqualTo(
+            getGoQuorumRawTxJsonParams(params.privateFrom().get(), params.privateFor().get()));
+  }
+
+  private JsonObject getGoQuorumRawTxJsonParams(
+      final Base64String privateFrom, final List<Base64String> privateFor) {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put("privateFrom", privateFrom.toString());
+    jsonObject.put("privateFor", Base64String.unwrapList(privateFor));
+    jsonObject.put("privacyFlag", 0);
+    return jsonObject;
   }
 }

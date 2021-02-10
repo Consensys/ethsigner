@@ -12,7 +12,10 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
+
 import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
@@ -20,6 +23,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import io.vertx.core.json.JsonObject;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Restriction;
@@ -59,15 +63,22 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
     this.enclaveLookupIdProvider = enclaveLookupIdProvider;
   }
 
+  private String getPayload() {
+
+    // TODO-storeraw this payload has to come from EthSigner - ie encode the tx
+    // see TransactionSerializer
+    return "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
+  }
+
   @Override
   public String getJsonRpcMethodName() {
-    return "goquorum_storeRaw";
+    return "eth_sendRawPrivateTransaction";
   }
 
   @Override
   public void updateNonce() {
     this.nonce = nonceProvider.getNonce();
-    this.lookupId = enclaveLookupIdProvider.getLookupId();
+    this.lookupId = enclaveLookupIdProvider.getLookupId(this.getPayload());
   }
 
   @Override
@@ -80,6 +91,22 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
         .add("enclaveLookupIdProvider", enclaveLookupIdProvider)
         .add("lookupId", lookupId)
         .toString();
+  }
+
+  private JsonObject getGoQuorumRawTxJsonParams() {
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.put("privateFrom", transactionJsonParameters.privateFrom().toString());
+    jsonObject.put("privateFor", Base64String.unwrapList(privateFor));
+    jsonObject.put("privacyFlag", 0);
+    return jsonObject;
+  }
+
+  @Override
+  public JsonRpcRequest jsonRpcRequest(final String payload, final JsonRpcRequestId id) {
+    final JsonRpcRequest request = new JsonRpcRequest(JSON_RPC_VERSION, getJsonRpcMethodName());
+    request.setParams(new Object[] {payload, getGoQuorumRawTxJsonParams()});
+    request.setId(id);
+    return request;
   }
 
   @Override

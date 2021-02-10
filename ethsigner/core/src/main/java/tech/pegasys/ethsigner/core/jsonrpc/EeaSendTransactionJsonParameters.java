@@ -149,9 +149,12 @@ public class EeaSendTransactionJsonParameters {
 
   public EeaSendTransactionJsonParameters(final EthSendTransactionJsonParameters ethSendParams) {
     this(
-        // TODO-storeraw privateFrom is optional
+        // TODO-storeraw privateFrom is optional - but this "" doesn't work. maybe need to refactor
+        // this class or make a new GoQuorumSendTransactionJsonParameters
         ethSendParams.sender(),
-        ethSendParams.privateFrom().get().toString(),
+        ethSendParams.privateFrom().isEmpty()
+            ? ""
+            : String.valueOf(ethSendParams.privateFrom().get()),
         Restriction.RESTRICTED.name());
     if (ethSendParams.privateFor().isEmpty()) {
       throw new IllegalArgumentException(

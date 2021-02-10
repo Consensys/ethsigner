@@ -70,11 +70,8 @@ public class TransactionFactory {
 
     final NonceProvider ethNonceProvider =
         new EthNonceProvider(params.sender(), nonceRequestTransmitter);
-    // TODO-storeraw this payload has to come from EthSigner - ie encode the tx
-    String payload =
-        "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
     final StoreRawEnclaveLookupIdProvider lookupIdProvider =
-        new StoreRawEnclaveLookupIdProvider(payload, storeRawRequestTransmitter);
+        new StoreRawEnclaveLookupIdProvider(storeRawRequestTransmitter);
 
     if (params.privateFor().isPresent()) {
       return GoQuorumPrivateTransaction.from(
