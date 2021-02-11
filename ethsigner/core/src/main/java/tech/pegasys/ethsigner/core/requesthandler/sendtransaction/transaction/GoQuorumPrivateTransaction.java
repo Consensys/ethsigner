@@ -113,7 +113,7 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
         transactionJsonParameters.gasPrice().orElse(DEFAULT_GAS_PRICE),
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
-        transactionJsonParameters.data().orElse(DEFAULT_DATA),
+        lookupId,
         transactionJsonParameters.privateFrom(),
         privateFor,
         Restriction.fromString(transactionJsonParameters.restriction()));
