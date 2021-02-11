@@ -90,7 +90,6 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       return Optional.empty();
     }
 
-    // TODO-storeraw - this is the bit that puts the RPC method into the request
     return Optional.of(transaction.jsonRpcRequest(signedTransactionHexString, transaction.getId()));
   }
 

@@ -43,7 +43,6 @@ public class TransactionFactory {
     final String method = request.getMethod().toLowerCase();
     final VertxNonceRequestTransmitter nonceRequestTransmitter =
         new VertxNonceRequestTransmitter(context.request().headers(), decoder, transmitterFactory);
-    // TODO-storeraw does it make sense to create this somewhere else
     final VertxStoreRawRequestTransmitter storeRawRequestTransmitter =
         new VertxStoreRawRequestTransmitter(
             context.request().headers(), decoder, transmitterFactory);
@@ -53,9 +52,6 @@ public class TransactionFactory {
         return createEthTransaction(request, nonceRequestTransmitter, storeRawRequestTransmitter);
       case "eea_sendtransaction":
         return createEeaTransaction(request, nonceRequestTransmitter);
-      case "eth_sendxtransaction":
-        // TODO-storeraw this is not a real RPC method - combine with eth_sendTransaction
-        return createEthTransaction(request, nonceRequestTransmitter, storeRawRequestTransmitter);
       default:
         throw new IllegalStateException("Unknown send transaction method " + method);
     }
