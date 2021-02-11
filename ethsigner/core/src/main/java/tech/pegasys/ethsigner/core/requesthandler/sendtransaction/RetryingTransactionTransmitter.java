@@ -27,7 +27,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class RetryingTransactionTransmitter extends TransactionTransmitter {
 
-  protected final RetryMechanism retryMechanism;
+  private final RetryMechanism retryMechanism;
 
   public RetryingTransactionTransmitter(
       final Transaction transaction,
