@@ -63,13 +63,6 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
     this.enclaveLookupIdProvider = enclaveLookupIdProvider;
   }
 
-  private String getPayload() {
-
-    // TODO-storeraw this payload has to come from EthSigner - ie encode the tx
-    // see TransactionSerializer
-    return "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
-  }
-
   @Override
   public String getJsonRpcMethodName() {
     return "eth_sendRawPrivateTransaction";
@@ -78,7 +71,11 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
   @Override
   public void updateNonce() {
     this.nonce = nonceProvider.getNonce();
-    this.lookupId = enclaveLookupIdProvider.getLookupId(this.getPayload());
+    // TODO refactor or at least rename this method - it now does TWO things
+    // TODO data is optional - do we also accept _input_ as per
+    // https://docs.goquorum.consensys.net/en/stable/Reference/APIs/PrivacyAPI/#ethsendtransaction
+    final String payload = this.transactionJsonParameters.data().get();
+    this.lookupId = enclaveLookupIdProvider.getLookupId(payload);
   }
 
   @Override

@@ -101,9 +101,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
     } catch (final RuntimeException e) {
       // It is currently recognised that the underlying nonce provider will wrap a transmission
       // exception in a Runtime exception.
-      // TODO-storeraw this msg may not be right if nonce is provided AND method now also gets
-      // enclaveLookupId from besu/tessera
-      LOG.warn("Unable to get nonce from web3j provider.", e);
+      LOG.warn("Unable to get nonce (or enclave lookup id) from web3j provider.", e);
       this.handleFailure(e.getCause());
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode/serialize transaction: {}", transaction, thrown);
