@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 
-import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
+import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
@@ -24,18 +24,23 @@ import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import io.vertx.core.json.JsonObject;
-import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
+import org.jetbrains.annotations.NotNull;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.Sign.SignatureData;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpType;
 import org.web3j.utils.Base64String;
-import org.web3j.utils.Restriction;
 
-public class GoQuorumPrivateTransaction extends PrivateTransaction {
+public class GoQuorumPrivateTransaction extends EthTransaction {
 
   private final List<Base64String> privateFor;
   private final EnclaveLookupIdProvider enclaveLookupIdProvider;
   private String lookupId;
 
   public static GoQuorumPrivateTransaction from(
-      final EeaSendTransactionJsonParameters transactionJsonParameters,
+      final EthSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final EnclaveLookupIdProvider enclaveLookupIdProvider,
       final JsonRpcRequestId id) {
@@ -53,7 +58,7 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
   }
 
   private GoQuorumPrivateTransaction(
-      final EeaSendTransactionJsonParameters transactionJsonParameters,
+      final EthSendTransactionJsonParameters transactionJsonParameters,
       final NonceProvider nonceProvider,
       final EnclaveLookupIdProvider enclaveLookupIdProvider,
       final JsonRpcRequestId id,
@@ -64,14 +69,18 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
   }
 
   @Override
+  @NotNull
   public String getJsonRpcMethodName() {
     return "eth_sendRawPrivateTransaction";
   }
 
   @Override
   public void updateNonce() {
-    this.nonce = nonceProvider.getNonce();
+
     // TODO refactor or at least rename this method - it now does TWO things
+
+    this.nonce = nonceProvider.getNonce();
+
     // TODO data is optional - do we also accept _input_ as per
     // https://docs.goquorum.consensys.net/en/stable/Reference/APIs/PrivacyAPI/#ethsendtransaction
     final String payload = this.transactionJsonParameters.data().get();
@@ -99,6 +108,14 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
   }
 
   @Override
+  public byte[] rlpEncode(final SignatureData signatureData) {
+    final RawTransaction rawTransaction = createTransaction();
+    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    final RlpList rlpList = new RlpList(values);
+    return RlpEncoder.encode(rlpList);
+  }
+
+  @Override
   public JsonRpcRequest jsonRpcRequest(final String payload, final JsonRpcRequestId id) {
     final JsonRpcRequest request = new JsonRpcRequest(JSON_RPC_VERSION, getJsonRpcMethodName());
     request.setParams(new Object[] {payload, getGoQuorumRawTxJsonParams()});
@@ -107,15 +124,12 @@ public class GoQuorumPrivateTransaction extends PrivateTransaction {
   }
 
   @Override
-  protected RawPrivateTransaction createTransaction() {
-    return RawPrivateTransaction.createTransaction(
+  protected RawTransaction createTransaction() {
+    return RawTransaction.createTransaction(
         nonce,
         transactionJsonParameters.gasPrice().orElse(DEFAULT_GAS_PRICE),
         transactionJsonParameters.gas().orElse(DEFAULT_GAS),
         transactionJsonParameters.receiver().orElse(DEFAULT_TO),
-        lookupId,
-        transactionJsonParameters.privateFrom(),
-        privateFor,
-        Restriction.fromString(transactionJsonParameters.restriction()));
+        lookupId);
   }
 }

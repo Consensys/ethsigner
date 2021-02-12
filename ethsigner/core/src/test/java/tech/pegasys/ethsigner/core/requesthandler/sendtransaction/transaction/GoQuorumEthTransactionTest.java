@@ -58,10 +58,7 @@ public class GoQuorumEthTransactionTest {
             "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
     ethTransaction =
         GoQuorumPrivateTransaction.from(
-            new EeaSendTransactionJsonParameters(params),
-            () -> BigInteger.ZERO,
-            provider,
-            new JsonRpcRequestId(1));
+            params, () -> BigInteger.ZERO, provider, new JsonRpcRequestId(1));
   }
 
   @Test

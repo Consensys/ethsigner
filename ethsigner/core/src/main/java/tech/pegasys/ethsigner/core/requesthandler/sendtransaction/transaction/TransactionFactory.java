@@ -71,10 +71,7 @@ public class TransactionFactory {
 
     if (params.privateFor().isPresent()) {
       return GoQuorumPrivateTransaction.from(
-          new EeaSendTransactionJsonParameters(params),
-          ethNonceProvider,
-          lookupIdProvider,
-          request.getId());
+          params, ethNonceProvider, lookupIdProvider, request.getId());
     } else {
       return new EthTransaction(params, ethNonceProvider, request.getId());
     }

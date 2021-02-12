@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
@@ -31,10 +32,10 @@ import org.web3j.rlp.RlpType;
 public class EthTransaction implements Transaction {
 
   private static final String JSON_RPC_METHOD = "eth_sendRawTransaction";
-  private final EthSendTransactionJsonParameters transactionJsonParameters;
-  private final NonceProvider nonceProvider;
-  private final JsonRpcRequestId id;
-  private BigInteger nonce;
+  protected final EthSendTransactionJsonParameters transactionJsonParameters;
+  protected final NonceProvider nonceProvider;
+  protected final JsonRpcRequestId id;
+  protected BigInteger nonce;
 
   public EthTransaction(
       final EthSendTransactionJsonParameters transactionJsonParameters,
@@ -49,6 +50,12 @@ public class EthTransaction implements Transaction {
   @Override
   public void updateNonce() {
     this.nonce = nonceProvider.getNonce();
+  }
+
+  @Override
+  @NotNull
+  public String getJsonRpcMethodName() {
+    return JSON_RPC_METHOD;
   }
 
   @Override
@@ -90,7 +97,7 @@ public class EthTransaction implements Transaction {
         .toString();
   }
 
-  private RawTransaction createTransaction() {
+  protected RawTransaction createTransaction() {
     return RawTransaction.createTransaction(
         nonce,
         transactionJsonParameters.gasPrice().orElse(DEFAULT_GAS_PRICE),
