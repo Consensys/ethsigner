@@ -101,7 +101,6 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
 
   private JsonObject getGoQuorumRawTxJsonParams() {
     final JsonObject jsonObject = new JsonObject();
-    jsonObject.put("privateFrom", transactionJsonParameters.privateFrom().toString());
     jsonObject.put("privateFor", Base64String.unwrapList(privateFor));
     jsonObject.put("privacyFlag", 0);
     return jsonObject;
