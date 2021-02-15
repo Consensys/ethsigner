@@ -81,10 +81,12 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
 
     this.nonce = nonceProvider.getNonce();
 
-    // TODO data is optional - do we also accept _input_ as per
-    // https://docs.goquorum.consensys.net/en/stable/Reference/APIs/PrivacyAPI/#ethsendtransaction
-    final String payload = this.transactionJsonParameters.data().get();
-    this.lookupId = enclaveLookupIdProvider.getLookupId(payload);
+    // data must be provided for private tx
+    if (this.transactionJsonParameters.data().isEmpty()) {
+      throw new IllegalArgumentException("Transaction does not contain data");
+    }
+    this.lookupId =
+        enclaveLookupIdProvider.getLookupId(this.transactionJsonParameters.data().get());
   }
 
   @Override
@@ -101,8 +103,10 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
 
   private JsonObject getGoQuorumRawTxJsonParams() {
     final JsonObject jsonObject = new JsonObject();
+    if (this.transactionJsonParameters.privateFrom().isPresent()) {
+      jsonObject.put("privateFrom", this.transactionJsonParameters.privateFrom().get().toString());
+    }
     jsonObject.put("privateFor", Base64String.unwrapList(privateFor));
-    jsonObject.put("privacyFlag", 0);
     return jsonObject;
   }
 
