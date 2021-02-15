@@ -37,7 +37,7 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
 
   private final List<Base64String> privateFor;
   private final EnclaveLookupIdProvider enclaveLookupIdProvider;
-  private String lookupId;
+  private String lookupId = "";
 
   public static GoQuorumPrivateTransaction from(
       final EthSendTransactionJsonParameters transactionJsonParameters,

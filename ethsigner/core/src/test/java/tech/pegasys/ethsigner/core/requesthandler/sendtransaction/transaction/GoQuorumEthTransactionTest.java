@@ -28,11 +28,10 @@ import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.protocol.eea.crypto.PrivateTransactionDecoder;
-import org.web3j.protocol.eea.crypto.SignedRawPrivateTransaction;
+import org.web3j.crypto.SignedRawTransaction;
+import org.web3j.crypto.TransactionDecoder;
 import org.web3j.utils.Base64String;
 import org.web3j.utils.Numeric;
-import org.web3j.utils.Restriction;
 
 public class GoQuorumEthTransactionTest {
 
@@ -45,7 +44,7 @@ public class GoQuorumEthTransactionTest {
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
-    params.nonce("0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2");
+    params.nonce("0x07");
     params.value("0x0");
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
@@ -55,10 +54,11 @@ public class GoQuorumEthTransactionTest {
 
     EnclaveLookupIdProvider provider =
         (x) ->
-            "9alPvwI5WX9Ct/1DUdNSvCdhj0bLvw+f7NZ/1oG9IaznAspXyAlqp30YzKHcx8oe+QBrnrKPldoPzy98bA7ABg==";
+            "9aefeff5ef9cef1dfdeffccff0afefff6fef0ff9faef9feffaeff3ffeffcf8feefafefeffdefef98ba7aafef";
     ethTransaction =
         GoQuorumPrivateTransaction.from(
-            params, () -> BigInteger.ZERO, provider, new JsonRpcRequestId(1));
+            params, () -> BigInteger.valueOf(7), provider, new JsonRpcRequestId(1));
+    ethTransaction.updateNonce();
   }
 
   @Test
@@ -79,28 +79,16 @@ public class GoQuorumEthTransactionTest {
     final byte[] rlpEncodedBytes = ethTransaction.rlpEncode(signatureData);
     final String rlpString = Numeric.toHexString(rlpEncodedBytes);
 
-    final SignedRawPrivateTransaction decodedTransaction =
-        (SignedRawPrivateTransaction) PrivateTransactionDecoder.decode(rlpString);
+    final SignedRawTransaction decodedTransaction =
+        (SignedRawTransaction) TransactionDecoder.decode(rlpString);
     assertThat(decodedTransaction.getTo()).isEqualTo("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     assertThat(decodedTransaction.getGasLimit()).isEqualTo(Numeric.decodeQuantity("0x76c0"));
     assertThat(decodedTransaction.getGasPrice()).isEqualTo(Numeric.decodeQuantity("0x9184e72a000"));
-    assertThat(decodedTransaction.getNonce())
-        .isEqualTo(
-            Numeric.decodeQuantity(
-                "0xe04d296d2460cfb8472af2c5fd05b5a214109c25688d3704aed5484f9a7792f2"));
+    assertThat(decodedTransaction.getNonce()).isEqualTo(Numeric.decodeQuantity("0x07"));
     assertThat(decodedTransaction.getValue()).isEqualTo(Numeric.decodeQuantity("0x0"));
     assertThat(decodedTransaction.getData())
         .isEqualTo(
-            "d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
-
-    assertThat(decodedTransaction.getRestriction()).isEqualTo(Restriction.RESTRICTED);
-
-    final Base64String expectedDecodedPrivateFrom = params.privateFrom().get();
-    final Base64String expectedDecodedPrivateFor = params.privateFor().get().get(0);
-
-    assertThat(decodedTransaction.getPrivateFrom()).isEqualTo(expectedDecodedPrivateFrom);
-    assertThat(decodedTransaction.getPrivateFor().get().get(0))
-        .isEqualTo(expectedDecodedPrivateFor);
+            "9aefeff5ef9cef1dfdeffccff0afefff6fef0ff9faef9feffaeff3ffeffcf8feefafefeffdefef98ba7aafef");
 
     final SignatureData decodedSignatureData = decodedTransaction.getSignatureData();
     assertThat(trimLeadingZeroes(decodedSignatureData.getV())).isEqualTo(new byte[] {1});
@@ -132,7 +120,6 @@ public class GoQuorumEthTransactionTest {
     final JsonObject jsonObject = new JsonObject();
     jsonObject.put("privateFrom", privateFrom.toString());
     jsonObject.put("privateFor", Base64String.unwrapList(privateFor));
-    jsonObject.put("privacyFlag", 0);
     return jsonObject;
   }
 }
