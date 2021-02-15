@@ -77,6 +77,7 @@ public abstract class PrivateTransaction implements Transaction {
     return Transaction.jsonRpcRequest(signedTransactionHexString, id, getJsonRpcMethodName());
   }
 
+  @Override
   @NotNull
   public String getJsonRpcMethodName() {
     return JSON_RPC_METHOD;
