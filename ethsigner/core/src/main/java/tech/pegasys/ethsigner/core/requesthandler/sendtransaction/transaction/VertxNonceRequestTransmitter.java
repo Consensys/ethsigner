@@ -50,25 +50,6 @@ public class VertxNonceRequestTransmitter {
 
   private static final AtomicInteger nextId = new AtomicInteger(0);
 
-  private class ResponseCallback implements DownstreamResponseHandler {
-    private final CompletableFuture<BigInteger> result;
-
-    private ResponseCallback(final CompletableFuture<BigInteger> result) {
-      this.result = result;
-    }
-
-    @Override
-    public void handleResponse(
-        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
-      VertxNonceRequestTransmitter.this.handleResponse(body, result);
-    }
-
-    @Override
-    public void handleFailure(Throwable t) {
-      result.completeExceptionally(t);
-    }
-  }
-
   public VertxNonceRequestTransmitter(
       final MultiMap headers,
       final JsonDecoder decoder,
@@ -134,6 +115,25 @@ public class VertxNonceRequestTransmitter {
       return response.getError();
     } catch (final DecodeException e) {
       return JsonRpcError.INTERNAL_ERROR;
+    }
+  }
+
+  private class ResponseCallback implements DownstreamResponseHandler {
+    private final CompletableFuture<BigInteger> result;
+
+    private ResponseCallback(final CompletableFuture<BigInteger> result) {
+      this.result = result;
+    }
+
+    @Override
+    public void handleResponse(
+        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
+      VertxNonceRequestTransmitter.this.handleResponse(body, result);
+    }
+
+    @Override
+    public void handleFailure(Throwable t) {
+      result.completeExceptionally(t);
     }
   }
 }

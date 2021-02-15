@@ -48,25 +48,6 @@ public class VertxStoreRawRequestTransmitter {
 
   private static final AtomicInteger nextId = new AtomicInteger(0);
 
-  private class ResponseCallback implements DownstreamResponseHandler {
-    private final CompletableFuture<String> result;
-
-    private ResponseCallback(final CompletableFuture<String> result) {
-      this.result = result;
-    }
-
-    @Override
-    public void handleResponse(
-        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
-      VertxStoreRawRequestTransmitter.this.handleResponse(body, result);
-    }
-
-    @Override
-    public void handleFailure(Throwable t) {
-      result.completeExceptionally(t);
-    }
-  }
-
   public VertxStoreRawRequestTransmitter(
       final MultiMap headers,
       final JsonDecoder decoder,
@@ -133,6 +114,25 @@ public class VertxStoreRawRequestTransmitter {
       return response.getError();
     } catch (final DecodeException e) {
       return JsonRpcError.INTERNAL_ERROR;
+    }
+  }
+
+  private class ResponseCallback implements DownstreamResponseHandler {
+    private final CompletableFuture<String> result;
+
+    private ResponseCallback(final CompletableFuture<String> result) {
+      this.result = result;
+    }
+
+    @Override
+    public void handleResponse(
+        final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
+      VertxStoreRawRequestTransmitter.this.handleResponse(body, result);
+    }
+
+    @Override
+    public void handleFailure(Throwable t) {
+      result.completeExceptionally(t);
     }
   }
 }
