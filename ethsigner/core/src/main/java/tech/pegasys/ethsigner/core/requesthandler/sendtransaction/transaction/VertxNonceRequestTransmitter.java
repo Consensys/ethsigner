@@ -12,13 +12,13 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.determineErrorCode;
+
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
-import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcSuccessResponse;
 import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.RequestTransmitter;
@@ -104,17 +104,7 @@ public class VertxNonceRequestTransmitter {
       }
       result.completeExceptionally(new RuntimeException("Web3 did not provide a string response."));
     } catch (final DecodeException e) {
-      result.completeExceptionally(new JsonRpcException(determineErrorCode(body)));
-    }
-  }
-
-  private JsonRpcError determineErrorCode(final String body) {
-    try {
-      final JsonRpcErrorResponse response =
-          decoder.decodeValue(Buffer.buffer(body), JsonRpcErrorResponse.class);
-      return response.getError();
-    } catch (final DecodeException e) {
-      return JsonRpcError.INTERNAL_ERROR;
+      result.completeExceptionally(new JsonRpcException(determineErrorCode(body, decoder)));
     }
   }
 
