@@ -107,6 +107,7 @@ public class VertxStoreRawRequestTransmitter {
     }
   }
 
+  // TODO-storeraw this is duplicated in VertxNonceRequestTransmitter
   private JsonRpcError determineErrorCode(final String body) {
     try {
       final JsonRpcErrorResponse response =
