@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.web3j.utils.Bytes.trimLeadingZeroes;
 
-import tech.pegasys.ethsigner.core.jsonrpc.EeaSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
@@ -49,8 +48,8 @@ public class GoQuorumEthTransactionTest {
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
     // These extra attributes make it a GoQuorum private transaction via eth_sendTransaction
-    params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
     params.privateFor(new String[] {"GV8m0VZAccYGAAYMBuYQtKEj0XtpXeaw2APcoBmtA2w="});
+    params.privateFrom("ZlapEsl9qDLPy/e88+/6yvCUEVIvH83y0N4A6wHuKXI=");
 
     EnclaveLookupIdProvider provider =
         (x) ->
@@ -59,17 +58,6 @@ public class GoQuorumEthTransactionTest {
         GoQuorumPrivateTransaction.from(
             params, () -> BigInteger.valueOf(7), provider, new JsonRpcRequestId(1));
     ethTransaction.updateNonce();
-  }
-
-  @Test
-  public void eeaSendTxParamsFromEthSendTxParams() {
-    EeaSendTransactionJsonParameters eeaParams = new EeaSendTransactionJsonParameters(params);
-    assertThat(eeaParams.privateFrom()).isEqualTo(params.privateFrom().get());
-    assertThat(eeaParams.nonce()).isEqualTo(params.nonce());
-    assertThat(eeaParams.restriction()).isEqualTo("RESTRICTED");
-    assertThat(eeaParams.privacyGroupId()).isEmpty();
-    assertThat(eeaParams.privateFor()).isEqualTo(params.privateFor());
-    assertThat(eeaParams.receiver()).isEqualTo(params.receiver());
   }
 
   @Test

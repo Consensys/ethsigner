@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import org.web3j.utils.Base64String;
-import org.web3j.utils.Restriction;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EeaSendTransactionJsonParameters {
@@ -145,64 +144,6 @@ public class EeaSendTransactionJsonParameters {
 
   public static EeaSendTransactionJsonParameters from(final JsonRpcRequest request) {
     return fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
-  }
-
-  public EeaSendTransactionJsonParameters(final EthSendTransactionJsonParameters ethSendParams) {
-    this(
-        // TODO-storeraw privateFrom is optional - but this "" doesn't work. maybe need to refactor
-        // this class or make a new GoQuorumSendTransactionJsonParameters
-        ethSendParams.sender(),
-        ethSendParams.privateFrom().isEmpty()
-            ? ""
-            : String.valueOf(ethSendParams.privateFrom().get()),
-        Restriction.RESTRICTED.name());
-    if (ethSendParams.privateFor().isEmpty()) {
-      throw new IllegalArgumentException(
-          "privateFor must be specified for private transactions sent via eth_sendTransaction");
-    }
-    ethSendParams
-        .privateFor()
-        .ifPresent(
-            d -> {
-              this.privateFor = d;
-            });
-
-    ethSendParams
-        .data()
-        .ifPresent(
-            d -> {
-              this.data = d;
-            });
-    ethSendParams
-        .gas()
-        .ifPresent(
-            d -> {
-              this.gas = d;
-            });
-    ethSendParams
-        .gasPrice()
-        .ifPresent(
-            d -> {
-              this.gasPrice = d;
-            });
-    ethSendParams
-        .value()
-        .ifPresent(
-            d -> {
-              this.value = d;
-            });
-    ethSendParams
-        .nonce()
-        .ifPresent(
-            d -> {
-              this.nonce = d;
-            });
-    ethSendParams
-        .receiver()
-        .ifPresent(
-            d -> {
-              this.receiver = d;
-            });
   }
 
   private void validateValue(final String value) {
