@@ -71,10 +71,8 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
 
   private Optional<JsonRpcRequest> createSignedTransactionPayload() {
 
-    if (!transaction.isNonceUserSpecified()) {
-      if (!populateNonce()) {
-        return Optional.empty();
-      }
+    if (!populateNonce()) {
+      return Optional.empty();
     }
 
     final String signedTransactionHexString;

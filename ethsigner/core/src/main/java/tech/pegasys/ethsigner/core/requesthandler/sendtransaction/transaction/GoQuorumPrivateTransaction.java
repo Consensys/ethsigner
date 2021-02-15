@@ -77,9 +77,11 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
   @Override
   public void updateNonce() {
 
-    // TODO refactor or at least rename this method - it now does TWO things
+    // TODO rename this method - it now does TWO things
 
-    this.nonce = nonceProvider.getNonce();
+    if (!this.isNonceUserSpecified()) {
+      this.nonce = nonceProvider.getNonce();
+    }
 
     // data must be provided for private tx
     if (this.transactionJsonParameters.data().isEmpty()) {
