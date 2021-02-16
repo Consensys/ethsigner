@@ -1,9 +1,15 @@
 # Changelog
 
+## 21.1.0
+
+### Features Added
+- Added support for sending GoQuorum private transactions via "eth_sendTransaction" JSON-RPC
+- Improve error message if HTTP server fails to start
+
 ## 20.10.0
 
 ### Features Added
-- Added "eth_signTransaction" JSON RPC
+- Added "eth_signTransaction" JSON-RPC
 - Docker namespace updated to reflect "consensys/quorum-ethsigner"
 - Strip ACCESS_CONTROL_ALLOW_ORIGIN header from responses received from the web3provider
 - Added a Prometheus metrics endpoint, reporting basic application metrics
