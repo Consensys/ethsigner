@@ -120,9 +120,10 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
   }
 
   @Override
-  public JsonRpcRequest jsonRpcRequest(final String payload, final JsonRpcRequestId id) {
+  public JsonRpcRequest jsonRpcRequest(
+      final String signedTransactionHexString, final JsonRpcRequestId id) {
     final JsonRpcRequest request = new JsonRpcRequest(JSON_RPC_VERSION, getJsonRpcMethodName());
-    request.setParams(new Object[] {payload, getGoQuorumRawTxJsonParams()});
+    request.setParams(new Object[] {signedTransactionHexString, getGoQuorumRawTxJsonParams()});
     request.setId(id);
     return request;
   }
