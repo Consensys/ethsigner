@@ -61,7 +61,6 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
     }
 
     try {
-      // TODO-storeraw should sendTransaction be called something different?
       sendTransaction(Json.encode(request.get()));
     } catch (final IllegalArgumentException | EncodeException e) {
       LOG.debug("JSON Serialization failed for: {}", request, e);
@@ -93,7 +92,7 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
 
   private boolean populateNonce() {
     try {
-      transaction.updateNonce();
+      transaction.updateFieldsIfRequired();
       return true;
     } catch (final RuntimeException e) {
       // It is currently recognised that the underlying nonce provider will wrap a transmission

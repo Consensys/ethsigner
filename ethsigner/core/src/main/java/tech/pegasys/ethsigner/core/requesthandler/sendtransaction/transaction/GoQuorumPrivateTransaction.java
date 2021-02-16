@@ -75,20 +75,19 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
   }
 
   @Override
-  public void updateNonce() {
-
-    // TODO rename this method - it now does TWO things
+  public void updateFieldsIfRequired() {
 
     if (!this.isNonceUserSpecified()) {
       this.nonce = nonceProvider.getNonce();
     }
 
-    // data must be provided for private tx
-    if (this.transactionJsonParameters.data().isEmpty()) {
-      throw new IllegalArgumentException("Transaction does not contain data");
-    }
-    this.lookupId =
-        enclaveLookupIdProvider.getLookupId(this.transactionJsonParameters.data().get());
+    final String data =
+        this.transactionJsonParameters
+            .data()
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException("GoQuorum private transaction must contain data"));
+    this.lookupId = enclaveLookupIdProvider.getLookupId(data);
   }
 
   @Override

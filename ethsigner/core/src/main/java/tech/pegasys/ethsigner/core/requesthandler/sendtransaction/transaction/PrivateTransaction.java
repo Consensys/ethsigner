@@ -48,7 +48,7 @@ public abstract class PrivateTransaction implements Transaction {
   }
 
   @Override
-  public void updateNonce() {
+  public void updateFieldsIfRequired() {
     if (!this.isNonceUserSpecified()) {
       this.nonce = nonceProvider.getNonce();
     }

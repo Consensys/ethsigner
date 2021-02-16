@@ -94,7 +94,7 @@ public class VertxStoreRawRequestTransmitter {
       final Object suppliedLookupId = response.getResult();
       if (suppliedLookupId instanceof String) {
         try {
-          result.complete(suppliedLookupId.toString());
+          result.complete((String) suppliedLookupId);
           return;
         } catch (final MessageDecodingException ex) {
           result.completeExceptionally(ex);

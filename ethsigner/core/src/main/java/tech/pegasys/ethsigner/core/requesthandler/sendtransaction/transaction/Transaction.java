@@ -31,7 +31,7 @@ public interface Transaction {
   String DEFAULT_DATA = "";
   String DEFAULT_TO = "";
 
-  void updateNonce();
+  void updateFieldsIfRequired();
 
   byte[] rlpEncode(SignatureData signatureData);
 
