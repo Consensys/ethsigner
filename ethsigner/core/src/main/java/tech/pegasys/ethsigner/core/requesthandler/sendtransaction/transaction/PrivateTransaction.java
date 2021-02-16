@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.protocol.eea.crypto.PrivateTransactionEncoder;
 import org.web3j.protocol.eea.crypto.RawPrivateTransaction;
@@ -47,8 +48,10 @@ public abstract class PrivateTransaction implements Transaction {
   }
 
   @Override
-  public void updateNonce() {
-    this.nonce = nonceProvider.getNonce();
+  public void updateFieldsIfRequired() {
+    if (!this.isNonceUserSpecified()) {
+      this.nonce = nonceProvider.getNonce();
+    }
   }
 
   @Override
@@ -73,7 +76,13 @@ public abstract class PrivateTransaction implements Transaction {
   @Override
   public JsonRpcRequest jsonRpcRequest(
       final String signedTransactionHexString, final JsonRpcRequestId id) {
-    return Transaction.jsonRpcRequest(signedTransactionHexString, id, JSON_RPC_METHOD);
+    return Transaction.jsonRpcRequest(signedTransactionHexString, id, getJsonRpcMethodName());
+  }
+
+  @Override
+  @NotNull
+  public String getJsonRpcMethodName() {
+    return JSON_RPC_METHOD;
   }
 
   @Override

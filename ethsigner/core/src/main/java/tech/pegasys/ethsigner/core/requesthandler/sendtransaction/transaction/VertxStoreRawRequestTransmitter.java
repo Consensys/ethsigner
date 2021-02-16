@@ -24,7 +24,6 @@ import tech.pegasys.ethsigner.core.requesthandler.DownstreamResponseHandler;
 import tech.pegasys.ethsigner.core.requesthandler.RequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 
-import java.math.BigInteger;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -38,9 +37,8 @@ import io.vertx.core.json.Json;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.exceptions.MessageDecodingException;
-import org.web3j.utils.Numeric;
 
-public class VertxNonceRequestTransmitter {
+public class VertxStoreRawRequestTransmitter {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -50,7 +48,7 @@ public class VertxNonceRequestTransmitter {
 
   private static final AtomicInteger nextId = new AtomicInteger(0);
 
-  public VertxNonceRequestTransmitter(
+  public VertxStoreRawRequestTransmitter(
       final MultiMap headers,
       final JsonDecoder decoder,
       final VertxRequestTransmitterFactory transmitterFactory) {
@@ -59,22 +57,23 @@ public class VertxNonceRequestTransmitter {
     this.decoder = decoder;
   }
 
-  public BigInteger requestNonce(final JsonRpcRequest request) {
-    final CompletableFuture<BigInteger> result = getNonceFromWeb3Provider(request, headers);
+  public String storeRaw(final JsonRpcRequest request) {
+    final CompletableFuture<String> result = storePayloadAndGetLookupId(request, headers);
 
     try {
-      final BigInteger nonce = result.get();
-      LOG.debug("Supplying nonce of {}", nonce.toString());
-      return nonce;
+      final String lookupId = result.get();
+      LOG.debug("storeRaw response of {}", lookupId);
+      return lookupId;
     } catch (final InterruptedException | ExecutionException e) {
-      throw new RuntimeException("Failed to retrieve nonce:" + e.getMessage(), e.getCause());
+      throw new RuntimeException(
+          "Failed to retrieve storeRaw result (enclave lookup id):" + e.getMessage(), e.getCause());
     }
   }
 
-  private CompletableFuture<BigInteger> getNonceFromWeb3Provider(
+  private CompletableFuture<String> storePayloadAndGetLookupId(
       final JsonRpcRequest requestBody, final MultiMap headers) {
 
-    final CompletableFuture<BigInteger> result = new CompletableFuture<>();
+    final CompletableFuture<String> result = new CompletableFuture<>();
 
     final RequestTransmitter transmitter = transmitterFactory.create(new ResponseCallback(result));
 
@@ -87,15 +86,15 @@ public class VertxNonceRequestTransmitter {
     return result;
   }
 
-  private void handleResponse(final String body, final CompletableFuture<BigInteger> result) {
+  private void handleResponse(final String body, final CompletableFuture<String> result) {
     try {
 
       final JsonRpcSuccessResponse response =
           decoder.decodeValue(Buffer.buffer(body), JsonRpcSuccessResponse.class);
-      final Object suppliedNonce = response.getResult();
-      if (suppliedNonce instanceof String) {
+      final Object suppliedLookupId = response.getResult();
+      if (suppliedLookupId instanceof String) {
         try {
-          result.complete(Numeric.decodeQuantity((String) suppliedNonce));
+          result.complete((String) suppliedLookupId);
           return;
         } catch (final MessageDecodingException ex) {
           result.completeExceptionally(ex);
@@ -109,16 +108,16 @@ public class VertxNonceRequestTransmitter {
   }
 
   private class ResponseCallback implements DownstreamResponseHandler {
-    private final CompletableFuture<BigInteger> result;
+    private final CompletableFuture<String> result;
 
-    private ResponseCallback(final CompletableFuture<BigInteger> result) {
+    private ResponseCallback(final CompletableFuture<String> result) {
       this.result = result;
     }
 
     @Override
     public void handleResponse(
         final Iterable<Entry<String, String>> headers, final int statusCode, String body) {
-      VertxNonceRequestTransmitter.this.handleResponse(body, result);
+      VertxStoreRawRequestTransmitter.this.handleResponse(body, result);
     }
 
     @Override

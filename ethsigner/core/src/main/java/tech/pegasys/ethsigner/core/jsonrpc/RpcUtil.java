@@ -14,9 +14,14 @@ package tech.pegasys.ethsigner.core.jsonrpc;
 
 import static org.web3j.utils.Numeric.decodeQuantity;
 
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+
 import java.math.BigInteger;
 import java.util.List;
 
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 
 public class RpcUtil {
@@ -53,5 +58,15 @@ public class RpcUtil {
 
   static BigInteger decodeBigInteger(final String value) {
     return value == null ? null : decodeQuantity(value);
+  }
+
+  public static JsonRpcError determineErrorCode(final String body, final JsonDecoder decoder) {
+    try {
+      final JsonRpcErrorResponse response =
+          decoder.decodeValue(Buffer.buffer(body), JsonRpcErrorResponse.class);
+      return response.getError();
+    } catch (final DecodeException e) {
+      return JsonRpcError.INTERNAL_ERROR;
+    }
   }
 }
