@@ -1,6 +1,6 @@
 # Changelog
 
-## 21.2.0
+## 21.1.0
 
 ### Features Added
 - Added support for sending GoQuorum private transactions via "eth_sendTransaction" JSON-RPC
