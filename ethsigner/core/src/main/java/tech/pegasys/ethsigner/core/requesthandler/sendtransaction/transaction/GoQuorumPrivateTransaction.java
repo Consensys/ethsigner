@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
-import static tech.pegasys.ethsigner.core.signing.GoQuorumPrivateTransactionSerializer.getGoQuorumVValue;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -120,11 +119,7 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
   public byte[] rlpEncode(final SignatureData signatureData) {
     final RawTransaction rawTransaction = createTransaction();
     LOG.info("RLP encoding raw tx ");
-    final byte[] v = signatureData.getV();
-    final SignatureData fixedSignatureData =
-        new SignatureData(getGoQuorumVValue(v), signatureData.getR(), signatureData.getS());
-    LOG.info("V value " + fixedSignatureData.getV()[0]);
-    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, fixedSignatureData);
+    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
   }

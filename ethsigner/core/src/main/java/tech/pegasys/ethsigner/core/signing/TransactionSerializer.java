@@ -16,8 +16,6 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
@@ -25,10 +23,8 @@ import org.web3j.utils.Numeric;
 
 public class TransactionSerializer {
 
-  private static final Logger LOG = LogManager.getLogger();
-
   protected final Signer signer;
-  private final long chainId;
+  protected final long chainId;
 
   public TransactionSerializer(final Signer signer, final long chainId) {
     this.signer = signer;
@@ -48,8 +44,6 @@ public class TransactionSerializer {
 
     final SignatureData eip155Signature =
         TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-    LOG.info("Made an EIP1551 signature with V " + eip155Signature.getV());
-
     final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serializedBytes);
   }
