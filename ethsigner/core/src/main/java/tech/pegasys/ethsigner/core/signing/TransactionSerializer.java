@@ -44,7 +44,7 @@ public class TransactionSerializer {
 
     final SignatureData eip155Signature =
         TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-    
+
     final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serializedBytes);
   }
