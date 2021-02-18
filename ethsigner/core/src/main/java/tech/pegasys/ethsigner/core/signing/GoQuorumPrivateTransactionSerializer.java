@@ -18,43 +18,43 @@ import tech.pegasys.signers.secp256k1.api.Signer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
-public class TransactionSerializer {
+public class GoQuorumPrivateTransactionSerializer extends TransactionSerializer {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  protected final Signer signer;
-  private final long chainId;
-
-  public TransactionSerializer(final Signer signer, final long chainId) {
-    this.signer = signer;
-    this.chainId = chainId;
+  public GoQuorumPrivateTransactionSerializer(Signer signer, long chainId) {
+    super(signer, chainId);
   }
 
+  @Override
   public String serialize(final Transaction transaction) {
-    final byte[] bytesToSign = transaction.rlpEncode(chainId);
+    LOG.info("ignoring the chainId ");
+    LOG.info("tx.sender " + transaction.sender());
 
-    final Signature signature = signer.sign(bytesToSign);
+    // TODO does signing an empty byte [] give the right thing?
+    final Signature signature = signer.sign(new byte[] {});
+
+    LOG.info("signing bytes " + " with signature V " + signature.getV());
+
+    byte[] newV = (getGoQuorumVValue(signature.getV().toByteArray()));
+
+    LOG.info("signing bytes " + " with signature R " + signature.getR());
+    LOG.info("signing bytes " + " with signature S " + signature.getS());
+    LOG.info("signing bytes " + " with NEW signature V " + newV);
 
     final SignatureData web3jSignature =
-        new SignatureData(
-            signature.getV().toByteArray(),
-            signature.getR().toByteArray(),
-            signature.getS().toByteArray());
+        new SignatureData(newV, signature.getR().toByteArray(), signature.getS().toByteArray());
 
-    final SignatureData eip155Signature =
-        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-    LOG.info("Made an EIP1551 signature with V " + eip155Signature.getV());
-
-    final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
+    final byte[] serializedBytes = transaction.rlpEncode(web3jSignature);
+    LOG.info("made serialized bytes " + Numeric.toHexString(serializedBytes));
     return Numeric.toHexString(serializedBytes);
   }
 
-  public String getAddress() {
-    return Keys.getAddress(signer.getPublicKey().toString());
+  public static byte[] getGoQuorumVValue(byte[] v) {
+    LOG.info("using " + v + " to get GoQuorum V ");
+    return ((v[v.length - 1] & 1) == 1) ? new byte[] {38} : new byte[] {37};
   }
 }

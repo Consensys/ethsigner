@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
+import static tech.pegasys.ethsigner.core.signing.GoQuorumPrivateTransactionSerializer.getGoQuorumVValue;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -24,6 +25,8 @@ import java.util.List;
 
 import com.google.common.base.MoreObjects;
 import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.Sign.SignatureData;
@@ -34,6 +37,8 @@ import org.web3j.rlp.RlpType;
 import org.web3j.utils.Base64String;
 
 public class GoQuorumPrivateTransaction extends EthTransaction {
+
+  private static final Logger LOG = LogManager.getLogger();
 
   private final List<Base64String> privateFor;
   private final EnclaveLookupIdProvider enclaveLookupIdProvider;
@@ -114,7 +119,12 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
   @Override
   public byte[] rlpEncode(final SignatureData signatureData) {
     final RawTransaction rawTransaction = createTransaction();
-    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
+    LOG.info("RLP encoding raw tx ");
+    final byte[] v = signatureData.getV();
+    final SignatureData fixedSignatureData =
+        new SignatureData(getGoQuorumVValue(v), signatureData.getR(), signatureData.getS());
+    LOG.info("V value " + fixedSignatureData.getV()[0]);
+    final List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, fixedSignatureData);
     final RlpList rlpList = new RlpList(values);
     return RlpEncoder.encode(rlpList);
   }
