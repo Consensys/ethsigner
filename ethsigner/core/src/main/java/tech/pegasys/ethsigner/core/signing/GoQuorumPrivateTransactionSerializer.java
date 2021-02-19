@@ -40,6 +40,8 @@ public class GoQuorumPrivateTransactionSerializer extends TransactionSerializer 
   }
 
   public static byte[] getGoQuorumVValue(byte[] v) {
+    // The current v has a value of 27 or 28,
+    // and we need to change that to 37 or 38 for GoQuorum private tx
     if (v[v.length - 1] == (byte) 28) {
       return new byte[] {38};
     } else {
