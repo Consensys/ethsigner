@@ -16,40 +16,36 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
-import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
-public class TransactionSerializer {
+public class GoQuorumPrivateTransactionSerializer extends TransactionSerializer {
 
-  protected final Signer signer;
-  protected final long chainId;
-
-  public TransactionSerializer(final Signer signer, final long chainId) {
-    this.signer = signer;
-    this.chainId = chainId;
+  public GoQuorumPrivateTransactionSerializer(Signer signer, long chainId) {
+    super(signer, chainId);
   }
 
+  @Override
   public String serialize(final Transaction transaction) {
-    final byte[] bytesToSign = transaction.rlpEncode(chainId);
-
+    final byte[] bytesToSign = transaction.rlpEncode(null);
     final Signature signature = signer.sign(bytesToSign);
 
+    byte[] newV = (getGoQuorumVValue(signature.getV().toByteArray()));
+
     final SignatureData web3jSignature =
-        new SignatureData(
-            signature.getV().toByteArray(),
-            signature.getR().toByteArray(),
-            signature.getS().toByteArray());
+        new SignatureData(newV, signature.getR().toByteArray(), signature.getS().toByteArray());
 
-    final SignatureData eip155Signature =
-        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-
-    final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
+    final byte[] serializedBytes = transaction.rlpEncode(web3jSignature);
     return Numeric.toHexString(serializedBytes);
   }
 
-  public String getAddress() {
-    return Keys.getAddress(signer.getPublicKey().toString());
+  public static byte[] getGoQuorumVValue(byte[] v) {
+    // The current v has a value of 27 or 28,
+    // and we need to change that to 37 or 38 for GoQuorum private tx
+    if (v[v.length - 1] == (byte) 28) {
+      return new byte[] {38};
+    } else {
+      return new byte[] {37};
+    }
   }
 }
