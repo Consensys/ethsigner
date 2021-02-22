@@ -228,6 +228,7 @@ workflows:
               only:
                 - master
                 - /^release-.*/
+                - pull/353
           requires:
             - build
             - acceptanceTests
