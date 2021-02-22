@@ -35,24 +35,6 @@ if (!JavaVersion.current().java11Compatible) {
   "  Detected version ${JavaVersion.current()}")
 }
 
-def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
-def bintrayPackage = bintray.pkg {
-  repo = 'pegasys-repo'
-  name = repositoryName
-  userOrg = 'consensys'
-  licenses = ['Apache-2.0']
-  websiteUrl = 'https://github.com/PegaSysEng/' + repositoryName
-  issueTrackerUrl = 'https://github.com/PegaSysEng/' + repositoryName + '/issues'
-  vcsUrl = 'https://github.com/PegaSysEng/' + repositoryName + '.git'
-
-  version {
-    name = project.version
-    released = new Date()
-  }
-}
-
-
 group = 'tech.pegasys.' + repositoryName
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
@@ -119,6 +101,7 @@ allprojects {
   repositories {
     jcenter()
     mavenCentral()
+    //TODO: Update the cloudsmith maven repo once created - for internal libraries such as Signers
     maven { url "https://consensys.bintray.com/pegasys-repo" }
   }
 
