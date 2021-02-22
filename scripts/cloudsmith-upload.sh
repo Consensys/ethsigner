@@ -19,7 +19,6 @@ fi
 
 if [ -z ${CLOUDSMITH_USER+x} ]; then echo "CLOUDSMITH_USER is unset"; else echo "CLOUDSMITH_USER is set to '$CLOUDSMITH_USER'"; fi
 
-exit 0
 # cloudsmith cli setup
 ENV_DIR=./build/tmp/cloudsmith-env
 if [[ -d ${ENV_DIR} ]] ; then
