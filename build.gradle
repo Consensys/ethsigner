@@ -17,7 +17,6 @@ import java.text.SimpleDateFormat
 
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.27.1'
-  id 'com.jfrog.bintray' version '1.8.4'
   id 'com.github.ben-manes.versions' version '0.27.0'
   id 'com.github.hierynomus.license' version '0.15.0'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
@@ -249,7 +248,6 @@ task deploy() {}
 subprojects {
 
   if (file('src/main/java').directory) {
-    apply plugin: 'com.jfrog.bintray'
     apply plugin: 'maven-publish'
 
     publishing {
@@ -282,18 +280,6 @@ subprojects {
           }
         }
       }
-    }
-
-    bintray {
-      user = bintrayUser
-      key = bintrayKey
-
-      publications = ['mavenJava']
-      override = version.endsWith('SNAPSHOT')
-
-      publish = true
-
-      pkg = bintrayPackage
     }
   }
 
@@ -639,24 +625,17 @@ release {
   }
 }
 
-apply plugin: 'com.jfrog.bintray'
-
-bintray {
-  user = bintrayUser
-  key = bintrayKey
-
-  filesSpec {
-    from distTar.destinationDirectory
-    from distZip.destinationDirectory
-    into '.'
+task cloudsmithUpload {
+  dependsOn([
+          distTar,
+          distZip,
+  ])
+  doLast {
+    exec {
+      executable project.file("scripts/cloudsmith-upload.sh")
+      args rootProject.version, "${buildDir}/distributions"
+    }
   }
-
-  publish = true
-  override = version.endsWith('SNAPSHOT')
-
-  pkg = bintrayPackage
 }
 
-afterReleaseBuild.dependsOn bintrayUpload
-bintrayUpload.mustRunAfter(distTar)
-bintrayUpload.mustRunAfter(distZip)
+afterReleaseBuild.dependsOn cloudsmithUpload

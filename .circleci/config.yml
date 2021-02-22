@@ -171,7 +171,7 @@ jobs:
       - run:
           name: Publish
           command: |
-            ./gradlew --no-daemon --parallel bintrayUpload
+            ./gradlew --no-daemon --parallel cloudSmithUpload
       - notify
       
   publishDocker:
