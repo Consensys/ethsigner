@@ -610,8 +610,8 @@ release {
 
 task cloudsmithUpload {
   dependsOn([
-          distTar,
-          distZip,
+    distTar,
+    distZip,
   ])
   doLast {
     exec {
