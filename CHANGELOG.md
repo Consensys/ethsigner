@@ -1,5 +1,11 @@
 # Changelog
 
+## 21.2.0
+
+### Features Added
+- Publish artifacts to [cloudsmith](https://cloudsmith.io/~consensys/repos/ethsigner).
+
+
 ## 21.1.0
 
 ### Features Added
