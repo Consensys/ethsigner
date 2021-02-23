@@ -1,14 +1,9 @@
 # Changelog
 
-## 21.2.0
-
-### Features Added
-- Publish artifacts to [cloudsmith](https://cloudsmith.io/~consensys/repos/ethsigner).
-
-
 ## 21.1.0
 
 ### Features Added
+- Publish artifacts to [cloudsmith](https://cloudsmith.io/~consensys/repos/ethsigner).
 - Added support for sending GoQuorum private transactions via "eth_sendTransaction" JSON-RPC
 - Improve error message if HTTP server fails to start
 
