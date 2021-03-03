@@ -101,7 +101,7 @@ allprojects {
   repositories {
     jcenter()
     mavenCentral()
-    //TODO: Update the cloudsmith maven repo once created - for internal libraries such as Signers
+    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
     maven { url "https://consensys.bintray.com/pegasys-repo" }
   }
 
