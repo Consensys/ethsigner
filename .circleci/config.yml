@@ -174,9 +174,6 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run:
-          name: "Which cloudsmith user is being used?"
-          command: echo $CLOUDSMITH_USER
-      - run:
           name: Publish
           command: |
             ./gradlew --no-daemon --parallel cloudSmithUpload
@@ -241,7 +238,7 @@ workflows:
             - acceptanceTests
           context:
             - dockerhub-quorumengineering-ro   
-            - quorum-gradle                 
+            - cloudsmith-protocols
       - publishDocker:
           filters:
             branches:
