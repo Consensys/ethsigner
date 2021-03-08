@@ -176,7 +176,7 @@ jobs:
       - run:
           name: Publish
           command: |
-            ./gradlew --no-daemon --parallel cloudSmithUpload
+            ./gradlew --no-daemon --parallel cloudSmithUpload publish
       - notify
       
   publishDocker:
