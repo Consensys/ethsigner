@@ -35,6 +35,9 @@ if (!JavaVersion.current().java11Compatible) {
   "  Detected version ${JavaVersion.current()}")
 }
 
+def cloudsmithUser = project.hasProperty('cloudsmithUser') ? project.property('cloudsmithUser') : System.getenv('CLOUDSMITH_USER')
+def cloudsmithKey = project.hasProperty('cloudsmithApiKey') ? project.property('cloudsmithApiKey') : System.getenv('CLOUDSMITH_API_KEY')
+
 group = 'tech.pegasys.' + repositoryName
 
 defaultTasks 'build', 'checkLicenses', 'javadoc'
@@ -101,8 +104,7 @@ allprojects {
   repositories {
     jcenter()
     mavenCentral()
-    //TODO: Update the cloudsmith maven repo once created - for internal libraries such as Signers
-    maven { url "https://consensys.bintray.com/pegasys-repo" }
+    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
   }
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
@@ -234,8 +236,19 @@ subprojects {
     apply plugin: 'maven-publish'
 
     publishing {
+      repositories {
+        maven {
+          name = "cloudsmith"
+          url = "https://api-g.cloudsmith.io/maven/consensys/maven/"
+          credentials {
+            username = cloudsmithUser
+            password = cloudsmithKey
+          }
+        }
+      }
       publications {
         mavenJava(MavenPublication) {
+          artifactId calculateJarName(project)
           groupId String.format("tech.pegasys.%s.internal", repositoryName)
           version "${project.version}"
           from components.java
@@ -247,7 +260,7 @@ subprojects {
           }
           pom {
             name = projectName + " -  ${project.name}"
-            url = 'http://github.com/PegaSysEng/' + repositoryName
+            url = 'http://github.com/ConsenSys/' + repositoryName
             licenses {
               license {
                 name = 'The Apache License, Version 2.0'
@@ -255,10 +268,10 @@ subprojects {
               }
             }
             scm {
-              def hostPath = 'github.com/PegasysEng/' + repositoryName + '.git'
+              def hostPath = 'github.com/ConsenSys/' + repositoryName + '.git'
               connection = 'scm:git:git://' + hostPath
               developerConnection = 'scm:git:ssh://' + hostPath
-              url = 'https://github.com/PegaSysEng/' + repositoryName
+              url = 'https://github.com/ConsenSys/' + repositoryName
             }
           }
         }
@@ -622,3 +635,16 @@ task cloudsmithUpload {
 }
 
 afterReleaseBuild.dependsOn cloudsmithUpload
+
+def calculateJarName(Project project) {
+  def jarName = project.name
+  def parent = project.parent
+
+  while (parent != null) {
+    if (parent != rootProject) {
+      jarName = parent.name + '-' + jarName
+    }
+    parent = parent.parent
+  }
+  return jarName
+}

@@ -17,7 +17,7 @@ if [[ $VERSION == *"SNAPSHOT"* ]]; then
   REPUBLISH="--republish"
 fi
 
-if [ -z ${CLOUDSMITH_USER+x} ]; then echo "CLOUDSMITH_USER is unset"; else echo "CLOUDSMITH_USER is set to '$CLOUDSMITH_USER'"; fi
+if [ -z ${CLOUDSMITH_USER+x} ]; then echo "CLOUDSMITH_USER is unset."; else echo "CLOUDSMITH_USER is set."; fi
 
 # cloudsmith cli setup
 ENV_DIR=./build/tmp/cloudsmith-env
