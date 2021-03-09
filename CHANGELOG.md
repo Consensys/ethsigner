@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming Release
+## 21.3.0
 
 ### Features Added
 - Upgraded besu-metrics library
