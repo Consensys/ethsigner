@@ -1,5 +1,11 @@
 # Changelog
 
+## Upcoming Release
+
+### Features Added
+- Upgraded besu-metrics library
+- Publish ethsigner module jars to cloudsmith maven repo
+
 ## 21.1.0
 
 ### Features Added
