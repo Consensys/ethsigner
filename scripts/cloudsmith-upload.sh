@@ -13,7 +13,7 @@ TAR_DIST="${DIST}/${DIST_IDENTIFIER}-${VERSION}.tar.gz"
 TAR_NAME="${DIST_IDENTIFIER}.tar.gz"
 
 REPUBLISH=""
-if [[ $VERSION == *"SNAPSHOT"* ]]; then
+if [[ $VERSION == *"develop"* ]]; then
   REPUBLISH="--republish"
 fi
 
