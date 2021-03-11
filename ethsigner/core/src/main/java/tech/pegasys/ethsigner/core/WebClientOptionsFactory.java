@@ -31,7 +31,8 @@ class WebClientOptionsFactory {
     final WebClientOptions clientOptions =
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
-            .setDefaultHost(config.getDownstreamHttpHost());
+            .setDefaultHost(config.getDownstreamHttpHost())
+            .setTryUseCompression(true);
 
     applyTlsOptions(clientOptions, config);
     return clientOptions;
