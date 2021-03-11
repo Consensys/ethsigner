@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 
@@ -27,16 +26,10 @@ public class Eea {
     this.requestFactory = requestFactory;
   }
 
-  public String sendTransaction(final PrivateTransaction transaction) throws IOException {
-    final EthSendTransaction response =
-        requestFactory
-            .createRequest(
-                "eea_sendTransaction", singletonList(transaction), EthSendTransaction.class)
-            .send();
-
-    assertThat(response.getTransactionHash()).isNotEmpty();
-    assertThat(response.getError()).isNull();
-
-    return response.getTransactionHash();
+  public EthSendTransaction sendTransaction(final PrivateTransaction transaction)
+      throws IOException {
+    return requestFactory
+        .createRequest("eea_sendTransaction", singletonList(transaction), EthSendTransaction.class)
+        .send();
   }
 }

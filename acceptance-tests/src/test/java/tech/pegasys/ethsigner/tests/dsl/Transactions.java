@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
@@ -44,14 +43,11 @@ public class Transactions {
 
   public SignerResponse<JsonRpcErrorResponse> submitExceptional(final Transaction transaction) {
     try {
-      failOnIOException(() -> eth.sendTransaction(transaction));
-      fail("Expecting exceptional response ");
+      return failOnIOException(() -> eth.sendTransactionExpectsError(transaction));
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
       return SignerResponse.fromError(e);
     }
-
-    return null;
   }
 
   public void awaitBlockContaining(final String hash) {

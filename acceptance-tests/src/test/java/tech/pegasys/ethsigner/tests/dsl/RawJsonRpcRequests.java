@@ -54,7 +54,11 @@ public class RawJsonRpcRequests {
     final Request<?, ArbitraryResponseType> request = requestFactory.createRequest(method);
 
     try {
-      failOnIOException(request::send);
+      final SignerResponse<JsonRpcErrorResponse> response =
+          SignerResponse.fromWeb3JErrorResponse(failOnIOException(request::send));
+      if (response != null) {
+        return response;
+      }
       fail("Expecting exceptional response ");
       return null;
     } catch (final ClientConnectionException e) {
