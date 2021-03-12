@@ -70,7 +70,9 @@ public final class EthSigner {
             .setPort(config.getHttpListenPort())
             .setHost(config.getHttpListenHost())
             .setReuseAddress(true)
-            .setReusePort(true);
+            .setReusePort(true)
+            .setHandle100ContinueAutomatically(true)
+            .setCompressionSupported(true);
 
     final MetricsEndpoint metricsEndpoint =
         new MetricsEndpoint(

@@ -13,7 +13,6 @@
 package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
@@ -39,6 +38,9 @@ public abstract class Contracts<T> {
 
   public abstract String sendTransaction(T smartContract) throws IOException;
 
+  public abstract SignerResponse<JsonRpcErrorResponse> sendTransactionExpectsError(T smartContract)
+      throws IOException;
+
   public abstract Optional<? extends TransactionReceipt> getTransactionReceipt(final String hash)
       throws IOException;
 
@@ -48,13 +50,11 @@ public abstract class Contracts<T> {
 
   public SignerResponse<JsonRpcErrorResponse> submitExceptional(final T smartContract) {
     try {
-      submit(smartContract);
-      fail("Expecting exceptional response ");
+      return failOnIOException(() -> sendTransactionExpectsError(smartContract));
     } catch (final ClientConnectionException e) {
       LOG.info("ClientConnectionException with message: " + e.getMessage());
       return SignerResponse.fromError(e);
     }
-    return null;
   }
 
   public void awaitBlockContaining(final String hash) {

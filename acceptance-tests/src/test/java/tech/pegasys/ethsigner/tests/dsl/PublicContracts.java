@@ -15,6 +15,9 @@ package tech.pegasys.ethsigner.tests.dsl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.utils.ExceptionUtils.failOnIOException;
 
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -32,6 +35,12 @@ public class PublicContracts extends Contracts<Transaction> {
   @Override
   public String sendTransaction(final Transaction smartContract) throws IOException {
     return eth.sendTransaction(smartContract);
+  }
+
+  @Override
+  public SignerResponse<JsonRpcErrorResponse> sendTransactionExpectsError(
+      final Transaction smartContract) throws IOException {
+    return eth.sendTransactionExpectsError(smartContract);
   }
 
   @Override

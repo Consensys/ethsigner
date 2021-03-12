@@ -5,6 +5,8 @@
 ### Features Added
 - Upgraded besu-metrics library
 - Publish ethsigner module jars to cloudsmith maven repo
+- Update Besu latest version for Acceptance Tests
+- Add gzip compression support
 
 ## 21.1.0
 

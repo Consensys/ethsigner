@@ -28,7 +28,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawJsonRpcRequests().exceptionalRequest("ibft_getPendingVotes");
 
-    assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
+    assertThat(response.status()).isEqualTo(HttpResponseStatus.OK);
     assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_ENABLED);
   }
 
@@ -37,7 +37,7 @@ public class MethodNotFoundAcceptanceTest extends AcceptanceTestBase {
     final SignerResponse<JsonRpcErrorResponse> response =
         ethSigner().rawJsonRpcRequests().exceptionalRequest("invalidJsonRpcMethod");
 
-    assertThat(response.status()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
+    assertThat(response.status()).isEqualTo(HttpResponseStatus.OK);
     assertThat(response.jsonRpc().getError()).isEqualTo(JsonRpcError.METHOD_NOT_FOUND);
   }
 }

@@ -12,9 +12,15 @@
  */
 package tech.pegasys.ethsigner.tests.dsl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
 import java.io.IOException;
 import java.util.Optional;
 
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class PrivateContracts extends Contracts<PrivateTransaction> {
@@ -29,7 +35,22 @@ public class PrivateContracts extends Contracts<PrivateTransaction> {
 
   @Override
   public String sendTransaction(final PrivateTransaction smartContract) throws IOException {
-    return eea.sendTransaction(smartContract);
+    final EthSendTransaction response = eea.sendTransaction(smartContract);
+
+    assertThat(response.getTransactionHash()).isNotEmpty();
+    assertThat(response.getError()).isNull();
+
+    return response.getTransactionHash();
+  }
+
+  @Override
+  public SignerResponse<JsonRpcErrorResponse> sendTransactionExpectsError(
+      final PrivateTransaction smartContract) throws IOException {
+    final EthSendTransaction response = eea.sendTransaction(smartContract);
+
+    assertThat(response.hasError()).isTrue();
+
+    return SignerResponse.fromWeb3jErrorResponse(response);
   }
 
   @Override

@@ -14,6 +14,9 @@ package tech.pegasys.ethsigner.tests.dsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
+import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
@@ -40,6 +43,13 @@ public class Eth {
     assertThat(response.getError()).isNull();
 
     return response.getTransactionHash();
+  }
+
+  public SignerResponse<JsonRpcErrorResponse> sendTransactionExpectsError(
+      final Transaction transaction) throws IOException {
+    final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
+    assertThat(response.hasError()).isTrue();
+    return SignerResponse.fromWeb3jErrorResponse(response);
   }
 
   public List<String> getAccounts() throws IOException {
