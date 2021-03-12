@@ -50,7 +50,7 @@ public class PrivateContracts extends Contracts<PrivateTransaction> {
 
     assertThat(response.hasError()).isTrue();
 
-    return SignerResponse.fromWeb3JErrorResponse(response);
+    return SignerResponse.fromWeb3jErrorResponse(response);
   }
 
   @Override

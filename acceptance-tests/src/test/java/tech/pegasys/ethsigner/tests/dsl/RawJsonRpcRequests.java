@@ -55,7 +55,7 @@ public class RawJsonRpcRequests {
 
     try {
       final SignerResponse<JsonRpcErrorResponse> response =
-          SignerResponse.fromWeb3JErrorResponse(failOnIOException(request::send));
+          SignerResponse.fromWeb3jErrorResponse(failOnIOException(request::send));
       if (response != null) {
         return response;
       }

@@ -57,7 +57,7 @@ public class SignerResponse<T extends JsonRpcResponse> {
     }
   }
 
-  public static SignerResponse<JsonRpcErrorResponse> fromWeb3JErrorResponse(
+  public static SignerResponse<JsonRpcErrorResponse> fromWeb3jErrorResponse(
       final Response<?> response) {
     if (response != null && response.hasError()) {
       final Response.Error error = response.getError();

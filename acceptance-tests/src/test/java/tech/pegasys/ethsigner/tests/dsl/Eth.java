@@ -49,7 +49,7 @@ public class Eth {
       final Transaction transaction) throws IOException {
     final EthSendTransaction response = jsonRpc.ethSendTransaction(transaction).send();
     assertThat(response.hasError()).isTrue();
-    return SignerResponse.fromWeb3JErrorResponse(response);
+    return SignerResponse.fromWeb3jErrorResponse(response);
   }
 
   public List<String> getAccounts() throws IOException {
