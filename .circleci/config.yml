@@ -216,23 +216,34 @@ workflows:
     jobs:
       - build:
           context:
-            - dockerhub-quorumengineering-ro              
+            - dockerhub-quorumengineering-ro
+          filters:
+            tags: &filters-release-tags
+              only: /^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?/
       - acceptanceTests:
           requires:
             - build
           context:
-            - dockerhub-quorumengineering-ro                    
+            - dockerhub-quorumengineering-ro
+          filters:
+            tags:
+              <<: *filters-release-tags
       - buildDocker:
           requires:
             - build
           context:
-            - dockerhub-quorumengineering-ro                    
+            - dockerhub-quorumengineering-ro
+          filters:
+            tags:
+              <<: *filters-release-tags
       - publish:
           filters:
             branches:
               only:
                 - master
                 - /^release-.*/
+            tags:
+              <<: *filters-release-tags
           requires:
             - build
             - acceptanceTests
@@ -245,6 +256,8 @@ workflows:
               only:
                 - master
                 - /^release-.*/
+            tags:
+              <<: *filters-release-tags
           requires:
             - build
             - acceptanceTests
