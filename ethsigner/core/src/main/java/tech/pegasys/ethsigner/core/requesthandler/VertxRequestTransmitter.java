@@ -60,13 +60,14 @@ public class VertxRequestTransmitter implements RequestTransmitter {
       final Iterable<Entry<String, String>> headers,
       final String path,
       final String body) {
-    if (LOG.isDebugEnabled()) {
-      final String headerStr =
-          StreamSupport.stream(headers.spliterator(), true)
-              .map(Objects::toString)
-              .collect(Collectors.joining(", "));
-      LOG.debug("Sending headers {} and request {} to {} ", headerStr, body, path);
-    }
+    LOG.debug(
+        "Sending headers {} and request {} to {} ",
+        () ->
+            StreamSupport.stream(headers.spliterator(), false)
+                .map(Objects::toString)
+                .collect(Collectors.joining(", ")),
+        () -> body,
+        () -> path);
 
     final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
     final HttpClientRequest request =
