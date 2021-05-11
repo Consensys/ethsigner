@@ -16,6 +16,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.GATEWAY_TIMEOUT;
 import static java.math.BigInteger.ONE;
 import static java.util.Collections.singletonList;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ETH_SEND_TX_REPLACEMENT_UNDERPRICED;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
@@ -32,6 +33,7 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,11 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 /** Signing is a step during proxying a sendTransaction() JSON-RPC request to an Ethereum node. */
 class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
+
+  private static final String VALID_BODY_RESPONSE =
+      "{\"jsonrpc\" : \"2.0\",\"id\" : 1,\"result\" : \"VALID\"}";
+  private static final String INVALID_PARAMS_BODY =
+      "{\"jsonrpc\":\"2.0\",\"id\":77,\"error\":{\"code\":-32602,\"message\":\"Invalid params\"}}";
 
   private SendTransaction sendTransaction;
   private SendRawTransaction sendRawTransaction;
@@ -74,7 +81,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
   @Test
   void missingNonceResultsInEthNodeRespondingSuccessfully() {
-    final String ethNodeResponseBody = "VALID_RESPONSE";
+    final String ethNodeResponseBody = VALID_BODY_RESPONSE;
     final String requestBody =
         sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
 
@@ -454,7 +461,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
 
-    final String successResponseFromWeb3Provider = "VALID_RESULT";
+    final String successResponseFromWeb3Provider = VALID_BODY_RESPONSE;
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithNextNonce),
         response.ethNode(successResponseFromWeb3Provider));
@@ -473,7 +480,27 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithInitialNonce), response.ethNode(NONCE_TOO_LOW));
 
-    final String successResponseFromWeb3Provider = "VALID_RESULT";
+    final String successResponseFromWeb3Provider = VALID_BODY_RESPONSE;
+    setUpEthNodeResponse(
+        request.ethNode(rawTransactionWithNextNonce),
+        response.ethNode(successResponseFromWeb3Provider));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(transactionBuilder.withNonce(null))),
+        response.ethSigner(successResponseFromWeb3Provider));
+  }
+
+  @Test
+  void nullNonceWithUnderpricedResponseResultsInNewNonceBeingCreatedAndResent() {
+    final String rawTransactionWithInitialNonce =
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x0")));
+    final String rawTransactionWithNextNonce =
+        sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
+    setUpEthNodeResponse(
+        request.ethNode(rawTransactionWithInitialNonce),
+        response.ethNode(ETH_SEND_TX_REPLACEMENT_UNDERPRICED));
+
+    final String successResponseFromWeb3Provider = VALID_BODY_RESPONSE;
     setUpEthNodeResponse(
         request.ethNode(rawTransactionWithNextNonce),
         response.ethNode(successResponseFromWeb3Provider));
@@ -488,16 +515,27 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
     final String rawTransactionWithInitialNonce =
         sendRawTransaction.request(sendTransaction.request(transactionBuilder.withNonce("0x1")));
     setUpEthNodeResponse(
-        request.ethNode(rawTransactionWithInitialNonce), response.ethNode(INVALID_PARAMS));
+        request.ethNode(rawTransactionWithInitialNonce),
+        response.ethNode(INVALID_PARAMS_BODY, HttpResponseStatus.BAD_REQUEST));
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(INVALID_PARAMS));
+        response.ethSigner(INVALID_PARAMS_BODY, HttpResponseStatus.BAD_REQUEST));
   }
 
   @Test
-  void moreThanFiveNonceTooLowErrorsReturnsAnErrorToUser() {
-    setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 6);
+  void moreThanTenNonceTooLowErrorsReturnsAnErrorToUser() {
+    setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 11);
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
+        response.ethSigner(INTERNAL_ERROR));
+  }
+
+  @Test
+  void moreThanTenUnderpircedErrorsReturnsAnErrorToUser() {
+    setupEthNodeResponse(
+        ".*eth_sendRawTransaction.*", response.ethNode(ETH_SEND_TX_REPLACEMENT_UNDERPRICED), 11);
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
@@ -507,6 +545,17 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   @Test
   void thirdNonceRetryTimesOutAndGatewayTimeoutIsReturnedToClient() {
     setupEthNodeResponse(".*eth_sendRawTransaction.*", response.ethNode(NONCE_TOO_LOW), 3);
+    timeoutRequest(".*eth_sendRawTransaction.*");
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
+        response.ethSigner(CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT, GATEWAY_TIMEOUT));
+  }
+
+  @Test
+  void thirdNonceRetryForUnderpricedTimesOutAndGatewayTimeoutIsReturnedToClient() {
+    setupEthNodeResponse(
+        ".*eth_sendRawTransaction.*", response.ethNode(ETH_SEND_TX_REPLACEMENT_UNDERPRICED), 3);
     timeoutRequest(".*eth_sendRawTransaction.*");
 
     sendPostRequestAndVerifyResponse(
