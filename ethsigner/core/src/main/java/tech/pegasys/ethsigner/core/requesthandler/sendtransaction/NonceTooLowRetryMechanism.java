@@ -12,6 +12,7 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ETH_SEND_TX_REPLACEMENT_UNDERPRICED;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
@@ -31,10 +32,21 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
 
   @Override
   public boolean responseRequiresRetry(final int httpStatusCode, final String body) {
-    if ((httpStatusCode == HttpResponseStatus.BAD_REQUEST.code())) {
-      final JsonRpcErrorResponse errorResponse = specialiseResponse(body);
+    if ((httpStatusCode == HttpResponseStatus.OK.code())) {
+      final JsonRpcErrorResponse errorResponse;
+      try {
+        errorResponse = specialiseResponse(body);
+      } catch (final IllegalArgumentException e) {
+        return false;
+      }
       if (NONCE_TOO_LOW.equals(errorResponse.getError())) {
         LOG.info("Nonce too low, resend required for {}.", errorResponse.getId());
+        return true;
+      } else if (ETH_SEND_TX_REPLACEMENT_UNDERPRICED.equals(errorResponse.getError())) {
+        LOG.info(
+            "Besu returned \"{}\", which means that a Tx with the same nonce is in the transaction pool, resend required for {}.",
+            ETH_SEND_TX_REPLACEMENT_UNDERPRICED,
+            errorResponse.getId());
         return true;
       }
     }

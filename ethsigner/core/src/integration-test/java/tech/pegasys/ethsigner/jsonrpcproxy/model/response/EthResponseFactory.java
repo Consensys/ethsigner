@@ -76,7 +76,6 @@ public class EthResponseFactory {
   public EthNodeResponse ethNode(final JsonRpcError error) {
     final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(DEFAULT_ID, error);
 
-    return new EthNodeResponse(
-        NO_HEADERS, Json.encode(errorResponse), HttpResponseStatus.BAD_REQUEST);
+    return new EthNodeResponse(NO_HEADERS, Json.encode(errorResponse), HttpResponseStatus.OK);
   }
 }
