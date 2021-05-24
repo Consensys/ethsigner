@@ -44,7 +44,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
-  private static final int MAX_NONCE_RETRIES = 10;
+  private static final int MAX_NONCE_RETRIES = 20;
 
   public SendTransactionHandler(
       final long chainId,
