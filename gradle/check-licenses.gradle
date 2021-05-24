@@ -62,7 +62,7 @@ downloadLicenses {
   includeProjectDependencies = true
   reportByDependency = false
   reportByLicenseType = true
-  dependencyConfiguration = 'testCompile'
+  dependencyConfiguration = 'implementation'
 
   ext.apache = license('Apache License, Version 2.0', 'http://opensource.org/licenses/Apache-2.0')
   ext.mit = license('MIT License', 'http://www.opensource.org/licenses/mit-license.php')

@@ -20,10 +20,10 @@ import java.text.SimpleDateFormat
 plugins {
   id 'com.diffplug.gradle.spotless' version '3.27.1'
   id 'com.github.ben-manes.versions' version '0.27.0'
-  id 'com.github.hierynomus.license' version '0.15.0'
+  id 'com.github.hierynomus.license' version '0.16.1'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.5.0' apply false
-  id 'net.ltgt.errorprone' version '1.1.1'
+  id 'net.ltgt.errorprone' version '2.0.0'
   id 'org.ajoberstar.grgit' version '4.1.0'
 }
 
@@ -414,7 +414,7 @@ startScripts {
 }
 
 dependencies {
-  compile project(':ethsigner:app')
+  implementation project(':ethsigner:app')
   errorprone 'com.google.errorprone:error_prone_core'
 }
 
