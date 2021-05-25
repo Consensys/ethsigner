@@ -1,0 +1,73 @@
+{
+  "allowedLicenses": [
+    {
+      "moduleLicense": "Apache License, Version 2.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "BSD Zero Clause License",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Bouncy Castle Licence",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "CDDL/GPLv2+CE",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.1",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Creative Commons Legal Code",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Eclipse Distribution License - v 1.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Eclipse Public License - v 1.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Eclipse Public License - v 2.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "MIT License",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "Mozilla Public License, Version 2.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "The 2-Clause BSD License",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "The 3-Clause BSD License",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "The BSD License",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "GNU LESSER GENERAL PUBLIC LICENSE, Version 3",
+      "moduleVersion": "3.0.0",
+      "moduleName": "com.google.code.findbugs:jFormatString"
+    },
+    {
+      "moduleName": "org.junit:junit-bom",
+      "moduleVersion": ".*"
+    }
+  ]
+}

@@ -12,18 +12,22 @@
  */
 
 
+import com.sun.java.accessibility.util.AccessibilityListenerList
 import groovy.transform.Memoized
 import net.ltgt.gradle.errorprone.CheckSeverity
-
+import com.github.jk1.license.filter.*
+import com.github.jk1.license.render.*
 import java.text.SimpleDateFormat
+import tech.pegasys.internal.license.CustomLicenseRenderer
 
 plugins {
   id 'com.diffplug.spotless' version '5.12.5'
   id 'com.github.ben-manes.versions' version '0.27.0'
-  id 'com.github.hierynomus.license' version '0.16.1'
+  // id 'com.github.hierynomus.license' version '0.16.1'
+  id 'com.github.jk1.dependency-license-report'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.5.0' apply false
-  id 'net.ltgt.errorprone' version '2.0.0'
+  id 'net.ltgt.errorprone' version '2.0.1'
   id 'org.ajoberstar.grgit' version '4.1.0'
 }
 
@@ -46,12 +50,12 @@ def cloudsmithKey = project.hasProperty('cloudsmithApiKey') ? project.property('
 
 group = 'tech.pegasys.' + repositoryName
 
-defaultTasks 'build', 'checkLicenses', 'javadoc'
+defaultTasks 'build', 'checkLicense', 'javadoc'
 
 def buildAliases = ['dev': [
     'spotlessApply',
     'build',
-    'checkLicenses',
+    'checkLicense',
     'javadoc'
   ]]
 
@@ -89,7 +93,7 @@ allprojects {
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'com.diffplug.spotless'
   apply from: "${rootDir}/gradle/versions.gradle"
-  apply from: "${rootDir}/gradle/check-licenses.gradle"
+  // apply from: "${rootDir}/gradle/check-licenses.gradle"
 
   version = rootProject.version
 
@@ -235,6 +239,18 @@ allprojects {
 }
 
 task deploy() {}
+
+licenseReport {
+  configurations = ALL
+  allowedLicensesFile = new File("${rootDir}/gradle/allowed-licenses.json")
+  filters = [new LicenseBundleNormalizer()]
+  renderers = [new CustomLicenseRenderer('dep-index.html',
+          'EthSigner',
+          new File("${rootDir}/gradle/unknown-licenses-details.txt"),
+          new File("${rootDir}/gradle/multi-licenses.txt")
+                  ),
+          new InventoryHtmlReportRenderer('index.html', 'EthSigner')]
+}
 
 
 subprojects {
@@ -429,10 +445,10 @@ distributions {
   }
 }
 
-installDist { dependsOn checkLicenses }
+installDist { dependsOn checkLicense }
 
 distTar {
-  dependsOn checkLicenses
+  dependsOn checkLicense
   doFirst {
     delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
   }
@@ -441,7 +457,7 @@ distTar {
 }
 
 distZip {
-  dependsOn checkLicenses
+  dependsOn checkLicense
   doFirst {
     delete fileTree(dir: 'build/distributions', include: '*.zip')
   }
