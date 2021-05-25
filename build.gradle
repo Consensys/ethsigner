@@ -18,10 +18,9 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import java.text.SimpleDateFormat
 
 plugins {
-  id 'com.diffplug.gradle.spotless' version '3.27.1'
+  id 'com.diffplug.spotless' version '5.12.5'
   id 'com.github.ben-manes.versions' version '0.27.0'
   id 'com.github.hierynomus.license' version '0.16.1'
-  id "com.github.hierynomus.license-report" version '0.16.1'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.5.0' apply false
   id 'net.ltgt.errorprone' version '2.0.0'
@@ -88,12 +87,13 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
   apply plugin: 'net.ltgt.errorprone'
+  apply plugin: 'com.diffplug.spotless'
   apply from: "${rootDir}/gradle/versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
 
   version = rootProject.version
 
-  jacoco { toolVersion = '0.8.5' }
+  jacoco { toolVersion = '0.8.6' }
 
   task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -117,7 +117,6 @@ allprojects {
 
   dependencies { errorprone("com.google.errorprone:error_prone_core") }
 
-  apply plugin: 'com.diffplug.gradle.spotless'
   spotless {
     java {
       // This path needs to be relative to each project
@@ -126,7 +125,7 @@ allprojects {
         exclude '**/.gradle/**'
       }
       removeUnusedImports()
-      googleJavaFormat('1.7')
+      googleJavaFormat()
       importOrder 'tech.pegasys', 'java', ''
       trimTrailingWhitespace()
       endWithNewline()
