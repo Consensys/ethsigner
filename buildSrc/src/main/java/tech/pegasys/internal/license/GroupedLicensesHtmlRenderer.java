@@ -435,6 +435,7 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
               .map(
                   licenseFileDetails ->
                       hrefLink(licenseFileDetails.getFile(), licenseFileDetails.getFile()))
+              .distinct()
               .collect(Collectors.joining("<br>"));
       return String.format("<p><strong>Bundled Licenses:</strong><br />%s</p>%n", links);
     }
