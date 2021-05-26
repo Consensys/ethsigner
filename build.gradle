@@ -91,7 +91,6 @@ allprojects {
   apply plugin: 'net.ltgt.errorprone'
   apply plugin: 'com.diffplug.spotless'
   apply from: "${rootDir}/gradle/versions.gradle"
-  // apply from: "${rootDir}/gradle/check-licenses.gradle"
 
   version = rootProject.version
 
