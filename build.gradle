@@ -18,7 +18,7 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import com.github.jk1.license.filter.*
 import com.github.jk1.license.render.*
 import java.text.SimpleDateFormat
-import tech.pegasys.internal.license.CustomLicenseRenderer
+import tech.pegasys.internal.license.GroupedLicensesHtmlRenderer
 
 plugins {
   id 'com.diffplug.spotless' version '5.12.5'
@@ -241,15 +241,14 @@ allprojects {
 task deploy() {}
 
 licenseReport {
-  configurations = ALL
-  allowedLicensesFile = new File("${rootDir}/gradle/allowed-licenses.json")
-  filters = [new LicenseBundleNormalizer()]
-  renderers = [new CustomLicenseRenderer('dep-index.html',
-          'EthSigner',
-          new File("${rootDir}/gradle/unknown-licenses-details.txt"),
-          new File("${rootDir}/gradle/multi-licenses.txt")
-                  ),
-          new InventoryHtmlReportRenderer('index.html', 'EthSigner')]
+  // configurations = ALL
+  allowedLicensesFile = new File("${rootDir}/gradle/license-report-config/allowed-licenses.json")
+  filters = [
+    new LicenseBundleNormalizer(["bundlePath": new File("${rootDir}/gradle/license-report-config/license-normalizer.json"), "createDefaultTransformationRules": true])
+  ]
+  renderers = [
+    new GroupedLicensesHtmlRenderer(["multiLicensesFile": new File("${rootDir}/gradle/license-report-config/multi-licenses.txt")])
+  ]
 }
 
 
@@ -438,7 +437,7 @@ distributions {
   main {
     contents {
       from("./LICENSE") { into "." }
-      from("build/reports/license/license-dependency.html") { into "." }
+      from("build/reports/dependency-license") { into "./dependency-license" exclude "**/dependencies-without-allowed-license.json" exclude "**/project-licenses-for-check-license-task.json" }
       from("./docs/GettingStartedBinaries.md") { into "." }
       from("./docs/DocsArchive0.8.0.html") { into "." }
     }
@@ -642,3 +641,5 @@ def calculateJarName(Project project) {
   }
   return jarName
 }
+
+check.dependsOn checkLicense

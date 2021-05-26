@@ -59,15 +59,6 @@
     {
       "moduleLicense": "The BSD License",
       "moduleName": ".*"
-    },
-    {
-      "moduleLicense": "GNU LESSER GENERAL PUBLIC LICENSE, Version 3",
-      "moduleVersion": "3.0.0",
-      "moduleName": "com.google.code.findbugs:jFormatString"
-    },
-    {
-      "moduleName": "org.junit:junit-bom",
-      "moduleVersion": ".*"
     }
   ]
 }
