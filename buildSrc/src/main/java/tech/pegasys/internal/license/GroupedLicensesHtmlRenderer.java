@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,8 +54,7 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
   private static final String OVERRIDE_LICENSE_URL = "licenseUrl";
   private String fileName;
   private String projectName;
-  private Project project;
-  private LicenseReportExtension config;
+  private String projectVersion;
   private File output;
   private int counter;
   private int licenseCounter;
@@ -96,10 +96,15 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
 
   @Override
   public void render(final ProjectData data) {
-    project = data.getProject();
+    Project project = data.getProject();
     projectName = projectName == null ? project.getName() : projectName;
+    projectVersion =
+        !"unspecified".equalsIgnoreCase(project.getVersion().toString())
+            ? project.getVersion().toString()
+            : "";
     fileName = fileName == null ? "index.html" : fileName;
-    config = project.getExtensions().findByType(LicenseReportExtension.class);
+    LicenseReportExtension config =
+        project.getExtensions().findByType(LicenseReportExtension.class);
     if (config == null) {
       throw new GradleException("LicenseReportExtension is not available");
     }
@@ -109,10 +114,6 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
     final Map<String, List<ModuleData>> licenseGroup = buildLicenseGroup(moduleLicenses);
 
     writeReport(licenseGroup, moduleLicenses);
-  }
-
-  private String hrefLink(final String url, final String text) {
-    return String.format("<code><a href=\"%s\">%s</a></code>", url, text);
   }
 
   private Map<ModuleData, Set<Pair<String, String>>> buildModuleLicenses(final ProjectData data) {
@@ -307,32 +308,38 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
       final Map<String, List<ModuleData>> licenseGroup,
       final Map<ModuleData, Set<Pair<String, String>>> moduleLicenses) {
     final StringBuilder html = new StringBuilder();
+    html.append("<!doctype html>\n");
+    html.append("<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
+    html.append(
+        String.format("<title>Dependency License Report For %s</title></head>\n", projectName));
+    html.append("<body style=\"font-family: sans-serif\">\n");
     html.append(
         String.format(
-            "<html>%n<head>%n<title>Dependency License Report For %s</title></head><body>",
-            projectName));
-    html.append(String.format("<h1>Dependency License Report for %s</h1>%n", projectName));
+            "<h1>Dependency License Report for %s %s</h1>%n", projectName, projectVersion));
     html.append(
-        "<table style=\"width:100%;text-align:left;border-collapse:separate;background-color:grey;\" border=\"0\">\n");
+        "<table style=\"width:100%;text-align:left;border-collapse:separate;background-color:LightGrey;\" border=\"0\">\n");
     html.append("<tbody>\n");
 
     licenseGroup.forEach(
         (license, moduleList) -> {
           html.append(
               String.format(
-                  "<tr><td style=\"width: 98.0679%%;\"><strong>%d.&nbsp;%s</strong><td></tr>",
+                  "<tr><td style=\"width: 98.0679%%; padding: 10px;\"><strong>%d.&nbsp;%s</strong><td></tr>",
                   ++licenseCounter, license));
 
           moduleList.forEach(
               module ->
                   html.append(
                       String.format(
-                          "<tr><td style=\"width: 98.0679%%;border: 10px solid grey; background-color:white;padding: 10px;\">%s<td></tr>",
+                          "<tr><td style=\"width: 98.0679%%;border: 10px solid LightGrey; background-color:white;padding: 10px;\">%s<td></tr>",
                           buildModuleDependencyHtml(module, moduleLicenses))));
         });
 
     html.append("</tbody></table>\n");
-    html.append(String.format("<hr /><p>This report was generated at <em>%s</em>", Instant.now()));
+    html.append(
+        String.format(
+            "<hr /><p>This report was generated at <em>%s</em>",
+            DateTimeFormatter.ISO_INSTANT.format(Instant.now())));
     html.append("</body></html>");
 
     try {
@@ -433,5 +440,9 @@ public class GroupedLicensesHtmlRenderer implements ReportRenderer {
     }
     return String.format(
         "<p><strong>Bundled Licenses:</strong><br /><code>%s</code></p>%n", "Not Available");
+  }
+
+  private String hrefLink(final String url, final String text) {
+    return String.format("<code><a href=\"%s\">%s</a></code>", url, text);
   }
 }

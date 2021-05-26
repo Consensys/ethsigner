@@ -16,14 +16,12 @@ import com.sun.java.accessibility.util.AccessibilityListenerList
 import groovy.transform.Memoized
 import net.ltgt.gradle.errorprone.CheckSeverity
 import com.github.jk1.license.filter.*
-import com.github.jk1.license.render.*
 import java.text.SimpleDateFormat
 import tech.pegasys.internal.license.GroupedLicensesHtmlRenderer
 
 plugins {
   id 'com.diffplug.spotless' version '5.12.5'
   id 'com.github.ben-manes.versions' version '0.27.0'
-  // id 'com.github.hierynomus.license' version '0.16.1'
   id 'com.github.jk1.dependency-license-report'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.5.0' apply false
@@ -242,12 +240,13 @@ task deploy() {}
 
 licenseReport {
   // configurations = ALL
+  outputDir = "${buildDir}/reports/licenses"
   allowedLicensesFile = new File("${rootDir}/gradle/license-report-config/allowed-licenses.json")
   filters = [
     new LicenseBundleNormalizer(["bundlePath": new File("${rootDir}/gradle/license-report-config/license-normalizer.json"), "createDefaultTransformationRules": true])
   ]
   renderers = [
-    new GroupedLicensesHtmlRenderer(["multiLicensesFile": new File("${rootDir}/gradle/license-report-config/multi-licenses.txt")])
+    new GroupedLicensesHtmlRenderer(["projectName":"EthSigner", "multiLicensesFile": new File("${rootDir}/gradle/license-report-config/multi-licenses.txt")])
   ]
 }
 
@@ -437,7 +436,7 @@ distributions {
   main {
     contents {
       from("./LICENSE") { into "." }
-      from("build/reports/dependency-license") { into "./dependency-license" exclude "**/dependencies-without-allowed-license.json" exclude "**/project-licenses-for-check-license-task.json" }
+      from("build/reports/licenses") { into "./licenses" exclude "**/dependencies-without-allowed-license.json" exclude "**/project-licenses-for-check-license-task.json" }
       from("./docs/GettingStartedBinaries.md") { into "." }
       from("./docs/DocsArchive0.8.0.html") { into "." }
     }
