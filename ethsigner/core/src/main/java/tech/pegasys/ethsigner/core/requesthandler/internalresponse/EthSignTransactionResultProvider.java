@@ -23,11 +23,11 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
+import tech.pegasys.ethsigner.core.signing.GoQuorumPrivateTransactionSerializer;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.util.List;
-import java.util.Optional;
 
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
@@ -72,15 +72,28 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
     }
 
     LOG.debug("Obtaining signer for {}", transaction.sender());
-    final Optional<Signer> Signer = signerProvider.getSigner(transaction.sender());
-    if (Signer.isEmpty()) {
-      LOG.info("From address ({}) does not match any available account", transaction.sender());
-      throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
-    }
+    return signerProvider
+        .getSigner(transaction.sender())
+        .map(
+            signer -> {
+              final TransactionSerializer transactionSerializer =
+                  getTransactionSerializer(request, signer);
+              return transactionSerializer.serialize(transaction);
+            })
+        .orElseThrow(
+            () -> {
+              LOG.info(
+                  "From address ({}) does not match any available account", transaction.sender());
+              throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
+            });
+  }
 
-    final TransactionSerializer transactionSerializer =
-        new TransactionSerializer(Signer.get(), chainId);
-    return transactionSerializer.serialize(transaction);
+  private TransactionSerializer getTransactionSerializer(JsonRpcRequest request, Signer signer) {
+    final EthSendTransactionJsonParameters params =
+        fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+    return params.privateFor().isPresent()
+        ? new GoQuorumPrivateTransactionSerializer(signer, chainId)
+        : new TransactionSerializer(signer, chainId);
   }
 
   private Transaction createTransaction(final JsonRpcRequest request) {
