@@ -54,9 +54,12 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
+    final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
     final Transaction transaction;
     try {
-      transaction = createTransaction(request);
+      ethSendTransactionJsonParameters =
+          fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+      transaction = createTransaction(request, ethSendTransactionJsonParameters);
 
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
@@ -77,7 +80,7 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
         .map(
             signer -> {
               final TransactionSerializer transactionSerializer =
-                  getTransactionSerializer(request, signer);
+                  getTransactionSerializer(ethSendTransactionJsonParameters, signer);
               return transactionSerializer.serialize(transaction);
             })
         .orElseThrow(
@@ -88,17 +91,15 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
             });
   }
 
-  private TransactionSerializer getTransactionSerializer(JsonRpcRequest request, Signer signer) {
-    final EthSendTransactionJsonParameters params =
-        fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+  private TransactionSerializer getTransactionSerializer(
+      final EthSendTransactionJsonParameters params, final Signer signer) {
     return params.privateFor().isPresent()
         ? new GoQuorumPrivateTransactionSerializer(signer, chainId)
         : new TransactionSerializer(signer, chainId);
   }
 
-  private Transaction createTransaction(final JsonRpcRequest request) {
-    final EthSendTransactionJsonParameters params =
-        fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+  private Transaction createTransaction(
+      final JsonRpcRequest request, final EthSendTransactionJsonParameters params) {
     return new EthTransaction(params, null, request.getId());
   }
 
