@@ -23,11 +23,11 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
+import tech.pegasys.ethsigner.core.signing.GoQuorumPrivateTransactionSerializer;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.util.List;
-import java.util.Optional;
 
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
@@ -54,9 +54,12 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
+    final EthSendTransactionJsonParameters ethSendTransactionJsonParameters;
     final Transaction transaction;
     try {
-      transaction = createTransaction(request);
+      ethSendTransactionJsonParameters =
+          fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+      transaction = createTransaction(request, ethSendTransactionJsonParameters);
 
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
@@ -72,20 +75,31 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
     }
 
     LOG.debug("Obtaining signer for {}", transaction.sender());
-    final Optional<Signer> Signer = signerProvider.getSigner(transaction.sender());
-    if (Signer.isEmpty()) {
-      LOG.info("From address ({}) does not match any available account", transaction.sender());
-      throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
-    }
-
-    final TransactionSerializer transactionSerializer =
-        new TransactionSerializer(Signer.get(), chainId);
-    return transactionSerializer.serialize(transaction);
+    return signerProvider
+        .getSigner(transaction.sender())
+        .map(
+            signer -> {
+              final TransactionSerializer transactionSerializer =
+                  getTransactionSerializer(ethSendTransactionJsonParameters, signer);
+              return transactionSerializer.serialize(transaction);
+            })
+        .orElseThrow(
+            () -> {
+              LOG.info(
+                  "From address ({}) does not match any available account", transaction.sender());
+              throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
+            });
   }
 
-  private Transaction createTransaction(final JsonRpcRequest request) {
-    final EthSendTransactionJsonParameters params =
-        fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
+  private TransactionSerializer getTransactionSerializer(
+      final EthSendTransactionJsonParameters params, final Signer signer) {
+    return params.privateFor().isPresent()
+        ? new GoQuorumPrivateTransactionSerializer(signer, chainId)
+        : new TransactionSerializer(signer, chainId);
+  }
+
+  private Transaction createTransaction(
+      final JsonRpcRequest request, final EthSendTransactionJsonParameters params) {
     return new EthTransaction(params, null, request.getId());
   }
 
