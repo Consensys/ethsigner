@@ -8,7 +8,7 @@
   name ES256K. The deprecated keys using the SECP256K and signature algorithm name ECDSA256 are still supported.
 
 ### Bugs Fixed
-- Fixing nonce too low retries and added support for replacement underpriced rpc response
+- Fix nonce too low retries and added support for "replacement underpriced" and "Known transaction" RPC responses
 
 ## 21.3.0
 
