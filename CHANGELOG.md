@@ -1,5 +1,10 @@
 # Changelog
 
+## 21.3.2
+
+### Bugs Fixed
+- Fix nonce too low retries and added support for "replacement underpriced" and "Known transaction" RPC responses
+
 ## 21.3.1
 
 ### Features Added
