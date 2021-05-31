@@ -3,9 +3,9 @@
 ## 21.3.1
 
 ### Features Added
-- Updated  eth_signTransaction to handle with GoQuorum transactions
-- Azure remote signing - add support for keys using curve name P-256K and signature algorithm name ES256K. Curve name
-  SECP256K and signature algorithm name ECDSA256 are deprecated by Azure.
+- Update transaction signing to handle with GoQuorum transactions
+- Azure remote signing now supports new Azure keys using the curve name P-256K and signature algorithm
+  name ES256K. The deprecated keys using the SECP256K and signature algorithm name ECDSA256 are still supported.
 
 ### Bugs Fixed
 - Fixing nonce too low retries and added support for replacement underpriced rpc response
