@@ -41,6 +41,44 @@ public class NonceTooLowRetryMechanismTest {
   }
 
   @Test
+  public void retryIsRequiredIfErrorIsNonceTooLow() {
+    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code());
+
+    final JsonRpcErrorResponse errorResponse = new JsonRpcErrorResponse(JsonRpcError.NONCE_TOO_LOW);
+
+    assertThat(
+            retryMechanism.responseRequiresRetry(
+                httpResponse.statusCode(), Json.encode(errorResponse)))
+        .isTrue();
+  }
+
+  @Test
+  public void retryIsRequiredIfErrorIsKnownTransaction() {
+    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code());
+
+    final JsonRpcErrorResponse errorResponse =
+        new JsonRpcErrorResponse(JsonRpcError.ETH_SEND_TX_ALREADY_KNOWN);
+
+    assertThat(
+            retryMechanism.responseRequiresRetry(
+                httpResponse.statusCode(), Json.encode(errorResponse)))
+        .isTrue();
+  }
+
+  @Test
+  public void retryIsRequiredIfErrorIsReplacementTransactionUnderpriced() {
+    when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code());
+
+    final JsonRpcErrorResponse errorResponse =
+        new JsonRpcErrorResponse(JsonRpcError.ETH_SEND_TX_REPLACEMENT_UNDERPRICED);
+
+    assertThat(
+            retryMechanism.responseRequiresRetry(
+                httpResponse.statusCode(), Json.encode(errorResponse)))
+        .isTrue();
+  }
+
+  @Test
   public void retryIsNotRequiredIfErrorIsNotNonceTooLow() {
     when(httpResponse.statusCode()).thenReturn(HttpResponseStatus.BAD_REQUEST.code());
 
