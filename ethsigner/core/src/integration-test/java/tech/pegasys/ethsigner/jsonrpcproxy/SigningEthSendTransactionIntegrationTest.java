@@ -533,7 +533,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void moreThanTenUnderpircedErrorsReturnsAnErrorToUser() {
+  void moreThanTenUnderpricedErrorsReturnsAnErrorToUser() {
     setupEthNodeResponse(
         ".*eth_sendRawTransaction.*", response.ethNode(ETH_SEND_TX_REPLACEMENT_UNDERPRICED), 11);
 

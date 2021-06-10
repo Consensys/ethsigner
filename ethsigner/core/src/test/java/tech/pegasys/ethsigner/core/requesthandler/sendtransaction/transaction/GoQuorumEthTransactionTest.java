@@ -13,10 +13,13 @@
 package tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ETHER_VALUE_NOT_SUPPORTED;
 
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
 
 import java.math.BigInteger;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.vertx.core.json.JsonObject;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.utils.Base64String;
@@ -90,6 +94,21 @@ public class GoQuorumEthTransactionTest {
 
     assertThat(paramsArray[1])
         .isEqualTo(getGoQuorumRawTxJsonParams(params.privateFrom(), params.privateFor().get()));
+  }
+
+  @Test
+  public void createGoQuorumPrivateTransactionWithSomeValueShouldFail() {
+    // Set the value to something non-zero
+    params.value("0x7");
+
+    final Condition<JsonRpcException> hasErrorType =
+        new Condition<>(
+            exception -> exception.getJsonRpcError().equals(ETHER_VALUE_NOT_SUPPORTED),
+            "Must have correct error type: " + ETHER_VALUE_NOT_SUPPORTED);
+
+    assertThatExceptionOfType(JsonRpcException.class)
+        .isThrownBy(() -> GoQuorumPrivateTransaction.from(params, null, null, null))
+        .has(hasErrorType);
   }
 
   private void createGoQuorumPrivateTransaction(final Optional<String> privateFrom) {
