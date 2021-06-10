@@ -17,9 +17,12 @@ import static tech.pegasys.ethsigner.core.jsonrpc.RpcUtil.JSON_RPC_VERSION;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
+import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
+import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.EnclaveLookupIdProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.NonceProvider;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
@@ -47,6 +50,11 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
 
     if (transactionJsonParameters.privateFor().isEmpty()) {
       throw new IllegalArgumentException("Transaction does not contain a valid privateFor list.");
+    }
+
+    if (transactionJsonParameters.value().isPresent()
+        && transactionJsonParameters.value().get().compareTo(BigInteger.ZERO) > 0) {
+      throw new JsonRpcException(JsonRpcError.ETHER_VALUE_NOT_SUPPORTED);
     }
 
     return new GoQuorumPrivateTransaction(
