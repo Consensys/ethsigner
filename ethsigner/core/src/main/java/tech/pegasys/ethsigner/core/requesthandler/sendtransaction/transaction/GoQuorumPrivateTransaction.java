@@ -53,7 +53,7 @@ public class GoQuorumPrivateTransaction extends EthTransaction {
     }
 
     if (transactionJsonParameters.value().isPresent()
-        && transactionJsonParameters.value().get().compareTo(BigInteger.ZERO) > 0) {
+        && !transactionJsonParameters.value().get().equals(BigInteger.ZERO)) {
       throw new JsonRpcException(JsonRpcError.ETHER_VALUE_NOT_SUPPORTED);
     }
 
