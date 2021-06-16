@@ -50,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -58,10 +59,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import io.restassured.RestAssured;
+import io.restassured.config.HttpClientConfig;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.awaitility.Awaitility;
@@ -238,13 +242,31 @@ public class IntegrationTestBase {
 
   void sendPostRequestAndVerifyResponse(
       final EthSignerRequest request, final EthSignerResponse expectResponse, final String path) {
+    sendPostRequestAndVerifyResponse(request, expectResponse, path, Optional.empty());
+  }
 
-    final Response response =
+  void sendPostRequestAndVerifyResponse(
+      final EthSignerRequest request,
+      final EthSignerResponse expectResponse,
+      final String path,
+      final Optional<Integer> maybeTimeoutInMilliSec) {
+
+    final RequestSpecification requestSpec =
         given()
             .when()
             .body(request.getBody())
-            .headers(RestAssuredConverter.headers(request.getHeaders()))
-            .post(path);
+            .headers(RestAssuredConverter.headers(request.getHeaders()));
+
+    maybeTimeoutInMilliSec.ifPresent(
+        (timeoutInMilliSec) ->
+            requestSpec.config(
+                RestAssured.config()
+                    .httpClient(
+                        HttpClientConfig.httpClientConfig()
+                            .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, timeoutInMilliSec)
+                            .setParam(CoreConnectionPNames.SO_TIMEOUT, timeoutInMilliSec))));
+
+    final Response response = requestSpec.post(path);
 
     verifyResponseMatchesExpected(response, expectResponse);
   }

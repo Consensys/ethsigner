@@ -32,6 +32,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.Transaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.util.Optional;
+
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
@@ -529,7 +531,9 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(INTERNAL_ERROR));
+        response.ethSigner(INTERNAL_ERROR),
+        "/",
+        Optional.of(5000));
   }
 
   @Test
@@ -539,7 +543,9 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(INTERNAL_ERROR));
+        response.ethSigner(INTERNAL_ERROR),
+        "/",
+        Optional.of(5000));
   }
 
   @Test

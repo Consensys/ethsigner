@@ -34,6 +34,8 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.TransactionCountResponder;
 
+import java.util.Optional;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -594,7 +596,9 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(INTERNAL_ERROR));
+        response.ethSigner(INTERNAL_ERROR),
+        "/",
+        Optional.of(5000));
   }
 
   @Test
@@ -604,7 +608,9 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
-        response.ethSigner(INTERNAL_ERROR));
+        response.ethSigner(INTERNAL_ERROR),
+        "/",
+        Optional.of(5000));
   }
 
   @Test
