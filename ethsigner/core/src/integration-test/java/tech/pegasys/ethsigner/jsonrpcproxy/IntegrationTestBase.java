@@ -263,8 +263,8 @@ public class IntegrationTestBase {
                 RestAssured.config()
                     .httpClient(
                         HttpClientConfig.httpClientConfig()
-                            .setParam(
-                                CoreConnectionPNames.CONNECTION_TIMEOUT, timeoutInMilliSec))));
+                            .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, timeoutInMilliSec)
+                            .setParam(CoreConnectionPNames.SO_TIMEOUT, timeoutInMilliSec))));
 
     final Response response = requestSpec.post(path);
 
