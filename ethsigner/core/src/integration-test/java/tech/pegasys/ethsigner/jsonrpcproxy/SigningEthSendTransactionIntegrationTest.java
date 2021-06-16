@@ -533,7 +533,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(INTERNAL_ERROR),
         "/",
-        Optional.of(Integer.valueOf(5000)));
+        Optional.of(5000));
   }
 
   @Test
@@ -545,7 +545,7 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(INTERNAL_ERROR),
         "/",
-        Optional.of(Integer.valueOf(5000)));
+        Optional.of(5000));
   }
 
   @Test
