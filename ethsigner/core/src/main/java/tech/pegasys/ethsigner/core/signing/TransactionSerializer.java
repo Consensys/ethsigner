@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
-import java.math.BigInteger;
-import org.jetbrains.annotations.NotNull;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
+
+import java.math.BigInteger;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
@@ -51,6 +51,7 @@ public class TransactionSerializer {
     return Numeric.toHexString(serializedBytes);
   }
 
+  // Modified from Web3j createEip155SignatureData to fix issue in multiplying large chainId
   private SignatureData createEip155SignatureData(final SignatureData web3jSignature) {
     BigInteger v = Numeric.toBigInt(web3jSignature.getV());
     v = v.subtract(BigInteger.valueOf(LOWER_REAL_V));
