@@ -12,16 +12,19 @@
  */
 package tech.pegasys.ethsigner.core.signing;
 
+import java.math.BigInteger;
+import org.jetbrains.annotations.NotNull;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
 public class TransactionSerializer {
+  private static final int CHAIN_ID_INC = 35;
+  private static final int LOWER_REAL_V = 27;
 
   protected final Signer signer;
   protected final long chainId;
@@ -42,11 +45,18 @@ public class TransactionSerializer {
             signature.getR().toByteArray(),
             signature.getS().toByteArray());
 
-    final SignatureData eip155Signature =
-        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
+    final SignatureData eip155Signature = createEip155SignatureData(web3jSignature);
 
     final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serializedBytes);
+  }
+
+  private SignatureData createEip155SignatureData(final SignatureData web3jSignature) {
+    BigInteger v = Numeric.toBigInt(web3jSignature.getV());
+    v = v.subtract(BigInteger.valueOf(LOWER_REAL_V));
+    v = v.add(BigInteger.valueOf(chainId).multiply(BigInteger.TWO));
+    v = v.add(BigInteger.valueOf(CHAIN_ID_INC));
+    return new SignatureData(v.toByteArray(), web3jSignature.getR(), web3jSignature.getS());
   }
 
   public String getAddress() {

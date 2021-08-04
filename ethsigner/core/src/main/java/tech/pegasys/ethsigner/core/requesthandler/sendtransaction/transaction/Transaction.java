@@ -47,7 +47,7 @@ public interface Transaction {
 
   JsonRpcRequest jsonRpcRequest(String signedTransactionHexString, JsonRpcRequestId id);
 
-  // NOTE: This was taken from Web3j TransactionEncode as the function is private
+  // NOTE: This was taken from Web3j TransactionEncoder as the function is private
   static byte[] longToBytes(final long x) {
     final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
     buffer.putLong(x);
