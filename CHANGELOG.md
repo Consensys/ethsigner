@@ -1,5 +1,20 @@
 # Changelog
 
+## 21.3.2
+
+### Bugs Fixed
+- Fix nonce too low retries and added support for "replacement underpriced" and "Known transaction" RPC responses
+
+## 21.3.1
+
+### Features Added
+- Update transaction signing to handle GoQuorum private transactions
+- Azure remote signing now supports new Azure keys using the curve name P-256K and signature algorithm
+  name ES256K. The deprecated keys using the SECP256K and signature algorithm name ECDSA256 are still supported.
+
+### Bugs Fixed
+- Fixing nonce too low retries and added support for replacement underpriced rpc response
+
 ## 21.3.0
 
 ### Features Added

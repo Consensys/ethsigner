@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
+import static tech.pegasys.ethsigner.core.util.ResponseCodeSelector.jsonRPCErrorCode;
 
 import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -65,11 +66,16 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       transaction = transactionFactory.createTransaction(context, request);
     } catch (final NumberFormatException e) {
       LOG.debug("Parsing values failed for request: {}", request.getParams(), e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      final JsonRpcException jsonRpcException = new JsonRpcException(INVALID_PARAMS);
+      context.fail(jsonRPCErrorCode(jsonRpcException), jsonRpcException);
+      return;
+    } catch (final JsonRpcException e) {
+      context.fail(jsonRPCErrorCode(e), e);
       return;
     } catch (final IllegalArgumentException | DecodeException e) {
       LOG.debug("JSON Deserialization failed for request: {}", request.getParams(), e);
-      context.fail(BAD_REQUEST.code(), new JsonRpcException(INVALID_PARAMS));
+      final JsonRpcException jsonRpcException = new JsonRpcException(INVALID_PARAMS);
+      context.fail(jsonRPCErrorCode(jsonRpcException), jsonRpcException);
       return;
     }
 

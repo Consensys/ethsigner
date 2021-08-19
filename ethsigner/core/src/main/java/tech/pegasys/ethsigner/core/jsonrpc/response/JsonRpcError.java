@@ -174,7 +174,10 @@ public enum JsonRpcError {
   FAILED_TO_CONNECT_TO_DOWNSTREAM_NODE(-32000, "Failed to connect to downstream node"),
 
   // Transaction signing errors
-  SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "No unlocked account matches the Sender");
+  SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT(-32000, "No unlocked account matches the Sender"),
+
+  // GoQuorum transaction validation
+  ETHER_VALUE_NOT_SUPPORTED(-30200, "ether value is not supported for private transactions");
 
   private final int code;
   private final String message;

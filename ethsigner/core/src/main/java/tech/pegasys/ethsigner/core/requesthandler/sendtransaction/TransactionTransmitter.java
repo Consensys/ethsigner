@@ -14,6 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.sendtransaction;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INTERNAL_ERROR;
+import static tech.pegasys.ethsigner.core.util.ResponseCodeSelector.jsonRPCErrorCode;
 
 import tech.pegasys.ethsigner.core.http.HeaderHelpers;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -79,7 +80,8 @@ public class TransactionTransmitter extends ForwardedMessageResponder {
       signedTransactionHexString = transactionSerializer.serialize(transaction);
     } catch (final IllegalArgumentException e) {
       LOG.debug("Failed to encode transaction: {}", transaction, e);
-      context().fail(BAD_REQUEST.code(), new JsonRpcException(JsonRpcError.INVALID_PARAMS));
+      final JsonRpcException jsonRpcException = new JsonRpcException(JsonRpcError.INVALID_PARAMS);
+      context().fail(jsonRPCErrorCode(jsonRpcException), jsonRpcException);
       return Optional.empty();
     } catch (final Throwable thrown) {
       LOG.debug("Failed to encode transaction: {}", transaction, thrown);

@@ -12,8 +12,8 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
+import static tech.pegasys.ethsigner.core.util.ResponseCodeSelector.jsonRPCErrorCode;
 
 import tech.pegasys.ethsigner.core.http.HttpResponseFactory;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -46,8 +46,9 @@ public class InternalResponseHandler<T> implements JsonRpcRequestHandler {
       final T result = responseResultProvider.createResponseResult(rpcRequest);
       responder.successResponse(context.response(), rpcRequest.getId(), result);
     } catch (final JsonRpcException e) {
+      final JsonRpcError jsonRpcError = e.getJsonRpcError();
       responder.failureResponse(
-          context.response(), rpcRequest.getId(), BAD_REQUEST.code(), e.getJsonRpcError());
+          context.response(), rpcRequest.getId(), jsonRPCErrorCode(e), jsonRpcError);
     } catch (final RuntimeException e) {
       responder.failureResponse(
           context.response(),
