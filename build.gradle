@@ -504,11 +504,7 @@ task dockerUpload(type: Exec) {
   dependsOn distDocker
   def imageName = "consensys/quorum-" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def cmd = "docker push '${image}'"
-
-  def psImageName = "pegasyseng/" + repositoryName
-  def psImage = project.hasProperty('release.releaseVersion') ? "${psImageName}:" + project.property('release.releaseVersion') : "${psImageName}:${project.version}"
-  cmd += " && docker tag '${image}' '${psImage}' && docker push '${psImage}'"
+  def cmd = "docker push '${image}' && docker tag '${image}'"
 
   def additionalTags = []
 
@@ -522,7 +518,6 @@ task dockerUpload(type: Exec) {
   }
 
   additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
-  additionalTags.each { tag -> cmd += " && docker tag '${image}' '${psImageName}:${tag.trim()}' && docker push '${psImageName}:${tag.trim()}'" }
   executable "sh"
   args "-c", cmd
 }
