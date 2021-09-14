@@ -469,7 +469,7 @@ tasks.register("dockerDistUntar") {
 task distDocker(type: Exec) {
   dependsOn dockerDistUntar
   def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
-  def imageName = "consensys/quorum-" + repositoryName
+  def imageName = "consensys/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   def dockerBuildDir = "build/docker-" + repositoryName + "/"
   workingDir "${dockerBuildDir}"
@@ -488,7 +488,7 @@ task distDocker(type: Exec) {
 task testDocker(type: Exec) {
   dependsOn distDocker
   def dockerReportsDir = "docker/reports/"
-  def imageName = "consensys/quorum-" + repositoryName
+  def imageName = "consensys/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
   workingDir "docker"
 
@@ -502,9 +502,13 @@ task testDocker(type: Exec) {
 
 task dockerUpload(type: Exec) {
   dependsOn distDocker
-  def imageName = "consensys/quorum-" + repositoryName
+  def imageName = "consensys/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def cmd = "docker push '${image}' && docker tag '${image}'"
+  def cmd = "docker push '${image}'"
+
+  def deprecatedQuorumImageName = "consensys/quorum-" + repositoryName
+  def deprecatedQuorumImage = project.hasProperty('release.releaseVersion') ? "${deprecatedQuorumImageName}:" + project.property('release.releaseVersion') : "${deprecatedQuorumImageName}:${project.version}"
+  cmd += " && docker tag '${image}' '${deprecatedQuorumImage}' && docker push '${deprecatedQuorumImage}'"
 
   def additionalTags = []
 
@@ -518,6 +522,7 @@ task dockerUpload(type: Exec) {
   }
 
   additionalTags.each { tag -> cmd += " && docker tag '${image}' '${imageName}:${tag.trim()}' && docker push '${imageName}:${tag.trim()}'" }
+  additionalTags.each { tag -> cmd += " && docker tag '${image}' '${deprecatedQuorumImageName}:${tag.trim()}' && docker push '${deprecatedQuorumImageName}:${tag.trim()}'" }
   executable "sh"
   args "-c", cmd
 }
