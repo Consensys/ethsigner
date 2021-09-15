@@ -1,5 +1,12 @@
 # Changelog
 
+## ...Next Version...
+
+### Features Added
+
+- Add publishing to docker namespace "consensys/ethsigner"
+- Deprecating docker namespace "consensys/quorum-ethsigner"
+
 ## 21.3.2
 
 ### Bugs Fixed
