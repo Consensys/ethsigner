@@ -2,6 +2,9 @@
 
 ## ...Next Version...
 
+### Breaking Changes
+- Upgrade to signers 1.0.18 removes support for deprecated SECP256K1 curve.
+
 ### Features Added
 
 - Add publishing to docker namespace "consensys/ethsigner"

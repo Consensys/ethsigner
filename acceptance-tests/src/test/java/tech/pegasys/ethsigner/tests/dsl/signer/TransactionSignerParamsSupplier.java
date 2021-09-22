@@ -83,7 +83,7 @@ public class TransactionSignerParamsSupplier {
       params.add("--key-name");
       params.add("TestKey");
       params.add("--key-version");
-      params.add("7c01fe58d68148bba5824ce418241092");
+      params.add("");
       params.add("--client-id");
       params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
