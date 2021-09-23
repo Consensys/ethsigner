@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
-import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.node.Node;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfig;
 import tech.pegasys.ethsigner.tests.dsl.node.besu.BesuNodeConfigBuilder;
@@ -37,6 +36,8 @@ import org.web3j.utils.Convert;
 public class ValueTransferWithAzureAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
+  private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
+      "0x8c250253147a091cfcb7e9425022bcd03a329ce6";
 
   private static Node ethNode;
   private static Signer ethSigner;
@@ -80,10 +81,6 @@ public class ValueTransferWithAzureAcceptanceTest {
     }
   }
 
-  private Account richBenefactor() {
-    return ethSigner.accounts().richBenefactor();
-  }
-
   private Signer ethSigner() {
     return ethSigner;
   }
@@ -99,7 +96,7 @@ public class ValueTransferWithAzureAcceptanceTest {
     final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            richBenefactor().address(),
+            AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY,
             null,
             GAS_PRICE,
             INTRINSIC_GAS,

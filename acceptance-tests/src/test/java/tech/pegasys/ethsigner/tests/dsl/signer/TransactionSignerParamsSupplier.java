@@ -81,7 +81,7 @@ public class TransactionSignerParamsSupplier {
       params.add("--key-vault-name");
       params.add(azureKeyVault);
       params.add("--key-name");
-      params.add("TestKey");
+      params.add("TestKey2");
       params.add("--key-version");
       params.add("");
       params.add("--client-id");

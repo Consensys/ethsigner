@@ -62,17 +62,16 @@ public class MultiKeyTransactionSigningAcceptanceTestBase extends MultiKeyAccept
   }
 
   void performTransaction() {
+    performTransaction(richBenefactor().address());
+  }
+
+  void performTransaction(String ethAddress) {
     final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
 
     final BigInteger startBalance = ethNode.accounts().balance(RECIPIENT);
     final Transaction transaction =
         Transaction.createEtherTransaction(
-            richBenefactor().address(),
-            null,
-            GAS_PRICE,
-            INTRINSIC_GAS,
-            RECIPIENT,
-            transferAmountWei);
+            ethAddress, null, GAS_PRICE, INTRINSIC_GAS, RECIPIENT, transferAmountWei);
 
     final String hash = ethSigner.transactions().submit(transaction);
     ethNode.transactions().awaitBlockContaining(hash);
