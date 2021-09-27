@@ -98,6 +98,7 @@ downloadLicenses {
                   license('New BSD License', 'http://www.opensource.org/licenses/bsd-license.php')
           ],
           (bsd3Clause): [
+                  'BSD-3-Clause',
                   'BSD 3-Clause',
                   'BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)',
                   '3-Clause BSD License',
@@ -162,7 +163,8 @@ downloadLicenses {
           (group('javax.xml.bind')): cddl1_1,
           (group('net.jcip')): apache,
           (group('net.java.dev.jna')): apache,
-          (group('com.sun.mail')): cddl
+          (group('com.sun.mail')): cddl,
+          (group('io.netty')): apache,
   ]
 }
 

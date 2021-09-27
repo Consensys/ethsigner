@@ -25,7 +25,9 @@ public class MultiKeyAzureTransactionSignerAcceptanceTest
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
   static final String tenantId = System.getenv("ETHSIGNER_AZURE_TENANT_ID");
-  static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";
+  static final String FILENAME = "8c250253147a091cfcb7e9425022bcd03a329ce6";
+  private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
+      "0x8c250253147a091cfcb7e9425022bcd03a329ce6";
 
   @BeforeAll
   public static void checkAzureCredentials() {
@@ -44,6 +46,6 @@ public class MultiKeyAzureTransactionSignerAcceptanceTest
 
     setup(tomlDirectory);
 
-    performTransaction();
+    performTransaction(AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY);
   }
 }

@@ -29,7 +29,7 @@ dependencyManagement {
 
     dependency 'io.rest-assured:rest-assured:4.3.1'
 
-    dependencySet(group: 'io.vertx', version: '3.9.1') {
+    dependencySet(group: 'io.vertx', version: '3.9.9') {
        entry 'vertx-codegen'
        entry 'vertx-core'
        entry 'vertx-unit'
@@ -70,7 +70,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.17') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '1.0.19') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
