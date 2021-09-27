@@ -4,9 +4,11 @@
 ### Breaking Changes
 - Upgrade to signers 1.0.19 removes support for deprecated SECP256K1 curve in Azure remote signing [#386](https://github.com/ConsenSys/ethsigner/pull/386)
 
+### Bugs Fixed
+- Upgrade web3j to latest version for fix to handle large chainids in eip155 transactions [#382](https://github.com/ConsenSys/ethsigner/pull/382)
+
 ### Features Added
 - Add validation for GoQuorum transactions with value [#377](https://github.com/ConsenSys/ethsigner/pull/377)
-- Upgrade web3j to latest version for fix to handle large chainids in eip155 transactions [#382](https://github.com/ConsenSys/ethsigner/pull/382)
 - Add publishing to docker namespace "consensys/ethsigner" and deprecate docker namespace "consensys/quorum-ethsigner" [#384](https://github.com/ConsenSys/ethsigner/issues/384)
 - Upgrade to signers 1.0.19 allows empty password files to be read when creating a Signer [#372](https://github.com/ConsenSys/ethsigner/issues/372)
 
