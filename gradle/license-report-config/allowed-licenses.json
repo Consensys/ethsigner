@@ -59,16 +59,6 @@
     {
       "moduleLicense": "The BSD License",
       "moduleName": ".*"
-    },
-    {
-      "moduleLicense": "IAIK of Graz University of Technology License",
-      "moduleVersion": "1.4.7",
-      "moduleName": "org.xipki.iaik:sunpkcs11-wrapper"
-    },
-    {
-      "moduleName": "com.fasterxml.jackson:jackson-bom",
-      "moduleVersion": "2.12.4",
-      "moduleLicense": "Apache License, Version 2.0"
     }
   ],
   "overrideLicenses": [
@@ -82,22 +72,22 @@
     },
     {
       "moduleName": "jakarta.activation:jakarta.activation-api",
-      "moduleLicense": "Eclipse Distribution License - v 1.0"
+      "moduleLicense": "Eclipse Public License - v 2.0"
     },
     {
       "moduleName": "jakarta.xml.bind:jakarta.xml.bind-api",
-      "moduleLicense": "Eclipse Distribution License - v 1.0"
-    },
-    {
-      "moduleName": "jakarta.validation:jakarta.validation-api",
-      "moduleLicense": "Apache License, Version 2.0"
+      "moduleLicense": "Eclipse Public License - v 2.0"
     },
     {
       "moduleName": "javax.xml.bind:jaxb-api",
       "moduleLicense": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.1"
     },
     {
-      "moduleName": "net.java.dev.jna",
+      "moduleName": "net.java.dev.jna:jna",
+      "moduleLicense": "Apache License, Version 2.0"
+    },
+    {
+      "moduleName": "net.java.dev.jna:jna-platform",
       "moduleLicense": "Apache License, Version 2.0"
     },
     {
@@ -109,16 +99,7 @@
       "moduleLicense": "Apache License, Version 2.0"
     },
     {
-      "moduleName": "org.hdrhistogram:HdrHistogram",
-      "moduleLicense": "The 2-Clause BSD License"
-    },
-    {
       "moduleName": "org.ow2.asm",
-      "moduleLicense": "Apache License, Version 2.0"
-    },
-    {
-      "moduleName": "com.fasterxml.jackson:jackson-bom",
-      "moduleVersion": "2.12.4",
       "moduleLicense": "Apache License, Version 2.0"
     }
   ]
