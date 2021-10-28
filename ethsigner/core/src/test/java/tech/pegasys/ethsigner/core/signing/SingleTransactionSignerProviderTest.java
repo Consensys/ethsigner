@@ -78,7 +78,7 @@ class SingleTransactionSignerProviderTest {
 
   @Test
   void whenGetSignerWithNullAddressShouldReturnEmpty() {
-    assertThat(signerFactory.getSigner(null)).isEmpty();
+    assertThat(signerFactory.getSigner((ECPublicKey) null)).isEmpty();
   }
 
   @Test

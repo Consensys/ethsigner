@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.subcommands;
 import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 import tech.pegasys.signers.secp256k1.api.FileSelector;
 
-import java.io.IOException;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Path;
 import java.security.interfaces.ECPublicKey;
@@ -23,7 +22,7 @@ import java.security.interfaces.ECPublicKey;
 import com.google.common.io.Files;
 import org.web3j.crypto.Keys;
 
-public class EthSignerFileSelector implements FileSelector<ECPublicKey> {
+public class EthSignerFileSelector implements FileSelector<ECPublicKey, String> {
 
   final String fileExtension = "toml";
 
@@ -41,11 +40,22 @@ public class EthSignerFileSelector implements FileSelector<ECPublicKey> {
     return entry -> matchesPublicKey(publicKey, entry);
   }
 
-  public boolean matchesPublicKey(final ECPublicKey publicKey, final Path entry)
-      throws IOException {
-    String addressToMatch = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKey));
+  @Override
+  public Filter<Path> getSingleConfigFileFilter(final String address) {
+    return entry -> matchesAddress(remove0xPrefix(address), entry);
+  }
 
+  public boolean matchesPublicKey(final ECPublicKey publicKey, final Path entry) {
+    final String addressToMatch = Keys.getAddress(EthPublicKeyUtils.toHexString(publicKey));
+    return matchesAddress(addressToMatch, entry);
+  }
+
+  public boolean matchesAddress(final String addressToMatch, final Path entry) {
     return Files.getNameWithoutExtension(entry.getFileName().toString()).endsWith(addressToMatch)
         && hasExpectedFileExtension(entry);
+  }
+
+  static String remove0xPrefix(final String address) {
+    return address.toLowerCase().startsWith("0x") ? address.substring(2) : address;
   }
 }

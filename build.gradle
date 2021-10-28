@@ -117,7 +117,7 @@ allprojects {
   targetCompatibility = 11
 
   repositories {
-    jcenter()
+    mavenLocal()
     mavenCentral()
     maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven" }
     maven { url "https://artifacts.consensys.net/public/maven/maven/" }
