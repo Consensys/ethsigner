@@ -18,7 +18,6 @@ import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -65,7 +64,8 @@ public class AddressIndexedSignerProvider {
     if (publicKey == null) {
       // attempts to load config/signer via address
       final Optional<Signer> signer = signerProvider.getSigner(address.toLowerCase());
-      signer.ifPresent(value -> addressToPublicKeyMap.put(address.toLowerCase(), value.getPublicKey()));
+      signer.ifPresent(
+          value -> addressToPublicKeyMap.put(address.toLowerCase(), value.getPublicKey()));
       return signer;
     }
     return signerProvider.getSigner(publicKey);
