@@ -70,6 +70,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
+    // TODO: Change version to 1.0.20
     dependencySet(group: 'tech.pegasys.signers.internal', version: 'develop') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
