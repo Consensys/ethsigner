@@ -76,6 +76,16 @@ public class AddressIndexedSignerProvider {
   }
 
   public Set<ECPublicKey> availablePublicKeys() {
-    return signerProvider.availablePublicKeys();
+    final Set<ECPublicKey> publicKeys = signerProvider.availablePublicKeys();
+    // update local cache
+    publicKeys.forEach(
+        pubKey -> {
+          final String address =
+              "0x"
+                  + Keys.getAddress(Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
+                      .toLowerCase();
+          addressToPublicKeyMap.putIfAbsent(address, pubKey);
+        });
+    return publicKeys;
   }
 }

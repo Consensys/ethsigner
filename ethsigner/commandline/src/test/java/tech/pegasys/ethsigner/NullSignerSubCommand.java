@@ -73,6 +73,11 @@ public class NullSignerSubCommand extends SignerSubCommand {
     }
 
     @Override
+    public Optional<Signer> getSigner(final String fileName) {
+      return Optional.empty();
+    }
+
+    @Override
     public Set<ECPublicKey> availablePublicKeys() {
       return Collections.emptySet();
     }
