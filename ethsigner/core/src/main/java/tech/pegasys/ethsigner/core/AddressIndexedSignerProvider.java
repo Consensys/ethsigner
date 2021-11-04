@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.web3j.crypto.Keys;
@@ -37,23 +38,14 @@ public class AddressIndexedSignerProvider {
   public AddressIndexedSignerProvider(
       final SignerProvider signerProvider, final Map<String, ECPublicKey> addressToPublicKeyMap) {
     this.signerProvider = signerProvider;
-    this.addressToPublicKeyMap = addressToPublicKeyMap;
+    this.addressToPublicKeyMap = new HashMap<>(addressToPublicKeyMap);
   }
 
   public static AddressIndexedSignerProvider create(final SignerProvider signerProvider) {
-    final Map<String, ECPublicKey> addrToPubKeyMap = new HashMap<>();
-
-    signerProvider
-        .availablePublicKeys()
-        .forEach(
-            pubKey -> {
-              final String address =
-                  "0x"
-                      + Keys.getAddress(
-                              Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
-                          .toLowerCase();
-              addrToPubKeyMap.put(address, pubKey);
-            });
+    final Map<String, ECPublicKey> addrToPubKeyMap =
+        signerProvider.availablePublicKeys().stream()
+            .map(pubKey -> Map.entry(getAddress(pubKey), pubKey))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     return new AddressIndexedSignerProvider(signerProvider, addrToPubKeyMap);
   }
@@ -62,8 +54,9 @@ public class AddressIndexedSignerProvider {
   public Optional<Signer> getSigner(final String address) {
     final ECPublicKey publicKey = addressToPublicKeyMap.get(address.toLowerCase());
     if (publicKey == null) {
-      // attempts to load config/signer via address
+      // attempts to load config/signer via address in fileName
       final Optional<Signer> signer = signerProvider.getSigner(address.toLowerCase());
+      // put it in local cache
       signer.ifPresent(
           value -> addressToPublicKeyMap.put(address.toLowerCase(), value.getPublicKey()));
       return signer;
@@ -76,16 +69,22 @@ public class AddressIndexedSignerProvider {
   }
 
   public Set<ECPublicKey> availablePublicKeys() {
-    final Set<ECPublicKey> publicKeys = signerProvider.availablePublicKeys();
+    final Set<ECPublicKey> ecPublicKeys = signerProvider.availablePublicKeys();
+    final Map<String, ECPublicKey> addrToPubKeyMap =
+        ecPublicKeys.stream()
+            .map(pubKey -> Map.entry(getAddress(pubKey), pubKey))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     // update local cache
-    publicKeys.forEach(
-        pubKey -> {
-          final String address =
-              "0x"
-                  + Keys.getAddress(Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
-                      .toLowerCase();
-          addressToPublicKeyMap.putIfAbsent(address, pubKey);
-        });
-    return publicKeys;
+    addressToPublicKeyMap.clear();
+    addressToPublicKeyMap.putAll(addrToPubKeyMap);
+
+    return ecPublicKeys;
+  }
+
+  private static String getAddress(final ECPublicKey pubKey) {
+    return "0x"
+        + Keys.getAddress(Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
+            .toLowerCase();
   }
 }
