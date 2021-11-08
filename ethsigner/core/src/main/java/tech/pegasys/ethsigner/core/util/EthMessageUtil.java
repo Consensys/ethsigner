@@ -21,7 +21,7 @@ import org.apache.tuweni.bytes.Bytes;
 // adapted from
 // https://github.com/web3j/web3j/blob/7054ab324cab0d44a759780e61ee12978fd17490/crypto/src/main/java/org/web3j/crypto/Sign.java#L59
 public class EthMessageUtil {
-  static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
+  private static final String MESSAGE_PREFIX = "\u0019Ethereum Signed Message:\n";
 
   /**
    * Converts input message (hex or literal string) to Ethereum specific message so that it can be
@@ -41,11 +41,11 @@ public class EthMessageUtil {
     return result;
   }
 
-  static byte[] getEthereumMessagePrefix(int messageLength) {
+  private static byte[] getEthereumMessagePrefix(int messageLength) {
     return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes(UTF_8);
   }
 
-  static byte[] hexToBytes(final String message) {
+  private static byte[] hexToBytes(final String message) {
     if (message.toLowerCase(Locale.US).startsWith("0x")) {
       return Bytes.fromHexString(message).toArray();
     }
