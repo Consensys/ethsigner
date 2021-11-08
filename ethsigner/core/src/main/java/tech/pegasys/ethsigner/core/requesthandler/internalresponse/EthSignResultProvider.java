@@ -14,7 +14,7 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
-import static tech.pegasys.ethsigner.core.util.HexUtil.hexToString;
+import static tech.pegasys.ethsigner.core.util.EthMessageUtil.getEthereumMessage;
 
 import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -24,7 +24,6 @@ import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,11 +61,8 @@ public class EthSignResultProvider implements ResultProvider<String> {
     }
 
     final Signer signer = transactionSigner.get();
-    final String originalMessage = hexToString(params.get(1));
-
-    final String message =
-        (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
-    final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
+    final byte[] ethMessage = getEthereumMessage(params.get(1));
+    final Signature signature = signer.sign(ethMessage);
 
     final Bytes outputSignature =
         Bytes.concatenate(
