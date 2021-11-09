@@ -61,7 +61,7 @@ public class EthSignResultProvider implements ResultProvider<String> {
     }
 
     final Signer signer = transactionSigner.get();
-    final byte[] ethMessage = getEthereumMessage(params.get(1));
+    final byte[] ethMessage = getEthereumMessage(params.get(1)).toArray();
     final Signature signature = signer.sign(ethMessage);
 
     final Bytes outputSignature =

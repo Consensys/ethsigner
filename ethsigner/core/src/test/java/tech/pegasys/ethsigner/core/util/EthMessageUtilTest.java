@@ -20,7 +20,7 @@ class EthMessageUtilTest {
   @Test
   void hexStringToEthMessage() {
     final String message = "0xdeadbeaf";
-    Assertions.assertThat(Bytes.of(EthMessageUtil.getEthereumMessage(message)))
+    Assertions.assertThat(EthMessageUtil.getEthereumMessage(message))
         .isEqualTo(
             Bytes.fromHexString(
                 "0x19457468657265756d205369676e6564204d6573736167653a0a34deadbeaf"));
@@ -29,14 +29,14 @@ class EthMessageUtilTest {
   @Test
   void emptyStringToEthMessage() {
     final String message = "";
-    Assertions.assertThat(Bytes.of(EthMessageUtil.getEthereumMessage(message)))
+    Assertions.assertThat(EthMessageUtil.getEthereumMessage(message))
         .isEqualTo(Bytes.fromHexString("0x19457468657265756d205369676e6564204d6573736167653a0a30"));
   }
 
   @Test
   void literalStringToEthMessage() {
     final String message = "hello world";
-    Assertions.assertThat(Bytes.of(EthMessageUtil.getEthereumMessage(message)))
+    Assertions.assertThat(EthMessageUtil.getEthereumMessage(message))
         .isEqualTo(
             Bytes.fromHexString(
                 "0x19457468657265756d205369676e6564204d6573736167653a0a313168656c6c6f20776f726c64"));

@@ -155,7 +155,7 @@ public class EthSignResultProviderTest {
     final String hexSignature = (String) result;
     final byte[] signature = Numeric.hexStringToByteArray(hexSignature);
     final ECDSASignature expectedSignature =
-        keyPair.sign(Hash.sha3(EthMessageUtil.getEthereumMessage(message)));
+        keyPair.sign(Hash.sha3(EthMessageUtil.getEthereumMessage(message).toArray()));
     assertThat(new BigInteger(1, signature, 0, 32)).isEqualTo(expectedSignature.r);
     assertThat(new BigInteger(1, signature, 32, 32)).isEqualTo(expectedSignature.s);
   }

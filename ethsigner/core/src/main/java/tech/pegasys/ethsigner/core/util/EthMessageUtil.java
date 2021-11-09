@@ -28,27 +28,23 @@ public class EthMessageUtil {
    * signed. <code>\x19Ethereum Signed Message:\n" + len(message) + message</code>
    *
    * @param message Hex String (starts with 0x) or literal string
-   * @return byte[] of ethereum formatted message ready to be signed
+   * @return Bytes wrapping byte[] of ethereum formatted message ready to be signed
    */
-  public static byte[] getEthereumMessage(final String message) {
-    final byte[] messageBytes = hexToBytes(message);
-    final byte[] prefix = getEthereumMessagePrefix(messageBytes.length);
+  public static Bytes getEthereumMessage(final String message) {
+    final Bytes messageBytes = hexToBytes(message);
+    final Bytes prefix = getEthereumMessagePrefix(messageBytes.size());
 
-    byte[] result = new byte[prefix.length + messageBytes.length];
-    System.arraycopy(prefix, 0, result, 0, prefix.length);
-    System.arraycopy(messageBytes, 0, result, prefix.length, messageBytes.length);
-
-    return result;
+    return Bytes.wrap(prefix, messageBytes);
   }
 
-  private static byte[] getEthereumMessagePrefix(int messageLength) {
-    return MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes(UTF_8);
+  private static Bytes getEthereumMessagePrefix(final int messageLength) {
+    return Bytes.of(MESSAGE_PREFIX.concat(String.valueOf(messageLength)).getBytes(UTF_8));
   }
 
-  private static byte[] hexToBytes(final String message) {
+  private static Bytes hexToBytes(final String message) {
     if (message.toLowerCase(Locale.US).startsWith("0x")) {
-      return Bytes.fromHexString(message).toArray();
+      return Bytes.fromHexString(message);
     }
-    return message.getBytes(UTF_8);
+    return Bytes.of(message.getBytes(UTF_8));
   }
 }
