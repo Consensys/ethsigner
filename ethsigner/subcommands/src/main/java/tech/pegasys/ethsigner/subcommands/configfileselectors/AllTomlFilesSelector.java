@@ -17,9 +17,15 @@ import tech.pegasys.signers.secp256k1.api.FileSelector;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 
-public class EthSignerAllFilesSelector extends EthSignerFileSelector implements FileSelector<Void> {
+import com.google.common.io.Files;
+
+public class AllTomlFilesSelector implements FileSelector<Void> {
   @Override
   public DirectoryStream.Filter<Path> getConfigFilesFilter(final Void unused) {
-    return this::hasExpectedFileExtension;
+    return this::hasTomlExtension;
+  }
+
+  private boolean hasTomlExtension(final Path entry) {
+    return Files.getFileExtension(entry.toString()).equals("toml");
   }
 }

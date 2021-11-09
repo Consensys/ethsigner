@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner;
 
 import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerIdentifier;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
@@ -20,6 +21,7 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -68,17 +70,13 @@ public class NullSignerSubCommand extends SignerSubCommand {
   public static class EmptySignerProvider implements SignerProvider {
 
     @Override
-    public Optional<Signer> getSigner(final ECPublicKey pubKey) {
+    public Optional<Signer> getSigner(final SignerIdentifier signerIdentifier) {
       return Optional.empty();
     }
 
     @Override
-    public Optional<Signer> getSigner(final String fileName) {
-      return Optional.empty();
-    }
-
-    @Override
-    public Set<ECPublicKey> availablePublicKeys() {
+    public Set<ECPublicKey> availablePublicKeys(
+        final Function<ECPublicKey, SignerIdentifier> function) {
       return Collections.emptySet();
     }
   }

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static tech.pegasys.ethsigner.support.PublicKeyUtils.createKeyFrom;
 
+import tech.pegasys.ethsigner.core.Eth1AddressSignerIdentifier;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 
@@ -48,7 +49,8 @@ class SingleTransactionSignerProviderTest {
   void whenSignerPublicKeyIsNullFactoryAvailablePublicKeysShouldReturnEmptySet() {
     when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Collection<ECPublicKey> publicKeys = signerFactory.availablePublicKeys();
+    final Collection<ECPublicKey> publicKeys =
+        signerFactory.availablePublicKeys(Eth1AddressSignerIdentifier::fromPublicKey);
     assertThat(publicKeys).isEmpty();
   }
 
@@ -56,7 +58,8 @@ class SingleTransactionSignerProviderTest {
   void whenSignerPublicKeyIsNullFactoryGetSignerShouldReturnEmpty() {
     when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x00"));
+    final Optional<Signer> signer =
+        signerFactory.getSigner(Eth1AddressSignerIdentifier.fromPublicKey(createKeyFrom("0x00")));
     assertThat(signer).isEmpty();
   }
 
@@ -64,7 +67,8 @@ class SingleTransactionSignerProviderTest {
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
     when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x00"));
+    final Optional<Signer> signer =
+        signerFactory.getSigner(Eth1AddressSignerIdentifier.fromPublicKey(createKeyFrom("0x00")));
     assertThat(signer).isNotEmpty();
   }
 
@@ -72,20 +76,27 @@ class SingleTransactionSignerProviderTest {
   void getSignerPublicKeyIsCaseInsensitive() {
     when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0xAA"));
 
-    assertThat(signerFactory.getSigner(createKeyFrom("0xaa"))).isNotEmpty();
-    assertThat(signerFactory.getSigner(createKeyFrom("0xAA"))).isNotEmpty();
+    assertThat(
+            signerFactory.getSigner(
+                Eth1AddressSignerIdentifier.fromPublicKey(createKeyFrom("0xaa"))))
+        .isNotEmpty();
+    assertThat(
+            signerFactory.getSigner(
+                Eth1AddressSignerIdentifier.fromPublicKey(createKeyFrom("0xAA"))))
+        .isNotEmpty();
   }
 
   @Test
   void whenGetSignerWithNullAddressShouldReturnEmpty() {
-    assertThat(signerFactory.getSigner((ECPublicKey) null)).isEmpty();
+    assertThat(signerFactory.getSigner(null)).isEmpty();
   }
 
   @Test
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
     when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x01"));
+    final Optional<Signer> signer =
+        signerFactory.getSigner(Eth1AddressSignerIdentifier.fromPublicKey(createKeyFrom("0x01")));
     assertThat(signer).isEmpty();
   }
 
@@ -93,7 +104,8 @@ class SingleTransactionSignerProviderTest {
   void whenGetAvailablePublicKeyShouldReturnSignerAddress() {
     when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Collection<ECPublicKey> addresses = signerFactory.availablePublicKeys();
+    final Collection<ECPublicKey> addresses =
+        signerFactory.availablePublicKeys(Eth1AddressSignerIdentifier::fromPublicKey);
     assertThat(addresses).containsExactly(createKeyFrom("0x00"));
   }
 }

@@ -12,79 +12,41 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.security.interfaces.ECPublicKey;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.tuweni.bytes.Bytes;
-import org.web3j.crypto.Keys;
+import com.google.common.annotations.VisibleForTesting;
 
 public class AddressIndexedSignerProvider {
-
-  // Provides a signer based on its Public Key
   private final SignerProvider signerProvider;
 
-  // String is an 0x prefixed hex string of the ethereum address corresponding to the public
-  // key.
-  private final Map<String, ECPublicKey> addressToPublicKeyMap;
-
-  public AddressIndexedSignerProvider(
-      final SignerProvider signerProvider, final Map<String, ECPublicKey> addressToPublicKeyMap) {
+  public AddressIndexedSignerProvider(final SignerProvider signerProvider) {
     this.signerProvider = signerProvider;
-    this.addressToPublicKeyMap = new HashMap<>(addressToPublicKeyMap);
   }
 
   public static AddressIndexedSignerProvider create(final SignerProvider signerProvider) {
-    final Map<String, ECPublicKey> addrToPubKeyMap =
-        signerProvider.availablePublicKeys().stream()
-            .map(pubKey -> Map.entry(getAddress(pubKey), pubKey))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-    return new AddressIndexedSignerProvider(signerProvider, addrToPubKeyMap);
+    return new AddressIndexedSignerProvider(signerProvider);
   }
 
   /* Gets a signer from its address, NOTE address MUST have 0x hex prefix */
   public Optional<Signer> getSigner(final String address) {
-    final ECPublicKey publicKey = addressToPublicKeyMap.get(address.toLowerCase());
-    if (publicKey == null) {
-      // attempts to load config/signer via address in fileName
-      final Optional<Signer> signer = signerProvider.getSigner(address.toLowerCase());
-      // put it in local cache
-      signer.ifPresent(
-          value -> addressToPublicKeyMap.put(address.toLowerCase(), value.getPublicKey()));
-      return signer;
-    }
-    return signerProvider.getSigner(publicKey);
+    return signerProvider.getSigner(new Eth1AddressSignerIdentifier(address));
   }
 
+  @VisibleForTesting
   public Set<String> availableAddresses() {
-    return addressToPublicKeyMap.keySet();
+    return availablePublicKeys().stream()
+        .map(Eth1AddressSignerIdentifier::fromPublicKey)
+        .map(signerIdentifier -> "0x" + signerIdentifier.toStringIdentifier())
+        .collect(Collectors.toSet());
   }
 
   public Set<ECPublicKey> availablePublicKeys() {
-    final Set<ECPublicKey> ecPublicKeys = signerProvider.availablePublicKeys();
-    final Map<String, ECPublicKey> addrToPubKeyMap =
-        ecPublicKeys.stream()
-            .map(pubKey -> Map.entry(getAddress(pubKey), pubKey))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-    // update local cache
-    addressToPublicKeyMap.clear();
-    addressToPublicKeyMap.putAll(addrToPubKeyMap);
-
-    return ecPublicKeys;
-  }
-
-  private static String getAddress(final ECPublicKey pubKey) {
-    return "0x"
-        + Keys.getAddress(Bytes.wrap(EthPublicKeyUtils.toByteArray(pubKey)).toHexString())
-            .toLowerCase();
+    return signerProvider.availablePublicKeys(Eth1AddressSignerIdentifier::fromPublicKey);
   }
 }

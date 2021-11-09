@@ -18,9 +18,8 @@ import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOpt
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.ethsigner.annotations.RequiredOption;
 import tech.pegasys.ethsigner.core.InitializationException;
-import tech.pegasys.ethsigner.subcommands.configfileselectors.EthSignerAddressConfigFileSelector;
-import tech.pegasys.ethsigner.subcommands.configfileselectors.EthSignerAllFilesSelector;
-import tech.pegasys.ethsigner.subcommands.configfileselectors.EthSignerPublicKeyConfigFileSelector;
+import tech.pegasys.ethsigner.subcommands.configfileselectors.AllTomlFilesSelector;
+import tech.pegasys.ethsigner.subcommands.configfileselectors.SignerIdentifierConfigFileSelector;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.multikey.MultiKeySignerProvider;
@@ -72,10 +71,7 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Override
   public SignerProvider createSignerFactory() throws SignerInitializationException {
     return MultiKeySignerProvider.create(
-        directoryPath,
-        new EthSignerAllFilesSelector(),
-        new EthSignerPublicKeyConfigFileSelector(),
-        new EthSignerAddressConfigFileSelector());
+        directoryPath, new AllTomlFilesSelector(), new SignerIdentifierConfigFileSelector());
   }
 
   @Override
