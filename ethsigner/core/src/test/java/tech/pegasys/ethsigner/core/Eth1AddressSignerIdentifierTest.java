@@ -48,6 +48,13 @@ class Eth1AddressSignerIdentifierTest {
   }
 
   @Test
+  void validateFailsForNullPrimaryKey() {
+    final ECPublicKey publicKey = PublicKeyUtils.createKeyFrom("0xab");
+    final SignerIdentifier signerIdentifier = Eth1AddressSignerIdentifier.fromPublicKey(publicKey);
+    assertThat(signerIdentifier.validate(null)).isFalse();
+  }
+
+  @Test
   void correctEth1AddressIsGeneratedFromPublicKey() {
     final ECPublicKey publicKey = PublicKeyUtils.createKeyFrom("0xab");
     final SignerIdentifier signerIdentifier = Eth1AddressSignerIdentifier.fromPublicKey(publicKey);
