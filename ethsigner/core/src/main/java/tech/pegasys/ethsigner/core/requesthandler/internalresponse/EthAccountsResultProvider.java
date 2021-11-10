@@ -12,11 +12,11 @@
  */
 package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
+import tech.pegasys.ethsigner.core.Eth1AddressSignerIdentifier;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
-import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.Collection;
@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tuweni.bytes.Bytes;
-import org.web3j.crypto.Keys;
 
 public class EthAccountsResultProvider implements ResultProvider<List<String>> {
 
@@ -50,7 +48,8 @@ public class EthAccountsResultProvider implements ResultProvider<List<String>> {
     }
 
     return publicKeySupplier.get().stream()
-        .map(pk -> Bytes.wrap(Keys.getAddress(EthPublicKeyUtils.toByteArray(pk))).toHexString())
+        .map(Eth1AddressSignerIdentifier::fromPublicKey)
+        .map(signerIdentifier -> "0x" + signerIdentifier.toStringIdentifier())
         .sorted()
         .collect(Collectors.toList());
   }

@@ -18,32 +18,18 @@ import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import java.security.interfaces.ECPublicKey;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.google.common.annotations.VisibleForTesting;
-
-public class AddressIndexedSignerProvider {
+/** Wrapper on SignerProvider that uses address (Eth1AddressSignerIdentifier) to load signer */
+public class Eth1AddressSignerProvider {
   private final SignerProvider signerProvider;
 
-  public AddressIndexedSignerProvider(final SignerProvider signerProvider) {
+  public Eth1AddressSignerProvider(final SignerProvider signerProvider) {
     this.signerProvider = signerProvider;
   }
 
-  public static AddressIndexedSignerProvider create(final SignerProvider signerProvider) {
-    return new AddressIndexedSignerProvider(signerProvider);
-  }
-
-  /* Gets a signer from its address, NOTE address MUST have 0x hex prefix */
+  /* Gets a signer from its address, address is expected to be hex value, with or without 0x */
   public Optional<Signer> getSigner(final String address) {
     return signerProvider.getSigner(new Eth1AddressSignerIdentifier(address));
-  }
-
-  @VisibleForTesting
-  public Set<String> availableAddresses() {
-    return availablePublicKeys().stream()
-        .map(Eth1AddressSignerIdentifier::fromPublicKey)
-        .map(signerIdentifier -> "0x" + signerIdentifier.toStringIdentifier())
-        .collect(Collectors.toSet());
   }
 
   public Set<ECPublicKey> availablePublicKeys() {

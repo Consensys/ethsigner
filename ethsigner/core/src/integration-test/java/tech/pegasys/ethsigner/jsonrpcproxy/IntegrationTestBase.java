@@ -25,7 +25,8 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.web3j.utils.Async.defaultExecutorService;
 
-import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
+import tech.pegasys.ethsigner.core.Eth1AddressSignerIdentifier;
+import tech.pegasys.ethsigner.core.Eth1AddressSignerProvider;
 import tech.pegasys.ethsigner.core.Runner;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.metrics.MetricsEndpoint;
@@ -122,9 +123,8 @@ public class IntegrationTestBase {
     final File passwordFile = createFile("password");
     credentials = WalletUtils.loadCredentials("password", keyFile);
 
-    final AddressIndexedSignerProvider transactionSignerProvider =
-        AddressIndexedSignerProvider.create(
-            new SingleSignerProvider(signer(keyFile, passwordFile)));
+    final Eth1AddressSignerProvider transactionSignerProvider =
+        new Eth1AddressSignerProvider(new SingleSignerProvider(signer(keyFile, passwordFile)));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -168,7 +168,11 @@ public class IntegrationTestBase {
         clientAndServer.getLocalPort());
 
     unlockedAccount =
-        transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
+        transactionSignerProvider.availablePublicKeys().stream()
+            .map(Eth1AddressSignerIdentifier::fromPublicKey)
+            .map(signerIdentifier -> "0x" + signerIdentifier)
+            .findAny()
+            .orElseThrow();
   }
 
   Web3j jsonRpc() {

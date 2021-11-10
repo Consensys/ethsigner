@@ -66,7 +66,7 @@ public class Runner {
   private static final String TEXT = HttpHeaderValues.TEXT_PLAIN.toString() + "; charset=utf-8";
 
   private final long chainId;
-  private final AddressIndexedSignerProvider signerProvider;
+  private final Eth1AddressSignerProvider signerProvider;
   private final HttpClientOptions clientOptions;
   private final Duration httpRequestTimeout;
   private final DownstreamPathCalculator downstreamPathCalculator;
@@ -80,7 +80,7 @@ public class Runner {
 
   public Runner(
       final long chainId,
-      final AddressIndexedSignerProvider signerProvider,
+      final Eth1AddressSignerProvider signerProvider,
       final HttpClientOptions clientOptions,
       final HttpServerOptions serverOptions,
       final Duration httpRequestTimeout,
