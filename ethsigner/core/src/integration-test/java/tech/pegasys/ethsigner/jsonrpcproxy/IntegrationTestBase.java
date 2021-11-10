@@ -170,7 +170,7 @@ public class IntegrationTestBase {
     unlockedAccount =
         transactionSignerProvider.availablePublicKeys().stream()
             .map(Eth1AddressSignerIdentifier::fromPublicKey)
-            .map(signerIdentifier -> "0x" + signerIdentifier)
+            .map(signerIdentifier -> "0x" + signerIdentifier.toStringIdentifier())
             .findAny()
             .orElseThrow();
   }

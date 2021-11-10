@@ -48,6 +48,11 @@ public class Eth1AddressSignerIdentifier implements SignerIdentifier {
   }
 
   @Override
+  public String toString() {
+    return toStringIdentifier();
+  }
+
+  @Override
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
