@@ -16,7 +16,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.core.util.EthMessageUtil.getEthereumMessage;
 
-import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
+import tech.pegasys.ethsigner.core.Eth1AddressSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
@@ -37,9 +37,9 @@ public class EthSignResultProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final AddressIndexedSignerProvider transactionSignerProvider;
+  private final Eth1AddressSignerProvider transactionSignerProvider;
 
-  public EthSignResultProvider(final AddressIndexedSignerProvider transactionSignerProvider) {
+  public EthSignResultProvider(final Eth1AddressSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 

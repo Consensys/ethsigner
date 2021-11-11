@@ -17,7 +17,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.core.util.ResponseCodeSelector.jsonRPCErrorCode;
 
-import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
+import tech.pegasys.ethsigner.core.Eth1AddressSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.JsonRpcRequestHandler;
@@ -41,7 +41,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final AddressIndexedSignerProvider signerProvider;
+  private final Eth1AddressSignerProvider signerProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
@@ -49,7 +49,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   public SendTransactionHandler(
       final long chainId,
-      final AddressIndexedSignerProvider signerProvider,
+      final Eth1AddressSignerProvider signerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;

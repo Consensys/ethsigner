@@ -15,7 +15,7 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
-import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
+import tech.pegasys.ethsigner.core.Eth1AddressSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -39,12 +39,12 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final AddressIndexedSignerProvider signerProvider;
+  private final Eth1AddressSignerProvider signerProvider;
   private final JsonDecoder decoder;
 
   public EthSignTransactionResultProvider(
       final long chainId,
-      final AddressIndexedSignerProvider signerProvider,
+      final Eth1AddressSignerProvider signerProvider,
       final JsonDecoder decoder) {
     this.chainId = chainId;
     this.signerProvider = signerProvider;
