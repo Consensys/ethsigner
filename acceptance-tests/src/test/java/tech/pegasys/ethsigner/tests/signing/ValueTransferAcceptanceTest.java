@@ -25,6 +25,7 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 import tech.pegasys.ethsigner.tests.AcceptanceTestBase;
 import tech.pegasys.ethsigner.tests.dsl.Account;
 import tech.pegasys.ethsigner.tests.dsl.signer.SignerResponse;
+import tech.pegasys.signers.secp256k1.api.util.AddressUtil;
 
 import java.math.BigInteger;
 
@@ -45,6 +46,27 @@ public class ValueTransferAcceptanceTest extends AcceptanceTestBase {
     final Transaction transaction =
         Transaction.createEtherTransaction(
             richBenefactor().address(),
+            null,
+            GAS_PRICE,
+            INTRINSIC_GAS,
+            RECIPIENT,
+            transferAmountWei);
+
+    final String hash = ethSigner().transactions().submit(transaction);
+    ethNode().transactions().awaitBlockContaining(hash);
+
+    final BigInteger expectedEndBalance = startBalance.add(transferAmountWei);
+    final BigInteger actualEndBalance = ethNode().accounts().balance(RECIPIENT);
+    assertThat(actualEndBalance).isEqualTo(expectedEndBalance);
+  }
+
+  @Test
+  public void valueTransferWithFromWithout0xPrefix() {
+    final BigInteger transferAmountWei = Convert.toWei("1.75", Unit.ETHER).toBigIntegerExact();
+    final BigInteger startBalance = ethNode().accounts().balance(RECIPIENT);
+    final Transaction transaction =
+        Transaction.createEtherTransaction(
+            AddressUtil.remove0xPrefix(richBenefactor().address()),
             null,
             GAS_PRICE,
             INTRINSIC_GAS,
