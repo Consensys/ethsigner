@@ -114,15 +114,6 @@ class SigningEthSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenFromAddressMissingHexPrefix() {
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(
-            sendTransaction.request(
-                transactionBuilder.withFrom("7577919ae5df4941180eac211965f275CDCE314D"))),
-        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
-  }
-
-  @Test
   void invalidParamsResponseWhenFromAddressIsMalformedHex() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
