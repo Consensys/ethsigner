@@ -1,6 +1,6 @@
 # Changelog
 
-## ...Next Version...
+## 21.10.0
 ### Breaking Changes
 - Upgrade to signers 1.0.19 removes support for deprecated SECP256K1 curve in Azure remote signing [#386](https://github.com/ConsenSys/ethsigner/pull/386)
 
@@ -13,6 +13,7 @@
 - Add validation for GoQuorum transactions with value [#377](https://github.com/ConsenSys/ethsigner/pull/377)
 - Add publishing to docker namespace "consensys/ethsigner" and deprecate docker namespace "consensys/quorum-ethsigner" [#384](https://github.com/ConsenSys/ethsigner/issues/384)
 - Upgrade to signers 1.0.19 allows empty password files to be read when creating a Signer [#372](https://github.com/ConsenSys/ethsigner/issues/372)
+- Upgrade besu to 21.10.0 for acceptance tests
 
 ## 21.3.2
 
