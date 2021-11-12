@@ -5,6 +5,8 @@
 - Upgrade to signers 1.0.19 removes support for deprecated SECP256K1 curve in Azure remote signing [#386](https://github.com/ConsenSys/ethsigner/pull/386)
 
 ### Bugs Fixed
+- Adding configuration files should load new accounts automatically without restarting EthSigner [#390](https://github.com/ConsenSys/ethsigner/issues/390)
+- eth_sign signing of hex data [#393](https://github.com/ConsenSys/ethsigner/issues/393)
 - Upgrade web3j to latest version for fix to handle large chainids in eip155 transactions [#382](https://github.com/ConsenSys/ethsigner/pull/382)
 
 ### Features Added

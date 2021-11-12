@@ -27,6 +27,9 @@ dependencies {
 
   testImplementation project(':ethsigner:core')
   testImplementation project(':ethsigner:app')
+  testImplementation 'tech.pegasys.signers.internal:signing-secp256k1-api'
+  testImplementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
+
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'signing-secp256k1-impl', classifier: 'test-fixtures')
   testImplementation (group: 'tech.pegasys.signers.internal', name: 'keystorage-hashicorp', classifier: 'test-fixtures')
 

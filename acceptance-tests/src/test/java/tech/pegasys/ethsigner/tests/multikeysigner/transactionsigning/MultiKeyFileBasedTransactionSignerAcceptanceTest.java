@@ -14,6 +14,8 @@ package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import tech.pegasys.signers.secp256k1.api.util.AddressUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -45,5 +47,23 @@ public class MultiKeyFileBasedTransactionSignerAcceptanceTest
 
     setup(tomlDirectory);
     performTransaction();
+  }
+
+  @Test
+  public void fileBasedMultiKeyTransactionWithSenderWithout0xPrefix(@TempDir Path tomlDirectory)
+      throws URISyntaxException, IOException {
+    final String keyPath =
+        new File(Resources.getResource("rich_benefactor_one.json").toURI()).getAbsolutePath();
+
+    final Path passwordPath = tomlDirectory.resolve("password");
+    Files.write(passwordPath, "pass".getBytes(UTF_8));
+
+    createFileBasedTomlFileAt(
+        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"),
+        keyPath,
+        passwordPath.toString());
+
+    setup(tomlDirectory);
+    performTransaction(AddressUtil.remove0xPrefix(richBenefactor().address()));
   }
 }

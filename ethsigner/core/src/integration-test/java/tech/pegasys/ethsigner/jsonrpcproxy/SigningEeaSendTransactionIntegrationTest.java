@@ -21,6 +21,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVACY_GROUP_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.privacyGroupIdTransaction;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA_DEFAULT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_GAS_DEFAULT;
@@ -125,15 +126,6 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
   }
 
   @Test
-  void invalidParamsResponseWhenFromAddressMissingHexPrefix() {
-    sendPostRequestAndVerifyResponse(
-        request.ethSigner(
-            sendTransaction.request(
-                transactionBuilder.withFrom("7577919ae5df4941180eac211965f275CDCE314D"))),
-        response.ethSigner(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
-  }
-
-  @Test
   void invalidParamsResponseWhenFromAddressIsMalformedHex() {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(
@@ -222,6 +214,25 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         sendRawTransaction.request(
             sendTransaction.request(
                 transactionBuilder.withTo("0x7577919ae5df4941180eac211965f275CDCE314D")));
+    final String sendRawTransactionResponse =
+        sendRawTransaction.response(
+            "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");
+    setUpEthNodeResponse(
+        request.ethNode(sendRawTransactionRequest), response.ethNode(sendRawTransactionResponse));
+
+    sendPostRequestAndVerifyResponse(
+        request.ethSigner(sendTransactionRequest), response.ethSigner(sendRawTransactionResponse));
+
+    verifyEthNodeReceived(sendRawTransactionRequest);
+  }
+
+  @Test
+  void signTransactionWhenFromHasAddressMissingHexPrefix() {
+    final Request<Object, EthSendTransaction> sendTransactionRequest =
+        sendTransaction.request(transactionBuilder.withFrom(UNLOCKED_ACCOUNT.substring(2)));
+    final String sendRawTransactionRequest =
+        sendRawTransaction.request(
+            sendTransaction.request(transactionBuilder.withFrom(UNLOCKED_ACCOUNT.substring(2))));
     final String sendRawTransactionResponse =
         sendRawTransaction.response(
             "0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1355555");

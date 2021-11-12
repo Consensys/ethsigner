@@ -41,12 +41,12 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final AddressIndexedSignerProvider signerProvider;
+  private final Eth1AddressSignerProvider signerProvider;
   private final WebClientOptionsFactory webClientOptionsFactory = new WebClientOptionsFactory();
 
   public EthSigner(final Config config, final SignerProvider signerProvider) {
     this.config = config;
-    this.signerProvider = AddressIndexedSignerProvider.create(signerProvider);
+    this.signerProvider = new Eth1AddressSignerProvider(signerProvider);
   }
 
   public void run() {
