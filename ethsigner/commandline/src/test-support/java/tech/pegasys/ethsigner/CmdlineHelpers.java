@@ -26,9 +26,6 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 
 public class CmdlineHelpers {
-  private static final String TOML_STRING_PATTERN = "%s=\"%s\"%n";
-  private static final String TOML_NUMBER_PATTERN = "%s=%d%n";
-  private static final String TOML_BOOLEAN_PATTERN = "%s=%b%n";
 
   public static Map<String, Object> baseCommandOptions() {
     final Map<String, Object> optionsMap = new LinkedHashMap<>();
@@ -98,14 +95,26 @@ public class CmdlineHelpers {
     options.forEach(
         (option, value) -> {
           if (value instanceof Integer) {
-            tomlBuilder.append(String.format(TOML_NUMBER_PATTERN, option, (Integer) value));
+            tomlBuilder.append(tomlNumber(option, (Integer) value));
           } else if (value instanceof Boolean) {
-            tomlBuilder.append(String.format(TOML_BOOLEAN_PATTERN, option, value));
+            tomlBuilder.append(tomlBoolean(option, (Boolean) value));
           } else {
-            tomlBuilder.append(String.format(TOML_STRING_PATTERN, option, value));
+            tomlBuilder.append(tomlString(option, value.toString()));
           }
         });
     return tomlBuilder.toString();
+  }
+
+  private static String tomlNumber(final String option, final Integer value) {
+    return String.format("%s=%d%n", option, value);
+  }
+
+  private static String tomlString(final String option, final String value) {
+    return String.format("%s=\"%s\"%n", option, value);
+  }
+
+  private static String tomlBoolean(final String option, final Boolean value) {
+    return String.format("%s=%b%n", option, value);
   }
 
   public static Map<String, String> toEnvironmentMap(
