@@ -21,6 +21,8 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVACY_GROUP_ID;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FOR;
+import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.PRIVATE_FROM;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.EeaSendTransaction.UNLOCKED_ACCOUNT;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.PrivateTransaction.privacyGroupIdTransaction;
 import static tech.pegasys.ethsigner.jsonrpcproxy.model.jsonrpc.SendTransaction.FIELD_DATA_DEFAULT;
@@ -50,16 +52,24 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
       "{\"jsonrpc\" : \"2.0\",\"id\" : 1,\"result\" : \"VALID\"}";
   private static final String INVALID_PARAMS_BODY =
       "{\"jsonrpc\":\"2.0\",\"id\":77,\"error\":{\"code\":-32602,\"message\":\"Invalid params\"}}";
-  private static final String GET_EEA_TX_COUNT_REQUEST_BODY_TEMPLATE =
-      "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}";
-
-  private static final String GET_TX_COUNT_REQUEST_BODY_TEMPLATE =
-      "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getTransactionCount\",\"params\":[\"%s\",\"%s\"]}";
 
   private EeaSendTransaction sendTransaction;
   private EeaSendRawTransaction sendRawTransaction;
   private final PrivateTransaction.Builder transactionBuilder =
       PrivateTransaction.defaultTransaction();
+
+  private static String getTxCountRequestBody(final String account, final String groupId) {
+    return String.format(
+        "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getTransactionCount\",\"params\":[\"%s\",\"%s\"]}",
+        account, groupId);
+  }
+
+  private static String getEeaTxCountRequestBody(
+      final String account, final String privateFrom, final String privateFor) {
+    return String.format(
+        "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getEeaTransactionCount\",\"params\":[\"%s\",\"%s\",[\"%s\"]]}",
+        account, privateFrom, privateFor);
+  }
 
   @BeforeEach
   void setUp() {
@@ -562,11 +572,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
         request.ethSigner(sendTransaction.request(transactionBuilder.missingNonce())),
         response.ethSigner(ethNodeResponseBody));
     final String expectedBody =
-        String.format(
-            GET_EEA_TX_COUNT_REQUEST_BODY_TEMPLATE,
-            EeaSendTransaction.UNLOCKED_ACCOUNT,
-            EeaSendTransaction.PRIVATE_FROM,
-            EeaSendTransaction.PRIVATE_FOR);
+        getEeaTxCountRequestBody(UNLOCKED_ACCOUNT, PRIVATE_FROM, PRIVATE_FOR);
     verifyEthNodeReceived(expectedBody);
   }
 
@@ -580,11 +586,7 @@ class SigningEeaSendTransactionIntegrationTest extends DefaultTestBase {
     sendPostRequestAndVerifyResponse(
         request.ethSigner(sendTransaction.request(privacyGroupIdTransaction().missingNonce())),
         response.ethSigner(ethNodeResponseBody));
-    final String expectedBody =
-        String.format(
-            GET_TX_COUNT_REQUEST_BODY_TEMPLATE,
-            EeaSendTransaction.UNLOCKED_ACCOUNT,
-            EeaSendTransaction.PRIVACY_GROUP_ID);
+    final String expectedBody = getTxCountRequestBody(UNLOCKED_ACCOUNT, PRIVACY_GROUP_ID);
     verifyEthNodeReceived(expectedBody);
   }
 
