@@ -126,6 +126,8 @@ jobs:
           name: SonarQube
           no_output_timeout: 30m
           command: ./gradlew --no-daemon sonarqube -Dsonar.login=${ETHSIGNER_SONAR_TOKEN}
+          context:
+            - SonarCloud
       - save_cache:
           name: Caching gradle dependencies
           key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
@@ -136,8 +138,6 @@ jobs:
           root: ~/project
           paths:
             - ./
-    context:
-      - SonarCloud
 
   acceptanceTests:
     executor: executor_large
