@@ -125,7 +125,7 @@ jobs:
       - run:
           name: SonarQube
           no_output_timeout: 30m
-          command: ./gradlew --no-daemon sonarqube -Dsonar.login=$SONAR_TOKEN
+          command: ./gradlew --no-daemon sonarqube -Dsonar.login=${SONAR_TOKEN}
       - save_cache:
           name: Caching gradle dependencies
           key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
