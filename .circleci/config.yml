@@ -54,6 +54,10 @@ commands:
     description: "Capture test results"
     steps:
       - run:
+          name: Jacoco
+          command: |
+            ./gradlew --no-daemon jacocoTestReport
+      - run:
           name: Gather test results
           when: always
           command: |
@@ -67,6 +71,8 @@ commands:
             done
       - store_test_results:
           path: build/test-results
+      - store_artifacts:
+          path: ethsigner/build/reports/jacoco
 
   capture_test_reports:
     description: "Capture test reports"
@@ -116,6 +122,10 @@ jobs:
       - notify      
       - capture_test_results
       - capture_test_reports
+      - run:
+          name: SonarQube
+          no_output_timeout: 30m
+          command: ./gradlew --no-daemon sonarqube -Dsonar.login=$SONAR_TOKEN
       - save_cache:
           name: Caching gradle dependencies
           key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
