@@ -125,7 +125,7 @@ jobs:
       - run:
           name: SonarQube
           no_output_timeout: 30m
-          command: ./gradlew --no-daemon sonarqube -Dsonar.login=${ETHSIGNER_SONAR_TOKEN}
+          command: ./gradlew --no-daemon sonarqube -Dsonar.login=${SONAR_TOKEN}
       - save_cache:
           name: Caching gradle dependencies
           key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
@@ -221,13 +221,12 @@ workflows:
           requires:
             - build
           context:
-            - dockerhub-quorumengineering-ro                    
+            - dockerhub-quorumengineering-ro
   default:
     jobs:
       - build:
           context:
             - dockerhub-quorumengineering-ro
-            - sonarcloud
           filters:
             tags: &filters-release-tags
               only: /^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?/
@@ -236,6 +235,7 @@ workflows:
             - build
           context:
             - dockerhub-quorumengineering-ro
+            - signer_azure
           filters:
             tags:
               <<: *filters-release-tags
@@ -259,7 +259,7 @@ workflows:
             - build
             - acceptanceTests
           context:
-            - dockerhub-quorumengineering-ro   
+            - dockerhub-quorumengineering-ro
             - cloudsmith-protocols
       - publishDocker:
           filters:
