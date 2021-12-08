@@ -529,7 +529,7 @@ task dockerUpload(type: Exec) {
   dependsOn distDocker
   def imageName = "consensys/" + repositoryName
   def image = project.hasProperty('release.releaseVersion') ? "${imageName}:" + project.property('release.releaseVersion') : "${imageName}:${project.version}"
-  def cmd = "docker push '${image}'"
+  def cmd = "docker trust sign '${image}' && docker push '${image}'"
 
   def deprecatedQuorumImageName = "consensys/quorum-" + repositoryName
   def deprecatedQuorumImage = project.hasProperty('release.releaseVersion') ? "${deprecatedQuorumImageName}:" + project.property('release.releaseVersion') : "${deprecatedQuorumImageName}:${project.version}"
