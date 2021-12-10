@@ -41,9 +41,9 @@ dependencyManagement {
 
     dependency 'javax.activation:activation:1.1.1'
 
-    dependency 'org.apache.logging.log4j:log4j-api:2.13.0'
-    dependency 'org.apache.logging.log4j:log4j-core:2.13.0'
-    dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.0'
+    dependency 'org.apache.logging.log4j:log4j-api:2.15.0'
+    dependency 'org.apache.logging.log4j:log4j-core:2.15.0'
+    dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.15.0'
 
     dependencySet(group: 'org.apache.tuweni', version: '1.1.0') {
       entry 'tuweni-net'
