@@ -1,5 +1,12 @@
 # Changelog
 
+---
+
+## 21.10.1
+### Bugs Fixed
+- Updated log4j and explicitly disabled format message lookups.
+
+---
 ## 21.10.0
 ### Breaking Changes
 - Upgrade to signers 1.0.19 removes support for deprecated SECP256K1 curve in Azure remote signing [#386](https://github.com/ConsenSys/ethsigner/pull/386)
