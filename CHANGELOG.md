@@ -1,5 +1,11 @@
 # Changelog
 
+## 21.10.4
+### Bugs Fixed
+- Updated to log4j 2.17.1. Resolves two potential vulnerabilities which are only exploitable when using custom log4j configurations that are either writable by untrusted users or log data from the `ThreadContext`.
+
+--- 
+
 ## 21.10.2
 ### Bugs Fixed
 - Updated log4j to 2.16.0 to mitigate JNDI attack via thread context.
