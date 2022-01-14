@@ -65,13 +65,6 @@ jobs:
       - name: Compile Java code
         run: ./gradlew --no-daemon --parallel build
 
-      # Install all dependent libraries for JavaScript/TypeScript projects, e.g. via npm
-      # Please adapt to run `npm install` in the correct directories.
-      # Please adapt, if your project uses another package manager for getting JavaScript libraries.
-      # Please comment out, if your project does not use a package manager for getting JavaScript libraries.
-      - name: Install JavaScript libraries
-        run: npm install
-
       # Run the security analysis with default settings
       - name: Xanitizer Security Analysis
         uses: RIGS-IT/xanitizer-action@87d13138fb113b727cbe040c744a15a2b4fe5316
