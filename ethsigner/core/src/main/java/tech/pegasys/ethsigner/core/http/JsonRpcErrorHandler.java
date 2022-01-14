@@ -22,6 +22,7 @@ import java.net.ConnectException;
 import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLException;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +62,12 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
             requestId,
             statusCode,
             JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
+      } else if (failure instanceof IllegalStateException
+          && statusCode == HttpResponseStatus.FORBIDDEN.code()) {
+        LOG.error("CORS Rejected", failure);
+        // send status code and empty body
+        context.response().setStatusCode(statusCode);
+        context.response().end();
       } else {
         LOG.error("Unhandled exception handling request", failure);
         httpResponseFactory.failureResponse(
