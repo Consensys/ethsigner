@@ -82,7 +82,7 @@ dependencyManagement {
 
     dependency 'org.zeroturnaround:zt-exec:1.11'
 
-    dependency 'org.hyperledger.besu:plugin-api:21.1.1'
-    dependency 'org.hyperledger.besu.internal:metrics-core:21.1.1'
+    dependency "org.hyperledger.besu:plugin-api:${besuVersion}"
+    dependency "org.hyperledger.besu.internal:metrics-core:${besuVersion}"
   }
 }

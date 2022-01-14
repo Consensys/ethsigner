@@ -628,10 +628,7 @@ def getCheckedOutGitCommitHash() {
 }
 
 task cloudsmithUpload {
-  dependsOn([
-    distTar,
-    distZip,
-  ])
+  dependsOn([distTar, distZip,])
   doLast {
     exec {
       executable project.file("scripts/cloudsmith-upload.sh")
