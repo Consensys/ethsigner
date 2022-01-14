@@ -63,7 +63,7 @@ jobs:
       # Please adapt, if your project uses another build system to compile Java source code.
       # Please comment out, if your project does not contain Java source code.
       - name: Compile Java code
-        run: mvn -B compile
+        run: ./gradlew --no-daemon --parallel build
 
       # Install all dependent libraries for JavaScript/TypeScript projects, e.g. via npm
       # Please adapt to run `npm install` in the correct directories.
