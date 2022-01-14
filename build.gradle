@@ -24,6 +24,7 @@ buildscript {
   }
   dependencies {
     classpath 'tech.pegasys.internal.license.reporter:license-reporter:1.0.1'
+    classpath 'org.owasp:dependency-check-gradle:6.5.3'
   }
 }
 
@@ -97,6 +98,7 @@ allprojects {
   apply plugin: 'io.spring.dependency-management'
   apply plugin: 'jacoco'
   apply plugin: 'net.ltgt.errorprone'
+  apply plugin: 'org.owasp.dependencycheck'
   apply from: "${rootDir}/gradle/versions.gradle"
 
   version = rootProject.version
