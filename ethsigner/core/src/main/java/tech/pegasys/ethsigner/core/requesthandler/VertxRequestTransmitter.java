@@ -73,13 +73,14 @@ public class VertxRequestTransmitter implements RequestTransmitter {
         .request(method, fullPath)
         .onSuccess(
             request -> {
-              request.response().onSuccess(this::handleResponse);
+              request.response().onSuccess(this::handleResponse).onFailure(this::handleException);
               request.setTimeout(httpRequestTimeout.toMillis());
               request.exceptionHandler(this::handleException);
               headers.forEach(entry -> request.headers().add(entry.getKey(), entry.getValue()));
               request.setChunked(false);
               request.end(body);
-            });
+            })
+        .onFailure(this::handleException);
   }
 
   private void handleException(final Throwable thrown) {
