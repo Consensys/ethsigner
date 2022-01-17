@@ -147,10 +147,10 @@ jobs:
       - setup_remote_docker
       - attach_workspace:
           at: ~/project
-      - run:
-          name: hadoLint
-          command: |
-            docker run --rm -i hadolint/hadolint < docker/Dockerfile
+      #- run:
+      #    name: hadoLint
+      #    command: |
+      #      docker run --rm -i hadolint/hadolint < docker/Dockerfile
       - run:
           name: build image
           command: |
