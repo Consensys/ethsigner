@@ -2,8 +2,8 @@ file:
   /opt/ethsigner/bin/ethsigner:
     exists: true
     mode: "0755"
-    owner: root
-    group: root
+    owner: ethsigner
+    group: ethsigner
     filetype: file
     contains: []
 port:
