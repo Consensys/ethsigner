@@ -16,6 +16,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ETH_SEND
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ETH_SEND_TX_REPLACEMENT_UNDERPRICED;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TOO_LOW;
 
+import io.vertx.core.json.DecodeException;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -37,7 +38,7 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
       final JsonRpcErrorResponse errorResponse;
       try {
         errorResponse = specialiseResponse(body);
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException | DecodeException e) {
         return false;
       }
       if (NONCE_TOO_LOW.equals(errorResponse.getError())) {
