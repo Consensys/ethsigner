@@ -1,5 +1,15 @@
 # Changelog
 
+## Next release (21.10.5)
+### Features Added
+- Update Vertx to 4.x. 
+- Update various other dependencies to latest versions.
+- Update EthSigner docker image user to be `ethsigner` instead of `root`. May result in backward compatibility/permission issues with existing directory mounts.
+
+### Bugs Fixed
+- Update various dependencies [#415](https://github.com/ConsenSys/ethsigner/issues/415)
+
+---
 ## 21.10.4
 ### Bugs Fixed
 - Updated to log4j 2.17.1. Resolves two potential vulnerabilities which are only exploitable when using custom log4j configurations that are either writable by untrusted users or log data from the `ThreadContext`.

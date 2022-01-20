@@ -59,6 +59,9 @@
     {
       "moduleLicense": "The BSD License",
       "moduleName": ".*"
+    },
+    {
+      "moduleName": "io.netty:netty-tcnative-classes"
     }
   ],
   "overrideLicenses": [
@@ -100,6 +103,10 @@
     },
     {
       "moduleName": "org.ow2.asm",
+      "moduleLicense": "Apache License, Version 2.0"
+    },
+    {
+      "moduleName": "io.netty:netty-tcnative-classes",
       "moduleLicense": "Apache License, Version 2.0"
     }
   ]

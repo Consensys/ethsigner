@@ -15,7 +15,6 @@ package tech.pegasys.ethsigner.tests.signing;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.ENCLAVE_ERROR;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.GET_PRIVATE_TRANSACTION_NONCE_ERROR;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_LIMIT;
 import static tech.pegasys.ethsigner.tests.dsl.Contracts.GAS_PRICE;
@@ -52,7 +51,8 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().privateContracts().submitExceptional(contract);
-    // We expect this to fail with enclave error as we don't have orion running. If rlp decode fails
+    // We expect this to fail with enclave error as we don't have orion/Teserra running. If rlp
+    // decode fails
     // then we would get a different error
     assertThat(signerResponse.jsonRpc().getError()).isEqualTo(ENCLAVE_ERROR);
   }
@@ -94,6 +94,7 @@ public class PrivateTransactionAcceptanceTest extends AcceptanceTestBase {
 
     final SignerResponse<JsonRpcErrorResponse> signerResponse =
         ethSigner().privateContracts().submitExceptional(transaction);
-    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(GET_PRIVATE_TRANSACTION_NONCE_ERROR);
+    // We expect this to fail with enclave error as we don't have orion/Teserra running.
+    assertThat(signerResponse.jsonRpc().getError()).isEqualTo(ENCLAVE_ERROR);
   }
 }

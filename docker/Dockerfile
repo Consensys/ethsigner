@@ -1,8 +1,33 @@
+FROM eclipse-temurin:11 as jre-build
 
-FROM openjdk:11.0.8-jre-slim-buster
+# Create a custom Java runtime
+RUN JAVA_TOOL_OPTIONS="-Djdk.lang.Process.launchMechanism=vfork" "$JAVA_HOME/bin/jlink" \
+         --add-modules ALL-MODULE-PATH \
+         --strip-debug \
+         --no-man-pages \
+         --no-header-files \
+         --compress=2 \
+         --output /javaruntime
 
-COPY ethsigner /opt/ethsigner/
+FROM ubuntu:20.04
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH "${JAVA_HOME}/bin:${PATH}"
+COPY --from=jre-build /javaruntime $JAVA_HOME
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl=7.68\.* \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Add ethsigner user instead of using root (may bring backward incompatibility for previous directory mounts)
+RUN adduser --disabled-password --gecos "" --home /opt/ethsigner ethsigner && \
+    chown ethsigner:ethsigner /opt/ethsigner
+USER ethsigner
 WORKDIR /opt/ethsigner
+
+COPY --chown=ethsigner:ethsigner ethsigner /opt/ethsigner/
+
+ENV ETHSIGNER_HTTP_LISTEN_HOST="0.0.0.0"
+ENV ETHSIGNER_METRICS_HOST="0.0.0.0"
 
 # Expose services ports
 # 8545 HTTP JSON-RPC
@@ -17,9 +42,9 @@ ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="Ethsigner" \
       org.label-schema.description="Ethereum transaction signing application" \
-      org.label-schema.url="https://docs.ethsigner.pegasys.tech/" \
+      org.label-schema.url="https://docs.ethsigner.consensys.net" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/PegaSysEng/ethsigner.git" \
-      org.label-schema.vendor="Pegasys" \
+      org.label-schema.vcs-url="https://github.com/ConsenSys/ethsigner" \
+      org.label-schema.vendor="Consensys" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"

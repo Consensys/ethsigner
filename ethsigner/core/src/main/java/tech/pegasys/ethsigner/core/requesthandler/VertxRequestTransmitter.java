@@ -24,7 +24,6 @@ import java.util.stream.StreamSupport;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import org.apache.logging.log4j.LogManager;
@@ -70,13 +69,18 @@ public class VertxRequestTransmitter implements RequestTransmitter {
         () -> path);
 
     final String fullPath = downstreamPathCalculator.calculateDownstreamPath(path);
-    final HttpClientRequest request =
-        downStreamConnection.request(method, fullPath, this::handleResponse);
-    request.setTimeout(httpRequestTimeout.toMillis());
-    request.exceptionHandler(this::handleException);
-    headers.forEach(entry -> request.headers().add(entry.getKey(), entry.getValue()));
-    request.setChunked(false);
-    request.end(body);
+    downStreamConnection
+        .request(method, fullPath)
+        .onSuccess(
+            request -> {
+              request.response().onSuccess(this::handleResponse).onFailure(this::handleException);
+              request.setTimeout(httpRequestTimeout.toMillis());
+              request.exceptionHandler(this::handleException);
+              headers.forEach(entry -> request.headers().add(entry.getKey(), entry.getValue()));
+              request.setChunked(false);
+              request.end(body);
+            })
+        .onFailure(this::handleException);
   }
 
   private void handleException(final Throwable thrown) {
