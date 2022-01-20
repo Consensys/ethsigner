@@ -1,7 +1,7 @@
 FROM eclipse-temurin:11 as jre-build
 
 # Create a custom Java runtime
-RUN JAVA_TOOL_OPTIONS="-Djdk.lang.Process.launchMechanism=vfork" $JAVA_HOME/bin/jlink \
+RUN JAVA_TOOL_OPTIONS="-Djdk.lang.Process.launchMechanism=vfork" "$JAVA_HOME/bin/jlink" \
          --add-modules ALL-MODULE-PATH \
          --strip-debug \
          --no-man-pages \
@@ -9,14 +9,14 @@ RUN JAVA_TOOL_OPTIONS="-Djdk.lang.Process.launchMechanism=vfork" $JAVA_HOME/bin/
          --compress=2 \
          --output /javaruntime
 
-FROM ubuntu:latest
+FROM ubuntu:20.04
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 COPY --from=jre-build /javaruntime $JAVA_HOME
 
-RUN apt-get -y update
-RUN apt-get -y install curl
-RUN rm -rf /var/lib/api/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends curl=7.68\.* \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # Add ethsigner user instead of using root (may bring backward incompatibility for previous directory mounts)
 RUN adduser --disabled-password --gecos "" --home /opt/ethsigner ethsigner && \
