@@ -64,7 +64,6 @@ public class JsonRpcErrorHandler implements Handler<RoutingContext> {
             JsonRpcError.CONNECTION_TO_DOWNSTREAM_NODE_TIMED_OUT);
       } else if (failure instanceof IllegalStateException
           && statusCode == HttpResponseStatus.FORBIDDEN.code()) {
-        LOG.trace("CORS Rejected", failure);
         // send status code and empty body
         context.response().setStatusCode(statusCode);
         context.response().end();
