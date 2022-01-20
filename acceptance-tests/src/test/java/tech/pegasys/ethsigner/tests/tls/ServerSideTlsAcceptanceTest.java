@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -241,6 +240,6 @@ class ServerSideTlsAcceptanceTest {
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
-    assertThat(thrown.getCause()).isInstanceOf(SSLException.class);
+    assertThat(thrown.getCause()).isInstanceOf(IOException.class);
   }
 }
