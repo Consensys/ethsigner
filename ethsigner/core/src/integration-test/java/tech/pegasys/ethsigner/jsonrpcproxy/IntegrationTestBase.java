@@ -16,7 +16,6 @@ import static io.restassured.RestAssured.given;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.matchers.Times.exactly;
@@ -50,6 +49,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
@@ -117,6 +117,14 @@ public class IntegrationTestBase {
 
   static void setupEthSigner(final long chainId, final String downstreamHttpRequestPath)
       throws Exception {
+    setupEthSigner(chainId, downstreamHttpRequestPath, List.of("sample.com"));
+  }
+
+  static void setupEthSigner(
+      final long chainId,
+      final String downstreamHttpRequestPath,
+      final List<String> allowedCorsOrigin)
+      throws Exception {
     clientAndServer = startClientAndServer();
 
     final File keyFile = createKeyFile();
@@ -153,7 +161,7 @@ public class IntegrationTestBase {
             jsonDecoder,
             dataPath,
             vertx,
-            singletonList("sample.com"),
+            allowedCorsOrigin,
             new MetricsEndpoint(false, 0, "", emptySet(), emptyList()));
     runner.start();
 

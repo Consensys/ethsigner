@@ -16,12 +16,12 @@ import java.util.List;
 
 import com.google.common.net.HttpHeaders;
 import io.vertx.core.MultiMap;
-import io.vertx.core.http.impl.headers.VertxHttpHeaders;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 
 public class HeaderHelpers {
 
   public static MultiMap createHeaders(final MultiMap headers) {
-    final MultiMap headersToReturn = new VertxHttpHeaders();
+    final MultiMap headersToReturn = new HeadersMultiMap();
     headers.forEach(entry -> headersToReturn.add(entry.getKey(), entry.getValue()));
 
     headersToReturn.remove(HttpHeaders.CONTENT_LENGTH);

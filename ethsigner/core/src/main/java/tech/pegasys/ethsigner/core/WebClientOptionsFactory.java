@@ -12,7 +12,7 @@
  */
 package tech.pegasys.ethsigner.core;
 
-import static org.apache.tuweni.net.tls.VertxTrustOptions.whitelistServers;
+import static org.apache.tuweni.net.tls.VertxTrustOptions.allowlistServers;
 
 import tech.pegasys.ethsigner.core.config.Config;
 import tech.pegasys.ethsigner.core.config.KeyStoreOptions;
@@ -62,7 +62,7 @@ class WebClientOptionsFactory {
 
     if (knownServerFile.isPresent()) {
       try {
-        webClientOptions.setTrustOptions(whitelistServers(knownServerFile.get(), caAuthEnabled));
+        webClientOptions.setTrustOptions(allowlistServers(knownServerFile.get(), caAuthEnabled));
       } catch (RuntimeException e) {
         throw new InitializationException("Failed to load known server file.", e);
       }

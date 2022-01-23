@@ -23,19 +23,19 @@ buildscript {
     maven { url "https://artifacts.consensys.net/public/maven/maven/" }
   }
   dependencies {
+    // custom license-reporter used by com.github.jk1.dependency-license-report plugin
     classpath 'tech.pegasys.internal.license.reporter:license-reporter:1.0.1'
     classpath 'org.owasp:dependency-check-gradle:6.5.3'
   }
 }
 
 plugins {
-  id 'com.diffplug.spotless' version '5.12.5'
-  id 'com.github.ben-manes.versions' version '0.27.0'
-  id 'com.github.jk1.dependency-license-report' version '1.16'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-  id 'me.champeau.gradle.jmh' version '0.5.0' apply false
-  id 'net.ltgt.errorprone' version '2.0.1'
-  id 'org.ajoberstar.grgit' version '4.1.0'
+  id 'com.diffplug.spotless' version '6.2.0'
+  id 'com.github.jk1.dependency-license-report' version '2.0'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'me.champeau.gradle.jmh' version '0.5.3' apply false
+  id 'net.ltgt.errorprone' version '2.0.2'
+  id 'org.ajoberstar.grgit' version '4.1.1'
 }
 
 String projectName = "EthSigner"
@@ -630,10 +630,7 @@ def getCheckedOutGitCommitHash() {
 }
 
 task cloudsmithUpload {
-  dependsOn([
-    distTar,
-    distZip,
-  ])
+  dependsOn([distTar, distZip,])
   doLast {
     exec {
       executable project.file("scripts/cloudsmith-upload.sh")
