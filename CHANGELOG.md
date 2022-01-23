@@ -2,7 +2,6 @@
 
 ## 21.10.9
 ### Breaking Changes
-
 - Update EthSigner docker image user to use `ethsigner` instead of `root`. It may result in backward compatibility/permission issues with existing directory mounts.
 
 ### Bugs Fixed
