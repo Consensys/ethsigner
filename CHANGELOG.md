@@ -1,13 +1,11 @@
 # Changelog
 
-## Next release (21.10.5)
-### Features Added
-- Update Vertx to 4.x. 
-- Update various other dependencies to latest versions.
-- Update EthSigner docker image user to be `ethsigner` instead of `root`. May result in backward compatibility/permission issues with existing directory mounts.
+## 21.10.9
+### Breaking Changes
+- Update EthSigner docker image user to use `ethsigner` instead of `root`. It may result in backward compatibility/permission issues with existing directory mounts.
 
 ### Bugs Fixed
-- Update various dependencies [#415](https://github.com/ConsenSys/ethsigner/issues/415)
+- Update Vertx to 4.x and various other dependencies to their latest versions. [#415](https://github.com/ConsenSys/ethsigner/issues/415)
 
 ---
 ## 21.10.4
