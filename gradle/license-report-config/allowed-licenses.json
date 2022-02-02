@@ -62,6 +62,11 @@
     },
     {
       "moduleName": "io.netty:netty-tcnative-classes"
+    },
+    {
+      "moduleLicense": "Unicode/ICU License",
+      "moduleVersion": "58.2",
+      "moduleName": "com.ibm.icu:icu4j"
     }
   ],
   "overrideLicenses": [
