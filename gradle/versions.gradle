@@ -76,10 +76,10 @@ dependencyManagement {
 
     dependencySet(group: 'org.web3j', version: '4.8.9') {
       entry 'besu'
-      entry 'core'
-      entry ('crypto') {
+      entry ('core') {
         exclude group: 'com.github.jnr', name: 'jnr-unixsocket'
       }
+      entry 'crypto'
     }
 
     dependencySet(group: 'tech.pegasys.signers.internal', version: '2.0.0') {
