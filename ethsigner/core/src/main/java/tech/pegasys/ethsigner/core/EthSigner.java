@@ -121,6 +121,7 @@ public final class EthSigner {
     if (tlsConfig.getClientAuthConstraints().isPresent()) {
       result = applyClientAuthentication(result, tlsConfig.getClientAuthConstraints().get());
     }
+    LOG.info("Enabling TLS");
 
     return result;
   }
@@ -158,7 +159,7 @@ public final class EthSigner {
           .ifPresent(
               whitelistFile ->
                   result.setTrustOptions(
-                      VertxTrustOptions.whitelistClients(
+                      VertxTrustOptions.allowlistClients(
                           whitelistFile.toPath(), constraints.isCaAuthorizedClientAllowed())));
     } catch (final IllegalArgumentException e) {
       throw new InitializationException("Illegally formatted client fingerprint file.");

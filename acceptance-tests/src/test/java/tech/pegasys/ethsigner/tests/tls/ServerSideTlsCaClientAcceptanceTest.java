@@ -28,9 +28,9 @@ import tech.pegasys.ethsigner.tests.dsl.tls.OkHttpClientHelpers;
 import tech.pegasys.ethsigner.tests.dsl.tls.TlsCertificateDefinition;
 import tech.pegasys.ethsigner.tests.tls.support.BasicClientAuthConstraints;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
-import javax.net.ssl.SSLException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -103,6 +103,6 @@ public class ServerSideTlsCaClientAcceptanceTest {
 
     final Throwable thrown = catchThrowable(() -> rawRequests.get("/upcheck"));
 
-    assertThat(thrown.getCause()).isInstanceOf(SSLException.class);
+    assertThat(thrown.getCause()).isInstanceOf(IOException.class);
   }
 }

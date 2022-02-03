@@ -19,6 +19,7 @@ import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.NONCE_TO
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ public class NonceTooLowRetryMechanism extends RetryMechanism {
       final JsonRpcErrorResponse errorResponse;
       try {
         errorResponse = specialiseResponse(body);
-      } catch (final IllegalArgumentException e) {
+      } catch (final IllegalArgumentException | DecodeException e) {
         return false;
       }
       if (NONCE_TOO_LOW.equals(errorResponse.getError())) {
