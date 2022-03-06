@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming Release
+### Breaking Changes
+- Update Metrics service default port from 8546 to 9546. 
+
 ## 22.1.0
 ### Features Added
 - Updated Tuweni dependency to version 2.1.0 [#432](https://github.com/ConsenSys/ethsigner/pull/432)
