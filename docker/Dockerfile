@@ -14,8 +14,8 @@ ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 COPY --from=jre-build /javaruntime $JAVA_HOME
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl iputils-ping net-tools \
- && apt-get clean \
+RUN apt update && apt install -y --no-install-recommends curl iputils-ping net-tools \
+ && apt clean \
  && rm -rf /var/lib/apt/lists/*
 
 # Add ethsigner user instead of using root (may bring backward incompatibility for previous directory mounts)
