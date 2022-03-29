@@ -123,6 +123,10 @@
     {
       "moduleName": "com.google.protobuf:protobuf-java",
       "moduleLicense": "The BSD License"
+    },
+    {
+      "moduleName": "org.java-websocket:Java-WebSocket",
+      "moduleLicense": "MIT License"
     }
   ]
 }
