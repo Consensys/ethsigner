@@ -46,7 +46,7 @@ dependencyManagement {
       entry 'log4j-slf4j-impl'
     }
 
-    dependencySet(group: 'org.apache.tuweni', version: '2.1.0') {
+    dependencySet(group: 'org.apache.tuweni', version: '2.2.0') {
       entry 'tuweni-net'
       entry 'tuweni-toml'
     }
@@ -82,7 +82,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.0.0') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.1.0') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
