@@ -95,6 +95,5 @@ dependencyManagement {
 
     // explicit declaring to override older versions with vulnerabilities
     dependency 'org.java-websocket:Java-WebSocket:1.5.2'
-    dependency 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21'
   }
 }
