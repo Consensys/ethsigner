@@ -171,7 +171,8 @@ jobs:
     executor: executor_med
     steps:
       - prepare
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.11
       - attach_workspace:
           at: ~/project
       - run:
