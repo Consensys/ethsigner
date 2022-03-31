@@ -82,7 +82,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.1.0') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.2.1') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
