@@ -96,5 +96,15 @@ dependencyManagement {
     // explicit declaring to override transitive dependencies with vulnerabilities
     dependency 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
     dependency 'org.java-websocket:Java-WebSocket:1.5.2'
+    dependency 'com.google.protobuf:protobuf-java:3.19.4'
+    dependencySet(group: 'io.grpc', version: '1.45.1') {
+      entry 'grpc-api'
+      entry 'grpc-context'
+      entry 'grpc-core'
+      entry 'grpc-netty'
+      entry 'grpc-protobuf'
+      entry 'grpc-protobuf-lite'
+      entry 'grpc-stub'
+    }
   }
 }
