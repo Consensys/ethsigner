@@ -154,6 +154,10 @@ allprojects {
     }
   }
 
+  dependencyCheck {
+    suppressionFile "${rootDir}/gradle/dependency-check-suppression-file.xml"
+  }
+
   tasks.withType(JavaCompile) {
     options.compilerArgs += [
       '-Xlint:unchecked',
