@@ -13,24 +13,24 @@
 
 dependencyManagement {
   dependencies {
-    dependencySet(group: 'com.google.errorprone', version: '2.10.0') {
+    dependencySet(group: 'com.google.errorprone', version: '2.11.0') {
       entry 'error_prone_annotation'
       entry 'error_prone_check_api'
       entry 'error_prone_core'
       entry 'error_prone_test_helpers'
     }
 
-    dependency 'com.google.guava:guava:31.0.1-jre'
+    dependency 'com.google.guava:guava:31.1-jre'
 
     dependency 'com.squareup.okhttp3:okhttp:4.9.3'
 
     dependency 'commons-io:commons-io:2.11.0'
 
-    dependency 'info.picocli:picocli:4.6.2'
+    dependency 'info.picocli:picocli:4.6.3'
 
     dependency 'io.rest-assured:rest-assured:4.4.0'
 
-    dependencySet(group: 'io.vertx', version: '4.2.3') {
+    dependencySet(group: 'io.vertx', version: '4.2.6') {
        entry 'vertx-codegen'
        entry 'vertx-core'
        entry 'vertx-unit'
@@ -40,13 +40,13 @@ dependencyManagement {
 
     dependency 'javax.activation:activation:1.1.1'
 
-    dependencySet(group: 'org.apache.logging.log4j', version: '2.17.1') {
+    dependencySet(group: 'org.apache.logging.log4j', version: '2.17.2') {
       entry 'log4j-api'
       entry 'log4j-core'
       entry 'log4j-slf4j-impl'
     }
 
-    dependencySet(group: 'org.apache.tuweni', version: '2.1.0') {
+    dependencySet(group: 'org.apache.tuweni', version: '2.2.0') {
       entry 'tuweni-net'
       entry 'tuweni-toml'
     }
@@ -74,7 +74,7 @@ dependencyManagement {
       entry 'mockito-junit-jupiter'
     }
 
-    dependencySet(group: 'org.web3j', version: '4.8.9') {
+    dependencySet(group: 'org.web3j', version: '4.9.0') {
       entry 'besu'
       entry ('core') {
         exclude group: 'com.github.jnr', name: 'jnr-unixsocket'
@@ -82,7 +82,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.0.0') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.2.1') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
@@ -93,8 +93,18 @@ dependencyManagement {
     dependency "org.hyperledger.besu:plugin-api:${besuVersion}"
     dependency "org.hyperledger.besu.internal:metrics-core:${besuVersion}"
 
-    // explicit declaring to override older versions with vulnerabilities
+    // explicit declaring to override transitive dependencies with vulnerabilities
+    dependency 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
     dependency 'org.java-websocket:Java-WebSocket:1.5.2'
-    dependency 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21'
+    dependency 'com.google.protobuf:protobuf-java:3.19.4'
+    dependencySet(group: 'io.grpc', version: '1.45.1') {
+      entry 'grpc-api'
+      entry 'grpc-context'
+      entry 'grpc-core'
+      entry 'grpc-netty'
+      entry 'grpc-protobuf'
+      entry 'grpc-protobuf-lite'
+      entry 'grpc-stub'
+    }
   }
 }

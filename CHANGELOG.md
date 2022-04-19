@@ -1,5 +1,18 @@
 # Changelog
 
+## 22.1.3
+### Breaking Changes
+- Updated Metrics service default port from 8546 to 9546.
+
+### Features Added
+- Updated various dependent libraries versions
+
+---
+## 22.1.0
+### Features Added
+- Updated Tuweni dependency to version 2.1.0 [#432](https://github.com/ConsenSys/ethsigner/pull/432)
+- Updated Besu dependency to version 22.1.0 [#436](https://github.com/ConsenSys/ethsigner/pull/436)
+---
 ## 21.10.9
 ### Breaking Changes
 - Update EthSigner docker image user to use `ethsigner` instead of `root`. It may result in backward compatibility/permission issues with existing directory mounts.

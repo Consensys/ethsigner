@@ -199,7 +199,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
       paramLabel = PORT_FORMAT_HELP,
       description = "Port for the metrics exporter to listen on (default: ${DEFAULT-VALUE})",
       arity = "1")
-  private final Integer metricsPort = 8546;
+  private final Integer metricsPort = 9546;
 
   @Option(
       names = {"--metrics-category", "--metrics-categories"},

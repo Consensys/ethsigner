@@ -7,7 +7,7 @@ orbs:
 executors:
   executor_med:  # 2cpu, 4G ram
     docker:
-      - image: circleci/openjdk:11.0.8-jdk-buster
+      - image: cimg/openjdk:11.0
         auth:
           username: $DOCKER_USER_RO
           password: $DOCKER_PASSWORD_RO             
@@ -19,7 +19,7 @@ executors:
 
   executor_large: # 4cpu, 8G ram
     docker:
-      - image: circleci/openjdk:11.0.8-jdk-buster
+      - image: cimg/openjdk:11.0
         auth:
           username: $DOCKER_USER_RO
           password: $DOCKER_PASSWORD_RO     
@@ -28,15 +28,6 @@ executors:
     environment:
       JAVA_TOOL_OPTIONS: -Xmx4096m
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4 -Xmx4096m
-
-  executor_machine: # 2cpu , 8G ram
-    machine:
-      image: ubuntu-2004:202008-01 #Ubuntu 20.04, docker 19.03, docker-compose 1.27.4
-      docker_layer_caching: true
-    working_directory: ~/project
-    environment:
-      JAVA_TOOL_OPTIONS: -Xmx4096m
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2 -Xmx4096m
 
 commands:
   prepare:
@@ -144,13 +135,10 @@ jobs:
     executor: executor_med
     steps:
       - prepare
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.11
       - attach_workspace:
           at: ~/project
-      - run:
-          name: hadoLint
-          command: |
-            docker run --rm -i hadolint/hadolint < docker/Dockerfile
       - run:
           name: build image
           command: |
@@ -183,7 +171,8 @@ jobs:
     executor: executor_med
     steps:
       - prepare
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 20.10.11
       - attach_workspace:
           at: ~/project
       - run:
