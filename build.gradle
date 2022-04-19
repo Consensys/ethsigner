@@ -155,7 +155,7 @@ allprojects {
   }
 
   dependencyCheck {
-    suppressionFile "${rootDir}/gradle/dependency-check-suppression-file.xml"
+    suppressionFile "${rootDir}/gradle/dependency-check-suppressions.xml"
   }
 
   tasks.withType(JavaCompile) {
