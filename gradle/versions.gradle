@@ -98,7 +98,6 @@ dependencyManagement {
     dependency 'org.java-websocket:Java-WebSocket:1.5.2'
     dependencySet(group: 'com.google.protobuf', version: '3.19.4') {
       entry 'protobuf-java'
-      entry 'protobuf-java-util'
     }
     dependencySet(group: 'io.grpc', version: '1.45.1') {
       entry 'grpc-api'
