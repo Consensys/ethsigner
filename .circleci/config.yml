@@ -48,13 +48,17 @@ commands:
           name: Gather test results
           when: always
           command: |
-            FILES=`find . -type d -name test-results`
+            FILES=`find . -type d -name reports`
             for FILE in $FILES
             do
-              MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/test-results@\1@'`
-              TARGET="build/test-results/$MODULE"
+              MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
+              TARGET="build/test-reports/$MODULE"
+              SOURCE="${FILE}/*/*"
               mkdir -p "$TARGET"
-              cp -rf ${FILE}/*/* "$TARGET"
+              if [[ -f "$SOURCE" ]]; then
+                cp -rf "$SOURCE" "$TARGET"
+              fi
+              cp ${FILE}/*.html "$TARGET"
             done
       - store_test_results:
           path: build/test-results
@@ -66,7 +70,7 @@ commands:
           name: Gather test results
           when: always
           command: |
-            FILES=`find . -type d -name reports`
+            FILES=`find . -name reports`
             for FILE in $FILES
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
