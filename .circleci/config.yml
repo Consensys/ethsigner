@@ -71,11 +71,8 @@ commands:
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
               TARGET="build/test-reports/$MODULE"
-              SOURCE="${FILE}/tests/test"
               mkdir -p "$TARGET"
-              if [[ -d "$SOURCE" ]]; then
-                  cp -rf "$SOURCE" "$TARGET"
-              fi
+              cp -rf ${FILE}/*/* "$TARGET"
             done
             if [[ -f 'build/reports/dependency-check-report.html' ]]; then
               cp 'build/reports/dependency-check-report.html' 'build/test-reports'
@@ -103,7 +100,7 @@ jobs:
       - run:
           name: Dependency vulnerability scan
           command: |
-            ./gradlew --no-daemon dependencyCheckAnalyze
+            ./gradlew --no-daemon dependencyCheckAggregate
       - run:
           name: Test
           no_output_timeout: 20m
