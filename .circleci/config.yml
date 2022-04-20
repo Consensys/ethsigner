@@ -48,17 +48,13 @@ commands:
           name: Gather test results
           when: always
           command: |
-            rm -rf build/test-results
             FILES=`find . -name test-results`
             for FILE in $FILES
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/test-results@\1@'`
               TARGET="build/test-results/$MODULE"
-              SOURCE="${FILE}/*/*"
               mkdir -p "$TARGET"
-              if [[ -f "$SOURCE" ]]; then
-                cp -rf "$SOURCE" "$TARGET"
-              fi
+              cp -rf ${FILE}/*/* "$TARGET"
             done
       - store_test_results:
           path: build/test-results
@@ -70,19 +66,20 @@ commands:
           name: Gather test results
           when: always
           command: |
-            rm -rf build/test-reports
             FILES=`find . -name reports -not -path './build/reports'`
             for FILE in $FILES
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
               TARGET="build/test-reports/$MODULE"
-              SOURCE="${FILE}/*/*"
+              SOURCE="${FILE}/tests/test"
               mkdir -p "$TARGET"
-              if [[ -f "$SOURCE" ]]; then
-                cp -rf "$SOURCE" "$TARGET"
+              if [[ -d "$SOURCE" ]]; then
+                  cp -rf "$SOURCE" "$TARGET"
               fi
-              cp ${FILE}/*.html "$TARGET"
             done
+            if [[ -f 'build/reports/dependency-check-report.html' ]]; then
+              cp 'build/reports/dependency-check-report.html' 'build/test-reports'
+            fi
       - store_artifacts:
           path: build/test-reports
           destination: test-reports
