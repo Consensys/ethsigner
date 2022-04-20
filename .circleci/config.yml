@@ -71,8 +71,11 @@ commands:
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
               TARGET="build/test-reports/$MODULE"
+              SOURCE="${FILE}/tests/test"
               mkdir -p "$TARGET"
-              cp -rf ${FILE}/*/* "$TARGET"
+              if [[ -d "$SOURCE" ]]; then
+                  cp -rf "$SOURCE" "$TARGET"
+              fi
             done
             if [[ -f 'build/reports/dependency-check-report.html' ]]; then
               cp 'build/reports/dependency-check-report.html' 'build/test-reports'
