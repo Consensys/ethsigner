@@ -71,7 +71,7 @@ commands:
           when: always
           command: |
             rm -rf build/test-reports
-            FILES=`find . reports -not -path './build/reports'`
+            FILES=`find . -name reports -not -path './build/reports'`
             for FILE in $FILES
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
@@ -104,7 +104,7 @@ jobs:
           command: |
             ./gradlew --no-daemon --parallel build
       - run:
-          name: Dependency scan
+          name: Dependency vulnerability scan
           command: |
             ./gradlew --no-daemon dependencyCheckAnalyze
       - run:
