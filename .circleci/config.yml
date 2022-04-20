@@ -48,16 +48,17 @@ commands:
           name: Gather test results
           when: always
           command: |
+            rm -rf build/test-output
             FILES=`find . -name test-results`
             for FILE in $FILES
             do
               MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/test-results@\1@'`
-              TARGET="build/test-results/$MODULE"
+              TARGET="build/test-output/$MODULE"
               mkdir -p "$TARGET"
               cp -rf ${FILE}/*/* "$TARGET"
             done
       - store_test_results:
-          path: build/test-results
+          path: build/test-output
 
   capture_test_reports:
     description: "Capture test reports"
@@ -66,6 +67,7 @@ commands:
           name: Gather test results
           when: always
           command: |
+            rm -rf build/test-reports
             FILES=`find . -name reports`
             for FILE in $FILES
             do
