@@ -155,8 +155,11 @@ allprojects {
   }
 
   dependencyCheck {
-    suppressionFile "${rootDir}/gradle/dependency-check-suppressions.xml"
-    failBuildOnCVSS 4 // Fail on medium CVSS severity
+    failBuildOnCVSS = 4 // Fail on medium CVSS severity
+    skipConfigurations = [
+      'integrationTestCompileClasspath',
+      'integrationTestRuntimeClasspath'
+    ]
   }
 
   tasks.withType(JavaCompile) {

@@ -98,6 +98,7 @@ dependencyManagement {
     dependency 'org.java-websocket:Java-WebSocket:1.5.2'
     dependencySet(group: 'com.google.protobuf', version: '3.19.4') {
       entry 'protobuf-java'
+      entry 'protobuf-java-util'
     }
     dependencySet(group: 'io.grpc', version: '1.45.1') {
       entry 'grpc-api'
@@ -107,6 +108,12 @@ dependencyManagement {
       entry 'grpc-protobuf'
       entry 'grpc-protobuf-lite'
       entry 'grpc-stub'
+    }
+    dependencySet(group: 'org.jetbrains.kotlin', version: '1.6.10') {
+      entry 'kotlin-stdlib'
+      entry 'kotlin-stdlib-common'
+      entry 'kotlin-stdlib-jdk7'
+      entry 'kotlin-stdlib-jdk8'
     }
   }
 }
