@@ -95,7 +95,6 @@ dependencyManagement {
 
     // explicit declaring to override transitive dependencies with vulnerabilities
     dependency 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
-    dependency 'org.java-websocket:Java-WebSocket:1.5.2'
     dependencySet(group: 'com.google.protobuf', version: '3.19.4') {
       entry 'protobuf-java'
       entry 'protobuf-java-util'
