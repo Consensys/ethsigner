@@ -62,7 +62,7 @@ import picocli.CommandLine.Spec;
 @Command(
     description =
         "This command runs the EthSigner.\n"
-            + "Documentation can be found at https://docs.ethsigner.pegasys.tech.",
+            + "Documentation can be found at https://docs.ethsigner.consensys.net.",
     abbreviateSynopsis = true,
     name = "ethsigner",
     sortOptions = false,

@@ -9,7 +9,7 @@ EthSigner issues are tracked in [GitHub issues].
 See our [contribution guidelines](CONTRIBUTING.md) for more detail on searching and creating issues.
 
 ## Users
-* [User documentation](https://docs.ethsigner.pegasys.tech/)
+* [User documentation](https://docs.ethsigner.consensys.net/)
 
 ## Chat
 * [Discord]
