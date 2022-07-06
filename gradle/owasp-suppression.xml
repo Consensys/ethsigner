@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress until="2022-07-15">
-        <notes><![CDATA[
-          False positive, should be able to remove suppression once false positive has been included in a new version of the dependency check plugin, see https://github.com/jeremylong/DependencyCheck/issues/4637
-        ]]></notes>
-        <cve>CVE-2022-33915</cve>
-    </suppress>
+    <!-- See https://jeremylong.github.io/DependencyCheck/general/suppression.html for examples -->
 </suppressions>
