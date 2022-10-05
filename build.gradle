@@ -25,7 +25,7 @@ buildscript {
   dependencies {
     // custom license-reporter used by com.github.jk1.dependency-license-report plugin
     classpath 'tech.pegasys.internal.license.reporter:license-reporter:1.0.1'
-    classpath 'org.owasp:dependency-check-gradle:6.5.3'
+    classpath 'org.owasp:dependency-check-gradle:7.2.1'
   }
 }
 
