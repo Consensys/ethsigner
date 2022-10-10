@@ -95,7 +95,12 @@ dependencyManagement {
 
     // explicit declaring to override transitive dependencies with vulnerabilities
     dependency 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
-    dependencySet(group: 'com.google.protobuf', version: '3.19.4') {
+    dependencySet(group: 'com.google.protobuf', version: '3.19.6') {
+      /*
+        com.google.protobuf:protobuf-java:3.11.4 -> 3.19.4 // CVE-2022-3171
+        \--- io.jaegertracing:jaeger-proto:0.7.0
+          \--- org.hyperledger.besu.internal:metrics-core:22.7.6
+      */
       entry 'protobuf-java'
       entry 'protobuf-java-util'
     }
