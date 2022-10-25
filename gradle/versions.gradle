@@ -126,5 +126,14 @@ dependencyManagement {
       entry 'netty-handler-proxy'
       entry 'netty-resolver-dns'
     }
+
+    /*
+      io.projectreactor.netty:reactor-netty-core:1.0.15 // CVE-2022-31684
+      \--- io.projectreactor.netty:reactor-netty-http:1.0.15
+        \--- com.azure:azure-core-http-netty:1.11.8
+          +--- com.azure:azure-security-keyvault-keys:4.3.8
+            |    +--- tech.pegasys.signers.internal:signing-secp256k1-impl:2.2.2
+    */
+    dependency 'io.projectreactor.netty:reactor-netty-http:1.0.24'
   }
 }
