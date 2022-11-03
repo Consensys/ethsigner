@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import io.vertx.core.net.PfxOptions;
+import io.vertx.core.net.ProxyOptions;
 import io.vertx.ext.web.client.WebClientOptions;
 
 class WebClientOptionsFactory {
@@ -32,10 +33,23 @@ class WebClientOptionsFactory {
         new WebClientOptions()
             .setDefaultPort(config.getDownstreamHttpPort())
             .setDefaultHost(config.getDownstreamHttpHost())
-            .setTryUseCompression(true);
+            .setTryUseCompression(true)
+            .setProxyOptions(proxyOptions().orElse(null));
 
     applyTlsOptions(clientOptions, config);
     return clientOptions;
+  }
+
+  private static Optional<ProxyOptions> proxyOptions() {
+    var proxyHost = System.getProperty("http.proxyHost", "none");
+    var proxyPort = Integer.valueOf(System.getProperty("http.proxyPort", "80"));
+    if ("none".equalsIgnoreCase(proxyHost)) {
+      return Optional.empty();
+    }
+    var proxyOptions = new ProxyOptions();
+    proxyOptions.setHost(proxyHost);
+    proxyOptions.setPort(proxyPort);
+    return Optional.of(proxyOptions);
   }
 
   private void applyTlsOptions(final WebClientOptions webClientOptions, final Config config) {
