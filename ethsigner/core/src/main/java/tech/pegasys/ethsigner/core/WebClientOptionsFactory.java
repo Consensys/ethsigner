@@ -53,7 +53,7 @@ class WebClientOptionsFactory {
     try {
       proxyPort = Integer.valueOf(System.getProperty("http.proxyPort", "80"));
     } catch (NumberFormatException nfe) {
-      LOG.warn("Error reading proxy port (defaulting to 80) : ", nfe);
+      LOG.warn("Error reading proxy port : defaulting to 80");
       proxyPort = 80;
     }
     var proxyOptions = new ProxyOptions();
