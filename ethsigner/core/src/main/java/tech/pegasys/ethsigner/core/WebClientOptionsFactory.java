@@ -26,8 +26,12 @@ import java.util.Optional;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.core.net.ProxyOptions;
 import io.vertx.ext.web.client.WebClientOptions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class WebClientOptionsFactory {
+  private static final Logger LOG = LogManager.getLogger();
+
   public WebClientOptions createWebClientOptions(final Config config) {
     final WebClientOptions clientOptions =
         new WebClientOptions()
@@ -42,9 +46,15 @@ class WebClientOptionsFactory {
 
   private static Optional<ProxyOptions> proxyOptions() {
     var proxyHost = System.getProperty("http.proxyHost", "none");
-    var proxyPort = Integer.valueOf(System.getProperty("http.proxyPort", "80"));
     if ("none".equalsIgnoreCase(proxyHost)) {
       return Optional.empty();
+    }
+    int proxyPort;
+    try {
+      proxyPort = Integer.valueOf(System.getProperty("http.proxyPort", "80"));
+    } catch (NumberFormatException nfe) {
+      LOG.warn("Error reading proxy port (defaulting to 80) : ", nfe);
+      proxyPort = 80;
     }
     var proxyOptions = new ProxyOptions();
     proxyOptions.setHost(proxyHost);
