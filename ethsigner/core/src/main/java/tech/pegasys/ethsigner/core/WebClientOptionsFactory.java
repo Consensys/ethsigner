@@ -59,6 +59,14 @@ class WebClientOptionsFactory {
     var proxyOptions = new ProxyOptions();
     proxyOptions.setHost(proxyHost);
     proxyOptions.setPort(proxyPort);
+    var proxyUsername = System.getProperty("http.proxyUser", "none");
+    var proxyPassword = System.getProperty("http.proxyPassword", "none");
+    if (!"none".equalsIgnoreCase(proxyUsername)) {
+      proxyOptions.setUsername(proxyUsername);
+      if (!"none".equalsIgnoreCase(proxyPassword)) {
+        proxyOptions.setPassword(proxyPassword);
+      }
+    }
     return Optional.of(proxyOptions);
   }
 
