@@ -219,6 +219,37 @@ public class EthSignerBaseCommand implements Config, Runnable {
       defaultValue = "localhost,127.0.0.1")
   private final AllowListHostsProperty metricsHostAllowList = new AllowListHostsProperty();
 
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--http-proxy-host"},
+      description = "Hostname for proxy connect, no proxy if null (default: null)",
+      paramLabel = HOST_FORMAT_HELP,
+      arity = "1")
+  private String httpProxyHost = null;
+
+  @Option(
+      names = {"--http-proxy-port"},
+      paramLabel = PORT_FORMAT_HELP,
+      description = "Port for proxy connect (default: 80)",
+      arity = "1")
+  private final Integer httpProxyPort = 80;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--http-proxy-username"},
+      paramLabel = "<username>",
+      description = "Username for proxy connect, no authentication if null (default: null)",
+      arity = "1")
+  private String httpProxyUsername = null;
+
+  @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
+  @Option(
+      names = {"--http-proxy-password"},
+      paramLabel = "<password>",
+      description = "Password for proxy connect, no authentication if null (default: null)",
+      arity = "1")
+  private String httpProxyPassword = null;
+
   @Override
   public Level getLogLevel() {
     return logLevel;
@@ -307,6 +338,26 @@ public class EthSignerBaseCommand implements Config, Runnable {
   }
 
   @Override
+  public String getHttpProxyHost() {
+    return httpProxyHost;
+  }
+
+  @Override
+  public Integer getHttpProxyPort() {
+    return httpProxyPort;
+  }
+
+  @Override
+  public String getHttpProxyUsername() {
+    return httpProxyUsername;
+  }
+
+  @Override
+  public String getHttpProxyPassword() {
+    return httpProxyPassword;
+  }
+
+  @Override
   public void run() {
     // validation is performed to simulate similar behavior as with ArgGroups.
     // ArgGroups are removed because of config-file and environment based default options
@@ -329,6 +380,10 @@ public class EthSignerBaseCommand implements Config, Runnable {
         .add("dataPath", dataPath)
         .add("clientTlsOptions", clientTlsOptions)
         .add("corsAllowedOrigins", rpcHttpCorsAllowedOrigins)
+        .add("httpProxyHost", httpProxyHost)
+        .add("httpProxyPort", httpProxyPort)
+        .add("httpProxyUsername", httpProxyUsername)
+        .add("httpProxyPassword", httpProxyPassword)
         .toString();
   }
 

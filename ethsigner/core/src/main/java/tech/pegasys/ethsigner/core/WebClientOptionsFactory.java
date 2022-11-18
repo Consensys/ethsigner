@@ -26,11 +26,8 @@ import java.util.Optional;
 import io.vertx.core.net.PfxOptions;
 import io.vertx.core.net.ProxyOptions;
 import io.vertx.ext.web.client.WebClientOptions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 class WebClientOptionsFactory {
-  private static final Logger LOG = LogManager.getLogger();
 
   public WebClientOptions createWebClientOptions(final Config config) {
     final WebClientOptions clientOptions =
@@ -38,34 +35,23 @@ class WebClientOptionsFactory {
             .setDefaultPort(config.getDownstreamHttpPort())
             .setDefaultHost(config.getDownstreamHttpHost())
             .setTryUseCompression(true)
-            .setProxyOptions(proxyOptions().orElse(null));
+            .setProxyOptions(getProxyOptions(config).orElse(null));
 
     applyTlsOptions(clientOptions, config);
     return clientOptions;
   }
 
-  private static Optional<ProxyOptions> proxyOptions() {
-    var proxyHost = System.getProperty("http.proxyHost", "none");
-    if ("none".equalsIgnoreCase(proxyHost)) {
+  private static Optional<ProxyOptions> getProxyOptions(final Config config) {
+    final String proxyHost = config.getHttpProxyHost();
+    if (proxyHost == null) {
       return Optional.empty();
     }
-    int proxyPort;
-    try {
-      proxyPort = Integer.valueOf(System.getProperty("http.proxyPort", "80"));
-    } catch (NumberFormatException nfe) {
-      LOG.warn("Error reading proxy port : defaulting to 80");
-      proxyPort = 80;
-    }
-    var proxyOptions = new ProxyOptions();
-    proxyOptions.setHost(proxyHost);
-    proxyOptions.setPort(proxyPort);
-    var proxyUsername = System.getProperty("http.proxyUser", "none");
-    var proxyPassword = System.getProperty("http.proxyPassword", "none");
-    if (!"none".equalsIgnoreCase(proxyUsername)) {
-      proxyOptions.setUsername(proxyUsername);
-      if (!"none".equalsIgnoreCase(proxyPassword)) {
-        proxyOptions.setPassword(proxyPassword);
-      }
+    final int proxyPort = config.getHttpProxyPort();
+    final ProxyOptions proxyOptions = new ProxyOptions().setHost(proxyHost).setPort(proxyPort);
+    final String proxyUsername = config.getHttpProxyUsername();
+    final String proxyPassword = config.getHttpProxyPassword();
+    if (proxyUsername != null && proxyPassword != null) {
+      proxyOptions.setUsername(proxyUsername).setPassword(proxyPassword);
     }
     return Optional.of(proxyOptions);
   }
