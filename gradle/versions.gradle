@@ -94,10 +94,10 @@ dependencyManagement {
     dependency "org.hyperledger.besu.internal:metrics-core:${besuVersion}"
 
     // explicit declaring to override transitive dependencies with vulnerabilities
-    dependency 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
-    dependencySet(group: 'com.google.protobuf', version: '3.19.6') {
+    dependency 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+    dependencySet(group: 'com.google.protobuf', version: '3.21.9') {
       /*
-        com.google.protobuf:protobuf-java:3.11.4 -> 3.19.4 // CVE-2022-3171
+        com.google.protobuf:protobuf-java:3.11.4 -> 3.21.9 // CVE-2022-3509
         \--- io.jaegertracing:jaeger-proto:0.7.0
           \--- org.hyperledger.besu.internal:metrics-core:22.7.6
       */
