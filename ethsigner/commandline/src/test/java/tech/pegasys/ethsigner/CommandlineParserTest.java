@@ -159,12 +159,13 @@ class CommandlineParserTest {
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
   void nonIntegerInputForHttpProxyPortShowsError(final boolean useConfigFile) {
-    final Map<String, Object> options = modifyOptionValue("http-proxy-port", "abc");
+    final Map<String, Object> options = modifyOptionValue("downstream-http-proxy-port", "abc");
     final List<String> args =
         useConfigFile ? toConfigFileOptionsList(tempDir, options) : toOptionsList(options);
     final boolean result = parser.parseCommandLine(args.toArray(String[]::new));
     assertThat(result).isFalse();
-    assertThat(commandError.toString()).contains("--http-proxy-port", "'abc' is not an int");
+    assertThat(commandError.toString())
+        .contains("--downstream-http-proxy-port", "'abc' is not an int");
     assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
   }
 
@@ -221,24 +222,25 @@ class CommandlineParserTest {
   @Test
   void missingHttpProxyHostDefaultsToNull() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-proxy-host", config::getHttpProxyHost, null);
+        "downstream-http-proxy-host", config::getHttpProxyHost, null);
   }
 
   @Test
   void missingHttpProxyPortDefaultsToLoopback() {
-    missingOptionalParameterIsValidAndMeetsDefault("http-proxy-port", config::getHttpProxyPort, 80);
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-proxy-port", config::getHttpProxyPort, 80);
   }
 
   @Test
   void missingHttpProxyUsernameDefaultsToNull() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-proxy-username", config::getHttpProxyUsername, null);
+        "downstream-http-proxy-username", config::getHttpProxyUsername, null);
   }
 
   @Test
   void missingHttpProxyPasswordDefaultsToNull() {
     missingOptionalParameterIsValidAndMeetsDefault(
-        "http-proxy-password", config::getHttpProxyPassword, null);
+        "downstream-http-proxy-password", config::getHttpProxyPassword, null);
   }
 
   @Test

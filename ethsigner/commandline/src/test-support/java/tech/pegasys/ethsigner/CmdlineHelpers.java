@@ -46,10 +46,10 @@ public class CmdlineHelpers {
     optionsMap.put("downstream-http-tls-keystore-password-file", "./test.pass");
     optionsMap.put("downstream-http-tls-ca-auth-enabled", Boolean.FALSE);
     optionsMap.put("downstream-http-tls-known-servers-file", "./test.txt");
-    optionsMap.put("http-proxy-host", "localhost");
-    optionsMap.put("http-proxy-port", 80);
-    optionsMap.put("http-proxy-username", "username");
-    optionsMap.put("http-proxy-password", "passwd");
+    optionsMap.put("downstream-http-proxy-host", "localhost");
+    optionsMap.put("downstream-http-proxy-port", 80);
+    optionsMap.put("downstream-http-proxy-username", "username");
+    optionsMap.put("downstream-http-proxy-password", "passwd");
     return optionsMap;
   }
 

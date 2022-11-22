@@ -221,14 +221,14 @@ public class EthSignerBaseCommand implements Config, Runnable {
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--http-proxy-host"},
+      names = {"--downstream-http-proxy-host"},
       description = "Hostname for proxy connect, no proxy if null (default: null)",
       paramLabel = HOST_FORMAT_HELP,
       arity = "1")
   private String httpProxyHost = null;
 
   @Option(
-      names = {"--http-proxy-port"},
+      names = {"--downstream-http-proxy-port"},
       paramLabel = PORT_FORMAT_HELP,
       description = "Port for proxy connect (default: 80)",
       arity = "1")
@@ -236,7 +236,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--http-proxy-username"},
+      names = {"--downstream-http-proxy-username"},
       paramLabel = "<username>",
       description = "Username for proxy connect, no authentication if null (default: null)",
       arity = "1")
@@ -244,7 +244,7 @@ public class EthSignerBaseCommand implements Config, Runnable {
 
   @SuppressWarnings("FieldMayBeFinal") // Because PicoCLI requires Strings to not be final.
   @Option(
-      names = {"--http-proxy-password"},
+      names = {"--downstream-http-proxy-password"},
       paramLabel = "<password>",
       description = "Password for proxy connect, no authentication if null (default: null)",
       arity = "1")
