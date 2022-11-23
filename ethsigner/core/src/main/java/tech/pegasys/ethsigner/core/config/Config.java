@@ -60,4 +60,12 @@ public interface Config {
   Set<MetricCategory> getMetricCategories();
 
   List<String> getMetricsHostAllowList();
+
+  String getHttpProxyHost();
+
+  Integer getHttpProxyPort();
+
+  String getHttpProxyUsername();
+
+  String getHttpProxyPassword();
 }

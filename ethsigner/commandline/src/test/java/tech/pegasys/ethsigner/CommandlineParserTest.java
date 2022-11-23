@@ -101,6 +101,10 @@ class CommandlineParserTest {
     assertThat(tlsClientConstaints.getKnownClientsFile())
         .isEqualTo(Optional.of(new File("./known_clients")));
     assertThat(tlsClientConstaints.isCaAuthorizedClientAllowed()).isTrue();
+    assertThat(config.getHttpProxyHost()).isEqualTo("localhost");
+    assertThat(config.getHttpProxyPort()).isEqualTo(80);
+    assertThat(config.getHttpProxyUsername()).isEqualTo("username");
+    assertThat(config.getHttpProxyPassword()).isEqualTo("passwd");
 
     final Optional<ClientTlsOptions> downstreamTlsOptionsOptional = config.getClientTlsOptions();
     assertThat(downstreamTlsOptionsOptional.isPresent()).isTrue();
@@ -154,6 +158,19 @@ class CommandlineParserTest {
 
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
+  void nonIntegerInputForHttpProxyPortShowsError(final boolean useConfigFile) {
+    final Map<String, Object> options = modifyOptionValue("downstream-http-proxy-port", "abc");
+    final List<String> args =
+        useConfigFile ? toConfigFileOptionsList(tempDir, options) : toOptionsList(options);
+    final boolean result = parser.parseCommandLine(args.toArray(String[]::new));
+    assertThat(result).isFalse();
+    assertThat(commandError.toString())
+        .contains("--downstream-http-proxy-port", "'abc' is not an int");
+    assertThat(commandOutput.toString()).containsOnlyOnce(defaultUsageText);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
   void missingRequiredParamShowsAppropriateError(final boolean useConfigFile) {
     parseCommandLineWithMissingParamsShowsError(
         parser,
@@ -200,6 +217,30 @@ class CommandlineParserTest {
   void missingListenHostDefaultsToLoopback() {
     missingOptionalParameterIsValidAndMeetsDefault(
         "http-listen-host", config::getHttpListenHost, "127.0.0.1");
+  }
+
+  @Test
+  void missingHttpProxyHostDefaultsToNull() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-proxy-host", config::getHttpProxyHost, null);
+  }
+
+  @Test
+  void missingHttpProxyPortDefaultsToLoopback() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-proxy-port", config::getHttpProxyPort, 80);
+  }
+
+  @Test
+  void missingHttpProxyUsernameDefaultsToNull() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-proxy-username", config::getHttpProxyUsername, null);
+  }
+
+  @Test
+  void missingHttpProxyPasswordDefaultsToNull() {
+    missingOptionalParameterIsValidAndMeetsDefault(
+        "downstream-http-proxy-password", config::getHttpProxyPassword, null);
   }
 
   @Test
