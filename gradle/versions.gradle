@@ -46,7 +46,7 @@ dependencyManagement {
       entry 'log4j-slf4j-impl'
     }
 
-    dependencySet(group: 'org.apache.tuweni', version: '2.2.0') {
+    dependencySet(group: 'org.apache.tuweni', version: '2.3.1') {
       entry 'tuweni-net'
       entry 'tuweni-toml'
     }
@@ -135,5 +135,11 @@ dependencyManagement {
             |    +--- tech.pegasys.signers.internal:signing-secp256k1-impl:2.2.2
     */
     dependency 'io.projectreactor.netty:reactor-netty-http:1.0.24'
+
+    // manual overriding of commons-net to avoid CVE-2021-37533
+    /* commons-net:commons-net:3.8.0
+       \-- org.apache.tuweni:tuweni-net:2.3.1
+     */
+    dependency 'commons-net:commons-net:3.9.0'
   }
 }
