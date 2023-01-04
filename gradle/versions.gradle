@@ -119,8 +119,8 @@ dependencyManagement {
       entry 'kotlin-stdlib-jdk7'
       entry 'kotlin-stdlib-jdk8'
     }
-    // addressing CVE-2022-24823
-    dependencySet(group: 'io.netty', version: '4.1.77.Final') {
+    // addressing CVE-2022-41881 and CVE-2022-41915
+    dependencySet(group: 'io.netty', version: '4.1.86.Final') {
       entry 'netty-all'
       entry 'netty-codec-http2'
       entry 'netty-handler-proxy'
