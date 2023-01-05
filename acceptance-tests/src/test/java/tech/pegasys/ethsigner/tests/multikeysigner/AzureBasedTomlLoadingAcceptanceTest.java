@@ -23,9 +23,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestBase {
 
-  static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
-  static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  static final String tenantId = System.getenv("ETHSIGNER_AZURE_TENANT_ID");
+  static final String clientId = System.getenv("AZURE_CLIENT_ID");
+  static final String clientSecret = System.getenv("AZURE_CLIENT_SECRET");
+  static final String tenantId = System.getenv("AZURE_TENANT_ID");
   static final String FILENAME = "8c250253147a091cfcb7e9425022bcd03a329ce6";
   static final String AZURE_ETHEREUM_ADDRESS = "0x" + FILENAME;
 

@@ -85,11 +85,11 @@ public class TransactionSignerParamsSupplier {
       params.add("--key-version");
       params.add("");
       params.add("--client-id");
-      params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
+      params.add(System.getenv("AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
       params.add("--tenant-id");
-      params.add(System.getenv("ETHSIGNER_AZURE_TENANT_ID"));
+      params.add(System.getenv("AZURE_TENANT_ID"));
     } else if (multiKeySignerDirectory != null) {
       params.add("multikey-signer");
       params.add("--directory");
@@ -105,8 +105,7 @@ public class TransactionSignerParamsSupplier {
   }
 
   private File createAzureSecretFile() {
-    return createTmpFile(
-        "azure_secret", System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET").getBytes(UTF_8));
+    return createTmpFile("azure_secret", System.getenv("AZURE_CLIENT_SECRET").getBytes(UTF_8));
   }
 
   private File createPasswordFile() {
