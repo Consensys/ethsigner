@@ -22,9 +22,9 @@ import org.junit.jupiter.api.io.TempDir;
 public class MultiKeyAzureTransactionSignerAcceptanceTest
     extends MultiKeyTransactionSigningAcceptanceTestBase {
 
-  static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");
-  static final String clientSecret = System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET");
-  static final String tenantId = System.getenv("ETHSIGNER_AZURE_TENANT_ID");
+  static final String clientId = System.getenv("AZURE_CLIENT_ID");
+  static final String clientSecret = System.getenv("AZURE_CLIENT_SECRET");
+  static final String tenantId = System.getenv("AZURE_TENANT_ID");
   static final String FILENAME = "8c250253147a091cfcb7e9425022bcd03a329ce6";
   private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
       "0x8c250253147a091cfcb7e9425022bcd03a329ce6";

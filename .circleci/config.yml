@@ -231,6 +231,7 @@ workflows:
             - build
           context:
             - dockerhub-quorumengineering-ro
+            - protocols-signers
           filters:
             tags:
               <<: *filters-release-tags

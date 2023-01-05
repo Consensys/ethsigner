@@ -48,9 +48,9 @@ public class ValueTransferWithAzureAcceptanceTest {
         .addShutdownHook(new Thread(ValueTransferWithAzureAcceptanceTest::tearDownBase));
 
     Assumptions.assumeTrue(
-        System.getenv("ETHSIGNER_AZURE_CLIENT_ID") != null
-            && System.getenv("ETHSIGNER_AZURE_CLIENT_SECRET") != null
-            && System.getenv("ETHSIGNER_AZURE_TENANT_ID") != null,
+        System.getenv("AZURE_CLIENT_ID") != null
+            && System.getenv("AZURE_CLIENT_SECRET") != null
+            && System.getenv("AZURE_TENANT_ID") != null,
         "Ensure Azure client id, client secret and tenantId env variables are set");
 
     final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
