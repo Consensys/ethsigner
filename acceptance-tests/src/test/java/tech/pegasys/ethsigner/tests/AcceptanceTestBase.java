@@ -25,6 +25,7 @@ import tech.pegasys.ethsigner.tests.dsl.signer.SignerConfigurationBuilder;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import com.google.common.io.Resources;
 import org.junit.jupiter.api.AfterAll;
@@ -67,7 +68,10 @@ public class AcceptanceTestBase {
   public static void setUpBase() {
     Runtime.getRuntime().addShutdownHook(new Thread(AcceptanceTestBase::tearDownBase));
 
-    final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
+    final BesuNodeConfig besuNodeConfig =
+        BesuNodeConfigBuilder.aBesuNodeConfig()
+            .withAdditionalCommandLineArgs(List.of("--tx-pool-limit-by-account-percentage=1"))
+            .build();
     final SignerConfiguration signerConfig = new SignerConfigurationBuilder().build();
 
     ethNode = BesuNodeFactory.create(besuNodeConfig);
