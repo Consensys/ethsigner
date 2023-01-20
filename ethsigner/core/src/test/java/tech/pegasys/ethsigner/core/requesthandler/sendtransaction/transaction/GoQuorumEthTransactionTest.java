@@ -44,7 +44,7 @@ public class GoQuorumEthTransactionTest {
     params.receiver("0xd46e8dd67c5d32be8058bb8eb970870f07244567");
     params.gas("0x76c0");
     params.gasPrice("0x9184e72a000");
-    params.nonce("0x07");
+    params.nonce("0x7");
     params.value("0x0");
     params.data(
         "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675");
