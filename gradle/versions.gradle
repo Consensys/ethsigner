@@ -40,7 +40,7 @@ dependencyManagement {
 
     dependency 'javax.activation:activation:1.1.1'
 
-    dependencySet(group: 'org.apache.logging.log4j', version: '2.17.2') {
+    dependencySet(group: 'org.apache.logging.log4j', version: '2.19.0') {
       entry 'log4j-api'
       entry 'log4j-core'
       entry 'log4j-slf4j-impl'
