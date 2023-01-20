@@ -73,6 +73,9 @@
     {
       "moduleName": "org.reactivestreams:reactive-streams",
       "moduleLicense": "MIT-0"
+    },
+    {
+      "moduleName": "com.squareup.okio:okio"
     }
   ],
   "overrideLicenses": [
@@ -131,6 +134,10 @@
     {
       "moduleName": "org.java-websocket:Java-WebSocket",
       "moduleLicense": "MIT License"
+    },
+    {
+      "moduleName": "com.squareup.okio:okio",
+      "moduleLicense": "Apache License, Version 2.0"
     }
   ]
 }

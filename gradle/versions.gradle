@@ -22,7 +22,7 @@ dependencyManagement {
 
     dependency 'com.google.guava:guava:31.1-jre'
 
-    dependency 'com.squareup.okhttp3:okhttp:4.9.3'
+    dependency 'com.squareup.okhttp3:okhttp:4.10.0'
 
     dependency 'commons-io:commons-io:2.11.0'
 
@@ -82,7 +82,7 @@ dependencyManagement {
       entry 'crypto'
     }
 
-    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.2.2') {
+    dependencySet(group: 'tech.pegasys.signers.internal', version: '2.2.4') {
       entry 'keystorage-hashicorp'
       entry 'signing-secp256k1-api'
       entry 'signing-secp256k1-impl'
