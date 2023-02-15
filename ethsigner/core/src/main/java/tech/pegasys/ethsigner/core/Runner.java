@@ -130,7 +130,8 @@ public class Runner {
     router
         .route()
         .handler(
-            CorsHandler.create(buildCorsRegexFromConfig())
+            CorsHandler.create()
+                .addRelativeOrigin(buildCorsRegexFromConfig())
                 .allowedHeaders(Sets.newHashSet("*", "content-type")));
 
     router
