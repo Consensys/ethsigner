@@ -15,6 +15,7 @@ package tech.pegasys.ethsigner.jsonrpcproxy.model.response;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcResponse;
 
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
@@ -25,6 +26,8 @@ public class EthSignerResponse {
   private final Iterable<Entry<String, String>> headers;
   private final HttpResponseStatus status;
 
+  private final Optional<String> statusLine;
+
   public EthSignerResponse(
       final Iterable<Entry<String, String>> headers,
       final JsonRpcResponse body,
@@ -32,6 +35,7 @@ public class EthSignerResponse {
     this.body = Json.encode(body);
     this.headers = headers;
     this.status = status;
+    this.statusLine = Optional.empty();
   }
 
   public EthSignerResponse(
@@ -41,6 +45,18 @@ public class EthSignerResponse {
     this.body = body;
     this.headers = headers;
     this.status = status;
+    this.statusLine = Optional.empty();
+  }
+
+  public EthSignerResponse(
+      final Iterable<Entry<String, String>> headers,
+      final String body,
+      final HttpResponseStatus status,
+      Optional<String> statusLine) {
+    this.body = body;
+    this.headers = headers;
+    this.status = status;
+    this.statusLine = statusLine;
   }
 
   public String getBody() {
@@ -53,5 +69,9 @@ public class EthSignerResponse {
 
   public int getStatusCode() {
     return status.code();
+  }
+
+  public Optional<String> getStatusLine() {
+    return statusLine;
   }
 }

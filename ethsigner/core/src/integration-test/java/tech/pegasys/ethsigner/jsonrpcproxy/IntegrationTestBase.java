@@ -321,6 +321,9 @@ public class IntegrationTestBase {
   private void verifyResponseMatchesExpected(
       final Response response, final EthSignerResponse expectResponse) {
     assertThat(response.statusCode()).isEqualTo(expectResponse.getStatusCode());
+    if (expectResponse.getStatusLine().isPresent()) {
+      assertThat(response.getStatusLine()).contains(expectResponse.getStatusLine().get());
+    }
     assertThat(response.headers())
         .containsAll(RestAssuredConverter.headers(expectResponse.getHeaders()));
     assertThat(response.body().print()).isEqualTo(expectResponse.getBody());
