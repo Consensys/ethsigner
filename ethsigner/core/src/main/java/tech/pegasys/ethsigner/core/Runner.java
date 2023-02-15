@@ -136,8 +136,8 @@ public class Runner {
     router
         .route(HttpMethod.POST, "/")
         .produces(JSON)
-        .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
+        .handler(BodyHandler.create())
         .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
         .blockingHandler(new JsonRpcHandler(responseFactory, requestMapper, jsonDecoder), false);
 
@@ -145,8 +145,8 @@ public class Runner {
     router
         .route(HttpMethod.GET, "/upcheck")
         .produces(TEXT)
-        .handler(BodyHandler.create())
         .handler(ResponseContentTypeHandler.create())
+        .handler(BodyHandler.create())
         .failureHandler(new LogErrorHandler())
         .handler(new UpcheckHandler());
 
