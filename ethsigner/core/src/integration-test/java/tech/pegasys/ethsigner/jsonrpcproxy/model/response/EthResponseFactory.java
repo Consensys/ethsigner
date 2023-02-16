@@ -18,7 +18,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError;
 import tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcErrorResponse;
 
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
@@ -55,8 +54,7 @@ public class EthResponseFactory {
     return new EthSignerResponse(NO_HEADERS, body, statusCode);
   }
 
-  public EthSignerResponse ethSigner(
-      final HttpResponseStatus statusCode, Optional<String> statusLine) {
+  public EthSignerResponse ethSigner(final HttpResponseStatus statusCode, String statusLine) {
     return new EthSignerResponse(NO_HEADERS, "", statusCode, statusLine);
   }
 

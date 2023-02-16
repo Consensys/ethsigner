@@ -52,11 +52,11 @@ public class EthSignerResponse {
       final Iterable<Entry<String, String>> headers,
       final String body,
       final HttpResponseStatus status,
-      Optional<String> statusLine) {
+      final String statusLine) {
     this.body = body;
     this.headers = headers;
     this.status = status;
-    this.statusLine = statusLine;
+    this.statusLine = Optional.ofNullable(statusLine);
   }
 
   public String getBody() {

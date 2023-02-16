@@ -17,7 +17,6 @@ import static org.mockserver.model.HttpRequest.request;
 
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
@@ -61,8 +60,7 @@ public class AllDomainsCorsIntegrationTest extends IntegrationTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(requestHeaders, netVersionRequest),
-        response.ethSigner(
-            HttpResponseStatus.FORBIDDEN, Optional.of("403 CORS Rejected - Invalid origin")));
+        response.ethSigner(HttpResponseStatus.FORBIDDEN, "403 CORS Rejected - Invalid origin"));
 
     // Cors headers should not be forwarded to the downstream web3 provider (CORS is handled
     // entirely within Ethsigner.
