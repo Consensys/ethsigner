@@ -184,7 +184,7 @@ class ClientSideTlsAcceptanceTest {
   }
 
   @Test
-  void missingKeyStoreForEthSignerResultsInEthSignerTerminating(@TempDir Path workDir)
+  void missingKeyStoreForEthSignerResultsInInternalServerError500Return(@TempDir Path workDir)
       throws Exception {
     final TlsCertificateDefinition missingServerCert =
         new TlsCertificateDefinition(
@@ -210,8 +210,8 @@ class ClientSideTlsAcceptanceTest {
   }
 
   @Test
-  void incorrectPasswordForDownstreamKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
-      throws Exception {
+  void incorrectPasswordForDownstreamKeyStoreResultsInInternalServerError500Return(
+      @TempDir Path workDir) throws Exception {
     final TlsCertificateDefinition serverPresentedCertWithInvalidPassword =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
     final TlsCertificateDefinition serverCert =
