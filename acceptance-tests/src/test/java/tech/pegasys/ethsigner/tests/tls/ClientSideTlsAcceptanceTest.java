@@ -13,9 +13,9 @@
 package tech.pegasys.ethsigner.tests.tls;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
+import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static tech.pegasys.ethsigner.tests.WaitUtils.waitFor;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 import static tech.pegasys.ethsigner.tests.tls.support.CertificateHelpers.populateFingerprintFile;
@@ -186,29 +186,55 @@ class ClientSideTlsAcceptanceTest {
   @Test
   void missingKeyStoreForEthSignerResultsInEthSignerTerminating(@TempDir Path workDir)
       throws Exception {
-    final TlsCertificateDefinition serverPresentedCert =
-        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
-    final TlsCertificateDefinition ethSignerCert =
+    final TlsCertificateDefinition missingServerCert =
         new TlsCertificateDefinition(
             workDir.resolve("Missing_keyStore").toFile(), "arbitraryPassword");
+    final TlsCertificateDefinition serverCert =
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
+    final TlsCertificateDefinition ethSignerCert =
+        TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
-    // Ports are arbitrary as EthSigner should exit
-    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    final HttpServer web3ProviderHttpServer =
+        serverFactory.create(serverCert, ethSignerCert, workDir);
+
+    signer =
+        createSigner(
+            missingServerCert, ethSignerCert, web3ProviderHttpServer.actualPort(), 0, workDir);
     signer.start();
-    waitFor(() -> assertThat(signer.isRunning()).isFalse());
+
+    // the actual connection to downstream server should fail as an internal error (500) since the
+    // keystore is invalid ...
+    assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
+        .isInstanceOf(ClientConnectionException.class)
+        .hasMessageContaining(String.valueOf(INTERNAL_SERVER_ERROR.code()));
   }
 
   @Test
   void incorrectPasswordForDownstreamKeyStoreResultsInEthSignerTerminating(@TempDir Path workDir)
       throws Exception {
-    final TlsCertificateDefinition serverPresentedCert =
+    final TlsCertificateDefinition serverPresentedCertWithInvalidPassword =
+        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
+    final TlsCertificateDefinition serverCert =
         TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "password");
     final TlsCertificateDefinition ethSignerCert =
-        TlsCertificateDefinition.loadFromResource("tls/cert1.pfx", "wrong_password");
+        TlsCertificateDefinition.loadFromResource("tls/cert2.pfx", "password2");
 
-    // Ports are arbitrary as EthSigner should exit
-    signer = createSigner(ethSignerCert, serverPresentedCert, 9000, 9001, workDir);
+    final HttpServer web3ProviderHttpServer =
+        serverFactory.create(serverCert, ethSignerCert, workDir);
+
+    signer =
+        createSigner(
+            serverPresentedCertWithInvalidPassword,
+            ethSignerCert,
+            web3ProviderHttpServer.actualPort(),
+            0,
+            workDir);
     signer.start();
-    waitFor(() -> assertThat(signer.isRunning()).isFalse());
+
+    // the actual connection to downstream server should fail as an internal error (500) since the
+    // keystore password is invalid ...
+    assertThatThrownBy(() -> signer.accounts().balance("0x123456"))
+        .isInstanceOf(ClientConnectionException.class)
+        .hasMessageContaining(String.valueOf(INTERNAL_SERVER_ERROR.code()));
   }
 }
