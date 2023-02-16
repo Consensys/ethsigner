@@ -32,20 +32,14 @@ public class EthSignerResponse {
       final Iterable<Entry<String, String>> headers,
       final JsonRpcResponse body,
       final HttpResponseStatus status) {
-    this.body = Json.encode(body);
-    this.headers = headers;
-    this.status = status;
-    this.statusLine = Optional.empty();
+    this(headers, Json.encode(body), status, null);
   }
 
   public EthSignerResponse(
       final Iterable<Entry<String, String>> headers,
       final String body,
       final HttpResponseStatus status) {
-    this.body = body;
-    this.headers = headers;
-    this.status = status;
-    this.statusLine = Optional.empty();
+    this(headers, body, status, null);
   }
 
   public EthSignerResponse(
