@@ -54,6 +54,10 @@ public class EthResponseFactory {
     return new EthSignerResponse(NO_HEADERS, body, statusCode);
   }
 
+  public EthSignerResponse ethSigner(final HttpResponseStatus statusCode, String statusLine) {
+    return new EthSignerResponse(NO_HEADERS, "", statusCode, statusLine);
+  }
+
   public EthNodeResponse ethNode(final Iterable<Entry<String, String>> headers, final String body) {
     return new EthNodeResponse(headers, body, HttpResponseStatus.OK);
   }

@@ -12,15 +12,13 @@
  */
 package tech.pegasys.ethsigner.jsonrpcproxy;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.model.HttpRequest.request;
 
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.google.common.collect.Lists;
-import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.Json;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,9 +29,6 @@ import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.NetVersion;
 
 public class AllDomainsCorsIntegrationTest extends IntegrationTestBase {
-
-  private static final Iterable<Entry<String, String>> RESPONSE_HEADERS =
-      singletonList(ImmutablePair.of("Content-Type", "Application/Json"));
 
   private static final String ROOT_PATH = "/arbitraryRootPath";
 
@@ -52,15 +47,10 @@ public class AllDomainsCorsIntegrationTest extends IntegrationTestBase {
     final String netVersionRequest = Json.encode(jsonRpc().netVersion());
     final Response<String> netVersion = new NetVersion();
     netVersion.setResult("4");
-    final String netVersionResponse = Json.encode(netVersion);
 
+    // Vertx 4.3.8 returns 403 Forbidden status with CORS rejected in status line.
     setUpEthNodeResponse(
-        request.ethNode(netVersionRequest), response.ethNode(RESPONSE_HEADERS, netVersionResponse));
-
-    final List<Entry<String, String>> expectedResponseHeaders =
-        Lists.newArrayList(RESPONSE_HEADERS);
-    expectedResponseHeaders.add(
-        ImmutablePair.of(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), originDomain));
+        request.ethNode(netVersionRequest), response.ethNode("", HttpResponseStatus.FORBIDDEN));
 
     final Iterable<Entry<String, String>> requestHeaders =
         List.of(
@@ -70,7 +60,7 @@ public class AllDomainsCorsIntegrationTest extends IntegrationTestBase {
 
     sendPostRequestAndVerifyResponse(
         request.ethSigner(requestHeaders, netVersionRequest),
-        response.ethSigner(expectedResponseHeaders, netVersionResponse));
+        response.ethSigner(HttpResponseStatus.FORBIDDEN, "403 CORS Rejected - Invalid origin"));
 
     // Cors headers should not be forwarded to the downstream web3 provider (CORS is handled
     // entirely within Ethsigner.

@@ -85,8 +85,8 @@ public class TlsEnabledHttpServerFactory {
       router
           .route(HttpMethod.POST, "/")
           .produces(HttpHeaderValues.APPLICATION_JSON.toString())
-          .handler(BodyHandler.create())
           .handler(ResponseContentTypeHandler.create())
+          .handler(BodyHandler.create())
           .failureHandler(new JsonRpcErrorHandler(new HttpResponseFactory()))
           .handler(new JsonRpcHandler(null, requestMapper, jsonDecoder));
 
