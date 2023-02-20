@@ -3,7 +3,7 @@
 ## 23.2.0
 ### Bugs Fixed
 - Various library dependencies updates in Gradle build script
-- Docker image - run `apt upgrade` to pull in latest OS libraries
+- Docker image - manually install libssl3 to bring in latest version
 
 ---
 ## 22.1.3
