@@ -1,5 +1,11 @@
 # Changelog
 
+## 23.2.0
+### Bugs Fixed
+- Various library dependencies updates in Gradle build script
+- Docker image - manually install libssl3 to bring in latest version
+
+---
 ## 22.1.3
 ### Breaking Changes
 - Updated Metrics service default port from 8546 to 9546.
