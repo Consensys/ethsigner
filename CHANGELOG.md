@@ -1,5 +1,10 @@
 # Changelog
 
+## 23.2.0
+### Bugs Fixed
+- Various library dependencies updates
+
+---
 ## 22.1.3
 ### Breaking Changes
 - Updated Metrics service default port from 8546 to 9546.
