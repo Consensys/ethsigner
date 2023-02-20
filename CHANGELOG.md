@@ -2,7 +2,8 @@
 
 ## 23.2.0
 ### Bugs Fixed
-- Various library dependencies updates
+- Various library dependencies updates in Gradle build script
+- Docker image - run `apt upgrade` to pull in latest OS libraries
 
 ---
 ## 22.1.3
