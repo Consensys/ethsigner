@@ -204,6 +204,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
+          # UTC time
           cron: "0 17 * * *"
           filters:
             branches:
