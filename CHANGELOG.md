@@ -1,5 +1,12 @@
 # Changelog
 
+## Upcoming release
+
+### Bugs Fixed
+- Update of Azure libraries (transitive via signers library) and manual override to fix CVE-2023-1370
+
+---
+
 ## 23.2.0
 ### Bugs Fixed
 - Various library dependencies updates in Gradle build script
