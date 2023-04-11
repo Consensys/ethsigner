@@ -6,7 +6,7 @@
 - Update of Azure libraries (transitive via signers library) and manual override to fix CVE-2023-1370
 
 ### Breaking Changes
-- remove support for GoQuorum private transactions via Besu
+- remove support for GoQuorum private transactions via Besu [#500](https://github.com/ConsenSys/ethsigner/pull/500)
 
 ---
 
