@@ -23,12 +23,8 @@ import java.util.List;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class TransactionFactory {
-
-  private static final Logger LOG = LogManager.getLogger();
 
   private final VertxRequestTransmitterFactory transmitterFactory;
   private final JsonDecoder decoder;
@@ -43,13 +39,10 @@ public class TransactionFactory {
     final String method = request.getMethod().toLowerCase();
     final VertxNonceRequestTransmitter nonceRequestTransmitter =
         new VertxNonceRequestTransmitter(context.request().headers(), decoder, transmitterFactory);
-    final VertxStoreRawRequestTransmitter storeRawRequestTransmitter =
-        new VertxStoreRawRequestTransmitter(
-            context.request().headers(), decoder, transmitterFactory);
 
     switch (method) {
       case "eth_sendtransaction":
-        return createEthTransaction(request, nonceRequestTransmitter, storeRawRequestTransmitter);
+        return createEthTransaction(request, nonceRequestTransmitter);
       case "eea_sendtransaction":
         return createEeaTransaction(request, nonceRequestTransmitter);
       default:
@@ -58,20 +51,16 @@ public class TransactionFactory {
   }
 
   private Transaction createEthTransaction(
-      final JsonRpcRequest request,
-      final VertxNonceRequestTransmitter nonceRequestTransmitter,
-      final VertxStoreRawRequestTransmitter storeRawRequestTransmitter) {
+      final JsonRpcRequest request, final VertxNonceRequestTransmitter nonceRequestTransmitter) {
     final EthSendTransactionJsonParameters params =
         fromRpcRequestToJsonParam(EthSendTransactionJsonParameters.class, request);
 
     final NonceProvider ethNonceProvider =
         new EthNonceProvider(params.sender(), nonceRequestTransmitter);
-    final StoreRawEnclaveLookupIdProvider lookupIdProvider =
-        new StoreRawEnclaveLookupIdProvider(storeRawRequestTransmitter);
 
     if (params.privateFor().isPresent()) {
-      return GoQuorumPrivateTransaction.from(
-          params, ethNonceProvider, lookupIdProvider, request.getId());
+      throw new IllegalArgumentException(
+          "GoQuorum private transactions (using PrivateFor) are not supported.");
     } else {
       return new EthTransaction(params, ethNonceProvider, request.getId());
     }
@@ -82,14 +71,6 @@ public class TransactionFactory {
 
     final EeaSendTransactionJsonParameters params =
         fromRpcRequestToJsonParam(EeaSendTransactionJsonParameters.class, request);
-
-    if (params.privacyGroupId().isPresent() == params.privateFor().isPresent()) {
-      LOG.warn(
-          "Illegal private transaction received; privacyGroup (present = {}) and privateFor (present = {}) are mutually exclusive.",
-          params.privacyGroupId().isPresent(),
-          params.privateFor().isPresent());
-      throw new IllegalArgumentException("PrivacyGroup and PrivateFor are mutually exclusive.");
-    }
 
     if (params.privacyGroupId().isPresent()) {
       final NonceProvider nonceProvider =
