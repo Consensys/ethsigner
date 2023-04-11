@@ -5,6 +5,9 @@
 ### Bugs Fixed
 - Update of Azure libraries (transitive via signers library) and manual override to fix CVE-2023-1370
 
+### Breaking Changes
+- remove support for GoQuorum private transactions via Besu
+
 ---
 
 ## 23.2.0
