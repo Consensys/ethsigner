@@ -1,4 +1,4 @@
-# EthSigner
+# EthSigner test
 
 A transaction signing application to be used with a web3 provider. All questions, queries and other discussion can be found on [Discord].
 
