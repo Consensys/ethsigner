@@ -20,7 +20,7 @@ dependencyManagement {
       entry 'error_prone_test_helpers'
     }
 
-    dependency 'com.google.guava:guava:31.1-jre'
+    dependency 'com.google.guava:guava:32.0.1-jre'
 
     dependency 'com.squareup.okhttp3:okhttp:4.10.0'
 
@@ -55,9 +55,9 @@ dependencyManagement {
 
     dependency 'org.awaitility:awaitility:4.1.1'
 
-    dependencySet(group: 'org.bouncycastle', version: '1.70') {
-      entry 'bcpkix-jdk15on'
-      entry 'bcprov-jdk15on'
+    dependencySet(group: 'org.bouncycastle', version: '1.74') {
+      entry 'bcpkix-jdk18on'
+      entry 'bcprov-jdk18on'
     }
 
     dependencySet(group: 'org.junit.jupiter', version: '5.8.2') {
@@ -94,7 +94,7 @@ dependencyManagement {
     dependency "org.hyperledger.besu.internal:metrics-core:${besuVersion}"
 
     // explicit declaring to override transitive dependencies with vulnerabilities
-    dependency 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    dependency 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     dependencySet(group: 'com.google.protobuf', version: '3.21.12') {
       /*
         com.google.protobuf:protobuf-java:3.11.4 -> 3.21.9 // CVE-2022-3509
@@ -104,7 +104,7 @@ dependencyManagement {
       entry 'protobuf-java'
       entry 'protobuf-java-util'
     }
-    dependencySet(group: 'io.grpc', version: '1.45.1') {
+    dependencySet(group: 'io.grpc', version: '1.56.0') {
       entry 'grpc-api'
       entry 'grpc-context'
       entry 'grpc-core'
