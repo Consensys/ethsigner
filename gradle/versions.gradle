@@ -79,7 +79,9 @@ dependencyManagement {
       entry ('core') {
         exclude group: 'com.github.jnr', name: 'jnr-unixsocket'
       }
-      entry 'crypto'
+      entry ('crypto') {
+        exclude group: 'org.bouncycastle', name: 'bcprov-jdk15on'
+      }
     }
 
     dependencySet(group: 'tech.pegasys.signers.internal', version: '2.2.7') {
@@ -120,7 +122,7 @@ dependencyManagement {
       entry 'kotlin-stdlib-jdk8'
     }
     // addressing CVE-2022-41881 and CVE-2022-41915
-    dependencySet(group: 'io.netty', version: '4.1.86.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.94.Final') {
       entry 'netty-all'
       entry 'netty-codec-http2'
       entry 'netty-handler-proxy'
