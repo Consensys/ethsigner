@@ -69,6 +69,7 @@ dependencies {
   integrationTestImplementation 'org.mockito:mockito-core'
   integrationTestImplementation 'org.mockito:mockito-junit-jupiter'
   integrationTestImplementation 'org.awaitility:awaitility'
+  integrationTestImplementation 'org.bouncycastle:bcprov-jdk18on'
 
   integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
