@@ -39,6 +39,7 @@ dependencies {
   implementation 'org.apache.tuweni:tuweni-net'
   implementation 'org.hyperledger.besu.internal:metrics-core'
   implementation 'org.hyperledger.besu:plugin-api'
+  implementation 'org.bouncycastle:bcprov-jdk18on'
 
   runtimeOnly 'org.apache.logging.log4j:log4j-core'
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
@@ -51,7 +52,6 @@ dependencies {
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
-  testImplementation 'org.bouncycastle:bcprov-jdk18on'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
@@ -69,7 +69,6 @@ dependencies {
   integrationTestImplementation 'org.mockito:mockito-core'
   integrationTestImplementation 'org.mockito:mockito-junit-jupiter'
   integrationTestImplementation 'org.awaitility:awaitility'
-  integrationTestImplementation 'org.bouncycastle:bcprov-jdk18on'
 
   integrationTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
