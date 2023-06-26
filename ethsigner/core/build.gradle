@@ -51,6 +51,7 @@ dependencies {
   testImplementation 'org.mockito:mockito-core'
   testImplementation 'org.mockito:mockito-junit-jupiter'
   testImplementation 'tech.pegasys.signers.internal:signing-secp256k1-impl'
+  testImplementation 'org.bouncycastle:bcprov-jdk18on'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 

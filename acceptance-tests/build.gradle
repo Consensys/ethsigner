@@ -44,6 +44,7 @@ dependencies {
   testImplementation 'org.awaitility:awaitility'
   testImplementation 'commons-io:commons-io'
   testImplementation 'org.zeroturnaround:zt-exec'
+  testImplementation 'org.bouncycastle:bcprov-jdk18on'
 }
 
 test.enabled = false
