@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <!-- See https://jeremylong.github.io/DependencyCheck/general/suppression.html for examples -->
-    <suppress until="2023-04-15">
+    <suppress>
         <notes><![CDATA[
-        Suppress various improper matches to the CPE that belongs only to pkg:maven/org.json/json. Our code does not
-        use this library.
-        Suppress until a future version of dependency-check plugin solves it.
-        - https://github.com/jeremylong/DependencyCheck/issues/5545
+        Suppress CVE-2023-35116 as this is not considered a CVE according to discussion in https://github.com/FasterXML/jackson-databind/issues/3972
         ]]></notes>
-        <packageUrl regex="true">^(?!pkg:maven/org\.json/json@).+$</packageUrl>
-        <cpe>cpe:/a:json-java_project:json-java</cpe>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+        <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
     </suppress>
     <suppress>
         <notes><![CDATA[
