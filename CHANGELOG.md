@@ -1,5 +1,10 @@
 # Changelog
 
+## Next release
+
+## Features Added
+- Updated Docker image to use the latest Ubuntu LTS image
+
 ## 23.6.0
 
 As part of our ongoing commitment to deliver the best remote signing solutions, we are announcing a change in our product offerings.
