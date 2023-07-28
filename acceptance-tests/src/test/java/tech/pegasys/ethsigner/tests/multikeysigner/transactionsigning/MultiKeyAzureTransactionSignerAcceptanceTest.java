@@ -12,6 +12,9 @@
  */
 package tech.pegasys.ethsigner.tests.multikeysigner.transactionsigning;
 
+import static tech.pegasys.ethsigner.tests.AcceptanceTestBase.AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY;
+import static tech.pegasys.ethsigner.tests.AcceptanceTestBase.AZURE_PUBLIC_KEY;
+
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Assumptions;
@@ -25,24 +28,23 @@ public class MultiKeyAzureTransactionSignerAcceptanceTest
   static final String clientId = System.getenv("AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("AZURE_CLIENT_SECRET");
   static final String tenantId = System.getenv("AZURE_TENANT_ID");
-  static final String FILENAME = "8c250253147a091cfcb7e9425022bcd03a329ce6";
-  private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0x8c250253147a091cfcb7e9425022bcd03a329ce6";
+  static final String clientKeyVaultName = System.getenv("AZURE_KEY_VAULT_NAME");
 
   @BeforeAll
   public static void checkAzureCredentials() {
     Assumptions.assumeTrue(
-        clientId != null && clientSecret != null && tenantId != null,
+        clientId != null && clientSecret != null && tenantId != null && clientKeyVaultName != null,
         "Ensure Azure client id, client secret and tenant_id env variables are set");
   }
 
   @Test
   public void azureLoadedFromMultiKeyCanSignValueTransferTransaction(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"),
+        tomlDirectory.resolve("arbitrary_prefix" + AZURE_PUBLIC_KEY + ".toml"),
         clientId,
         clientSecret,
-        tenantId);
+        tenantId,
+        clientKeyVaultName);
 
     setup(tomlDirectory);
 

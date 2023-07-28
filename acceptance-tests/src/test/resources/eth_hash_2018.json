@@ -40,6 +40,10 @@
     "8c250253147a091cfcb7e9425022bcd03a329ce6" : {
       "comment": "azure public key",
       "balance": "90000000000000000000000"
+    },
+    "3d93035f56685fd609415654beccfcaf166ea382" : {
+      "comment": "azure public key",
+      "balance": "90000000000000000000000"
     }
   },
   "number": "0x0",

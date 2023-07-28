@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.AcceptanceTestBase.AZURE_PUBLIC_KEY;
 import static tech.pegasys.ethsigner.tests.multikeysigner.AzureBasedTomlLoadingAcceptanceTest.AZURE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.FileBasedTomlLoadingAcceptanceTest.FILE_ETHEREUM_ADDRESS;
 import static tech.pegasys.ethsigner.tests.multikeysigner.HashicorpBasedTomlLoadingAcceptanceTest.HASHICORP_ETHEREUM_ADDRESS;
@@ -55,10 +56,11 @@ class MultiKeySigningAcceptanceTest extends MultiKeyAcceptanceTestBase {
   void multipleSignersAreCreatedAndExpectedAddressAreReported() throws URISyntaxException {
 
     createAzureTomlFileAt(
-        tempDir.resolve(AzureBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
+        tempDir.resolve(AZURE_PUBLIC_KEY + ".toml"),
         AzureBasedTomlLoadingAcceptanceTest.clientId,
         AzureBasedTomlLoadingAcceptanceTest.clientSecret,
-        AzureBasedTomlLoadingAcceptanceTest.tenantId);
+        AzureBasedTomlLoadingAcceptanceTest.tenantId,
+        AzureBasedTomlLoadingAcceptanceTest.clientKeyVaultName);
     createFileBasedTomlFileAt(
         tempDir.resolve(FileBasedTomlLoadingAcceptanceTest.FILENAME + ".toml"),
         new File(
