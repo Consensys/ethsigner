@@ -34,6 +34,8 @@ import org.junit.jupiter.api.BeforeAll;
 public class AcceptanceTestBase {
 
   private static final String ENCLAVE_PUBLIC_KEY_FILENAME = "enclave_key.pub";
+  public static final String AZURE_PUBLIC_KEY = "3d93035f56685fd609415654beccfcaf166ea382";
+  public static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY = "0x" + AZURE_PUBLIC_KEY;
 
   private static Node ethNode;
   private static Signer ethSigner;
