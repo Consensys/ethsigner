@@ -22,7 +22,7 @@ dependencyManagement {
 
     dependency 'com.google.guava:guava:32.0.1-jre'
 
-    dependency 'com.squareup.okhttp3:okhttp:4.10.0'
+    dependency 'com.squareup.okhttp3:okhttp:4.11.0'
 
     dependency 'commons-io:commons-io:2.11.0'
 
@@ -155,5 +155,8 @@ dependencyManagement {
 
     dependency 'net.minidev:json-smart:2.4.10'
     dependency 'com.nimbusds:nimbus-jose-jwt:9.31'
+
+    // addresses CVE-2023-3635
+    dependency 'com.squareup.okio:okio:3.4.0'
   }
 }
