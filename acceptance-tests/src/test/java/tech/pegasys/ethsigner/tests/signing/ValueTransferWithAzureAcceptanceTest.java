@@ -37,7 +37,7 @@ public class ValueTransferWithAzureAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
   private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0x8c250253147a091cfcb7e9425022bcd03a329ce6";
+      "0x3d93035f56685fd609415654beccfcaf166ea382";
 
   private static Node ethNode;
   private static Signer ethSigner;
@@ -59,7 +59,7 @@ public class ValueTransferWithAzureAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withAzureKeyVault("ethsignertestkey").build();
+        new SignerConfigurationBuilder().withAzureKeyVault("web3signerKVTests").build();
 
     ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();

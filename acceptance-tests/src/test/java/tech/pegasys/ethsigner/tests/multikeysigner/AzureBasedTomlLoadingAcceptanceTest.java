@@ -26,7 +26,7 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   static final String clientId = System.getenv("AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("AZURE_CLIENT_SECRET");
   static final String tenantId = System.getenv("AZURE_TENANT_ID");
-  static final String FILENAME = "8c250253147a091cfcb7e9425022bcd03a329ce6";
+  static final String FILENAME = "3d93035f56685fd609415654beccfcaf166ea382";
   static final String AZURE_ETHEREUM_ADDRESS = "0x" + FILENAME;
 
   @BeforeAll

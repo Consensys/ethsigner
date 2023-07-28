@@ -61,7 +61,7 @@ public class MultiKeyAcceptanceTestBase {
     final String toml =
         new TomlStringBuilder("signing")
             .withQuotedString("type", "azure-signer")
-            .withQuotedString("key-vault-name", "ethsignertestkey")
+            .withQuotedString("key-vault-name", "web3signerKVTests")
             .withQuotedString("key-name", "TestKey2")
             .withQuotedString("key-version", "")
             .withQuotedString("client-id", clientId)
