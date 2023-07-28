@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
+import static tech.pegasys.ethsigner.tests.dsl.signer.TransactionSignerParamsSupplier.AZURE_KEY_NAME;
 import static tech.pegasys.signers.hashicorp.dsl.certificates.CertificateHelpers.createFingerprintFile;
 
 import tech.pegasys.ethsigner.tests.dsl.node.HashicorpSigningParams;
@@ -57,12 +58,13 @@ public class MultiKeyAcceptanceTestBase {
       final Path tomlPath,
       final String clientId,
       final String clientSecret,
-      final String tenantId) {
+      final String tenantId,
+      final String clientKeyVaultName) {
     final String toml =
         new TomlStringBuilder("signing")
             .withQuotedString("type", "azure-signer")
-            .withQuotedString("key-vault-name", "web3signerKVTests")
-            .withQuotedString("key-name", "TestKey2")
+            .withQuotedString("key-vault-name", clientKeyVaultName)
+            .withQuotedString("key-name", AZURE_KEY_NAME)
             .withQuotedString("key-version", "")
             .withQuotedString("client-id", clientId)
             .withQuotedString("client-secret", clientSecret)

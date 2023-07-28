@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.multikeysigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.AcceptanceTestBase.AZURE_PUBLIC_KEY;
 
 import java.nio.file.Path;
 
@@ -26,23 +27,24 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
   static final String clientId = System.getenv("AZURE_CLIENT_ID");
   static final String clientSecret = System.getenv("AZURE_CLIENT_SECRET");
   static final String tenantId = System.getenv("AZURE_TENANT_ID");
-  static final String FILENAME = "3d93035f56685fd609415654beccfcaf166ea382";
-  static final String AZURE_ETHEREUM_ADDRESS = "0x" + FILENAME;
+  static final String clientKeyVaultName = System.getenv("AZURE_KEY_VAULT_NAME");
+  static final String AZURE_ETHEREUM_ADDRESS = "0x" + AZURE_PUBLIC_KEY;
 
   @BeforeAll
   public static void checkAzureCredentials() {
     Assumptions.assumeTrue(
-        clientId != null && clientSecret != null && tenantId != null,
+        clientId != null && clientSecret != null && tenantId != null && clientKeyVaultName != null,
         "Ensure Azure client id, client secret and tenant_id env variables are set");
   }
 
   @Test
   void azureSignersAreCreatedAndExpectedAddressIsReported(@TempDir Path tomlDirectory) {
     createAzureTomlFileAt(
-        tomlDirectory.resolve("arbitrary_prefix" + FILENAME + ".toml"),
+        tomlDirectory.resolve("arbitrary_prefix" + AZURE_PUBLIC_KEY + ".toml"),
         clientId,
         clientSecret,
-        tenantId);
+        tenantId,
+        clientKeyVaultName);
 
     setup(tomlDirectory);
 
@@ -55,7 +57,8 @@ public class AzureBasedTomlLoadingAcceptanceTest extends MultiKeyAcceptanceTestB
         tomlDirectory.resolve("ffffffffffffffffffffffffffffffffffffffff.toml"),
         clientId,
         clientSecret,
-        tenantId);
+        tenantId,
+        clientKeyVaultName);
 
     setup(tomlDirectory);
 

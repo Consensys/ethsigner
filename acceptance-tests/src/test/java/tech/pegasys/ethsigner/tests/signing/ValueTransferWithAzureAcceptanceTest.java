@@ -13,6 +13,7 @@
 package tech.pegasys.ethsigner.tests.signing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static tech.pegasys.ethsigner.tests.AcceptanceTestBase.AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.GAS_PRICE;
 import static tech.pegasys.ethsigner.tests.dsl.Gas.INTRINSIC_GAS;
 
@@ -36,8 +37,6 @@ import org.web3j.utils.Convert;
 public class ValueTransferWithAzureAcceptanceTest {
 
   private static final String RECIPIENT = "0x1b00ba00ca00bb00aa00bc00be00ac00ca00da00";
-  private static final String AZURE_GENESIS_ACCOUNT_ONE_PUBLIC_KEY =
-      "0x3d93035f56685fd609415654beccfcaf166ea382";
 
   private static Node ethNode;
   private static Signer ethSigner;
@@ -50,7 +49,8 @@ public class ValueTransferWithAzureAcceptanceTest {
     Assumptions.assumeTrue(
         System.getenv("AZURE_CLIENT_ID") != null
             && System.getenv("AZURE_CLIENT_SECRET") != null
-            && System.getenv("AZURE_TENANT_ID") != null,
+            && System.getenv("AZURE_TENANT_ID") != null
+            && System.getenv("AZURE_KEY_VAULT_NAME") != null,
         "Ensure Azure client id, client secret and tenantId env variables are set");
 
     final BesuNodeConfig besuNodeConfig = BesuNodeConfigBuilder.aBesuNodeConfig().build();
@@ -59,7 +59,9 @@ public class ValueTransferWithAzureAcceptanceTest {
     ethNode.awaitStartupCompletion();
 
     final SignerConfiguration signerConfig =
-        new SignerConfigurationBuilder().withAzureKeyVault("web3signerKVTests").build();
+        new SignerConfigurationBuilder()
+            .withAzureKeyVault(System.getenv("AZURE_KEY_VAULT_NAME"))
+            .build();
 
     ethSigner = new Signer(signerConfig, besuNodeConfig.getHostName(), ethNode.ports());
     ethSigner.start();

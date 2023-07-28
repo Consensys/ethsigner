@@ -36,6 +36,7 @@ public class TransactionSignerParamsSupplier {
   private final HashicorpSigningParams hashicorpNode;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
+  public static final String AZURE_KEY_NAME = "TestKey2";
 
   public TransactionSignerParamsSupplier(
       final HashicorpSigningParams hashicorpNode,
@@ -81,7 +82,7 @@ public class TransactionSignerParamsSupplier {
       params.add("--key-vault-name");
       params.add(azureKeyVault);
       params.add("--key-name");
-      params.add("TestKey2");
+      params.add(AZURE_KEY_NAME);
       params.add("--key-version");
       params.add("");
       params.add("--client-id");
