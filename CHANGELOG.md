@@ -5,6 +5,9 @@
 ## Features Added
 - Updated Docker image to use the latest Ubuntu LTS image
 
+### Bugs Fixed
+- Update grpc to version 1.57.2 to fix CVE-2023-33953
+
 ## 23.6.0
 
 As part of our ongoing commitment to deliver the best remote signing solutions, we are announcing a change in our product offerings.
