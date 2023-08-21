@@ -106,7 +106,7 @@ dependencyManagement {
       entry 'protobuf-java'
       entry 'protobuf-java-util'
     }
-    dependencySet(group: 'io.grpc', version: '1.56.0') {
+    dependencySet(group: 'io.grpc', version: '1.57.2') {
       entry 'grpc-api'
       entry 'grpc-context'
       entry 'grpc-core'
