@@ -6,7 +6,7 @@
 - Updated Docker image to use the latest Ubuntu LTS image
 
 ### Bugs Fixed
-- Update grpc to version 1.57.2 to fix CVE-2023-33953[#524](https://github.com/Consensys/ethsigner/pull/524)
+- Update grpc to version 1.57.2 to fix CVE-2023-33953
 
 ## 23.6.0
 
