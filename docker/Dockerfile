@@ -14,7 +14,7 @@ ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 COPY --from=jre-build /javaruntime $JAVA_HOME
 
-RUN apt update && apt install -y --no-install-recommends libc-bin libc6 libssl3 curl iputils-ping net-tools netcat \
+RUN apt update && apt install -y --no-install-recommends libc-bin libc6 curl iputils-ping net-tools netcat \
  && apt clean \
  && rm -rf /var/lib/apt/lists/*
 
