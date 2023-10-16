@@ -19,7 +19,7 @@ public class ByteUtils {
   /**
    * Omitting sign indication byte. <br>
    * <br>
-   * Instead of {@link org.bouncycastle.util.BigIntegers#asUnsignedByteArray(BigInteger)} <br>
+   * Instead of org.bouncycastle.util.BigIntegers#asUnsignedByteArray(BigInteger) <br>
    * we use this custom method to avoid an empty array in case of BigInteger.ZERO
    *
    * @param value - any big integer number. A <code>null</code>-value will return <code>null</code>
