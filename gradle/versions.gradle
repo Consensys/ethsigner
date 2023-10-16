@@ -23,6 +23,11 @@ dependencyManagement {
     dependency 'com.google.guava:guava:32.0.1-jre'
 
     dependency 'com.squareup.okhttp3:okhttp:4.11.0'
+    /*
+    com.squareup.okhttp3:logging-interceptor:4.9.0 // CVE-2023-0833
+      \--- org.web3j:core:4.10.2
+    */
+    dependency 'com.squareup.okhttp3:logging-interceptor:4.11.0'
 
     dependency 'commons-io:commons-io:2.11.0'
 
