@@ -129,6 +129,14 @@ dependencyManagement {
       entry 'netty-resolver-dns'
     }
 
+    //overriding Azure libraries dependencies as we don't update signers library anymore
+    dependencySet(group: 'com.azure', version: '4.7.0') {
+      entry 'azure-security-keyvault-secrets'
+      entry 'azure-security-keyvault-keys'
+    }
+    dependency 'com.azure:azure-identity:1.10.3'
+    dependency 'com.azure:azure-core-http-netty:1.13.8'
+
     /*
       io.projectreactor.netty:reactor-netty-core:1.0.15 // CVE-2022-31684
       \--- io.projectreactor.netty:reactor-netty-http:1.0.15
