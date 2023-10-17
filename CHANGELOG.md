@@ -3,10 +3,14 @@
 ## Next release
 
 ## Features Added
+- Build and docker image to use Java 17
 - Updated Docker image to use the latest Ubuntu LTS image
+- Updated web3j library to 4.10.2
 
 ### Bugs Fixed
 - Update grpc to version 1.57.2 to fix CVE-2023-33953
+- Update Azure libraries to fix CVE-2023-36415
+- Update okhttp logging interceptor version to fix CVE-2023-0833
 
 ## 23.6.0
 

@@ -7,7 +7,7 @@ orbs:
 executors:
   executor_med:  # 2cpu, 4G ram
     docker:
-      - image: cimg/openjdk:11.0
+      - image: cimg/openjdk:17.0
         auth:
           username: $DOCKER_USER_RO
           password: $DOCKER_PASSWORD_RO             
@@ -19,7 +19,7 @@ executors:
 
   executor_large: # 4cpu, 8G ram
     docker:
-      - image: cimg/openjdk:11.0
+      - image: cimg/openjdk:17.0
         auth:
           username: $DOCKER_USER_RO
           password: $DOCKER_PASSWORD_RO     
@@ -154,8 +154,7 @@ jobs:
     executor: executor_med
     steps:
       - prepare
-      - setup_remote_docker:
-          version: 20.10.11
+      - setup_remote_docker
       - attach_workspace:
           at: ~/project
       - run:
@@ -190,8 +189,7 @@ jobs:
     executor: executor_med
     steps:
       - prepare
-      - setup_remote_docker:
-          version: 20.10.11
+      - setup_remote_docker
       - attach_workspace:
           at: ~/project
       - run:
