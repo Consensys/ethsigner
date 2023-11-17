@@ -136,21 +136,20 @@ dependencyManagement {
     }
 
     //overriding Azure libraries dependencies as we don't update signers library anymore
-    dependencySet(group: 'com.azure', version: '4.7.0') {
+    dependencySet(group: 'com.azure', version: '4.7.1') {
       entry 'azure-security-keyvault-secrets'
       entry 'azure-security-keyvault-keys'
     }
-    dependency 'com.azure:azure-identity:1.10.3'
-    dependency 'com.azure:azure-core-http-netty:1.13.8'
+    dependency 'com.azure:azure-identity:1.10.4'
 
     /*
-      io.projectreactor.netty:reactor-netty-core:1.0.15 // CVE-2022-31684
-      \--- io.projectreactor.netty:reactor-netty-http:1.0.15
-        \--- com.azure:azure-core-http-netty:1.11.8
-          +--- com.azure:azure-security-keyvault-keys:4.3.8
-            |    +--- tech.pegasys.signers.internal:signing-secp256k1-impl:2.2.2
+      io.projectreactor.netty:reactor-netty-http:1.0.38 -> 1.0.39 // CVE-2023-34062
+      \--- com.azure:azure-core-http-netty:1.13.9
+           +--- com.azure:azure-security-keyvault-keys:4.7.1
+           +--- com.azure:azure-security-keyvault-secrets:4.7.1
+           \--- com.azure:azure-identity:1.10.4
     */
-    dependency 'io.projectreactor.netty:reactor-netty-http:1.0.26'
+    dependency 'io.projectreactor.netty:reactor-netty-http:1.0.39'
 
     // manual overriding of commons-net to avoid CVE-2021-37533
     /* commons-net:commons-net:3.8.0
