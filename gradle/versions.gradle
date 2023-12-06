@@ -102,7 +102,7 @@ dependencyManagement {
     dependency "org.hyperledger.besu.internal:metrics-core:${besuVersion}"
 
     // explicit declaring to override transitive dependencies with vulnerabilities
-    dependency 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    dependency 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
     dependencySet(group: 'com.google.protobuf', version: '3.21.12') {
       /*
         com.google.protobuf:protobuf-java:3.11.4 -> 3.21.9 // CVE-2022-3509
@@ -112,7 +112,7 @@ dependencyManagement {
       entry 'protobuf-java'
       entry 'protobuf-java-util'
     }
-    dependencySet(group: 'io.grpc', version: '1.59.0') {
+    dependencySet(group: 'io.grpc', version: '1.59.1') {
       entry 'grpc-api'
       entry 'grpc-context'
       entry 'grpc-core'
@@ -128,7 +128,7 @@ dependencyManagement {
       entry 'kotlin-stdlib-jdk8'
     }
     // addressing CVE-2023-44487
-    dependencySet(group: 'io.netty', version: '4.1.100.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.101.Final') {
       entry 'netty-all'
       entry 'netty-codec-http2'
       entry 'netty-handler-proxy'

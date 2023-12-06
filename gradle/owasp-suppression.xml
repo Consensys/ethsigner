@@ -37,4 +37,18 @@
         ]]></notes>
         <cve>CVE-2020-8908</cve>
     </suppress>
+    <suppress until="2024-01-16">
+        <notes><![CDATA[
+        FP per issue #6100 - CVE-2023-36052 since it is related to Azure-cli not to the azure-core libraries
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.azure/azure*@*.*$</packageUrl>
+        <cve>CVE-2023-36052</cve>
+    </suppress>
+    <suppress until="2024-01-16">
+        <notes><![CDATA[
+        CVE relates to attach on gRPC servers (not clients) and is dependent on the Netty version used
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/io\.grpc/grpc\-.*$</packageUrl>
+        <cve>CVE-2023-44487</cve>
+    </suppress>
 </suppressions>
