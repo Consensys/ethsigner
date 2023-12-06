@@ -161,6 +161,9 @@ allprojects {
       'integrationTestCompileClasspath',
       'integrationTestRuntimeClasspath'
     ]
+    nvd {
+      delay = 6000
+    }
   }
 
   tasks.withType(JavaCompile) {
