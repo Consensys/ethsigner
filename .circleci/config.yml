@@ -114,7 +114,6 @@ jobs:
           no_output_timeout: 20m
           command: |
             ./gradlew --no-daemon --parallel integrationTest --info
-      - notify      
       - capture_test_results
       - capture_test_reports
       - save_cache:
@@ -137,7 +136,6 @@ jobs:
           no_output_timeout: 20m
           command: |
             ./gradlew --no-daemon --parallel acceptanceTest
-      - notify
       - capture_test_results
       - capture_test_reports
 
@@ -156,8 +154,7 @@ jobs:
           name: test image
           command: |
             mkdir -p docker/reports
-            ./gradlew --no-daemon testDocker
-      - notify            
+            ./gradlew --no-daemon testDocker        
 
   publish:
     executor: executor_med
@@ -174,8 +171,7 @@ jobs:
           name: Publish
           command: |
             ./gradlew --no-daemon --parallel cloudSmithUpload publish
-      - notify
-      
+
   publishDocker:
     executor: executor_med
     steps:
@@ -195,7 +191,6 @@ jobs:
             docker trust key load $HOME/.docker/trust/private/$DCT_HASH.key --name ecosystem
 
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
-      - notify
 
   dockerScan:
     executor: trivy_executor
@@ -213,7 +208,6 @@ jobs:
           shell: /bin/sh
           command: |
             trivy -q image --exit-code 1 --no-progress --severity HIGH,CRITICAL --ignorefile "gradle/trivyignore.txt" --timeout 10m "consensys/ethsigner:develop" 
-      - notify
 
 workflows:
   version: 2
