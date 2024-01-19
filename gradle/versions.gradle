@@ -136,11 +136,11 @@ dependencyManagement {
     }
 
     //overriding Azure libraries dependencies as we don't update signers library anymore
-    dependencySet(group: 'com.azure', version: '4.7.1') {
+    dependencySet(group: 'com.azure', version: '4.7.3') {
       entry 'azure-security-keyvault-secrets'
       entry 'azure-security-keyvault-keys'
     }
-    dependency 'com.azure:azure-identity:1.10.4'
+    dependency 'com.azure:azure-identity:1.11.1'
 
     /*
       io.projectreactor.netty:reactor-netty-http:1.0.38 -> 1.0.39 // CVE-2023-34062
