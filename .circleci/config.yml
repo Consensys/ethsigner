@@ -211,27 +211,6 @@ jobs:
 
 workflows:
   version: 2
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 17 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - build:
-          context:
-            - protocols-dockerhub
-      - dockerScan:            
-          context:
-            - protocols-dockerhub
-      - acceptanceTests:
-          requires:
-            - build
-          context:
-            - protocols-dockerhub
-            - protocols-signers
   default:
     jobs:
       - build:
