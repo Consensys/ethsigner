@@ -1,0 +1,287 @@
+---
+version: 2.1
+
+executors:
+  executor_med:  # 2cpu, 4G ram
+    docker:
+      - image: cimg/openjdk:17.0
+        auth:
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO             
+    resource_class: medium
+    working_directory: ~/project
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx2048m
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2 -Xmx2048m
+
+  executor_large: # 4cpu, 8G ram
+    docker:
+      - image: cimg/openjdk:17.0
+        auth:
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO     
+    resource_class: large
+    working_directory: ~/project
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx4096m
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4 -Xmx4096m
+
+  trivy_executor:
+    docker:
+      - image: docker:stable-git
+        auth:
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO  
+    resource_class: small
+    working_directory: ~/project
+
+commands:
+  prepare:
+    description: "Prepare"
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore cached gradle dependencies
+          keys:
+            - deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
+            - deps-{{ checksum "build.gradle" }}
+            - deps-
+
+  capture_test_results:
+    description: "Capture test results"
+    steps:
+      - run:
+          name: Gather test results
+          when: always
+          command: |
+            FILES=`find . -name test-results`
+            for FILE in $FILES
+            do
+              MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/test-results@\1@'`
+              TARGET="build/test-results/$MODULE"
+              mkdir -p "$TARGET"
+              cp -rf ${FILE}/*/* "$TARGET"
+            done
+      - store_test_results:
+          path: build/test-results
+
+  capture_test_reports:
+    description: "Capture test reports"
+    steps:
+      - run:
+          name: Gather test results
+          when: always
+          command: |
+            FILES=`find . -name reports -not -path './build/reports'`
+            for FILE in $FILES
+            do
+              MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/reports@\1@'`
+              TARGET="build/test-reports/$MODULE"
+              SOURCE="${FILE}/tests/test"
+              mkdir -p "$TARGET"
+              if [[ -d "$SOURCE" ]]; then
+                  cp -rf "$SOURCE" "$TARGET"
+              fi
+            done
+            if [[ -f 'build/reports/dependency-check-report.html' ]]; then
+              cp 'build/reports/dependency-check-report.html' 'build/test-reports'
+            fi
+      - store_artifacts:
+          path: build/test-reports
+          destination: test-reports
+
+jobs:
+  build:
+    executor: executor_large
+    steps:
+      - prepare
+      - run:
+          name: Build
+          command: |
+            ./gradlew --no-daemon --parallel build
+      - run:
+          name: Dependency vulnerability scan
+          no_output_timeout: 40m
+          command: |
+            ./gradlew --no-daemon -Dorg.gradle.parallel=false dependencyCheckAggregate
+      - run:
+          name: Test
+          no_output_timeout: 20m
+          command: |
+            ./gradlew --no-daemon --parallel test
+      - run:
+          name: Integration Test
+          no_output_timeout: 20m
+          command: |
+            ./gradlew --no-daemon --parallel integrationTest --info
+      - capture_test_results
+      - capture_test_reports
+      - save_cache:
+          name: Caching gradle dependencies
+          key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .gradle
+            - ~/.gradle
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  acceptanceTests:
+    executor: executor_large
+    steps:
+      - prepare
+      - run:
+          name: Acceptance Test
+          no_output_timeout: 20m
+          command: |
+            ./gradlew --no-daemon --parallel acceptanceTest
+      - capture_test_results
+      - capture_test_reports
+
+  buildDocker:
+    executor: executor_med
+    steps:
+      - prepare
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: build image
+          command: |
+            ./gradlew --no-daemon distDocker
+      - run:
+          name: test image
+          command: |
+            mkdir -p docker/reports
+            ./gradlew --no-daemon testDocker        
+
+  publish:
+    executor: executor_med
+    steps:
+      - prepare
+      - run:
+          name: Install Python3
+          command: |
+            sudo apt update
+            sudo apt install python3 python3-pip python3-venv
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Publish
+          command: |
+            ./gradlew --no-daemon --parallel cloudSmithUpload publish
+
+  publishDocker:
+    executor: executor_med
+    steps:
+      - prepare
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Publish Docker
+          command: |
+            docker login --username "${DOCKER_USER_RW}" --password "${DOCKER_PASSWORD_RW}"
+
+            # dct signing setup
+            mkdir -p $HOME/.docker/trust/private
+            echo $DCT_KEY | base64 --decode > $HOME/.docker/trust/private/$DCT_HASH.key
+            chmod 600 $HOME/.docker/trust/private/$DCT_HASH.key
+            docker trust key load $HOME/.docker/trust/private/$DCT_HASH.key --name ecosystem
+
+            ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
+
+  dockerScan:
+    executor: trivy_executor
+    steps:
+      - prepare
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Install trivy
+          command: |
+            apk add --update-cache --upgrade curl bash
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      - run:
+          name: Scan with trivy
+          shell: /bin/sh
+          command: |
+            trivy -q image --exit-code 1 --no-progress --severity HIGH,CRITICAL --ignorefile "gradle/trivyignore.txt" --timeout 10m "consensys/ethsigner:develop" 
+
+workflows:
+  version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 17 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build:
+          context:
+            - protocols-dockerhub
+      - dockerScan:            
+          context:
+            - protocols-dockerhub
+      - acceptanceTests:
+          requires:
+            - build
+          context:
+            - protocols-dockerhub
+            - protocols-signers
+  default:
+    jobs:
+      - build:
+          context:
+            - protocols-dockerhub
+          filters:
+            tags: &filters-release-tags
+              only: /^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?/
+      - acceptanceTests:
+          requires:
+            - build
+          context:
+            - protocols-dockerhub
+            - protocols-signers
+          filters:
+            tags:
+              <<: *filters-release-tags
+      - buildDocker:
+          requires:
+            - build
+          context:
+            - protocols-dockerhub
+          filters:
+            tags:
+              <<: *filters-release-tags
+      - publish:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+            tags:
+              <<: *filters-release-tags
+          requires:
+            - build
+            - acceptanceTests
+          context:
+            - protocols-dockerhub
+            - protocols-cloudsmith
+      - publishDocker:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+            tags:
+              <<: *filters-release-tags
+          requires:
+            - build
+            - acceptanceTests
+            - buildDocker
+          context:
+            - protocols-dockerhub
