@@ -1,7 +1,11 @@
-# EthSigner
+# EthSigner [DEPRECATED]
 A transaction signing application to be used with a web3 provider. All questions, queries and other discussion can be found on [Discord].
 
 ## ⚠️ Project Deprecation ⚠️
+EthSigner is no longer supported. Please migrate to Web3Signer, which includes all EthSigner functionality.
+
+---
+
 As part of our ongoing commitment to deliver the best remote signing solutions, we are announcing a change in our product offerings.
 
 We have decided to deprecate our EthSigner product to focus our efforts on enhancing [Web3Signer](https://github.com/ConsenSys/web3signer), our newly comprehensive remote signing solution. This is rooted in our strategy to streamline our offerings and focus on a single, robust product that will provide functionality for both transaction and Ethereum validator signing. We hope this makes it applicable to all your use-cases like public Ethereum signing, staking infrastructure offerings, and in private network contexts.
