@@ -2,7 +2,7 @@
 A transaction signing application to be used with a web3 provider. All questions, queries and other discussion can be found on [Discord].
 
 ## ⚠️ Project Deprecation ⚠️
-EthSigner is no longer supported. Please migrate to Web3Signer, which includes all EthSigner functionality.
+EthSigner is no longer supported. Please migrate to [Web3Signer](https://github.com/ConsenSys/web3signer), which includes all EthSigner functionality.
 
 ---
 
